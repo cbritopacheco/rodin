@@ -15,11 +15,16 @@ static Real periodic_activation(Real t)
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
 
-  if (tau < 0.13)  return 0.0;
-  if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
-  if (tau < 0.281) return 35.0;
-  if (tau < 0.361) return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
-  if (tau < 0.45)  return -20.0;
+  if (tau < 0.13)
+    return 0.0;
+  if (tau < 0.141)
+    return 35.0 * ((tau - 0.13) / 0.011);
+  if (tau < 0.281)
+    return 35.0;
+  if (tau < 0.361)
+    return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
+  if (tau < 0.45)
+    return -20.0;
   return 0.0;
 }
 
@@ -185,19 +190,19 @@ int main()
 
   Model model(in);
   model.setMaxIterations(200)
-       .setAbsoluteTolerance(1e-8)
-       .setRelativeTolerance(1e-8)
-       .setStepTolerance(1e-10)
-       .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   Model::State s0;
   s0.t = 0.0;
 
-  s0.y   = 0.0;
-  s0.v   = 0.0;
-  s0.pv  = in.pAt(0.0) - 100.0;
+  s0.y = 0.0;
+  s0.v = 0.0;
+  s0.pv = in.pAt(0.0) - 100.0;
   s0.par = 11000.0;
-  s0.pd  = 10000.0;
+  s0.pd = 10000.0;
 
   // Initial local active state
   s0.ec = in.initFibDef;
@@ -236,17 +241,15 @@ int main()
     std::cout << "Step " << i << ": t = " << model.getState().t << "\n";
 
     const auto rep = model.step(dt);
-    std::cout << "  Newton step: "
-              << (rep.converged ? "converged" : "not converged")
+    std::cout << "  Newton step: " << (rep.converged ? "converged" : "not converged")
               << ", iterations = " << rep.iterations
               << ", final residual = " << rep.finalResidual
-              << ", final step norm = " << rep.finalStepNorm
-              << '\n';
+              << ", final step norm = " << rep.finalStepNorm << '\n';
 
     if (!rep.converged)
     {
-      std::cerr << "Solver failed to converge at step "
-                << i << ", t = " << model.getState().t << "\n";
+      std::cerr << "Solver failed to converge at step " << i
+                << ", t = " << model.getState().t << "\n";
       break;
     }
 
@@ -257,21 +260,9 @@ int main()
     const Real Q = 4.0 * std::numbers::pi_v<Real> * R * R * s.v;
     const Real pat = in.pAt(s.t);
 
-    out << s.t << ","
-        << s.y << ","
-        << s.v << ","
-        << s.pv << ","
-        << s.par << ","
-        << s.pd << ","
-        << s.ec << ","
-        << s.gamma << ","
-        << s.beta << ","
-        << s.w << ","
-        << s.kc << ","
-        << s.tauc << ","
-        << V << ","
-        << Q << ","
-        << pat << "\n";
+    out << s.t << "," << s.y << "," << s.v << "," << s.pv << "," << s.par << "," << s.pd
+        << "," << s.ec << "," << s.gamma << "," << s.beta << "," << s.w << "," << s.kc
+        << "," << s.tauc << "," << V << "," << Q << "," << pat << "\n";
   }
 
   return 0;

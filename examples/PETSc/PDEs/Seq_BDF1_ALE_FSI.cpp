@@ -73,41 +73,37 @@ namespace
 
   struct FluidBoundary
   {
-    static constexpr Attribute Inlet    = 1;
-    static constexpr Attribute Outlet   = 2;
-    static constexpr Attribute Wall     = 3;
-    static constexpr Attribute FSI      = 4;
+      static constexpr Attribute Inlet = 1;
+      static constexpr Attribute Outlet = 2;
+      static constexpr Attribute Wall = 3;
+      static constexpr Attribute FSI = 4;
   };
 
   struct SolidBoundary
   {
-    static constexpr Attribute FSI        = 11;
-    static constexpr Attribute ClampLeft  = 12;
-    static constexpr Attribute ClampRight = 13;
-    static constexpr Attribute Free       = 14;
+      static constexpr Attribute FSI = 11;
+      static constexpr Attribute ClampLeft = 12;
+      static constexpr Attribute ClampRight = 13;
+      static constexpr Attribute Free = 14;
   };
 
   struct InterfaceSegment
   {
-    Index fluid;
-    Index solid;
-    Real xmin;
-    Real xmax;
+      Index fluid;
+      Index solid;
+      Real xmin;
+      Real xmax;
   };
 
   struct InterfaceMap
   {
-    std::unordered_map<Index, Index> fluidToSolid;
-    std::unordered_map<Index, Index> solidToFluid;
-    std::vector<InterfaceSegment> segments;
+      std::unordered_map<Index, Index> fluidToSolid;
+      std::unordered_map<Index, Index> solidToFluid;
+      std::vector<InterfaceSegment> segments;
   };
 
-  static Real pulseTrain(
-      const Real t,
-      const Real amplitude,
-      const Real duration,
-      const Real gap,
-      const Index count)
+  static Real pulseTrain(const Real t, const Real amplitude, const Real duration,
+    const Real gap, const Index count)
   {
     if (t < 0.0 || duration <= 0.0 || count == 0)
       return 0.0;
@@ -140,21 +136,22 @@ namespace
     return c;
   }
 
-  static std::pair<Real, Real> segmentXRange(const LocalMesh& mesh, const Polytope& segment)
+  static std::pair<Real, Real> segmentXRange(
+    const LocalMesh& mesh, const Polytope& segment)
   {
     const auto& vertices = segment.getVertices();
 
     const Real x0 = mesh.getVertexCoordinates(vertices[0]).x();
     const Real x1 = mesh.getVertexCoordinates(vertices[1]).x();
 
-    return { std::min(x0, x1), std::max(x0, x1) };
+    return {std::min(x0, x1), std::max(x0, x1)};
   }
 
   static void mapMeshToBox(LocalMesh& mesh, Real L, Real H, Real y0)
   {
-    Real xmin =  std::numeric_limits<Real>::max();
+    Real xmin = std::numeric_limits<Real>::max();
     Real xmax = -std::numeric_limits<Real>::max();
-    Real ymin =  std::numeric_limits<Real>::max();
+    Real ymin = std::numeric_limits<Real>::max();
     Real ymax = -std::numeric_limits<Real>::max();
 
     for (auto it = mesh.getVertex(); it; ++it)
@@ -184,7 +181,7 @@ namespace
   {
     Mesh mesh;
 
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { nx + 1, ny + 1 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {nx + 1, ny + 1});
 
     mapMeshToBox(mesh, L, H, y0);
 
@@ -233,14 +230,12 @@ namespace
   }
 
   static InterfaceMap buildInterfaceMap(
-      const LocalMesh& fluidReferenceMesh,
-      const LocalMesh& solidReferenceMesh)
+    const LocalMesh& fluidReferenceMesh, const LocalMesh& solidReferenceMesh)
   {
     InterfaceMap map;
     std::map<long long, Index> solidByMidpoint;
 
-    auto key = [](Real x) -> long long
-    {
+    auto key = [](Real x) -> long long {
       return static_cast<long long>(std::llround(1e12 * x));
     };
 
@@ -249,9 +244,7 @@ namespace
       if (it->getAttribute() != SolidBoundary::FSI)
         continue;
 
-      solidByMidpoint.emplace(
-          key(centroid(solidReferenceMesh, *it).x()),
-          it->getIndex());
+      solidByMidpoint.emplace(key(centroid(solidReferenceMesh, *it).x()), it->getIndex());
     }
 
     for (auto it = fluidReferenceMesh.getBoundary(); it; ++it)
@@ -272,24 +265,19 @@ namespace
       map.solidToFluid.emplace(solidFace, fluidFace);
 
       const auto [xmin, xmax] = segmentXRange(fluidReferenceMesh, *it);
-      map.segments.push_back({ fluidFace, solidFace, xmin, xmax });
+      map.segments.push_back({fluidFace, solidFace, xmin, xmax});
     }
 
-    std::sort(
-        map.segments.begin(),
-        map.segments.end(),
-        [](const InterfaceSegment& a, const InterfaceSegment& b)
-        {
-          return a.xmin < b.xmin;
-        });
+    std::sort(map.segments.begin(), map.segments.end(),
+      [](const InterfaceSegment& a, const InterfaceSegment& b) {
+        return a.xmin < b.xmin;
+      });
 
     return map;
   }
 
   static Point forwardFluidPointToSolid(
-      const Point& p,
-      const LocalMesh& solidReferenceMesh,
-      const InterfaceMap& map)
+    const Point& p, const LocalMesh& solidReferenceMesh, const InterfaceMap& map)
   {
     const auto found = map.fluidToSolid.find(p.getPolytope().getIndex());
 
@@ -305,9 +293,7 @@ namespace
   }
 
   static Point forwardSolidPointToFluid(
-      const Point& p,
-      const LocalMesh& fluidMesh,
-      const InterfaceMap& map)
+    const Point& p, const LocalMesh& fluidMesh, const InterfaceMap& map)
   {
     const auto found = map.solidToFluid.find(p.getPolytope().getIndex());
 
@@ -333,8 +319,7 @@ namespace
   }
 
   static void saveReferenceVertices(
-      const LocalMesh& mesh,
-      std::vector<Math::SpatialPoint>& vertices)
+    const LocalMesh& mesh, std::vector<Math::SpatialPoint>& vertices)
   {
     vertices.resize(mesh.getVertexCount());
 
@@ -343,8 +328,7 @@ namespace
   }
 
   static void restoreMesh(
-      LocalMesh& mesh,
-      const std::vector<Math::SpatialPoint>& referenceVertices)
+    LocalMesh& mesh, const std::vector<Math::SpatialPoint>& referenceVertices)
   {
     for (auto it = mesh.getVertex(); it; ++it)
     {
@@ -356,11 +340,9 @@ namespace
   }
 
   template <class GridFunctionType>
-  static void moveMeshWithDisplacement(
-      LocalMesh& mesh,
-      const LocalMesh& referenceMesh,
-      const std::vector<Math::SpatialPoint>& referenceVertices,
-      const GridFunctionType& displacement)
+  static void moveMeshWithDisplacement(LocalMesh& mesh, const LocalMesh& referenceMesh,
+    const std::vector<Math::SpatialPoint>& referenceVertices,
+    const GridFunctionType& displacement)
   {
     for (auto it = mesh.getVertex(); it; ++it)
     {
@@ -415,10 +397,13 @@ int main(int argc, char** argv)
   PetscReal finalTimeOpt = 1.0;
 
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_nx", &nxOpt, PETSC_NULLPTR);
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_fluid_ny", &fluidNyOpt, PETSC_NULLPTR);
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_ny", &solidNyOpt, PETSC_NULLPTR);
+  PetscOptionsGetInt(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_fluid_ny", &fluidNyOpt, PETSC_NULLPTR);
+  PetscOptionsGetInt(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_ny", &solidNyOpt, PETSC_NULLPTR);
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_Nt", &ntOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_T", &finalTimeOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_T", &finalTimeOpt, PETSC_NULLPTR);
 
   PetscReal pressureScaleOpt = 0.05;
   PetscReal viscousScaleOpt = 1.0;
@@ -436,66 +421,64 @@ int main(int argc, char** argv)
   PetscReal newtonDampingOpt = 1.0;
   PetscBool checkNoSlipOpt = PETSC_TRUE;
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pressure_scale", &pressureScaleOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pressure_scale",
+    &pressureScaleOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_viscous_scale", &viscousScaleOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_viscous_scale", &viscousScaleOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_traction_scale", &tractionScaleOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_traction_scale",
+    &tractionScaleOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_backflow_stabilization_scale",
-      &backflowStabilizationScaleOpt,
-      PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_backflow_stabilization_scale",
+    &backflowStabilizationScaleOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_inlet_amplitude", &inletAmplitudeOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_inlet_amplitude",
+    &inletAmplitudeOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pulse_duration", &pulseDurationOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pulse_duration",
+    &pulseDurationOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pulse_gap", &pulseGapOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pulse_gap", &pulseGapOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pulse_count", &pulseCountOpt, PETSC_NULLPTR);
+  PetscOptionsGetInt(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pulse_count", &pulseCountOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_E", &solidEOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_E", &solidEOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_nu", &solidNuOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_nu", &solidNuOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_density", &solidDensityOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_density", &solidDensityOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_rayleigh_alpha", &solidRayleighAlphaOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_rayleigh_alpha",
+    &solidRayleighAlphaOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_damping", &solidRayleighAlphaOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_damping",
+    &solidRayleighAlphaOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_rayleigh_beta", &solidRayleighBetaOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_rayleigh_beta",
+    &solidRayleighBetaOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_newton_damping", &newtonDampingOpt, PETSC_NULLPTR);
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_newton_damping",
+    &newtonDampingOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_check_no_slip", &checkNoSlipOpt, PETSC_NULLPTR);
+  PetscOptionsGetBool(
+    PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_check_no_slip", &checkNoSlipOpt, PETSC_NULLPTR);
 
   const size_t nx = static_cast<size_t>(std::max<PetscInt>(2, nxOpt));
   const size_t fluidNy = static_cast<size_t>(std::max<PetscInt>(2, fluidNyOpt));
   const size_t solidNy = static_cast<size_t>(std::max<PetscInt>(1, solidNyOpt));
   const Index Nt = static_cast<Index>(std::max<PetscInt>(1, ntOpt));
 
-  const Real L  = 4.0;
+  const Real L = 4.0;
   const Real Hf = 1.0;
   const Real Hs = 0.25;
 
-  const Real T  = static_cast<Real>(finalTimeOpt);
+  const Real T = static_cast<Real>(finalTimeOpt);
   const Real dt = T / static_cast<Real>(Nt);
 
   {
@@ -633,32 +616,27 @@ int main(int argc, char** argv)
     solidOutputVelocity.setData(solidVelocity.getData());
     solidOutputFluidTraction.setData(solidFluidTraction.getData());
 
-    xdmf.write(0.0);
+    xdmf.write(0.0).flush();
 
     /*
      * Parameters.
      */
     const Real rhoF = 1.0;
-    const Real muF  = 0.02;
+    const Real muF = 0.02;
 
     const Real solidE = static_cast<Real>(solidEOpt);
     const Real solidNu = static_cast<Real>(solidNuOpt);
 
-    const Real solidLambda =
-      solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
+    const Real solidLambda = solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
 
-    const Real solidMu =
-      solidE / (2.0 * (1.0 + solidNu));
+    const Real solidMu = solidE / (2.0 * (1.0 + solidNu));
 
     const Real rhoS = static_cast<Real>(solidDensityOpt);
-    const Real solidRayleighAlpha =
-      static_cast<Real>(solidRayleighAlphaOpt);
+    const Real solidRayleighAlpha = static_cast<Real>(solidRayleighAlphaOpt);
 
-    const Real solidRayleighBeta =
-      static_cast<Real>(solidRayleighBetaOpt);
+    const Real solidRayleighBeta = static_cast<Real>(solidRayleighBetaOpt);
 
-    const Real solidMassCoeff =
-      rhoS / (dt * dt) + solidRayleighAlpha * rhoS / dt;
+    const Real solidMassCoeff = rhoS / (dt * dt) + solidRayleighAlpha * rhoS / dt;
 
     Solid::NeoHookean law(solidLambda, solidMu);
 
@@ -670,54 +648,44 @@ int main(int argc, char** argv)
      * This restores the fluid mesh to the reference coordinates, solves the
      * harmonic extension, stores it in fluidDisplacement, then moves fluidMesh.
      */
-    auto solveHarmonicALE =
-      [&](const auto& interfaceSolidDisplacement)
-      {
-        restoreMesh(fluidMesh, fluidReferenceVertices);
+    auto solveHarmonicALE = [&](const auto& interfaceSolidDisplacement) {
+      restoreMesh(fluidMesh, fluidReferenceVertices);
 
-        PETSc::Variational::TrialFunction d(uh);
-        PETSc::Variational::TestFunction  z(uh);
+      PETSc::Variational::TrialFunction d(uh);
+      PETSc::Variational::TestFunction z(uh);
 
-        d.setName("ALEDisplacementTrial");
+      d.setName("ALEDisplacementTrial");
 
-        auto interfaceDisplacement = VectorFunction(dim, [&](const Point& xf)
-        {
-          const Point xs =
-            forwardFluidPointToSolid(xf, solidMesh, interfaceMap);
+      auto interfaceDisplacement = VectorFunction(dim, [&](const Point& xf) {
+        const Point xs = forwardFluidPointToSolid(xf, solidMesh, interfaceMap);
 
-          Math::SpatialVector<Real> value(dim);
-          value.setZero();
+        Math::SpatialVector<Real> value(dim);
+        value.setZero();
 
-          const auto ds = interfaceSolidDisplacement(xs);
-          for (Index i = 0; i < static_cast<Index>(dim); ++i)
-            value(i) = ds(i);
+        const auto ds = interfaceSolidDisplacement(xs);
+        for (Index i = 0; i < static_cast<Index>(dim); ++i)
+          value(i) = ds(i);
 
-          return value;
-        });
+        return value;
+      });
 
-        Problem ale(d, z);
+      Problem ale(d, z);
 
-        ale =
-            Integral(Jacobian(d), Jacobian(z))
-          + DirichletBC(d, Zero(dim)).on(FluidBoundary::Inlet)
-          + DirichletBC(d, Zero(dim)).on(FluidBoundary::Wall)
-          + DirichletBC(d, interfaceDisplacement).on(FluidBoundary::FSI);
+      ale = Integral(Jacobian(d), Jacobian(z)) +
+        DirichletBC(d, Zero(dim)).on(FluidBoundary::Inlet) +
+        DirichletBC(d, Zero(dim)).on(FluidBoundary::Wall) +
+        DirichletBC(d, interfaceDisplacement).on(FluidBoundary::FSI);
 
-        Alert::Info()
-          << "Solving harmonic ALE extension."
-          << Alert::Raise;
+      Alert::Info() << "Solving harmonic ALE extension." << Alert::Raise;
 
-        ale.assemble();
-        Solver::KSP(ale).solve();
+      ale.assemble();
+      Solver::KSP(ale).solve();
 
-        fluidDisplacement.setData(d.getSolution().getData());
+      fluidDisplacement.setData(d.getSolution().getData());
 
-        moveMeshWithDisplacement(
-            fluidMesh,
-            fluidMesh,
-            fluidReferenceVertices,
-            fluidDisplacement);
-      };
+      moveMeshWithDisplacement(
+        fluidMesh, fluidMesh, fluidReferenceVertices, fluidDisplacement);
+    };
 
     Real t = 0.0;
 
@@ -730,31 +698,25 @@ int main(int argc, char** argv)
        *
        * The fluid is solved on the mesh induced by the old solid displacement.
        */
-      //fluidDisplacementOld.setData(fluidDisplacement.getData());
-      //solveHarmonicALE(solidDisplacementOld);
+      fluidDisplacementOld.setData(fluidDisplacement.getData());
+      solveHarmonicALE(solidDisplacementOld);
 
-      //meshVelocity =
-        //(1.0 / dt) * (fluidDisplacement - fluidDisplacementOld);
+      meshVelocity = (1.0 / dt) * (fluidDisplacement - fluidDisplacementOld);
 
-      inletVelocity = VectorFunction(dim, [&](const Point& x)
-      {
+      inletVelocity = VectorFunction(dim, [&](const Point& x) {
         const Real y = std::clamp(x.y(), 0.0, Hf);
         const Real profile = 4.0 * y * (Hf - y) / (Hf * Hf);
 
-        return Math::Vector<Real>{{
-            pulseTrain(
-              t,
-              static_cast<Real>(inletAmplitudeOpt),
-              static_cast<Real>(pulseDurationOpt),
-              static_cast<Real>(pulseGapOpt),
-              static_cast<Index>(pulseCountOpt)) * profile,
-            0.0 }};
+        return Math::Vector<Real>{
+          {pulseTrain(t, static_cast<Real>(inletAmplitudeOpt),
+             static_cast<Real>(pulseDurationOpt), static_cast<Real>(pulseGapOpt),
+             static_cast<Index>(pulseCountOpt)) *
+              profile,
+            0.0}};
       });
 
-      auto interfaceVelocity = VectorFunction(dim, [&](const Point& xf)
-      {
-        const Point xs =
-          forwardFluidPointToSolid(xf, solidMesh, interfaceMap);
+      auto interfaceVelocity = VectorFunction(dim, [&](const Point& xf) {
+        const Point xs = forwardFluidPointToSolid(xf, solidMesh, interfaceMap);
 
         Math::SpatialVector<Real> value(dim);
         value.setZero();
@@ -776,36 +738,26 @@ int main(int argc, char** argv)
 
       Problem flow(u, p, l, v, q, m);
 
-      flow =
-            (rhoF / dt) * Integral(u, v)
-          - (rhoF / dt) * Integral(uOld, v)
-          + rhoF * Integral(Dot(convU, v))
-          + 0.5 * rhoF * Integral(divTransport * Dot(u, v))
-          + muF * Integral(Jacobian(u), Jacobian(v))
-          - Integral(p, Div(v))
-          + Integral(Div(u), q)
-          + Integral(l, q)
-          + Integral(p, m)
-          + backflowStabilizationScale *
-            BoundaryIntegral(
-                0.5 * rhoF * beta * Dot(u, v)).over(FluidBoundary::Outlet)
-          + 1e-10 * Integral(p, q)
-          + 1e-10 * Integral(l, m)
-          + DirichletBC(u, inletVelocity).on(FluidBoundary::Inlet)
-          + DirichletBC(u, Zero(dim)).on(FluidBoundary::Wall)
-          + DirichletBC(u, interfaceVelocity).on(FluidBoundary::FSI);
+      flow = (rhoF / dt) * Integral(u, v) - (rhoF / dt) * Integral(uOld, v) +
+        rhoF * Integral(Dot(convU, v)) + 0.5 * rhoF * Integral(divTransport * Dot(u, v)) +
+        muF * Integral(Jacobian(u), Jacobian(v)) - Integral(p, Div(v)) +
+        Integral(Div(u), q) + Integral(l, q) + Integral(p, m) +
+        backflowStabilizationScale *
+          BoundaryIntegral(0.5 * rhoF * beta * Dot(u, v)).over(FluidBoundary::Outlet) +
+        1e-10 * Integral(p, q) + 1e-10 * Integral(l, m) +
+        DirichletBC(u, inletVelocity).on(FluidBoundary::Inlet) +
+        DirichletBC(u, Zero(dim)).on(FluidBoundary::Wall) +
+        DirichletBC(u, interfaceVelocity).on(FluidBoundary::FSI);
 
-      Alert::Info()
-        << "Fluid BDF1 ALE/Oseen step " << step << " / " << Nt
-        << Alert::Raise;
+      Alert::Info() << "Fluid BDF1 ALE/Oseen step " << step << " / " << Nt
+                    << Alert::Raise;
 
       flow.assemble().setFieldSplits();
       Solver::KSP(flow).solve();
 
       if (checkNoSlipOpt)
       {
-        auto fsiNoSlip =
-          DirichletBC(u, interfaceVelocity).on(FluidBoundary::FSI);
+        auto fsiNoSlip = DirichletBC(u, interfaceVelocity).on(FluidBoundary::FSI);
         fsiNoSlip.assemble();
 
         const auto& fluidVelocityData = u.getSolution().getData();
@@ -813,39 +765,28 @@ int main(int argc, char** argv)
         Real maxFluidFSIVelocity = 0.0;
         Real maxWallFSIVelocity = 0.0;
 
-        for (const auto& [local, target]
-               : std::get<IndexMap<Real>>(fsiNoSlip.getDOFs()))
+        for (const auto& [local, target] : std::get<IndexMap<Real>>(fsiNoSlip.getDOFs()))
         {
           const PetscInt idx = static_cast<PetscInt>(local);
           PetscScalar actual = 0.0;
 
-          const PetscErrorCode ierr =
-            VecGetValues(fluidVelocityData, 1, &idx, &actual);
+          const PetscErrorCode ierr = VecGetValues(fluidVelocityData, 1, &idx, &actual);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
 
-          maxNoSlipResidual =
-            std::max<Real>(
-                maxNoSlipResidual,
-                std::abs(static_cast<Real>(actual - target)));
+          maxNoSlipResidual = std::max<Real>(
+            maxNoSlipResidual, std::abs(static_cast<Real>(actual - target)));
 
           maxFluidFSIVelocity =
-            std::max<Real>(
-                maxFluidFSIVelocity,
-                std::abs(static_cast<Real>(actual)));
+            std::max<Real>(maxFluidFSIVelocity, std::abs(static_cast<Real>(actual)));
 
           maxWallFSIVelocity =
-            std::max<Real>(
-                maxWallFSIVelocity,
-                std::abs(static_cast<Real>(target)));
+            std::max<Real>(maxWallFSIVelocity, std::abs(static_cast<Real>(target)));
         }
 
-        Alert::Info()
-          << "  fluid FSI no-slip DOF max |u - u_FSI|: "
-          << maxNoSlipResidual
-          << " (max |u|=" << maxFluidFSIVelocity
-          << ", max |u_FSI|=" << maxWallFSIVelocity << ")"
-          << Alert::Raise;
+        Alert::Info() << "  fluid FSI no-slip DOF max |u - u_FSI|: " << maxNoSlipResidual
+                      << " (max |u|=" << maxFluidFSIVelocity
+                      << ", max |u_FSI|=" << maxWallFSIVelocity << ")" << Alert::Raise;
       }
 
       uOld.setData(u.getSolution().getData());
@@ -855,9 +796,9 @@ int main(int argc, char** argv)
        * Solid tangent and internal force.
        */
       TrialFunction du(solidVh);
-      TestFunction  w(solidVh);
+      TestFunction w(solidVh);
 
-      auto ivw    = Solid::InternalVirtualWork(law, solidDisplacement);
+      auto ivw = Solid::InternalVirtualWork(law, solidDisplacement);
       auto ivwOld = Solid::InternalVirtualWork(law, solidDisplacementOld);
 
       /*
@@ -869,13 +810,11 @@ int main(int argc, char** argv)
       const Real viscousScale = static_cast<Real>(viscousScaleOpt);
       const Real tractionScale = static_cast<Real>(tractionScaleOpt);
 
-      auto fluidTractionLoad = VectorFunction(dim, [&](const Point& xs)
-      {
+      auto fluidTractionLoad = VectorFunction(dim, [&](const Point& xs) {
         Math::SpatialVector<Real> traction(dim);
         traction.setZero();
 
-        const Point xf =
-          forwardSolidPointToFluid(xs, fluidMesh, interfaceMap);
+        const Point xf = forwardSolidPointToFluid(xs, fluidMesh, interfaceMap);
 
         const Real pressure = pOld(xf);
         const auto J = Jacobian(uOld)(xf);
@@ -883,10 +822,8 @@ int main(int argc, char** argv)
 
         const bool pOk = std::isfinite(pressure);
         const bool nOk = isFinite(normal);
-        const bool JOk =
-          (J.rows() == static_cast<int>(dim)) &&
-          (J.cols() == static_cast<int>(dim)) &&
-          isFinite(J);
+        const bool JOk = (J.rows() == static_cast<int>(dim)) &&
+          (J.cols() == static_cast<int>(dim)) && isFinite(J);
 
         if (!pOk || !nOk || !JOk)
         {
@@ -896,13 +833,11 @@ int main(int argc, char** argv)
 
             const auto& pc = xs.getPhysicalCoordinates();
 
-            Alert::Warning()
-              << "fluidTractionLoad: non-finite at xs=("
-              << pc.transpose() << ")"
-              << " pressure=" << pressure
-              << " normalOk=" << nOk
-              << " J(" << J.rows() << "x" << J.cols() << ")Ok=" << JOk
-              << Alert::Raise;
+            Alert::Warning() << "fluidTractionLoad: non-finite at xs=(" << pc.transpose()
+                             << ")"
+                             << " pressure=" << pressure << " normalOk=" << nOk << " J("
+                             << J.rows() << "x" << J.cols() << ")Ok=" << JOk
+                             << Alert::Raise;
           }
 
           return traction;
@@ -911,8 +846,7 @@ int main(int argc, char** argv)
         const auto I = Math::SpatialMatrix<Real>::Identity(dim, dim);
 
         const auto sigmaF =
-            -pressureScale * pressure * I
-            + viscousScale * muF * (J + J.transpose());
+          -pressureScale * pressure * I + viscousScale * muF * (J + J.transpose());
 
         /*
          * nFluid is the outward normal of the fluid.
@@ -925,10 +859,7 @@ int main(int argc, char** argv)
 
       solidFluidTraction = zero;
 
-      solidFluidTraction.project(
-          Region::Boundary,
-          fluidTractionLoad,
-          SolidBoundary::FSI);
+      solidFluidTraction.project(Region::Boundary, fluidTractionLoad, SolidBoundary::FSI);
 
       /*
        * Solid problem.
@@ -938,115 +869,83 @@ int main(int argc, char** argv)
        */
       Problem solid(du, w);
 
-      solid =
-          ivw.Tangent(du, w)
-        + solidMassCoeff * Integral(du, w)
-        + (solidRayleighBeta / dt) * ivw.Tangent(du, w)
+      solid = ivw.Tangent(du, w) + solidMassCoeff * Integral(du, w) +
+        (solidRayleighBeta / dt) * ivw.Tangent(du, w)
 
-        + ivw.Residual(w)
-        + solidMassCoeff * Integral(solidDisplacement, w)
-        - solidMassCoeff * Integral(solidDisplacementOld, w)
-        - (rhoS / dt) * Integral(solidVelocityOld, w)
-        + (solidRayleighBeta / dt) * ivw.Residual(w)
-        - (solidRayleighBeta / dt) * ivwOld.Residual(w)
-        - BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
+        + ivw.Residual(w) + solidMassCoeff * Integral(solidDisplacement, w) -
+        solidMassCoeff * Integral(solidDisplacementOld, w) -
+        (rhoS / dt) * Integral(solidVelocityOld, w) +
+        (solidRayleighBeta / dt) * ivw.Residual(w) -
+        (solidRayleighBeta / dt) * ivwOld.Residual(w) -
+        BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
 
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft)
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampRight);
+        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft) +
+        DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampRight);
 
-      Alert::Info()
-        << "Solid BDF1 hyperelastic step " << step << " / " << Nt
-        << Alert::Raise;
+      Alert::Info() << "Solid BDF1 hyperelastic step " << step << " / " << Nt
+                    << Alert::Raise;
 
-      Alert::Info()
-        << "  solidDisplacement norm before Newton: "
-        << solidDisplacement.getData().norm()
-        << Alert::Raise;
+      Alert::Info() << "  solidDisplacement norm before Newton: "
+                    << solidDisplacement.getData().norm() << Alert::Raise;
 
-      Alert::Info()
-        << "  solidFluidTraction norm: "
-        << solidFluidTraction.getData().norm()
-        << Alert::Raise;
+      Alert::Info() << "  solidFluidTraction norm: "
+                    << solidFluidTraction.getData().norm() << Alert::Raise;
 
-      const auto solidDisplacementInitial =
-        solidDisplacement.getData();
+      const auto solidDisplacementInitial = solidDisplacement.getData();
 
       const Real tightSolidTolerance = 1e-10;
       const Real basinSolidTolerance = 1e-8;
 
-      auto solveSolidNewton =
-        [&](const char* label,
-            Real damping,
-            Real absoluteTolerance,
-            Real relativeTolerance)
-        {
-          SparseLU solidLinearSolver(solid);
-          NewtonSolver solidSolver(solidLinearSolver);
+      auto solveSolidNewton = [&](const char* label, Real damping, Real absoluteTolerance,
+                                Real relativeTolerance) {
+        SparseLU solidLinearSolver(solid);
+        NewtonSolver solidSolver(solidLinearSolver);
 
-          solidSolver.setMaxIterations(75)
-                     .setDampingFactor(damping)
-                     .setAbsoluteTolerance(absoluteTolerance)
-                     .setRelativeTolerance(relativeTolerance);
+        solidSolver.setMaxIterations(75)
+          .setDampingFactor(damping)
+          .setAbsoluteTolerance(absoluteTolerance)
+          .setRelativeTolerance(relativeTolerance);
 
-          Alert::Info()
-            << "  " << label
-            << " alpha=" << damping
-            << " atol=" << absoluteTolerance
-            << Alert::Raise;
+        Alert::Info() << "  " << label << " alpha=" << damping
+                      << " atol=" << absoluteTolerance << Alert::Raise;
 
-          solidSolver.setMonitor([](const auto& rep) {
-            Alert::Info() << "    it=" << rep.iterations << " r=" << rep.finalResidual
-                          << " dx=" << rep.finalStepNorm << Alert::Raise;
-          });
+        solidSolver.setMonitor([](const auto& rep) {
+          Alert::Info() << "    it=" << rep.iterations << " r=" << rep.finalResidual
+                        << " dx=" << rep.finalStepNorm << Alert::Raise;
+        });
 
-          solidSolver.solve(solidDisplacement);
+        solidSolver.solve(solidDisplacement);
 
-          return solidSolver.converged();
-        };
+        return solidSolver.converged();
+      };
 
       solidDisplacement.setData(solidDisplacementInitial);
 
       bool solidNewtonConverged =
-        solveSolidNewton(
-            "full Newton attempt",
-            1.0,
-            tightSolidTolerance,
-            1e-8);
+        solveSolidNewton("full Newton attempt", 1.0, tightSolidTolerance, 1e-8);
 
-      Real solidNewtonDamping =
-        std::min<Real>(newtonDampingOpt, 0.5);
+      Real solidNewtonDamping = std::min<Real>(newtonDampingOpt, 0.5);
 
       for (Index attempt = 0; !solidNewtonConverged && attempt < 8; ++attempt)
       {
         solidDisplacement.setData(solidDisplacementInitial);
 
-        Alert::Warning()
-          << "  full Newton did not converge; seeking basin with alpha="
-          << solidNewtonDamping
-          << Alert::Raise;
+        Alert::Warning() << "  full Newton did not converge; seeking basin with alpha="
+                         << solidNewtonDamping << Alert::Raise;
 
-        const bool reachedBasin =
-          solveSolidNewton(
-              "damped basin attempt",
-              solidNewtonDamping,
-              basinSolidTolerance,
-              0.0);
+        const bool reachedBasin = solveSolidNewton(
+          "damped basin attempt", solidNewtonDamping, basinSolidTolerance, 0.0);
 
         if (reachedBasin)
         {
           solidNewtonConverged =
-            solveSolidNewton(
-                "full Newton final",
-                1.0,
-                tightSolidTolerance,
-                1e-8);
+            solveSolidNewton("full Newton final", 1.0, tightSolidTolerance, 1e-8);
 
           if (solidNewtonConverged)
             break;
 
-          Alert::Warning()
-            << "  full Newton failed from damped iterate; reducing alpha."
-            << Alert::Raise;
+          Alert::Warning() << "  full Newton failed from damped iterate; reducing alpha."
+                           << Alert::Raise;
         }
 
         solidNewtonDamping *= 0.5;
@@ -1055,14 +954,13 @@ int main(int argc, char** argv)
       if (!solidNewtonConverged)
       {
         throw std::runtime_error(
-            "Solid Newton failed to converge after basin damping retries.");
+          "Solid Newton failed to converge after basin damping retries.");
       }
 
       /*
        * Commit solid state.
        */
-      solidVelocity =
-        (1.0 / dt) * (solidDisplacement - solidDisplacementOld);
+      solidVelocity = (1.0 / dt) * (solidDisplacement - solidDisplacementOld);
 
       solidDisplacementOld = solidDisplacement;
       solidVelocityOld = solidVelocity;
@@ -1079,16 +977,12 @@ int main(int argc, char** argv)
       fluidDisplacementOld.setData(fluidDisplacement.getData());
       solveHarmonicALE(solidDisplacement);
 
-      meshVelocity =
-        (1.0 / dt) * (fluidDisplacement - fluidDisplacementOld);
+      meshVelocity = (1.0 / dt) * (fluidDisplacement - fluidDisplacementOld);
 
       restoreMesh(solidOutputMesh, solidReferenceVertices);
 
       moveMeshWithDisplacement(
-          solidOutputMesh,
-          solidMesh,
-          solidReferenceVertices,
-          solidDisplacement);
+        solidOutputMesh, solidMesh, solidReferenceVertices, solidDisplacement);
 
       /*
        * Copy solid assembly fields to output fields.

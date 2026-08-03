@@ -452,7 +452,7 @@ namespace Rodin::Geometry
        * @returns Reference to this object for method chaining
        */
       Connectivity& polytope(
-          Geometry::Polytope::Type t, std::initializer_list<Index> p, Index& index)
+        Geometry::Polytope::Type t, std::initializer_list<Index> p, Index& index)
       {
         return this->polytope(t, Polytope::Key(p), index);
       }
@@ -480,7 +480,7 @@ namespace Rodin::Geometry
        * @returns Reference to this object for method chaining
        */
       Connectivity& polytope(
-          Geometry::Polytope::Type t, const IndexArray& polytope, Index& index)
+        Geometry::Polytope::Type t, const IndexArray& polytope, Index& index)
       {
         assert(polytope.size() <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
         Polytope::Key key(polytope.size());
@@ -514,7 +514,7 @@ namespace Rodin::Geometry
        * @returns Reference to this object for method chaining
        */
       Connectivity& polytope(
-          Geometry::Polytope::Type t, const Polytope::Key& polytope, Index& index);
+        Geometry::Polytope::Type t, const Polytope::Key& polytope, Index& index);
 
       /**
        * @brief Adds a moved polytope key and returns its connectivity index.
@@ -524,7 +524,7 @@ namespace Rodin::Geometry
        * @returns Reference to this object for method chaining
        */
       Connectivity& polytope(
-          Geometry::Polytope::Type t, Polytope::Key&& polytope, Index& index);
+        Geometry::Polytope::Type t, Polytope::Key&& polytope, Index& index);
 
       /**
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and

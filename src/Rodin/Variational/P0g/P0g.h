@@ -197,8 +197,9 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Wedge:
           case Geometry::Polytope::Type::Hexahedron:
           {
-            // One thread-local element per call site; geometry is set in ctor.
-            // Returning a reference is required by the FES API.
+            // Unlike the fixed P0/P1/H1 elements, this cached element is
+            // reassigned when the requested geometry changes. It must remain
+            // thread-local while the FES API returns it by reference.
             static thread_local ElementType e(Geometry::Polytope::Type::Point);
             if (e.getGeometry() != g)
               e = ElementType(g);
@@ -378,6 +379,8 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Wedge:
           case Geometry::Polytope::Type::Hexahedron:
           {
+            // Geometry and vector dimension both select the returned element;
+            // sharing this mutable cache would race between evaluations.
             static thread_local ElementType e(Geometry::Polytope::Type::Point, 1);
             if (e.getGeometry() != g || e.getCount() != m_vdim)
               e = ElementType(g, m_vdim);

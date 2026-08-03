@@ -56,10 +56,10 @@ namespace Rodin::Solid
       /// Precomputed cache for the Yeoh law.
       struct Cache
       {
-        Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
-        Real J;       ///< Jacobian
-        Real Jm2d;    ///< @f$ J^{-2/d} @f$
-        Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
+          Real I1;      ///< @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
+          Real J;       ///< Jacobian
+          Real Jm2d;    ///< @f$ J^{-2/d} @f$
+          Real I1bar;   ///< @f$ \bar{I}_1 = J^{-2/d} I_1 @f$
       };
 
       /**
@@ -70,24 +70,46 @@ namespace Rodin::Solid
        * @param bulkModulus Bulk modulus @f$ \kappa @f$
        */
       Yeoh(Real c1, Real c2, Real c3, Real bulkModulus)
-        : m_c1(c1), m_c2(c2), m_c3(c3), m_kappa(bulkModulus)
+        : m_c1(c1),
+          m_c2(c2),
+          m_c3(c3),
+          m_kappa(bulkModulus)
       {}
 
+      /// @brief Copy constructor.
       Yeoh(const Yeoh&) = default;
+      /// @brief Move constructor.
       Yeoh(Yeoh&&) = default;
 
       /// @brief Gets @f$ c_1 @f$.
-      Real getMaterialConstantC1() const { return m_c1; }
+      Real getMaterialConstantC1() const
+      {
+        return m_c1;
+      }
 
       /// @brief Gets @f$ c_2 @f$.
-      Real getMaterialConstantC2() const { return m_c2; }
+      Real getMaterialConstantC2() const
+      {
+        return m_c2;
+      }
 
       /// @brief Gets @f$ c_3 @f$.
-      Real getMaterialConstantC3() const { return m_c3; }
+      Real getMaterialConstantC3() const
+      {
+        return m_c3;
+      }
 
       /// @brief Gets the bulk modulus @f$ \kappa @f$.
-      Real getBulkModulus() const { return m_kappa; }
+      Real getBulkModulus() const
+      {
+        return m_kappa;
+      }
 
+      /**
+       * @brief Populates the constitutive cache at the current state.
+       * @param cache The cache to fill
+       * @param cp The constitutive point
+       */
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -101,20 +123,28 @@ namespace Rodin::Solid
         cache.I1bar = cache.Jm2d * cache.I1;
       }
 
+      /**
+       * @brief Computes the strain-energy density.
+       * @param cache The precomputed constitutive cache
+       * @param cp The constitutive point
+       * @returns The stored energy density
+       */
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
         const Real x = cache.I1bar - dd;
-        return m_c1 * x
-             + m_c2 * x * x
-             + m_c3 * x * x * x
-             + 0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
+        return m_c1 * x + m_c2 * x * x + m_c3 * x * x * x +
+          0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
       }
 
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      /**
+       * @brief Computes the first Piola-Kirchhoff stress.
+       * @param[out] P The resulting stress tensor
+       * @param cache The precomputed constitutive cache
+       * @param cp The constitutive point
+       */
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
@@ -140,11 +170,15 @@ namespace Rodin::Solid
         P = dW1 * dI1bar_dF + dJvol_dF;
       }
 
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+      /**
+       * @brief Applies the material tangent to a deformation-gradient increment.
+       * @param[out] dP The resulting stress increment
+       * @param cache The precomputed constitutive cache
+       * @param cp The constitutive point
+       * @param dF The deformation-gradient increment
+       */
+      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
+        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
         const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
@@ -179,16 +213,14 @@ namespace Rodin::Solid
         // Directional derivative of dI1bar/dF (cf. MooneyRivlin):
         // d(Jm2d)/dF term + Jm2d d(2F - (2/d) I1 F^{-T})/dF
         const Math::SpatialMatrix<Real> d_dI1bar_dF =
-          dJm2d * (2.0 * F + (-(2.0 / dd) * cache.I1) * FinvT)
-          + 2.0 * cache.Jm2d * dF
-          + (-(2.0 / dd) * cache.Jm2d * dI1) * FinvT
-          + (-(2.0 / dd) * cache.Jm2d * cache.I1) * dFinvT;
+          dJm2d * (2.0 * F + (-(2.0 / dd) * cache.I1) * FinvT) + 2.0 * cache.Jm2d * dF +
+          (-(2.0 / dd) * cache.Jm2d * dI1) * FinvT +
+          (-(2.0 / dd) * cache.Jm2d * cache.I1) * dFinvT;
 
         // ---- Volumetric contribution ----
         const Real dJ = cache.J * FinvT_dF;
-        const Math::SpatialMatrix<Real> d_dJvol_dF =
-          m_kappa * ((dJ * (2.0 * cache.J - 1.0)) * FinvT
-                   + (cache.J - 1.0) * cache.J * dFinvT);
+        const Math::SpatialMatrix<Real> d_dJvol_dF = m_kappa *
+          ((dJ * (2.0 * cache.J - 1.0)) * FinvT + (cache.J - 1.0) * cache.J * dFinvT);
 
         // Chain rule: P_iso = dW1(I1bar) dI1bar/dF, so
         //   dP_iso = ddW1 dI1bar/dF + dW1 d(dI1bar/dF)

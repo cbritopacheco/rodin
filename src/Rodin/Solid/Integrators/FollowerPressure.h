@@ -90,17 +90,19 @@ namespace Rodin::Solid
   namespace Internal
   {
     /// Scalar P1 basis on the reference segment/triangle.
-    inline Real p1FaceBasis(size_t a, const Math::SpatialVector<Real>& rc,
-                            size_t faceDim)
+    inline Real p1FaceBasis(size_t a, const Math::SpatialVector<Real>& rc, size_t faceDim)
     {
       if (faceDim == 1)
         return (a == 0) ? (1.0 - rc(0)) : rc(0);
       // triangle
       switch (a)
       {
-        case 0:  return 1.0 - rc(0) - rc(1);
-        case 1:  return rc(0);
-        default: return rc(1);
+        case 0:
+          return 1.0 - rc(0) - rc(1);
+        case 1:
+          return rc(0);
+        default:
+          return rc(1);
       }
     }
 
@@ -110,16 +112,16 @@ namespace Rodin::Solid
       if (faceDim == 1)
         return (a == 0) ? -1.0 : 1.0;
       // triangle
-      if (a == 0) return -1.0;
+      if (a == 0)
+        return -1.0;
       return ((a == 1 && j == 0) || (a == 2 && j == 1)) ? 1.0 : 0.0;
     }
 
     /// "Cross product" carrying normal direction and area element:
     /// 3D: t1 x t2; 2D: +90-degree rotation of t1 (t2 ignored).
     inline void surfaceCross(Math::SpatialVector<Real>& out,
-                             const Math::SpatialVector<Real>& t1,
-                             const Math::SpatialVector<Real>& t2,
-                             size_t sdim)
+      const Math::SpatialVector<Real>& t1, const Math::SpatialVector<Real>& t2,
+      size_t sdim)
     {
       out.resize(sdim);
       if (sdim == 3)
@@ -130,7 +132,7 @@ namespace Rodin::Solid
       }
       else
       {
-        out(0) =  t1(1);
+        out(0) = t1(1);
         out(1) = -t1(0);
       }
     }
@@ -141,82 +143,82 @@ namespace Rodin::Solid
     template <class StateFES, class State>
     struct FaceKinematics
     {
-      size_t sdim;
-      size_t faceDim;
-      size_t nv;
-      std::vector<Index> vertices;
-      Math::SpatialMatrix<Real> Xjac; ///< Reference geometric Jacobian X_{,xi}
-      Real orientation;               ///< +-1: makes the cross point OUTWARD
+        size_t sdim;                  ///< Space dimension.
+        size_t faceDim;               ///< Reference face dimension.
+        size_t nv;                    ///< Number of face vertices.
+        std::vector<Index> vertices;  ///< Global vertex indices of the face.
+        Math::SpatialMatrix<Real> Xjac; ///< Reference geometric Jacobian X_{,xi}
+        Real orientation;               ///< +-1: makes the cross point OUTWARD
 
-      void setFace(const Geometry::Polytope& face)
-      {
-        const auto& mesh = face.getMesh();
-        sdim = mesh.getSpaceDimension();
-        faceDim = face.getDimension();
-        const auto& vs = face.getVertices();
-        vertices.assign(vs.begin(), vs.end());
-        nv = vertices.size();
+      /// @brief Initializes the geometric data associated with a boundary face.
+        void setFace(const Geometry::Polytope& face)
+        {
+          const auto& mesh = face.getMesh();
+          sdim = mesh.getSpaceDimension();
+          faceDim = face.getDimension();
+          const auto& vs = face.getVertices();
+          vertices.assign(vs.begin(), vs.end());
+          nv = vertices.size();
 
         // Reference tangents from the (affine) vertex coordinates:
         // X_{,xi_j} = X_{j+1} - X_0 for the unit simplex parametrization,
         // consistent with p1FaceBasis/p1FaceBasisGrad above.
-        Xjac.resize(sdim, faceDim);
-        const auto X0 = mesh.getVertexCoordinates(vertices[0]);
-        for (size_t j = 0; j < faceDim; ++j)
-        {
-          const auto Xj = mesh.getVertexCoordinates(vertices[j + 1]);
-          for (size_t c = 0; c < sdim; ++c)
-            Xjac(c, j) = Xj(c) - X0(c);
-        }
+          Xjac.resize(sdim, faceDim);
+          const auto X0 = mesh.getVertexCoordinates(vertices[0]);
+          for (size_t j = 0; j < faceDim; ++j)
+          {
+            const auto Xj = mesh.getVertexCoordinates(vertices[j + 1]);
+            for (size_t c = 0; c < sdim; ++c)
+              Xjac(c, j) = Xj(c) - X0(c);
+          }
 
         // Orientation: sign such that surfaceCross points away from the
         // incident cell centroid (outward of the solid), evaluated on the
         // REFERENCE configuration (orientation is topological and constant).
-        Math::SpatialVector<Real> t1(sdim), t2(sdim), cr;
-        for (size_t c = 0; c < sdim; ++c)
-        {
-          t1(c) = Xjac(c, 0);
-          t2(c) = (faceDim == 2) ? Xjac(c, 1) : 0.0;
+          Math::SpatialVector<Real> t1(sdim), t2(sdim), cr;
+          for (size_t c = 0; c < sdim; ++c)
+          {
+            t1(c) = Xjac(c, 0);
+            t2(c) = (faceDim == 2) ? Xjac(c, 1) : 0.0;
+          }
+          surfaceCross(cr, t1, t2, sdim);
+
+          const auto& conn = mesh.getConnectivity();
+          const auto& inc = conn.getIncidence({faceDim, faceDim + 1}, face.getIndex());
+          assert(inc.size() == 1);
+          const auto cellIt = mesh.getPolytope(faceDim + 1, *inc.begin());
+          const auto rcCell =
+            Geometry::Polytope::Traits(cellIt->getGeometry()).getCentroid();
+          const Geometry::Point pc(*cellIt, rcCell);
+          const auto& xc = pc.getPhysicalCoordinates();
+
+          Real dot = 0.0;
+          for (size_t c = 0; c < sdim; ++c)
+            dot += cr(c) * (xc(c) - X0(c));
+          orientation = (dot > 0.0) ? -1.0 : 1.0;
         }
-        surfaceCross(cr, t1, t2, sdim);
-
-        const auto& conn = mesh.getConnectivity();
-        const auto& inc = conn.getIncidence({ faceDim, faceDim + 1 },
-                                            face.getIndex());
-        assert(inc.size() == 1);
-        const auto cellIt = mesh.getPolytope(faceDim + 1, *inc.begin());
-        const auto rcCell =
-          Geometry::Polytope::Traits(cellIt->getGeometry()).getCentroid();
-        const Geometry::Point pc(*cellIt, rcCell);
-        const auto& xc = pc.getPhysicalCoordinates();
-
-        Real dot = 0.0;
-        for (size_t c = 0; c < sdim; ++c)
-          dot += cr(c) * (xc(c) - X0(c));
-        orientation = (dot > 0.0) ? -1.0 : 1.0;
-      }
 
       /// Nodal displacement of face vertex a, component c.
-      Real nodal(const StateFES& fes, const State& d, size_t a, size_t c) const
-      {
-        return d[fes.getGlobalIndex({ 0, vertices[a] }, c)];
-      }
+        Real nodal(const StateFES& fes, const State& d, size_t a, size_t c) const
+        {
+          return d[fes.getGlobalIndex({0, vertices[a]}, c)];
+        }
 
       /// Deformed tangents at this face (P1: constant over the face).
-      void deformedTangents(Math::SpatialMatrix<Real>& xjac,
-                            const StateFES& fes, const State& d) const
-      {
-        xjac = Xjac;
-        for (size_t j = 0; j < faceDim; ++j)
-          for (size_t a = 0; a < nv; ++a)
-          {
-            const Real g = p1FaceBasisGrad(a, j, faceDim);
-            if (g == 0.0)
-              continue;
-            for (size_t c = 0; c < sdim; ++c)
-              xjac(c, j) += g * nodal(fes, d, a, c);
-          }
-      }
+        void deformedTangents(
+          Math::SpatialMatrix<Real>& xjac, const StateFES& fes, const State& d) const
+        {
+          xjac = Xjac;
+          for (size_t j = 0; j < faceDim; ++j)
+            for (size_t a = 0; a < nv; ++a)
+            {
+              const Real g = p1FaceBasisGrad(a, j, faceDim);
+              if (g == 0.0)
+                continue;
+              for (size_t c = 0; c < sdim; ++c)
+                xjac(c, j) += g * nodal(fes, d, a, c);
+            }
+        }
     };
   }
 
@@ -228,23 +230,28 @@ namespace Rodin::Solid
    * outward normal).
    */
   template <class TestFunctionType, class DisplacementType>
-  class FollowerPressureForce final
-    : public Variational::LinearFormIntegratorBase<Real>
+  class FollowerPressureForce final : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+      /// @brief Test function type.
       using TestType = TestFunctionType;
+      /// @brief Current displacement state type.
       using StateType = DisplacementType;
+      /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::FollowerPressureForce expects a Rodin test function.");
 
       /// Pressure captured BY REFERENCE: all copies follow the variable.
-      FollowerPressureForce(const Real& pressure, const TestType& v,
-                            const StateType& displacement)
+      FollowerPressureForce(
+        const Real& pressure, const TestType& v, const StateType& displacement)
         : Parent(v),
           m_pressure(pressure),
           m_test(v),
@@ -253,10 +260,11 @@ namespace Rodin::Solid
           m_statefes(displacement.getFiniteElementSpace())
       {}
 
+      /// @brief Copy constructor.
       FollowerPressureForce(const FollowerPressureForce&) = default;
 
-      FollowerPressureForce& setPolytope(const Geometry::Polytope& face)
-        final override
+      /// @brief Sets the current face and assembles the element residual.
+      FollowerPressureForce& setPolytope(const Geometry::Polytope& face) final override
       {
         m_polytope = face;
         m_kin.setFace(face);
@@ -271,8 +279,7 @@ namespace Rodin::Solid
         // Deformed tangents and oriented current normal-area vector
         // (constant over a P1 face).
         Math::SpatialMatrix<Real> xjac;
-        m_kin.deformedTangents(xjac, m_statefes.get(),
-                               m_displacement.get());
+        m_kin.deformedTangents(xjac, m_statefes.get(), m_displacement.get());
         Math::SpatialVector<Real> t1(sdim), t2(sdim), cr;
         for (size_t c = 0; c < sdim; ++c)
         {
@@ -282,8 +289,7 @@ namespace Rodin::Solid
         Internal::surfaceCross(cr, t1, t2, sdim);
 
         const Real p = m_pressure.get();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(
-            2, face.getGeometry());
+        const auto& qf = QF::PolytopeQuadratureFormula::get(2, face.getGeometry());
         const size_t nqp = qf.getSize();
 
         for (size_t q = 0; q < nqp; ++q)
@@ -294,26 +300,32 @@ namespace Rodin::Solid
           {
             const Real phi = Internal::p1FaceBasis(a, rc, m_kin.faceDim);
             for (size_t c = 0; c < vdim; ++c)
-              m_elemVec(a * vdim + c) +=
-                wq * m_kin.orientation * p * cr(c) * phi;
+              m_elemVec(a * vdim + c) += wq * m_kin.orientation * p * cr(c) * phi;
           }
         }
         return *this;
       }
 
-      ScalarType integrate(size_t te) final override { return m_elemVec(te); }
+      /// @brief Returns an entry of the current element residual vector.
+      ScalarType integrate(size_t te) final override
+      {
+        return m_elemVec(te);
+      }
 
+      /// @brief Returns the current face polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Boundary;
       }
 
+      /// @brief Polymorphically copies this follower-pressure residual.
       FollowerPressureForce* copy() const noexcept final override
       {
         return new FollowerPressureForce(*this);
@@ -331,11 +343,11 @@ namespace Rodin::Solid
       Math::Vector<ScalarType> m_elemVec;
   };
 
+  /// @brief CTAD guide for the follower-pressure residual.
   template <class TestFunctionType, class DisplacementType>
   FollowerPressureForce(const Real&, const TestFunctionType&,
-                        const DisplacementType&)
-    -> FollowerPressureForce<std::decay_t<TestFunctionType>,
-                             std::decay_t<DisplacementType>>;
+    const DisplacementType&) -> FollowerPressureForce<std::decay_t<TestFunctionType>,
+                               std::decay_t<DisplacementType>>;
 
   /**
    * @brief Bilinear-form integrator: the EXACT load stiffness of the
@@ -345,19 +357,26 @@ namespace Rodin::Solid
    *    \cdot \mathbf{w} @f$.  Add it with "+" alongside the material
    * tangent.  NONSYMMETRIC.
    */
-  template <class TrialFunctionType, class TestFunctionType,
-            class DisplacementType>
+  template <class TrialFunctionType, class TestFunctionType, class DisplacementType>
   class FollowerPressureTangent final
     : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      /// @brief Trial function type.
       using TrialType = TrialFunctionType;
+      /// @brief Test function type.
       using TestType = TestFunctionType;
+      /// @brief Current displacement state type.
       using StateType = DisplacementType;
+      /// @brief Trial finite element space type.
       using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+      /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
       static_assert(Variational::IsTrialFunction<TrialType>::Value,
@@ -365,9 +384,15 @@ namespace Rodin::Solid
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::FollowerPressureTangent expects a Rodin test function.");
 
-      FollowerPressureTangent(const Real& pressure, const TrialType& u,
-                              const TestType& v,
-                              const StateType& displacement)
+      /**
+       * @brief Constructs the follower-pressure tangent integrator.
+       * @param pressure The applied pressure, captured by reference
+       * @param u The trial displacement function
+       * @param v The test displacement function
+       * @param displacement The current displacement state
+       */
+      FollowerPressureTangent(const Real& pressure, const TrialType& u, const TestType& v,
+        const StateType& displacement)
         : Parent(u, v),
           m_pressure(pressure),
           m_trial(u),
@@ -378,10 +403,11 @@ namespace Rodin::Solid
           m_statefes(displacement.getFiniteElementSpace())
       {}
 
+      /// @brief Copy constructor.
       FollowerPressureTangent(const FollowerPressureTangent&) = default;
 
-      FollowerPressureTangent& setPolytope(const Geometry::Polytope& face)
-        final override
+      /// @brief Sets the current face and assembles the element tangent.
+      FollowerPressureTangent& setPolytope(const Geometry::Polytope& face) final override
       {
         m_polytope = face;
         m_kin.setFace(face);
@@ -395,8 +421,7 @@ namespace Rodin::Solid
         m_matrix.setZero();
 
         Math::SpatialMatrix<Real> xjac;
-        m_kin.deformedTangents(xjac, m_statefes.get(),
-                               m_displacement.get());
+        m_kin.deformedTangents(xjac, m_statefes.get(), m_displacement.get());
         Math::SpatialVector<Real> x1(sdim), x2(sdim);
         for (size_t c = 0; c < sdim; ++c)
         {
@@ -405,8 +430,7 @@ namespace Rodin::Solid
         }
 
         const Real p = m_pressure.get();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(
-            2, face.getGeometry());
+        const auto& qf = QF::PolytopeQuadratureFormula::get(2, face.getGeometry());
         const size_t nqp = qf.getSize();
 
         Math::SpatialVector<Real> e(sdim), d1(sdim), d2(sdim), c1, c2, dcr(sdim);
@@ -417,8 +441,8 @@ namespace Rodin::Solid
           for (size_t b = 0; b < nv; ++b) // trial vertex
           {
             const Real g1 = Internal::p1FaceBasisGrad(b, 0, m_kin.faceDim);
-            const Real g2 = (m_kin.faceDim == 2)
-              ? Internal::p1FaceBasisGrad(b, 1, m_kin.faceDim) : 0.0;
+            const Real g2 =
+              (m_kin.faceDim == 2) ? Internal::p1FaceBasisGrad(b, 1, m_kin.faceDim) : 0.0;
             for (size_t cb = 0; cb < vdim; ++cb) // trial component
             {
               // delta x_{,1} = g1 e_cb ; delta x_{,2} = g2 e_cb
@@ -437,8 +461,7 @@ namespace Rodin::Solid
               const size_t tr = b * vdim + cb;
               for (size_t a = 0; a < nv; ++a) // test vertex
               {
-                const Real phi =
-                  Internal::p1FaceBasis(a, rc, m_kin.faceDim);
+                const Real phi = Internal::p1FaceBasis(a, rc, m_kin.faceDim);
                 for (size_t ca = 0; ca < vdim; ++ca)
                   m_matrix(a * vdim + ca, tr) +=
                     wq * m_kin.orientation * p * dcr(ca) * phi;
@@ -449,22 +472,26 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns an entry of the current element tangent matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the current face polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Boundary;
       }
 
+      /// @brief Polymorphically copies this follower-pressure tangent.
       FollowerPressureTangent* copy() const noexcept final override
       {
         return new FollowerPressureTangent(*this);
@@ -484,13 +511,12 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  template <class TrialFunctionType, class TestFunctionType,
-            class DisplacementType>
-  FollowerPressureTangent(const Real&, const TrialFunctionType&,
-                          const TestFunctionType&, const DisplacementType&)
+  /// @brief CTAD guide for the follower-pressure tangent.
+  template <class TrialFunctionType, class TestFunctionType, class DisplacementType>
+  FollowerPressureTangent(const Real&, const TrialFunctionType&, const TestFunctionType&,
+    const DisplacementType&)
     -> FollowerPressureTangent<std::decay_t<TrialFunctionType>,
-                               std::decay_t<TestFunctionType>,
-                               std::decay_t<DisplacementType>>;
+      std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 }
 
 #endif

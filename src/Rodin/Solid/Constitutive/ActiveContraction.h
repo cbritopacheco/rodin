@@ -34,7 +34,8 @@ namespace Rodin::Solid
    * condensed dynamic tangent is used.
    */
   template <class PassiveLaw, class ActiveLaw = ActiveFiberLaw>
-  class ActiveContraction final : public HyperElasticLaw<ActiveContraction<PassiveLaw, ActiveLaw>>
+  class ActiveContraction final
+    : public HyperElasticLaw<ActiveContraction<PassiveLaw, ActiveLaw>>
   {
     public:
       /// @brief Cached passive and active quantities at a quadrature point.
@@ -60,8 +61,7 @@ namespace Rodin::Solid
 
       /// @brief Constructs the coupled active contraction law.
       ActiveContraction(
-          const PassiveLaw& passiveLaw,
-          const ActiveLaw& activeLaw = ActiveLaw())
+        const PassiveLaw& passiveLaw, const ActiveLaw& activeLaw = ActiveLaw())
         : m_passiveLaw(passiveLaw),
           m_activeLaw(activeLaw),
           m_localTolerance(1e-12),
@@ -118,6 +118,17 @@ namespace Rodin::Solid
           const Real ecN = cp.get<Tags::PreviousActiveExtension>();
           const Real activation = cp.get<Tags::ElectricalActivation>();
 
+          // The series law is evaluated at the midpoint fiber strain when the
+          // previous strain is supplied, matching the compatible
+          // discretization; otherwise it falls back to the current strain.
+          // e^n is a constant of the step, so the derivative of the evaluation
+          // strain with respect to e^{n+1} is 1/2 in the midpoint case.
+          const bool midpoint = cp.has<Tags::PreviousFiberStrain>();
+          const Real strainFactor = midpoint ? 0.5 : 1.0;
+          const Real seriesStrain = midpoint
+            ? 0.5 * (cache.strain + cp.get<Tags::PreviousFiberStrain>())
+            : cache.strain;
+
           // Initial guess: previous extension, optionally overridden by the
           // input via Tags::ActiveExtension (warm start).
           Real c =
@@ -126,7 +137,7 @@ namespace Rodin::Solid
           typename ActiveLaw::State newState =
             m_activeLaw.update(dt, oldState, ecN, c, activation);
           typename ActiveLaw::Response resp = m_activeLaw.evaluateDynamic(
-            dt, oldState, newState, cache.strain, ecN, c, activation);
+            dt, oldState, newState, seriesStrain, ecN, c, activation, strainFactor);
 
           size_t it = 0;
           for (; it < m_localMaxIterations; ++it)
@@ -137,7 +148,7 @@ namespace Rodin::Solid
             c += dc;
             newState = m_activeLaw.update(dt, oldState, ecN, c, activation);
             resp = m_activeLaw.evaluateDynamic(
-              dt, oldState, newState, cache.strain, ecN, c, activation);
+              dt, oldState, newState, seriesStrain, ecN, c, activation, strainFactor);
             if (std::abs(dc) < m_localTolerance)
               break;
           }
@@ -152,8 +163,7 @@ namespace Rodin::Solid
           cache.activeExtension = cp.has<Tags::ActiveExtension>()
             ? cp.get<Tags::ActiveExtension>()
             : m_activeLaw.getParameters().initial.extension;
-          cache.active =
-            m_activeLaw.evaluateStatic(cache.strain, cache.activeExtension);
+          cache.active = m_activeLaw.evaluateStatic(cache.strain, cache.activeExtension);
           cache.newState = m_activeLaw.initialState();
           cache.dynamic = false;
           cache.localIterations = 0;
@@ -163,35 +173,27 @@ namespace Rodin::Solid
       /// @brief Returns the sum of passive and active strain-energy densities.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
-        const Real passiveEnergy =
-          m_passiveLaw.getStrainEnergyDensity(cache.passive, cp);
+        const Real passiveEnergy = m_passiveLaw.getStrainEnergyDensity(cache.passive, cp);
         const Real denom = 1.0 + 2.0 * cache.activeExtension;
-        const Real activeEnergy =
-          0.5 * m_activeLaw.getParameters().stiffness
-          * (cache.strain - cache.activeExtension)
-          * (cache.strain - cache.activeExtension)
-          / (denom * denom);
+        const Real activeEnergy = 0.5 * m_activeLaw.getParameters().stiffness *
+          (cache.strain - cache.activeExtension) *
+          (cache.strain - cache.activeExtension) / (denom * denom);
         return passiveEnergy + activeEnergy;
       }
 
       /// @brief Adds the active contribution to the first Piola-Kirchhoff stress.
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const ConstitutivePoint& cp) const
       {
         m_passiveLaw.getFirstPiolaKirchhoffStress(P, cache.passive, cp);
-        P = P + cache.active.stress
-              * cp.getKinematicState().getDeformationGradient()
-              * cache.fiber.tensor();
+        P = P +
+          cache.active.stress * cp.getKinematicState().getDeformationGradient() *
+            cache.fiber.tensor();
       }
 
       /// @brief Adds the active contribution to the material tangent action.
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
+        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
         m_passiveLaw.getMaterialTangent(dP, cache.passive, cp, dF);
 
@@ -209,21 +211,17 @@ namespace Rodin::Solid
         const Real dStrain = cache.fiber.dStrain(dF);
         const Real fiberTangent =
           cache.dynamic ? cache.active.tangent : cache.active.dStressDe;
-        dP = dP
-           + cache.active.stress * dF * cache.fiber.tensor()
-           + fiberTangent * dStrain
-             * cp.getKinematicState().getDeformationGradient()
-             * cache.fiber.tensor();
+        dP = dP + cache.active.stress * dF * cache.fiber.tensor() +
+          fiberTangent * dStrain * cp.getKinematicState().getDeformationGradient() *
+            cache.fiber.tensor();
       }
 
     private:
       static bool hasDynamicData(const ConstitutivePoint& cp)
       {
-        return cp.has<Tags::TimeStep>()
-            && cp.has<Tags::PreviousActiveExtension>()
-            && cp.has<Tags::PreviousActiveGamma>()
-            && cp.has<Tags::PreviousActiveBeta>()
-            && cp.has<Tags::ElectricalActivation>();
+        return cp.has<Tags::TimeStep>() && cp.has<Tags::PreviousActiveExtension>() &&
+          cp.has<Tags::PreviousActiveGamma>() && cp.has<Tags::PreviousActiveBeta>() &&
+          cp.has<Tags::ElectricalActivation>();
       }
 
       PassiveLaw m_passiveLaw;

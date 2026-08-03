@@ -206,7 +206,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies save load round trip pyramid for IO MFEM P1 grid function by checking tolerance-based numerical results, exact expected values, grid-function projection.
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Pyramid)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, {3, 3, 3});
 
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
@@ -217,9 +217,8 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     GridFunction gf(fes);
 
-    RealFunction func([](const Geometry::Point& p) {
-      return p.x() + 2.0 * p.y() + 3.0 * p.z();
-    });
+    RealFunction func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y() + 3.0 * p.z(); });
     gf.project(func);
 
     std::stringstream ss;
@@ -449,7 +448,8 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Triangle:      return "Triangle";
         case Polytope::Type::Quadrilateral: return "Quadrilateral";
         case Polytope::Type::Tetrahedron:   return "Tetrahedron";
-        case Polytope::Type::Pyramid:       return "Pyramid";
+        case Polytope::Type::Pyramid:
+          return "Pyramid";
         case Polytope::Type::Hexahedron:    return "Hexahedron";
         case Polytope::Type::Wedge:         return "Wedge";
       }
@@ -484,22 +484,14 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates P1 MEDIT Grid Function Coverage over the All Supported Geometries parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      AllSupportedGeometries,
-      P1MEDITGridFunctionCoverage,
-      ::testing::Values(
-        Polytope::Type::Point,
-        Polytope::Type::Segment,
-        Polytope::Type::Triangle,
-        Polytope::Type::Quadrilateral,
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      [](const ::testing::TestParamInfo<Polytope::Type>& info)
-      {
-        return meditGeometryName(info.param);
-      });
+  INSTANTIATE_TEST_SUITE_P(AllSupportedGeometries, P1MEDITGridFunctionCoverage,
+    ::testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
+      return meditGeometryName(info.param);
+    });
 
   /// @brief Verifies vector 3 D round trip for IO MEDIT P1 grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_MEDIT_P1_GridFunction, Vector3DRoundTrip)

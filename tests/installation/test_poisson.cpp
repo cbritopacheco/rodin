@@ -37,7 +37,7 @@ int main()
     
     // Right-hand side function f = 1
     RealFunction f = 1.0;
-    
+
     // Assemble the Poisson problem:
     // -Δu = f in \Omega
     // u = 0 on \partial\Omega

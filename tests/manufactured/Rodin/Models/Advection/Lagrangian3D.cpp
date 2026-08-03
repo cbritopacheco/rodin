@@ -209,13 +209,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
   }
 
   /// @brief Instantiates Manufactured Advection 3 D Test 10 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    ManufacturedAdvection3DTest_10,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, ManufacturedAdvection3DTest_10,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

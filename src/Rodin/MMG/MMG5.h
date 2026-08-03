@@ -72,7 +72,7 @@ namespace Rodin::MMG
   {
     public:
       /// MMG mesh version tag used in generated MMG mesh objects.
-      static constexpr int s_meshVersionFormatted = 2;
+      static constexpr int sMeshVersionFormatted = 2;
 
       // ---- Mesh methods ---------------------------------------------------
       /**
@@ -229,7 +229,8 @@ namespace Rodin::MMG
         else if constexpr (std::is_same_v<Math::Vector<Real>, Range>)
         {
           assert(dst->type == MMG5_Vector);
-          const size_t vdim = src.getFiniteElementSpace().getVectorDimension();
+          [[maybe_unused]] const size_t vdim =
+            src.getFiniteElementSpace().getVectorDimension();
           assert(dst->size >= 0);
           assert(vdim == static_cast<size_t>(dst->size));
           const Math::Matrix<Real>& data = src.getData();

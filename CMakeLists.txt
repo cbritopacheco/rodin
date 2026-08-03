@@ -62,6 +62,7 @@ option(RODIN_BUILD_UNIT_TESTS         "Build Rodin unit tests"                  
 option(RODIN_BUILD_MANUFACTURED_TESTS "Build Rodin manufactured solution tests"   OFF)
 option(RODIN_BUILD_BENCHMARKS         "Build Rodin benchmarks"                    OFF)
 option(RODIN_BUILD_DOC                "Build the Rodin documentation"             OFF)
+option(RODIN_BUILD_TIDY               "Configure the clang-tidy aggregate target" OFF)
 option(RODIN_WITH_PY                  "Build Python bindings"                     OFF)
 option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
 option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)
@@ -174,6 +175,15 @@ rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=array-bounds)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=nontrivial-memcall)
 
+# Apple's ld (Xcode >= 15) warns whenever a static library appears more than
+# once on the link line, which CMake's transitive component dependencies
+# produce by design. Silence it where the linker understands the flag.
+include(CheckLinkerFlag)
+check_linker_flag(CXX "-Wl,-no_warn_duplicate_libraries" RODIN_LINKER_NO_WARN_DUPLICATE_LIBRARIES)
+if(RODIN_LINKER_NO_WARN_DUPLICATE_LIBRARIES)
+  add_link_options(-Wl,-no_warn_duplicate_libraries)
+endif()
+
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
 
@@ -263,18 +273,26 @@ if (RODIN_BUILD_SRC)
     find_package(Scotch REQUIRED)
   endif()
 
-  # ---- UMFPACK, SPQR, CHOLMOD ----
+  # ---- SuiteSparse ---------------------------------------------------------
+  set(_RODIN_SUITESPARSE_COMPONENTS)
+
   if (RODIN_USE_UMFPACK)
-    find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS UMFPACK)
   endif()
 
   if (RODIN_USE_SPQR)
-    find_package(SuiteSparse REQUIRED COMPONENTS SPQR)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS SPQR)
   endif()
 
   if (RODIN_USE_CHOLMOD)
-    find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS CHOLMOD)
   endif()
+
+  if (_RODIN_SUITESPARSE_COMPONENTS)
+    find_package(SuiteSparse REQUIRED
+      COMPONENTS ${_RODIN_SUITESPARSE_COMPONENTS})
+  endif()
+  unset(_RODIN_SUITESPARSE_COMPONENTS)
 
   # ---- OpenMP ----
   if (RODIN_USE_OPENMP)
@@ -282,6 +300,23 @@ if (RODIN_BUILD_SRC)
   endif()
 
   add_subdirectory(src)
+
+  if (RODIN_BUILD_TIDY)
+    add_library(RodinTidyTU OBJECT EXCLUDE_FROM_ALL dev/TidyTU.cpp)
+    target_link_libraries(RodinTidyTU PRIVATE Rodin::MMG Rodin::Solver)
+
+    if (RODIN_USE_MPI)
+      target_link_libraries(RodinTidyTU PRIVATE Rodin::MPI)
+    endif()
+
+    if (RODIN_USE_PETSC)
+      target_link_libraries(RodinTidyTU PRIVATE Rodin::PETSc)
+    endif()
+
+    if (RODIN_USE_SCOTCH)
+      target_link_libraries(RodinTidyTU PRIVATE Rodin::Scotch)
+    endif()
+  endif()
 
   if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(examples)
@@ -292,6 +327,14 @@ if (RODIN_BUILD_SRC)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
+    # GoogleTest builds itself with -Wall; GCC then flags gtest-death-test.cc
+    # with -Wmaybe-uninitialized. Vendored code, so silence instead of patch.
+    foreach(_gtest_target gtest gtest_main gmock gmock_main)
+      if(TARGET ${_gtest_target})
+        target_compile_options(${_gtest_target} PRIVATE
+          $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>)
+      endif()
+    endforeach()
     if (RODIN_BUILD_BENCHMARKS)
       if (RODIN_LTO)
         set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)

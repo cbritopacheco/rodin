@@ -166,7 +166,8 @@ namespace Rodin::Examples::Heart
    * @tparam OldVelocity Frozen convective velocity field type.
    * @tparam ProjectedTau Projected stabilization parameter field type.
    */
-  template <class TrialFunction, class TestFunction, class OldVelocity, class ProjectedTau>
+  template <class TrialFunction, class TestFunction, class OldVelocity,
+    class ProjectedTau>
   class VMSConvectionBilinearIntegrator final
     : public Variational::LocalBilinearFormIntegratorBase<
         typename TrialFunction::ScalarType>
@@ -184,12 +185,8 @@ namespace Rodin::Examples::Heart
        * @param[in] rho Fluid density @f$\rho@f$.
        * @param[in] tau Projected stabilization parameter @f$\tau_K@f$.
        */
-      VMSConvectionBilinearIntegrator(
-          const TrialFunction& u,
-          const TestFunction& v,
-          const OldVelocity& uOld,
-          const ProjectedTau& tau,
-          ScalarType rho)
+      VMSConvectionBilinearIntegrator(const TrialFunction& u, const TestFunction& v,
+        const OldVelocity& uOld, const ProjectedTau& tau, ScalarType rho)
         : Parent(u.getLeaf(), v.getLeaf()),
           m_u(u),
           m_v(v),
@@ -199,11 +196,9 @@ namespace Rodin::Examples::Heart
           m_rho(rho)
       {}
 
-      VMSConvectionBilinearIntegrator(
-          const VMSConvectionBilinearIntegrator&) = default;
+      VMSConvectionBilinearIntegrator(const VMSConvectionBilinearIntegrator&) = default;
 
-      VMSConvectionBilinearIntegrator(
-          VMSConvectionBilinearIntegrator&&) = default;
+      VMSConvectionBilinearIntegrator(VMSConvectionBilinearIntegrator&&) = default;
 
       const Geometry::Polytope& getPolytope() const final override
       {
@@ -215,7 +210,7 @@ namespace Rodin::Examples::Heart
        * @brief Builds the local matrix on one cell.
        */
       VMSConvectionBilinearIntegrator& setPolytope(
-          const Geometry::Polytope& polytope) final override
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
 
@@ -224,20 +219,23 @@ namespace Rodin::Examples::Heart
         const auto idx = polytope.getIndex();
 
         const auto& trialFES = m_u.getFiniteElementSpace();
-        const auto& testFES  = m_v.getFiniteElementSpace();
+        const auto& testFES = m_v.getFiniteElementSpace();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
-        const auto& testFE  = testFES .getFiniteElement(d, idx);
+        const auto& testFE = testFES.getFiniteElement(d, idx);
 
         const size_t ntr = m_u.getDOFs(polytope);
         const size_t nte = m_v.getDOFs(polytope);
         const size_t vdim = trialFES.getVectorDimension();
 
         if (vdim == 0 || vdim != testFES.getVectorDimension())
-          throw std::runtime_error("VMSConvectionBilinearIntegrator expects matching vector-valued spaces.");
+          throw std::runtime_error(
+            "VMSConvectionBilinearIntegrator expects matching vector-valued spaces.");
 
         if (ntr != trialFE.getCount() || nte != testFE.getCount())
-          throw std::runtime_error("VMSConvectionBilinearIntegrator expects element-local DOFs to match finite-element basis count.");
+          throw std::runtime_error(
+            "VMSConvectionBilinearIntegrator expects element-local DOFs to match "
+            "finite-element basis count.");
 
         /*
          * Conservative quadrature choice for
@@ -249,24 +247,16 @@ namespace Rodin::Examples::Heart
          * part of the lagged convective stabilization without the old P2
          * underintegration.
          */
-        const size_t uOldOrder =
-          getFunctionOrder(m_uOld, polytope, trialFE.getOrder());
-        const size_t tauOrder =
-          getFunctionOrder(m_tau, polytope, size_t(0));
-        const size_t qOrder =
-          tauOrder
-          + derivativeOrder(trialFE.getOrder())
-          + derivativeOrder(testFE.getOrder())
-          + 2 * uOldOrder;
+        const size_t uOldOrder = getFunctionOrder(m_uOld, polytope, trialFE.getOrder());
+        const size_t tauOrder = getFunctionOrder(m_tau, polytope, size_t(0));
+        const size_t qOrder = tauOrder + derivativeOrder(trialFE.getOrder()) +
+          derivativeOrder(testFE.getOrder()) + 2 * uOldOrder;
 
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
-        m_mat.resize(
-          static_cast<Eigen::Index>(nte),
-          static_cast<Eigen::Index>(ntr));
+        m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
 
         m_mat.setZero();
 
@@ -296,7 +286,8 @@ namespace Rodin::Examples::Heart
           const auto tau = m_tau.getValue(ip);
 
           if (uOld.size() != d)
-            throw std::runtime_error("VMSConvectionBilinearIntegrator expects the frozen velocity dimension to match the cell dimension.");
+            throw std::runtime_error("VMSConvectionBilinearIntegrator expects the frozen "
+                                     "velocity dimension to match the cell dimension.");
 
           /*
            * Directional derivatives along frozen velocity:
@@ -335,9 +326,7 @@ namespace Rodin::Examples::Heart
 
       ScalarType integrate(size_t trial, size_t test) final override
       {
-        return m_mat(
-          static_cast<Eigen::Index>(test),
-          static_cast<Eigen::Index>(trial));
+        return m_mat(static_cast<Eigen::Index>(test), static_cast<Eigen::Index>(trial));
       }
 
       Geometry::Region getRegion() const final override
@@ -359,12 +348,9 @@ namespace Rodin::Examples::Heart
        * @f$\nabla_x\Phi = \hat\nabla\Phi J^{-1}@f$.
        */
       template <class Basis, class JInv, class Vector>
-      static void fillDirectionalDerivative(
-          Math::SpatialVector<ScalarType>& out,
-          const Basis& basis,
-          const Math::SpatialVector<Real>& rc,
-          const JInv& Jinv,
-          const Vector& uOld)
+      static void fillDirectionalDerivative(Math::SpatialVector<ScalarType>& out,
+        const Basis& basis, const Math::SpatialVector<Real>& rc, const JInv& Jinv,
+        const Vector& uOld)
       {
         const auto Jref = basis.getJacobian()(rc);
         const size_t vdim = out.size();
@@ -379,8 +365,8 @@ namespace Rodin::Examples::Heart
             for (size_t r = 0; r < d; ++r)
             {
               gradPhys +=
-                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
-                * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
+                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
+                Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
             }
             out(static_cast<std::uint8_t>(c)) +=
               gradPhys * uOld(static_cast<std::uint8_t>(j));
@@ -395,9 +381,7 @@ namespace Rodin::Examples::Heart
 
       template <class Function>
       static size_t getFunctionOrder(
-          const Function& f,
-          const Geometry::Polytope& polytope,
-          size_t fallback)
+        const Function& f, const Geometry::Polytope& polytope, size_t fallback)
       {
         if constexpr (requires { f.getOrder(polytope); })
         {
@@ -416,11 +400,7 @@ namespace Rodin::Examples::Heart
       const Geometry::Polytope* m_polytope;
       ScalarType m_rho;
 
-      Eigen::Matrix<
-        ScalarType,
-        Eigen::Dynamic,
-        Eigen::Dynamic,
-        Eigen::RowMajor> m_mat;
+      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
   /**
@@ -481,9 +461,7 @@ namespace Rodin::Examples::Heart
        * @param[in] tauC Projected grad-div parameter @f$\tau_C@f$.
        */
       VMSGradDivBilinearIntegrator(
-          const TrialFunction& u,
-          const TestFunction& v,
-          const ProjectedTauC& tauC)
+        const TrialFunction& u, const TestFunction& v, const ProjectedTauC& tauC)
         : Parent(u.getLeaf(), v.getLeaf()),
           m_u(u),
           m_v(v),
@@ -491,11 +469,9 @@ namespace Rodin::Examples::Heart
           m_polytope(nullptr)
       {}
 
-      VMSGradDivBilinearIntegrator(
-          const VMSGradDivBilinearIntegrator&) = default;
+      VMSGradDivBilinearIntegrator(const VMSGradDivBilinearIntegrator&) = default;
 
-      VMSGradDivBilinearIntegrator(
-          VMSGradDivBilinearIntegrator&&) = default;
+      VMSGradDivBilinearIntegrator(VMSGradDivBilinearIntegrator&&) = default;
 
       const Geometry::Polytope& getPolytope() const final override
       {
@@ -504,7 +480,7 @@ namespace Rodin::Examples::Heart
       }
 
       VMSGradDivBilinearIntegrator& setPolytope(
-          const Geometry::Polytope& polytope) final override
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
 
@@ -513,39 +489,36 @@ namespace Rodin::Examples::Heart
         const auto idx = polytope.getIndex();
 
         const auto& trialFES = m_u.getFiniteElementSpace();
-        const auto& testFES  = m_v.getFiniteElementSpace();
+        const auto& testFES = m_v.getFiniteElementSpace();
 
         const auto& trialFE = trialFES.getFiniteElement(d, idx);
-        const auto& testFE  = testFES .getFiniteElement(d, idx);
+        const auto& testFE = testFES.getFiniteElement(d, idx);
 
         const size_t ntr = m_u.getDOFs(polytope);
         const size_t nte = m_v.getDOFs(polytope);
         const size_t vdim = trialFES.getVectorDimension();
 
         if (vdim == 0 || vdim != testFES.getVectorDimension())
-          throw std::runtime_error("VMSGradDivBilinearIntegrator expects matching vector-valued spaces.");
+          throw std::runtime_error(
+            "VMSGradDivBilinearIntegrator expects matching vector-valued spaces.");
 
         if (vdim != d)
-          throw std::runtime_error("VMSGradDivBilinearIntegrator expects vector dimension to match the cell dimension.");
+          throw std::runtime_error("VMSGradDivBilinearIntegrator expects vector "
+                                   "dimension to match the cell dimension.");
 
         if (ntr != trialFE.getCount() || nte != testFE.getCount())
-          throw std::runtime_error("VMSGradDivBilinearIntegrator expects element-local DOFs to match finite-element basis count.");
+          throw std::runtime_error("VMSGradDivBilinearIntegrator expects element-local "
+                                   "DOFs to match finite-element basis count.");
 
-        const size_t tauOrder =
-          getFunctionOrder(m_tauC, polytope, size_t(0));
-        const size_t qOrder =
-          tauOrder
-          + derivativeOrder(trialFE.getOrder())
-          + derivativeOrder(testFE.getOrder());
+        const size_t tauOrder = getFunctionOrder(m_tauC, polytope, size_t(0));
+        const size_t qOrder = tauOrder + derivativeOrder(trialFE.getOrder()) +
+          derivativeOrder(testFE.getOrder());
 
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
-        m_mat.resize(
-          static_cast<Eigen::Index>(nte),
-          static_cast<Eigen::Index>(ntr));
+        m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
 
         m_mat.setZero();
 
@@ -587,9 +560,7 @@ namespace Rodin::Examples::Heart
 
       ScalarType integrate(size_t trial, size_t test) final override
       {
-        return m_mat(
-          static_cast<Eigen::Index>(test),
-          static_cast<Eigen::Index>(trial));
+        return m_mat(static_cast<Eigen::Index>(test), static_cast<Eigen::Index>(trial));
       }
 
       Geometry::Region getRegion() const final override
@@ -607,12 +578,8 @@ namespace Rodin::Examples::Heart
        * @brief Computes @f$\nabla\cdot\Phi = \sum_c (\hat\nabla\Phi\,J^{-1})_{cc}@f$.
        */
       template <class Basis, class JInv>
-      static ScalarType divergence(
-          const Basis& basis,
-          const Math::SpatialVector<Real>& rc,
-          const JInv& Jinv,
-          size_t vdim,
-          size_t d)
+      static ScalarType divergence(const Basis& basis,
+        const Math::SpatialVector<Real>& rc, const JInv& Jinv, size_t vdim, size_t d)
       {
         const auto Jref = basis.getJacobian()(rc);
         ScalarType div = 0;
@@ -620,9 +587,8 @@ namespace Rodin::Examples::Heart
         {
           for (size_t r = 0; r < d; ++r)
           {
-            div +=
-              Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
-              * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
+            div += Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
+              Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
           }
         }
         return div;
@@ -635,9 +601,7 @@ namespace Rodin::Examples::Heart
 
       template <class Function>
       static size_t getFunctionOrder(
-          const Function& f,
-          const Geometry::Polytope& polytope,
-          size_t fallback)
+        const Function& f, const Geometry::Polytope& polytope, size_t fallback)
       {
         if constexpr (requires { f.getOrder(polytope); })
         {
@@ -654,11 +618,7 @@ namespace Rodin::Examples::Heart
 
       const Geometry::Polytope* m_polytope;
 
-      Eigen::Matrix<
-        ScalarType,
-        Eigen::Dynamic,
-        Eigen::Dynamic,
-        Eigen::RowMajor> m_mat;
+      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
   /**
@@ -691,17 +651,14 @@ namespace Rodin::Examples::Heart
    */
   template <class TestFunction, class ProjectedDiv, class ProjectedTauC>
   class VMSGradDivLinearIntegrator final
-    : public Variational::LinearFormIntegratorBase<
-        typename TestFunction::ScalarType>
+    : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
   {
     public:
       using ScalarType = typename TestFunction::ScalarType;
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
       VMSGradDivLinearIntegrator(
-          const TestFunction& v,
-          const ProjectedDiv& xi,
-          const ProjectedTauC& tauC)
+        const TestFunction& v, const ProjectedDiv& xi, const ProjectedTauC& tauC)
         : Parent(v.getLeaf()),
           m_v(v),
           m_xi(xi),
@@ -719,7 +676,7 @@ namespace Rodin::Examples::Heart
       }
 
       VMSGradDivLinearIntegrator& setPolytope(
-          const Geometry::Polytope& polytope) final override
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
 
@@ -734,19 +691,20 @@ namespace Rodin::Examples::Heart
         const size_t vdim = fes.getVectorDimension();
 
         if (vdim == 0)
-          throw std::runtime_error("VMSGradDivLinearIntegrator expects a vector-valued test space.");
+          throw std::runtime_error(
+            "VMSGradDivLinearIntegrator expects a vector-valued test space.");
         if (vdim != d)
-          throw std::runtime_error("VMSGradDivLinearIntegrator expects vector dimension to match the cell dimension.");
+          throw std::runtime_error("VMSGradDivLinearIntegrator expects vector dimension "
+                                   "to match the cell dimension.");
         if (nte != fe.getCount())
-          throw std::runtime_error("VMSGradDivLinearIntegrator expects element-local DOFs to match finite-element basis count.");
+          throw std::runtime_error("VMSGradDivLinearIntegrator expects element-local "
+                                   "DOFs to match finite-element basis count.");
 
         const size_t tauOrder = getFunctionOrder(m_tauC, polytope, size_t(0));
-        const size_t xiOrder  = getFunctionOrder(m_xi, polytope, size_t(0));
-        const size_t qOrder =
-          tauOrder + xiOrder + derivativeOrder(fe.getOrder());
+        const size_t xiOrder = getFunctionOrder(m_xi, polytope, size_t(0));
+        const size_t qOrder = tauOrder + xiOrder + derivativeOrder(fe.getOrder());
 
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -765,8 +723,8 @@ namespace Rodin::Examples::Heart
           const auto& rc = p.getReferenceCoordinates();
 
           const ScalarType tauC = m_tauC.getValue(ip);
-          const ScalarType xi   = m_xi.getValue(ip);
-          const ScalarType c    = tauC * xi;
+          const ScalarType xi = m_xi.getValue(ip);
+          const ScalarType c = tauC * xi;
 
           for (size_t b = 0; b < nte; ++b)
           {
@@ -795,20 +753,15 @@ namespace Rodin::Examples::Heart
 
     private:
       template <class Basis, class JInv>
-      static ScalarType divergence(
-          const Basis& basis,
-          const Math::SpatialVector<Real>& rc,
-          const JInv& Jinv,
-          size_t vdim,
-          size_t d)
+      static ScalarType divergence(const Basis& basis,
+        const Math::SpatialVector<Real>& rc, const JInv& Jinv, size_t vdim, size_t d)
       {
         const auto Jref = basis.getJacobian()(rc);
         ScalarType div = 0;
         for (size_t c = 0; c < vdim; ++c)
           for (size_t r = 0; r < d; ++r)
-            div +=
-              Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
-              * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
+            div += Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
+              Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
         return div;
       }
 
@@ -819,9 +772,7 @@ namespace Rodin::Examples::Heart
 
       template <class Function>
       static size_t getFunctionOrder(
-          const Function& f,
-          const Geometry::Polytope& polytope,
-          size_t fallback)
+        const Function& f, const Geometry::Polytope& polytope, size_t fallback)
       {
         if constexpr (requires { f.getOrder(polytope); })
         {
@@ -891,10 +842,10 @@ namespace Rodin::Examples::Heart
    * @tparam ProjectedVelocity Projected convective acceleration type.
    * @tparam ProjectedTau Projected stabilization parameter field type.
    */
-  template <class TestFunction, class OldSubScale, class OldVelocity, class ProjectedVelocity, class ProjectedTau>
+  template <class TestFunction, class OldSubScale, class OldVelocity,
+    class ProjectedVelocity, class ProjectedTau>
   class VMSConvectionLinearIntegrator final
-    : public Variational::LinearFormIntegratorBase<
-        typename TestFunction::ScalarType>
+    : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
   {
     public:
       using ScalarType = typename TestFunction::ScalarType;
@@ -911,14 +862,9 @@ namespace Rodin::Examples::Heart
        * @param[in] rho Fluid density @f$\rho@f$.
        * @param[in] tau Projected stabilization parameter @f$\tau_K@f$.
        */
-      VMSConvectionLinearIntegrator(
-          const TestFunction& v,
-          const OldSubScale& subOld,
-          const OldVelocity& uOld,
-          const ProjectedVelocity& uProj,
-          const ProjectedTau& tau,
-          ScalarType rho,
-          ScalarType dt)
+      VMSConvectionLinearIntegrator(const TestFunction& v, const OldSubScale& subOld,
+        const OldVelocity& uOld, const ProjectedVelocity& uProj, const ProjectedTau& tau,
+        ScalarType rho, ScalarType dt)
         : Parent(v.getLeaf()),
           m_v(v),
           m_sub(subOld),
@@ -930,11 +876,9 @@ namespace Rodin::Examples::Heart
           m_dt(dt)
       {}
 
-      VMSConvectionLinearIntegrator(
-          const VMSConvectionLinearIntegrator&) = default;
+      VMSConvectionLinearIntegrator(const VMSConvectionLinearIntegrator&) = default;
 
-      VMSConvectionLinearIntegrator(
-          VMSConvectionLinearIntegrator&&) = default;
+      VMSConvectionLinearIntegrator(VMSConvectionLinearIntegrator&&) = default;
 
       const Geometry::Polytope& getPolytope() const final override
       {
@@ -946,7 +890,7 @@ namespace Rodin::Examples::Heart
        * @brief Builds the local vector on one cell.
        */
       VMSConvectionLinearIntegrator& setPolytope(
-          const Geometry::Polytope& polytope) final override
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
 
@@ -961,10 +905,12 @@ namespace Rodin::Examples::Heart
         const size_t vdim = fes.getVectorDimension();
 
         if (vdim == 0)
-          throw std::runtime_error("VMSConvectionLinearIntegrator expects a vector-valued test space.");
+          throw std::runtime_error(
+            "VMSConvectionLinearIntegrator expects a vector-valued test space.");
 
         if (nte != fe.getCount())
-          throw std::runtime_error("VMSConvectionLinearIntegrator expects element-local DOFs to match finite-element basis count.");
+          throw std::runtime_error("VMSConvectionLinearIntegrator expects element-local "
+                                   "DOFs to match finite-element basis count.");
 
         /*
          * Conservative quadrature choice for
@@ -974,21 +920,15 @@ namespace Rodin::Examples::Heart
          * The projected fields can be polynomial, while tau is usually a
          * projected representation of a non-polynomial expression.
          */
-        const size_t uOldOrder =
-          getFunctionOrder(m_uOld, polytope, fe.getOrder());
-        const size_t tauOrder =
-          getFunctionOrder(m_tau, polytope, size_t(0));
-        const size_t projOrder =
-          getFunctionOrder(m_uProj, polytope, uOldOrder);
-        const size_t subOrder =
-          getFunctionOrder(m_sub, polytope, projOrder);
-        const size_t coefficientOrder =
-          std::max(tauOrder + projOrder, subOrder);
+        const size_t uOldOrder = getFunctionOrder(m_uOld, polytope, fe.getOrder());
+        const size_t tauOrder = getFunctionOrder(m_tau, polytope, size_t(0));
+        const size_t projOrder = getFunctionOrder(m_uProj, polytope, uOldOrder);
+        const size_t subOrder = getFunctionOrder(m_sub, polytope, projOrder);
+        const size_t coefficientOrder = std::max(tauOrder + projOrder, subOrder);
         const size_t qOrder =
           coefficientOrder + derivativeOrder(fe.getOrder()) + uOldOrder;
 
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
 
@@ -1012,13 +952,14 @@ namespace Rodin::Examples::Heart
           const auto Jinv = p.getJacobianInverse();
           const auto& rc = p.getReferenceCoordinates();
 
-          const auto uOld  = m_uOld.getValue(ip);
+          const auto uOld = m_uOld.getValue(ip);
           const auto uProj = m_uProj.getValue(ip);
           const auto subScale = m_sub.getValue(ip);
           const auto tau = m_tau.getValue(ip);
 
           if (uOld.size() != d)
-            throw std::runtime_error("VMSConvectionLinearIntegrator expects the frozen velocity dimension to match the cell dimension.");
+            throw std::runtime_error("VMSConvectionLinearIntegrator expects the frozen "
+                                     "velocity dimension to match the cell dimension.");
 
           /*
            * Directional derivative of test basis along frozen velocity:
@@ -1030,9 +971,9 @@ namespace Rodin::Examples::Heart
 
           for (size_t c = 0; c < vdim; ++c)
           {
-            coefficient(static_cast<std::uint8_t>(c)) =
-              tau * m_rho * (uProj(static_cast<std::uint8_t>(c))
-              + 1. / m_dt * subScale(static_cast<std::uint8_t>(c)));
+            coefficient(static_cast<std::uint8_t>(c)) = tau * m_rho *
+              (uProj(static_cast<std::uint8_t>(c)) +
+                1. / m_dt * subScale(static_cast<std::uint8_t>(c)));
           }
 
           for (size_t b = 0; b < nte; ++b)
@@ -1079,12 +1020,9 @@ namespace Rodin::Examples::Heart
        * @f$\nabla_x\Psi = \hat\nabla\Psi J^{-1}@f$.
        */
       template <class Basis, class JInv, class Vector>
-      static void fillDirectionalDerivative(
-          Math::SpatialVector<ScalarType>& out,
-          const Basis& basis,
-          const Math::SpatialVector<Real>& rc,
-          const JInv& Jinv,
-          const Vector& uOld)
+      static void fillDirectionalDerivative(Math::SpatialVector<ScalarType>& out,
+        const Basis& basis, const Math::SpatialVector<Real>& rc, const JInv& Jinv,
+        const Vector& uOld)
       {
         const auto Jref = basis.getJacobian()(rc);
         const size_t vdim = out.size();
@@ -1099,8 +1037,8 @@ namespace Rodin::Examples::Heart
             for (size_t r = 0; r < d; ++r)
             {
               gradPhys +=
-                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
-                * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
+                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
+                Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
             }
             out(static_cast<std::uint8_t>(c)) +=
               gradPhys * uOld(static_cast<std::uint8_t>(j));
@@ -1115,9 +1053,7 @@ namespace Rodin::Examples::Heart
 
       template <class Function>
       static size_t getFunctionOrder(
-          const Function& f,
-          const Geometry::Polytope& polytope,
-          size_t fallback)
+        const Function& f, const Geometry::Polytope& polytope, size_t fallback)
       {
         if constexpr (requires { f.getOrder(polytope); })
         {
@@ -1139,7 +1075,6 @@ namespace Rodin::Examples::Heart
       ScalarType m_dt;
 
       Math::Vector<ScalarType> m_vec;
-
   };
 }
 

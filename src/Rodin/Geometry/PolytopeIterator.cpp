@@ -36,12 +36,19 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Polytope* PolytopeIterator::generate() const
+  Polytope PolytopeIterator::make() const
   {
-    if (this->end()) return nullptr;
+    assert(!this->end());
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
-    return new Polytope(getDimension(), index, getMesh());
+    return Polytope(getDimension(), index, getMesh());
+  }
+
+  Polytope* PolytopeIterator::generate() const
+  {
+    if (this->end())
+      return nullptr;
+    return new Polytope(make());
   }
 
   // ---- CellIterator -------------------------------------------------------
@@ -49,12 +56,19 @@ namespace Rodin::Geometry
     : Parent(mesh.getDimension(), mesh, std::move(gen))
   {}
 
-  Cell* CellIterator::generate() const
+  Cell CellIterator::make() const
   {
-    if (this->end()) return nullptr;
+    assert(!this->end());
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
-    return new Cell(index, getMesh());
+    return Cell(index, getMesh());
+  }
+
+  Cell* CellIterator::generate() const
+  {
+    if (this->end())
+      return nullptr;
+    return new Cell(make());
   }
 
   // ---- FaceIterator -------------------------------------------------------
@@ -62,12 +76,19 @@ namespace Rodin::Geometry
     : Parent(mesh.getDimension() - 1, mesh, std::move(gen))
   {}
 
-  Face* FaceIterator::generate() const
+  Face FaceIterator::make() const
   {
-    if (this->end()) return nullptr;
+    assert(!this->end());
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
-    return new Face(index, getMesh());
+    return Face(index, getMesh());
+  }
+
+  Face* FaceIterator::generate() const
+  {
+    if (this->end())
+      return nullptr;
+    return new Face(make());
   }
 
   // ---- VertexIterator -----------------------------------------------------
@@ -75,11 +96,18 @@ namespace Rodin::Geometry
     : Parent(0, mesh, std::move(gen))
   {}
 
-  Vertex* VertexIterator::generate() const
+  Vertex VertexIterator::make() const
   {
-    if (this->end()) return nullptr;
+    assert(!this->end());
     const auto& gen = getIndexGenerator();
     const auto& index = *gen;
-    return new Vertex(index, getMesh());
+    return Vertex(index, getMesh());
+  }
+
+  Vertex* VertexIterator::generate() const
+  {
+    if (this->end())
+      return nullptr;
+    return new Vertex(make());
   }
 }

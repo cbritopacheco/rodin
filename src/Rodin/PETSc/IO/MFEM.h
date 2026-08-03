@@ -87,7 +87,6 @@ namespace Rodin::IO
         // Base prints Ordering: Nodes, but for P0 that’s effectively "block by component":
         // emit all scalar dofs for comp 0, then comp 1, ...
         const size_t vdim = fes.getVectorDimension();
-        const size_t D    = mesh.getDimension();
 
         const size_t totalSize  = fes.getSize();
         const size_t scalarSize = totalSize / vdim;

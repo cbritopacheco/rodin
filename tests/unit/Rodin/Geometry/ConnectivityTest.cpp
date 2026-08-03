@@ -291,9 +291,8 @@ namespace Rodin::Tests::Unit
     constexpr const size_t nodes = 5;
 
     Connectivity<Context::Local> connectivity;
-    connectivity.initialize(meshDim)
-                .nodes(nodes)
-                .polytope(Polytope::Type::Pyramid, {0, 1, 2, 3, 4});
+    connectivity.initialize(meshDim).nodes(nodes).polytope(
+      Polytope::Type::Pyramid, {0, 1, 2, 3, 4});
 
     EXPECT_EQ(connectivity.getDimension(), 3);
 

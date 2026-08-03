@@ -51,7 +51,8 @@ using namespace Rodin::Solver;
 
 using Model = Rodin::Heart::CCMLC2014T<>;
 
-static Real periodic_activation(Real t) {
+static Real periodic_activation(Real t)
+{
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
 
@@ -68,7 +69,8 @@ static Real periodic_activation(Real t) {
   return 0.0;
 }
 
-static Real load_dependent_relaxation_m0(Real ec) {
+static Real load_dependent_relaxation_m0(Real ec)
+{
   // Piecewise-linear approximation of Caruel et al. Fig. 7.
   const Real low_ec = 0.0;
   const Real high_ec = 2.0;
@@ -84,7 +86,8 @@ static Real load_dependent_relaxation_m0(Real ec) {
   return (1.0 - s) * low_value + s * high_value;
 }
 
-static Real load_dependent_relaxation_dm0(Real ec) {
+static Real load_dependent_relaxation_dm0(Real ec)
+{
   const Real low_ec = 0.0;
   const Real high_ec = 2.0;
   const Real low_value = 1.6;
@@ -95,7 +98,8 @@ static Real load_dependent_relaxation_dm0(Real ec) {
   return (high_value - low_value) / (high_ec - low_ec);
 }
 
-static Real atrial_pressure(Real t) {
+static Real atrial_pressure(Real t)
+{
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
 
@@ -113,31 +117,44 @@ static Real atrial_pressure(Real t) {
   Real alpha = 0.0;
   Real value = min_value;
 
-  if (tau < t1) {
+  if (tau < t1)
+  {
     alpha = -(tau - t1) / t1;
     value = alpha * min_value + (1.0 - alpha) * max_value;
-  } else if (tau < t2) {
+  }
+  else if (tau < t2)
+  {
     value = max_value;
-  } else if (tau < t3) {
+  }
+  else if (tau < t3)
+  {
     alpha = -(tau - t3) / (t3 - t2);
     value = alpha * max_value + (1.0 - alpha) * min_value;
-  } else if (tau < t4) {
+  }
+  else if (tau < t4)
+  {
     alpha = -(tau - t4) / (t4 - t3);
     value = alpha * min_value + (1.0 - alpha) * second_threshold;
-  } else if (tau < t5) {
+  }
+  else if (tau < t5)
+  {
     value = second_threshold;
-  } else if (tau < t6) {
+  }
+  else if (tau < t6)
+  {
     alpha = -(tau - t6) / (t6 - t5);
     value = alpha * second_threshold + (1.0 - alpha) * min_value;
-  } else {
+  }
+  else
+  {
     value = min_value;
   }
 
   return value;
 }
 
-int main(int, char **) {
-
+int main(int, char**)
+{
   // Initialization 0D model
 
   Model::Input in;
@@ -176,8 +193,7 @@ int main(int, char **) {
   in.proximalLength = 0.4;
   in.distalRadius = 0.0007;
   in.distalLength = 0.004;
-  in.windkesselRheology =
-      Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
+  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
 
   // Valve parameters
   in.Kat = 9.0e-6;
@@ -217,10 +233,10 @@ int main(int, char **) {
 
   Model model(in);
   model.setMaxIterations(200)
-      .setAbsoluteTolerance(1e-8)
-      .setRelativeTolerance(1e-8)
-      .setStepTolerance(1e-10)
-      .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   Model::State s0;
   s0.t = 0.0;
@@ -242,7 +258,7 @@ int main(int, char **) {
   model.initialize(s0);
 
   {
-    const auto &s = model.getState();
+    const auto& s = model.getState();
     std::cout << "Initial state:\n"
               << "  y     = " << s.y << '\n'
               << "  v     = " << s.v << '\n'
@@ -262,7 +278,7 @@ int main(int, char **) {
 
   // Initialization 3D Model
 
-  const char *meshFile = "../resources/examples/Heart/CoronaryArterySolid.mesh";
+  const char* meshFile = "../resources/examples/Heart/CoronaryArterySolid.mesh";
 
   // Define boundary attributes
   Attribute GammaRing = 100, Gamma1 = 101, Gamma2 = 105;
@@ -286,8 +302,7 @@ int main(int, char **) {
   //Fields
   Problem Laplacian(u_l, v_l);
 
-  Laplacian = Integral(Grad(u_l), Grad(v_l))
-            + DirichletBC(u_l, zero_lap).on(GammaRing);
+  Laplacian = Integral(Grad(u_l), Grad(v_l)) + DirichletBC(u_l, zero_lap).on(GammaRing);
 
   CG(Laplacian).solve();
 
@@ -296,14 +311,12 @@ int main(int, char **) {
   xdmf_lap.grid().setMesh(mesh).add("map", u_l.getSolution());
   xdmf_lap.write();
 
-
-
   // ---- material -----------------------------------------------------------
   const Real E = 5e5;
   const Real nu = 0.3;
   const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
   const Real mu = E / (2.0 * (1.0 + nu));
-  (void) lambda;
+  (void)lambda;
   // u-p mixed formulation: the law carries only the isochoric part
   // (lambda = 0); the volumetric response is carried by the pressure field.
   Solid::NeoHookean law(0.0, mu);
@@ -363,34 +376,32 @@ int main(int, char **) {
   TrialFunction dp(Qh);
   TestFunction q(Qh);
 
-  for (size_t step = 1; step <= nSteps; ++step) {
-
+  for (size_t step = 1; step <= nSteps; ++step)
+  {
     const Real t = step * dt;
 
     const auto rep = model.step(dt);
-    std::cout << "  Newton step: "
-              << (rep.converged ? "converged" : "not converged")
+    std::cout << "  Newton step: " << (rep.converged ? "converged" : "not converged")
               << ", iterations = " << rep.iterations
               << ", final residual = " << rep.finalResidual
               << ", final step norm = " << rep.finalStepNorm << '\n';
 
-    if (!rep.converged) {
+    if (!rep.converged)
+    {
       std::cerr << "Solver failed to converge at step " << step
                 << ", t = " << model.getState().t << "\n";
       break;
     }
 
-    const auto &s = model.getState();
+    const auto& s = model.getState();
     const Real R = in.R0 + s.y;
     const Real V = (4.0 / 3.0) * std::numbers::pi_v<Real> * R * R * R;
     const Real Q = 4.0 * std::numbers::pi_v<Real> * R * R * s.v;
     const Real pat = in.pAt(s.t);
 
-    out << s.t << "," << s.y << "," << s.v << "," << s.pv << "," << s.par << ","
-        << s.pd << "," << s.ec << "," << s.gamma << "," << s.beta << "," << s.w
-        << "," << s.kc << "," << s.tauc << "," << V << "," << Q << "," << pat
-        << "\n";
-
+    out << s.t << "," << s.y << "," << s.v << "," << s.pv << "," << s.par << "," << s.pd
+        << "," << s.ec << "," << s.gamma << "," << s.beta << "," << s.w << "," << s.kc
+        << "," << s.tauc << "," << V << "," << Q << "," << pat << "\n";
 
     // Passing the displacement to be imposed in the 3D model
     const Real disp = s.y;
@@ -436,20 +447,20 @@ int main(int, char **) {
 
     Problem newton(du, dp, w, q);
     newton = tangent + tangentUP + tangentPU + aMass * Integral(du, w) + internal +
-             aMass * Integral(u, w)
-             + k * BoundaryIntegral(Dot(du, normal), Dot(w,normal)).over(Gamma1,Gamma2)
-             + k * BoundaryIntegral(Dot(u, normal), Dot(w,normal)).over(Gamma1,Gamma2)
-             - k * BoundaryIntegral(disp_0D, Dot(w,normal)).over(Gamma1,Gamma2)
-             - aMass * Integral(uPred, w) + DirichletBC(du, zero).on(GammaRing)
-             + incompressibility
-             - tau * Integral(Grad(dp), Grad(q))
-             - tau * Integral(Dot(Grad(p), Grad(q)));
+      aMass * Integral(u, w) +
+      k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(Gamma1, Gamma2) +
+      k * BoundaryIntegral(Dot(u, normal), Dot(w, normal)).over(Gamma1, Gamma2) -
+      k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(Gamma1, Gamma2) -
+      aMass * Integral(uPred, w) + DirichletBC(du, zero).on(GammaRing) +
+      incompressibility - tau * Integral(Grad(dp), Grad(q)) -
+      tau * Integral(Dot(Grad(p), Grad(q)));
 
     SparseLU linearSolver(newton);
 
     // Newton loop on the block system: K [du; dp] = -[R_u; R_p]
     Real r0 = 0;
-    for (size_t it = 0; it < 50; ++it) {
+    for (size_t it = 0; it < 50; ++it)
+    {
       newton.assemble();
       const Real r = newton.getLinearSystem().getVector().norm();
       if (it == 0)

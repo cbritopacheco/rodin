@@ -108,9 +108,7 @@ int main(int, char**)
 
     // Newton linearization:  K δu = -F_int(u) + F_body
     Problem newton(du, v);
-    newton = ivw(du, v)
-           - Integral(bodyForce, v)
-           + DirichletBC(du, zero).on(bottomBC);
+    newton = ivw(du, v) - Integral(bodyForce, v) + DirichletBC(du, zero).on(bottomBC);
 
     SparseLU linearSolver(newton);
     NewtonSolver solver(linearSolver);
@@ -120,7 +118,7 @@ int main(int, char**)
 
     solver.solve(u);
 
-    xdmf.write(static_cast<Real>(step));
+    xdmf.write(static_cast<Real>(step)).flush();
   }
 
   return 0;

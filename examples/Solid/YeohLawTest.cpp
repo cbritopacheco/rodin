@@ -47,8 +47,8 @@ namespace
     const bool pass = std::isfinite(err) && err < tol;
     g_allPass = g_allPass && pass;
     std::cout << "  " << (pass ? "[PASS] " : "[FAIL] ") << name
-              << "  max rel. error = " << std::scientific
-              << std::setprecision(3) << err << "  (tol " << tol << ")\n";
+              << "  max rel. error = " << std::scientific << std::setprecision(3) << err
+              << "  (tol " << tol << ")\n";
   }
 
   // Random displacement gradient with guaranteed J > 0.
@@ -81,8 +81,8 @@ namespace
   }
 
   template <class Law>
-  Math::SpatialMatrix<Real> stressAt(const Law& law, size_t d,
-                                     const Math::SpatialMatrix<Real>& H)
+  Math::SpatialMatrix<Real> stressAt(
+    const Law& law, size_t d, const Math::SpatialMatrix<Real>& H)
   {
     KinematicState state(d);
     state.setDisplacementGradient(H);
@@ -96,8 +96,7 @@ namespace
 
   template <class Law>
   Math::SpatialMatrix<Real> tangentAt(const Law& law, size_t d,
-                                      const Math::SpatialMatrix<Real>& H,
-                                      const Math::SpatialMatrix<Real>& dF)
+    const Math::SpatialMatrix<Real>& H, const Math::SpatialMatrix<Real>& dF)
   {
     KinematicState state(d);
     state.setDisplacementGradient(H);
@@ -111,8 +110,8 @@ namespace
 
   // 1. P vs central finite differences of W (component by component).
   template <class Law>
-  Real stressFDError(const Law& law, size_t d,
-                     const Math::SpatialMatrix<Real>& H, Real eps)
+  Real stressFDError(
+    const Law& law, size_t d, const Math::SpatialMatrix<Real>& H, Real eps)
   {
     const Math::SpatialMatrix<Real> P = stressAt(law, d, H);
     Real maxErr = 0.0;
@@ -123,10 +122,8 @@ namespace
         Math::SpatialMatrix<Real> Hp = H, Hm = H;
         Hp(i, j) += eps;
         Hm(i, j) -= eps;
-        const Real fd =
-          (energyAt(law, d, Hp) - energyAt(law, d, Hm)) / (2.0 * eps);
-        const Real err =
-          std::abs(fd - P(i, j)) / (1.0 + std::abs(P(i, j)));
+        const Real fd = (energyAt(law, d, Hp) - energyAt(law, d, Hm)) / (2.0 * eps);
+        const Real err = std::abs(fd - P(i, j)) / (1.0 + std::abs(P(i, j)));
         maxErr = std::max(maxErr, err);
       }
     }
@@ -135,37 +132,34 @@ namespace
 
   // 2. dP[dF] vs central finite differences of P along dF.
   template <class Law>
-  Real tangentFDError(const Law& law, size_t d,
-                      const Math::SpatialMatrix<Real>& H,
-                      const Math::SpatialMatrix<Real>& dF, Real eps)
+  Real tangentFDError(const Law& law, size_t d, const Math::SpatialMatrix<Real>& H,
+    const Math::SpatialMatrix<Real>& dF, Real eps)
   {
     const Math::SpatialMatrix<Real> dP = tangentAt(law, d, H, dF);
-    const Math::SpatialMatrix<Real> Pp = stressAt(
-        law, d, Math::SpatialMatrix<Real>(H + eps * dF));
-    const Math::SpatialMatrix<Real> Pm = stressAt(
-        law, d, Math::SpatialMatrix<Real>(H + (-eps) * dF));
+    const Math::SpatialMatrix<Real> Pp =
+      stressAt(law, d, Math::SpatialMatrix<Real>(H + eps * dF));
+    const Math::SpatialMatrix<Real> Pm =
+      stressAt(law, d, Math::SpatialMatrix<Real>(H + (-eps) * dF));
     Real maxErr = 0.0;
     for (size_t i = 0; i < d; ++i)
     {
       for (size_t j = 0; j < d; ++j)
       {
         const Real fd = (Pp(i, j) - Pm(i, j)) / (2.0 * eps);
-        const Real err =
-          std::abs(fd - dP(i, j)) / (1.0 + std::abs(dP(i, j)));
+        const Real err = std::abs(fd - dP(i, j)) / (1.0 + std::abs(dP(i, j)));
         maxErr = std::max(maxErr, err);
       }
     }
     return maxErr;
   }
 
-  Real matRelDiff(const Math::SpatialMatrix<Real>& A,
-                  const Math::SpatialMatrix<Real>& B)
+  Real matRelDiff(const Math::SpatialMatrix<Real>& A, const Math::SpatialMatrix<Real>& B)
   {
     Real maxErr = 0.0;
     for (int i = 0; i < A.rows(); ++i)
       for (int j = 0; j < A.cols(); ++j)
-        maxErr = std::max(maxErr,
-            std::abs(A(i, j) - B(i, j)) / (1.0 + std::abs(B(i, j))));
+        maxErr =
+          std::max(maxErr, std::abs(A(i, j) - B(i, j)) / (1.0 + std::abs(B(i, j))));
     return maxErr;
   }
 }
@@ -209,16 +203,15 @@ int main()
 
       // 3. Exact degeneration: Yeoh(c1,0,0,k) == MooneyRivlin(c1,0,k).
       const Real wErr =
-        std::abs(energyAt(yeohReduced, d, H) - energyAt(mooneyReduced, d, H))
-        / (1.0 + std::abs(energyAt(mooneyReduced, d, H)));
+        std::abs(energyAt(yeohReduced, d, H) - energyAt(mooneyReduced, d, H)) /
+        (1.0 + std::abs(energyAt(mooneyReduced, d, H)));
       report("W  == MR(c2=0)      ", wErr, exactTol);
       report("P  == MR(c2=0)      ",
-             matRelDiff(stressAt(yeohReduced, d, H),
-                        stressAt(mooneyReduced, d, H)), exactTol);
+        matRelDiff(stressAt(yeohReduced, d, H), stressAt(mooneyReduced, d, H)), exactTol);
       const Math::SpatialMatrix<Real> dF = randomH(d, 1.0, gen);
       report("dP == MR(c2=0)      ",
-             matRelDiff(tangentAt(yeohReduced, d, H, dF),
-                        tangentAt(mooneyReduced, d, H, dF)), exactTol);
+        matRelDiff(tangentAt(yeohReduced, d, H, dF), tangentAt(mooneyReduced, d, H, dF)),
+        exactTol);
     }
   }
 

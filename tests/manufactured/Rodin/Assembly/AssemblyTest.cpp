@@ -254,7 +254,7 @@ namespace Rodin::Tests::Manufactured::Assembly
     protected:
       void SetUp() override
       {
-        m_mesh = Mesh<Context::Local>::UniformGrid(GetParam(), { 4, 4, 4 });
+        m_mesh = Mesh<Context::Local>::UniformGrid(GetParam(), {4, 4, 4});
         m_mesh.scale(1.0 / 3.0);
         m_mesh.getConnectivity().compute(2, 3);
         m_mesh.getConnectivity().compute(3, 0);
@@ -576,13 +576,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   }
 
   /// @brief Instantiates Assembly 3 D Test over the All Geometries 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometries3D,
-    Assembly_3D_Test,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(AllGeometries3D, Assembly_3D_Test,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

@@ -59,8 +59,13 @@ import numpy as np
 import pandas as pd
 
 
-OUTLET_IDS = [4, 5, 6, 7, 8, 9]
+# Boundary attributes of the coronary outlets, matching Config::outlets.
+OUTLET_IDS = [7, 8, 9, 10, 14, 15]
 PERIOD = 0.85
+
+# Systole is taken from the activation ramp to the end of the relaxation ramp
+# (Activation::tRampStart .. tRelaxEnd); the rest of the cycle is diastole.
+SYSTOLE = (0.15, 0.45)
 
 
 def cols_present(df, cols):
@@ -204,7 +209,126 @@ def add_derived_columns(df):
         df["cycle"] = np.floor(df["t"] / PERIOD).astype("Int64")
         df["tau"] = df["t"] - PERIOD * df["cycle"].astype(float)
 
+    # ---- Venous / intramyocardial compartment ---------------------------
+    # The flow leaving the compliant microvascular compartment towards the
+    # right atrium is reported in the DistalFlux columns. Coronary venous
+    # outflow is systolic dominant, in phase opposition with the diastolic
+    # dominant arterial inflow; the two are plotted together because that
+    # opposition is the signature of the intramyocardial pump.
+    if "CoronaryDistalFluxTotal_mL_s" in df:
+        df["CoronaryVenousFluxTotal_mL_s"] = df["CoronaryDistalFluxTotal_mL_s"]
+
+    for i in OUTLET_IDS:
+        src = f"CoronaryOutlet{i}DistalFlux_mL_s"
+        if src in df:
+            df[f"CoronaryOutlet{i}VenousFlux_mL_s"] = df[src]
+
+    # Arterial inflow uses the outward normal, so inflow is negative. Flip it
+    # so that both curves are positive in their forward direction.
+    if "CoronaryInletFlux_mL_s" in df:
+        df["CoronaryArterialInflow_mL_s"] = -df["CoronaryInletFlux_mL_s"]
+
+    # Transmural pressure across the microvascular compliance, p_c - p_im.
+    # This is the quantity the compliance actually stores; myocardial
+    # compression shows up as its systolic collapse.
+    if "IntramyoPressure" in df and "MeanCapPressure" in df:
+        df["TransmuralPressure"] = df["MeanCapPressure"] - df["IntramyoPressure"]
+
     return df
+
+
+def phase_split(df, col):
+    """Mean of a column over systole and over diastole, plus peak/mean ratio."""
+    if col not in df or "tau" not in df:
+        return None
+    s = numeric_series(df, col)
+    tau = numeric_series(df, "tau")
+    sys_mask = (tau >= SYSTOLE[0]) & (tau < SYSTOLE[1])
+    mean_all = s.mean()
+    out = {
+        "systolic_mean": s[sys_mask].mean(),
+        "diastolic_mean": s[~sys_mask].mean(),
+        "mean": mean_all,
+        "peak": s.max(),
+    }
+    out["peak_over_mean"] = (
+        out["peak"] / mean_all if mean_all not in (0.0, np.nan) else np.nan
+    )
+    return out
+
+
+def shade_systole(ax, df):
+    """Shade the systolic part of every cycle."""
+    if "t" not in df:
+        return
+    t = numeric_series(df, "t")
+    if t.empty:
+        return
+    tmin, tmax = float(t.min()), float(t.max())
+    n = int(np.floor(tmax / PERIOD)) + 1
+    for k in range(n):
+        lo = k * PERIOD + SYSTOLE[0]
+        hi = k * PERIOD + SYSTOLE[1]
+        # Clip to the data range so no band is drawn past the last sample.
+        lo, hi = max(lo, tmin), min(hi, tmax)
+        if hi > lo:
+            ax.axvspan(lo, hi, color="0.85", zorder=0, lw=0)
+
+
+def phased_flows(ax, df):
+    """Arterial inflow against venous outflow, with systole shaded.
+
+    Coronary arterial inflow is diastolic dominant and venous outflow is
+    systolic dominant. Their phase opposition is the signature of the
+    intramyocardial pump, so a physiological result shows the two curves
+    peaking in opposite halves of the shaded bands.
+    """
+    cols = cols_present(
+        df, ["CoronaryArterialInflow_mL_s", "CoronaryVenousFluxTotal_mL_s"]
+    )
+    if not cols or "t" not in df:
+        ax.set_axis_off()
+        return
+    shade_systole(ax, df)
+    ts(ax, df, cols, "Arterial inflow vs venous outflow", "mL/s")
+
+    parts = []
+    for c, label in (
+        ("CoronaryArterialInflow_mL_s", "art"),
+        ("CoronaryVenousFluxTotal_mL_s", "ven"),
+    ):
+        st = phase_split(df, c)
+        if st is None or not np.isfinite(st["mean"]):
+            continue
+        parts.append(
+            f"{label}: sys {st['systolic_mean']:.2f}, "
+            f"dia {st['diastolic_mean']:.2f}, pk/mean {st['peak_over_mean']:.1f}"
+        )
+    if parts:
+        ax.set_title("Arterial inflow vs venous outflow\n" + " | ".join(parts),
+                     fontsize=8)
+
+
+def cycle_overlay(ax, df, col, title, ylabel=""):
+    """Overlay every cardiac cycle against the in-cycle time tau."""
+    if col not in df or "tau" not in df or "cycle" not in df:
+        ax.set_axis_off()
+        return
+    shade_systole_tau(ax)
+    for cyc, grp in df.groupby("cycle"):
+        if grp.empty:
+            continue
+        ax.plot(grp["tau"], numeric_series(grp, col), lw=1.2, label=f"cycle {cyc}")
+    ax.set_title(title)
+    ax.set_xlabel("tau [s]")
+    ax.set_ylabel(ylabel)
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=7)
+
+
+def shade_systole_tau(ax):
+    """Shade systole on an in-cycle (tau) axis."""
+    ax.axvspan(SYSTOLE[0], SYSTOLE[1], color="0.85", zorder=0, lw=0)
 
 
 def savefig(path):
@@ -434,6 +558,41 @@ def dashboard_specs():
                     ],
                     "RCR pressure summary",
                     "Pa",
+                ),
+            ],
+        ),
+        (
+            "Venous / intramyocardial compartment",
+            [
+                lambda ax, df: phased_flows(ax, df),
+                lambda ax, df: ts(
+                    ax,
+                    df,
+                    [f"CoronaryOutlet{i}VenousFlux_mL_s" for i in OUTLET_IDS],
+                    "Venous outflow per outlet",
+                    "mL/s",
+                ),
+                lambda ax, df: ts(
+                    ax,
+                    df,
+                    ["IntramyoPressure", "MeanCapPressure"],
+                    "Tissue vs microvascular pressure",
+                    "Pa",
+                ),
+                lambda ax, df: ts(
+                    ax,
+                    df,
+                    ["TransmuralPressure"],
+                    "Transmural pressure  p_c - p_im",
+                    "Pa",
+                ),
+                lambda ax, df: cycle_overlay(
+                    ax, df, "CoronaryVenousFluxTotal_mL_s",
+                    "Venous outflow, cycles overlaid", "mL/s",
+                ),
+                lambda ax, df: cycle_overlay(
+                    ax, df, "CoronaryArterialInflow_mL_s",
+                    "Arterial inflow, cycles overlaid", "mL/s",
                 ),
             ],
         ),
@@ -793,6 +952,38 @@ def save_all_figures(df, outdir):
         "RCR capacitor pressures",
         "Pa",
     )
+    # ---- Venous / intramyocardial compartment ---------------------------
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    phased_flows(ax, df)
+    savefig(outdir / "10a_arterial_vs_venous.png")
+
+    make_ts(
+        "10b_venous_flux_per_outlet.png",
+        [f"CoronaryOutlet{i}VenousFlux_mL_s" for i in OUTLET_IDS],
+        "Venous outflow per outlet",
+        "mL/s",
+    )
+    make_ts(
+        "10c_tissue_vs_microvascular_pressure.png",
+        ["IntramyoPressure", "MeanCapPressure"],
+        "Tissue vs microvascular pressure",
+        "Pa",
+    )
+    make_ts(
+        "10d_transmural_pressure.png",
+        ["TransmuralPressure"],
+        "Transmural pressure  p_c - p_im",
+        "Pa",
+    )
+    for name, col, ylab in (
+        ("10e_venous_cycles.png", "CoronaryVenousFluxTotal_mL_s", "mL/s"),
+        ("10f_arterial_cycles.png", "CoronaryArterialInflow_mL_s", "mL/s"),
+    ):
+        if col in df:
+            fig, ax = plt.subplots(figsize=(8, 4.5))
+            cycle_overlay(ax, df, col, col, ylab)
+            savefig(outdir / name)
+
     make_ts(
         "11_flow_balance.png",
         ["FlowBalance", "OutletFluxMismatch", "DistalFluxMismatch"],
@@ -914,6 +1105,27 @@ def write_tables(df, outdir):
 
     def add_flag(name, value):
         flags.append({"diagnostic": name, "value": value})
+
+    # Venous / intramyocardial validation metrics. The systolic-to-diastolic
+    # ratios should be opposite in sign of dominance (arterial diastolic,
+    # venous systolic), and the venous peak-to-mean ratio is physiologically
+    # about 2-3; a much larger value indicates an over-strong pump.
+    for col, label in (
+        ("CoronaryArterialInflow_mL_s", "arterial_inflow"),
+        ("CoronaryVenousFluxTotal_mL_s", "venous_outflow"),
+    ):
+        st = phase_split(df, col)
+        if st is None:
+            continue
+        add_flag(f"{label}_mean_mL_s", st["mean"])
+        add_flag(f"{label}_systolic_mean_mL_s", st["systolic_mean"])
+        add_flag(f"{label}_diastolic_mean_mL_s", st["diastolic_mean"])
+        add_flag(f"{label}_peak_over_mean", st["peak_over_mean"])
+        if np.isfinite(st["diastolic_mean"]) and st["diastolic_mean"] != 0.0:
+            add_flag(
+                f"{label}_systolic_over_diastolic",
+                st["systolic_mean"] / st["diastolic_mean"],
+            )
 
     if "RelativeFlowBalance" in df:
         add_flag("max_relative_flow_balance", safe_series(df, "RelativeFlowBalance").max())

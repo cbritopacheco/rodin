@@ -63,6 +63,7 @@
 
 #include "Rodin/Variational/NonLinearFormIntegrator.h"
 #include "Rodin/Solid/Local/Input.h"
+#include "Rodin/Solid/Local/Output.h"
 
 #include "InternalVirtualWorkResidual.h"
 #include "InternalVirtualWorkTangent.h"
@@ -91,9 +92,13 @@ namespace Rodin::Solid
   {
     public:
       /// @brief Constitutive law type.
-      using LawType   = Law;
+      using LawType = Law;
       /// @brief Current displacement state type.
       using StateType = State;
+      /// @brief The law's cache type, handed to the output by @c commit().
+      using CacheType = typename Law::Cache;
+      /// @brief Type-erased output callable for this law.
+      using OutputFunctionType = OutputFunction<CacheType>;
 
       /**
        * @brief Constructs the internal virtual work object.
@@ -136,8 +141,98 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /**
+       * @brief Sets the output invoked at each quadrature point by @c commit().
+       *
+       * The output is the dual of @c setInput(): it reads the law's cache
+       * after evaluation, and is the extraction site for committed internal
+       * variables, recovered stresses or diagnostics. It is invoked only by
+       * @c commit(), never during assembly, so a caller controls exactly when
+       * derived quantities are taken.
+       *
+       * @see Solid::Output
+       */
+      InternalVirtualWork& setOutput(OutputFunctionType output)
+      {
+        m_output = std::move(output);
+        return *this;
+      }
+
+      /**
+       * @brief Evaluates the law at every quadrature point and invokes the
+       *        output. Performs no assembly.
+       *
+       * Sweeps the cells of the displacement's mesh, reproducing the
+       * constitutive evaluation of @c Residual() and @c Tangent() at the
+       * current displacement -- the same kinematics, the same
+       * @c ConstitutivePoint, the same @c Input -- and hands each resulting
+       * cache to the output. Callers use this to commit internal variables
+       * once a nonlinear solve has converged, without recomputing the
+       * kinematics themselves.
+       *
+       * The quadrature rule is the one set by @c setQuadratureOrder(), or
+       * @f$ 2 \times @f$ the displacement's element order. This agrees with
+       * @c Residual() and @c Tangent() as long as the trial and test spaces do
+       * not exceed the displacement's order; otherwise pin the order with
+       * @c setQuadratureOrder() so that every pass addresses the same
+       * quadrature points.
+       *
+       * Does nothing if no output has been set.
+       */
+      void commit() const
+      {
+        if (!m_output)
+          return;
+
+        const auto& displacement = m_displacement.get();
+        const auto& fes = displacement.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t d = mesh.getSpaceDimension();
+
+        auto stateGradient = Variational::Jacobian(displacement);
+
+        for (auto it = mesh.getCell(); it; ++it)
+        {
+          const auto& polytope = *it;
+          const Index idx = polytope.getIndex();
+          const auto& stateFE = fes.getFiniteElement(d, idx);
+
+          const size_t effectiveOrder =
+            (m_quadOrder > 0) ? m_quadOrder : 2 * stateFE.getOrder();
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          const auto& quadrature = polytope.getQuadrature(qf);
+          const size_t nqp = quadrature.getSize();
+
+          for (size_t q = 0; q < nqp; ++q)
+          {
+            const auto& pt = quadrature.getPoint(q);
+            const Variational::IntegrationPoint ip(pt, &qf, q);
+            const auto H = stateGradient.getValue(ip);
+
+            KinematicState state(d);
+            state.setDisplacementGradient(H);
+
+            ConstitutivePoint cp(pt, state);
+            cp.set<Tags::CellIndex>(idx);
+            cp.set<Tags::QuadraturePointIndex>(q);
+
+            if (m_input)
+              m_input(cp);
+
+            typename LawType::Cache cache;
+            m_law.setCache(cache, cp);
+
+            m_output(cp, cache);
+          }
+        }
+      }
+
       /// @brief Gets the constitutive law.
-      const Law& getLaw() const { return m_law; }
+      const Law& getLaw() const
+      {
+        return m_law;
+      }
 
       /**
        * @brief Returns the residual integrator (linear form contribution).
@@ -189,12 +284,13 @@ namespace Rodin::Solid
       std::reference_wrapper<const State> m_displacement;
       size_t m_quadOrder;
       InputFunction m_input;
+      OutputFunctionType m_output;
   };
 
   /// CTAD deduction guide for InternalVirtualWork
   template <class Law, class State>
-  InternalVirtualWork(const Law&, const State&)
-    -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
+  InternalVirtualWork(const Law&,
+    const State&) -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
 }
 
 #endif

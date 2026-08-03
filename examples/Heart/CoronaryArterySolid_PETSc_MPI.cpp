@@ -76,7 +76,8 @@ using namespace Rodin::Solver;
 
 using Model = Rodin::Heart::CCMLC2014T<>;
 
-static Real periodic_activation(Real t) {
+static Real periodic_activation(Real t)
+{
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
   if (tau < 0.13)
@@ -91,7 +92,8 @@ static Real periodic_activation(Real t) {
     return -20.0;
   return 0.0;
 }
-static Real load_dependent_relaxation_m0(Real ec) {
+static Real load_dependent_relaxation_m0(Real ec)
+{
   // Piecewise-linear approximation of Caruel et al. Fig. 7.
   const Real low_ec = 0.0;
   const Real high_ec = 2.0;
@@ -104,7 +106,8 @@ static Real load_dependent_relaxation_m0(Real ec) {
   const Real s = (ec - low_ec) / (high_ec - low_ec);
   return (1.0 - s) * low_value + s * high_value;
 }
-static Real load_dependent_relaxation_dm0(Real ec) {
+static Real load_dependent_relaxation_dm0(Real ec)
+{
   const Real low_ec = 0.0;
   const Real high_ec = 2.0;
   const Real low_value = 1.6;
@@ -113,7 +116,8 @@ static Real load_dependent_relaxation_dm0(Real ec) {
     return 0.0;
   return (high_value - low_value) / (high_ec - low_ec);
 }
-static Real atrial_pressure(Real t) {
+static Real atrial_pressure(Real t)
+{
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
   const Real min_value = 500.0;
@@ -127,30 +131,43 @@ static Real atrial_pressure(Real t) {
   const Real t6 = 0.85;
   Real alpha = 0.0;
   Real value = min_value;
-  if (tau < t1) {
+  if (tau < t1)
+  {
     alpha = -(tau - t1) / t1;
     value = alpha * min_value + (1.0 - alpha) * max_value;
-  } else if (tau < t2) {
+  }
+  else if (tau < t2)
+  {
     value = max_value;
-  } else if (tau < t3) {
+  }
+  else if (tau < t3)
+  {
     alpha = -(tau - t3) / (t3 - t2);
     value = alpha * max_value + (1.0 - alpha) * min_value;
-  } else if (tau < t4) {
+  }
+  else if (tau < t4)
+  {
     alpha = -(tau - t4) / (t4 - t3);
     value = alpha * min_value + (1.0 - alpha) * second_threshold;
-  } else if (tau < t5) {
+  }
+  else if (tau < t5)
+  {
     value = second_threshold;
-  } else if (tau < t6) {
+  }
+  else if (tau < t6)
+  {
     alpha = -(tau - t6) / (t6 - t5);
     value = alpha * second_threshold + (1.0 - alpha) * min_value;
-  } else {
+  }
+  else
+  {
     value = min_value;
   }
   return value;
 }
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
@@ -195,8 +212,7 @@ int main(int argc, char** argv) {
   in.proximalLength = 0.4;
   in.distalRadius = 0.0007;
   in.distalLength = 0.004;
-  in.windkesselRheology =
-      Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
+  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
   // Valve parameters
   in.Kat = 9.0e-6;
   in.Kp = 5.0e-10;
@@ -229,10 +245,10 @@ int main(int argc, char** argv) {
   }
   Model model(in);
   model.setMaxIterations(200)
-      .setAbsoluteTolerance(1e-8)
-      .setRelativeTolerance(1e-8)
-      .setStepTolerance(1e-10)
-      .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
   Model::State s0;
   s0.t = 0.0;
   s0.y = 0.0;
@@ -248,8 +264,9 @@ int main(int argc, char** argv) {
   s0.tauc = s0.gamma * s0.beta;
   s0.w = in.m0(s0.ec);
   model.initialize(s0);
-  if (isRoot) {
-    const auto &s = model.getState();
+  if (isRoot)
+  {
+    const auto& s = model.getState();
     std::cout << "Initial state:\n"
               << "  y     = " << s.y << '\n'
               << "  v     = " << s.v << '\n'
@@ -264,13 +281,13 @@ int main(int argc, char** argv) {
               << "  tauc  = " << s.tauc << '\n';
   }
   std::ofstream out;
-  if (isRoot) {
+  if (isRoot)
+  {
     out.open("ccmlc2014_0d_cycle.csv");
     out << "t,y,v,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat\n";
   }
 
-
-  const char *meshFile = "../resources/examples/Heart/malla_solido.mesh";
+  const char* meshFile = "../resources/examples/Heart/malla_solido.mesh";
 
   Rodin::MPI::Sharder sharder(context);
   if (comm.rank() == RootRank)
@@ -314,14 +331,14 @@ int main(int argc, char** argv) {
   mesh.reconcile(2);
   mesh.reconcile(1);
 
-
   std::array<Attribute, 6> SolidOutlets{{18, 19, 20, 21, 22, 31}};
   Attribute SolidRing = 17;
   Attribute SolidExt = 102;
 
   // ---- Finite-element space -----------------------------------------------
   const size_t dim = mesh.getSpaceDimension();
-  H1 Vh(std::integral_constant<size_t,2>{}, mesh, dim);   // vector P1 on the distributed mesh
+  H1 Vh(
+    std::integral_constant<size_t, 2>{}, mesh, dim); // vector P1 on the distributed mesh
 
   // ---- Laplacian "map" problem (PETSc KSP / CG) ---------------------------
   //H1 V_lh(mesh);
@@ -331,13 +348,13 @@ int main(int argc, char** argv) {
 
   //Problem Laplacian(u_l, v_l);
   //Laplacian = Integral(Grad(u_l), Grad(v_l))
-    //        + DirichletBC(u_l, zero_lap).on(GammaRing);
- // {
-   // Laplacian.assemble();
-   // Solver::KSP lapSolver(Laplacian);
-   // lapSolver.setType(KSPCG);
-   // Laplacian.solve(lapSolver);
-   // }
+  //        + DirichletBC(u_l, zero_lap).on(GammaRing);
+  // {
+  // Laplacian.assemble();
+  // Solver::KSP lapSolver(Laplacian);
+  // lapSolver.setType(KSPCG);
+  // Laplacian.solve(lapSolver);
+  // }
 
   //IO::XDMF xdmf_lap("Laplacian");
   //xdmf_lap.setMesh(mesh);
@@ -359,17 +376,17 @@ int main(int argc, char** argv) {
   // α=0  → standard Newmark (no damping); α<0 → algorithmic damping of high-frequency modes.
   // For cardiac mechanics at dt=1ms the 1st-order temporal error (~α·dt) is negligible.
   const Real alpha_hht = -0.1;
-  const Real beta  = (1.0 - alpha_hht) * (1.0 - alpha_hht) / 4.0;  // 0.275625
-  const Real gamma = (1.0 - 2.0 * alpha_hht) / 2.0;                 // 0.55
+  const Real beta = (1.0 - alpha_hht) * (1.0 - alpha_hht) / 4.0; // 0.275625
+  const Real gamma = (1.0 - 2.0 * alpha_hht) / 2.0; // 0.55
   // Effective coefficients
   const Real aMass = rho / (beta * dt * dt);
 
   // ---- fields ---------------------------------
-  PETSc::Variational::GridFunction u(Vh);   // displacement
+  PETSc::Variational::GridFunction u(Vh); // displacement
   PETSc::Variational::GridFunction vel(Vh); // velocity
   PETSc::Variational::GridFunction acc(Vh); // acceleration
   auto zero = VectorFunction{Zero(), Zero(), Zero()};
-  u   = zero;
+  u = zero;
   vel = zero;
   acc = zero;
 
@@ -379,8 +396,8 @@ int main(int argc, char** argv) {
   PETSc::Variational::GridFunction tmp(Vh);
   uPred = zero;
   vPred = zero;
-  aNew  = zero;
-  tmp   = zero;
+  aNew = zero;
+  tmp = zero;
 
   // ---- output -------------------------------------------------------------
   // Distributed (MPI) XDMF: each rank writes its own HDF5 piece and the root
@@ -395,7 +412,7 @@ int main(int argc, char** argv) {
   xdmf.write(0.0).flush();
 
   PETSc::Variational::TrialFunction du(Vh);
-  PETSc::Variational::TestFunction  w(Vh);
+  PETSc::Variational::TestFunction w(Vh);
 
   const auto normal = BoundaryNormal(mesh);
 
@@ -404,27 +421,36 @@ int main(int argc, char** argv) {
   const Real b = 5e4;
   const Real aVel = b * gamma / (beta * dt);
 
-
   Real disp0DValue = 0.0;
   auto disp_0D = RealFunction([&](const Geometry::Point&) { return disp0DValue; });
 
   Solid::InternalVirtualWorkTangent tangent(law, du, w, u);
-  Solid::InternalVirtualWorkResidual   internal(law, w, u);
+  Solid::InternalVirtualWorkResidual internal(law, w, u);
 
   Problem newton(du, w);
-  newton = tangent + aMass * Integral(du, w) + internal
-         + aMass * Integral(u, w)
-         + k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(SolidExt)
-         + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(SolidExt)
-         - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(SolidExt)
-         - aMass * Integral(uPred, w)
-         + DirichletBC(du, zero).on(SolidRing)
-         + a   * BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
-         + aVel * BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
-         + a    * BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
-         + aVel * BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
-         - aVel * BoundaryIntegral(uPred, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
-         + b    * BoundaryIntegral(vPred, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]);
+  newton = tangent + aMass * Integral(du, w) + internal + aMass * Integral(u, w) +
+    k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(SolidExt) +
+    k * BoundaryIntegral(Dot(u, normal), Dot(w, normal)).over(SolidExt) -
+    k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(SolidExt) -
+    aMass * Integral(uPred, w) + DirichletBC(du, zero).on(SolidRing) +
+    a *
+      BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2],
+        SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]) +
+    aVel *
+      BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2],
+        SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]) +
+    a *
+      BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2],
+        SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]) +
+    aVel *
+      BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2],
+        SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]) -
+    aVel *
+      BoundaryIntegral(uPred, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2],
+        SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]) +
+    b *
+      BoundaryIntegral(vPred, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2],
+        SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]);
 
   newton.assemble();
 
@@ -432,40 +458,41 @@ int main(int argc, char** argv) {
   Solver::SNES snes(ksp);
   // setTolerances(abstol, rtol, stol, maxIt, maxF)
   snes.setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
-      .setStateUpdate([&](const PETSc::Math::Vector& x)
-      {
-        // setData refreshes ghosts on MPI grid functions.
-        u.setData(x, 0);
-      });
+    .setStateUpdate([&](const PETSc::Math::Vector& x) {
+      // setData refreshes ghosts on MPI grid functions.
+      u.setData(x, 0);
+    });
 
-  for (size_t step = 1; step <= static_cast<size_t>(nSteps); ++step) {
+  for (size_t step = 1; step <= static_cast<size_t>(nSteps); ++step)
+  {
     const Real t = step * dt;
 
     // ---- 0D step (redundant on every rank) --------------------------------
     const auto rep = model.step(dt);
-    if (isRoot) {
-      std::cout << "  0D Newton: "
-                << (rep.converged ? "converged" : "not converged")
+    if (isRoot)
+    {
+      std::cout << "  0D Newton: " << (rep.converged ? "converged" : "not converged")
                 << ", iterations = " << rep.iterations
                 << ", final residual = " << rep.finalResidual
                 << ", final step norm = " << rep.finalStepNorm << '\n';
     }
-    if (!rep.converged) {
+    if (!rep.converged)
+    {
       if (isRoot)
         std::cerr << "0D solver failed to converge at step " << step
                   << ", t = " << model.getState().t << "\n";
       break;
     }
-    const auto &s = model.getState();
-    if (isRoot) {
+    const auto& s = model.getState();
+    if (isRoot)
+    {
       const Real R = in.R0 + s.y;
       const Real V = (4.0 / 3.0) * std::numbers::pi_v<Real> * R * R * R;
       const Real Q = 4.0 * std::numbers::pi_v<Real> * R * R * s.v;
       const Real pat = in.pAt(s.t);
-      out << s.t << "," << s.y << "," << s.v << "," << s.pv << "," << s.par
-          << "," << s.pd << "," << s.ec << "," << s.gamma << "," << s.beta
-          << "," << s.w << "," << s.kc << "," << s.tauc << "," << V << "," << Q
-          << "," << pat << "\n";
+      out << s.t << "," << s.y << "," << s.v << "," << s.pv << "," << s.par << "," << s.pd
+          << "," << s.ec << "," << s.gamma << "," << s.beta << "," << s.w << "," << s.kc
+          << "," << s.tauc << "," << V << "," << Q << "," << pat << "\n";
     }
 
     // 0D -> 3D imposed displacement for this step (same value on all ranks).
@@ -474,11 +501,17 @@ int main(int argc, char** argv) {
     // ---- Newmark predictors (ghost-aware GridFunction algebra) -------------
     // uPred = u + dt*vel + dt*dt*(0.5 - beta)*acc
     uPred = u;
-    tmp = vel; tmp *= dt;                         uPred += tmp;
-    tmp = acc; tmp *= dt * dt * (0.5 - beta);     uPred += tmp;
+    tmp = vel;
+    tmp *= dt;
+    uPred += tmp;
+    tmp = acc;
+    tmp *= dt * dt * (0.5 - beta);
+    uPred += tmp;
     // vPred = vel + dt*(1 - gamma)*acc
     vPred = vel;
-    tmp = acc; tmp *= dt * (1.0 - gamma);         vPred += tmp;
+    tmp = acc;
+    tmp *= dt * (1.0 - gamma);
+    vPred += tmp;
 
     // Initial guess for u^{n+1}: the predictor (state only; SNES x warm-starts
     // from the previous step on its own).
@@ -487,22 +520,27 @@ int main(int argc, char** argv) {
     // ---- nonlinear solve with SNES ----------------------------------------
     snes.solve();
 
-    if (!snes.converged()) {
+    if (!snes.converged())
+    {
       if (isRoot)
-        std::cerr << "SNES failed to converge at step " << step
-                  << " after " << snes.getIterationNumber() << " iterations.\n";
+        std::cerr << "SNES failed to converge at step " << step << " after "
+                  << snes.getIterationNumber() << " iterations.\n";
       break;
     }
     if (isRoot)
       std::cout << "Step " << step << ", time " << t
-                << ", SNES iterations = " << snes.getIterationNumber()
-                << std::endl;
+                << ", SNES iterations = " << snes.getIterationNumber() << std::endl;
 
     // ---- Newmark correctors ----------------------------------------------
     // aNew = (1/(beta*dt^2)) * (u - uPred)
-    aNew = u; aNew -= uPred; aNew *= 1.0 / (beta * dt * dt);
+    aNew = u;
+    aNew -= uPred;
+    aNew *= 1.0 / (beta * dt * dt);
     // vel = vPred + gamma*dt*aNew
-    vel = vPred; tmp = aNew; tmp *= gamma * dt; vel += tmp;
+    vel = vPred;
+    tmp = aNew;
+    tmp *= gamma * dt;
+    vel += tmp;
     // acc = aNew
     acc = aNew;
 

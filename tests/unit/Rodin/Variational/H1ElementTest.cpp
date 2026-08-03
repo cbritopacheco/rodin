@@ -2273,9 +2273,9 @@ namespace Rodin::Tests::Unit
     // Comprehensive tests for H1Element<1> across all geometries
     // K=1 is piecewise linear element
 
-    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    for (auto geom :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealH1Element<1> pk(geom);
 

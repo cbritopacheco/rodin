@@ -151,10 +151,7 @@ namespace Rodin::Solver
     return PETSC_SUCCESS;
   }
 
-  PetscErrorCode SNES::Assemble(
-      ::Vec x,
-      void* ctx,
-      Variational::AssemblyTarget target)
+  PetscErrorCode SNES::Assemble(::Vec x, void* ctx, Variational::AssemblyTarget target)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
@@ -167,10 +164,8 @@ namespace Rodin::Solver
     if (ierr)
       return ierr;
 
-    auto& assembled =
-      target == Variational::AssemblyTarget::LHS
-        ? self->m_lhsAssembled
-        : self->m_rhsAssembled;
+    auto& assembled = target == Variational::AssemblyTarget::LHS ? self->m_lhsAssembled
+                                                                 : self->m_rhsAssembled;
     if (assembled && *assembled == state)
       return PETSC_SUCCESS;
 #endif
@@ -270,8 +265,7 @@ namespace Rodin::Solver
         {
           const auto& s = splits[k];
           assert(s.is);
-          const std::string name =
-            !s.name.empty() ? s.name : std::to_string(k);
+          const std::string name = !s.name.empty() ? s.name : std::to_string(k);
           ierr = PCFieldSplitSetIS(pc, name.c_str(), s.is);
           assert(ierr == PETSC_SUCCESS);
         }

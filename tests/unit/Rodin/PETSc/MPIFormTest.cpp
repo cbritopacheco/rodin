@@ -146,9 +146,9 @@ namespace
     auto mesh = distributeFromRoot(ctx);
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
     PETSc::Variational::TrialFunction eta(fes);
-    PETSc::Variational::TestFunction  zeta(fes);
+    PETSc::Variational::TestFunction zeta(fes);
 
     constexpr PetscScalar gamma = 2.0;
     constexpr PetscScalar defect = 3.0;
@@ -158,8 +158,7 @@ namespace
     fes.getOwnershipRange(begin, end);
     const PetscInt localSize = static_cast<PetscInt>(end - begin);
 
-    auto dbc =
-      DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
+    auto dbc = DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
     dbc.assemble();
     using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
     ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
@@ -228,17 +227,20 @@ namespace
       PetscInt c;
       PetscScalar value;
 
-      r = master; c = master;
+      r = master;
+      c = master;
       ierr = MatGetValues(A, 1, &r, 1, &c, &value);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
       EXPECT_NEAR(value, coefficient * 2.0 * coefficient, 1e-14);
 
-      r = slave; c = slave;
+      r = slave;
+      c = slave;
       ierr = MatGetValues(A, 1, &r, 1, &c, &value);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
       EXPECT_NEAR(value, 1.0, 1e-14);
 
-      r = slave; c = master;
+      r = slave;
+      c = master;
       ierr = MatGetValues(A, 1, &r, 1, &c, &value);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
       EXPECT_NEAR(value, -coefficient, 1e-14);
@@ -255,6 +257,63 @@ namespace
     }
   }
 
+  /// @brief Regression: block (multi-trial) assemble() must seed the block
+  ///        solution vector with each trial function's data as the initial
+  ///        guess. In the distributed case this needs per-field owned-range
+  ///        index sets; an earlier version used a globally-sized index set and
+  ///        the wrong scatter direction, aborting with an IS/Vec local-length
+  ///        mismatch under MPI. Verifies each field's guess round-trips through
+  ///        the documented offset scatter used by solve().
+  TEST(PETSc_MPI_Form, DistributedBlockAssembleSeedsPerFieldInitialGuess)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    PETSc::Variational::TrialFunction eta(fes);
+    PETSc::Variational::TestFunction zeta(fes);
+
+    // Distinct, nonzero per-field guesses carried by the trial functions.
+    constexpr PetscScalar guessU = 3.0;
+    constexpr PetscScalar guessEta = -5.0;
+    u.getSolution() = guessU;
+    eta.getSolution() = guessEta;
+
+    Problem problem(u, v, eta, zeta);
+    problem = Integral(Grad(u), Grad(v)) + Integral(Grad(eta), Grad(zeta)) -
+      Integral(RealFunction(1.0), v) - Integral(RealFunction(1.0), zeta);
+    problem.assemble(); // regression: this aborted under MPI
+
+    // Recover each field from the seeded block solution vector using the same
+    // offset scatter that solve() uses, and confirm the guesses survived.
+    Vec x = problem.getLinearSystem().getSolution();
+    const auto& offsets = problem.getTrialOffsets();
+
+    PETSc::Variational::GridFunction uRecovered(fes);
+    PETSc::Variational::GridFunction etaRecovered(fes);
+    uRecovered = PetscScalar(0);
+    etaRecovered = PetscScalar(0);
+    uRecovered.setData(x, offsets[0]);
+    etaRecovered.setData(x, offsets[1]);
+
+    auto expectOwnedConstant = [](const Vec& data, PetscScalar expected) {
+      PetscInt begin = 0;
+      PetscInt end = 0;
+      EXPECT_EQ(VecGetOwnershipRange(data, &begin, &end), PETSC_SUCCESS);
+      for (PetscInt i = begin; i < end; ++i)
+      {
+        PetscScalar value = 0;
+        EXPECT_EQ(VecGetValues(data, 1, &i, &value), PETSC_SUCCESS);
+        EXPECT_NEAR(PetscRealPart(value), PetscRealPart(expected), 1e-14) << "row " << i;
+      }
+    };
+
+    expectOwnedConstant(uRecovered.getData(), guessU);
+    expectOwnedConstant(etaRecovered.getData(), guessEta);
+  }
+
   /// @brief Verifies distributed self identification matches zero value constraint for PET sc MPI form by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(PETSc_MPI_Form, DistributedSelfIdentificationMatchesZeroValueConstraint)
   {
@@ -264,40 +323,37 @@ namespace
 
     P1 refFES(mesh);
     PETSc::Variational::TrialFunction uRef(refFES);
-    PETSc::Variational::TestFunction  vRef(refFES);
+    PETSc::Variational::TestFunction vRef(refFES);
 
     Problem refProblem(uRef, vRef);
-    refProblem = Integral(Grad(uRef), Grad(vRef))
-               - Integral(RealFunction(1.0), vRef)
-               + DirichletBC(uRef, Zero());
+    refProblem = Integral(Grad(uRef), Grad(vRef)) - Integral(RealFunction(1.0), vRef) +
+      DirichletBC(uRef, Zero());
     refProblem.assemble();
 
     P1 idFES(mesh);
     PETSc::Variational::TrialFunction uId(idFES);
-    PETSc::Variational::TestFunction  vId(idFES);
+    PETSc::Variational::TestFunction vId(idFES);
 
     Problem idProblem(uId, vId);
-    idProblem = Integral(Grad(uId), Grad(vId))
-              - Integral(RealFunction(1.0), vId)
-              + DirichletBC(uId, -uId);
+    idProblem = Integral(Grad(uId), Grad(vId)) - Integral(RealFunction(1.0), vId) +
+      DirichletBC(uId, -uId);
     idProblem.assemble();
 
     auto& ARef = refProblem.getLinearSystem().getOperator();
-    auto& AId  = idProblem.getLinearSystem().getOperator();
+    auto& AId = idProblem.getLinearSystem().getOperator();
     auto& bRef = refProblem.getLinearSystem().getVector();
-    auto& bId  = idProblem.getLinearSystem().getVector();
+    auto& bId = idProblem.getLinearSystem().getVector();
 
     size_t begin = 0;
-    size_t end   = 0;
+    size_t end = 0;
     refFES.getOwnershipRange(begin, end);
 
     const PetscInt n = static_cast<PetscInt>(refFES.getSize());
-    for (PetscInt i = static_cast<PetscInt>(begin);
-         i < static_cast<PetscInt>(end); i++)
+    for (PetscInt i = static_cast<PetscInt>(begin); i < static_cast<PetscInt>(end); i++)
     {
       PetscErrorCode ierr;
       PetscScalar refValue = 0;
-      PetscScalar idValue  = 0;
+      PetscScalar idValue = 0;
 
       ierr = VecGetValues(bRef, 1, &i, &refValue);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
@@ -311,8 +367,7 @@ namespace
         ASSERT_EQ(ierr, PETSC_SUCCESS);
         ierr = MatGetValues(AId, 1, &i, 1, &j, &idValue);
         ASSERT_EQ(ierr, PETSC_SUCCESS);
-        EXPECT_NEAR(refValue, idValue, 1e-12)
-          << "entry (" << i << ", " << j << ")";
+        EXPECT_NEAR(refValue, idValue, 1e-12) << "entry (" << i << ", " << j << ")";
       }
     }
   }
@@ -328,27 +383,23 @@ namespace
     P1 masterFES(mesh, mesh.getSpaceDimension());
 
     PETSc::Variational::TrialFunction u(slaveFES);
-    PETSc::Variational::TestFunction  v(slaveFES);
+    PETSc::Variational::TestFunction v(slaveFES);
     PETSc::Variational::TrialFunction eta(masterFES);
-    PETSc::Variational::TestFunction  zeta(masterFES);
+    PETSc::Variational::TestFunction zeta(masterFES);
 
-    const PetscInt nSlave  = static_cast<PetscInt>(slaveFES.getSize());
+    const PetscInt nSlave = static_cast<PetscInt>(slaveFES.getSize());
     const PetscInt nMaster = static_cast<PetscInt>(masterFES.getSize());
 
     size_t slaveBegin = 0;
     size_t slaveEnd = 0;
     slaveFES.getOwnershipRange(slaveBegin, slaveEnd);
-    const PetscInt localSlaveSize =
-      static_cast<PetscInt>(slaveEnd - slaveBegin);
+    const PetscInt localSlaveSize = static_cast<PetscInt>(slaveEnd - slaveBegin);
 
     size_t masterBegin = 0;
     size_t masterEnd = 0;
     masterFES.getOwnershipRange(masterBegin, masterEnd);
 
-    auto dbc =
-      DirichletBC(
-          u,
-          RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
+    auto dbc = DirichletBC(u, RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
     dbc.assemble();
     using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
     ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
@@ -375,8 +426,7 @@ namespace
 
     BilinearForm uu(u, v);
     auto& op = uu.getOperator();
-    PetscErrorCode ierr =
-      MatSetSizes(op, localSlaveSize, localSlaveSize, nSlave, nSlave);
+    PetscErrorCode ierr = MatSetSizes(op, localSlaveSize, localSlaveSize, nSlave, nSlave);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
     ierr = MatSetFromOptions(op);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
@@ -426,8 +476,7 @@ namespace
         PetscInt r = masters[a];
         ierr = VecGetValues(b, 1, &r, &value);
         ASSERT_EQ(ierr, PETSC_SUCCESS);
-        EXPECT_NEAR(value, coefficients[a] * 7.0, 1e-14)
-          << "projected vector row " << r;
+        EXPECT_NEAR(value, coefficients[a] * 7.0, 1e-14) << "projected vector row " << r;
 
         for (size_t cidx = 0; cidx < masters.size(); cidx++)
         {
@@ -435,10 +484,7 @@ namespace
           PetscInt c = masters[cidx];
           ierr = MatGetValues(A, 1, &r, 1, &c, &value);
           ASSERT_EQ(ierr, PETSC_SUCCESS);
-          EXPECT_NEAR(
-              value,
-              coefficients[a] * 2.0 * coefficients[cidx],
-              1e-14)
+          EXPECT_NEAR(value, coefficients[a] * 2.0 * coefficients[cidx], 1e-14)
             << "projected matrix entry (" << r << ", " << c << ")";
         }
       }
@@ -465,9 +511,9 @@ namespace
       EXPECT_NEAR(value, 0.0, 1e-14);
     }
 
-    (void) nMaster;
-    (void) masterBegin;
-    (void) masterEnd;
+    (void)nMaster;
+    (void)masterBegin;
+    (void)masterEnd;
   }
 }
 

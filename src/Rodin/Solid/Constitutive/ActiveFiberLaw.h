@@ -111,11 +111,8 @@ namespace Rodin::Solid
       State initialState() const
       {
         State state;
-        state.gamma =
-          std::sqrt(std::max<Real>(m_parameters.initial.stiffness, 0.0));
-        state.beta = state.gamma > 0.0
-          ? m_parameters.initial.stress / state.gamma
-          : 0.0;
+        state.gamma = std::sqrt(std::max<Real>(m_parameters.initial.stiffness, 0.0));
+        state.beta = state.gamma > 0.0 ? m_parameters.initial.stress / state.gamma : 0.0;
         return state;
       }
 
@@ -123,8 +120,7 @@ namespace Rodin::Solid
       Real stress(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
-        return m_parameters.stiffness
-             * (e - c) / (denom * denom);
+        return m_parameters.stiffness * (e - c) / (denom * denom);
       }
 
       /// @brief Evaluates @f$\partial\sigma/\partial e@f$ at fixed extension.
@@ -138,9 +134,8 @@ namespace Rodin::Solid
       Real dStressDc(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
-        return m_parameters.stiffness
-             * (2.0 * c - 4.0 * e - 1.0)
-             / (denom * denom * denom);
+        return m_parameters.stiffness * (2.0 * c - 4.0 * e - 1.0) /
+          (denom * denom * denom);
       }
 
       /// @brief Evaluates the static active response.
@@ -151,24 +146,17 @@ namespace Rodin::Solid
         response.dStressDe = dStressDe(c);
         response.dStressDc = dStressDc(e, c);
         response.kcc = m_parameters.stiffness * (1.0 + 2.0 * e);
-        response.kce =
-          -m_parameters.stiffness * (1.0 + 4.0 * e - 2.0 * c);
+        response.kce = -m_parameters.stiffness * (1.0 + 4.0 * e - 2.0 * c);
         response.residual =
-          (-m_parameters.stiffness
-           * (e - c) * (1.0 + 2.0 * e))
-          / response.kcc;
+          (-m_parameters.stiffness * (e - c) * (1.0 + 2.0 * e)) / response.kcc;
         response.tangent =
           response.dStressDe - response.dStressDc * response.kce / response.kcc;
         return response;
       }
 
       /// @brief Advances the internal active-fiber state.
-      State update(
-          Real dt,
-          const State& oldState,
-          Real previousActiveExtension,
-          Real activeExtension,
-          Real activation) const
+      State update(Real dt, const State& oldState, Real previousActiveExtension,
+        Real activeExtension, Real activation) const
       {
         const Real alpha = m_parameters.destructionRate;
         const Real k0 = m_parameters.crossBridgeStiffness;
@@ -179,86 +167,82 @@ namespace Rodin::Solid
         const Real n0 = starling(previousActiveExtension);
 
         const Real denominatorGamma =
-          1.0
-          + dt * std::abs(activation)
-          + alpha * std::abs(delta);
+          1.0 + dt * std::abs(activation) + alpha * std::abs(delta);
 
-        const Real gammaSquare =
-          std::max<Real>(1.e-16,
-              (oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus)
-              / denominatorGamma);
+        const Real gammaSquare = std::max<Real>(1.e-16,
+          (oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus) /
+            denominatorGamma);
 
         State state;
         state.gamma = std::sqrt(gammaSquare);
 
-        const Real denominatorBeta =
-          1.0
-          + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare
-          + 0.5 * dt * std::abs(activation)
-          + 0.5 * alpha * std::abs(delta);
+        const Real denominatorBeta = 1.0 +
+          0.5 * dt * n0 * k0 * activationPlus / gammaSquare +
+          0.5 * dt * std::abs(activation) + 0.5 * alpha * std::abs(delta);
 
-        state.beta =
-          (oldState.beta + state.gamma * delta
-           + dt * n0 * sigma0 * activationPlus / state.gamma)
-          / denominatorBeta;
+        state.beta = (oldState.beta + state.gamma * delta +
+                       dt * n0 * sigma0 * activationPlus / state.gamma) /
+          denominatorBeta;
 
         return state;
       }
 
       /// @brief Evaluates the dynamic active response and condensed tangent.
-      Response evaluateDynamic(
-          Real dt,
-          const State& oldState,
-          const State& newState,
-          Real e,
-          Real previousActiveExtension,
-          Real activeExtension,
-          Real activation) const
+      ///
+      /// @param dt Time step @f$\Delta t@f$.
+      /// @param oldState Previous internal state @f$(\gamma^n, \beta^n)@f$.
+      /// @param newState Updated internal state @f$(\gamma^{n+1}, \beta^{n+1})@f$.
+      /// @param e Fiber strain at which the series law is evaluated. For the
+      ///   compatible discretization this is the midpoint strain
+      ///   @f$e_{1D}^{n+\frac{1}{2}}@f$.
+      /// @param previousActiveExtension Previous active extension @f$e_c^n@f$.
+      /// @param activeExtension Current active extension @f$e_c^{n+1}@f$.
+      /// @param activation Electrical activation @f$u_1@f$.
+      /// @param strainFactor Derivative @f$\partial e/\partial e_{1D}^{n+1}@f$
+      ///   of the evaluation strain with respect to the current fiber strain.
+      ///   It is @f$\frac{1}{2}@f$ for the midpoint strain and @f$1@f$ when
+      ///   @p e is the current strain. Only the condensed tangent depends on
+      ///   it, since the global tangent differentiates with respect to
+      ///   @f$e_{1D}^{n+1}@f$.
+      Response evaluateDynamic(Real dt, const State& oldState, const State& newState,
+        Real e, Real previousActiveExtension, Real activeExtension, Real activation,
+        Real strainFactor = 1.0) const
       {
-        const Real midpointExtension =
-          0.5 * (activeExtension + previousActiveExtension);
+        const Real midpointExtension = 0.5 * (activeExtension + previousActiveExtension);
         const Real onePlus2MidpointExtension = 1.0 + 2.0 * midpointExtension;
-        const Real activeBranchStress =
-          newState.activeStress()
-          + m_parameters.damping
-          * (activeExtension - previousActiveExtension) / dt;
+        const Real activeBranchStress = newState.activeStress() +
+          m_parameters.damping * (activeExtension - previousActiveExtension) / dt;
 
         Response response;
         response.stress = stress(e, midpointExtension);
         response.dStressDe = dStressDe(midpointExtension);
         response.dStressDc = dStressDc(e, midpointExtension);
         response.kce =
-          -m_parameters.stiffness
-          * (1.0 + 4.0 * e - 2.0 * midpointExtension);
-        response.kcc =
-          3.0 * onePlus2MidpointExtension * onePlus2MidpointExtension
-            * activeBranchStress
-          + onePlus2MidpointExtension * onePlus2MidpointExtension
-            * onePlus2MidpointExtension
-            * (dActiveStressDc(
-                dt, oldState, activation, previousActiveExtension, activeExtension)
-              + m_parameters.damping / dt)
-          + 0.5 * m_parameters.stiffness * (1.0 + 2.0 * e);
+          -m_parameters.stiffness * (1.0 + 4.0 * e - 2.0 * midpointExtension);
+        response.kcc = 3.0 * onePlus2MidpointExtension * onePlus2MidpointExtension *
+            activeBranchStress +
+          onePlus2MidpointExtension * onePlus2MidpointExtension *
+            onePlus2MidpointExtension *
+            (dActiveStressDc(
+               dt, oldState, activation, previousActiveExtension, activeExtension) +
+              m_parameters.damping / dt) +
+          0.5 * m_parameters.stiffness * (1.0 + 2.0 * e);
         response.residual =
-          (activeBranchStress
-             * onePlus2MidpointExtension * onePlus2MidpointExtension
-             * onePlus2MidpointExtension
-           - m_parameters.stiffness
-             * (e - midpointExtension) * (1.0 + 2.0 * e))
-          / response.kcc;
-        response.tangent =
-          response.dStressDe
-          - 0.5 * response.dStressDc * response.kce / response.kcc;
+          (activeBranchStress * onePlus2MidpointExtension * onePlus2MidpointExtension *
+              onePlus2MidpointExtension -
+            m_parameters.stiffness * (e - midpointExtension) * (1.0 + 2.0 * e)) /
+          response.kcc;
+        // Chain rule to the current fiber strain: sigma and the local residual
+        // are functions of the evaluation strain e, whose derivative with
+        // respect to e_1D^{n+1} is strainFactor.
+        response.tangent = strainFactor *
+          (response.dStressDe - 0.5 * response.dStressDc * response.kce / response.kcc);
         return response;
       }
 
       /// @brief Evaluates the derivative of active stress with respect to extension.
-      Real dActiveStressDc(
-          Real dt,
-          const State& oldState,
-          Real activation,
-          Real previousActiveExtension,
-          Real activeExtension) const
+      Real dActiveStressDc(Real dt, const State& oldState, Real activation,
+        Real previousActiveExtension, Real activeExtension) const
       {
         const Real alpha = m_parameters.destructionRate;
         const Real k0 = m_parameters.crossBridgeStiffness;
@@ -270,14 +254,9 @@ namespace Rodin::Solid
         const Real activationPlus = std::max<Real>(activation, 0.0);
         const Real n0 = starling(previousActiveExtension);
 
-        const Real Dg =
-          1.0
-          + dt * std::abs(activation)
-          + alpha * absDelta;
+        const Real Dg = 1.0 + dt * std::abs(activation) + alpha * absDelta;
 
-        const Real Ng =
-          oldState.gamma * oldState.gamma
-          + dt * n0 * k0 * activationPlus;
+        const Real Ng = oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus;
 
         const Real gammaSquare = std::max<Real>(1.e-16, Ng / Dg);
         const Real gamma = std::sqrt(gammaSquare);
@@ -286,25 +265,17 @@ namespace Rodin::Solid
         const Real dGamma = 0.5 * dGammaSquare / gamma;
 
         const Real Nb =
-          oldState.beta
-          + gamma * delta
-          + dt * n0 * sigma0 * activationPlus / gamma;
+          oldState.beta + gamma * delta + dt * n0 * sigma0 * activationPlus / gamma;
 
-        const Real Db =
-          1.0
-          + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare
-          + 0.5 * dt * std::abs(activation)
-          + 0.5 * alpha * absDelta;
+        const Real Db = 1.0 + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare +
+          0.5 * dt * std::abs(activation) + 0.5 * alpha * absDelta;
 
-        const Real dNb =
-          dGamma * delta
-          + gamma
-          - dt * n0 * sigma0 * activationPlus * dGamma / (gamma * gamma);
+        const Real dNb = dGamma * delta + gamma -
+          dt * n0 * sigma0 * activationPlus * dGamma / (gamma * gamma);
 
-        const Real dDb =
-          -0.5 * dt * n0 * k0 * activationPlus
-            * dGammaSquare / (gammaSquare * gammaSquare)
-          + 0.5 * alpha * sign;
+        const Real dDb = -0.5 * dt * n0 * k0 * activationPlus * dGammaSquare /
+            (gammaSquare * gammaSquare) +
+          0.5 * alpha * sign;
 
         const Real dBeta = (dNb * Db - Nb * dDb) / (Db * Db);
 

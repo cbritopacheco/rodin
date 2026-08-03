@@ -29,10 +29,10 @@ namespace boost::serialization
   void save(Archive& ar, const std::optional<T>& opt, const unsigned int version)
   {
     (void)version;
-    bool has_value = opt.has_value();
-    ar & has_value;
+    bool hasValue = opt.has_value();
+    ar & hasValue;
 
-    if (has_value)
+    if (hasValue)
       ar&* opt;
   }
 
@@ -48,10 +48,10 @@ namespace boost::serialization
   void load(Archive& ar, std::optional<T>& opt, const unsigned int version)
   {
     (void)version;
-    bool has_value;
-    ar & has_value;
+    bool hasValue;
+    ar & hasValue;
 
-    if (has_value)
+    if (hasValue)
     {
       T value;
       ar & value;

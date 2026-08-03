@@ -55,7 +55,6 @@
 #include "Solid/Integrators/InternalVirtualWorkTangent.h"
 #include "Solid/Integrators/InternalVirtualWork.h"
 
-
 // Fields
 #include "Solid/Fields/GreenLagrangeStrain.h"
 #include "Solid/Fields/FirstPiolaKirchhoffStress.h"

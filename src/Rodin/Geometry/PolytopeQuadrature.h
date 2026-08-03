@@ -72,14 +72,15 @@
  * same logical formula has a stable object identity.
  */
 
-#include <cassert>
-#include <utility>
+#include <algorithm>
+#include <atomic>
 #include <array>
+#include <cassert>
 #include <deque>
 #include <memory>
 #include <mutex>
+#include <utility>
 #include <vector>
-#include <shared_mutex>
 
 #include <boost/serialization/split_member.hpp>
 
@@ -153,36 +154,22 @@ namespace Rodin::Geometry
   /**
    * @brief Thread-safe cache of polytope quadratures.
    *
-   * This class maintains a mesh-owned cache of @ref PolytopeQuadrature objects,
-   * indexed by:
-   * - polytope dimension,
-   * - polytope index,
-   * - quadrature formula identity.
+   * This class maintains a mesh-owned cache of @ref PolytopeQuadrature objects.
+   * Within each dimension, it first resolves a quadrature formula and then
+   * indexes a dense array by polytope index.
    *
-   * # Slot design
+   * # Cache design
    *
-   * Each polytope slot contains:
-   * - a hot entry storing a non-owning mirror of the most recently promoted
-   *   cached quadrature,
-   * - a fixed-capacity array of owned entries used as a bounded ring buffer.
-   *
-   * The hot entry exists only to accelerate repeated hits. Ownership remains
-   * solely in the bounded cache entries.
-   *
-   * # Eviction policy
-   *
-   * The bounded cache uses round-robin replacement once full. This is
-   * appropriate because:
-   * - the per-polytope cache is intentionally small,
-   * - the lookup cost is linear in a tiny fixed capacity,
-   * - the hot entry captures the most common repeated access pattern.
+   * A formula cache owns one stable slot per polytope. Repeated assembly with a
+   * fixed formula therefore resolves one atomically published formula pointer
+   * and one atomically published quadrature pointer. Cached objects remain valid
+   * until the mesh geometry is flushed.
    *
    * # Thread safety
    *
-   * - Each dimension bucket owns a shared mutex.
-   * - Each polytope slot owns its own shared mutex.
-   * - Reads first take shared locks.
-   * - Misses upgrade to exclusive slot access only where insertion is required.
+   * - Repeated cache hits are lock-free.
+   * - Formula creation and storage growth are serialized per dimension.
+   * - First quadrature construction is serialized through striped locks.
    *
    * # Lifecycle
    *
@@ -258,9 +245,9 @@ namespace Rodin::Geometry
       {
         assert(d < m_dimensions.size());
         auto& dim = m_dimensions[d];
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
-        if (dim.slots.size() < count)
-          dim.slots.resize(count);
+        std::lock_guard<std::mutex> lock(dim.mutex);
+        for (auto& formula : dim.formulas)
+          formula->resize(count);
       }
 
       /**
@@ -273,8 +260,11 @@ namespace Rodin::Geometry
       {
         for (auto& dim : m_dimensions)
         {
-          std::unique_lock<std::shared_mutex> wr(dim.mutex);
-          dim.slots.clear();
+          std::lock_guard<std::mutex> lock(dim.mutex);
+          dim.hot.store(nullptr, std::memory_order_relaxed);
+          for (auto& entry : dim.lookup)
+            entry.store(nullptr, std::memory_order_relaxed);
+          dim.formulas.clear();
         }
       }
 
@@ -288,15 +278,12 @@ namespace Rodin::Geometry
        * @param[in] factory Nullary factory called only on cache miss
        * @returns Reference to the cached polytope quadrature
        *
-       * Lookup proceeds in three stages:
-       * - check the hot entry,
-       * - scan the bounded owned cache,
-       * - lazily construct and insert on miss.
+       * Formula and quadrature pointers are resolved atomically on repeated
+       * accesses. A miss creates stable owned storage under a narrow lock.
        *
-       * On hits in the bounded cache, the entry is promoted to the hot slot.
-       * On misses, a new owned entry is inserted into the bounded cache, using
-       * round-robin replacement once the slot is full, and is then promoted to
-       * the hot slot.
+       * @note Cache mutation, including clear(), must not overlap use of a
+       *       returned reference. Mesh geometry must remain unchanged during
+       *       variational evaluation.
        *
        * @throws Rodin::Alert::Exception if:
        * - the dimension is outside the initialized range,
@@ -331,82 +318,62 @@ namespace Rodin::Geometry
         }
 
         auto& dim = m_dimensions[d];
-
-        // --------------------------------------------------------------------
-        // Fast path: shared lookup in an existing slot
-        // --------------------------------------------------------------------
+        Formula* formula = dim.hot.load(std::memory_order_acquire);
+        if (!formula || formula->qf != &qf)
         {
-          std::shared_lock<std::shared_mutex> rd(dim.mutex);
-          if (idx < dim.slots.size())
+          formula = nullptr;
+          for (const auto& entry : dim.lookup)
           {
-            const auto& slot = dim.slots[idx];
-            std::shared_lock<std::shared_mutex> rdslot(slot.mutex);
-
-            // Hot entry: fastest repeated-hit path.
-            if (slot.hot.qf == &qf)
+            Formula* candidate = entry.load(std::memory_order_acquire);
+            if (candidate && candidate->qf == &qf)
             {
-              assert(slot.hot.ptr);
-              return *slot.hot.ptr;
+              formula = candidate;
+              break;
             }
+          }
 
-            // Bounded cache lookup.
-            for (size_t i = 0; i < slot.size; ++i)
-            {
-              const auto& entry = slot.entries[i];
-              if (entry.valid && entry.qf == &qf)
+          if (!formula)
+          {
+            std::lock_guard<std::mutex> lock(dim.mutex);
+            for (const auto& candidate : dim.formulas)
+              if (candidate->qf == &qf)
               {
-                assert(entry.owner);
-                return *entry.owner;
+                formula = candidate.get();
+                break;
               }
-            }
-          }
-        }
 
-        // --------------------------------------------------------------------
-        // Ensure slot exists
-        // --------------------------------------------------------------------
-        {
-          std::unique_lock<std::shared_mutex> wr(dim.mutex);
-          if (dim.slots.size() < count)
-            dim.slots.resize(count);
-        }
-
-        assert(idx < dim.slots.size());
-        auto& slot = dim.slots[idx];
-
-        // --------------------------------------------------------------------
-        // Slow path: exclusive slot access
-        // --------------------------------------------------------------------
-        {
-          std::unique_lock<std::shared_mutex> wrslot(slot.mutex);
-
-          // Re-check hot entry under exclusive access.
-          if (slot.hot.qf == &qf)
-          {
-            assert(slot.hot.ptr);
-            return *slot.hot.ptr;
-          }
-
-          // Re-check bounded cache under exclusive access.
-          for (size_t i = 0; i < slot.size; ++i)
-          {
-            auto& entry = slot.entries[i];
-            if (entry.valid && entry.qf == &qf)
+            if (!formula)
             {
-              assert(entry.owner);
-              slot.promote(entry);
-              return *entry.owner;
+              dim.formulas.emplace_back(std::make_unique<Formula>(&qf, count));
+              formula = dim.formulas.back().get();
+              for (auto& entry : dim.lookup)
+                if (!entry.load(std::memory_order_relaxed))
+                {
+                  entry.store(formula, std::memory_order_release);
+                  break;
+                }
             }
           }
-
-          // Miss: build and insert into bounded cache.
-          CacheEntry& entry = slot.insert(&qf, factory());
-          assert(entry.owner);
-
-          // Promote inserted entry to the hot path.
-          slot.promote(entry);
-          return *entry.owner;
+          dim.hot.store(formula, std::memory_order_release);
         }
+
+        if (idx >= formula->publishedSize.load(std::memory_order_acquire))
+          formula->resize(count);
+
+        auto& slot = formula->slots[idx];
+        if (auto* quadrature = slot.ptr.load(std::memory_order_acquire))
+          return *quadrature;
+
+        std::lock_guard<std::mutex> lock(
+          formula->mutexes[static_cast<size_t>(idx) % formula->mutexes.size()]);
+        PolytopeQuadrature* quadrature = slot.ptr.load(std::memory_order_relaxed);
+        if (!quadrature)
+        {
+          slot.owner = factory();
+          quadrature = slot.owner.get();
+          slot.ptr.store(quadrature, std::memory_order_release);
+        }
+        return *quadrature;
       }
 
       /**
@@ -419,213 +386,87 @@ namespace Rodin::Geometry
       }
 
     private:
-      /**
-       * @brief Single owned cache entry.
-       *
-       * This is the owning storage unit for a cached polytope quadrature.
-       */
-      struct CacheEntry
-      {
-        const QF::QuadratureFormulaBase* qf = nullptr; ///< Cache key
-        std::unique_ptr<PolytopeQuadrature> owner;     ///< Owned cached quadrature
-        bool valid = false;                            ///< Whether this entry is populated
-      };
-
-      /**
-       * @brief Non-owning hot entry.
-       *
-       * The hot entry mirrors one of the owned cache entries to accelerate the
-       * most common repeated-hit case.
-       */
-      struct HotEntry
-      {
-        const QF::QuadratureFormulaBase* qf = nullptr; ///< Hot key
-        PolytopeQuadrature* ptr = nullptr;             ///< Non-owning pointer to owned entry
-      };
-
-      /**
-       * @brief Cache slot associated with one concrete polytope.
-       *
-       * Each slot stores:
-       * - one hot entry,
-       * - one bounded ring buffer of owned entries.
-       *
-       * Ownership remains solely in the bounded cache entries. The hot entry is
-       * only a mirror of one owned entry.
-       */
       struct Slot
       {
-        /**
-         * @brief Maximum number of owned quadratures cached per polytope.
-         *
-         * Lookup is linear in this value, so it is intentionally kept small.
-         */
-        static constexpr size_t Capacity = 8;
-
-        Slot() = default;
-        Slot(const Slot&) = delete;
-        Slot& operator=(const Slot&) = delete;
-
-        /**
-         * @brief Move constructor.
-         *
-         * The mutex is intentionally default-constructed in the moved instance.
-         */
-        Slot(Slot&& other) noexcept
-          : hot(other.hot),
-            entries(std::move(other.entries)),
-            size(std::exchange(other.size, 0)),
-            next(std::exchange(other.next, 0))
-        {}
-
-        /**
-         * @brief Move assignment operator.
-         *
-         * The mutex is intentionally default-constructed in the moved instance.
-         */
-        Slot& operator=(Slot&& other) noexcept
-        {
-          hot = other.hot;
-          entries = std::move(other.entries);
-          size = std::exchange(other.size, 0);
-          next = std::exchange(other.next, 0);
-          return *this;
-        }
-
-        /**
-         * @brief Promotes an owned entry to the hot path.
-         * @param[in] entry Cache entry to mirror in the hot slot
-         *
-         * The hot entry never owns. It only mirrors the provided owned entry.
-         */
-        void promote(const CacheEntry& entry)
-        {
-          assert(entry.valid);
-          assert(entry.qf);
-          assert(entry.owner);
-          hot.qf = entry.qf;
-          hot.ptr = entry.owner.get();
-        }
-
-        /**
-         * @brief Inserts an entry into the bounded cache.
-         * @param[in] qf Quadrature formula key
-         * @param[in] owner Newly constructed cached quadrature
-         * @returns Reference to the inserted owned entry
-         *
-         * If the cache is not full, the entry is appended.
-         * Otherwise, the next entry is overwritten in round-robin order.
-         *
-         * If the overwritten entry is currently mirrored by the hot slot,
-         * the hot slot is first invalidated to avoid a stale non-owning pointer.
-         */
-        CacheEntry& insert(
-            const QF::QuadratureFormulaBase* qf,
-            std::unique_ptr<PolytopeQuadrature> owner)
-        {
-          assert(qf);
-          assert(owner);
-
-          size_t i;
-          if (size < Capacity)
-          {
-            i = size++;
-          }
-          else
-          {
-            i = next;
-            next = (next + 1) % Capacity;
-
-            // Refinement:
-            // If the entry being overwritten is currently mirrored in the hot
-            // slot, invalidate the hot entry first to avoid keeping a stale
-            // non-owning pointer.
-            if (hot.ptr == entries[i].owner.get())
-            {
-              hot.qf = nullptr;
-              hot.ptr = nullptr;
-            }
-          }
-
-          auto& entry = entries[i];
-          entry.qf = qf;
-          entry.owner = std::move(owner);
-          entry.valid = true;
-          return entry;
-        }
-
-        HotEntry hot;                                ///< Non-owning fast path
-        std::array<CacheEntry, Capacity> entries;    ///< Owned bounded cache
-        size_t size = 0;                             ///< Number of valid entries
-        size_t next = 0;                             ///< Round-robin eviction pointer
-        mutable std::shared_mutex mutex;             ///< Slot-level synchronization
-
-
-        template <class Archive>
-        void save(Archive& ar, const unsigned int) const
-        {
-          // Intentionally serialize no cache content.
-        }
-
-        template <class Archive>
-        void load(Archive& ar, const unsigned int)
-        {
-          hot.qf = nullptr;
-          hot.ptr = nullptr;
-          entries = {};
-          size = 0;
-          next = 0;
-        }
-
-        BOOST_SERIALIZATION_SPLIT_MEMBER()
+          std::atomic<PolytopeQuadrature*> ptr{nullptr};
+          std::unique_ptr<PolytopeQuadrature> owner;
       };
 
-      /**
-       * @brief Storage bucket for all polytopes in a fixed dimension.
-       *
-       * A dimension bucket stores all slots for one polytope dimension.
-       */
+      struct Formula
+      {
+          static constexpr size_t MutexCount = 64;
+
+          Formula(const QF::QuadratureFormulaBase* qf, size_t count)
+            : qf(qf),
+              slots(count),
+              publishedSize(count)
+          {}
+
+          void resize(size_t count)
+          {
+            if (count <= publishedSize.load(std::memory_order_acquire))
+              return;
+            std::lock_guard<std::mutex> lock(resizeMutex);
+            if (slots.size() < count)
+              slots.resize(count);
+            publishedSize.store(slots.size(), std::memory_order_release);
+        }
+
+        const QF::QuadratureFormulaBase* qf;
+        std::deque<Slot> slots;
+        std::atomic<size_t> publishedSize;
+        std::mutex resizeMutex;
+        std::array<std::mutex, MutexCount> mutexes;
+      };
+
       struct Dimension
       {
-        Dimension() = default;
-        Dimension(const Dimension&) = delete;
-        Dimension& operator=(const Dimension&) = delete;
+          static constexpr size_t LookupCapacity = 16;
 
-        /**
-         * @brief Move constructor.
-         *
-         * The mutex is intentionally default-constructed in the moved instance.
-         */
-        Dimension(Dimension&& other) noexcept
-          : slots(std::move(other.slots))
-        {}
+          Dimension() = default;
+          Dimension(const Dimension&) = delete;
+          Dimension& operator=(const Dimension&) = delete;
 
-        /**
-         * @brief Move assignment operator.
-         *
-         * The mutex is intentionally default-constructed in the moved instance.
-         */
+          Dimension(Dimension&& other) noexcept
+            : formulas(std::move(other.formulas))
+          {
+            rebuildLookup();
+          }
+
         Dimension& operator=(Dimension&& other) noexcept
         {
-          slots = std::move(other.slots);
+          formulas = std::move(other.formulas);
+          rebuildLookup();
           return *this;
         }
 
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int)
+        void rebuildLookup()
         {
-          ar & slots; // mutex is not serialized
+          hot.store(nullptr, std::memory_order_relaxed);
+          for (auto& entry : lookup)
+            entry.store(nullptr, std::memory_order_relaxed);
+          const size_t count = std::min(formulas.size(), lookup.size());
+          for (size_t i = 0; i < count; ++i)
+            lookup[i].store(formulas[i].get(), std::memory_order_relaxed);
         }
 
-        std::deque<Slot> slots;              ///< Polytope slots for this dimension
-        mutable std::shared_mutex mutex;     ///< Dimension-level synchronization
+        std::vector<std::unique_ptr<Formula>> formulas;
+        std::array<std::atomic<Formula*>, LookupCapacity> lookup{};
+        std::atomic<Formula*> hot{nullptr};
+        mutable std::mutex mutex;
       };
 
-        template <class Archive>
-        void serialize(Archive& ar, const unsigned int)
-        {
-          ar & m_dimensions; // mutex is not serialized
-        }
+      template <class Archive>
+      void save(Archive&, const unsigned int) const
+      {}
+
+      template <class Archive>
+      void load(Archive&, const unsigned int)
+      {
+        clear();
+      }
+
+      BOOST_SERIALIZATION_SPLIT_MEMBER()
 
       mutable std::vector<Dimension> m_dimensions; ///< Dimension-partitioned storage
   };

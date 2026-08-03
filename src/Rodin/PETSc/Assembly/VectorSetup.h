@@ -83,26 +83,26 @@ namespace Rodin::PETSc::Assembly
         bool needsSetup = true;
         PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         if (needsSetup)
         {
           ierr = VecSetSizes(m_vector, options.localSize, options.globalSize);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
 
           if (options.type)
           {
             ierr = VecSetType(m_vector, options.type);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
 
           if (options.setFromOptions)
           {
             ierr = VecSetFromOptions(m_vector);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         }
 
@@ -117,13 +117,12 @@ namespace Rodin::PETSc::Assembly
       // vector whose size matches is reused. A typed vector whose size differs
       // violates the constant-space contract and cannot be resized in place, so
       // it fails the debug assertion.
-      PetscErrorCode needsStructuralSetup(
-          const Options& options, bool& needsSetup) const
+      PetscErrorCode needsStructuralSetup(const Options& options, bool& needsSetup) const
       {
         VecType curType = nullptr;
         PetscErrorCode ierr = VecGetType(m_vector, &curType);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         const bool hasType = (curType != nullptr);
         if (hasType)
@@ -131,11 +130,10 @@ namespace Rodin::PETSc::Assembly
           PetscInt curSize = 0;
           ierr = VecGetSize(m_vector, &curSize);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
-          assert(
-              curSize == options.globalSize &&
-              "VectorSetup cannot resize an assembled vector; use a fresh "
-              "LinearSystem for a different space or mesh.");
+          (void)ierr;
+          assert(curSize == options.globalSize &&
+            "VectorSetup cannot resize an assembled vector; use a fresh "
+            "LinearSystem for a different space or mesh.");
         }
 
         needsSetup = !hasType;

@@ -34,7 +34,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   protected:
     void SetUp() override
     {
-      m_mesh = Mesh().UniformGrid(GetParam(), { M, M, M });
+      m_mesh = Mesh().UniformGrid(GetParam(), {M, M, M});
       m_mesh.scale(1.0 / (M - 1));
       m_mesh.getConnectivity().compute(2, 3);
       m_mesh.getConnectivity().compute(3, 2);
@@ -170,7 +170,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   protected:
     void SetUp() override
     {
-      m_mesh = Mesh().UniformGrid(GetParam(), { M, M, M });
+      m_mesh = Mesh().UniformGrid(GetParam(), {M, M, M});
       m_mesh.scale(1.0 / (M - 1));
       m_mesh.getConnectivity().compute(2, 3);
       m_mesh.getConnectivity().compute(3, 2);
@@ -271,35 +271,17 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   }
 
   /// @brief Instantiates Manufactured Linear Elasticity 3 D H1 Test 8 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_LinearElasticity3D_H1_Test_8,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_LinearElasticity3D_H1_Test_8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Constant Linear Elasticity 3 D H1 Test 8 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Constant_LinearElasticity3D_H1_Test_8,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Constant_LinearElasticity3D_H1_Test_8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Constant Linear Elasticity 3 D H1 Test 16 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Constant_LinearElasticity3D_H1_Test_16,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Constant_LinearElasticity3D_H1_Test_16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

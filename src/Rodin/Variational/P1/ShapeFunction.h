@@ -208,7 +208,7 @@ namespace Rodin::Variational
 
         // ---- value cache: update once per (qf, qp)
         typename Cache::ValueKey vkey;
-        vkey.qf    = qf;
+        vkey.qf = qf;
         vkey.qp    = qp;
         vkey.valid = true;
 
@@ -217,8 +217,7 @@ namespace Rodin::Variational
         {
           m_cache.vkey = vkey;
 
-          const auto& rq =
-            qf ? qf->getPoint(qp) : p.getReferenceCoordinates();
+          const auto& rq = qf ? qf->getPoint(qp) : p.getReferenceCoordinates();
 
           // Cheap scalar P1 element (no allocations)
           const P1Element<ScalarType> feScalar(geom);

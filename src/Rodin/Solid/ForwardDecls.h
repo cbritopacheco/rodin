@@ -59,12 +59,10 @@ namespace Rodin::Solid
   template <class... Args>
   class InternalVirtualWorkTangent;
 
-  template <class TrialPressFunctionType, class TestFunctionType,
-            class DisplacementType>
+  template <class TrialPressFunctionType, class TestFunctionType, class DisplacementType>
   class InternalVirtualWorkTangentUP;
 
-  template <class TrialFunctionType, class TestPressFunctionType,
-            class DisplacementType>
+  template <class TrialFunctionType, class TestPressFunctionType, class DisplacementType>
   class InternalVirtualWorkTangentPU;
 
   template <class Law, class State>

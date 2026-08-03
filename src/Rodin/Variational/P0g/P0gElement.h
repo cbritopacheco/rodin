@@ -173,7 +173,7 @@ namespace Rodin::Variational
         }
         case G::Pyramid:
         {
-          static const Math::SpatialVector<Real> s_node{ { 0.375, 0.375, 0.25 } };
+          static const Math::SpatialVector<Real> s_node{{0.375, 0.375, 0.25}};
           return s_node;
         }
         case G::Wedge:
@@ -375,6 +375,15 @@ namespace Rodin::Variational
     {
       // All components share the same barycentric node
       return P0gElement<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
+    }
+
+    template <class Coefficient>
+    constexpr void evaluate(
+      RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint&) const
+    {
+      out.resize(m_vdim);
+      for (size_t component = 0; component < m_vdim; ++component)
+        out(component) = coefficient(component);
     }
 
     constexpr size_t getOrder() const { return 0; }

@@ -66,15 +66,13 @@ using namespace Rodin::Variational;
 // ---------------------------------------------------------------------------
 // Global MPI handles (initialized in main())
 // ---------------------------------------------------------------------------
-static boost::mpi::environment*  g_env   = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
   static Mesh<Context::Local> makeShardableMesh(
-      Polytope::Type type,
-      std::initializer_list<size_t> shape,
-      Real scale = Real(1))
+    Polytope::Type type, std::initializer_list<size_t> shape, Real scale = Real(1))
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
     if (scale != Real(1))
@@ -88,11 +86,8 @@ namespace
     return mesh;
   }
 
-  static Mesh<Context::MPI> distributeFromRoot(
-      const Context::MPI& ctx,
-      Polytope::Type type,
-      std::initializer_list<size_t> shape,
-      Real scale = Real(1))
+  static Mesh<Context::MPI> distributeFromRoot(const Context::MPI& ctx,
+    Polytope::Type type, std::initializer_list<size_t> shape, Real scale = Real(1))
   {
     const auto& comm = ctx.getCommunicator();
     Sharder<Context::MPI> sharder(ctx);
@@ -107,8 +102,7 @@ namespace
     return sharder.gather(0);
   }
 
-  static SubMesh<Context::MPI> makeBoundarySubMesh(
-      const Mesh<Context::MPI>& mesh)
+  static SubMesh<Context::MPI> makeBoundarySubMesh(const Mesh<Context::MPI>& mesh)
   {
     const size_t faceDim = mesh.getDimension() - 1;
     SubMesh<Context::MPI>::Builder builder;
@@ -118,8 +112,7 @@ namespace
     return builder.finalize();
   }
 
-  static SubMesh<Context::MPI> makeCellSubMesh(
-      const Mesh<Context::MPI>& mesh)
+  static SubMesh<Context::MPI> makeCellSubMesh(const Mesh<Context::MPI>& mesh)
   {
     const size_t cellDim = mesh.getDimension();
     const auto& shard = mesh.getShard();
@@ -152,9 +145,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 2.25;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0g<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -175,9 +168,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real subValue = 3.5;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P0g<Real, Mesh<Context::MPI>> parentFes(mesh);
     GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
@@ -214,9 +207,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeBoundarySubMesh(mesh);
 
     H1<1, Real, Mesh<Context::MPI>> fes(std::integral_constant<size_t, 1>{}, sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -240,7 +233,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -269,9 +262,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -299,7 +292,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -330,9 +323,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 3.0;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -356,9 +349,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -380,9 +373,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 2.5;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -410,7 +403,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -439,9 +432,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -469,7 +462,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -500,9 +493,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 1.41421;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -537,9 +530,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 5.5;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> parentFes(mesh);
     GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
@@ -570,9 +563,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 4.0;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> parentFes(mesh);
     GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
@@ -615,9 +608,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 6.28;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> subFes(sub);
     GridFunction<decltype(subFes), ::Vec> subGF(subFes);
@@ -647,9 +640,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 1.73205;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> subFes(sub);
     GridFunction<decltype(subFes), ::Vec> subGF(subFes);
@@ -684,7 +677,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -710,9 +703,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 2.71828;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(
-        ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
-    auto sub  = makeCellSubMesh(mesh);
+    auto mesh =
+      distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
@@ -730,7 +723,7 @@ int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
-  g_env   = &env;
+  g_env = &env;
   g_world = &world;
 
   PetscErrorCode ierr = PetscInitialize(&argc, &argv, nullptr, nullptr);

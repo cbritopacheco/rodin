@@ -186,8 +186,7 @@ namespace Rodin::Variational
       virtual ProblemBase& assemble(AssemblyTarget)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Targeted assembly is not implemented for this problem."
-          << Alert::Raise;
+          << "Targeted assembly is not implemented for this problem." << Alert::Raise;
         return *this;
       }
 
@@ -477,9 +476,18 @@ namespace Rodin::Variational
       }
 
       /// @brief Assembles the whole linear system.
+      /**
+       * @brief Assembles the linear system and establishes the initial guess.
+       *
+       * After assembly, the linear system's solution vector holds the trial
+       * function data as the initial guess: on entry to a linear solver the
+       * solution vector is the guess, on exit it is the solution. Trial
+       * functions are zero-initialized, so the guess is zero unless set.
+       */
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_axb.getSolution() = this->getTrialFunction().getSolution().getData();
         m_assembled = true;
         return *this;
       }
@@ -488,7 +496,7 @@ namespace Rodin::Variational
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(
-            m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+          m_axb, {m_pb, this->getTrialFunction(), this->getTestFunction()}, target);
         m_assembled = true;
         return *this;
       }
@@ -879,6 +887,15 @@ namespace Rodin::Variational
             m_trialUUIDMap, m_testUUIDMap, cols, rows);
         m_assembly.execute(axb, input);
 
+        // Establish the initial guess: gather the trial function data into
+        // the solution vector at the trial offsets.
+        auto& guess = axb.getSolution();
+        guess.resize(static_cast<Eigen::Index>(cols));
+        m_us.iapply([&](size_t i, auto& u) {
+          const auto& data = u.get().getSolution().getData();
+          guess.segment(static_cast<Eigen::Index>(m_trialOffsets[i]), data.size()) = data;
+        });
+
         m_assembled = true;
 
         return *this;
@@ -891,10 +908,9 @@ namespace Rodin::Variational
         // Compute trial offsets
         {
           std::array<size_t, TrialFunctionTuple::Size> sz;
-          m_us.map(
-                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
-              .iapply(
-                [&](const Index i, size_t s) { sz[i] = s; });
+          m_us
+            .map([](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+            .iapply([&](const Index i, size_t s) { sz[i] = s; });
           m_trialOffsets[0] = 0;
           for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
             m_trialOffsets[i + 1] = sz[i] + m_trialOffsets[i];
@@ -903,10 +919,9 @@ namespace Rodin::Variational
         // Compute test offsets
         {
           std::array<size_t, TestFunctionTuple::Size> sz;
-          m_vs.map(
-                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
-              .iapply(
-                [&](const Index i, size_t s) { sz[i] = s; });
+          m_vs
+            .map([](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+            .iapply([&](const Index i, size_t s) { sz[i] = s; });
           m_testOffsets[0] = 0;
           for (size_t i = 0; i < TestFunctionTuple::Size - 1; i++)
             m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
@@ -914,23 +929,20 @@ namespace Rodin::Variational
 
         size_t rows =
           m_vs
-            .map([](const auto& v)
-            {
+            .map([](const auto& v) {
               return static_cast<size_t>(v.get().getFiniteElementSpace().getSize());
             })
             .reduce([](size_t a, size_t b) { return a + b; });
 
         size_t cols =
           m_us
-            .map([](const auto& u)
-            {
+            .map([](const auto& u) {
               return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
             })
             .reduce([](size_t a, size_t b) { return a + b; });
 
-        AssemblyInput input(
-            m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
-            m_trialUUIDMap, m_testUUIDMap, cols, rows);
+        AssemblyInput input(m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
+          m_trialUUIDMap, m_testUUIDMap, cols, rows);
         m_assembly.execute(axb, input, target);
 
         m_assembled = true;

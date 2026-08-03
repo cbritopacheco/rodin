@@ -476,11 +476,11 @@ namespace Rodin::QF
        */
       void buildPyramid(size_t nx, size_t ny, size_t nz)
       {
-        std::vector<Real> u,wu,v,wv,z,wz;
+        std::vector<Real> u, wu, v, wv, z, wz;
         gll1dUnit(nx, u, wu);
         gll1dUnit(ny, v, wv);
         gll1dUnit(nz, z, wz);
-        const size_t N = nx*ny*nz;
+        const size_t N = nx * ny * nz;
         m_points.clear();
         m_points.reserve(N);
         m_weights.resize(N);

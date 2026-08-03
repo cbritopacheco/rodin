@@ -146,27 +146,23 @@ namespace
 
   struct Volume
   {
-    static constexpr Attribute Fluid = 1;
-    static constexpr Attribute Solid = 2;
+      static constexpr Attribute Fluid = 1;
+      static constexpr Attribute Solid = 2;
   };
 
   struct Boundary
   {
-    static constexpr Attribute Inlet          = 10;
-    static constexpr Attribute Outlet         = 11;
-    static constexpr Attribute FluidWall      = 12;
-    static constexpr Attribute SolidClampLeft = 13;
-    static constexpr Attribute SolidClampRight = 14;
-    static constexpr Attribute SolidFree      = 15;
-    static constexpr Attribute FSI            = 16;
+      static constexpr Attribute Inlet = 10;
+      static constexpr Attribute Outlet = 11;
+      static constexpr Attribute FluidWall = 12;
+      static constexpr Attribute SolidClampLeft = 13;
+      static constexpr Attribute SolidClampRight = 14;
+      static constexpr Attribute SolidFree = 15;
+      static constexpr Attribute FSI = 16;
   };
 
-  static Real pulseTrain(
-      const Real t,
-      const Real amplitude,
-      const Real duration,
-      const Real gap,
-      const Index count)
+  static Real pulseTrain(const Real t, const Real amplitude, const Real duration,
+    const Real gap, const Index count)
   {
     if (t < 0.0 || duration <= 0.0 || count == 0)
       return 0.0;
@@ -205,16 +201,11 @@ namespace
    * Hf / (Hf + Hs) differs from nfy / (nfy + nsy).
    */
   static void mapMeshToFSIStrip(
-      LocalMesh& mesh,
-      size_t nfy,
-      size_t nsy,
-      Real L,
-      Real Hf,
-      Real Hs)
+    LocalMesh& mesh, size_t nfy, size_t nsy, Real L, Real Hf, Real Hs)
   {
-    Real xmin =  std::numeric_limits<Real>::max();
+    Real xmin = std::numeric_limits<Real>::max();
     Real xmax = -std::numeric_limits<Real>::max();
-    Real ymin =  std::numeric_limits<Real>::max();
+    Real ymin = std::numeric_limits<Real>::max();
     Real ymax = -std::numeric_limits<Real>::max();
 
     for (auto it = mesh.getVertex(); it; ++it)
@@ -226,8 +217,7 @@ namespace
       ymax = std::max(ymax, x.y());
     }
 
-    const Real rInterface =
-      static_cast<Real>(nfy) / static_cast<Real>(nfy + nsy);
+    const Real rInterface = static_cast<Real>(nfy) / static_cast<Real>(nfy + nsy);
 
     for (auto it = mesh.getVertex(); it; ++it)
     {
@@ -255,8 +245,7 @@ namespace
 
   template <class MeshType>
   static void saveReferenceVertices(
-      const MeshType& mesh,
-      std::vector<Math::SpatialPoint>& vertices)
+    const MeshType& mesh, std::vector<Math::SpatialPoint>& vertices)
   {
     vertices.resize(mesh.getVertexCount());
 
@@ -265,11 +254,9 @@ namespace
   }
 
   template <class MeshType, class FESType, class GridFunctionType>
-  static void moveMeshWithVertexDisplacement(
-      MeshType& mesh,
-      const std::vector<Math::SpatialPoint>& referenceVertices,
-      const FESType& displacementFES,
-      const GridFunctionType& displacement)
+  static void moveMeshWithVertexDisplacement(MeshType& mesh,
+    const std::vector<Math::SpatialPoint>& referenceVertices,
+    const FESType& displacementFES, const GridFunctionType& displacement)
   {
     assert(mesh.getVertexCount() == referenceVertices.size());
     assert(displacementFES.getVectorDimension() >= mesh.getSpaceDimension());
@@ -282,7 +269,7 @@ namespace
       auto x = referenceVertices[vertex];
 
       for (Index c = 0; c < static_cast<Index>(dim); ++c)
-        x(c) += displacement[displacementFES.getGlobalIndex({ 0, vertex }, c)];
+        x(c) += displacement[displacementFES.getGlobalIndex({0, vertex}, c)];
 
       mesh.setVertexCoordinates(vertex, x);
     }
@@ -290,10 +277,11 @@ namespace
     mesh.flush();
   }
 
-  static LocalMesh makeFSIMesh(size_t nx, size_t nfy, size_t nsy, Real L, Real Hf, Real Hs)
+  static LocalMesh makeFSIMesh(
+    size_t nx, size_t nfy, size_t nsy, Real L, Real Hf, Real Hs)
   {
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { nx + 1, nfy + nsy + 1 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {nx + 1, nfy + nsy + 1});
 
     mapMeshToFSIStrip(mesh, nfy, nsy, L, Hf, Hs);
 
@@ -362,20 +350,14 @@ namespace
       }
 
       if (!touchesExterior && std::abs(c.y() - Hf) < eps)
-        mesh.setAttribute({ faceDim, it->getIndex() }, Boundary::FSI);
+        mesh.setAttribute({faceDim, it->getIndex()}, Boundary::FSI);
     }
 
     return mesh;
   }
 
-  static MPIMesh makeMPIFSIStrip(
-      const Rodin::Context::MPI& context,
-      size_t nx,
-      size_t nfy,
-      size_t nsy,
-      Real L,
-      Real Hf,
-      Real Hs)
+  static MPIMesh makeMPIFSIStrip(const Rodin::Context::MPI& context, size_t nx,
+    size_t nfy, size_t nsy, Real L, Real Hf, Real Hs)
   {
     const auto& comm = context.getCommunicator();
 
@@ -425,20 +407,17 @@ int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 
-  const auto setPETScDefault =
-    [](const char* name, const char* value)
+  const auto setPETScDefault = [](const char* name, const char* value) {
+    PetscBool set = PETSC_FALSE;
+    PetscErrorCode ierr = PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name, &set);
+    assert(ierr == PETSC_SUCCESS);
+    if (!set)
     {
-      PetscBool set = PETSC_FALSE;
-      PetscErrorCode ierr =
-        PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name, &set);
+      ierr = PetscOptionsSetValue(PETSC_NULLPTR, name, value);
       assert(ierr == PETSC_SUCCESS);
-      if (!set)
-      {
-        ierr = PetscOptionsSetValue(PETSC_NULLPTR, name, value);
-        assert(ierr == PETSC_SUCCESS);
-      }
-      (void) ierr;
-    };
+    }
+    (void)ierr;
+  };
 
   setPETScDefault("-ksp_type", "preonly");
   setPETScDefault("-pc_type", "lu");
@@ -449,75 +428,78 @@ int main(int argc, char** argv)
   setPETScDefault("-mat_mumps_icntl_20", "0");
 
   {
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
-  Rodin::Context::MPI context(env, world);
-  const auto& comm = context.getCommunicator();
-  const bool isRoot = comm.rank() == RootRank;
+    boost::mpi::environment env(argc, argv);
+    boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
+    Rodin::Context::MPI context(env, world);
+    const auto& comm = context.getCommunicator();
+    const bool isRoot = comm.rank() == RootRank;
 
-  PetscInt nxOpt = 48;
-  PetscInt fluidNyOpt = 12;
-  PetscInt solidNyOpt = 4;
-  PetscInt ntOpt = 100;
+    PetscInt nxOpt = 48;
+    PetscInt fluidNyOpt = 12;
+    PetscInt solidNyOpt = 4;
+    PetscInt ntOpt = 100;
 
-  PetscReal finalTimeOpt = 1.0;
-  PetscReal inletAmplitudeOpt = 1.25;
-  PetscReal pulseDurationOpt = 0.18;
-  PetscReal pulseGapOpt = 0.35;
-  PetscInt pulseCountOpt = 1;
+    PetscReal finalTimeOpt = 1.0;
+    PetscReal inletAmplitudeOpt = 1.25;
+    PetscReal pulseDurationOpt = 0.18;
+    PetscReal pulseGapOpt = 0.35;
+    PetscInt pulseCountOpt = 1;
 
-  PetscReal solidEOpt = 2.0e2;
-  PetscReal solidNuOpt = 0.3;
-  PetscReal solidDensityOpt = 5.0e-1;
-  PetscReal solidRayleighAlphaOpt = 5.0e-2;
-  PetscReal inactiveOpt = 1e-8;
-  PetscBool moveMeshDuringNewtonOpt = PETSC_FALSE;
+    PetscReal solidEOpt = 2.0e2;
+    PetscReal solidNuOpt = 0.3;
+    PetscReal solidDensityOpt = 5.0e-1;
+    PetscReal solidRayleighAlphaOpt = 5.0e-2;
+    PetscReal inactiveOpt = 1e-8;
+    PetscBool moveMeshDuringNewtonOpt = PETSC_FALSE;
 
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_nx", &nxOpt, PETSC_NULLPTR);
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_fluid_ny", &fluidNyOpt, PETSC_NULLPTR);
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_ny", &solidNyOpt, PETSC_NULLPTR);
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_Nt", &ntOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_T", &finalTimeOpt, PETSC_NULLPTR);
+    PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_nx", &nxOpt, PETSC_NULLPTR);
+    PetscOptionsGetInt(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_fluid_ny", &fluidNyOpt, PETSC_NULLPTR);
+    PetscOptionsGetInt(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_ny", &solidNyOpt, PETSC_NULLPTR);
+    PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_Nt", &ntOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_T", &finalTimeOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_inlet_amplitude", &inletAmplitudeOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pulse_duration", &pulseDurationOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pulse_gap", &pulseGapOpt, PETSC_NULLPTR);
-  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_pulse_count", &pulseCountOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_inlet_amplitude",
+      &inletAmplitudeOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pulse_duration",
+      &pulseDurationOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pulse_gap", &pulseGapOpt, PETSC_NULLPTR);
+    PetscOptionsGetInt(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pulse_count", &pulseCountOpt, PETSC_NULLPTR);
 
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_E", &solidEOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_nu", &solidNuOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_density", &solidDensityOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_solid_rayleigh_alpha", &solidRayleighAlphaOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_inactive_regularization", &inactiveOpt, PETSC_NULLPTR);
-  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
-      "-fsi_move_mesh_during_newton", &moveMeshDuringNewtonOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_E", &solidEOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_nu", &solidNuOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_density",
+      &solidDensityOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_rayleigh_alpha",
+      &solidRayleighAlphaOpt, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_inactive_regularization",
+      &inactiveOpt, PETSC_NULLPTR);
+    PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_move_mesh_during_newton",
+      &moveMeshDuringNewtonOpt, PETSC_NULLPTR);
 
-  const size_t nx = static_cast<size_t>(std::max<PetscInt>(3, nxOpt));
-  const size_t nfy = static_cast<size_t>(std::max<PetscInt>(2, fluidNyOpt));
-  const size_t nsy = static_cast<size_t>(std::max<PetscInt>(1, solidNyOpt));
-  const Index Nt = static_cast<Index>(std::max<PetscInt>(1, ntOpt));
+    const size_t nx = static_cast<size_t>(std::max<PetscInt>(3, nxOpt));
+    const size_t nfy = static_cast<size_t>(std::max<PetscInt>(2, fluidNyOpt));
+    const size_t nsy = static_cast<size_t>(std::max<PetscInt>(1, solidNyOpt));
+    const Index Nt = static_cast<Index>(std::max<PetscInt>(1, ntOpt));
 
-  const Real L = 4.0;
-  const Real Hf = 1.0;
-  const Real Hs = 0.25;
-  const Real T = static_cast<Real>(finalTimeOpt);
-  const Real dt = T / static_cast<Real>(Nt);
+    const Real L = 4.0;
+    const Real Hf = 1.0;
+    const Real Hs = 0.25;
+    const Real T = static_cast<Real>(finalTimeOpt);
+    const Real dt = T / static_cast<Real>(Nt);
 
-  MPIMesh mesh = makeMPIFSIStrip(context, nx, nfy, nsy, L, Hf, Hs);
-  const size_t dim = mesh.getSpaceDimension();
-  const bool moveMeshDuringNewton = (moveMeshDuringNewtonOpt == PETSC_TRUE);
+    MPIMesh mesh = makeMPIFSIStrip(context, nx, nfy, nsy, L, Hf, Hs);
+    const size_t dim = mesh.getSpaceDimension();
+    const bool moveMeshDuringNewton = (moveMeshDuringNewtonOpt == PETSC_TRUE);
 
-  std::vector<Math::SpatialPoint> referenceVertices;
-  saveReferenceVertices(mesh, referenceVertices);
+    std::vector<Math::SpatialPoint> referenceVertices;
+    saveReferenceVertices(mesh, referenceVertices);
 
   /* Global spaces.
    *
@@ -525,85 +507,83 @@ int main(int argc, char** argv)
    * Displacement is physical in the solid and ALE mesh displacement in the
    * fluid.
    */
-  H1 uh(std::integral_constant<size_t, 2>{}, mesh, dim);
-  H1 ph(std::integral_constant<size_t, 1>{}, mesh);
-  H1 dh(std::integral_constant<size_t, 2>{}, mesh, dim);
+    H1 uh(std::integral_constant<size_t, 2>{}, mesh, dim);
+    H1 ph(std::integral_constant<size_t, 1>{}, mesh);
+    H1 dh(std::integral_constant<size_t, 2>{}, mesh, dim);
 
-  PETSc::Variational::TrialFunction du(uh);
-  PETSc::Variational::TrialFunction dp(ph);
-  PETSc::Variational::TrialFunction deta(dh);
+    PETSc::Variational::TrialFunction du(uh);
+    PETSc::Variational::TrialFunction dp(ph);
+    PETSc::Variational::TrialFunction deta(dh);
 
-  PETSc::Variational::TestFunction v(uh);
-  PETSc::Variational::TestFunction q(ph);
-  PETSc::Variational::TestFunction z(dh);
+    PETSc::Variational::TestFunction v(uh);
+    PETSc::Variational::TestFunction q(ph);
+    PETSc::Variational::TestFunction z(dh);
 
-  du.setName("du");
-  dp.setName("dp");
-  deta.setName("deta");
+    du.setName("du");
+    dp.setName("dp");
+    deta.setName("deta");
 
-  PETSc::Variational::GridFunction uState(uh);
-  PETSc::Variational::GridFunction pState(ph);
-  PETSc::Variational::GridFunction etaState(dh);
-  PETSc::Variational::GridFunction dState(dh);
+    PETSc::Variational::GridFunction uState(uh);
+    PETSc::Variational::GridFunction pState(ph);
+    PETSc::Variational::GridFunction etaState(dh);
+    PETSc::Variational::GridFunction dState(dh);
 
-  PETSc::Variational::GridFunction uOld(uh);
-  PETSc::Variational::GridFunction pOld(ph);
-  PETSc::Variational::GridFunction etaOld(dh);
-  PETSc::Variational::GridFunction dOld(dh);
+    PETSc::Variational::GridFunction uOld(uh);
+    PETSc::Variational::GridFunction pOld(ph);
+    PETSc::Variational::GridFunction etaOld(dh);
+    PETSc::Variational::GridFunction dOld(dh);
 
-  PETSc::Variational::GridFunction meshVelocity(dh);
-  PETSc::Variational::GridFunction inletVelocity(uh);
+    PETSc::Variational::GridFunction meshVelocity(dh);
+    PETSc::Variational::GridFunction inletVelocity(uh);
 
-  auto moveMeshToCurrentDisplacement = [&]()
-  {
-    moveMeshWithVertexDisplacement(mesh, referenceVertices, dh, dState);
-  };
+    auto moveMeshToCurrentDisplacement = [&]() {
+      moveMeshWithVertexDisplacement(mesh, referenceVertices, dh, dState);
+    };
 
-  uState.setName("FluidVelocity");
-  pState.setName("FluidPressure");
-  etaState.setName("DisplacementIncrement");
-  dState.setName("Displacement");
-  meshVelocity.setName("ALEMeshVelocity");
+    uState.setName("FluidVelocity");
+    pState.setName("FluidPressure");
+    etaState.setName("DisplacementIncrement");
+    dState.setName("Displacement");
+    meshVelocity.setName("ALEMeshVelocity");
 
-  uState = Zero(dim);
-  pState = 0.0;
-  etaState = Zero(dim);
-  dState = Zero(dim);
-  uOld = Zero(dim);
-  pOld = 0.0;
-  etaOld = Zero(dim);
-  dOld = Zero(dim);
-  meshVelocity = Zero(dim);
-  inletVelocity = Zero(dim);
+    uState = Zero(dim);
+    pState = 0.0;
+    etaState = Zero(dim);
+    dState = Zero(dim);
+    uOld = Zero(dim);
+    pOld = 0.0;
+    etaOld = Zero(dim);
+    dOld = Zero(dim);
+    meshVelocity = Zero(dim);
+    inletVelocity = Zero(dim);
 
-  IO::XDMF xdmf(comm, "out/MPI_BDF1_Monolithic_ALE_FSI", RootRank);
-  auto grid = xdmf.grid("FSI");
-  grid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
-  grid.add("velocity", uState);
-  grid.add("pressure", pState);
-  grid.add("displacement", dState);
-  grid.add("mesh_velocity", meshVelocity);
-  xdmf.write(0.0);
+    IO::XDMF xdmf(comm, "out/MPI_BDF1_Monolithic_ALE_FSI", RootRank);
+    auto grid = xdmf.grid("FSI");
+    grid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
+    grid.add("velocity", uState);
+    grid.add("pressure", pState);
+    grid.add("displacement", dState);
+    grid.add("mesh_velocity", meshVelocity);
+    xdmf.write(0.0);
 
-  const Real rhoF = 1.0;
-  const Real muF = 0.02;
+    const Real rhoF = 1.0;
+    const Real muF = 0.02;
 
-  const Real solidE = static_cast<Real>(solidEOpt);
-  const Real solidNu = static_cast<Real>(solidNuOpt);
-  const Real solidLambda =
-    solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
-  const Real solidMu = solidE / (2.0 * (1.0 + solidNu));
-  const Real rhoS = static_cast<Real>(solidDensityOpt);
-  const Real solidRayleighAlpha = static_cast<Real>(solidRayleighAlphaOpt);
-  const Real inactive = static_cast<Real>(inactiveOpt);
+    const Real solidE = static_cast<Real>(solidEOpt);
+    const Real solidNu = static_cast<Real>(solidNuOpt);
+    const Real solidLambda = solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
+    const Real solidMu = solidE / (2.0 * (1.0 + solidNu));
+    const Real rhoS = static_cast<Real>(solidDensityOpt);
+    const Real solidRayleighAlpha = static_cast<Real>(solidRayleighAlphaOpt);
+    const Real inactive = static_cast<Real>(inactiveOpt);
 
-  Solid::NeoHookean law(solidLambda, solidMu);
+    Solid::NeoHookean law(solidLambda, solidMu);
 
-  Solid::InternalVirtualWorkTangent solidTangent(law, deta, z, dState);
+    Solid::InternalVirtualWorkTangent solidTangent(law, deta, z, dState);
 
-  Solid::InternalVirtualWorkResidual solidInternal(law, z, dState);
+    Solid::InternalVirtualWorkResidual solidInternal(law, z, dState);
 
-  auto n = BoundaryNormal(mesh);
+    auto n = BoundaryNormal(mesh);
 
   /* Fully nonlinear BDF1 ALE Navier--Stokes fluid block.
    *
@@ -627,123 +607,118 @@ int main(int argc, char** argv)
    * + 0.5 rho div(beta) du
    * + 0.5 rho div(delta beta) u.
    */
-  const auto meshVelocityState = (1.0 / dt) * etaState;
-  const auto transportVelocity = uState - meshVelocityState;
+    const auto meshVelocityState = (1.0 / dt) * etaState;
+    const auto transportVelocity = uState - meshVelocityState;
 
-  const auto convState = Mult(Jacobian(uState), transportVelocity);
-  const auto convTangentVelocity = Mult(Jacobian(du), transportVelocity);
-  const auto convTangentTransportU = Mult(Jacobian(uState), du);
-  const auto convTangentTransportEta = Mult(Jacobian(uState), deta);
+    const auto convState = Mult(Jacobian(uState), transportVelocity);
+    const auto convTangentVelocity = Mult(Jacobian(du), transportVelocity);
+    const auto convTangentTransportU = Mult(Jacobian(uState), du);
+    const auto convTangentTransportEta = Mult(Jacobian(uState), deta);
 
   /* Div does not currently have a deduction guide for Sum expressions such as
    * Div(uState - etaState / dt), so write the divergence algebraically.
   */
-  const auto divTransport = Div(uState) - (1.0 / dt) * Div(etaState);
-  const auto beta = Max(-Dot(transportVelocity, n), 0.0);
+    const auto divTransport = Div(uState) - (1.0 / dt) * Div(etaState);
+    const auto beta = Max(-Dot(transportVelocity, n), 0.0);
 
-  Problem fsi(du, dp, deta, v, q, z);
+    Problem fsi(du, dp, deta, v, q, z);
 
-  fsi =
+    fsi =
       /* Fully nonlinear ALE Navier--Stokes tangent over fluid cells. */
-        (rhoF / dt) * Integral(du, v).over(Volume::Fluid)
-      + rhoF * Integral(Dot(convTangentVelocity, v)).over(Volume::Fluid)
-      + rhoF * Integral(Dot(convTangentTransportU, v)).over(Volume::Fluid)
-      - (rhoF / dt) * Integral(Dot(convTangentTransportEta, v)).over(Volume::Fluid)
-      + 0.5 * rhoF * Integral(divTransport * Dot(du, v)).over(Volume::Fluid)
-      + 0.5 * rhoF * Integral(Dot(Div(du) * uState, v)).over(Volume::Fluid)
-      - (0.5 * rhoF / dt) * Integral(Dot(Div(deta) * uState, v)).over(Volume::Fluid)
-      + muF * Integral(Jacobian(du), Jacobian(v)).over(Volume::Fluid)
-      - Integral(dp, Div(v)).over(Volume::Fluid)
-      + Integral(Div(du), q).over(Volume::Fluid)
-      + BoundaryIntegral(0.5 * rhoF * beta * Dot(du, v)).over(Boundary::Outlet)
-      + 1e-10 * Integral(dp, q).over(Volume::Fluid)
+      (rhoF / dt) * Integral(du, v).over(Volume::Fluid) +
+      rhoF * Integral(Dot(convTangentVelocity, v)).over(Volume::Fluid) +
+      rhoF * Integral(Dot(convTangentTransportU, v)).over(Volume::Fluid) -
+      (rhoF / dt) * Integral(Dot(convTangentTransportEta, v)).over(Volume::Fluid) +
+      0.5 * rhoF * Integral(divTransport * Dot(du, v)).over(Volume::Fluid) +
+      0.5 * rhoF * Integral(Dot(Div(du) * uState, v)).over(Volume::Fluid) -
+      (0.5 * rhoF / dt) * Integral(Dot(Div(deta) * uState, v)).over(Volume::Fluid) +
+      muF * Integral(Jacobian(du), Jacobian(v)).over(Volume::Fluid) -
+      Integral(dp, Div(v)).over(Volume::Fluid) +
+      Integral(Div(du), q).over(Volume::Fluid) +
+      BoundaryIntegral(0.5 * rhoF * beta * Dot(du, v)).over(Boundary::Outlet) +
+      1e-10 * Integral(dp, q).over(Volume::Fluid)
 
       /* Fully nonlinear ALE Navier--Stokes residual over fluid cells. */
-      + (rhoF / dt) * Integral(uState - uOld, v).over(Volume::Fluid)
-      + rhoF * Integral(Dot(convState, v)).over(Volume::Fluid)
-      + 0.5 * rhoF * Integral(Dot(divTransport * uState, v)).over(Volume::Fluid)
-      + muF * Integral(Jacobian(uState), Jacobian(v)).over(Volume::Fluid)
-      - Integral(pState, Div(v)).over(Volume::Fluid)
-      + Integral(Div(uState), q).over(Volume::Fluid)
-      + BoundaryIntegral(0.5 * rhoF * Dot(beta * uState, v)).over(Boundary::Outlet)
-      + 1e-10 * Integral(pState, q).over(Volume::Fluid)
+      + (rhoF / dt) * Integral(uState - uOld, v).over(Volume::Fluid) +
+      rhoF * Integral(Dot(convState, v)).over(Volume::Fluid) +
+      0.5 * rhoF * Integral(Dot(divTransport * uState, v)).over(Volume::Fluid) +
+      muF * Integral(Jacobian(uState), Jacobian(v)).over(Volume::Fluid) -
+      Integral(pState, Div(v)).over(Volume::Fluid) +
+      Integral(Div(uState), q).over(Volume::Fluid) +
+      BoundaryIntegral(0.5 * rhoF * Dot(beta * uState, v)).over(Boundary::Outlet) +
+      1e-10 * Integral(pState, q).over(Volume::Fluid)
 
       /* Harmonic ALE displacement in the fluid. */
-      + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid)
-      + Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
+      + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid) +
+      Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
 
       /* Solid BDF1/Newmark-like displacement increment equation. */
-      + (rhoS / (dt * dt)) * Integral(deta, z).over(Volume::Solid)
-      + (solidRayleighAlpha * rhoS / dt) * Integral(deta, z).over(Volume::Solid)
-      + solidTangent.over(Volume::Solid)
+      + (rhoS / (dt * dt)) * Integral(deta, z).over(Volume::Solid) +
+      (solidRayleighAlpha * rhoS / dt) * Integral(deta, z).over(Volume::Solid) +
+      solidTangent.over(Volume::Solid)
 
-      + (rhoS / (dt * dt)) * Integral(etaState - etaOld, z).over(Volume::Solid)
-      + (solidRayleighAlpha * rhoS / dt) * Integral(etaState, z).over(Volume::Solid)
-      + solidInternal.over(Volume::Solid)
+      + (rhoS / (dt * dt)) * Integral(etaState - etaOld, z).over(Volume::Solid) +
+      (solidRayleighAlpha * rhoS / dt) * Integral(etaState, z).over(Volume::Solid) +
+      solidInternal.over(Volume::Solid)
 
       /* Temporary inactive-region regularization for globally-defined fluid
        * variables.  Replace by subdomain-restricted spaces when available.
        */
-      + inactive * Integral(du, v).over(Volume::Solid)
-      + inactive * Integral(uState, v).over(Volume::Solid)
-      + inactive * Integral(dp, q).over(Volume::Solid)
-      + inactive * Integral(pState, q).over(Volume::Solid)
+      + inactive * Integral(du, v).over(Volume::Solid) +
+      inactive * Integral(uState, v).over(Volume::Solid) +
+      inactive * Integral(dp, q).over(Volume::Solid) +
+      inactive * Integral(pState, q).over(Volume::Solid)
 
       /* Boundary and interface constraints. */
-      + DirichletBC(du, inletVelocity - uState).on(Boundary::Inlet)
-      + DirichletBC(du, -uState).on(Boundary::FluidWall)
-      + DirichletBC(deta, -etaState).on(Boundary::Inlet, Boundary::Outlet, Boundary::FluidWall)
-      + DirichletBC(deta, -etaState).on(Boundary::SolidClampLeft, Boundary::SolidClampRight)
-      + DirichletBC(
-          du,
-          (1.0 / dt) * deta,
-          (1.0 / dt) * etaState - uState).on(Boundary::FSI);
+      + DirichletBC(du, inletVelocity - uState).on(Boundary::Inlet) +
+      DirichletBC(du, -uState).on(Boundary::FluidWall) +
+      DirichletBC(deta, -etaState)
+        .on(Boundary::Inlet, Boundary::Outlet, Boundary::FluidWall) +
+      DirichletBC(deta, -etaState)
+        .on(Boundary::SolidClampLeft, Boundary::SolidClampRight) +
+      DirichletBC(du, (1.0 / dt) * deta, (1.0 / dt) * etaState - uState)
+        .on(Boundary::FSI);
 
-  fsi.assemble().setFieldSplits();
+    fsi.assemble().setFieldSplits();
 
-  Solver::KSP ksp(fsi);
-  Solver::SNES snes(ksp);
+    Solver::KSP ksp(fsi);
+    Solver::SNES snes(ksp);
 
-  snes.setTolerances(1e-10, 1e-8, 1e-10, 30, 10000);
+    snes.setTolerances(1e-10, 1e-8, 1e-10, 30, 10000);
 
-  snes.setStateUpdate([&](const PETSc::Math::Vector& state)
-  {
-    const size_t uOffset = 0;
-    const size_t pOffset = uOffset + uh.getSize();
-    const size_t etaOffset = pOffset + ph.getSize();
+    snes.setStateUpdate([&](const PETSc::Math::Vector& state) {
+      const size_t uOffset = 0;
+      const size_t pOffset = uOffset + uh.getSize();
+      const size_t etaOffset = pOffset + ph.getSize();
 
-    uState.setData(state, uOffset);
-    pState.setData(state, pOffset);
-    etaState.setData(state, etaOffset);
+      uState.setData(state, uOffset);
+      pState.setData(state, pOffset);
+      etaState.setData(state, etaOffset);
 
-    dState = dOld + etaState;
-    meshVelocity = (1.0 / dt) * etaState;
-    if (moveMeshDuringNewton)
-      moveMeshToCurrentDisplacement();
-  });
+      dState = dOld + etaState;
+      meshVelocity = (1.0 / dt) * etaState;
+      if (moveMeshDuringNewton)
+        moveMeshToCurrentDisplacement();
+    });
 
-  Real t = 0.0;
+    Real t = 0.0;
 
-  for (Index step = 1; step <= Nt; ++step)
-  {
-    t += dt;
-
-    inletVelocity = VectorFunction(dim, [&](const Point& x)
+    for (Index step = 1; step <= Nt; ++step)
     {
-      const Real y = std::clamp(x.y(), 0.0, Hf);
-      const Real profile = 4.0 * y * (Hf - y) / (Hf * Hf);
-      const Real amplitude = pulseTrain(
-          t,
-          static_cast<Real>(inletAmplitudeOpt),
-          static_cast<Real>(pulseDurationOpt),
-          static_cast<Real>(pulseGapOpt),
+      t += dt;
+
+      inletVelocity = VectorFunction(dim, [&](const Point& x) {
+        const Real y = std::clamp(x.y(), 0.0, Hf);
+        const Real profile = 4.0 * y * (Hf - y) / (Hf * Hf);
+        const Real amplitude = pulseTrain(t, static_cast<Real>(inletAmplitudeOpt),
+          static_cast<Real>(pulseDurationOpt), static_cast<Real>(pulseGapOpt),
           static_cast<Index>(pulseCountOpt));
 
-      Math::SpatialVector<Real> value(dim);
-      value.setZero();
-      value(0) = amplitude * profile;
-      return value;
-    });
+        Math::SpatialVector<Real> value(dim);
+        value.setZero();
+        value(0) = amplitude * profile;
+        return value;
+      });
 
     /* Initial Newton guess.
      *
@@ -751,37 +726,36 @@ int main(int argc, char** argv)
      * The affine FSI correction row below still drives the nonlinear
      * kinematic residual to zero if this guess is not exact.
      */
-    uState = uOld;
-    pState = pOld;
-    etaState = dt * uOld;
-    dState = dOld + etaState;
-    meshVelocity = (1.0 / dt) * etaState;
-    moveMeshToCurrentDisplacement();
+      uState = uOld;
+      pState = pOld;
+      etaState = dt * uOld;
+      dState = dOld + etaState;
+      meshVelocity = (1.0 / dt) * etaState;
+      moveMeshToCurrentDisplacement();
 
-    if (isRoot)
-    {
-      Alert::Info()
-        << "MPI monolithic BDF1 ALE FSI step " << step << " / " << Nt
-        << Alert::Raise;
+      if (isRoot)
+      {
+        Alert::Info() << "MPI monolithic BDF1 ALE FSI step " << step << " / " << Nt
+                      << Alert::Raise;
+      }
+
+      snes.solve();
+
+      if (!snes.converged())
+      {
+        Alert::MemberFunctionException("MPI_BDF1_Monolithic_ALE_FSI", "main")
+          << "SNES failed to converge at step " << step << Alert::Raise;
+      }
+
+      uOld.setData(uState.getData());
+      pOld.setData(pState.getData());
+      etaOld.setData(etaState.getData());
+      dOld.setData(dState.getData());
+
+      moveMeshToCurrentDisplacement();
+      xdmf.write(t);
+      xdmf.flush();
     }
-
-    snes.solve();
-
-    if (!snes.converged())
-    {
-      Alert::MemberFunctionException("MPI_BDF1_Monolithic_ALE_FSI", "main")
-        << "SNES failed to converge at step " << step << Alert::Raise;
-    }
-
-    uOld.setData(uState.getData());
-    pOld.setData(pState.getData());
-    etaOld.setData(etaState.getData());
-    dOld.setData(dState.getData());
-
-    moveMeshToCurrentDisplacement();
-    xdmf.write(t);
-    xdmf.flush();
-  }
   }
 
   PetscFinalize();

@@ -19,7 +19,6 @@
 #include <vector>
 #include <cassert>
 #include <utility>
-#include <shared_mutex>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/deque.hpp>
@@ -61,6 +60,7 @@ namespace Rodin::Geometry
     {
       std::atomic<PolytopeTransformation*> ptr{nullptr}; ///< Atomic pointer for fast access
       std::unique_ptr<PolytopeTransformation> owner;     ///< Unique pointer owning the transformation
+      mutable std::mutex mutex; ///< Serializes construction
 
       /**
        * @brief Serialization save method.
@@ -94,13 +94,15 @@ namespace Rodin::Geometry
     /**
      * @brief Storage for transformations of polytopes in a single dimension.
      *
-     * Contains a deque of transformation slots along with a shared mutex
-     * for thread-safe concurrent access.
+     * Contains stable transformation slots and publishes their initialized
+     * extent atomically. The dimension mutex is only used when storage grows;
+     * repeated accesses use the published extent and slot pointer directly.
      */
     struct Dimension
     {
       std::deque<Slot> slots;          ///< Storage for transformation slots
-      mutable std::shared_mutex mutex; ///< Mutex for thread-safe access
+      std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
+      mutable std::mutex mutex; ///< Serializes storage growth
 
       /**
        * @brief Default constructor.
@@ -121,7 +123,9 @@ namespace Rodin::Geometry
        * @brief Move constructor.
        */
       Dimension(Dimension&& other) noexcept
-        : slots(std::move(other.slots)) {}
+        : slots(std::move(other.slots)),
+          publishedSize(other.publishedSize.load(std::memory_order_relaxed))
+      {}
 
       /**
        * @brief Move assignment operator.
@@ -129,6 +133,8 @@ namespace Rodin::Geometry
       Dimension& operator=(Dimension&& other) noexcept
       {
         slots = std::move(other.slots);
+        publishedSize.store(
+          other.publishedSize.load(std::memory_order_relaxed), std::memory_order_relaxed);
         return *this;
       }
 
@@ -208,9 +214,10 @@ namespace Rodin::Geometry
     {
       assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
-      std::unique_lock<std::shared_mutex> wr(dim.mutex);
+      std::lock_guard<std::mutex> lock(dim.mutex);
       if (dim.slots.size() < count)
         dim.slots.resize(count);
+      dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
     }
 
     /**
@@ -229,12 +236,17 @@ namespace Rodin::Geometry
 
       assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
-      std::unique_lock<std::shared_mutex> wr(dim.mutex);
-      if (dim.slots.size() <= idx)
-        dim.slots.resize(idx + 1);
+      if (idx >= dim.publishedSize.load(std::memory_order_acquire))
+      {
+        std::lock_guard<std::mutex> lock(dim.mutex);
+        if (dim.slots.size() <= idx)
+          dim.slots.resize(idx + 1);
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
+      }
 
       assert(idx < dim.slots.size());
       Slot& s = dim.slots[idx];
+      std::lock_guard<std::mutex> lock(s.mutex);
       s.owner = std::move(obj);
       s.ptr.store(s.owner.get(), std::memory_order_release);
     }
@@ -258,12 +270,17 @@ namespace Rodin::Geometry
 
       assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
-      std::unique_lock<std::shared_mutex> wr(dim.mutex);
-      if (dim.slots.size() < count)
-        dim.slots.resize(count);
+      if (count > dim.publishedSize.load(std::memory_order_acquire))
+      {
+        std::lock_guard<std::mutex> lock(dim.mutex);
+        if (dim.slots.size() < count)
+          dim.slots.resize(count);
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
+      }
 
       assert(idx < dim.slots.size());
       Slot& s = dim.slots[idx];
+      std::lock_guard<std::mutex> lock(s.mutex);
       s.owner = std::move(obj);
       s.ptr.store(s.owner.get(), std::memory_order_release);
     }
@@ -276,9 +293,13 @@ namespace Rodin::Geometry
      * @param[in] factory Factory function to create transformation if needed
      * @returns Reference to the transformation
      *
-     * Uses a two-phase locking strategy: first tries a fast shared-lock read,
-     * then upgrades to exclusive lock only if the transformation needs to be
-     * created. The factory is called at most once per polytope.
+     * Uses an atomic pointer on repeated accesses. Storage growth is serialized
+     * per dimension, while first construction is serialized per polytope. The
+     * factory is called at most once per polytope.
+     *
+     * @note Cache mutation, including clear() and set(), must not overlap use of
+     *       a reference returned by this function. Mesh evaluation already
+     *       requires geometry to remain unchanged for the duration of assembly.
      *
      * @note The Factory must be callable with signature:
      *       `std::unique_ptr<PolytopeTransformation>(size_t d, Index idx)`
@@ -293,49 +314,51 @@ namespace Rodin::Geometry
       assert(d < m_dimensions.size());
       auto& dim = m_dimensions[d];
 
-      // Fast path: read under shared lock
+      // Fast path: the deque is stable below the atomically published extent.
+      const size_t publishedSize = dim.publishedSize.load(std::memory_order_acquire);
+      if (idx < publishedSize)
       {
-        std::shared_lock<std::shared_mutex> rd(dim.mutex);
-        if (idx < dim.slots.size())
-        {
-          assert(idx < count);
-          const Slot& s = dim.slots[idx];
-          if (auto* q = s.ptr.load(std::memory_order_acquire)) return *q;
-        }
+        assert(idx < count);
+        const Slot& s = dim.slots[idx];
+        if (auto* q = s.ptr.load(std::memory_order_acquire))
+          return *q;
       }
 
-      // Slow path: exclusive lock, ensure size, init in-place
+      // Slow path: grow the stable slot storage if necessary.
+      if (idx >= publishedSize)
       {
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
-
+        std::lock_guard<std::mutex> lock(dim.mutex);
         if (dim.slots.size() < count)
           dim.slots.resize(count);
-
-        assert(idx < dim.slots.size());
-        Slot& s = dim.slots[idx];
-        PolytopeTransformation* q = s.ptr.load(std::memory_order_relaxed);
-        if (!q)
-        {
-          auto up = factory(d, idx);
-          s.owner = std::move(up);
-          q = s.owner.get();
-          s.ptr.store(q, std::memory_order_release);
-        }
-        return *q; // still under wr; safe
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
       }
+
+      assert(idx < dim.slots.size());
+      Slot& s = dim.slots[idx];
+      std::lock_guard<std::mutex> lock(s.mutex);
+      PolytopeTransformation* q = s.ptr.load(std::memory_order_relaxed);
+      if (!q)
+      {
+        auto up = factory(d, idx);
+        s.owner = std::move(up);
+        q = s.owner.get();
+        s.ptr.store(q, std::memory_order_release);
+      }
+      return *q;
     }
 
     /**
      * @brief Clears all stored transformations.
      *
      * Releases all transformation objects and resets internal storage.
-     * Thread-safe with respect to concurrent operations.
+     * This operation must not overlap transformation evaluation.
      */
     void clear()
     {
       for (auto& dim : m_dimensions)
       {
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
+        std::lock_guard<std::mutex> lock(dim.mutex);
+        dim.publishedSize.store(0, std::memory_order_release);
         dim.slots.clear();
       }
     }
@@ -370,6 +393,8 @@ namespace Rodin::Geometry
     {
       clear();
       ar & m_dimensions;
+      for (auto& dim : m_dimensions)
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_relaxed);
       // ptr fields restored by Slot::load
     }
 

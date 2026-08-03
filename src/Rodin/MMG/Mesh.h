@@ -300,8 +300,10 @@ namespace Rodin::MMG
           RidgeIndex  m_ridgeIndex; ///< Ridge edge set accumulated during build.
           RequiredVertexIndex m_requiredVertexIndex; ///< Required-vertex set accumulated during build.
           RequiredEdgeIndex m_requiredEdgeIndex; ///< Required-edge set accumulated during build.
-          RequiredTriangleIndex m_requiredTriangleIndex; ///< Required-triangle set accumulated during build.
-          RequiredTetrahedronIndex m_requiredTetrahedronIndex; ///< Required-tetrahedron set accumulated during build.
+          RequiredTriangleIndex
+            m_requiredTriangleIndex; ///< Required-triangle set accumulated during build.
+          RequiredTetrahedronIndex
+            m_requiredTetrahedronIndex; ///< Required-tetrahedron set accumulated during build.
       };
 
       /**
@@ -574,8 +576,10 @@ namespace Rodin::MMG
     private:
       CornerIndex m_cornerIndex; ///< Corner vertex indices (`MG_CRN`).
       RequiredVertexIndex m_requiredVertexIndex; ///< Required vertex indices (`MG_REQ` on vertices).
-      RequiredTriangleIndex m_requiredTriangleIndex; ///< Required triangle indices (`MG_REQ` on triangle entities).
-      RequiredTetrahedronIndex m_requiredTetrahedronIndex; ///< Required tetrahedron indices (`MG_REQ` on tetrahedra).
+      RequiredTriangleIndex
+        m_requiredTriangleIndex; ///< Required triangle indices (`MG_REQ` on triangle entities).
+      RequiredTetrahedronIndex
+        m_requiredTetrahedronIndex; ///< Required tetrahedron indices (`MG_REQ` on tetrahedra).
 
       RidgeIndex  m_ridgeIndex; ///< Ridge edge indices (`MG_GEO`).
       RequiredEdgeIndex m_requiredEdgeIndex; ///< Required edge indices (`MG_REQ` on edges).

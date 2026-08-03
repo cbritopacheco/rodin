@@ -21,7 +21,9 @@
  * - Attribute-based region marking
  */
 
+#include <algorithm>
 #include <deque>
+#include <vector>
 
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
@@ -954,9 +956,10 @@ namespace Rodin::Geometry
           }
 
           /// @brief Adds a polytope and returns its index via @p index.
-          Builder& polytope(Polytope::Type t, std::initializer_list<Index> vs, Index& index)
+          Builder& polytope(
+            Polytope::Type t, std::initializer_list<Index> vs, Index& index)
           {
-            return polytope(t, IndexArray({ vs }), index);
+            return polytope(t, IndexArray({vs}), index);
           }
 
           /**
@@ -1115,6 +1118,8 @@ namespace Rodin::Geometry
        * @param[in] g Geometry type of the cells (e.g., Triangle,
        * Quadrilateral)
        * @param[in] l Number of nodes in each coordinate direction
+       * @throws Alert::MemberFunctionException If the shape dimension does
+       * not match the geometry or an axis contains fewer than two grid points.
        */
       static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1151,6 +1156,8 @@ namespace Rodin::Geometry
        * @param[in] g Geometry type of the cells (e.g., Triangle,
        * Quadrilateral)
        * @param[in] shape Number of nodes in each coordinate direction
+       * @throws Alert::MemberFunctionException If the shape dimension does
+       * not match the geometry or an axis contains fewer than two grid points.
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
@@ -1382,49 +1389,51 @@ namespace Rodin::Geometry
        * @param[in] f Inclusion predicate
        * @returns Deque of FlatSet<Index>, each set being one connected component.
        *
-       * Uses a breadth-first search algorithm to discover connected components
+       * Uses a graph traversal to discover connected components
        * among polytopes of the specified dimension. Requires that the adjacency
        * connectivity @f$ d \rightarrow d @f$ has been computed beforehand.
        */
       template <class BinaryPredicate, class UnitaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const UnitaryPredicate& f) const
       {
-        FlatSet<Index> visited;
-        visited.reserve(getPolytopeCount(d));
-        std::deque<Index> searchQueue;
+        const size_t count = getPolytopeCount(d);
+        std::vector<Boolean> visited(count, false);
+        std::vector<Index> searchStack;
+        searchStack.reserve(count);
+        std::vector<Index> component;
         std::deque<FlatSet<Index>> res;
 
         // Perform the labelling
         for (auto it = getPolytope(d); it; ++it)
         {
           const Index i = it->getIndex();
-          if (!visited.count(i))
+          if (!visited[i] && f(*it))
           {
-            if (f(*it))
+            searchStack.push_back(i);
+            visited[i] = true;
+            component.clear();
+
+            while (!searchStack.empty())
             {
-              res.push_back({});
-              searchQueue.push_back(i);
-            }
-            while (searchQueue.size() > 0)
-            {
-              const Index idx = searchQueue.back();
+              const Index idx = searchStack.back();
               const auto el = getPolytope(d, idx);
-              searchQueue.pop_back();
-              const auto result = visited.insert(idx);
-              const Boolean inserted = result.second;
-              if (inserted)
+              searchStack.pop_back();
+              component.push_back(idx);
+
+              for (auto adj = el->getAdjacent(); adj; ++adj)
               {
-                res.back().insert(idx);
-                for (auto adj = el->getAdjacent(); adj; ++adj)
+                const Index adjacent = adj->getIndex();
+                if (!visited[adjacent] && p(*el, *adj) && f(*adj))
                 {
-                  if (p(*el, *adj))
-                  {
-                    if (f(*adj))
-                      searchQueue.push_back(adj->getIndex());
-                  }
+                  visited[adjacent] = true;
+                  searchStack.push_back(adjacent);
                 }
               }
             }
+
+            std::sort(component.begin(), component.end());
+            res.emplace_back(
+              boost::container::ordered_unique_range, component.begin(), component.end());
           }
         }
         return res;

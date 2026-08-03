@@ -172,7 +172,6 @@ namespace Rodin::Tests::Unit
   {
     // 1 element mesh, triangle with vertices (0,0), (1,0), (0,1)
     constexpr size_t sdim = 2;
-    constexpr size_t mdim = 2;
 
     Mesh mesh =
       Mesh<Rodin::Context::Local>::Builder()
@@ -257,7 +256,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies pyramid H1 2 uniform grid build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Pyramid_H1_2_UniformGrid_Build)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -1361,7 +1360,7 @@ namespace Rodin::Tests::Unit
 
         // Count interior DOFs on the edge = edge DOFs minus vertex DOFs
         size_t interiorCount = 0;
-        for (Index k = 0; k < dofs_e.size(); ++k)
+        for (Index k = 0; k < static_cast<Index>(dofs_e.size()); ++k)
         {
           if (vertexDOFs.count(dofs_e(k)) == 0)
             ++interiorCount;
@@ -1907,6 +1906,77 @@ namespace Rodin::Tests::Unit
     testVectorGridFunction(H1(std::integral_constant<size_t, 4>{}, mesh, vdim));
     testVectorGridFunction(H1(std::integral_constant<size_t, 5>{}, mesh, vdim));
     testVectorGridFunction(H1(std::integral_constant<size_t, 6>{}, mesh, vdim));
+  }
+
+  /// @brief Verifies scalar and vector H1 evaluation at an interior cell point.
+  TEST(Rodin_Variational_H1_Space, VectorGridFunctionEvaluationAtCellInterior)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
+    H1 scalarFES(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+    GridFunction scalar(scalarFES);
+    gf = VectorFunction{[](const Point& p) { return 1.0 + 2.0 * p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + p.x() + 3.0 * p.y(); }};
+    scalar = RealFunction([](const Point& p) { return 3.0 - p.x() + 2.0 * p.y(); });
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
+    const auto value = gf(p);
+
+    EXPECT_NEAR(scalar(p), 3.0 - p.x() + 2.0 * p.y(), 1e-11);
+    EXPECT_NEAR(value(0), 1.0 + 2.0 * p.x() - p.y(), 1e-11);
+    EXPECT_NEAR(value(1), -2.0 + p.x() + 3.0 * p.y(), 1e-11);
+  }
+
+  /// @brief Verifies scalar and vector P2 evaluation against mapped-basis expansion.
+  TEST(Rodin_Variational_H1_Space, P2EvaluationMatchesMappedBasisExpansion)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 scalarFES(std::integral_constant<size_t, 2>{}, mesh);
+    H1 vectorFES(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
+    GridFunction scalar(scalarFES);
+    GridFunction vector(vectorFES);
+    for (Index i = 0; i < scalar.getSize(); ++i)
+      scalar[i] = Real(-0.5) + Real(0.17) * i;
+    for (Index i = 0; i < vector.getSize(); ++i)
+      vector[i] = Real(0.75) - Real(0.09) * i;
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.21, 0.34});
+
+    Real expectedScalar = 0;
+    const auto& scalarFE = scalarFES.getFiniteElement(2, cell->getIndex());
+    const auto& scalarDOFs = scalarFES.getDOFs(2, cell->getIndex());
+    for (size_t local = 0; local < scalarFE.getCount(); ++local)
+    {
+      const auto basis =
+        scalarFES.getPushforward({2, cell->getIndex()}, scalarFE.getBasis(local));
+      expectedScalar += scalar[scalarDOFs[local]] * basis(p);
+    }
+
+    Math::SpatialVector<Real> expectedVector;
+    const auto& vectorFE = vectorFES.getFiniteElement(2, cell->getIndex());
+    const auto& vectorDOFs = vectorFES.getDOFs(2, cell->getIndex());
+    for (size_t local = 0; local < vectorFE.getCount(); ++local)
+    {
+      const auto basis =
+        vectorFES.getPushforward({2, cell->getIndex()}, vectorFE.getBasis(local));
+      const auto term = vector[vectorDOFs[local]] * basis(p);
+      if (local == 0)
+        expectedVector = term;
+      else
+        expectedVector += term;
+    }
+
+    EXPECT_NEAR(scalar(p), expectedScalar, 1e-13);
+    EXPECT_NEAR((vector(p) - expectedVector).norm(), 0, 1e-13);
   }
 
   // Vector H1 16x16 mesh test

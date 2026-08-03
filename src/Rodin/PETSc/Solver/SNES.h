@@ -181,9 +181,12 @@ namespace Rodin::Solver
        *
        * The solution vector is obtained directly from
        * @c ksp.getProblem().getLinearSystem().getSolution(), so no manual
-       * initial-guess packing is needed.  After the first solve the solution
-       * vector retains its value, providing a natural warm-start for subsequent
-       * time steps.
+       * initial-guess packing is needed. A full @c Problem::assemble() seeds
+       * this vector from the trial function data, so the initial iterate is
+       * the trial functions' state — consistent with
+       * @c NewtonSolverBase::solve(GridFunction&). After the first solve the
+       * solution vector retains its value, providing a natural warm start for
+       * subsequent time steps.
        */
       void solve();
 
@@ -228,18 +231,18 @@ namespace Rodin::Solver
     private:
       static PetscErrorCode Update(::Vec x, void* ctx);
       static PetscErrorCode Assemble(
-          ::Vec x, void* ctx, Variational::AssemblyTarget target);
+        ::Vec x, void* ctx, Variational::AssemblyTarget target);
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
-      ::PetscReal m_abstol,  ///< Absolute convergence tolerance.
-                  m_rtol,    ///< Relative convergence tolerance.
-                  m_stol;    ///< Step norm convergence tolerance.
-      ::PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
-                 m_maxF;     ///< Maximum function evaluations.
+      ::PetscReal m_abstol, ///< Absolute convergence tolerance.
+        m_rtol, ///< Relative convergence tolerance.
+        m_stol; ///< Step norm convergence tolerance.
+      ::PetscInt m_maxIt, ///< Maximum nonlinear iterations.
+        m_maxF; ///< Maximum function evaluations.
       StateUpdate m_update; ///< Optional state synchronization callback.
       Optional<::PetscObjectState> m_lhsAssembled;
       Optional<::PetscObjectState> m_rhsAssembled;

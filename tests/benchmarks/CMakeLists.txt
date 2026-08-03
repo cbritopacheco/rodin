@@ -1,4 +1,5 @@
 set(RodinBenchmarks_SRCS
+  GridFunction.cpp
   P1.cpp
   Poisson.cpp
   MeshIO.cpp
@@ -13,4 +14,3 @@ target_link_libraries(RodinBenchmarks
   Rodin::Solver
   benchmark::benchmark
   benchmark::benchmark_main)
-

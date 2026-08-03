@@ -12,12 +12,15 @@
  * @brief Attribute indexing for mesh polytopes.
  */
 
+#include <atomic>
+#include <deque>
 #include <mutex>
 #include <optional>
 #include <vector>
-#include <shared_mutex>
 
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/deque.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include "Rodin/Geometry/Types.h" // Attribute, Index, FlatSet
 
@@ -34,16 +37,15 @@ namespace Rodin::Geometry
    * -----------
    * The storage is organized by dimension:
    * - For each @c d in @c [0, meshDim], a @c Dimension stores:
-   *   - @c slots: a vector of @c Optional<Attribute>, indexed by polytope index.
-   *   - @c mutex: a @c std::shared_mutex protecting accesses to @c slots.
+   *   - @c slots: stable attribute slots indexed by polytope index.
+   *   - @c mutex: a mutex protecting storage growth.
    *
    * Thread-Safety Model
    * -------------------
    * This class provides fine-grained thread-safety at the level of individual
-   * dimensions:
-   * - Each dimension owns an independent @c std::shared_mutex.
-   * - Operations that read/write attributes in a given dimension synchronize
-   *   using that dimension's mutex.
+   * dimensions. Slot values and the published storage extent are atomic, so
+   * repeated reads require no lock. Storage growth and writes are serialized per
+   * dimension.
    *
    * After initialization, concurrent calls to the following methods are safe
    * w.r.t. each other (subject to each method's preconditions):
@@ -68,11 +70,11 @@ namespace Rodin::Geometry
    * Copy and Move Semantics
    * -----------------------
    * Copy construction:
-   * - Copies per-dimension storage using the source per-dimension locks.
+   * - Copies per-dimension storage while serializing source storage growth.
    *
    * Copy assignment:
    * - Requires both objects to be initialized with the same number of dimensions.
-   * - Copies per dimension using the per-dimension locks.
+   * - Copies per dimension while serializing storage growth.
    * - Is NOT an atomic snapshot across all dimensions: a concurrent reader may
    *   observe a mix of old and new dimension contents while assignment is in
    *   progress.
@@ -99,112 +101,179 @@ namespace Rodin::Geometry
      * @brief Storage for attributes of polytopes in a single dimension.
      *
      * Contains:
-     * - @c slots: attribute values indexed by polytope index.
-     * - @c mutex: a shared mutex protecting @c slots.
+     * - @c slots: stable attribute values indexed by polytope index.
+     * - @c mutex: a mutex protecting storage growth.
      *
      * Thread-safety:
-     * - Multiple concurrent readers are allowed via shared locking.
-     * - Writers use exclusive locking.
+     * - Readers use atomic slot snapshots and do not acquire a lock.
+     * - Storage growth and slot writes are serialized per dimension.
      */
-    struct Dimension
+    struct Slot
     {
       friend class boost::serialization::access;
 
-      std::vector<Optional<Attribute>> slots; ///< Attribute values indexed by polytope index
+      std::atomic<size_t> sequence{0};
+      std::atomic<Attribute> value{0};
+      std::atomic<bool> engaged{false};
 
-      mutable std::shared_mutex mutex; ///< Mutex for thread-safe access
+      Slot() = default;
+
+      Slot(const Slot& other)
+      {
+        assign(other.get());
+      }
+
+      Slot& operator=(const Slot& other)
+      {
+        if (this != &other)
+          set(other.get());
+        return *this;
+      }
+
+      Slot(Slot&& other) noexcept
+      {
+        assign(other.get());
+      }
+
+      Slot& operator=(Slot&& other) noexcept
+      {
+        if (this != &other)
+          set(other.get());
+        return *this;
+      }
+
+      Optional<Attribute> get() const
+      {
+        for (;;)
+        {
+          const size_t before = sequence.load(std::memory_order_acquire);
+          if (before & 1)
+            continue;
+
+          const bool hasValue = engaged.load(std::memory_order_relaxed);
+          const Attribute attribute = value.load(std::memory_order_relaxed);
+          const size_t after = sequence.load(std::memory_order_acquire);
+          if (before == after)
+            return hasValue ? Optional<Attribute>(attribute) : std::nullopt;
+        }
+      }
+
+      void set(const Optional<Attribute>& attribute)
+      {
+        sequence.fetch_add(1, std::memory_order_acq_rel);
+        assign(attribute);
+        sequence.fetch_add(1, std::memory_order_release);
+      }
+
+      template <class Archive>
+      void save(Archive& ar, const unsigned int) const
+      {
+        const Optional<Attribute> attribute = get();
+        ar & attribute;
+      }
+
+      template <class Archive>
+      void load(Archive& ar, const unsigned int)
+      {
+        Optional<Attribute> attribute;
+        ar & attribute;
+        assign(attribute);
+      }
+
+      BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    private:
+      void assign(const Optional<Attribute>& attribute)
+      {
+        if (attribute)
+          value.store(*attribute, std::memory_order_relaxed);
+        engaged.store(attribute.has_value(), std::memory_order_relaxed);
+      }
+    };
+
+    struct Dimension
+    {
+        friend class boost::serialization::access;
+
+        std::deque<Slot> slots; ///< Stable attribute slots indexed by polytope index
+        std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
+        mutable std::mutex mutex; ///< Serializes storage growth and slot writes
 
       /**
        * @brief Default constructor.
        */
-      Dimension() = default;
+        Dimension() = default;
 
       /**
        * @brief Copy constructor.
        *
-       * Copies the slot vector from @p other under @p other's shared lock.
+       * Copies the stable slots from @p other while blocking storage growth.
        *
        * Thread-safety:
        * - Safe w.r.t. concurrent readers/writers of @p other.
        */
-      Dimension(const Dimension& other)
-      {
-        std::shared_lock<std::shared_mutex> rd(other.mutex);
-        slots = other.slots;
-      }
+        Dimension(const Dimension& other)
+        {
+          std::lock_guard<std::mutex> lock(other.mutex);
+          slots = other.slots;
+          publishedSize.store(slots.size(), std::memory_order_relaxed);
+        }
 
       /**
        * @brief Copy assignment operator.
        *
-       * Assigns slots from @p other to @c *this using per-object locking.
-       * A deadlock-avoiding lock ordering is used based on object addresses.
+       * Assigns slots from @p other to @c *this while blocking storage growth.
        *
        * Thread-safety:
        * - Safe w.r.t. concurrent readers/writers of either dimension.
        * - Not an atomic snapshot w.r.t. external observers of the whole container.
        */
-      Dimension& operator=(const Dimension& other)
-      {
-        if (this == &other)
+        Dimension& operator=(const Dimension& other)
+        {
+          if (this == &other)
+            return *this;
+
+          std::scoped_lock lock(mutex, other.mutex);
+          slots = other.slots;
+          publishedSize.store(slots.size(), std::memory_order_release);
+
           return *this;
-
-        // Lock ordering by address to avoid deadlock.
-        const Dimension* first  = this;
-        const Dimension* second = &other;
-        if (std::less<const Dimension*>{}(second, first))
-          std::swap(first, second);
-
-        if (first == this)
-        {
-          std::unique_lock<std::shared_mutex> lockThis(mutex);
-          std::shared_lock<std::shared_mutex> lockOther(other.mutex);
-          slots = other.slots;
         }
-        else
-        {
-          std::shared_lock<std::shared_mutex> lockOther(other.mutex);
-          std::unique_lock<std::shared_mutex> lockThis(mutex);
-          slots = other.slots;
-        }
-
-        return *this;
-      }
 
       /**
        * @brief Move constructor.
        *
-       * Moves the slot vector from @p other under @p other's exclusive lock.
+       * Moves the stable slots from @p other while blocking storage growth.
        *
        * Thread-safety:
        * - Requires that no other thread accesses @p other concurrently.
        */
-      Dimension(Dimension&& other) noexcept
-      {
-        std::unique_lock<std::shared_mutex> wr(other.mutex);
-        slots = std::move(other.slots);
-      }
+        Dimension(Dimension&& other) noexcept
+        {
+          std::lock_guard<std::mutex> lock(other.mutex);
+          slots = std::move(other.slots);
+          publishedSize.store(slots.size(), std::memory_order_relaxed);
+        }
 
       /**
        * @brief Move assignment operator.
        *
-       * Moves slots from @p other into @c *this using exclusive locks on both.
+       * Moves slots from @p other into @c *this while blocking storage growth.
        *
        * Thread-safety:
        * - Requires external synchronization: no concurrent access to either
        *   dimension while moving.
        */
-      Dimension& operator=(Dimension&& other) noexcept
-      {
-        if (this == &other)
+        Dimension& operator=(Dimension&& other) noexcept
+        {
+          if (this == &other)
+            return *this;
+
+          std::scoped_lock lock(mutex, other.mutex);
+          slots = std::move(other.slots);
+          publishedSize.store(slots.size(), std::memory_order_release);
           return *this;
-
-        std::unique_lock<std::shared_mutex> thisLock(mutex, std::defer_lock);
-        std::unique_lock<std::shared_mutex> otherLock(other.mutex, std::defer_lock);
-        std::lock(thisLock, otherLock);
-
-        slots = std::move(other.slots);
-        return *this;
-      }
+        }
 
       /**
        * @brief Serialization method for Boost.Serialization.
@@ -212,11 +281,21 @@ namespace Rodin::Geometry
        *
        * The serialization version argument is ignored.
        */
-      template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
-      {
-        ar & slots;
-      }
+        template <class Archive>
+        void save(Archive& ar, const unsigned int) const
+        {
+          std::lock_guard<std::mutex> lock(mutex);
+          ar & slots;
+        }
+
+        template <class Archive>
+        void load(Archive& ar, const unsigned int)
+        {
+          ar & slots;
+          publishedSize.store(slots.size(), std::memory_order_relaxed);
+        }
+
+        BOOST_SERIALIZATION_SPLIT_MEMBER()
     };
 
     public:
@@ -255,7 +334,7 @@ namespace Rodin::Geometry
        *   (i.e. same @c m_dimensions.size()).
        *
        * Thread-safety:
-       * - Uses per-dimension locks.
+       * - Serializes storage growth per dimension; slot snapshots are atomic.
        * - Not an atomic snapshot across dimensions.
        */
       AttributeIndex& operator=(const AttributeIndex& other)
@@ -345,9 +424,10 @@ namespace Rodin::Geometry
       void resize(size_t d, size_t count)
       {
         auto& dim = m_dimensions.at(d);
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
+        std::lock_guard<std::mutex> lock(dim.mutex);
         if (dim.slots.size() < count)
-          dim.slots.resize(count, std::nullopt);
+          dim.slots.resize(count);
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
       }
 
       /**
@@ -357,7 +437,7 @@ namespace Rodin::Geometry
        * assigns @p attr.
        *
        * Thread-safety:
-       * - Thread-safe (dimension-level exclusive lock).
+       * - Thread-safe (dimension growth and slot writes are serialized).
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
        * @param[in] attr Attribute value to assign.
@@ -369,11 +449,12 @@ namespace Rodin::Geometry
         assert(d < m_dimensions.size());
 
         auto& dim = m_dimensions.at(d);
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
+        std::lock_guard<std::mutex> lock(dim.mutex);
         if (dim.slots.size() <= idx)
-          dim.slots.resize(idx + 1, std::nullopt);
+          dim.slots.resize(idx + 1);
         assert(idx < dim.slots.size());
-        dim.slots[idx] = attr;
+        dim.slots[idx].set(attr);
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
       }
 
       /**
@@ -386,7 +467,7 @@ namespace Rodin::Geometry
        * - @p idx < @p count.
        *
        * Thread-safety:
-       * - Thread-safe (dimension-level exclusive lock).
+       * - Thread-safe (dimension growth and slot writes are serialized).
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
        * @param[in] count Expected number of polytopes in this dimension.
@@ -400,10 +481,11 @@ namespace Rodin::Geometry
         assert(idx < count);
 
         auto& dim = m_dimensions.at(d);
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
+        std::lock_guard<std::mutex> lock(dim.mutex);
         if (dim.slots.size() < count)
-          dim.slots.resize(count, std::nullopt);
-        dim.slots[idx] = attr;
+          dim.slots.resize(count);
+        dim.slots[idx].set(attr);
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
       }
 
       /**
@@ -413,7 +495,7 @@ namespace Rodin::Geometry
        * then resets the entry at @p idx to @c std::nullopt.
        *
        * Thread-safety:
-       * - Thread-safe (dimension-level exclusive lock).
+       * - Thread-safe (dimension growth and slot writes are serialized).
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
        * @param[in] count Expected number of polytopes in this dimension.
@@ -423,16 +505,17 @@ namespace Rodin::Geometry
         const auto& [d, idx] = p;
         auto& dim = m_dimensions.at(d);
         assert(d < m_dimensions.size());
-        std::unique_lock<std::shared_mutex> wr(dim.mutex);
+        std::lock_guard<std::mutex> lock(dim.mutex);
         if (dim.slots.size() < count)
-          dim.slots.resize(count, std::nullopt);
-        dim.slots[idx].reset();
+          dim.slots.resize(count);
+        dim.slots[idx].set(std::nullopt);
+        dim.publishedSize.store(dim.slots.size(), std::memory_order_release);
       }
 
       /**
        * @brief Gets the attribute for a polytope.
        *
-       * Reads the slot at @p idx under a shared lock.
+       * Reads an atomic snapshot of the slot at @p idx.
        *
        * Notes:
        * - This method does not resize. If @p idx is out of range, returns
@@ -442,7 +525,8 @@ namespace Rodin::Geometry
        * - @p idx < @p count (debug-checked).
        *
        * Thread-safety:
-       * - Thread-safe (dimension-level shared lock).
+       * - Thread-safe and does not acquire a mutex when the slot has been
+       *   published.
        *
        * @param[in] p Pair (dimension, index) identifying the polytope.
        * @param[in] count Expected number of polytopes in this dimension.
@@ -456,13 +540,9 @@ namespace Rodin::Geometry
         assert(idx < count);
 
         const auto& dim = m_dimensions.at(d);
-        std::shared_lock<std::shared_mutex> rd(dim.mutex);
-
-        // No resizing here: assume resize(d, count) happened earlier.
-        if (idx >= dim.slots.size())
+        if (idx >= dim.publishedSize.load(std::memory_order_acquire))
           return std::nullopt;
-
-        return dim.slots[idx];
+        return dim.slots[idx].get();
       }
 
       /**
@@ -472,7 +552,7 @@ namespace Rodin::Geometry
        * attributes.
        *
        * Thread-safety:
-       * - Thread-safe (dimension-level shared lock).
+       * - Thread-safe; each published slot is read atomically.
        *
        * @param[in] d Dimension of polytopes.
        * @return A flat set of unique attribute values.
@@ -481,9 +561,10 @@ namespace Rodin::Geometry
       {
         FlatSet<Attribute> out;
         const auto& dim = m_dimensions.at(d);
-        std::shared_lock<std::shared_mutex> rd(dim.mutex);
-        for (const auto& oa : dim.slots)
+        const size_t size = dim.publishedSize.load(std::memory_order_acquire);
+        for (size_t i = 0; i < size; ++i)
         {
+          const Optional<Attribute> oa = dim.slots[i].get();
           if (oa)
             out.insert(*oa);
         }

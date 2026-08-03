@@ -7,7 +7,6 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
-
 /**
  * @file
  * @brief Distributed P1 finite element space specialization on MPI meshes.
@@ -185,7 +184,8 @@ namespace Rodin::Variational
            */
           template <class Callable>
           CallablePullback(const Geometry::Polytope& polytope, Callable&& v)
-            : m_polytope(polytope), m_v(std::forward<Callable>(v))
+            : m_polytope(polytope),
+              m_v(std::forward<Callable>(v))
           {}
 
           /// @brief Copy constructor.
@@ -341,9 +341,11 @@ namespace Rodin::Variational
           UnorderedSet<int> nbrs;
           for (const auto& [i, peers] : halo)
             for (const Index r : peers)
-              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
           for (const auto& [lv, own] : owner)
-            if (static_cast<int>(own) != rank) nbrs.insert(static_cast<int>(own));
+            if (static_cast<int>(own) != rank)
+              nbrs.insert(static_cast<int>(own));
           neighbors.assign(nbrs.begin(), nbrs.end());
         }
 
@@ -353,8 +355,8 @@ namespace Rodin::Variational
           send[r]; // default-construct empty entry
 
         // owned + non-owned is a good upper bound
-        std::vector<std::pair<Index, Index>> gl_pairs;
-        gl_pairs.reserve(shard.getVertexCount());
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(shard.getVertexCount());
 
         // Number every owned local vertex.
         Index dofIdx = 0;
@@ -367,7 +369,7 @@ namespace Rodin::Variational
           const Index local  = m_fes.getDOFs(0, lv)[0];
           const Index global = m_offset + dofIdx++;
 
-          gl_pairs.push_back({ global, local });
+          globalLocalPairs.push_back({global, local});
 
           // Notify all neighbors that also hold this vertex.
           auto hit = halo.find(lv);
@@ -420,35 +422,33 @@ namespace Rodin::Variational
             assert(!shard.isOwned(0, lv));
 
             const Index local = m_fes.getDOFs(0, lv)[0];
-            gl_pairs.push_back({ global, local });
+            globalLocalPairs.push_back({global, local});
           }
         }
 
-        std::sort(gl_pairs.begin(), gl_pairs.end(),
-                  [](const auto& a, const auto& b) { return a.first < b.first; });
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end(),
+          [](const auto& a, const auto& b) { return a.first < b.first; });
 
-        gl_pairs.erase(
-            std::unique(gl_pairs.begin(), gl_pairs.end(),
-                        [](const auto& a, const auto& b)
-                        {
-                          return a.first == b.first;
-                        }),
-            gl_pairs.end());
+        globalLocalPairs.erase(
+          std::unique(globalLocalPairs.begin(), globalLocalPairs.end(),
+            [](const auto& a, const auto& b) { return a.first == b.first; }),
+          globalLocalPairs.end());
 
-        m_local_to_global.right = FlatMap<Index, Index>(gl_pairs.begin(), gl_pairs.end());
+        m_localToGlobal.right =
+          FlatMap<Index, Index>(globalLocalPairs.begin(), globalLocalPairs.end());
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
-        for (const auto& [global, local] : m_local_to_global.right)
+        for (const auto& [global, local] : m_localToGlobal.right)
         {
           assert(local < localDofCount);
-          m_local_to_global.left[local] = global;
+          m_localToGlobal.left[local] = global;
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -494,9 +494,11 @@ namespace Rodin::Variational
           UnorderedSet<int> nbrs;
           for (const auto& [i, peers] : halo)
             for (const Index r : peers)
-              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
           for (const auto& [lv, own] : owner)
-            if (static_cast<int>(own) != rank) nbrs.insert(static_cast<int>(own));
+            if (static_cast<int>(own) != rank)
+              nbrs.insert(static_cast<int>(own));
           neighbors.assign(nbrs.begin(), nbrs.end());
         }
 
@@ -523,7 +525,8 @@ namespace Rodin::Variational
               const Index global = m_offset + dofIdx;
               s_send.push_back(global);
 
-              const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
+              [[maybe_unused]] const auto [it, inserted] =
+                m_localToGlobal.right.emplace(global, local);
               assert(inserted);
 
               ++dofIdx;
@@ -537,7 +540,7 @@ namespace Rodin::Variational
               {
                 const int rpeer = static_cast<int>(peer);
                 assert(rpeer != rank);
-                push[rpeer].push_back({ gid, s_send });
+                push[rpeer].push_back({gid, s_send});
               }
             }
           }
@@ -576,28 +579,29 @@ namespace Rodin::Variational
               continue;
 
             const auto& dofs = m_fes.getDOFs(0, *i);
-            assert(dofs.size() == global.size());
+            assert(static_cast<size_t>(dofs.size()) == global.size());
 
-            for (size_t k = 0; k < global.size(); ++k)
+            for (size_t k = 0; k < static_cast<size_t>(global.size()); ++k)
             {
-              const auto [it, inserted] = m_local_to_global.right.emplace(global[k], dofs[k]);
+              [[maybe_unused]] const auto [it, inserted] =
+                m_localToGlobal.right.emplace(global[k], dofs[k]);
               assert(inserted);
             }
           }
         }
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
-        for (const auto& [global, local] : m_local_to_global.right)
+        for (const auto& [global, local] : m_localToGlobal.right)
         {
           assert(local < localDofCount);
-          m_local_to_global.left[local] = global;
+          m_localToGlobal.left[local] = global;
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -649,7 +653,7 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(localIdx);
+        return m_localToGlobal.left.at(localIdx);
       }
 
       /**
@@ -663,8 +667,8 @@ namespace Rodin::Variational
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto find = m_local_to_global.right.find(globalIdx);
-        if (find == m_local_to_global.right.end())
+        auto find = m_localToGlobal.right.find(globalIdx);
+        if (find == m_localToGlobal.right.end())
           return std::nullopt;
         else
           return *find;
@@ -803,7 +807,7 @@ namespace Rodin::Variational
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
         return CallablePullback<CallableType>(
-            *mesh.getPolytope(d, i), std::forward<CallableType>(v));
+          *mesh.getPolytope(d, i), std::forward<CallableType>(v));
       }
 
       /**
@@ -817,7 +821,7 @@ namespace Rodin::Variational
       auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
         return typename FESType::template Pushforward<CallableType>(
-            std::forward<CallableType>(v));
+          std::forward<CallableType>(v));
       }
 
       /**
@@ -831,7 +835,19 @@ namespace Rodin::Variational
       auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
         return typename FESType::template Pushforward<CallableType>(
-            std::forward<CallableType>(v));
+          std::forward<CallableType>(v));
+      }
+
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:
@@ -840,7 +856,7 @@ namespace Rodin::Variational
 
       size_t m_offset;
       size_t m_owned;
-      IndexBimap m_local_to_global;
+      IndexBimap m_localToGlobal;
   };
 }
 

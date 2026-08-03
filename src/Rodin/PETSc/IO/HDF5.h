@@ -183,7 +183,7 @@ namespace Rodin::IO
         auto& vec = gf.getData();
 
         PetscInt rb = 0, re = 0;
-        auto ierr = VecGetOwnershipRange(vec, &rb, &re);
+        [[maybe_unused]] auto ierr = VecGetOwnershipRange(vec, &rb, &re);
         assert(ierr == PETSC_SUCCESS);
         const PetscInt localN = re - rb;
 
@@ -280,7 +280,7 @@ namespace Rodin::IO
         const auto& vec = gf.getData();
 
         PetscInt rb = 0, re = 0;
-        auto ierr = VecGetOwnershipRange(vec, &rb, &re);
+        [[maybe_unused]] auto ierr = VecGetOwnershipRange(vec, &rb, &re);
         assert(ierr == PETSC_SUCCESS);
         const PetscInt localN = re - rb;
 

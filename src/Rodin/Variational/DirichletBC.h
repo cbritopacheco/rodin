@@ -297,8 +297,7 @@ namespace Rodin::Variational
        *
        * The constraint encoded is @f$ u_s = \sum_j C_{sj}\, v_j @f$.
        */
-      using IdentifiedDOFs =
-        IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
+      using IdentifiedDOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /**
        * @brief Optional defects for affine identification rows.
@@ -362,7 +361,10 @@ namespace Rodin::Variational
        * apply the correct global offset when assembling identified-DOF
        * constraints.
        */
-      virtual Optional<Identifiable::UUID> getValueUUID() const { return {}; }
+      virtual Optional<Identifiable::UUID> getValueUUID() const
+      {
+        return {};
+      }
 
       /**
        * @brief Returns optional defects for affine identification BCs.
@@ -468,7 +470,8 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using DefaultAssemblyType =
-        typename Assembly::Default<FESMeshContextType>::template Type<ValueDOFs, DirichletBC>;
+        typename Assembly::Default<FESMeshContextType>::template Type<ValueDOFs,
+          DirichletBC>;
 
       using AssemblyType =
         DefaultAssemblyType;
@@ -568,8 +571,7 @@ namespace Rodin::Variational
         // Ensure variant holds the ValueDOFs alternative.
         if (!std::holds_alternative<ValueDOFs>(m_dofs))
           m_dofs = ValueDOFs{};
-        m_assembly.execute(
-            std::get<ValueDOFs>(m_dofs), { m_u.get(), *m_value, m_essBdr });
+        m_assembly.execute(std::get<ValueDOFs>(m_dofs), {m_u.get(), *m_value, m_essBdr});
       }
 
       bool isComponent() const override
@@ -773,11 +775,10 @@ namespace Rodin::Variational
    * @see ShapeFunctionBase::setIntegrationPoint
    * @see PeriodicBC
    */
-  template <class Solution, class FES1,
-            class Derived2, class FES2, ShapeFunctionSpaceType Sp>
-  class DirichletBC<TrialFunction<Solution, FES1>,
-                    ShapeFunctionBase<Derived2, FES2, Sp>> final
-    : public DirichletBCBase<typename FormLanguage::Traits<FES1>::ScalarType>
+  template <class Solution, class FES1, class Derived2, class FES2,
+    ShapeFunctionSpaceType Sp>
+  class DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>
+    final : public DirichletBCBase<typename FormLanguage::Traits<FES1>::ScalarType>
   {
     public:
       /// @brief Finite element space type.
@@ -790,8 +791,7 @@ namespace Rodin::Variational
       using ValueType = ShapeFunctionBase<Derived2, FES2, Sp>;
 
       /// Scalar type
-      using ScalarType =
-        typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Parent class
       using Parent = DirichletBCBase<ScalarType>;
@@ -804,20 +804,17 @@ namespace Rodin::Variational
       /// Variant DOFs type
       using DOFs = typename Parent::DOFs;
 
-      using FESMeshType =
-        typename FormLanguage::Traits<FESType>::MeshType;
+      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
-      using FESRangeType =
-        typename FormLanguage::Traits<FESType>::RangeType;
+      using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
-      using FESMeshContextType =
-        typename FormLanguage::Traits<FESMeshType>::ContextType;
+      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using DefaultAssemblyType =
-        typename Assembly::Default<FESMeshContextType>::template Type<IdentifiedDOFs, DirichletBC>;
+        typename Assembly::Default<FESMeshContextType>::template Type<IdentifiedDOFs,
+          DirichletBC>;
 
-      using AssemblyType =
-        DefaultAssemblyType;
+      using AssemblyType = DefaultAssemblyType;
 
       class DefectBase
       {
@@ -863,7 +860,8 @@ namespace Rodin::Variational
        * @param[in] v Right-hand-side shape function expression @f$ A(v) @f$
        */
       DirichletBC(const OperandType& u, const ValueType& v)
-        : m_u(u), m_v(v.copy())
+        : m_u(u),
+          m_v(v.copy())
       {}
 
       /**
@@ -883,10 +881,8 @@ namespace Rodin::Variational
        * @param[in] defect Known additive defect @f$ d @f$
        */
       template <class DefectDerived>
-      DirichletBC(
-          const OperandType& u,
-          const ValueType& v,
-          const FunctionBase<DefectDerived>& defect)
+      DirichletBC(const OperandType& u, const ValueType& v,
+        const FunctionBase<DefectDerived>& defect)
         : m_u(u),
           m_v(v.copy()),
           m_defect(std::make_unique<Defect<DefectDerived>>(defect))
@@ -923,8 +919,7 @@ namespace Rodin::Variational
        * @f$ u=A(v) @f$ is enforced. Both slave and master DOFs are read from
        * the *same* face polytopes — there is no cross-face matching.
        */
-      constexpr
-      DirichletBC& on(Geometry::Attribute bdrAtr)
+      constexpr DirichletBC& on(Geometry::Attribute bdrAtr)
       {
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
@@ -932,18 +927,16 @@ namespace Rodin::Variational
       /**
        * @brief Sets @f$ \Gamma_D @f$ to the union of multiple attributes.
        */
-      template <class A1, class A2, class ... As>
-      constexpr
-      DirichletBC& on(A1 a1, A2 a2, As... as)
+      template <class A1, class A2, class... As>
+      constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
-        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+        return on(FlatSet<Geometry::Attribute>{a1, a2, as...});
       }
 
       /**
        * @brief Sets @f$ \Gamma_D @f$ to a precomputed attribute set.
        */
-      constexpr
-      DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
+      constexpr DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
         assert(bdrAttrs.size() > 0);
         m_essBdr = bdrAttrs;
@@ -953,8 +946,7 @@ namespace Rodin::Variational
       /**
        * @returns The boundary attribute set defining @f$ \Gamma_D @f$.
        */
-      constexpr
-      const FlatSet<Geometry::Attribute>& getAttributes() const
+      constexpr const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_essBdr;
       }
@@ -994,8 +986,7 @@ namespace Rodin::Variational
       {
         if (!std::holds_alternative<IdentifiedDOFs>(m_dofs))
           m_dofs = IdentifiedDOFs{};
-        m_assembly.execute(
-            std::get<IdentifiedDOFs>(m_dofs), { m_u.get(), *m_v, m_essBdr });
+        m_assembly.execute(std::get<IdentifiedDOFs>(m_dofs), {m_u.get(), *m_v, m_essBdr});
 
         m_values.clear();
         if (m_defect)
@@ -1019,18 +1010,17 @@ namespace Rodin::Variational
 
             const auto& fe = fes.getFiniteElement(faceDim, i);
             const auto mapping = fes.getPullback(
-                { faceDim, i },
-                [defect = m_defect.get()](const Geometry::Point& p)
-                {
-                  return defect->getValue(p);
-                });
+              {faceDim, i}, [defect = m_defect.get()](const Geometry::Point& p) {
+                return defect->getValue(p);
+              });
 
             for (Index local = 0; local < fe.getCount(); local++)
             {
-              const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+              const Index global = fes.getGlobalIndex({faceDim, i}, local);
               auto find = m_values.find(global);
               if (find == m_values.end())
-                m_values.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
+                m_values.insert(
+                  find, std::pair{global, fe.getLinearForm(local)(mapping)});
             }
           }
         }
@@ -1107,21 +1097,17 @@ namespace Rodin::Variational
    * @ingroup RodinCTAD
    * @brief CTAD for the identification DirichletBC.
    */
-  template <class Solution, class FES1,
-            class Derived2, class FES2, ShapeFunctionSpaceType Sp>
-  DirichletBC(const TrialFunction<Solution, FES1>&,
-              const ShapeFunctionBase<Derived2, FES2, Sp>&)
-    -> DirichletBC<TrialFunction<Solution, FES1>,
-                   ShapeFunctionBase<Derived2, FES2, Sp>>;
+  template <class Solution, class FES1, class Derived2, class FES2,
+    ShapeFunctionSpaceType Sp>
+  DirichletBC(
+    const TrialFunction<Solution, FES1>&, const ShapeFunctionBase<Derived2, FES2, Sp>&)
+    -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 
-  template <class Solution, class FES1,
-            class Derived2, class FES2, ShapeFunctionSpaceType Sp,
-            class DefectDerived>
+  template <class Solution, class FES1, class Derived2, class FES2,
+    ShapeFunctionSpaceType Sp, class DefectDerived>
   DirichletBC(const TrialFunction<Solution, FES1>&,
-              const ShapeFunctionBase<Derived2, FES2, Sp>&,
-              const FunctionBase<DefectDerived>&)
-    -> DirichletBC<TrialFunction<Solution, FES1>,
-                   ShapeFunctionBase<Derived2, FES2, Sp>>;
+    const ShapeFunctionBase<Derived2, FES2, Sp>&, const FunctionBase<DefectDerived>&)
+    -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 
 /// @endcond

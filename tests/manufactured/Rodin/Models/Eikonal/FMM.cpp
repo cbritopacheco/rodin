@@ -329,8 +329,8 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     // Create 3D mesh
     Mesh mesh;
-    mesh = mesh.UniformGrid(GetParam(), { n, n, n });
-    mesh.scale(h);  // Scale to [0, 2]^3
+    mesh = mesh.UniformGrid(GetParam(), {n, n, n});
+    mesh.scale(h); // Scale to [0, 2]^3
     mesh.displace(VectorFunction{ -1.0, -1.0, -1.0 });  // Center at origin: [-1, 1]^3
     mesh.getConnectivity().compute(3, 0);
     mesh.getConnectivity().compute(2, 3);
@@ -380,21 +380,14 @@ namespace Rodin::Tests::Manufactured::Eikonal
     if (count > 0)
     {
       Real avg_error = total_error / count;
-      EXPECT_LT(avg_error, h)
-        << "Average error should be within tolerance";
+      EXPECT_LT(avg_error, h) << "Average error should be within tolerance";
     }
   }
 
   /// @brief Instantiates FMM Manufactured 3 D Test over the All Geometries 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometries3D,
-    FMMManufactured3DTest,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(AllGeometries3D, FMMManufactured3DTest,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   // Test 6: Anisotropic speed function test
   /// @brief Verifies anisotropic speed 2 D for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.

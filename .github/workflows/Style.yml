@@ -66,20 +66,22 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           clang-tidy-18 libomp-18-dev cmake libboost-all-dev libeigen3-dev
-          libhdf5-dev
+          libhdf5-dev libsuitesparse-dev libscotch-dev libmetis-dev petsc-dev mpich
       - name: Configure (generates Configure.h)
         run: >-
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_USE_PETSC=OFF
+          -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_TIDY=ON
+          -DRODIN_USE_OPENMP=ON -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_SCOTCH=ON -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_SPQR=ON -DRODIN_USE_CHOLMOD=ON
       - name: clang-tidy naming ratchet
         # Full-tree analysis of the aggregate TU against the committed
         # findings baseline (dev/clang_tidy.baseline): only NEW naming
         # violations fail; fixing names shrinks the baseline.
-        run: >-
-          python3 dev/check_clang_tidy.py --clang-tidy clang-tidy-18
-          --flags "-std=c++20 -fopenmp -I$PWD/src -I$PWD/build/src
-          -I$PWD/third-party/termcolor/include -isystem /usr/include/eigen3
-          -isystem /usr/include/hdf5/serial"
+        run: |
+          cmake --build build --target copy_mmg_headers
+          python3 dev/check_clang_tidy.py --clang-tidy clang-tidy-18 \
+            --build-dir build
 
   DoxygenRatchet:
     runs-on: ubuntu-24.04

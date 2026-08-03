@@ -112,7 +112,8 @@ namespace Rodin::MMG
             mesh.setRequiredEdge(idx);
         }
         mesh.getRequiredTriangles().clear();
-        const size_t triangleCount = mesh.getPolytopeCount(Geometry::Polytope::Type::Triangle);
+        const size_t triangleCount =
+          mesh.getPolytopeCount(Geometry::Polytope::Type::Triangle);
         for (const auto& idx : requiredTriangles)
         {
           if (idx < triangleCount)

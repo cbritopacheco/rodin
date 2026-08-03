@@ -62,12 +62,18 @@ namespace Rodin::Assembly
       OpenMPIteration(const MeshType& mesh, const Geometry::Region& region);
 
       /**
-       * @brief Gets an iterator for a specific thread.
-       *
-       * @param i Thread index
-       * @return PolytopeIterator for the specified thread's element subset
+       * @brief Gets an iterator positioned at a specific polytope.
+       * @param i Polytope index
+       * @return Iterator positioned at @p i
        */
       Geometry::PolytopeIterator getIterator(Index i) const;
+
+      /**
+       * @brief Gets a polytope value for an indexed assembly iteration.
+       * @param i Polytope index
+       * @return Non-owning polytope descriptor
+       */
+      Geometry::Polytope getPolytope(Index i) const;
 
       /**
        * @brief Gets the topological dimension of elements.
@@ -235,8 +241,8 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
@@ -536,8 +542,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
               }
 
-              auto it = seq.getIterator(i);
-              lbfi->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              lbfi->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
@@ -585,21 +591,26 @@ namespace Rodin::Assembly
                 if (!a || !testAttrs.contains(*a)) continue;
               }
 
-              auto teIt = testseq.getIterator(i);
-              SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+              const auto testPolytope = testseq.getPolytope(i);
+              OpenMPIteration trialseq{mesh, gbfi->getTrialRegion()};
+              const Index rd = trialseq.getDimension();
+              const Index rcount = trialseq.getCount();
 
-              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+              for (Index tr = 0; tr < rcount; ++tr)
               {
+                if (!trialseq.filter(tr))
+                  continue;
                 if (!trialAttrs.empty())
                 {
-                  const auto a = trIt->getAttribute(); // Optional<Attribute>
+                  const auto a = mesh.getAttribute(rd, tr);
                   if (!a || !trialAttrs.contains(*a)) continue; // or trialAttrs.count(*a)==0
                 }
 
-                gbfi->setPolytope(*trIt, *teIt);
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                gbfi->setPolytope(trialPolytope, testPolytope);
 
-                const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
-                const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
+                const auto& rows = input.getTestFES().getDOFs(d, i);
+                const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (size_t r = 0; r < rows.size(); ++r)
                   for (size_t c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
@@ -729,8 +740,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& dofs = input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
@@ -868,7 +879,8 @@ namespace Rodin::Assembly
 #pragma omp for
           for (Index i = 0; i < faceCount; ++i)
           {
-            if (essBdr.empty() && !mesh.isBoundary(i)) continue;
+            if (essBdr.empty() && !mesh.isBoundary(i))
+              continue;
             if (!essBdr.empty())
             {
               const auto a = mesh.getAttribute(faceDim, i);
@@ -1038,52 +1050,51 @@ namespace Rodin::Assembly
             continue;
 
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
-                constraints.setFixed(
-                    static_cast<Index>(local),
-                    static_cast<ScalarType>(value));
-              }
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              // Single-FES path: master = same FES as slave, no offset.
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
-              {
-                const auto& masters = pair.first;
-                const auto& coeffs  = pair.second;
-                const Index n =
-                    static_cast<Index>(masters.size());
-                std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
-                entries.reserve(static_cast<size_t>(n));
-                for (Index k = 0; k < n; k++)
+                for (const auto& [local, value] : dofs)
                 {
-                  entries.push_back({
-                      static_cast<Index>(masters[k]),
-                      static_cast<ScalarType>(coeffs[k]) });
+                  constraints.setFixed(
+                    static_cast<Index>(local), static_cast<ScalarType>(value));
                 }
-                const auto valueIt = affineValues.find(slave);
-                const ScalarType value =
-                  valueIt == affineValues.end()
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
+              {
+                // Single-FES path: master = same FES as slave, no offset.
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
+                {
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  const Index n = static_cast<Index>(masters.size());
+                  std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(n));
+                  for (Index k = 0; k < n; k++)
+                  {
+                    entries.push_back({static_cast<Index>(masters[k]),
+                      static_cast<ScalarType>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const ScalarType value = valueIt == affineValues.end()
                     ? ScalarType(0)
                     : static_cast<ScalarType>(valueIt->second);
-                constraints.setIdentification(static_cast<Index>(slave), entries, value);
+                  constraints.setIdentification(
+                    static_cast<Index>(slave), entries, value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         if constexpr (IsSparse)
         {
           // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
+          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
+            static_cast<size_t>(tc));
 
           auto sparseEntry = [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
                                std::vector<std::pair<Index, ScalarType>>& localRhs,
@@ -1091,20 +1102,17 @@ namespace Rodin::Assembly
             if (val == ScalarType(0))
               return;
 
-            const ScalarType colValue =
-              constraints.isIdentified(col)
-                ? constraints.getIdentificationValue(col)
-                : ScalarType(0);
+            const ScalarType colValue = constraints.isIdentified(col)
+              ? constraints.getIdentificationValue(col)
+              : ScalarType(0);
 
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs.emplace_back(
-                    r.index,
-                    -r.coefficient * val * colValue);
+                localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
                 localT.emplace_back(
-                    r.index, c.index, r.coefficient * val * c.coefficient);
+                  r.index, c.index, r.coefficient * val * c.coefficient);
             }
           };
 
@@ -1143,8 +1151,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1194,6 +1202,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
                 const Index rcount = trialseq.getCount();
@@ -1209,10 +1218,8 @@ namespace Rodin::Assembly
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  auto teIt = testseq.getIterator(te);
-                  auto trIt = trialseq.getIterator(tr);
-
-                  integrator->setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1263,8 +1270,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -1306,7 +1313,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            v0.clear();
+            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -1319,10 +1326,10 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(all.size() + rows);
-          for (const auto& t : all)
+          size_t write = 0;
+          for (size_t read = 0; read < all.size(); ++read)
           {
+            const auto& t = all[read];
             const Index row = static_cast<Index>(t.row());
             const Index col = static_cast<Index>(t.col());
             const ScalarType val = t.value();
@@ -1334,21 +1341,23 @@ namespace Rodin::Assembly
                 val * constraints.getFixedValue(col);
               continue;
             }
-            filtered.push_back(t);
+            if (write != read)
+              all[write] = t;
+            ++write;
           }
+          all.resize(write);
 
           for (Index i = 0; i < static_cast<Index>(rows); ++i)
           {
             if (constraints.isFixed(i))
             {
-              filtered.emplace_back(i, i, ScalarType(1));
-              b.coeffRef(static_cast<size_t>(i)) =
-                constraints.getFixedValue(i);
+              all.emplace_back(i, i, ScalarType(1));
+              b.coeffRef(static_cast<size_t>(i)) = constraints.getFixedValue(i);
             }
           }
 
           A.resize(rows, cols);
-          A.setFromTriplets(filtered.begin(), filtered.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
@@ -1394,8 +1403,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1409,18 +1418,16 @@ namespace Rodin::Assembly
                     const ScalarType val = Math::conj(integrator->integrate(j, i));
                     if (val != ScalarType(0))
                     {
-                      const ScalarType colValue =
-                        constraints.isIdentified(J)
-                          ? constraints.getIdentificationValue(J)
-                          : ScalarType(0);
+                      const ScalarType colValue = constraints.isIdentified(J)
+                        ? constraints.getIdentificationValue(J)
+                        : ScalarType(0);
                       for (const auto& r : constraints.expand(I))
                       {
                         if (colValue != ScalarType(0))
                           localRhs[static_cast<size_t>(r.index)] -=
                             r.coefficient * val * colValue;
                         for (const auto& c : constraints.expand(J))
-                          Alocal(r.index, c.index) +=
-                            r.coefficient * val * c.coefficient;
+                          Alocal(r.index, c.index) += r.coefficient * val * c.coefficient;
                       }
                     }
                   }
@@ -1460,6 +1467,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
                 const Index rcount = trialseq.getCount();
@@ -1475,10 +1483,8 @@ namespace Rodin::Assembly
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  auto teIt = testseq.getIterator(te);
-                  auto trIt = trialseq.getIterator(tr);
-
-                  integrator->setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1489,10 +1495,9 @@ namespace Rodin::Assembly
                       const ScalarType val = Math::conj(integrator->integrate(j, i));
                       if (val != ScalarType(0))
                       {
-                        const ScalarType colValue =
-                          constraints.isIdentified(J)
-                            ? constraints.getIdentificationValue(J)
-                            : ScalarType(0);
+                        const ScalarType colValue = constraints.isIdentified(J)
+                          ? constraints.getIdentificationValue(J)
+                          : ScalarType(0);
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
@@ -1524,15 +1529,14 @@ namespace Rodin::Assembly
                 {
                   const ScalarType colValue =
                     constraints.isIdentified(static_cast<Index>(j))
-                      ? constraints.getIdentificationValue(static_cast<Index>(j))
-                      : ScalarType(0);
+                    ? constraints.getIdentificationValue(static_cast<Index>(j))
+                    : ScalarType(0);
                   for (const auto& r : constraints.expand(static_cast<Index>(i)))
                   {
                     if (colValue != ScalarType(0))
                       b.coeffRef(r.index) -= r.coefficient * val * colValue;
                     for (const auto& c : constraints.expand(static_cast<Index>(j)))
-                      A(r.index, c.index) +=
-                        r.coefficient * val * c.coefficient;
+                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
                   }
                 }
               }
@@ -1567,8 +1571,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue;
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -1577,8 +1581,7 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs[static_cast<size_t>(r.index)] +=
-                      r.coefficient * val;
+                    localRhs[static_cast<size_t>(r.index)] += r.coefficient * val;
                 }
               }
             }
@@ -1653,10 +1656,8 @@ namespace Rodin::Assembly
        * @param input Problem assembly input.
        * @param target Side of the system to assemble.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -1816,59 +1817,55 @@ namespace Rodin::Assembly
           const size_t uOff   = trialOffsets[uBlock];
 
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
-                const Index I = static_cast<Index>(
-                    uOff + static_cast<size_t>(local));
-                constraints.setFixed(I, static_cast<ScalarType>(value));
-              }
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              const auto vUUIDOpt = dbc.getValueUUID();
-              assert(vUUIDOpt
-                  && "Identification DBC missing value UUID");
-              const size_t vBlock = findTrialBlock(*vUUIDOpt);
-              const size_t vOff   = trialOffsets[vBlock];
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
-              {
-                const auto& masters = pair.first;
-                const auto& coeffs  = pair.second;
-                const Index gs = static_cast<Index>(
-                    uOff + static_cast<size_t>(slave));
-                const Index n =
-                    static_cast<Index>(masters.size());
-                std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
-                entries.reserve(static_cast<size_t>(n));
-                for (Index k = 0; k < n; k++)
+                for (const auto& [local, value] : dofs)
                 {
-                  const Index gm = static_cast<Index>(
-                      vOff + static_cast<size_t>(masters[k]));
-                  entries.push_back(
-                      { gm, static_cast<ScalarType>(coeffs[k]) });
+                  const Index I = static_cast<Index>(uOff + static_cast<size_t>(local));
+                  constraints.setFixed(I, static_cast<ScalarType>(value));
                 }
-                const auto valueIt = affineValues.find(slave);
-                const ScalarType value =
-                  valueIt == affineValues.end()
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
+              {
+                const auto vUUIDOpt = dbc.getValueUUID();
+                assert(vUUIDOpt && "Identification DBC missing value UUID");
+                const size_t vBlock = findTrialBlock(*vUUIDOpt);
+                const size_t vOff = trialOffsets[vBlock];
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
+                {
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  const Index gs = static_cast<Index>(uOff + static_cast<size_t>(slave));
+                  const Index n = static_cast<Index>(masters.size());
+                  std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(n));
+                  for (Index k = 0; k < n; k++)
+                  {
+                    const Index gm =
+                      static_cast<Index>(vOff + static_cast<size_t>(masters[k]));
+                    entries.push_back({gm, static_cast<ScalarType>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const ScalarType value = valueIt == affineValues.end()
                     ? ScalarType(0)
                     : static_cast<ScalarType>(valueIt->second);
-                constraints.setIdentification(gs, entries, value);
+                  constraints.setIdentification(gs, entries, value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         // ------------------------------------------------------------------
         // Thread-local accumulators
         // ------------------------------------------------------------------
         std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
+        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
+          static_cast<size_t>(tc));
 
         std::vector<OperatorType> Achunks;
         if constexpr (!IsSparse)
@@ -1890,20 +1887,18 @@ namespace Rodin::Assembly
           if (val == ScalarType(0))
             return;
 
-          const ScalarType colValue =
-            constraints.isIdentified(col)
-              ? constraints.getIdentificationValue(col)
-              : ScalarType(0);
+          const ScalarType colValue = constraints.isIdentified(col)
+            ? constraints.getIdentificationValue(col)
+            : ScalarType(0);
 
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != ScalarType(0))
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                  r.index,
-                  -r.coefficient * val * colValue);
+                r.index, -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
               tchunks[static_cast<size_t>(tid)].emplace_back(
-                  r.index, c.index, r.coefficient * val * c.coefficient);
+                r.index, c.index, r.coefficient * val * c.coefficient);
           }
         };
 
@@ -1955,8 +1950,8 @@ namespace Rodin::Assembly
                     if (!a || !attrs.contains(*a)) continue;
                   }
 
-                  auto it = seq.getIterator(p);
-                  integrator->setPolytope(*it);
+                  const auto polytope = seq.getPolytope(p);
+                  integrator->setPolytope(polytope);
 
                   const auto& rows = vFES.getDOFs(d, p);
                   const auto& cols = uFES.getDOFs(d, p);
@@ -1975,16 +1970,14 @@ namespace Rodin::Assembly
                         sparseEntry(tid, I, J, val);
                       else
                       {
-                        const ScalarType colValue =
-                          constraints.isIdentified(J)
-                            ? constraints.getIdentificationValue(J)
-                            : ScalarType(0);
+                        const ScalarType colValue = constraints.isIdentified(J)
+                          ? constraints.getIdentificationValue(J)
+                          : ScalarType(0);
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                r.index,
-                                -r.coefficient * val * colValue);
+                              r.index, -r.coefficient * val * colValue);
                           for (const auto& c : constraints.expand(J))
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
@@ -2051,6 +2044,7 @@ namespace Rodin::Assembly
                   }
 
                   const auto& rows = vFES.getDOFs(td, te);
+                  const auto testPolytope = testseq.getPolytope(te);
 
                   const Index rd = trialseq.getDimension();
                   const Index rcount = trialseq.getCount();
@@ -2066,10 +2060,8 @@ namespace Rodin::Assembly
 
                     const auto& cols = uFES.getDOFs(rd, tr);
 
-                    auto teIt = testseq.getIterator(te);
-                    auto trIt = trialseq.getIterator(tr);
-
-                    integrator->setPolytope(*trIt, *teIt);
+                    const auto trialPolytope = trialseq.getPolytope(tr);
+                    integrator->setPolytope(trialPolytope, testPolytope);
 
                     for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                     {
@@ -2085,16 +2077,14 @@ namespace Rodin::Assembly
                           sparseEntry(tid, I, J, val);
                         else
                         {
-                          const ScalarType colValue =
-                            constraints.isIdentified(J)
-                              ? constraints.getIdentificationValue(J)
-                              : ScalarType(0);
+                          const ScalarType colValue = constraints.isIdentified(J)
+                            ? constraints.getIdentificationValue(J)
+                            : ScalarType(0);
                           for (const auto& r : constraints.expand(I))
                           {
                             if (colValue != ScalarType(0))
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                  r.index,
-                                  -r.coefficient * val * colValue);
+                                r.index, -r.coefficient * val * colValue);
                             for (const auto& c : constraints.expand(J))
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
@@ -2145,8 +2135,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue;
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = vFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -2237,7 +2227,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            v0.clear();
+            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -2250,10 +2240,10 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(all.size() + nrows);
-          for (const auto& t : all)
+          size_t write = 0;
+          for (size_t read = 0; read < all.size(); ++read)
           {
+            const auto& t = all[read];
             const Index row = static_cast<Index>(t.row());
             const Index col = static_cast<Index>(t.col());
             const ScalarType val = t.value();
@@ -2265,21 +2255,23 @@ namespace Rodin::Assembly
                 val * constraints.getFixedValue(col);
               continue;
             }
-            filtered.push_back(t);
+            if (write != read)
+              all[write] = t;
+            ++write;
           }
+          all.resize(write);
 
           for (Index I = 0; I < static_cast<Index>(nrows); ++I)
           {
             if (constraints.isFixed(I))
             {
-              filtered.emplace_back(I, I, ScalarType(1));
-              b.coeffRef(static_cast<size_t>(I)) =
-                constraints.getFixedValue(I);
+              all.emplace_back(I, I, ScalarType(1));
+              b.coeffRef(static_cast<size_t>(I)) = constraints.getFixedValue(I);
             }
           }
 
           A.resize(nrows, ncols);
-          A.setFromTriplets(filtered.begin(), filtered.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
@@ -2312,17 +2304,15 @@ namespace Rodin::Assembly
                 {
                   const Index I = static_cast<Index>(vOff) + i;
                   const Index J = static_cast<Index>(uOff) + j;
-                  const ScalarType colValue =
-                    constraints.isIdentified(J)
-                      ? constraints.getIdentificationValue(J)
-                      : ScalarType(0);
+                  const ScalarType colValue = constraints.isIdentified(J)
+                    ? constraints.getIdentificationValue(J)
+                    : ScalarType(0);
                   for (const auto& r : constraints.expand(I))
                   {
                     if (colValue != ScalarType(0))
                       b.coeffRef(r.index) -= r.coefficient * val * colValue;
                     for (const auto& c : constraints.expand(J))
-                      A(r.index, c.index) +=
-                        r.coefficient * val * c.coefficient;
+                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
                   }
                 }
               }
@@ -2376,10 +2366,8 @@ namespace Rodin::Assembly
        * @param input Mixed problem input.
        * @param target Side of the system to assemble.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -2409,19 +2397,14 @@ namespace Rodin::Assembly
    * The expensive part (the linear-system constraint application) is
    * parallelized inside the problem-level OpenMP assembler above.
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
-  class OpenMP<
-    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Sol1, FES1>,
-      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
-    : public AssemblyBase<
-        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-        Variational::DirichletBC<
-          Variational::TrialFunction<Sol1, FES1>,
-          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
+  class OpenMP<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+    final : public AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+              Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+                Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
       /// @brief Output map type for slave-to-master identifications.
@@ -2434,8 +2417,7 @@ namespace Rodin::Assembly
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
 
       /// @brief Dirichlet condition type.
-      using DirichletBCType =
-        Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
@@ -2447,10 +2429,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
-      OpenMP(const OpenMP& other) : Parent(other) {}
+      OpenMP(const OpenMP& other)
+        : Parent(other)
+      {}
 
       /// @brief Move constructor.
-      OpenMP(OpenMP&& other) : Parent(std::move(other)) {}
+      OpenMP(OpenMP&& other)
+        : Parent(std::move(other))
+      {}
 
       /**
        * @brief Executes identification Dirichlet boundary condition assembly.
@@ -2471,11 +2457,13 @@ namespace Rodin::Assembly
         res.clear();
         for (Index fi = 0; fi < mesh.getFaceCount(); fi++)
         {
-          if (essBdr.empty() && !mesh.isBoundary(fi)) continue;
+          if (essBdr.empty() && !mesh.isBoundary(fi))
+            continue;
           if (!essBdr.empty())
           {
             const auto a = mesh.getAttribute(faceDim, fi);
-            if (!a || !essBdr.count(*a)) continue;
+            if (!a || !essBdr.count(*a))
+              continue;
           }
 
           const auto& feU = fesU.getFiniteElement(faceDim, fi);
@@ -2487,18 +2475,17 @@ namespace Rodin::Assembly
           for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
           {
             const Index slave = slaveDOFs[s];
-            if (res.find(slave) != res.end()) continue;
+            if (res.find(slave) != res.end())
+              continue;
 
-            std::vector<Index>  mIdx;
+            std::vector<Index> mIdx;
             std::vector<Scalar> mCoef;
             mIdx.reserve(static_cast<size_t>(nMasters));
             mCoef.reserve(static_cast<size_t>(nMasters));
 
             for (Index j = 0; j < nMasters; j++)
             {
-              auto basisCallable = [&Av, j]
-                                   (const Geometry::Point& p)
-              {
+              auto basisCallable = [&Av, j](const Geometry::Point& p) {
                 const Variational::IntegrationPoint ip(p);
                 Av.setIntegrationPoint(ip);
                 return Av.getBasis(static_cast<size_t>(j));
@@ -2513,17 +2500,17 @@ namespace Rodin::Assembly
               }
             }
 
-            if (mIdx.empty()) continue;
+            if (mIdx.empty())
+              continue;
             const Index n = static_cast<Index>(mIdx.size());
             IndexArray masters(n);
             Math::Vector<Scalar> coeffs(n);
             for (Index k = 0; k < n; k++)
             {
               masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
-              coeffs.coeffRef(k)  = mCoef[static_cast<size_t>(k)];
+              coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];
             }
-            res.emplace(slave,
-                std::pair{ std::move(masters), std::move(coeffs) });
+            res.emplace(slave, std::pair{std::move(masters), std::move(coeffs)});
           }
         }
       }
@@ -2532,7 +2519,10 @@ namespace Rodin::Assembly
        * @brief Creates a polymorphic copy.
        * @return Pointer to a new copy.
        */
-      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
   };
 }
 

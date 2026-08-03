@@ -25,18 +25,15 @@ namespace Rodin::Tests::Unit
     {
       assert(n >= 2);
       Geometry::Mesh<Context::Local> mesh =
-        LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
       mesh.scale(1.0 / (n - 1));
       mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
       return mesh;
     }
 
-    void labelBoundaryAttributes(
-      Geometry::Mesh<Context::Local>& mesh,
-      Attribute left = LeftAttribute,
-      Attribute right = RightAttribute,
-      Attribute bottom = BottomAttribute,
-      Attribute top = TopAttribute)
+    void labelBoundaryAttributes(Geometry::Mesh<Context::Local>& mesh,
+      Attribute left = LeftAttribute, Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute, Attribute top = TopAttribute)
     {
       for (auto it = mesh.getBoundary(); !it.end(); ++it)
       {
@@ -66,8 +63,7 @@ namespace Rodin::Tests::Unit
     }
 
     FlatSet<Index> getBoundaryVertices(
-      const Geometry::Mesh<Context::Local>& mesh,
-      const FlatSet<Attribute>& attrs)
+      const Geometry::Mesh<Context::Local>& mesh, const FlatSet<Attribute>& attrs)
     {
       FlatSet<Index> res;
       for (auto it = mesh.getBoundary(); !it.end(); ++it)
@@ -133,7 +129,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies dirichlet BC shape function identity for variational real P1 sanity test by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_Real_P1_SanityTest, DirichletBCShapeFunctionIdentity)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     const Attribute attr = 1;
 
@@ -174,7 +170,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies dirichlet BC shape function point evaluation for variational real P1 sanity test by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_Real_P1_SanityTest, DirichletBCShapeFunctionPointEvaluation)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     const Attribute attr = 1;
 
@@ -215,7 +211,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies H1 matches basis for variational point integration point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_PointIntegrationPoint, H1MatchesBasis)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, 0);
 
@@ -240,7 +236,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies H1 grad matches basis gradient for variational point integration point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_PointIntegrationPoint, H1GradMatchesBasisGradient)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, 0);
 
@@ -286,7 +282,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, g);
     dbc.on(LeftAttribute, RightAttribute);
 
-    const FlatSet<Attribute> attrs{ LeftAttribute, RightAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute, RightAttribute};
     EXPECT_EQ(dbc.getAttributes(), attrs);
     EXPECT_FALSE(dbc.isComponent());
     EXPECT_FALSE(dbc.getValueUUID().has_value());
@@ -325,7 +321,7 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
 
-    const FlatSet<Attribute> attrs{ BottomAttribute, TopAttribute };
+    const FlatSet<Attribute> attrs{BottomAttribute, TopAttribute};
     DirichletBC dbc(u, RealFunction(3.0));
     dbc.on(attrs);
     dbc.assemble();
@@ -353,7 +349,7 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TrialFunction v(fes);
 
-    const FlatSet<Attribute> attrs{ LeftAttribute, TopAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute, TopAttribute};
     DirichletBC dbc(u, (RealFunction(1.0) + F::x) * v);
     dbc.on(attrs);
 
@@ -406,8 +402,7 @@ namespace Rodin::Tests::Unit
     TrialFunction v(vectorFes);
 
     const FlatSet<Attribute> attrs{
-      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute
-    };
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute};
     const auto expectedVertices = getBoundaryVertices(mesh, attrs);
     const auto vertexCount = mesh.getVertexCount();
 
@@ -465,7 +460,7 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TrialFunction v(fes);
 
-    const FlatSet<Attribute> attrs{ LeftAttribute, RightAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute, RightAttribute};
     DirichletBC dbc(u, -v);
     dbc.on(attrs);
     dbc.assemble();
@@ -501,7 +496,7 @@ namespace Rodin::Tests::Unit
     TrialFunction v(fes);
 
     const Real c = 3.5;
-    const FlatSet<Attribute> attrs{ LeftAttribute, RightAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute, RightAttribute};
     DirichletBC dbc(u, RealFunction(c) * v);
     dbc.on(attrs);
     dbc.assemble();
@@ -541,7 +536,7 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
 
-    const FlatSet<Attribute> attrs{ LeftAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute};
     DirichletBC dbc(u, u);
     dbc.on(attrs);
 
@@ -585,7 +580,7 @@ namespace Rodin::Tests::Unit
     TrialFunction u(vfes);
     TrialFunction v(vfes);
 
-    const FlatSet<Attribute> attrs{ LeftAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute};
     DirichletBC dbc(u, v);
     dbc.on(attrs);
     dbc.assemble();
@@ -634,8 +629,7 @@ namespace Rodin::Tests::Unit
     const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
 
     const FlatSet<Attribute> all{
-      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute
-    };
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute};
     const auto expectedVertices = getBoundaryVertices(mesh, all);
     EXPECT_EQ(dofs.size(), expectedVertices.size());
   }
@@ -656,7 +650,7 @@ namespace Rodin::Tests::Unit
       if (mesh.isBoundary(face))
         continue;
 
-      mesh.setAttribute({ faceDim, face }, InterfaceAttribute);
+      mesh.setAttribute({faceDim, face}, InterfaceAttribute);
       for (const auto vertex : it->getVertices())
         interfaceVertices.insert(vertex);
       tagged = true;
@@ -746,7 +740,7 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TrialFunction v(fes);
 
-    const FlatSet<Attribute> attrs{ LeftAttribute };
+    const FlatSet<Attribute> attrs{LeftAttribute};
     // A(v) = 1*v + 1*v = 2*v at every basis. (A SUM of two ShapeFunction
     // expressions sharing the same underlying TrialFunction.)
     DirichletBC dbc(u, RealFunction(1.0) * v + RealFunction(1.0) * v);
@@ -785,12 +779,9 @@ namespace Rodin::Tests::Unit
     TrialFunction v(fes);
 
     constexpr Real gamma = 2.5;
-    RealFunction defect = [](const Point& p)
-    {
-      return 3.0 + 2.0 * p.x();
-    };
+    RealFunction defect = [](const Point& p) { return 3.0 + 2.0 * p.x(); };
 
-    const FlatSet<Attribute> attrs{ TopAttribute };
+    const FlatSet<Attribute> attrs{TopAttribute};
     DirichletBC dbc(u, RealFunction(gamma) * v, defect);
     dbc.on(attrs);
     dbc.assemble();
@@ -838,20 +829,20 @@ namespace Rodin::Tests::Unit
     dbc.on(LeftAttribute);
     dbc.assemble();
     const size_t leftSize = std::get<IdentifiedDOFs>(dbc.getDOFs()).size();
-    EXPECT_EQ(leftSize, getBoundaryVertices(mesh, { LeftAttribute }).size());
+    EXPECT_EQ(leftSize, getBoundaryVertices(mesh, {LeftAttribute}).size());
 
     dbc.on(LeftAttribute, RightAttribute);
     dbc.assemble();
     const size_t bothSize = std::get<IdentifiedDOFs>(dbc.getDOFs()).size();
-    EXPECT_EQ(bothSize,
-        getBoundaryVertices(mesh, { LeftAttribute, RightAttribute }).size());
+    EXPECT_EQ(
+      bothSize, getBoundaryVertices(mesh, {LeftAttribute, RightAttribute}).size());
     EXPECT_GT(bothSize, leftSize);
   }
 
   /// @brief Verifies H1 matches basis for variational shape function set point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_ShapeFunctionSetPoint, H1MatchesBasis)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, 0);
 
@@ -875,7 +866,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies H1 grad matches basis gradient for variational shape function set point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_ShapeFunctionSetPoint, H1GradMatchesBasisGradient)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, 0);
 

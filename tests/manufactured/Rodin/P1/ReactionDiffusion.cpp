@@ -55,12 +55,9 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
     constexpr Attribute BottomAttribute = 3;
     constexpr Attribute TopAttribute = 4;
 
-    void labelBoundaryAttributes(
-      Geometry::Mesh<Context::Local>& mesh,
-      Attribute left = LeftAttribute,
-      Attribute right = RightAttribute,
-      Attribute bottom = BottomAttribute,
-      Attribute top = TopAttribute)
+    void labelBoundaryAttributes(Geometry::Mesh<Context::Local>& mesh,
+      Attribute left = LeftAttribute, Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute, Attribute top = TopAttribute)
     {
       for (auto it = mesh.getBoundary(); !it.end(); ++it)
       {
@@ -330,22 +327,14 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
     TestFunction phi(vh), psi(vh);
 
     const FlatSet<Attribute> boundary{
-      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute
-    };
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute};
 
     Problem rd(u, w, phi, psi);
-    rd = Integral(Grad(u), Grad(phi))
-       + Integral(u, phi)
-       - Integral(forcing, phi)
-       + Integral(Grad(w), Grad(psi))
-       + Integral(w, psi)
-       - Integral(forcing, psi)
-       + DirichletBC(u, w).on(boundary)
-       + DirichletBC(w, solution).on(
-           LeftAttribute,
-           RightAttribute,
-           BottomAttribute,
-           TopAttribute);
+    rd = Integral(Grad(u), Grad(phi)) + Integral(u, phi) - Integral(forcing, phi) +
+      Integral(Grad(w), Grad(psi)) + Integral(w, psi) - Integral(forcing, psi) +
+      DirichletBC(u, w).on(boundary) +
+      DirichletBC(w, solution)
+        .on(LeftAttribute, RightAttribute, BottomAttribute, TopAttribute);
 
     GMRES(rd).solve();
 

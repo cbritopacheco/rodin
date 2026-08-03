@@ -181,6 +181,7 @@ target_link_libraries(RodinManufacturedP1HyperElasticity
   Rodin::Variational
   Rodin::Solver
   Rodin::Solid
+  Rodin::Test
 )
 gtest_discover_tests(RodinManufacturedP1HyperElasticity
   PROPERTIES

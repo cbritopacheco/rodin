@@ -81,9 +81,7 @@ namespace Rodin::Variational
        * the test function @f$ v @f$.
        */
       template <class TestFunctionType,
-                std::enable_if_t<
-                  IsTestFunction<std::decay_t<TestFunctionType>>::Value,
-                  int> = 0>
+        std::enable_if_t<IsTestFunction<std::decay_t<TestFunctionType>>::Value, int> = 0>
       LinearFormIntegratorBase(const TestFunctionType& v)
         : m_v(v.copy())
       {}

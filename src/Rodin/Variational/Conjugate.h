@@ -248,7 +248,7 @@ namespace Rodin::Variational
       constexpr
       decltype(auto) getBasis(size_t local) const
       {
-        const auto v = this->getOperand().getBasis(local);
+        decltype(auto) v = this->getOperand().getBasis(local);
         return Math::conj(v);
       }
 

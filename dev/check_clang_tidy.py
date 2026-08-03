@@ -17,6 +17,8 @@ agnostic, so unrelated edits do not shift old findings into "new" status.
 Under GitHub Actions each new finding is emitted as an inline annotation.
 
 Usage:
+  python3 dev/check_clang_tidy.py --build-dir build \
+      [--clang-tidy BIN] [--update-baseline]
   python3 dev/check_clang_tidy.py --flags "<compiler flags>" \
       [--clang-tidy BIN] [--update-baseline]
 """
@@ -42,10 +44,13 @@ def color(code, s, enabled=True):
     return f"\033[{code}m{s}\033[0m" if enabled else s
 
 
-def run(binary, flags):
+def run(binary, flags, build_dir):
     cmd = [binary, os.path.join(REPO, "dev", "TidyTU.cpp"),
-           "--header-filter=(^|/)src/Rodin/.*", "--quiet",
-           "--"] + shlex.split(flags)
+           "--header-filter=(^|/)src/Rodin/.*", "--quiet"]
+    if build_dir:
+        cmd.extend(["-p", os.path.abspath(build_dir)])
+    else:
+        cmd.extend(["--"] + shlex.split(flags))
     r = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
     findings = {}
     fatal = []
@@ -73,13 +78,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--clang-tidy", default=os.environ.get("CLANG_TIDY", "clang-tidy"))
-    ap.add_argument("--flags", required=True,
-                    help="compiler flags for the aggregate TU")
+    mode = ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--build-dir",
+                      help="CMake build directory containing compile_commands.json")
+    mode.add_argument("--flags", help="compiler flags for the aggregate TU")
     ap.add_argument("--update-baseline", action="store_true")
     args = ap.parse_args()
 
     tty = sys.stdout.isatty() or GITHUB
-    findings, fatal = run(args.clang_tidy, args.flags)
+    findings, fatal = run(args.clang_tidy, args.flags, args.build_dir)
 
     if fatal:
         print(color("1;31", "error:", tty),
