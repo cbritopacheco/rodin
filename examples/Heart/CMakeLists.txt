@@ -87,9 +87,51 @@ if (RODIN_USE_PETSC)
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly)
+
+  # Coagulation-kinetics testbed on a simplified geometry: one inlet, one
+  # outlet, an R_mu-Windkessel outlet and an ectatic segment that provides the
+  # recirculation the kinetics need. Sequential and PETSc-only, like the P1/P1
+  # case above; it does not link Rodin::MPI.
+  #
+  # The mesh is not in the repository because it is generated:
+  #   python3 examples/Heart/ProteinTest/make_test_mesh.py \
+  #           examples/Heart/ProteinTest/ProteinTest.mesh
+  # and the executable looks for it at ProteinTest/ProteinTest.mesh relative to
+  # the working directory, so run it from the examples/Heart tree or pass a
+  # different path in Config::meshPath.
+  add_executable(ProteinTest ProteinTest.cpp)
+  target_link_libraries(ProteinTest
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(ProteinTest
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  # Atrium: four pressure inlets, one outlet closed by the 0D LV through a
+  # mitral diode, VMS/PSPG-stabilised P1/P1 flow and the coagulation kinetics.
+  add_executable(Atrium Atrium.cpp)
+  target_link_libraries(Atrium
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(Atrium PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(Atrium PUBLIC Rodin::Scotch)
+  endif()
+
   add_executable(CoronaryArtery
     CoronaryArtery.cpp
     CoronaryArtery/CoupledLV0DCoronary3D.cpp

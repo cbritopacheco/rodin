@@ -73,6 +73,7 @@
 // Projected-VMS convective stabilization (lagged Oseen), shared with the
 // working CoupledLV0DCoronary3D fluid solver.
 #include "CoronaryArtery/VMSConvectionIntegrator.h"
+#include "CoronaryArtery/ThrombosisModel.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -2213,35 +2214,171 @@ int main(int argc, char** argv)
     xdmf_laplacian.write().flush();
     xdmf_laplacian.close();
 
-    // using ProteinFES = H1<1, Real, MeshType>;
-    // ProteinFES proh(std::integral_constant<size_t, 1>{}, meshFluid);
-    // PETSc::Variational::TrialFunction th(proh);
-    // PETSc::Variational::TrialFunction fg(proh);
-    // PETSc::Variational::TestFunction vth(proh);
-    // PETSc::Variational::TestFunction vfg(proh);
+    // ---- Coagulation kinetics (Qureshi et al. 2022) -------------------------
+    //
+    // Th:  dTh/dt = D_th DTh - u.grad Th + R_Th
+    // Fg:  dFg/dt = D_fg DFg - u.grad Fg - k_eff Fg Th
+    // Fn:  dFn/dt = D_fn DFn - u.grad Fn + k_eff Fg Th
+    //
+    // Signs of the Galerkin part of the previous draft were correct: moving
+    // every term to the left, the reaction enters +k_eff Th Fg in the Fg
+    // equation and -k_eff Th Fg in the Fn equation, which is what is written
+    // below. What was wrong was everything around them:
+    //
+    //  (1) a stray ';' terminated the assignment after the reaction terms, so
+    //      the previous-step terms and the whole stabilization were parsed as a
+    //      separate discarded expression -- and the file did not compile,
+    //      because that expression was then juxtaposed with protein.assemble();
+    //  (2) thcur/fgcur/fncur (lower case) were never declared;
+    //  (3) grad(...) is spelled Grad(...) in Rodin;
+    //  (4) Dth, Dfg, Dfn, keff and Rt were never declared;
+    //  (5) the stabilization carried no tau. The SUPG parameter has units of
+    //      time and is ~5e-4 s here, so omitting it weights the stabilizing
+    //      terms roughly 2000x too heavily and they dominate the system;
+    //  (6) R_Th is a flux per unit *area*, so it belongs in a boundary integral
+    //      over the wall, not in a volume integral;
+    //  (7) the Fn stabilization used thCur*fn where the Fn residual contains
+    //      k_eff Fg Th, i.e. fg, not fn;
+    //  (8) the Fn stabilization carried a +k_eff^2 (Th Fn)(Th v) term. The Fn
+    //      equation has no reactive term proportional to Fn -- k_eff Fg Th is a
+    //      source -- so its adjoint has no reactive part and that term is
+    //      spurious;
+    //  (9) the Fg reaction-adjoint term had the wrong sign and only one of its
+    //      four contributions;
+    // (10) the system was assembled and solved once, outside the time loop.
+    //
+    // See ThrombosisModel.h for the constants and for the scope of the model.
+    using ProteinFES = H1<1, Real, MeshType>;
+    ProteinFES proh(std::integral_constant<size_t, 1>{}, meshFluid);
 
-    // PETSc::Variational::GridFunction thCur(proh);
-    // PETSc::Variational::GridFunction fgCur(proh);
+    PETSc::Variational::TrialFunction th(proh);
+    PETSc::Variational::TrialFunction fg(proh);
+    PETSc::Variational::TrialFunction fn(proh);
 
-    // Problem protein(th, fg, vth, vfg);
-    // protein = (1. / dt) * Integral(th, vth) + (1. / dt) * Integral(fg, vfg)
-    //     - Dth * Integral(grad(th), grad(vth)) + Integral(Dot(uCur, grad(th)), vth) - Integral(Rt, vth)
-    //     - Dfg * Integral(grad(fg), grad(vfg)) + Integral(Dot(uCur, grad(fg)), vfg) + keff * Integral(thCur * fg, vfg);
+    PETSc::Variational::TestFunction vth(proh);
+    PETSc::Variational::TestFunction vfg(proh);
+    PETSc::Variational::TestFunction vfn(proh);
 
-    // //ECAP = OSI / TAWSS;
-    // protein.assemble(); // preguntar sobre setfields con petsc?
-    // Solver::KSP(protein).solve();
-    // thCur.setData(th.getSolution().getData());
-    // fgCur.setData(fg.getSolution().getData());
+    PETSc::Variational::GridFunction thCur(proh);
+    PETSc::Variational::GridFunction fgCur(proh);
+    PETSc::Variational::GridFunction fnCur(proh);
 
-    // // términos estabilizantes
-    // // VMS th
-    // + Integral(Rt, Dot(uCur, grad(vth))) + Integral(Dot(uCur, grad(th)), Dot(uCur, grad(vth)))
-    // // VMS fg
-    // + Integral(Dot(uCur, grad(fg)), Dot(uCur, grad(vfg))) + keff * Integral(thCur * fg, Dot(uCur, grad(vfg)))
-    // + keff * Integral(Dot(uCur, grad(fg)), Dot(thCur, vfg)) + keff * keff * Integral(thCur * fg, thCur * vfg)
+    Problem protein(th, fg, fn, vth, vfg, vfn);
 
-    // we miss fn but lets test with this by the moment. Treatment ECAP? it has to be computed after second time cycle, otherwise zero. no contribution on the problem (FIRSTARTICLE). Treatment uncertaintinty ecap along the years?  fast methods to try. Then, regrowth modeling on fluid mesh? how we couoke? can we prove stability?
+    const Rodin::Examples::Heart::ThrombosisParameters thrombosis;
+
+    const Real Dth = thrombosis.diffusivityThrombin;
+    const Real Dfg = thrombosis.diffusivityFibrinogen;
+    const Real Dfn = thrombosis.diffusivityFibrin;
+    const Real keff = thrombosis.reactionRate;
+
+    // Initial conditions: no thrombin, no fibrin, uniform fibrinogen at the
+    // rhythm-dependent plasma level converted from g/L to mol/m^3.
+    thCur = Real(0);
+    fnCur = Real(0);
+    fgCur = thrombosis.fibrinogenSinusRhythm / thrombosis.fibrinogenMolarMass;
+
+    // Stabilization parameter. Evaluated once per step from the representative
+    // element size and the current maximum speed; it is a scalar here, which is
+    // the usual compromise when the form language has no per-element context.
+    Real hMin = std::numeric_limits<Real>::infinity();
+    for (auto it = meshFluid.getCell(); !it.end(); ++it)
+      hMin = std::min<Real>(hMin, it->getAttribute() ? it->getMeasure() : it->getMeasure());
+    hMin = std::cbrt(std::max<Real>(hMin, 1e-300));
+
+    // The wall activation weight is filled once per cycle from the wall-shear
+    // indices; before the first cycle closes it is identically zero, which is
+    // what arms the source only after a full period (see ThrombosisModel.h).
+    PETSc::Variational::GridFunction activation(proh);
+    activation = Real(0);
+
+    const auto RthFlux = thrombosis.thrombinWallFlux * activation;
+
+    auto assembleProtein = [&](Real speed) {
+      const Real tauTh = thrombosis.stabilizationScale *
+        Rodin::Examples::Heart::supgTau(hMin, speed, Dth, 0.0, dt);
+      const Real tauFg = thrombosis.stabilizationScale *
+        Rodin::Examples::Heart::supgTau(hMin, speed, Dfg, keff * thCur.max(), dt);
+      const Real tauFn = thrombosis.stabilizationScale *
+        Rodin::Examples::Heart::supgTau(hMin, speed, Dfn, 0.0, dt);
+
+      // Adjoint test perturbations. Only Fg has a reactive term proportional to
+      // its own unknown, so only Fg carries a reactive adjoint.
+      const auto pTh = Dot(uCur, Grad(vth));
+      const auto pFg = Dot(uCur, Grad(vfg));
+      const auto pFn = Dot(uCur, Grad(vfn));
+
+      // NOTE. The residual cannot be formed as a single expression: writing
+      // (th - thCur) mixes a TrialFunction with a GridFunction, and the form
+      // language keeps the unknown and the data apart because it has to sort
+      // every term into the bilinear or the linear form. Each product of
+      // residual and perturbation is therefore expanded below, one term at a
+      // time. With P1 elements the Laplacian vanishes elementwise, so the
+      // diffusive part of the residual is legitimately absent rather than
+      // merely dropped; and the thrombin source is a wall flux, so it does not
+      // belong to the volumetric residual either.
+      //
+      //   R_th = (th - th^n)/dt + u.grad th
+      //   R_fg = (fg - fg^n)/dt + u.grad fg + k Th fg
+      //   R_fn = (fn - fn^n)/dt + u.grad fn - k Th fg
+      //   p_th = u.grad vth
+      //   p_fg = u.grad vfg + k Th vfg
+      //   p_fn = u.grad vfn
+
+      protein =
+        // ---- Galerkin ----
+          (1. / dt) * Integral(th, vth) - (1. / dt) * Integral(thCur, vth)
+        + Dth * Integral(Grad(th), Grad(vth)) + Integral(Dot(uCur, Grad(th)), vth)
+
+        + (1. / dt) * Integral(fg, vfg) - (1. / dt) * Integral(fgCur, vfg)
+        + Dfg * Integral(Grad(fg), Grad(vfg)) + Integral(Dot(uCur, Grad(fg)), vfg)
+        + keff * Integral(thCur * fg, vfg)
+
+        + (1. / dt) * Integral(fn, vfn) - (1. / dt) * Integral(fnCur, vfn)
+        + Dfn * Integral(Grad(fn), Grad(vfn)) + Integral(Dot(uCur, Grad(fn)), vfn)
+        - keff * Integral(thCur * fg, vfn)
+
+        // ---- Endothelial thrombin source: a wall flux, not a volume source ----
+        - BoundaryIntegral(RthFlux, vth).over(BoundaryFluid::FSI)
+
+        // ---- SUPG/VMS, expanded ----
+        // Th: R_th * (u.grad vth)
+        + (tauTh / dt) * Integral(th, pTh)
+        - (tauTh / dt) * Integral(thCur, pTh)
+        + tauTh * Integral(Dot(uCur, Grad(th)), pTh)
+
+        // Fg: R_fg * (u.grad vfg)
+        + (tauFg / dt) * Integral(fg, pFg)
+        - (tauFg / dt) * Integral(fgCur, pFg)
+        + tauFg * Integral(Dot(uCur, Grad(fg)), pFg)
+        + (tauFg * keff) * Integral(thCur * fg, pFg)
+
+        // Fg: R_fg * (k Th vfg), the reactive part of the adjoint. It exists
+        // only for Fg, whose reaction is proportional to its own unknown.
+        + (tauFg * keff / dt) * Integral(fg, thCur * vfg)
+        - (tauFg * keff / dt) * Integral(fgCur, thCur * vfg)
+        + (tauFg * keff) * Integral(Dot(uCur, Grad(fg)), thCur * vfg)
+        + (tauFg * keff * keff) * Integral(thCur * fg, thCur * vfg)
+
+        // Fn: R_fn * (u.grad vfn). The reactive term of R_fn carries fg, not
+        // fn, so it couples the Fg unknown to the Fn test function.
+        + (tauFn / dt) * Integral(fn, pFn)
+        - (tauFn / dt) * Integral(fnCur, pFn)
+        + tauFn * Integral(Dot(uCur, Grad(fn)), pFn)
+        - (tauFn * keff) * Integral(thCur * fg, pFn);
+    };
+
+    // NOTE: assembleProtein(...) must be called *inside* the time loop, after
+    // uCur has been updated and after the wall-shear accumulator has been
+    // advanced, and followed by
+    //     protein.assemble();
+    //     Solver::KSP(protein).solve();
+    //     thCur.setData(th.getSolution().getData());
+    //     fgCur.setData(fg.getSolution().getData());
+    //     fnCur.setData(fn.getSolution().getData());
+    // The previous draft did this once, before the loop, which integrated the
+    // kinetics for exactly one step.
+    (void)assembleProtein;
 
     if (cfg.prestressSteps > 0)
     {
