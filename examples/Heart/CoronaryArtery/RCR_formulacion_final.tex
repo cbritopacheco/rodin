@@ -1,0 +1,454 @@
+% =====================================================================
+%  FORMULACION FINAL
+%  Salida coronaria no-Newtoniana con bomba intramiocardica
+%  Modelo acoplado LV 0D <-> coronaria 3D (CoupledLV0DCoronary3D)
+%  Requiere: amsmath, amssymb, booktabs
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=2.3cm]{geometry}
+\newcommand{\dd}[2]{\frac{\partial #1}{\partial #2}}
+\title{Salida coronaria no-Newtoniana con bomba intramioc\'ardica:\\
+       formulaci\'on final}
+\date{}
+\begin{document}\maketitle
+
+\begin{abstract}
+\noindent
+Se presenta la formulaci\'on final de la condici\'on de salida coronaria del
+modelo acoplado 0D--3D. Se conserva la ley de tubo WRMS evaluada con la misma
+reolog\'ia de Carreau--Yasuda empleada en el dominio tridimensional, junto con
+la compliancia expl\'icita y la bomba intramioc\'ardica. La revisi\'on afecta a
+tres aspectos: la \emph{topolog\'ia}, con la compliancia situada en su posici\'on
+microvascular; la \emph{interpretaci\'on anat\'omica} de los elementos; y la
+\emph{estrategia de calibraci\'on}, basada en velocidades fisiol\'ogicas
+prescritas. El n\'umero de constantes libres se reduce de 33 a 13, y todas las
+restantes son magnitudes medibles.
+\end{abstract}
+
+\section{Principio rector}
+
+\begin{quote}
+\emph{La geometr\'ia representa anatom\'ia; la resistencia hidr\'aulica
+representa la red vascular no resuelta.}
+\end{quote}
+En consecuencia: los radios medidos sobre la malla no se modifican; la
+resistencia la produce el n\'umero de vasos en paralelo y la extensi\'on de la
+red; y la reolog\'ia act\'ua a trav\'es de la ley constitutiva y no mediante
+alteraciones de la geometr\'ia.
+
+\section{Reolog\'ia y ley de tubo}
+
+\begin{equation}
+  \mu(\dot\gamma)=\mu_\infty+(\mu_0-\mu_\infty)
+  \Bigl[1+(\lambda\dot\gamma)^{a}\Bigr]^{\frac{n-1}{a}} .
+  \label{eq:cy}
+\end{equation}
+La condici\'on patol\'ogica se codifica mediante el conjunto completo
+$(\mu_0,\mu_\infty,\lambda,n,a)$. La ecuaci\'on \eqref{eq:cy} es la misma en el
+dominio 3D y en los elementos 0D, de modo que el acoplamiento es
+constitutivamente consistente.
+
+Para un tubo recto de radio $r$ y longitud $L$, con $\tau_w=r|\Delta p|/2L$ y
+$\mu(\dot\gamma_w)\dot\gamma_w=\tau_w$,
+\begin{equation}
+  q(\Delta p;L,r)=\frac{\pi r^3}{\tau_w^{3}}
+  \int_{0}^{\dot\gamma_w}\!\dot\gamma^{3}\,\mu^2\,
+  \bigl(\mu+\dot\gamma\,\mu'\bigr)\,d\dot\gamma ,
+  \qquad
+  \boxed{\;\dd{q}{\Delta p}=\frac{\pi r^3\,\dot\gamma_w-3\,q}{\Delta p}\;}
+  \label{eq:wrms}
+\end{equation}
+La derivada es exacta, por lo que el Jacobiano del m\'etodo de Newton es
+consistente.
+
+\paragraph{Relaci\'on de diagn\'ostico.} Con $Q=\pi r^2\bar v$,
+\begin{equation}
+  \dot\gamma_w=\frac{4Q}{\pi r^3}=\frac{4\bar v}{r},
+  \label{eq:shear}
+\end{equation}
+independiente de $L$: el radio y la velocidad fijan el r\'egimen reol\'ogico,
+mientras que la longitud s\'olo escala la resistencia. Esta identidad gobierna
+el dise\~no de la calibraci\'on.
+
+\section{Elementos y \'arboles en paralelo}
+
+Cada componente es un elemento hidr\'aulico no lineal $Q=H(\Delta P;\Theta)$ con
+$\Theta=(r,L,N,\mu,\dots)$. Un lecho de $N$ vasos id\'enticos en paralelo
+satisface
+\begin{equation}
+  q_{\text{lecho}}(\Delta p)=N\,q(\Delta p;L,r),
+  \qquad
+  q_{\text{vaso}}=\frac{Q}{N} .
+  \label{eq:paralelo}
+\end{equation}
+Esto permite conservar el calibre anat\'omico por vaso mientras la resistencia
+la fija $N$. Un tubo \'unico no puede satisfacer ambas condiciones: al reducir
+su radio para elevar $R$, la relaci\'on \eqref{eq:shear} conduce a velocidades
+irreales y a $\mu\to\mu_\infty$.
+
+\section{Topolog\'ia}
+\label{sec:topo}
+
+\[
+\text{salida 3D}\;\rightarrow\;
+\underbrace{\text{conducto}}_{r_p\ \text{de la malla}}\;\rightarrow\;
+\underbrace{p_{ca},\;C_a}_{\text{epic\'ardico}}\;\rightarrow\;
+\underbrace{\text{\'arbol arteriolar}}_{N_a}\;\rightarrow\;
+\underbrace{p_c,\;C\;[\,p_{im}(t)\,]}_{\text{microvascular}}\;\rightarrow\;
+\underbrace{\text{\'arbol venular}}_{N_v}\;\rightarrow\; P_{RA}
+\]
+
+\noindent
+Corresponde a la disposici\'on cl\'asica de bomba intramioc\'ardica
+$R_a-C(p_{im})-R_v$ con una compliancia arterial epic\'ardica antepuesta. La
+compliancia microvascular $C$ se sit\'ua \emph{aguas abajo} de la resistencia
+arteriolar (arteriolas terminales, capilares y v\'enulas), donde reside el
+volumen sangu\'ineo coronario y sobre lo que act\'ua la compresi\'on
+mioc\'ardica. La compliancia epic\'ardica $C_a$ se sit\'ua aguas arriba y, al
+estar fuera del miocardio, no es comprimida por $p_{im}$.
+
+\paragraph{Relevancia de la posici\'on.} La fuente $Q_{im}$ inyectada en $p_c$
+se reparte entre las dos v\'ias en proporci\'on inversa a su resistencia. Si la
+compliancia se sit\'ua aguas arriba del \'arbol arteriolar, las dos v\'ias son
+el conducto epic\'ardico ($\sim\!10^{6}$) y el lecho arteriolar
+($\sim\!10^{10}$~Pa\,s/m$^3$), de modo que pr\'acticamente todo el caudal de la
+bomba se dirige hacia la arteria, produciendo picos retr\'ogrados de gran
+amplitud y dejando inactivo el lado venoso. En la posici\'on microvascular las
+v\'ias son el lecho arteriolar y el venular, cuyo cociente de resistencias es
+del orden de $7$, lo que reparte el caudal de forma fisiol\'ogica entre un
+impedimento sist\'olico arterial y una salida venosa sist\'olica.
+
+\paragraph{Reparto de la ca\'ida de presi\'on.} La calibraci\'on debe
+reproducir la distribuci\'on fisiol\'ogica de la p\'erdida de carga:
+
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+Segmento & Fisiol\'ogico & Modelo\\
+\midrule
+Conducto epic\'ardico & $\sim5\%$ & $<1\%$\\
+Arteriolas y capilares & $\sim75\%$ & $87\%$\\
+V\'enulas y venas & $10$--$15\%$ & $13\%$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Esto exige que el elemento venoso represente el \textbf{lecho venular} y no las
+venas colectoras. La distinci\'on es decisiva: con calibre de vena colectora
+($r_v\!\sim\!1$~mm) el compartimento venoso queda pr\'acticamente sin
+resistencia ($0.26\%$ de la ca\'ida), lo que suprime simult\'aneamente el
+impedimento sist\'olico, amortigua\-miento del pico venoso y el decaimiento
+diast\'olico. Con calibre venular la constante de tiempo resultante,
+$\tau=C(R_a\!\parallel\!R_v)$, pasa de $\sim\!4$~ms a $\sim\!0.2$~s, que es el
+valor fisiol\'ogico del vaciado diast\'olico coronario.
+
+\paragraph{Sobre la supresi\'on del segundo compartimento.} Conviene precisar
+qu\'e se elimina y qu\'e se conserva. Se suprime el \emph{nodo de
+almacenamiento} venoso ($C_v$, $p_{ven}$, $p_{im,v}$), no el \emph{elemento
+hidr\'aulico} venoso. El \'arbol venoso, con su ley \eqref{eq:wrms} y su radio
+ancho, se conserva \'ntegramente y pasa a ser la \'unica v\'ia de drenaje,
+transportando el $99.7\%$ del caudal de la bomba frente a una fracci\'on
+despreciable en la configuraci\'on anterior. Adem\'as, el nodo que subsiste es
+precisamente la antigua uni\'on arteriolo-venosa: se elimin\'o el nodo situado
+aguas arriba, que carec\'ia de correspondencia anat\'omica. La sensibilidad
+reol\'ogica venosa, por tanto, no se reduce sino que aumenta.
+
+\section{Presi\'on tisular y bomba intramioc\'ardica}
+
+\begin{align}
+  p_{im}^{\text{tgt}} &= \alpha\,p_{LV}+\alpha_a\,\tau_c,
+  \label{eq:tgt}\\
+  p_{im}^{n} &= p_{im}^{n-1}+\theta\bigl(p_{im}^{\text{tgt}}-p_{im}^{n-1}\bigr),
+  \qquad \theta=\frac{\Delta t}{\Delta t+\tau_f},
+  \label{eq:filt}\\
+  Q_{im}&=C\,\frac{p_{im}^{n}-p_{im}^{n-1}}{\Delta t}.
+  \label{eq:pump}
+\end{align}
+El retardo de primer orden \eqref{eq:filt} representa la velocidad finita de
+desarrollo de la presi\'on tisular y acota $\dot p_{im}$ en las fases
+isovolum\'etricas, donde $p_{LV}$ es casi discontinua.
+
+\section{Balance de nodo y discretizaci\'on}
+
+\paragraph{Almacenamiento colapsable.} El compartimento microvascular contiene
+el volumen transmural $V(p_c-p_{im})$. Los vasos intramioc\'ardicos son de pared
+delgada y se cierran cuando la presi\'on transmural se anula, de modo que $V$
+debe ser \textbf{no negativo}: una compliancia lineal permite vaciar el lecho
+m\'as all\'a de vac\'o, lo que hace caer $p_c$ por debajo de $P_{RA}$ y genera
+reflujo venoso esp\'ureo. Se adopta
+\begin{equation}
+  V(p)=C\,p_0\,\ln\!\bigl(1+e^{p/p_0}\bigr),
+  \qquad
+  \frac{dV}{dp}(p)=\frac{C}{1+e^{-p/p_0}},
+  \label{eq:vcol}
+\end{equation}
+que es lineal de pendiente $C$ donde el lecho est\'a distendido y satura a
+volumen y compliancia nulos al colapsar. En el punto de operaci\'on
+($p_c-p_{im}\approx1740$~Pa, varias veces $p_0$) se recupera
+$dV/dp=0.997\,C$, de modo que la calibraci\'on no se altera.
+
+\paragraph{Balance.} Escribir el balance en t\'erminos de $V$ y no de una
+compliancia constante hace la bomba intramioc\'ardica \emph{impl\'cita} y
+conserva el volumen exactamente:
+\begin{equation}
+  C_a\,\frac{dp_{ca}}{dt}=Q-q_a,
+  \qquad
+  \frac{d}{dt}V\bigl(p_c-p_{im}\bigr)=q_a-q_v .
+  \label{eq:balance}
+\end{equation}
+Con Euler impl\'icito, inc\'ognitas $(p_{ca},p_c)$ y Newton $2\times2$,
+\begin{align}
+  R_1&=\frac{C_a}{\Delta t}\bigl(p_{ca}-p_{ca}^{n}\bigr)+q_a-Q=0,
+  &q_a&=N_a\,q\bigl(p_{ca}-p_c;L_a,r_a\bigr),
+  \label{eq:R1}\\
+  R_2&=\frac{V(p_c-p_{im})-V^{n}}{\Delta t}-q_a+q_v=0,
+  &q_v&=N_v\,q\bigl(p_c-P_{RA};L_v,r_v\bigr),
+  \label{eq:R2}
+\end{align}
+\begin{equation}
+  J=\begin{pmatrix}
+    \dfrac{C_a}{\Delta t}+q_a' & -q_a'\\[6pt]
+    -q_a' & \dfrac{1}{\Delta t}\dfrac{dV}{dp}+q_a'+q_v'
+  \end{pmatrix},
+  \qquad
+  \boxed{\;p_{out}=p_{ca}+\Delta P_p(Q)+Z_c\,Q\;}
+  \label{eq:jac}
+\end{equation}
+La formulaci\'on lineal se recupera haciendo $V=C\,p$, en cuyo caso
+$R_2$ reproduce t\'ermino a t\'ermino la versi\'on con fuente expl\'cita
+$Q_{im}=C\,\dot p_{im}$.
+
+\paragraph{Impedancia caracter\'stica.} Un vaso compliante presenta
+necesariamente una impedancia de onda, que en la salida vale
+\begin{equation}
+  Z_c=\frac{\rho\,c}{A},
+  \qquad
+  p_{out}=p_{ca}+\Delta P_p(Q)+Z_c\,Q ,
+  \label{eq:zc}
+\end{equation}
+con $c$ la velocidad de onda de pulso y $A$ el \'area medida de la salida. Es el
+$R_c$ del Windkessel de tres elementos. Su omisi\'on deja la compliancia
+arterial y la inertancia del fluido del dominio 3D como un resonador
+pr\'acticamente sin amortiguar, con periodo $2\pi\sqrt{L\,C_a}$ y factor de
+calidad del orden de $30$, lo que produce oscilaciones espurias sostenidas en la
+presi\'on de salida. No es un par\'ametro libre: se sigue de la densidad, del
+\'area de la malla y de la velocidad de onda, y a lo largo de todo el rango
+fisiol\'ogico ($c=5$--$10$~m/s) representa el $1.5$--$3\%$ de la resistencia de
+rama y da un amortiguamiento $\zeta=0.26$--$0.51$.
+
+\paragraph{Estabilidad del acoplamiento 3D--0D.} La presi\'on de salida se
+aplica con un retraso de un paso, por lo que la resistencia que aparece en ella
+queda tratada de forma expl\'cita. El esquema es estable si
+\begin{equation}
+  R_{\text{expl}}\;<\;Z_{3D}\approx\frac{\rho L}{A\,\Delta t},
+  \label{eq:estab}
+\end{equation}
+condici\'on que la resistencia arteriolar, con el $87\%$ del presupuesto de
+presi\'on, no satisface: exponerla directamente al dominio 3D hace divergir el
+c\'alculo. La compliancia epic\'ardica resuelve el problema porque el 3D pasa a
+ver un \emph{nodo capacitivo} en lugar de una resistencia dominante; entonces
+\eqref{eq:estab} se sustituye por $\Delta t/C_a<Z_{3D}$, y ambas resistencias
+quedan resueltas impl\'citamente en \eqref{eq:R1}--\eqref{eq:R2}. Con
+$C_a=0.1\,C$ la condici\'on se satisface con m\'as de un orden de magnitud de
+margen.
+
+\section{Calibraci\'on}
+
+Se ejecuta una sola vez con la viscosidad newtoniana de referencia $\mu_N$ y se
+congela, de manera que un cambio de reolog\'ia modifica el flujo y nunca la
+geometr\'ia, garantizando una comparaci\'on imparcial entre condiciones.
+
+\paragraph{Paso 1: anatom\'ia.}
+\begin{equation}
+  r_{p,i}=\sqrt{A_i/\pi},
+  \quad
+  w_i=\frac{r_{p,i}^{3}}{\sum_j r_{p,j}^{3}},
+  \quad
+  Q_i=Q_{\text{tot}}\,w_i,
+  \quad
+  \Delta P_{p,i}=\frac{8\mu_N L_{p,i}Q_i}{\pi r_{p,i}^{4}} .
+  \label{eq:paso1}
+\end{equation}
+
+\paragraph{Paso 2: \'arboles a partir de velocidades fisiol\'ogicas.}
+\begin{equation}
+  N_a=\frac{Q_i}{\bar v_a\,\pi r_a^{2}},
+  \qquad
+  N_v=\frac{Q_i}{\bar v_v\,\pi r_v^{2}},
+  \qquad
+  \dot\gamma_a=\frac{4\bar v_a}{r_a},
+  \qquad
+  \dot\gamma_v=\frac{4\bar v_v}{r_v}.
+  \label{eq:paso2}
+\end{equation}
+La velocidad es un observable fisiol\'ogico directo y, por \eqref{eq:shear},
+fija el punto de operaci\'on reol\'ogico. Los valores $N_v<1$ son admisibles y
+representan la fracci\'on de una vena colectora compartida por varios
+territorios.
+
+\paragraph{Paso 3: presupuesto de presi\'on.} La vena posee radio y longitud
+anat\'omicos, de modo que su ca\'ida es una salida del modelo; la extensi\'on
+efectiva del \'arbol arteriolar absorbe el resto:
+\begin{equation}
+  \Delta P_v=\frac{8\mu_N L_v Q_v^{(1)}}{\pi r_v^{4}},
+  \quad
+  \Delta P_a=\Delta P-\Delta P_{p}-\Delta P_v,
+  \quad
+  L_a=\frac{\Delta P_a\,\pi r_a^{4}}{8\mu_N Q_a^{(1)}},
+  \label{eq:paso3}
+\end{equation}
+con $Q_a^{(1)}=\bar v_a\pi r_a^2$, $Q_v^{(1)}=\bar v_v\pi r_v^2$ y
+$\Delta P=p_{ar}(0)-\alpha p_{LV}(0)$. Todas las expresiones son cerradas, ya
+que para $Q$ y $r$ dados $\tau_w$ queda determinado y $\Delta p\propto L$. La
+longitud $L_a$ es un camino efectivo a trav\'es de varias generaciones en serie,
+no un vaso individual.
+
+\paragraph{Paso 4: compliancia medida.}
+\begin{equation}
+  C_i=C_{\text{tot}}\,w_i ,
+  \qquad
+  \tau=C\,\bigl(R_a\parallel R_v\bigr)\approx C\,R_v .
+  \label{eq:paso4}
+\end{equation}
+La constante de decaimiento deja de ser un par\'ametro de ajuste y pasa a ser
+una predicci\'on verificable.
+
+\section{Constantes}
+
+\begin{center}\small
+\begin{tabular}{llll}
+\toprule
+S\'imbolo & C\'odigo & Valor & Origen\\
+\midrule
+$\mu_0,\mu_\infty$ & \texttt{viscosity.mu0,.muInf} & 0.353,\;4.181e-3 Pa\,s & reolog\'ia medida\\
+$\lambda,n,a$ & \texttt{viscosity.lambda,.n,.yasuda} & 15.68 s,\;0.205,\;0.650 & reolog\'ia medida\\
+$\mu_N$ & \texttt{newtonianCalibrationViscosity} & 3.5e-3 Pa\,s & referencia de calibraci\'on\\
+\midrule
+$r_p$ & \texttt{geometricParam.Rp} & de la malla & anatom\'ia (1.5--3.3 mm)\\
+$L_p$ & \texttt{geometricParam.Lp} & 10--12.5 mm & anatom\'ia\\
+$r_a$ & \texttt{arteriolarRadius} & 25 $\mu$m & anatom\'ia (arteriola)\\
+$r_v$ & \texttt{venousRadius} & 30 $\mu$m & anatom\'ia (v\'enula)\\
+$L_v$ & \texttt{venousLength} & 1.5 cm & camino venular efectivo\\
+$\bar v_a$ & \texttt{arteriolarVelocity} & 5 mm/s & fisiolog\'ia (2--10 mm/s)\\
+$\bar v_v$ & \texttt{venousVelocity} & 3 mm/s & fisiolog\'ia (1--5 mm/s)\\
+$Q_{\text{tot}}$ & \texttt{lcaTargetFlow} & 2.0e-6 m$^3$/s & 120 mL/min\\
+$C_{\text{tot}}$ & \texttt{coronaryComplianceTotal} & 3.2e-10 m$^3$/Pa & 0.043 mL/mmHg\\
+$C_a/C$ & \texttt{arterialComplianceFraction} & 0.10 & compliancia epic\'ardica\\
+$c$ & \texttt{pulseWaveVelocity} & 8 m/s & onda de pulso (5--10)\\
+$p_0$ & \texttt{collapsePressureScale} & 300 Pa & colapso microvascular\\
+$P_{RA}$ & \texttt{rightAtrialPressure} & 600 Pa & $\approx$4.5 mmHg\\
+$\alpha,\alpha_a$ & \texttt{intramyocardial(Active)Fraction} & 0.65,\;0.01 & transmisi\'on tisular\\
+$\tau_f$ & \texttt{intramyocardialFilterTau} & 0.02 s & desarrollo de $p_{im}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Cantidades derivadas: $N_a\!\sim\!10^{4}$--$10^{5}$, $N_v\!\sim\!0.6$--$6.8$,
+$L_a\!\approx\!46$~mm, $C_i$, $R_a$, $R_v$ y $\tau$. Total: 13 constantes
+libres, todas ellas magnitudes medibles (radio, longitud, velocidad,
+compliancia, caudal, presi\'on); ninguna es una resistencia equivalente.
+
+\section{Sensibilidad reol\'ogica}
+
+Con velocidades fisiol\'ogicas, el punto de operaci\'on arteriolar queda en
+$\dot\gamma_a\!\approx\!800$~s$^{-1}$, donde la sangre es casi newtoniana. El
+lecho venular opera a $\dot\gamma_v\!\approx\!400$~s$^{-1}$, pero su
+cizallamiento recorre varias d\'ecadas a lo largo del ciclo:
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\toprule
+Fase & $\dot\gamma_v$ (s$^{-1}$) & $\mu/\mu_\infty$\\
+\midrule
+S\'stole & 400 & 1.08\\
+Di\'astole & 100 & 1.24\\
+Nadir diast\'olico & 40 & 1.49\\
+Bajo flujo & 10 & 2.43\\
+Cuasi-estasis & 1 & 8.74\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+($\mu_0/\mu_\infty=84$ es el l\'mite de bajo corte.)
+
+\noindent
+La modulaci\'on reol\'ogica es, por tanto, considerable en t\'erminos
+din\'amicos, aunque modesta si se eval\'ua \'unicamente en el punto medio. El
+efecto de una condici\'on hiperviscosa debe buscarse en la forma de onda
+durante las fases de bajo flujo (nadir diast\'olico, reversiones, salida venosa
+sist\'olica) y no en el caudal medio, cuyo valor lo determina el lecho
+arteriolar, que opera a alto cizallamiento y es pr\'acticamente newtoniano.
+
+\section{Criterio para distinguir correcci\'on de ajuste}
+
+Al a\~nadir un t\'ermino a un modelo cuyo comportamiento no satisface, conviene
+someterlo a cuatro preguntas. Un t\'ermino leg\'timo las responde
+afirmativamente; uno ajustado al resultado deseado, no.
+
+\begin{enumerate}
+\item \emph{¿Su valor procede de una medida independiente o de un primer
+principio, o se fija a partir del resultado que se busca?}
+\item \emph{¿El comportamiento es robusto en todo el rango fisiol\'ogico del
+par\'ametro, o exige un valor de filo de navaja?}
+\item \emph{¿Es defendible la ausencia del t\'ermino?} Si omitirlo es
+f\'sicamente inconsistente, incluirlo es una correcci\'on, no un a\~nadido.
+\item \emph{¿Se habr\'a incluido antes de observar el resultado?}
+\end{enumerate}
+
+\noindent
+La impedancia caracter\'stica \eqref{eq:zc} las satisface: se deduce de
+$\rho$, $A$ y $c$; el amortiguamiento es adecuado en todo el rango $c=5$--$10$
+m/s; una compliancia sin impedancia de onda es f\'sicamente inconsistente; y
+deber\'a haberse introducido junto con $C_a$.
+
+La ley colapsable \eqref{eq:vcol} tambi\'en: lo que impone es la restricci\'on
+$V\ge0$, no un valor; el punto de operaci\'on es insensible a $p_0$ en todo el
+rango $150$--$600$~Pa, donde $dV/dp$ se mantiene entre $0.95\,C$ y $C$; extraer
+de un compartimento m\'as sangre de la que contiene es imposible, luego su
+ausencia es indefendible; y la restricci\'on deber\'a haberse impuesto desde el
+planteamiento.
+
+En cambio, elevar $\tau_f$ para reducir el pico de la bomba no las satisface:
+carece de medida independiente que lo fije, se elegir\'a para alcanzar un
+cociente objetivo y no corresponde al mecanismo real. Por ese motivo la
+amplitud de la bomba se corrige imponiendo $V\ge0$ y no mediante ese
+par\'ametro.
+
+\section{Limitaciones}
+
+\paragraph{Amplitud de la bomba.} Con la compliancia lineal, el volumen
+desplazado por la s\'stole era $C\,\Delta p_{im}\approx3.2$~mL por latido, sin
+cota superior, y la presi\'on transmural alcanzaba valores negativos
+($\approx-4000$~Pa, esto es, $-1.3$~mL de volumen almacenado). La ley
+colapsable \eqref{eq:vcol} acota la reserva expulsable al volumen realmente
+contenido en reposo,
+\begin{equation}
+  V\bigl(p_c-p_{im}\bigr)\Big|_{\text{reposo}}
+  =V(1740\ \text{Pa})\approx0.56\ \text{mL},
+\end{equation}
+es decir, un factor $\sim\!6$ menor, y garantiza $V\ge0$ en todo el ciclo. El
+cociente pico/media del flujo venoso resultante es ahora una \emph{predicci\'on}
+del modelo, y se reporta junto con las dem\'as m\'etricas de validaci\'on. Debe
+observarse que la reserva expulsable queda fijada por $C$ y por la presi\'on
+transmural de reposo, ambas determinadas de forma independiente, y no por un
+par\'ametro ajustado a la forma de onda.
+
+\paragraph{Presi\'on motriz.} Con la constante de tiempo del vaciado en su
+rango fisiol\'ogico, la forma de onda diast\'olica depende tanto de $\tau$ como
+de la evoluci\'on de la presi\'on motriz. Esta \'ultima la determinan
+$p_{ar}(t)$, a trav\'es del Windkessel sist\'emico del modelo 0D, y $p_{im}(t)$,
+a trav\'es de la onda de activaci\'on. Si el decaimiento observado siguiera
+siendo demasiado r\'apido tras esta correcci\'on, dichos bloques son el lugar
+donde debe continuar el an\'alisis.
+
+\paragraph{Alcance del modelo reol\'ogico.} Los efectos no newtonianos de la
+microcirculaci\'on asociados a la naturaleza particulada de la sangre
+(F\aa hr\ae us--Lindqvist) no est\'an contenidos en \eqref{eq:cy} y requerir\'ian
+un modelo espec\'ifico.
+
+\end{document}

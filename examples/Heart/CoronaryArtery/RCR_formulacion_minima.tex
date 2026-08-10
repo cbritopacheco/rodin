@@ -1,0 +1,503 @@
+% =====================================================================
+%  FORMULACION MINIMA
+%  Salida coronaria: resistor de Starling intramiocardico
+%  Modelo acoplado LV 0D <-> coronaria 3D (CoupledLV0DCoronary3D)
+%  Requiere: amsmath, amssymb, booktabs
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=2.3cm]{geometry}
+\newcommand{\dd}[2]{\frac{\partial #1}{\partial #2}}
+\title{Salida coronaria como resistor de Starling intramioc\'ardico:\\
+       formulaci\'on m\'inima}
+\date{}
+\begin{document}\maketitle
+
+\begin{abstract}
+\noindent
+Se sustituye la condici\'on de salida coronaria del modelo acoplado 0D--3D por
+una formulaci\'on de un \'unico estado por salida. El diagn\'ostico de la
+ejecuci\'on anterior localiza dos defectos estructurales, no de calibraci\'on:
+la compliancia epic\'ardica $C_a$, introducida \'unicamente para estabilizar el
+acoplamiento retrasado, forma con la inertancia del dominio 3D un resonador de
+factor de calidad $2$ que explica tanto el rizado observado como el pico
+sist\'olico esp\'ureo del flujo de salida; y el drenaje venoso hacia una
+presi\'on auricular fija, mientras la compresi\'on empuja el nodo microvascular
+hasta $p_{im}$, multiplica por $7{,}6$ la presi\'on motriz venosa en s\'istole.
+La correcci\'on de ambos --- resistencia de salida impl\'icita en lugar de nodo
+capacitivo, y garganta colapsable de Starling en lugar de drenaje a presi\'on
+fija --- elimina la ley de tubo colapsable, las multiplicidades en paralelo, la
+impedancia caracter\'istica y las siete constantes asociadas. El estado por
+salida pasa de dos a uno, el n\'umero de constantes libres de $13$ a $8$, y
+desaparecen los tres solvers no lineales anidados por evaluaci\'on de residuo.
+El cierre WRMS se conserva \'integramente y se eval\'ua por tabla universal.
+\end{abstract}
+
+\section{Diagn\'ostico}
+\label{sec:diag}
+
+Las tres anomal\'ias reportadas --- oscilaciones, flujo de salida m\'aximo en
+s\'istole y flujo distal desmedido --- se miden directamente sobre
+\texttt{CoronaryArtery.csv} ($484$ pasos, $\Delta t=10^{-3}$~s). Conviene
+separar el caudal de salida $Q$ en sus dos contribuciones, que el balance de
+nodo hace accesibles sin instrumentar el c\'odigo:
+\begin{equation}
+  Q=\underbrace{C_a\,\dot p_{ca}}_{\text{carga del capacitor}}
+   +\underbrace{q_a}_{\text{perfusi\'on}},
+  \qquad
+  q_a=\dot V+q_v .
+  \label{eq:split}
+\end{equation}
+
+\begin{center}\small
+\begin{tabular}{lrrr}
+\toprule
+ & S\'istole & Di\'astole & Cociente\\
+\midrule
+$Q$ (salida 3D)              & $0{,}92$ & $1{,}29$ & $0{,}71$\\
+$q_a$ (perfusi\'on)          & $0{,}58$ & $1{,}44$ & $0{,}40$\\
+$q_v$ (venoso)               & $7{,}69$ & $1{,}63$ & $4{,}71$\\
+$C_a\dot p_{ca}$             & $0{,}33$ & $-0{,}16$ & ---\\
+\bottomrule
+\end{tabular}\\[2pt]
+\footnotesize mL/s; s\'istole $t\in[0{,}22,0{,}42]$, di\'astole $t<0{,}16$.
+\end{center}
+
+\paragraph{(a) La fasicidad arterial ya era correcta.} La perfusi\'on $q_a$
+tiene cociente sist\'ole/di\'astole $0{,}40$, que es el valor fisiol\'ogico. Lo
+que no es correcto es lo que ve el dominio 3D: en el instante $t=0{,}229$~s el
+caudal de salida vale $2{,}30$~mL/s, de los cuales $2{,}08$ son carga de $C_a$ y
+solamente $0{,}22$ son perfusi\'on. \emph{El m\'aximo sist\'olico del caudal de
+salida es en un $90\%$ carga capacitiva impulsada por $\dot p_{ao}$ durante el
+ascenso a\'ortico}, no perfusi\'on. La inversi\'on de fase no est\'a en la
+fisiolog\'ia del modelo sino en el elemento que se interpuso entre ella y la
+malla.
+
+\paragraph{(b) Las oscilaciones son la resonancia $L_{3D}$--$C_a$.} Con
+$C_a=A L_p/(\rho c^2)$ y $L_{3D}=\rho\,\ell/A$ la inertancia del dominio, el
+\'area se cancela y
+\begin{equation}
+  f_0=\frac{c}{2\pi\sqrt{L_p\,\ell}}\approx51\ \text{Hz},
+  \qquad
+  \zeta=\frac{Z_c}{2}\sqrt{\frac{C_a}{L_{3D}}}=0{,}25,
+  \qquad
+  Q_{\text{res}}=2 .
+  \label{eq:res}
+\end{equation}
+El espectro del caudal de salida en la ventana diast\'olica presenta sus picos
+en $12{,}5$--$37{,}5$~Hz, y un modelo unidimensional del acoplamiento reproduce
+$58$ inversiones de signo con frecuencia dominante $63$~Hz. La impedancia
+caracter\'istica amortigua ($\zeta=0{,}25$) pero no elimina: un resonador de
+$Q_{\text{res}}=2$ sigue timbrando cuatro periodos. Obs\'ervese que $f_0$ y
+$\zeta$ son \emph{independientes del radio de la salida}, de modo que el
+fen\'omeno no se corrige refinando la geometr\'ia ni distribuyendo el caudal de
+otro modo.
+
+\paragraph{(c) El flujo venoso desmedido es la ausencia de garganta.} En
+s\'istole $p_{im}$ alcanza $10\,349$~Pa. La constante de tiempo del
+compartimento, $\tau=C R_v\approx0{,}7$~s con la compliancia emergente
+$C\approx10^{-9}$~m$^3$/Pa, es larga frente a la s\'istole, de modo que $p_{tm}$
+apenas var\'ia y \emph{el nodo microvascular sigue a $p_{im}$ casi uno a uno}:
+$p_c$ pasa de $1\,910$ a $10\,509$~Pa. La presi\'on motriz venosa, que se toma
+como $p_c-P_{RA}$, se multiplica por
+\[
+  \frac{10\,509-600}{1\,910-600}=7{,}6 ,
+\]
+mientras la modulaci\'on de conductancia que deber\'ia compensarla solo aporta
+un factor $0{,}69$: la ley de tubo con $K_v=200$~Pa y $n=3/2$ reduce el radio
+venular de $1{,}117$ a $0{,}908$ veces el no tensionado, un $9\%$. El producto,
+$7{,}6\times0{,}69=5{,}2$, es el cociente $4{,}7$ medido. El lecho se vac\'ia a
+$9$~mL/s y pierde $1{,}9$ de sus $7{,}0$~mL en un solo latido.
+
+\paragraph{Conclusi\'on.} Ninguno de los tres es un problema de valores. El
+primero y el segundo tienen la misma causa --- un capacitor colocado en la
+salida por razones num\'ericas --- y el tercero es la falta de la \'unica
+propiedad constitutiva que hace acotado el drenaje de un vaso colapsable
+inmerso en un tejido a presi\'on: que la garganta se cierra a $p_{im}$.
+
+\section{Principio rector}
+
+\begin{quote}
+\emph{Un vaso colapsable embebido en un tejido a presi\'on $p_{im}$ drena
+contra $p_{im}$, no contra su reservorio distal. La presi\'on tisular no es una
+fuente a\~nadida al balance: es la referencia de todo el compartimento.}
+\end{quote}
+
+\noindent
+Es el resistor de Starling de Permutt y Riley y la cascada vascular de
+Downey y Kirk (1975). Tomarlo en serio tiene una consecuencia que ahorra la
+mitad del modelo: si la garganta se cierra a $p_{im}$, la presi\'on transmural
+$p_{tm}=p_c-p_{im}$ es una variable de relajaci\'on estable con constante de
+tiempo $CR_v$, acotada por debajo por $0$ y por arriba por $R_v\max q_a$. La
+ley de tubo colapsable, la ley de volumen no negativo, las \'areas no
+tensionadas y las multiplicidades en paralelo exist\'ian todas para acotar una
+variable que ahora est\'a acotada por construcci\'on.
+
+\section{Formulaci\'on}
+
+\subsection{Topolog\'ia}
+
+\[
+\text{salida 3D}\;
+\xrightarrow[\ \text{impl\'icita}\ ]{R_a}\;
+\underbrace{\bigl(p_c,\;C\bigr)}_{\text{microvascular},\ p_{im}(t)}\;
+\xrightarrow[\ \text{garganta a }p_{im}\ ]{R_v}\;
+P_{RA}
+\]
+
+\noindent
+Un solo nodo, una sola inc\'ognita. No hay nodo epic\'ardico, no hay capacitor
+en la salida y no hay impedancia caracter\'istica.
+
+\subsection{Ecuaciones}
+
+Sea $p_{tm}=p_c-p_{im}$ la presi\'on transmural microvascular, \'unico estado
+por salida. Con $p_{im}=\alpha\,p_{LV}(t)$,
+\begin{align}
+  \boxed{\;C\,\frac{d p_{tm}}{dt} = q_a-q_v\;}&
+  \label{eq:balance}\\[2pt]
+  \boxed{\;q_v = \begin{cases}
+      \dfrac{p_{tm}+p_{im}-\max(p_{im},P_{RA})}{R_v\,\Phi_v}
+        & \text{lumen abierto,}\\[8pt]
+      0 & \text{garganta cerrada,}
+    \end{cases}\;}&
+  \label{eq:starling}\\[2pt]
+  \boxed{\;p_{out} = p_{im}+p_{tm}+R_a\,\Phi_a\,Q,
+  \qquad q_a\equiv Q\;}&
+  \label{eq:pout}
+\end{align}
+$\Phi_a$ y $\Phi_v$ son los multiplicadores reol\'ogicos de la
+secci\'on~\ref{sec:reo}, iguales a la unidad en el punto de calibraci\'on. El
+volumen almacenado es $V=C\,p_{tm}$, y $V\ge0$ se cumple porque
+\eqref{eq:starling} anula el drenaje en cuanto $p_{tm}$ alcanza el cierre.
+
+\paragraph{Lectura de \eqref{eq:pout}.} La presi\'on tisular aparece
+expl\'icitamente en la presi\'on que ve la malla. Ah\'i est\'a, en una l\'inea,
+todo el impedimento sist\'olico: en s\'istole el dominio 3D descarga contra
+$p_{im}+p_{tm}\approx11\,200$~Pa en lugar de contra $2\,000$~Pa, y la ca\'ida
+motriz arteriolar cae de $7\,400$ a $900$~Pa. No hace falta ninguna modulaci\'on
+de calibre para producir la dominancia diast\'olica.
+
+\paragraph{Lectura de \eqref{eq:starling}.} En s\'istole $\max(p_{im},P_{RA})=
+p_{im}$ y por tanto $q_v=p_{tm}/(R_v\Phi_v)$: la presi\'on tisular se cancela y
+el drenaje queda gobernado por la \emph{sola} presi\'on transmural, que es lenta.
+En di\'astole $p_{im}<P_{RA}$, la garganta se abre y se recupera el drenaje
+ordinario $q_v=(p_c-P_{RA})/(R_v\Phi_v)$. El paso entre ambos reg\'imenes no es
+un interruptor a\~nadido: es la definici\'on del resistor de Starling.
+
+\paragraph{D\'onde va la compuerta.} Un resistor de Starling es una v\'alvula
+antirretorno \emph{solamente mientras est\'a colapsado}, de modo que la
+condici\'on se impone sobre el estado del lumen y no sobre el signo de la
+presi\'on motriz:
+\begin{equation}
+  \text{lumen abierto}
+  \iff
+  p_{im}\le P_{RA}
+  \ \ \text{(no hay compresi\'on)}
+  \quad\text{o}\quad
+  p_{tm}>0
+  \ \ \text{(garganta distendida)} .
+  \label{eq:gate}
+\end{equation}
+La distinci\'on importa: acotar $q_v\ge0$ siempre que $p_c<p_{drenaje}$
+prohibir\'ia el reflujo venoso con el vaso completamente abierto, que es una
+condici\'on real (presi\'on auricular derecha elevada, insuficiencia
+tricusp\'idea). El reflujo por la rama abierta se autolimita y no necesita cota
+inferior: $q_v<0$ da $C\dot p_{tm}>0$, que eleva $p_{tm}$ y cierra el
+gradiente; el jacobiano sigue siendo $C/\Delta t+G_v>0$ en ambas ramas. En el
+punto de operaci\'on de este modelo la compuerta no llega a activarse
+($p_{tm}\in[444,1540]$~Pa en todo el barrido de $\alpha$), de modo que es una
+salvaguarda y no una restricci\'on que est\'e conformando el resultado.
+
+\subsection{Discretizaci\'on}
+
+Euler impl\'icito y Newton escalar sobre $p_{tm}$:
+\begin{equation}
+  R(p_{tm})=\frac{C\bigl(p_{tm}-p_{tm}^{n}\bigr)}{\Delta t}-Q+q_v(p_{tm})=0,
+  \qquad
+  R'=\frac{C}{\Delta t}+\dd{q_v}{p_{tm}} .
+  \label{eq:newton}
+\end{equation}
+Con $q_v$ mon\'otona creciente, $R'>0$ siempre y la iteraci\'on converge
+globalmente desde cualquier iterado. Una sola inc\'ognita, sin b\'usqueda de
+l\'inea, sin resolver el \'area del tubo dentro del residuo y sin invertir la
+ley de flujo para obtener la ca\'ida del conducto.
+
+\section{Acoplamiento 3D--0D}
+\label{sec:acopl}
+
+La \'unica raz\'on de existir de $C_a$ era la estabilidad: aplicada con retraso
+de un paso, una resistencia $R$ produce el factor de amplificaci\'on
+$|1-R\Delta t/L_{3D}|$, inestable en cuanto $R>2Z_{3D}$, y la resistencia
+arteriolar por rama, $R_a\approx2{,}7\times10^{10}$, lo supera en un factor
+$6$. La soluci\'on no es interponer un capacitor sino no retrasar el t\'ermino.
+La contribuci\'on de $R_a$ a la tracci\'on de Neumann,
+\begin{equation}
+  \int_\Gamma R_a\,Q\,(v\cdot n)\,d\Gamma
+  \;\simeq\;
+  R_a\,A_\Gamma\int_\Gamma (u\cdot n)(v\cdot n)\,d\Gamma ,
+  \label{eq:implicita}
+\end{equation}
+es exacta para perfil plano, sim\'etrica y semidefinida positiva para cualquier
+perfil, y se ensambla con el mismo patr\'on que la impedancia normal de entrada
+ya presente en el c\'odigo. Con ella el factor de amplificaci\'on pasa a
+$1/(1+R\Delta t/L_{3D})<1$: \textbf{incondicionalmente estable}, sin
+restricci\'on sobre $\Delta t$ ni sobre $R_a$.
+
+\begin{center}\small
+\begin{tabular}{lrrr}
+\toprule
+$R$ (Pa\,s/m$^3$) & $Z_{3D}$ & expl\'icito $|g|$ & impl\'icito $|g|$\\
+\midrule
+$6{,}7\times10^{8}$ (solo $Z_c$)   & $4{,}2\times10^{9}$ & $0{,}84$ & $0{,}86$\\
+$4{,}5\times10^{9}$ (total)        & $4{,}2\times10^{9}$ & $0{,}07$ & $0{,}48$\\
+$2{,}7\times10^{10}$ (por rama)    & $4{,}2\times10^{9}$ & $\mathbf{5{,}40}$ & $0{,}14$\\
+\bottomrule
+\end{tabular}\\[2pt]
+\footnotesize $\Delta t=10^{-3}$~s. La tercera fila es la que hac\'ia divergir
+el c\'alculo y motiv\'o $C_a$.
+\end{center}
+
+\noindent
+Suprimido el capacitor, desaparece el resonador: el mismo modelo
+unidimensional pasa de $58$ inversiones de signo y rizado RMS $1{,}5\times10^{-2}$
+mL/s a $5$ inversiones y $5{,}3\times10^{-3}$, y el contenido restante es el del
+propio forzamiento a\'ortico. $Z_c$ deja de ser necesario: su papel era
+amortiguar $C_a$, y una impedancia de onda sin la compliancia que la genera no
+tiene sentido en un dominio de pared r\'igida.
+
+\section{Flujo retr\'ogrado}
+\label{sec:back}
+
+Nada en la formulaci\'on acota el signo de $q_a$. La reversi\'on sist\'olica
+epic\'ardica es una \emph{predicci\'on} de \eqref{eq:pout}: ocurre cuando
+$p_{im}+p_{tm}>p_{ao}$, esto es, cuando la presi\'on tisular supera a la
+a\'ortica durante la contracci\'on isovolum\'etrica. El \'unico par\'ametro que
+la gobierna es $\alpha$.
+
+\begin{center}\small
+\begin{tabular}{lrrrr}
+\toprule
+$\alpha$ & $q_a^{\min}$ (mL/s) & $t/T$ & $q_a$ sis/dia & $p_{tm}$ (Pa)\\
+\midrule
+$0{,}50$ & $+0{,}054$ & $0{,}209$ & $0{,}58$ & $1125$--$1540$\\
+$0{,}65$ & $+0{,}006$ & $0{,}213$ & $0{,}33$ & $895$--$1423$\\
+$0{,}80$ & $-0{,}032$ & $0{,}216$ & $0{,}10$ & $684$--$1342$\\
+$1{,}00$ & $-0{,}108$ & $0{,}220$ & $-0{,}18$ & $444$--$1261$\\
+\bottomrule
+\end{tabular}\\[2pt]
+\footnotesize Por salida, forzado con $p_{ao}(t)$ y $p_{LV}(t)$ del registro.
+\end{center}
+
+\noindent
+El valor por defecto $\alpha=0{,}65$ cae justo en el umbral, lo que es
+coherente con su lectura como transmisi\'on promediada sobre el espesor: en la
+arteria epic\'ardica humana normal el reflujo sist\'olico es peque\~no o
+ausente, y se hace prominente en el territorio subendoc\'ardico y en las
+perforantes septales, que es lo que reproducen $\alpha=0{,}8$--$1{,}0$. El
+instante del m\'inimo, $t/T\approx0{,}21$, es la contracci\'on isovolum\'etrica.
+
+\paragraph{Sobre acotar el reflujo.} No se impone ninguna cota inferior.
+Someti\'endola a las cuatro preguntas de la secci\'on~\ref{sec:crit}, una cota
+del tipo $q_a\ge-q_{\max}$ falla las cuatro: no procede de una medida
+independiente; su valor tendr\'ia que elegirse para que no interfiera con el
+resultado; su ausencia es perfectamente defendible porque la reversi\'on est\'a
+determinada por $\alpha$ y por la fase de $p_{ao}$ frente a $p_{LV}$; y no se
+habr\'ia introducido antes de observar un valor que incomodase. Su efecto
+pr\'actico ser\'ia enmascarar una divergencia en lugar de reportarla. El
+t\'ermino de estabilizaci\'on de reflujo del contorno, en cambio, s\'i es
+leg\'itimo y ya est\'a: es disipativo, se activa solo con $u\cdot n<0$ y su
+magnitud, $\tfrac12\sigma\rho|u|\sim26$~Pa\,s/m a $5$~cm/s, est\'a cuatro
+\'ordenes por debajo del coeficiente de resistencia impl\'icita
+$R_a\Phi_a A\approx4{,}1\times10^{5}$~Pa\,s/m, de modo que amortigua la
+reversi\'on sin prohibirla. El t\'ermino impl\'icito \eqref{eq:implicita} es
+lineal y sim\'etrico y act\'ua igual sobre ambos signos: es una resistencia, no
+un diodo.
+
+\section{Reolog\'ia}
+\label{sec:reo}
+
+El cierre WRMS se conserva sin aproximaci\'on. Escribiendo el caudal de
+Hagen--Poiseuille con una viscosidad aparente, $Q=\pi R^4\Delta p/(8\mu_{ap}L)$,
+y comparando con $Q=\pi R^3 I(\tau_w)/\tau_w^3$ se obtiene
+\begin{equation}
+  \boxed{\;\mu_{ap}(\tau_w)=\frac{\tau_w^{4}}{4\,I(\tau_w)}\;},
+  \qquad
+  \dot\gamma_{\text{nom}}=\frac{4Q}{\pi R^{3}}=\frac{\tau_w}{\mu_{ap}},
+  \qquad
+  I(\tau_w)=\int_0^{\tau_w}\!\tau^2\dot\gamma(\tau)\,d\tau .
+  \label{eq:muap}
+\end{equation}
+$\mu_{ap}$ es funci\'on \emph{universal} de $\tau_w$ para una reolog\'ia dada:
+no depende de $R$, de $L$ ni de la rama. Se tabula una vez en
+$\dot\gamma_{\text{nom}}$ y el elemento 0D solo interpola:
+\begin{equation}
+  \Phi_\bullet(q)=\frac{\mu_{ap}\bigl(\dot\gamma_\bullet^{0}\,|q|/q^{0}\bigr)}
+                       {\mu_{ap}\bigl(\dot\gamma_\bullet^{0}\bigr)},
+  \qquad \bullet\in\{a,v\}.
+  \label{eq:phi}
+\end{equation}
+Con $241$ nodos log-espaciados en $\tau_w\in[10^{-6},10^{4}]$ el error m\'aximo
+de interpolaci\'on log--log es $0{,}09\%$ y el medio $0{,}011\%$. Frente a la
+evaluaci\'on anterior --- Newton para $\dot\gamma_w$ m\'as RK4 de $100$ pasos
+por cada llamada, dentro de un Newton $2\times2$ con b\'usqueda de l\'inea, dos
+\'arboles y seis salidas --- el coste por paso cae en tres \'ordenes de
+magnitud sin perder una cifra.
+
+\paragraph{D\'onde queda la se\~nal reol\'ogica.} En $R_v\Phi_v$. Como
+$\dot\gamma_v^{0}\approx400$~s$^{-1}$ y el cizallamiento venoso recorre varias
+d\'ecadas a lo largo del ciclo, $\Phi_v$ modula la resistencia de drenaje; por
+\eqref{eq:balance} esto desplaza el punto de operaci\'on $p_{tm}$, que es
+observable directo. La verificaci\'on 0D da, multiplicando la viscosidad
+venosa:
+\begin{center}\small
+\begin{tabular}{lrrr}
+\toprule
+$\mu_v/\mu_v^{0}$ & $p_{tm}$ (Pa) & $Q$ (mL/min) & $q_a$ sis/dia\\
+\midrule
+$1{,}0$ & $831$--$1649$ & $102{,}3$ & $0{,}34$\\
+$1{,}5$ & $1271$--$2112$ & $96{,}2$ & $0{,}30$\\
+$2{,}0$ & $1662$--$2511$ & $90{,}9$ & $0{,}26$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent
+La hiperviscosidad distiende el lecho y reduce el caudal medio. Es el efecto
+que la formulaci\'on anterior no consegu\'ia mostrar, y aparece ahora en una
+sola variable de estado.
+
+\section{Calibraci\'on}
+
+Se ejecuta una vez con $\mu_N$ y se congela. Con
+$\Delta P=p_{ar}(0)-P_{RA}$ y $r_{p,i}$ medido sobre la malla:
+\begin{equation}
+  w_i=\frac{r_{p,i}^{3}}{\sum_j r_{p,j}^{3}},
+  \qquad
+  Q_i=Q_{\text{tot}}\,w_i,
+  \qquad
+  C_i=C_{\text{tot}}\,w_i,
+  \label{eq:cal1}
+\end{equation}
+\begin{equation}
+  R_{v,i}=\frac{f_v\,\Delta P}{Q_i},
+  \qquad
+  R_{a,i}=\frac{(1-f_v)\,\Delta P}{Q_i},
+  \qquad
+  p_{tm,i}(0)=P_{RA}+f_v\Delta P-\alpha\,p_{LV}(0).
+  \label{eq:cal2}
+\end{equation}
+Tres divisiones por salida. Todo lo dem\'as --- radios arteriolares y
+venulares, longitudes efectivas, multiplicidades, \'areas no tensionadas,
+rigideces de pared, tiempos de tr\'ansito --- desaparece: eran par\'ametros de
+una geometr\'ia expl\'icita que el modelo ya no necesita, porque
+$R_a$, $R_v$ y $C$ son las cantidades que realmente entran en
+\eqref{eq:balance}--\eqref{eq:pout}. La constante de tiempo de vaciado,
+$\tau=C_iR_{v,i}$, se reporta como predicci\'on verificable.
+
+\section{Constantes}
+
+\begin{center}\small
+\begin{tabular}{llll}
+\toprule
+S\'imbolo & C\'odigo & Valor & Origen\\
+\midrule
+$\mu_0,\mu_\infty,\lambda,n,a$ & \texttt{viscosity} & --- & reolog\'ia medida\\
+$\mu_N$ & \texttt{newtonianCalibrationViscosity} & 3{,}5e-3 Pa\,s & referencia\\
+\midrule
+$Q_{\text{tot}}$ & \texttt{lcaTargetFlow} & 2{,}0e-6 m$^3$/s & 120 mL/min\\
+$f_v$ & \texttt{venularPressureFraction} & 0{,}13 & reparto medido de carga\\
+$C_{\text{tot}}$ & \texttt{coronaryComplianceTotal} & 3{,}2e-10 m$^3$/Pa & compliancia identificada\\
+$\alpha$ & \texttt{intramyocardialFraction} & 0{,}65 & transmisi\'on tisular\\
+$P_{RA}$ & \texttt{rightAtrialPressure} & 600 Pa & $\approx4{,}5$ mmHg\\
+$\dot\gamma_a^{0}$ & \texttt{arteriolarShearRate} & 800 s$^{-1}$ & $4\bar v_a/r_a$\\
+$\dot\gamma_v^{0}$ & \texttt{venularShearRate} & 400 s$^{-1}$ & $4\bar v_v/r_v$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Ocho constantes libres m\'as la reolog\'ia medida. Suprimidas respecto de la
+formulaci\'on anterior: $c$ (\texttt{pulseWaveVelocity}),
+$K_a$, $K_v$ (rigideces de pared), $m$, $n$ y las cotas de \'area de la ley de
+tubo, $\bar v_a$, $\bar v_v$, $T_a$, $T_v$, $r_a$, $r_v$, $L_a$, $L_v$,
+$N_a$, $N_v$, $A_u^a$, $A_u^v$, $Z_c$, $C_a$ y la geometr\'ia del conducto
+epic\'ardico. Cantidades derivadas: $R_{a,i}$, $R_{v,i}$, $C_i$, $\tau_i$.
+
+\section{Verificaci\'on}
+
+Modelo 0D forzado con $p_{ao}(t)$ y $p_{LV}(t)$ del registro, $8$ ciclos,
+$\Delta t=5\times10^{-5}$~s, m\'etricas sobre el \'ultimo ciclo.
+
+\begin{center}\small
+\begin{tabular}{lrrrrr}
+\toprule
+$C$ (m$^3$/Pa) & $\tau=CR_v$ (s) & $q_a$ sis/dia & $q_v$ pico/media & $p_{tm}$ (Pa) & $\Delta V$ (mL)\\
+\midrule
+$1{,}0\times10^{-10}$ & $0{,}07$ & $0{,}38$ & $1{,}28$ & $587$--$1799$ & $0{,}12$\\
+$3{,}2\times10^{-10}$ & $0{,}22$ & $0{,}34$ & $1{,}33$ & $831$--$1649$ & $0{,}26$\\
+$1{,}0\times10^{-9}$  & $0{,}68$ & $0{,}31$ & $1{,}25$ & $1126$--$1450$ & $0{,}32$\\
+$3{,}0\times10^{-9}$  & $2{,}03$ & $0{,}30$ & $1{,}18$ & $1246$--$1358$ & $0{,}34$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item \textbf{Fasicidad arterial correcta y robusta.} $q_a$ sis/dia
+  $=0{,}30$--$0{,}38$ sobre \emph{treinta veces} el rango de $C$. No es un
+  ajuste: es una consecuencia estructural de \eqref{eq:pout}.
+\item \textbf{Flujo venoso acotado.} Pico/media $\le1{,}33$ frente al $4{,}7$
+  medido en la ejecuci\'on anterior, y sin desplazamiento neto de volumen.
+\item \textbf{$p_{tm}>0$ en todo el ciclo}, de modo que $V=Cp_{tm}\ge0$ se
+  cumple sin ley colapsable, sin penalizaci\'on y sin $p_0$.
+\item \textbf{Volumen desplazado por latido} $0{,}12$--$0{,}34$~mL, frente a
+  $1{,}9$~mL en la ejecuci\'on anterior. Es el orden fisiol\'ogico del
+  desplazamiento sist\'olico coronario.
+\item \textbf{Conservaci\'on exacta}: $\langle q_a\rangle=\langle q_v\rangle$ a
+  precisi\'on de m\'aquina.
+\end{enumerate}
+
+\section{Criterio de correcci\'on frente a ajuste}
+\label{sec:crit}
+
+Se aplican las cuatro preguntas del documento anterior a los dos cambios.
+
+\paragraph{Garganta de Starling \eqref{eq:starling}.} Procede de la mec\'anica
+del tubo colapsable (Permutt--Riley; Downey \& Kirk 1975), no de un valor
+medido a posteriori. El comportamiento es robusto: $q_a$ sis/dia var\'ia entre
+$0{,}30$ y $0{,}38$ en treinta veces el rango de $C$. Su ausencia es
+f\'isicamente indefendible: hace drenar un vaso comprimido contra un
+reservorio que no ve. Y deb\'ia haberse impuesto desde el momento en que el
+compartimento se declar\'o intramioc\'ardico.
+
+\paragraph{Resistencia impl\'icita \eqref{eq:implicita}.} No introduce ninguna
+constante: es el mismo $R_a$, ensamblado sin retraso. Es incondicionalmente
+estable en todo el rango, no en una ventana. Y el t\'ermino omitido es el
+t\'ermino diagonal exacto de la linealizaci\'on de la propia condici\'on de
+contorno, luego omitirlo era la inconsistencia.
+
+\paragraph{Contraste.} Ajustar $K_v$ para reducir el pico venoso no las
+satisface: no hay medida independiente que lo fije en el valor requerido, el
+comportamiento exige un valor de filo de navaja porque el cociente $7{,}6$ de
+presi\'on motriz ha de compensarse en un $9\%$ de radio, y el mecanismo real es
+el cierre de la garganta, no la reducci\'on gradual del calibre.
+
+\section{Limitaciones}
+
+\paragraph{Pico venoso sist\'olico.} La formulaci\'on entrega $q_v$ pico/media
+$\approx1{,}3$. El pico sist\'olico que se mide en el seno coronario procede de
+la descarga del compartimento venoso \emph{epic\'ardico}, que est\'a fuera del
+miocardio y no forma parte del modelo: aqu\'i $q_v$ representa la salida
+venular intramural, que fisiol\'ogicamente s\'i es casi plana. Recuperarlo
+exigir\'ia un segundo nodo $(p_{ev},C_{ev})$ aguas abajo de la garganta y dos
+constantes m\'as; se deja fuera deliberadamente.
+
+\paragraph{Estratificaci\'on transmural.} $\alpha$ es una transmisi\'on
+promediada sobre el espesor. La diferencia subendocardio/subepicardio, que es
+donde reside la vulnerabilidad isqu\'emica, requerir\'ia salidas por capa.
+
+\paragraph{Alcance del modelo reol\'ogico.} Los efectos no newtonianos ligados
+a la naturaleza particulada de la sangre (F\aa hr\ae us--Lindqvist) no est\'an
+contenidos en Carreau--Yasuda ni, por tanto, en $\mu_{ap}$.
+
+\end{document}

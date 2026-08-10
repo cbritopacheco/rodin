@@ -1,0 +1,586 @@
+% =====================================================================
+%  FORMULACION UNIFICADA
+%  Salida coronaria no-Newtoniana con ley de tubo colapsable
+%  Modelo acoplado LV 0D <-> coronaria 3D (CoupledLV0DCoronary3D)
+%  Requiere: amsmath, amssymb, booktabs
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=2.3cm]{geometry}
+\newcommand{\dd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ptm}{p_{\mathrm{tm}}}
+\title{Salida coronaria no-Newtoniana con ley de tubo colapsable:\\
+       formulaci\'on unificada}
+\date{}
+\begin{document}\maketitle
+
+\begin{abstract}
+\noindent
+Se presenta una reformulaci\'on de la condici\'on de salida coronaria del
+modelo acoplado 0D--3D. La versi\'on anterior conten\'ia la bomba
+intramioc\'ardica pero no la modulaci\'on de conductancia; la revisi\'on
+recibida propon\'ia la modulaci\'on de conductancia pero eliminaba la bomba.
+Ambas son medios modelos. Aqu\'i los dos mecanismos se reducen a un \'unico
+enunciado constitutivo: el radio de los vasos intramioc\'ardicos obedece una
+ley de tubo colapsable $r=r(\ptm)$, y ese mismo radio alimenta la ley de flujo
+(modulaci\'on de conductancia) y el volumen anat\'omico $N\pi r^{2}L$ (bomba).
+De ah\'i se siguen, sin t\'erminos adicionales, la restricci\'on $V\ge0$, el
+volumen no tensionado, la compliancia y la constante de vaciado. La
+calibraci\'on se reordena en torno a \emph{tiempos de tr\'ansito}, con lo que
+desaparece el residuo ajustado $L_a$ y los calibres pasan a ser predicciones
+verificables. El n\'umero de constantes libres de la condici\'on de salida baja
+de 15 a 12 y desaparecen las tres menos defendibles ($p_0$, $\alpha_a$,
+$\tau_f$). En una prueba 0D independiente, el cociente sist\'ole/di\'astole del
+flujo de entrada pasa de $1.97$ a $0.54$, dentro del rango fisiol\'ogico
+$0.4$--$0.6$; \'este era el defecto cualitativo pendiente.
+\end{abstract}
+
+\section{Qu\'e estaba mal, y d\'onde}
+\label{sec:diag}
+
+Conviene fijar el diagn\'ostico antes de la formulaci\'on, porque determina
+qu\'e se conserva y qu\'e se sustituye.
+
+\paragraph{El patr\'on f\'asico estaba invertido.} En la simulaci\'on
+disponible, el flujo medio de entrada durante la s\'istole era $2.22$ veces el
+diast\'olico, con el m\'aximo de entrada arterial en fase $0.226$ del ciclo,
+pr\'acticamente simult\'aneo al m\'aximo de salida venosa (fase $0.232$). La
+circulaci\'on coronaria izquierda es diast\'olica: el cociente
+sist\'ole/di\'astole del flujo de entrada vale $0.4$--$0.6$. Un modelo sin
+modulaci\'on de conductancia no puede reproducirlo, porque el \'unico
+mecanismo sist\'olico disponible, la contrapresi\'on $p_c$ generada por la
+bomba, queda compensado por el ascenso simult\'aneo de $p_{ar}$: ambas
+presiones suben juntas y la ca\'ida motriz $p_{ca}-p_c$ apenas se reduce. Lo
+que falta no es amplitud de bomba sino resistencia dependiente de la
+compresi\'on.
+
+\paragraph{La reserva expulsable era nula.} La presi\'on transmural registrada
+recorr\'ia el intervalo $[-8560,\,1146]$~Pa. Con la ley \emph{softplus}
+$V=Cp_0\ln(1+e^{p/p_0})$ eso significa que el lecho se vac\'ia por completo en
+cada latido: el compartimento se queda literalmente sin sangre a los pocos
+milisegundos de la s\'istole y permanece as\'i. El error no est\'a en $C$
+---$C_{tot}=3.2\times10^{-10}$~m$^3$/Pa es compatible con las
+identificaciones publicadas--- sino en que la ley \eqref{eq:vcol-old} asigna
+volumen \emph{cero} a presi\'on transmural cero,
+\begin{equation}
+  V(p)=C\,p_0\ln\bigl(1+e^{p/p_0}\bigr)\;\longrightarrow\;0
+  \quad\text{cuando}\quad \ptm\to0 ,
+  \label{eq:vcol-old}
+\end{equation}
+de modo que todo el dep\'osito vale $C\times1740~\text{Pa}=0.56$~mL, mientras
+que la propia anatom\'ia del modelo implica bastante m\'as: el \'arbol venular
+solo ya contiene $N_v\pi r_v^2L_v=QL_v/\bar v_v\approx10$~mL. Un vaso real a
+presi\'on transmural nula conserva su volumen no tensionado y s\'olo se vac\'ia
+cuando la pared pandea a $\ptm$ apreciablemente negativa. La correcci\'on no es
+retocar $p_0$ ni $C$: es sustituir una sigmoide por el origen por una ley de
+tubo colapsable con $V_0$ anat\'omico.
+
+\paragraph{La calibraci\'on era circular.} $L_a$ era el residuo del presupuesto
+de presi\'on ($\approx46$~mm, un ``camino efectivo'' sin correlato
+morfom\'etrico), $C_{tot}$ proven\'ia de una identificaci\'on externa,
+$L_v=1.5$~cm se impon\'ia sobre una v\'enula de $30~\mu$m, y $C_a/C=0.10$
+resultaba ser unas siete veces el cociente de esa misma identificaci\'on
+canina, se\~nal de que $C_a$ se hab\'ia dimensionado para satisfacer la
+condici\'on de estabilidad y no por medida. Adem\'as $Z_c$ y $C_a$, que son la
+misma elasticidad vista de dos maneras, se fijaban por separado y de forma
+mutuamente inconsistente.
+
+\paragraph{Lo art\'ificial estaba en la presi\'on tisular.} Los tres
+par\'ametros sin medida independiente eran $\alpha$, $\alpha_a=0.01$ y
+$\tau_f=0.02$~s. El filtro exist\'ia \'unicamente para acotar $\dot p_{im}$
+frente a una fuente expl\'icita $Q_{im}=C\dot p_{im}$; una vez que esa fuente
+desaparece, el filtro no tiene funci\'on.
+
+\paragraph{Atribuci\'on.} Por completitud: Spaan, Breuls \& Laird (1981) es el
+trabajo de la \emph{bomba} intramioc\'ardica, y Spaan (1985) lo extiende a la
+presi\'on de flujo cero mediante la compliancia intramioc\'ardica; la
+modulaci\'on de conductancia y la contrapresi\'on pertenecen a la l\'inea de la
+\emph{cascada vascular}, Downey \& Kirk (1975) y Westerhof, Sipkema \& van Huis
+(1983). La posici\'on moderna (Westerhof et al., \emph{Physiol Rev} 2006;
+Algranati, Kassab \& Lanir 2010) es que ambos mecanismos operan y que ninguno
+por s\'i solo reproduce la onda f\'asica.
+
+\section{Principio rector}
+
+\begin{quote}
+\emph{La geometr\'ia representa anatom\'ia; la resistencia hidr\'aulica
+representa la red vascular no resuelta; y la pared del vaso, una sola ley
+constitutiva, produce a la vez la resistencia y el almacenamiento.}
+\end{quote}
+
+\noindent
+La tercera cl\'ausula es la novedad. Los dos mecanismos discutidos no son dos
+t\'erminos que haya que sumar ni dos opciones entre las que haya que elegir:
+son dos consecuencias de que el calibre dependa de la presi\'on transmural. Por
+eso esta formulaci\'on tiene \emph{menos} constantes que cualquiera de los dos
+mecanismos modelado por separado.
+
+\section{Reolog\'ia y ley de tubo}
+
+\begin{equation}
+  \mu(\dot\gamma)=\mu_\infty+(\mu_0-\mu_\infty)
+  \Bigl[1+(\lambda\dot\gamma)^{a}\Bigr]^{\frac{n-1}{a}} ,
+  \label{eq:cy}
+\end{equation}
+la misma en el dominio 3D y en los elementos 0D, de modo que el acoplamiento es
+constitutivamente consistente. Para un tubo recto de radio $r$ y longitud $L$,
+con $\tau_w=r|\Delta p|/2L$ y $\mu(\dot\gamma_w)\dot\gamma_w=\tau_w$,
+\begin{equation}
+  q(\Delta p;L,r)=\frac{\pi r^3}{\tau_w^{3}}
+  \int_{0}^{\dot\gamma_w}\!\dot\gamma^{3}\,\mu^2\,
+  \bigl(\mu+\dot\gamma\,\mu'\bigr)\,d\dot\gamma .
+  \label{eq:wrms}
+\end{equation}
+
+\paragraph{Las dos derivadas exactas.} La primera ya estaba:
+\begin{equation}
+  \dd{q}{\Delta p}=\frac{\pi r^3\,\dot\gamma_w-3\,q}{\Delta p} .
+  \label{eq:dqdp}
+\end{equation}
+La segunda es nueva y hace viable todo lo dem\'as. Escribiendo
+\eqref{eq:wrms} en funci\'on de $\tau_w$ se observa que el prefactor
+\emph{no contiene el radio},
+\[
+  \frac{\pi r^{3}}{\tau_w^{3}}=\frac{8\pi L^{3}}{\Delta p^{3}},
+  \qquad\text{luego}\qquad
+  q=\frac{8\pi L^{3}}{\Delta p^{3}}\,I(\dot\gamma_w),
+\]
+y toda la dependencia en $r$ pasa por $\dot\gamma_w$. Derivando
+$I'(\dot\gamma_w)=\dot\gamma_w^{3}\mu_w^{2}(\mu_w+\dot\gamma_w\mu_w')$ y usando
+$(\mu+\dot\gamma\mu')\,\partial\dot\gamma_w/\partial r=\tau_w/r$ se obtiene, tras
+cancelar,
+\begin{equation}
+  \boxed{\;\dd{q}{r}=\pi r^{2}\,\dot\gamma_w\;}
+  \label{eq:dqdr}
+\end{equation}
+exacta para cualquier $\mu(\dot\gamma)$ generalizada newtoniana, y reducible a
+$4q/r$ en el l\'imite de Poiseuille. Su importancia pr\'actica es que
+$\dot\gamma_w$ y $q$ ya se han calculado: convertir el radio en variable de
+estado deja el Jacobiano \emph{exacto} y el coste por iteraci\'on de Newton
+\emph{sin cambios}.
+
+\paragraph{Relaci\'on de diagn\'ostico.} Con $Q=\pi r^2\bar v$,
+\begin{equation}
+  \dot\gamma_w=\frac{4Q}{\pi r^3}=\frac{4\bar v}{r},
+  \label{eq:shear}
+\end{equation}
+independiente de $L$: el radio y la velocidad fijan el r\'egimen reol\'ogico
+mientras que la longitud s\'olo escala la resistencia. Esta identidad gobierna
+el dise\~no de la calibraci\'on.
+
+\section{La ley de tubo colapsable}
+\label{sec:tubo}
+
+Cada \'arbol intramioc\'ardico es un lecho de $N$ vasos id\'enticos de
+\'area no tensionada $A_u$ y longitud de camino $L$. El \'area obedece la ley
+cl\'asica de tubo colapsable (Shapiro; Kamm \& Shapiro)
+\begin{equation}
+  \ptm = K\Bigl[\,a^{m}-a^{-n}\,\Bigr],
+  \qquad a=\frac{A}{A_u},
+  \qquad m=10,\quad n=\tfrac32 ,
+  \label{eq:tubo}
+\end{equation}
+con $K=\dfrac{E}{12(1-\nu^{2})}\Bigl(\dfrac{h}{r}\Bigr)^{3}$ la rigidez de
+flexi\'on de la pared. La rama $a^{m}$ es la pared en tracci\'on, que se
+endurece muy r\'apido; la rama $-a^{-n}$ es el pandeo en compresi\'on. Se
+invierte para $a$ con un Newton salvaguardado por bisecci\'on sobre $s=\ln a$,
+donde el residuo es mon\'otono, y la derivada es exacta por derivaci\'on
+impl\'icita:
+\begin{equation}
+  \frac{da}{d\ptm}=\frac{1}{K\bigl(m\,a^{m-1}+n\,a^{-n-1}\bigr)} .
+  \label{eq:dadp}
+\end{equation}
+
+\paragraph{Lo que la ley concede gratis.} Tres propiedades que antes se
+imponan con t\'erminos separados:
+\begin{itemize}
+\item $a>0$ para todo $\ptm$ finito, luego $V\ge0$ \emph{por construcci\'on},
+      sin penalizaci\'on ni saturaci\'on ad hoc;
+\item $a=1$ exactamente en $\ptm=0$: el vaso conserva su volumen no
+      tensionado a presi\'on transmural nula y s\'olo se vac\'ia al pandear.
+      \'Este es el defecto de \eqref{eq:vcol-old} que se corrige;
+\item la compliancia $dV/d\ptm$ deja de ser un dato y pasa a ser
+      $N L A_u\,da/d\ptm$, es decir, la rigidez de pared actuando sobre el
+      volumen anat\'omico. Se reporta como predicci\'on.
+\end{itemize}
+
+\paragraph{Un solo punto de evaluaci\'on.} La resistencia de un \'arbol
+coronario se concentra en sus generaciones terminales, que son intramioc\'ardicas
+y est\'an en el extremo aguas abajo del \'arbol arteriolar y aguas arriba del
+venular; ambas, por tanto, en el nodo $p_c$. Se evaluan los dos \'arboles en la
+misma presi\'on transmural
+\begin{equation}
+  \ptm = p_c-p_{im} .
+  \label{eq:ptm}
+\end{equation}
+Esto no es una simplificaci\'on de conveniencia: es la misma hip\'otesis que ya
+sosten\'ia el t\'ermino $V(p_c-p_{im})$ de la formulaci\'on anterior, extendida
+ahora tambi\'en a los radios. La consecuencia es que \emph{el balance de nodo no
+cambia}; s\'olo cambia de qu\'e depende $V$ y de qu\'e dependen los radios.
+
+\section{Presi\'on tisular}
+
+\begin{equation}
+  p_{im}=\alpha\,p_{LV} .
+  \label{eq:pim}
+\end{equation}
+Nada m\'as. El t\'ermino de acortamiento $\alpha_a\tau_c$ y el retardo de primer
+orden $\tau_f$ se eliminan: ninguno ten\'ia medida independiente, y el retardo
+exist\'ia solamente para acotar $\dot p_{im}$ frente a la fuente expl\'icita
+$Q_{im}=C\dot p_{im}$, que ya no existe. Ahora $p_{im}$ entra \'unicamente a
+trav\'es de \eqref{eq:tubo}, resuelta impl\'icitamente, y el volumen que puede
+desplazar est\'a acotado por el contenido anat\'omico del lecho; una $p_{LV}$
+casi discontinua la absorbe la f\'isica, no un filtro. La verificaci\'on 0D lo
+confirma: reintroducir el filtro con $\tau_f$ hasta $0.04$~s modifica el
+cociente pico/media venoso de $4.27$ a $3.73$ y empeora el cociente
+sist\'ole/di\'astole, de modo que no explica nada que la f\'isica no explique
+mejor.
+
+$\alpha$ es una transmisi\'on promediada sobre el espesor de pared: la presi\'on
+tisular va de $\approx p_{LV}$ en el subendocardio a una fracci\'on peque\~na en
+el subepicardio, y el promedio ponderado por volumen es del orden de
+$0.5$--$0.7$. Es la \'unica constante a la que el modelo es genuinamente
+sensible (\S\ref{sec:sens}), y as\'i debe declararse.
+
+\section{Balance de nodo y discretizaci\'on}
+
+\[
+\text{salida 3D}\;\rightarrow\;
+\underbrace{\text{conducto}}_{r_p\ \text{de la malla}}\;\rightarrow\;
+\underbrace{p_{ca},\;C_a}_{\text{epic\'ardico}}\;\rightarrow\;
+\underbrace{\text{\'arbol arteriolar}}_{N_a,\,L_a,\,r_a(\ptm)}\;\rightarrow\;
+\underbrace{p_c\;[\,p_{im}(t)\,]}_{\text{microvascular}}\;\rightarrow\;
+\underbrace{\text{\'arbol venular}}_{N_v,\,L_v,\,r_v(\ptm)}\;\rightarrow\; P_{RA}
+\]
+
+\noindent
+Volumen almacenado y balance:
+\begin{align}
+  V(\ptm) &= N_a L_a A_{u,a}\,a_a(\ptm)+N_v L_v A_{u,v}\,a_v(\ptm),
+  \label{eq:V}\\[2pt]
+  C_a\,\frac{dp_{ca}}{dt} &= Q-q_a,
+  \qquad
+  \frac{d}{dt}V\bigl(p_c-p_{im}\bigr)=q_a-q_v .
+  \label{eq:balance}
+\end{align}
+El balance \eqref{eq:balance} es, t\'ermino a t\'ermino, el de la formulaci\'on
+anterior. Conviene decirlo expl\'icitamente porque es donde la revisi\'on
+recibida se equivocaba: $\tfrac{d}{dt}V(p_c-p_{im})=q_a-q_v$ \emph{es} la bomba
+intramioc\'ardica ---desarrollando,
+$C_{\text{eff}}\dot p_c=q_a-q_v+C_{\text{eff}}\dot p_{im}$, y el \'ultimo
+t\'ermino es exactamente la antigua fuente expl\'icita---, y no es un
+a\~nadido artificial sino conservaci\'on de volumen para un compartimento cuyo
+entorno est\'a presurizado. Lo \'unico que se a\~nade es una dependencia: los
+radios, y por tanto $V$, dependen de $\ptm$.
+
+Con Euler impl\'icito, inc\'ognitas $(p_{ca},p_c)$ y Newton $2\times2$:
+\begin{align}
+  R_1&=\frac{C_a}{\Delta t}\bigl(p_{ca}-p_{ca}^{n}\bigr)+q_a-Q=0,
+  &q_a&=N_a\,q\bigl(p_{ca}-p_c;\,L_a,\,r_a(\ptm)\bigr),
+  \label{eq:R1}\\
+  R_2&=\frac{V(\ptm)-V^{n}}{\Delta t}-q_a+q_v=0,
+  &q_v&=N_v\,q\bigl(p_c-P_{RA};\,L_v,\,r_v(\ptm)\bigr) .
+  \label{eq:R2}
+\end{align}
+Con $r=\sqrt{A_u a/\pi}$ y por tanto
+$dr/d\ptm=A_u(da/d\ptm)/(2\pi r)$, y usando \eqref{eq:dqdp} y \eqref{eq:dqdr},
+\begin{equation}
+  J=\begin{pmatrix}
+    \dfrac{C_a}{\Delta t}+N_a q_a' & \ \ \partial_{p_c}q_a\\[8pt]
+    -N_a q_a' & \ \ \dfrac{C_{\text{eff}}}{\Delta t}-\partial_{p_c}q_a
+      +\partial_{p_c}q_v
+  \end{pmatrix},
+  \label{eq:jac}
+\end{equation}
+con
+\begin{equation}
+  \partial_{p_c}q_a=N_a\Bigl[-q_a'+\pi r_a^{2}\dot\gamma_{w,a}\,\frac{dr_a}{d\ptm}\Bigr],
+  \quad
+  \partial_{p_c}q_v=N_v\Bigl[\ \ q_v'+\pi r_v^{2}\dot\gamma_{w,v}\,\frac{dr_v}{d\ptm}\Bigr],
+  \quad
+  C_{\text{eff}}=\dd{V}{\ptm} .
+\end{equation}
+El Jacobiano deja de ser sim\'etrico, lo que es irrelevante en un sistema
+$2\times2$ resuelto directamente, y todas sus entradas son exactas: se ha
+comprobado frente a diferencias finitas con error relativo $4\times10^{-7}$. Se
+a\~nade una b\'usqueda lineal por retroceso sobre $|R_1|+|R_2|$, porque la rama
+en tracci\'on de \eqref{eq:tubo} es muy r\'igida y un paso completo puede
+sobrepasar hacia la rama colapsada; con ella el solver converge en $3.6$
+iteraciones de media y $6$ como m\'aximo.
+
+\paragraph{Impedancia caracter\'istica y compliancia epic\'ardica.} Son la misma
+elasticidad vista dos veces (Moens--Korteweg, $c=1/\sqrt{\rho D}$), y en la
+formulaci\'on anterior se fijaban por separado. Aqu\'i comparten la \'unica
+constante $c$:
+\begin{equation}
+  Z_c=\frac{\rho\,c}{A_p},
+  \qquad
+  C_a=\frac{A_p L_p}{\rho\,c^{2}},
+  \qquad\text{de donde}\qquad
+  Z_c\,C_a=\frac{L_p}{c},
+  \label{eq:zc}
+\end{equation}
+el tiempo de tr\'ansito de onda del conducto. La presi\'on de salida sigue
+siendo $p_{out}=p_{ca}+\Delta P_p(Q)+Z_cQ$.
+
+\paragraph{Estabilidad del acoplamiento 3D--0D.} La presi\'on de salida se
+aplica con un retraso de un paso, luego el 3D debe ver un nodo capacitivo y no
+la resistencia arteriolar dominante: $\Delta t/C_a<Z_{3D}\approx\rho L_{3D}/(A\Delta t)$.
+Sustituyendo \eqref{eq:zc}, el \'area se cancela y queda
+\begin{equation}
+  c\,\Delta t\;<\;\sqrt{L_p\,L_{3D}} ,
+  \label{eq:estab}
+\end{equation}
+una condici\'on tipo CFL transparente: la onda de presi\'on no debe recorrer la
+media geom\'etrica de la longitud del conducto y la del dominio en un paso de
+tiempo. Con $c=8$~m/s, $\Delta t=10^{-3}$~s, $L_p=10$~mm y $L_{3D}\approx50$~mm
+el margen es $\approx2.8$. Es m\'as ajustado que antes ---consecuencia de que
+$C_a$ ya no es un par\'ametro libre--- y se reporta en la calibraci\'on.
+
+\section{Calibraci\'on}
+\label{sec:calib}
+
+Se ejecuta una sola vez con la viscosidad newtoniana de referencia $\mu_N$ y se
+congela, de manera que un cambio de reolog\'ia modifica el flujo y nunca la
+geometr\'ia.
+
+\paragraph{Lo que cambia.} Nada absorbe un residuo. Para cada \'arbol, las dos
+relaciones de Poiseuille
+\begin{equation}
+  N\pi r^{2}\bar v = Q,
+  \qquad
+  \Delta P=\frac{8\mu_N L\,\bar v}{r^{2}}
+  \label{eq:cierre}
+\end{equation}
+dejan tres grados de libertad entre $\{r,L,N,\bar v,\Delta P\}$. Se prescriben
+tres observables fisiol\'ogicos ---velocidad media $\bar v$, tiempo de
+tr\'ansito medio $T$, y la cuota medida $\Delta P$ del presupuesto de
+presi\'on--- y el resto queda cerrado:
+\begin{equation}
+  \boxed{\;
+  L=\bar v\,T,
+  \qquad
+  r=\bar v\sqrt{\frac{8\mu_N T}{\Delta P}},
+  \qquad
+  N=\frac{Q}{\bar v\,\pi r^{2}},
+  \qquad
+  V_0=N\pi r^{2}L=Q\,T\;}
+  \label{eq:calib}
+\end{equation}
+La \'ultima igualdad es la relaci\'on de Stewart--Hamilton: el volumen del
+compartimento es el volumen de indicador-diluci\'on, y los tiempos de
+tr\'ansito coronarios son medibles directamente. El calibre $r$ deja de ser un
+dato y pasa a ser una \emph{predicci\'on contrastable con morfometr\'ia}.
+
+\paragraph{Pasos.}
+\begin{enumerate}
+\item \emph{Anatom\'ia y conducto.} $r_{p,i}=\sqrt{A_i/\pi}$ medido sobre la
+      malla, $w_i=r_{p,i}^{3}/\sum_j r_{p,j}^{3}$, $Q_i=Q_{\text{tot}}w_i$,
+      $\Delta P_{p,i}=8\mu_N L_{p,i}Q_i/(\pi r_{p,i}^{4})$; $Z_c$ y $C_a$ por
+      \eqref{eq:zc}, $\Delta P_{z}=Z_cQ_i$.
+\item \emph{Reparto medido del presupuesto.}
+      $\Delta P_\mu=\Delta P-\Delta P_p-\Delta P_z$ con
+      $\Delta P=p_{ar}(0)-P_{RA}$, y
+      $\Delta P_v=f_v\Delta P_\mu$, $\Delta P_a=(1-f_v)\Delta P_\mu$.
+\item \emph{\'Arboles.} \eqref{eq:calib} para cada uno.
+\item \emph{\'Areas no tensionadas.} Con
+      $\ptm^{\text{rep}}=P_{RA}+\Delta P_v-\alpha p_{LV}(0)$ se resuelve
+      $a^{\text{rep}}$ en \eqref{eq:tubo} y se toma
+      $A_u=\pi r^{2}/a^{\text{rep}}$, de modo que la ley de tubo reproduce
+      exactamente el calibre calibrado en reposo. N\'otese $a^{\text{rep}}>1$:
+      el lecho en reposo est\'a distendido por encima de su estado no
+      tensionado, y eso es precisamente lo que le da algo que expulsar.
+\end{enumerate}
+
+\paragraph{Resultado.} Con $\bar v_a=5$~mm/s, $T_a=1.5$~s, $\bar v_v=3$~mm/s,
+$T_v=2$~s y $f_v=0.13$:
+\begin{center}\small
+\begin{tabular}{lccl}
+\toprule
+Cantidad & Predicci\'on & Rango anat\'omico & Estado\\
+\midrule
+$r_a$ & $11.6~\mu$m & arteriola terminal, $8$--$15~\mu$m & compatible\\
+$r_v$ & $20.7~\mu$m & v\'enula, $15$--$40~\mu$m & compatible\\
+$L_a$ & $7.5$~mm & camino arteriolar & plausible (antes $46$~mm)\\
+$L_v$ & $6.0$~mm & camino venular & plausible (antes $15$~mm)\\
+$V_0$ & $7.0$~mL & volumen sangu\'ineo coronario LCA & compatible\\
+$C$   & $3.9\times10^{-10}$~m$^3$/Pa & identificaciones $\sim10^{-10}$ & mismo orden\\
+$\tau$ & $\approx0.4$~s & vaciado diast\'olico $0.2$--$0.5$~s & compatible\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Que el calibre predicho caiga en la arteriola terminal y no en la arteriola de
+$25~\mu$m que antes se \emph{imponia} es informativo: con $r_a=25~\mu$m fijo, las
+relaciones \eqref{eq:cierre} dan
+$\Delta P_a=8\mu\bar v^{2}T_a/r_a^{2}$, y exigir simult\'aneamente el $87\%$ del
+presupuesto, $5$~mm/s y un tr\'ansito fisiol\'ogico es imposible: hab\'ia que
+estirar $L_a$ hasta $46$~mm. La incompatibilidad estaba en los datos, no en el
+esquema num\'erico.
+
+\section{Constantes}
+
+\begin{center}\small
+\begin{tabular}{llll}
+\toprule
+S\'imbolo & C\'odigo & Valor & Origen\\
+\midrule
+$\mu_0,\mu_\infty$ & \texttt{viscosity.mu0,.muInf} & 0.353,\;4.181e-3 Pa\,s & reolog\'ia medida\\
+$\lambda,n,a$ & \texttt{viscosity.lambda,.n,.yasuda} & 15.68 s,\;0.205,\;0.650 & reolog\'ia medida\\
+$\mu_N$ & \texttt{newtonianCalibrationViscosity} & 3.5e-3 Pa\,s & referencia de calibraci\'on\\
+\midrule
+$r_p$ & \texttt{geometricParam.Rp} & de la malla & anatom\'ia (1.5--3.3 mm)\\
+$L_p$ & \texttt{geometricParam.Lp} & 10--12.5 mm & anatom\'ia\\
+$\bar v_a$ & \texttt{arteriolarVelocity} & 5 mm/s & fisiolog\'ia (2--10 mm/s)\\
+$\bar v_v$ & \texttt{venousVelocity} & 3 mm/s & fisiolog\'ia (1--5 mm/s)\\
+$T_a$ & \texttt{arteriolarTransitTime} & 1.5 s & tr\'ansito medido\\
+$T_v$ & \texttt{venularTransitTime} & 2.0 s & tr\'ansito medido\\
+$f_v$ & \texttt{venularPressureFraction} & 0.13 & reparto medido de carga\\
+$K_a$ & \texttt{arteriolarWallStiffness} & 500 Pa & $E(h/r)^3$, morfometr\'ia\\
+$K_v$ & \texttt{venularWallStiffness} & 200 Pa & $E(h/r)^3$, morfometr\'ia\\
+$Q_{\text{tot}}$ & \texttt{lcaTargetFlow} & 2.0e-6 m$^3$/s & 120 mL/min\\
+$c$ & \texttt{pulseWaveVelocity} & 8 m/s & onda de pulso (5--10)\\
+$P_{RA}$ & \texttt{rightAtrialPressure} & 600 Pa & $\approx$4.5 mmHg\\
+$\alpha$ & \texttt{intramyocardialFraction} & 0.65 & transmisi\'on tisular\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Doce constantes libres al margen de la reolog\'ia y de $\mu_N$, frente a quince
+antes. Desaparecen $r_a$, $r_v$, $L_v$, $C_{\text{tot}}$, $C_a/C$, $p_0$,
+$\alpha_a$ y $\tau_f$; aparecen $T_a$, $T_v$, $f_v$, $K_a$ y $K_v$. Pero la
+diferencia importante no es el recuento sino el cambio de estatus: $r_a$, $r_v$,
+$L_a$, $L_v$, $N_a$, $N_v$, $V_0$, $C$, $C_a$ y $\tau$ pasan de ser entradas a
+ser \emph{salidas}, y por tanto contrastables. Ninguna de las constantes
+restantes es una resistencia ni una compliancia equivalente.
+
+\section{Sensibilidad}
+\label{sec:sens}
+
+Barrido sobre el rango fisiol\'ogico de cada constante, con el modelo 0D
+independiente conducido por las trazas $p_{ar}(t)$ y $p_{LV}(t)$ de una
+simulaci\'on 3D previa:
+
+\begin{center}\small
+\begin{tabular}{lrrrr}
+\toprule
+Caso & $\bar Q$ (mL/min) & S/D & pico/media venoso & $V_{\min}$ (mL)\\
+\midrule
+referencia            & 66.0 & 0.54 & 4.27 & 4.49\\
+$K_v=100$ / $400$~Pa  & 69.7 / 53.7 & 0.53 / 0.56 & 4.22 / 4.37 & 4.56 / 4.29\\
+$K_a=250$ / $1000$~Pa & 47.6 / 76.8 & 0.56 / 0.54 & 4.08 / 4.35 & 4.12 / 4.73\\
+$T_v=1.0$ / $3.0$~s   & 64.1 / 67.3 & 0.53 / 0.54 & 4.89 / 3.99 & 3.18 / 5.99\\
+$f_v=0.10$ / $0.15$   & 62.8 / 67.7 & 0.54 / 0.53 & 4.51 / 4.14 & 4.17 / 4.68\\
+$\alpha=0.50$ / $0.80$& 75.7 / 57.1 & \textbf{0.73 / 0.34} & 4.12 / 4.34 & 4.99 / 4.11\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+El cociente sist\'ole/di\'astole se mantiene en $0.53$--$0.56$ frente a
+variaciones de factor cuatro en las rigideces de pared, de factor tres en el
+tiempo de tr\'ansito venular y de $\pm20\%$ en el reparto de presi\'on. No es un
+comportamiento de filo de navaja. La \'unica constante que lo mueve es $\alpha$,
+y lo mueve de forma mon\'otona y fisiol\'ogicamente interpretable. $K_a$ es el
+determinante del flujo medio, como corresponde al vaso de resistencia.
+
+\section{Verificaci\'on}
+
+El script \texttt{verify\_outlet\_0d.py} reimplementa la condici\'on de salida
+por separado, la conduce con las trazas de una simulaci\'on previa sustituyendo
+el dominio 3D por $p_{out}=p_{ar}(t)$, y ejecuta en paralelo la formulaci\'on
+antigua y la nueva sobre la misma entrada:
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\toprule
+ & Antigua & Nueva\\
+\midrule
+Jacobiano anal\'itico vs.\ diferencias finitas & $7\times10^{-8}$ & $4\times10^{-7}$\\
+Iteraciones de Newton (media / m\'ax) & 3.2 / 7 & 3.6 / 6\\
+Conservaci\'on discreta de volumen (relativa) & $10^{-13}$ & $4\times10^{-11}$\\
+Volumen almacenado, m\'in--m\'ax (mL) & $0.00$--$0.41$ & $4.49$--$5.74$\\
+Presi\'on transmural, m\'in--m\'ax (Pa) & $-8431$--$1281$ & $-378$--$-56$\\
+\textbf{Sist\'ole/di\'astole del flujo de entrada} & \textbf{1.97} & \textbf{0.54}\\
+Pico/media del flujo venoso & 5.74 & 4.27\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+El cociente sist\'ole/di\'astole entra en el rango fisiol\'ogico $0.4$--$0.6$;
+era el defecto cualitativo pendiente. El lecho conserva una reserva de $4.5$~mL
+en lugar de vaciarse por completo, y la presi\'on transmural se mantiene en una
+banda estrecha en vez de recorrer $-8.4$~kPa.
+
+\section{Lo que sigue sin cuadrar}
+
+\paragraph{Pico venoso.} El cociente pico/media del flujo venoso baja de $5.74$
+a $4.27$, pero el rango fisiol\'ogico es $2$--$3$. Es la \'unica m\'etrica que
+sigue fuera de banda, y merece un tratamiento honesto: \emph{no responde a
+ninguna constante del modelo}. Es insensible a $K_a$, $K_v$, $T_a$, $T_v$,
+$f_v$, $\alpha$ y tambi\'en al caudal objetivo (probado hasta 216 mL/min, donde
+sube a $4.40$ porque $V_0=QT$ escala con el caudal), y tampoco cede al suavizar
+$p_{im}$. Un n\'umero que no responde a los par\'ametros no es un par\'ametro
+mal puesto: es un elemento que falta. El candidato es la compliancia de las
+venas extramioc\'ardicas y del seno coronario, que amortiguan la descarga
+sist\'olica y que aqu\'i se sustituyen por una $P_{RA}$ r\'igida. A\~nadirla
+ser\'ia el sim\'etrico exacto de $C_a$ en el lado arterial, y su valor saldr\'ia
+de \eqref{eq:zc} aplicada al conducto venoso. Se deja fuera deliberadamente:
+conviene comprobar primero que el diagn\'ostico es correcto.
+
+\paragraph{Flujo medio y autorregulaci\'on.} $Q_{\text{tot}}$ se aplica en la
+calibraci\'on como caudal del punto de reposo, y el modelo predice ahora un
+d\'eficit sist\'olico, de modo que la media del ciclo cae a $\approx55\%$ del
+objetivo. No es un error del esquema: es que un lecho coronario real
+autorregula, ajustando el tono para mantener el flujo medio, y esto no se
+modela. Caben dos lecturas coherentes: interpretar \texttt{lcaTargetFlow} como
+el caudal diast\'olico de operaci\'on, o cerrar una iteraci\'on exterior sobre
+el presupuesto para que la media del ciclo alcance el objetivo. La segunda
+sigue siendo un punto fijo sobre una cantidad predicha, no un ajuste a la forma
+de onda, y desplaza $r_a$ de $11.6$ a $12.3~\mu$m, es decir, nada.
+
+\paragraph{Presi\'on motriz.} La onda diast\'olica depende tanto de $\tau$ como
+de la evoluci\'on de $p_{ar}(t)$ y $p_{im}(t)$. Vale la pena se\~nalar que la
+traza de $p_{LV}$ del modelo 0D alcanza $\dot p_{LV}=3.6\times10^{5}$~Pa/s,
+frente a un valor fisiol\'ogico de $\sim2\times10^{5}$~Pa/s: el bloque
+ventricular sube casi el doble de r\'apido de lo debido. Puesto que la amplitud
+de la bomba ya no es un par\'ametro libre, cualquier exceso residual de
+transitorios sist\'olicos debe buscarse ah\'i.
+
+\paragraph{Alcance reol\'ogico.} Los efectos no newtonianos de la
+microcirculaci\'on asociados a la naturaleza particulada de la sangre
+(F\aa hr\ae us--Lindqvist) no est\'an contenidos en \eqref{eq:cy}. Con los
+calibres ahora predichos ($11.6$ y $20.7~\mu$m) la omisi\'on es m\'as visible
+que antes, porque son precisamente las escalas donde ese efecto opera.
+
+\section{Criterio para distinguir correcci\'on de ajuste}
+
+Se conserva el criterio de la formulaci\'on anterior y se aplica a lo nuevo.
+Un t\'ermino leg\'itimo responde afirmativamente a: (i) \emph{¿su valor procede
+de una medida independiente o de un primer principio?}; (ii) \emph{¿el
+comportamiento es robusto en todo el rango fisiol\'ogico del par\'ametro?};
+(iii) \emph{¿es defendible la ausencia del t\'ermino?}; (iv) \emph{¿se habr\'ia
+incluido antes de observar el resultado?}
+
+La ley de tubo \eqref{eq:tubo} las satisface: $K=E(h/r)^3/12(1-\nu^2)$ es
+material y morfom\'etrico; el barrido de \S\ref{sec:sens} muestra robustez de
+factor cuatro en $K$; un vaso de pared delgada rodeado de m\'usculo en
+contracci\'on cuyo calibre no dependa de la presi\'on transmural es
+f\'isicamente insostenible; y deber\'ia haberse escrito as\'i desde el
+principio, puesto que ya se admit\'ia que el volumen depend\'ia de $\ptm$.
+
+La derivada \eqref{eq:dqdr} no es un t\'ermino de modelo sino una identidad, y
+por tanto no se somete al criterio; pero conviene notar que sin ella la
+alternativa habr\'ia sido un Jacobiano aproximado, y con \'el la tentaci\'on de
+retocar la amortiguaci\'on hasta que convergiera.
+
+En cambio, la eliminaci\'on de $\tau_f$ y $\alpha_a$ se justifica por el mismo
+criterio le\'ido al rev\'es: no ten\'ian medida independiente, se eleg\'ian
+mirando el resultado, y su ausencia es ahora perfectamente defendible porque el
+mecanismo que ven\'ian a paliar ya no existe.
+
+\end{document}
