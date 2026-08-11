@@ -252,6 +252,95 @@ namespace
     world.barrier();
   }
 
+  /// @brief Verifies that sync releases pending read/write access and refreshes
+  ///        ghosts before direct PETSc use and point evaluation.
+  TEST(PETSc_MPI_GridFunction, SyncReleasesAccessAndRefreshesGhosts)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    writeShardDOFs(mesh, fes, gf, [](Index) { return static_cast<PetscScalar>(5.0); });
+    ASSERT_TRUE(gf.getArrayWrite().acquired);
+    gf.sync();
+    EXPECT_FALSE(gf.getArrayWrite().acquired);
+
+    size_t evaluated = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point p(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(gf(p))), 5.0, 1e-14);
+      ++evaluated;
+    }
+    EXPECT_GT(evaluated, 0);
+
+    const auto& cgf = gf;
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cgf[begin])), 5.0);
+    ASSERT_TRUE(cgf.getArrayRead().acquired);
+    gf.sync();
+    EXPECT_FALSE(cgf.getArrayRead().acquired);
+
+    PetscReal norm = 0.0;
+    PetscErrorCode ierr = VecNorm(gf.getData(), NORM_INFINITY, &norm);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    EXPECT_DOUBLE_EQ(norm, 5.0);
+    world.barrier();
+  }
+
+  /// @brief Verifies that reductions synchronize pending shard writes without
+  ///        requiring callers to flush first.
+  TEST(PETSc_MPI_GridFunction, ReductionsSynchronizePendingWrites)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    const auto dofValue = [](Index i) {
+      return static_cast<PetscScalar>(static_cast<Real>(i) - 4.0);
+    };
+    writeShardDOFs(mesh, fes, gf, dofValue);
+
+    Real localSquares = 0.0;
+    Real localAbs = 0.0;
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+    for (Index i = begin; i < end; ++i)
+    {
+      const Real value = static_cast<Real>(i) - 4.0;
+      localSquares += value * value;
+      localAbs += std::abs(value);
+    }
+
+    Real globalSquares = 0.0;
+    Real globalAbs = 0.0;
+    boost::mpi::all_reduce(world, localSquares, globalSquares, std::plus<Real>());
+    boost::mpi::all_reduce(world, localAbs, globalAbs, std::plus<Real>());
+
+    EXPECT_NEAR(gf.norm(), std::sqrt(globalSquares), 1e-10 * std::sqrt(globalSquares));
+    EXPECT_NEAR(gf.norm(NORM_1), globalAbs, 1e-10 * globalAbs);
+
+    Index idx = fes.getSize();
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(gf.min(idx))), -4.0);
+    EXPECT_EQ(idx, 0);
+
+    const Index maxIdx = static_cast<Index>(fes.getSize() - 1);
+    EXPECT_DOUBLE_EQ(
+      static_cast<double>(PetscRealPart(gf.max(idx))), static_cast<double>(maxIdx) - 4.0);
+    EXPECT_EQ(idx, maxIdx);
+    world.barrier();
+  }
+
   /// @brief Verifies that norm is a global reduction over the owned DOFs by
   ///        comparing against an independent MPI reduction.
   TEST(PETSc_MPI_GridFunction, NormReducesOverAllRanks)

@@ -51,7 +51,7 @@
  * | owner → ghost      | `VecGhostUpdateBegin/End(INSERT, FORWARD)` | Refresh ghost DOFs after collective data updates |
  * | ghost → owner      | `VecGhostUpdateBegin/End(INSERT, REVERSE)` | Scatter locally-modified ghost values back to owners |
  *
- * The `acquire()` / `flush()` / `release()` methods encapsulate
+ * The `acquire()` / `flush()` / `sync()` / `release()` methods encapsulate
  * these patterns.
  *
  * ## Key Features
@@ -154,12 +154,13 @@ namespace Rodin::Variational
    * PETSc requires explicit lock/unlock of the underlying raw array via
    * `VecGetArray*` / `VecRestoreArray*`.  This class manages the lock
    * state through two helper structs (`ArrayRead` and `ArrayWrite`) and
-   * exposes three public methods:
+   * exposes four public methods:
    *
    * | Method      | Direction       | PETSc calls |
    * |-------------|-----------------|-------------|
    * | `acquire()` | begin access    | `VecGetLocalForm`, `VecGetArrayWrite` |
    * | `flush()`   | end access      | `VecRestoreArrayWrite`, `VecGhostRestoreLocalForm`, `VecGhostUpdate(REVERSE)` |
+   * | `sync()`    | make current    | Releases read access, then flushes write access |
    * | `release()` | destroy handles | Restores any acquired arrays, then `VecDestroy` |
    *
    * The const overloads use `VecGetArrayRead` / `VecRestoreArrayRead`.
@@ -559,13 +560,9 @@ namespace Rodin::Variational
       /**
        * @brief Finds the minimum DOF value in the grid function.
        *
-       * Releases any pending read access, then delegates to `VecMin`.
+       * Synchronizes any pending array access, then delegates to `VecMin`.
        * In MPI mode the result is the global minimum across all ranks
        * and the call is collective.
-       *
-       * @note Values written through `operator[]` are not flushed by this
-       *       call: call `flush()` first, or the cached PETSc reduction
-       *       may predate them.
        *
        * @param[out] idx On return, the global index of the minimum value.
        * @returns The minimum scalar value @f$ \min_i u_i @f$.
@@ -573,7 +570,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType min(Index& idx) const
       {
-        this->flush();
+        this->sync();
         PetscErrorCode ierr;
         auto& data = this->getData();
         PetscInt pidx;
@@ -588,13 +585,9 @@ namespace Rodin::Variational
       /**
        * @brief Finds the maximum DOF value in the grid function.
        *
-       * Releases any pending read access, then delegates to `VecMax`.
+       * Synchronizes any pending array access, then delegates to `VecMax`.
        * In MPI mode the result is the global maximum across all ranks
        * and the call is collective.
-       *
-       * @note Values written through `operator[]` are not flushed by this
-       *       call: call `flush()` first, or the cached PETSc reduction
-       *       may predate them.
        *
        * @param[out] idx On return, the global index of the maximum value.
        * @returns The maximum scalar value @f$ \max_i u_i @f$.
@@ -602,7 +595,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType max(Index& idx) const
       {
-        this->flush();
+        this->sync();
         PetscErrorCode ierr;
         auto& data = this->getData();
         PetscInt pidx;
@@ -617,13 +610,9 @@ namespace Rodin::Variational
       /**
        * @brief Computes a norm of the DOF coefficient vector.
        *
-       * Releases any pending read access, then delegates to `VecNorm`.
+       * Synchronizes any pending array access, then delegates to `VecNorm`.
        * In MPI mode the norm is taken over the globally owned entries and
        * the call is collective: every rank must reach it.
-       *
-       * @note Values written through `operator[]` are not flushed by this
-       *       call: call `flush()` first, or the cached PETSc norm may
-       *       predate them.
        *
        * @param[in] type PETSc norm type; `NORM_2` by default.  `NORM_1` and
        *                 `NORM_INFINITY` are the other common choices.
@@ -631,7 +620,7 @@ namespace Rodin::Variational
        */
       Real norm(NormType type = NORM_2) const
       {
-        this->flush();
+        this->sync();
         PetscReal res;
         PetscErrorCode ierr = VecNorm(this->getData(), type, &res);
         assert(ierr == PETSC_SUCCESS);
@@ -1337,6 +1326,47 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Synchronizes pending array access with the underlying PETSc vector.
+       *
+       * Releases any outstanding read access and then flushes any outstanding
+       * write access.  In MPI mode the write flush performs the reverse ghost
+       * scatter followed by a forward refresh, so PETSc routines called on
+       * `getData()` afterwards see the current owned coefficients and an
+       * up-to-date ghost layer.
+       *
+       * Use this before passing the raw `Vec` handle to PETSc.  Member
+       * operations call it internally.
+       *
+       * @warning In MPI mode this is collective if a write array is acquired:
+       * every rank that participates in the vector must reach the ghost update.
+       *
+       * @returns Reference to `*this`.
+       */
+      GridFunction& sync()
+      {
+        static_cast<const GridFunction&>(*this).flush();
+        this->flush();
+        return *this;
+      }
+
+      /**
+       * @brief Const overload of @ref sync().
+       *
+       * Synchronization changes PETSc access state, not the mathematical grid
+       * function.  The write state is mutable so const reductions can ensure
+       * they see DOFs written through a non-const alias before the object was
+       * observed as const.
+       *
+       * @returns Const reference to `*this`.
+       */
+      const GridFunction& sync() const
+      {
+        this->flush();
+        const_cast<GridFunction&>(*this).flush();
+        return *this;
+      }
+
+      /**
        * @brief Returns a mutable reference to the raw PETSc @c Vec handle,
        *        e.g. for passing to PETSc API functions directly.
        *
@@ -1346,13 +1376,12 @@ namespace Rodin::Variational
        * which in MPI mode means this object holds the ghosted local form
        * obtained from `VecGhostGetLocalForm` — then calling PETSc on the
        * returned handle operates on a vector whose local form is still
-       * checked out, and skips the reverse ghost scatter that `flush()`
-       * performs.  Call `flush()` (or `release()`) before using the handle,
-       * exactly as the operators of this class do:
+       * checked out, and skips the reverse ghost scatter that `sync()`
+       * performs.  Call `sync()` before using the handle, exactly as the
+       * operators of this class do:
        *
        * ```cpp
-       * static_cast<const GridFunction&>(u).flush(); // release read array
-       * u.flush();                                   // release write array
+       * u.sync();
        * VecAXPY(u.getData(), a, v.getData());
        * ```
        *
@@ -1362,7 +1391,7 @@ namespace Rodin::Variational
        * Reach for the raw handle only for operations this class does not
        * expose, such as block-vector manipulation.
        *
-       * @see flush(), release(), axpy(), setData()
+       * @see sync(), flush(), release(), axpy(), setData()
        */
       auto& getData()
       {
@@ -1375,7 +1404,7 @@ namespace Rodin::Variational
        * @warning Performs no synchronization; see the mutable overload for
        * the flushing requirements before passing the handle to PETSc.
        *
-       * @see flush(), release()
+       * @see sync(), flush(), release()
        */
       const DataType& getData() const
       {

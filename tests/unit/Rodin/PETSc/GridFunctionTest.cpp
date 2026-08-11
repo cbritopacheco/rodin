@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include <cassert>
+#include <cmath>
 
 #include <petsc.h>
 
@@ -143,6 +144,60 @@ namespace
     const auto value = gf.max(idx);
     EXPECT_EQ(idx, expectedIdx);
     EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(value)), 4.25);
+  }
+
+  /// @brief Verifies that sync releases pending write access before raw PETSc
+  ///        calls and releases pending read access afterwards.
+  TEST(PETSc_GridFunction, SequentialSyncReleasesReadAndWriteAccess)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    gf[0] = static_cast<PetscScalar>(2.0);
+    ASSERT_TRUE(gf.getArrayWrite().acquired);
+    gf.sync();
+    EXPECT_FALSE(gf.getArrayWrite().acquired);
+
+    PetscReal norm = 0.0;
+    PetscErrorCode ierr = VecNorm(gf.getData(), NORM_2, &norm);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    EXPECT_DOUBLE_EQ(norm, 2.0);
+
+    const auto& cgf = gf;
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cgf[0])), 2.0);
+    ASSERT_TRUE(cgf.getArrayRead().acquired);
+    gf.sync();
+    EXPECT_FALSE(cgf.getArrayRead().acquired);
+
+    ierr = VecScale(gf.getData(), static_cast<PetscScalar>(3.0));
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+
+    EXPECT_DOUBLE_EQ(gf.norm(), 6.0);
+  }
+
+  /// @brief Verifies that reductions synchronize DOFs written through
+  ///        operator[] without requiring an explicit flush.
+  TEST(PETSc_GridFunction, SequentialReductionsSynchronizePendingWrites)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    gf = static_cast<PetscScalar>(0.0);
+    gf[0] = static_cast<PetscScalar>(3.0);
+    gf[1] = static_cast<PetscScalar>(-4.0);
+    gf[2] = static_cast<PetscScalar>(9.0);
+
+    Index idx = gf.getSize();
+    EXPECT_DOUBLE_EQ(gf.norm(), std::sqrt(106.0));
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_1), 16.0);
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(gf.min(idx))), -4.0);
+    EXPECT_EQ(idx, 1);
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(gf.max(idx))), 9.0);
+    EXPECT_EQ(idx, 2);
   }
 
   /// @brief Verifies that axpy accumulates a scaled grid function without
