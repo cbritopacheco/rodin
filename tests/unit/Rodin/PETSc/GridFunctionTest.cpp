@@ -27,9 +27,9 @@ namespace
   PetscObjectId objectId(const ::Vec& vec)
   {
     PetscObjectId id = 0;
-    const PetscErrorCode ierr = PetscObjectGetId((PetscObject) vec, &id);
+    const PetscErrorCode ierr = PetscObjectGetId((PetscObject)vec, &id);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
     return id;
   }
 
@@ -168,8 +168,7 @@ namespace
     const auto& cx = x;
     for (Index i = 0; i < y.getSize(); ++i)
     {
-      EXPECT_DOUBLE_EQ(
-        static_cast<double>(PetscRealPart(cy[i])),
+      EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cy[i])),
         1.0 + static_cast<double>(i) + 0.5 * 2.0 * static_cast<double>(i));
       // The operand is left untouched.
       EXPECT_DOUBLE_EQ(

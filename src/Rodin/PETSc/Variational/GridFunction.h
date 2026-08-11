@@ -635,7 +635,7 @@ namespace Rodin::Variational
         PetscReal res;
         PetscErrorCode ierr = VecNorm(this->getData(), type, &res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
         return static_cast<Real>(res);
       }
 

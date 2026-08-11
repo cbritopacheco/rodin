@@ -41,9 +41,9 @@ namespace
   PetscObjectId objectId(const ::Vec& vec)
   {
     PetscObjectId id = 0;
-    const PetscErrorCode ierr = PetscObjectGetId((PetscObject) vec, &id);
+    const PetscErrorCode ierr = PetscObjectGetId((PetscObject)vec, &id);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
     return id;
   }
 
@@ -269,8 +269,9 @@ namespace
 
     // A value that depends only on the global DOF index, so every rank agrees
     // on the shared entries.
-    const auto dofValue = [](Index i)
-    { return static_cast<PetscScalar>(1.0 + static_cast<Real>(i)); };
+    const auto dofValue = [](Index i) {
+      return static_cast<PetscScalar>(1.0 + static_cast<Real>(i));
+    };
     writeShardDOFs(mesh, fes, gf, dofValue);
     gf.flush();
 
@@ -290,8 +291,7 @@ namespace
     Real globalMax = 0.0;
     boost::mpi::all_reduce(world, localSquares, globalSquares, std::plus<Real>());
     boost::mpi::all_reduce(world, localAbs, globalAbs, std::plus<Real>());
-    boost::mpi::all_reduce(
-      world, localMax, globalMax, boost::mpi::maximum<Real>());
+    boost::mpi::all_reduce(world, localMax, globalMax, boost::mpi::maximum<Real>());
 
     EXPECT_NEAR(gf.norm(), std::sqrt(globalSquares), 1e-10 * std::sqrt(globalSquares));
     EXPECT_NEAR(gf.norm(NORM_1), globalAbs, 1e-10 * globalAbs);
