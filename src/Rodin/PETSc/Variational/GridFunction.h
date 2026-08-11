@@ -66,13 +66,18 @@
  *   collective ghost communication.
  * - **Arithmetic operations**: Overloaded `+=`, `-=`, `*=`, `/=` for both
  *   scalar and grid-function operands, delegating to optimized PETSc
- *   routines (`VecShift`, `VecScale`, `VecAXPY`, `VecPointwiseMult`, …).
+ *   routines (`VecShift`, `VecScale`, `VecAXPY`, `VecPointwiseMult`, …),
+ *   plus the fused `axpy()` @f$ u \leftarrow u + a v @f$, which the
+ *   operators cannot express without a temporary.
+ * - **Reductions**: `min()`, `max()`, and `norm()`, collective in MPI mode.
  * - **Point evaluation**: `operator()` and `getValue()` evaluate
  *   @f$ u_h @f$ at arbitrary geometric points using the finite element
  *   interpolation machinery, with MPI-aware shard lookup.
  * - **Sub-vector import**: `setData()` copies a contiguous slice from
  *   another PETSc vector into this grid function, useful for extracting
- *   sub-solutions from block linear systems.
+ *   sub-solutions from block linear systems.  It is also the way to copy
+ *   a raw `Vec` into an existing grid function; copy assignment does the
+ *   same for another grid function, reusing this instance's vector.
  * - **Projection**: `project()` assigns DOF values by evaluating a
  *   user-supplied function over a filtered mesh region.
  *
@@ -435,9 +440,21 @@ namespace Rodin::Variational
       /**
        * @brief Copy assignment operator.
        *
-       * Releases any existing PETSc handles via `release()`, then deep-copies
-       * the vector from @p other with `VecDuplicate` + `VecCopy`.  Ghost
-       * mappings, ownership ranges, and assembly state are also copied.
+       * Deep-copies the DOF values of @p other into this grid function with
+       * `VecCopy`, followed by a forward ghost update in MPI mode.
+       *
+       * The underlying `Vec` is **reused**: both operands are required to
+       * live on the same finite element space, so their layouts (ownership
+       * range and ghost mapping) are identical by construction and a fresh
+       * allocation would produce a vector indistinguishable from the one
+       * already held.  Reuse also keeps the `Vec` handle stable, so a
+       * `KSP`, a `LinearForm`, or user code that cached `getData()` is not
+       * left holding a destroyed handle after an assignment.  A new vector
+       * is created with `VecDuplicate` only when this instance holds none,
+       * which is the case for a moved-from object.
+       *
+       * Any array acquired through `operator[]` on either operand is
+       * flushed first, so the copy sees the current values.
        *
        * @pre Both grid functions must reference the same finite element space.
        *
@@ -451,17 +468,20 @@ namespace Rodin::Variational
 
         assert(&this->getFiniteElementSpace() == &other.getFiniteElementSpace());
 
-        this->release();
+        static_cast<const GridFunction&>(*this).flush();
+        this->flush();
+        other.flush();
 
         m_begin = other.m_begin;
         m_end = other.m_end;
         m_ghosts = other.m_ghosts;
 
-        m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-        m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
-
-        PetscErrorCode ierr = VecDuplicate(other.m_data, &m_data);
-        assert(ierr == PETSC_SUCCESS);
+        PetscErrorCode ierr = PETSC_SUCCESS;
+        if (m_data == PETSC_NULLPTR)
+        {
+          ierr = VecDuplicate(other.m_data, &m_data);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         ierr = VecCopy(other.m_data, m_data);
         assert(ierr == PETSC_SUCCESS);
@@ -539,8 +559,13 @@ namespace Rodin::Variational
       /**
        * @brief Finds the minimum DOF value in the grid function.
        *
-       * Flushes any pending write access, then delegates to `VecMin`.
-       * In MPI mode the result is the global minimum across all ranks.
+       * Releases any pending read access, then delegates to `VecMin`.
+       * In MPI mode the result is the global minimum across all ranks
+       * and the call is collective.
+       *
+       * @note Values written through `operator[]` are not flushed by this
+       *       call: call `flush()` first, or the cached PETSc reduction
+       *       may predate them.
        *
        * @param[out] idx On return, the global index of the minimum value.
        * @returns The minimum scalar value @f$ \min_i u_i @f$.
@@ -563,8 +588,13 @@ namespace Rodin::Variational
       /**
        * @brief Finds the maximum DOF value in the grid function.
        *
-       * Flushes any pending write access, then delegates to `VecMax`.
-       * In MPI mode the result is the global maximum across all ranks.
+       * Releases any pending read access, then delegates to `VecMax`.
+       * In MPI mode the result is the global maximum across all ranks
+       * and the call is collective.
+       *
+       * @note Values written through `operator[]` are not flushed by this
+       *       call: call `flush()` first, or the cached PETSc reduction
+       *       may predate them.
        *
        * @param[out] idx On return, the global index of the maximum value.
        * @returns The maximum scalar value @f$ \max_i u_i @f$.
@@ -582,6 +612,31 @@ namespace Rodin::Variational
         (void) ierr;
         idx = static_cast<Index>(pidx);
         return static_cast<ScalarType>(res);
+      }
+
+      /**
+       * @brief Computes a norm of the DOF coefficient vector.
+       *
+       * Releases any pending read access, then delegates to `VecNorm`.
+       * In MPI mode the norm is taken over the globally owned entries and
+       * the call is collective: every rank must reach it.
+       *
+       * @note Values written through `operator[]` are not flushed by this
+       *       call: call `flush()` first, or the cached PETSc norm may
+       *       predate them.
+       *
+       * @param[in] type PETSc norm type; `NORM_2` by default.  `NORM_1` and
+       *                 `NORM_INFINITY` are the other common choices.
+       * @returns The norm @f$ \|\mathbf{u}\| @f$ of the coefficient vector.
+       */
+      Real norm(NormType type = NORM_2) const
+      {
+        this->flush();
+        PetscReal res;
+        PetscErrorCode ierr = VecNorm(this->getData(), type, &res);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+        return static_cast<Real>(res);
       }
 
       /**
@@ -767,25 +822,33 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Component-wise addition of another grid function:
-       *        @f$ u_i \leftarrow u_i + v_i @f$.
+       * @brief Scaled accumulation of another grid function:
+       *        @f$ u_i \leftarrow u_i + a\, v_i @f$.
        *
        * Both grid functions must live on the same finite element space.
-       * Delegates to `VecAXPY(data, 1.0, rhs.getData())`.
+       * Delegates to `VecAXPY(data, a, other.getData())`, followed by a
+       * forward ghost update in MPI mode.
        *
-       * @pre `&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace()`
+       * This is the fused form of `*this += a * other`, which the operators
+       * cannot express without materialising a scaled temporary: it is the
+       * operation time integrators and cycle accumulators need
+       * (@f$ \mathbf{u} \leftarrow \mathbf{u} + \Delta t\, \mathbf{v} @f$).
        *
-       * @param[in] rhs Grid function @f$ v @f$ to add.
+       * @pre `&this->getFiniteElementSpace() == &other.getFiniteElementSpace()`
+       *
+       * @param[in] a     Scalar coefficient @f$ a @f$.
+       * @param[in] other Grid function @f$ v @f$ to accumulate.
        * @returns Reference to `*this`.
        */
-      GridFunction& operator+=(const GridFunction& rhs)
+      GridFunction& axpy(const ScalarType& a, const GridFunction& other)
       {
-        assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        assert(&this->getFiniteElementSpace() == &other.getFiniteElementSpace());
         static_cast<const GridFunction&>(*this).flush();
         this->flush();
+        other.flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ierr = VecAXPY(data, 1.0, rhs.getData());
+        ierr = VecAXPY(data, a, other.getData());
         assert(ierr == PETSC_SUCCESS);
         if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
@@ -799,10 +862,27 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Component-wise addition of another grid function:
+       *        @f$ u_i \leftarrow u_i + v_i @f$.
+       *
+       * Both grid functions must live on the same finite element space.
+       * Delegates to `axpy(1.0, rhs)`.
+       *
+       * @pre `&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace()`
+       *
+       * @param[in] rhs Grid function @f$ v @f$ to add.
+       * @returns Reference to `*this`.
+       */
+      GridFunction& operator+=(const GridFunction& rhs)
+      {
+        return axpy(ScalarType(1.0), rhs);
+      }
+
+      /**
        * @brief Component-wise subtraction of another grid function:
        *        @f$ u_i \leftarrow u_i - v_i @f$.
        *
-       * Delegates to `VecAXPY(data, -1.0, rhs.getData())`.
+       * Delegates to `axpy(-1.0, rhs)`.
        *
        * @pre `&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace()`
        *
@@ -811,22 +891,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator-=(const GridFunction& rhs)
       {
-        assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
-        static_cast<const GridFunction&>(*this).flush();
-        this->flush();
-        PetscErrorCode ierr;
-        auto& data = this->getData();
-        ierr = VecAXPY(data, -1.0, rhs.getData());
-        assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
-          assert(ierr == PETSC_SUCCESS);
-        }
-        (void) ierr;
-        return *this;
+        return axpy(ScalarType(-1.0), rhs);
       }
 
       /**
@@ -1167,6 +1232,16 @@ namespace Rodin::Variational
        * reads of the owned portion will reflect any changes that were
        * made through ghost entries.
        *
+       * @warning In MPI mode the reverse scatter uses `INSERT_VALUES`, so
+       * ghost entries always win over the owner's value — including ghost
+       * entries that were never written.  A rank that assigns through
+       * `operator[]` must therefore cover every DOF of its shard, owned and
+       * ghost alike (as element-wise assembly does), not just its ownership
+       * range: leaving the ghost slots at their previous values overwrites
+       * whatever the owning ranks wrote.  Collective assignments
+       * (`operator=`, `project()`, `setData()`, `axpy()`, …) are unaffected;
+       * they end with a forward update from the owners.
+       *
        * @returns Reference to `*this`.
        */
       GridFunction& flush()
@@ -1261,14 +1336,47 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns a mutable reference to the raw PETSc @c Vec handle,
-      ///        e.g. for passing to PETSc API functions directly.
+      /**
+       * @brief Returns a mutable reference to the raw PETSc @c Vec handle,
+       *        e.g. for passing to PETSc API functions directly.
+       *
+       * @warning This accessor performs **no** synchronization: it hands
+       * out the handle exactly as it is.  If an array is currently acquired
+       * — which `operator[]`, `operator()`, and `getValue()` do lazily, and
+       * which in MPI mode means this object holds the ghosted local form
+       * obtained from `VecGhostGetLocalForm` — then calling PETSc on the
+       * returned handle operates on a vector whose local form is still
+       * checked out, and skips the reverse ghost scatter that `flush()`
+       * performs.  Call `flush()` (or `release()`) before using the handle,
+       * exactly as the operators of this class do:
+       *
+       * ```cpp
+       * static_cast<const GridFunction&>(u).flush(); // release read array
+       * u.flush();                                   // release write array
+       * VecAXPY(u.getData(), a, v.getData());
+       * ```
+       *
+       * Prefer the member operations (`axpy`, `norm`, `min`, `max`,
+       * `operator+=`, `operator*=`, `setData`, …) — they flush, call the
+       * same PETSc routine, and restore the ghost values afterwards.
+       * Reach for the raw handle only for operations this class does not
+       * expose, such as block-vector manipulation.
+       *
+       * @see flush(), release(), axpy(), setData()
+       */
       auto& getData()
       {
         return m_data;
       }
 
-      /// @brief Returns a read-only reference to the raw PETSc @c Vec handle.
+      /**
+       * @brief Returns a read-only reference to the raw PETSc @c Vec handle.
+       *
+       * @warning Performs no synchronization; see the mutable overload for
+       * the flushing requirements before passing the handle to PETSc.
+       *
+       * @see flush(), release()
+       */
       const DataType& getData() const
       {
         return m_data;
