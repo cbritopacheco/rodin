@@ -843,7 +843,13 @@ namespace Rodin::Examples::Heart
     // vector integral measures how much net direction survives, the scalar one
     // how much shear was applied regardless of direction.
     axpy(m_cfg.dt, m_wss.getData(), m_netShear.getData());
-    project(Sqrt(Dot(m_wss, m_wss)), m_shearMagnitude);
+
+    // Nodal interpolation, NOT an L2 projection. |tau_w| is finite on the wall
+    // and zero in the interior; the L2 projection of that onto a continuous P1
+    // field undershoots, and a single negative node makes int|tau_w| dt -- and
+    // therefore TAWSS, which is non-negative by definition -- come out
+    // negative. Interpolating the magnitude at the nodes cannot.
+    m_shearMagnitude.project(Sqrt(Dot(m_wss, m_wss)));
     axpy(m_cfg.dt, m_shearMagnitude.getData(), m_absShear.getData());
 
     m_timing.shear = secondsSince(shearStart);
@@ -854,37 +860,52 @@ namespace Rodin::Examples::Heart
     if (elapsed <= 0.0)
       return;
 
-    project(RealFunction([this, elapsed](const Point& p) {
-      return m_absShear.getValue(p) / elapsed;
-    }), m_tawss);
+    // TAWSS = (1/T) int |tau_w| dt. An exact scaling of the accumulator: no
+    // projection, no interpolation, no way to change its sign.
+    PetscErrorCode ierr = VecCopy(m_absShear.getData(), m_tawss.getData());
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecScale(m_tawss.getData(), 1.0 / elapsed);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGhostUpdateBegin(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGhostUpdateEnd(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
 
-    project(RealFunction([this](const Point& p) {
+    // OSI = (1/2)[1 - |int tau_w dt| / int |tau_w| dt]. Both accumulators are
+    // built from the same nodal values, so the triangle inequality holds node
+    // by node and OSI lands in [0, 1/2] on its own; the clamp is insurance.
+    m_osi.project(RealFunction([this](const Point& p) -> Real {
       const Real abs = m_absShear.getValue(p);
+      if (abs <= 0.0)
+        return 0.0;
       const auto net = m_netShear.getValue(p);
       const Real mag = std::sqrt(Math::dot(net, net));
-      return (abs > 0.0) ? 0.5 * (1.0 - mag / abs) : 0.0;
-    }), m_osi);
+      return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
+    }));
 
     // Smooth, bounded activation: a logistic in the measured shear threshold
-    // times the oscillatory index mapped onto [0,1]. Unlike ECAP it does not
-    // diverge where TAWSS vanishes.
+    // times the oscillatory index mapped onto [0,1]. Clamped to [0,1] so the
+    // endothelial thrombin flux can never turn into a sink -- a negative
+    // activation is what drives thrombin, and with it fibrin, negative.
     const Real tauA = m_cfg.thrombosis.activationShearStress;
     const Real width = std::max<Real>(m_cfg.thrombosis.activationShearWidth, 1e-12);
-    project(RealFunction([this, tauA, width](const Point& p) {
+    m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
       const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
-      return low * std::min<Real>(2.0 * m_osi.getValue(p), 1.0);
-    }), m_activation);
+      const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
+      return std::clamp<Real>(low * osi, 0.0, 1.0);
+    }));
 
     // The ghost entries must be zeroed too, or the next accumulation reads a
     // stale halo.
     const auto zeroWithGhosts = [](::Vec& v) {
-      PetscErrorCode ierr = VecZeroEntries(v);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecGhostUpdateBegin(v, INSERT_VALUES, SCATTER_FORWARD);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = VecGhostUpdateEnd(v, INSERT_VALUES, SCATTER_FORWARD);
-      assert(ierr == PETSC_SUCCESS);
-      (void)ierr;
+      PetscErrorCode e = VecZeroEntries(v);
+      assert(e == PETSC_SUCCESS);
+      e = VecGhostUpdateBegin(v, INSERT_VALUES, SCATTER_FORWARD);
+      assert(e == PETSC_SUCCESS);
+      e = VecGhostUpdateEnd(v, INSERT_VALUES, SCATTER_FORWARD);
+      assert(e == PETSC_SUCCESS);
+      (void)e;
     };
 
     zeroWithGhosts(m_netShear.getData());
