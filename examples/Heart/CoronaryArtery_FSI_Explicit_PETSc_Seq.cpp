@@ -2053,7 +2053,7 @@ int main(int argc, char** argv)
     // PREVIOUS configuration and injected into the RHS at solve time.
     auto flowRingBC = DirichletBC(u, zero).on(BoundaryFluid::FSIRing);
     flowRingBC.assemble();
-    // DirichletBC DOFs and massOld use the velocity FES-local numbering;
+    // DirichletBC DOFs and massOld use the velocity FES global numbering;
     // vOff is added only when addressing the mixed flow RHS.
     std::unordered_set<Index> flowRingDOFs;
     std::visit(
