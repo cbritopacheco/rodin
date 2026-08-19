@@ -18,6 +18,7 @@
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "Rodin/Solver/CG.h"
@@ -40,6 +41,7 @@
 #include "WNGIRNormalOffsetForceCoefficient.h"
 #include "WNGIRObservationCoefficient.h"
 #include "WNGIRSurfaceForceCoefficient.h"
+#include "WNGIRValidationWeights.h"
 
 namespace Rodin::Adaptation
 {
@@ -136,6 +138,28 @@ namespace Rodin::Adaptation
       WNGIR& setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
+        const std::size_t defaultMaxIterations = std::min<std::size_t>(2000,
+          std::max<std::size_t>(100,
+            2 * m_duStep.getFiniteElementSpace().getSize()));
+        const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
+          ? m_parameters.cgMaxIterations
+          : defaultMaxIterations;
+        if constexpr (requires(StepSolverType& solver, Real tolerance) {
+          solver.setTolerance(tolerance);
+        })
+          m_stepSolver.setTolerance(m_parameters.cgRelativeTolerance);
+        if constexpr (requires(StepSolverType& solver, std::size_t iterations) {
+          solver.setMaxIterations(iterations);
+        })
+          m_stepSolver.setMaxIterations(maxIterations);
+        if constexpr (requires(StepSolverType& solver, Real tolerance,
+                        std::size_t iterations) {
+          solver.setTolerances(tolerance, tolerance, tolerance, iterations);
+        })
+        {
+          m_stepSolver.setTolerances(m_parameters.cgRelativeTolerance,
+            StepSolverType::DEFAULT_ABSTOL, StepSolverType::DEFAULT_DTOL, maxIterations);
+        }
         m_bulkFormAssembled = false;
         return *this;
       }
@@ -175,10 +199,16 @@ namespace Rodin::Adaptation
 
         WNGIRReport rep;
         const Real h = p.h;
+        const bool usePrimalBarrier =
+          p.constraintFormulation == WNGIRConstraintFormulation::PrimalBarrierQP &&
+          p.includeAdmissibilityMetric && (p.gammaJ > Real(0) || p.gammaQ > Real(0));
+        const bool checkGeometry = p.admissibilityChecks || usePrimalBarrier;
+        const Real acceptedJacobianFloor =
+          usePrimalBarrier ? std::max(p.jLineSearchRatio, p.jSafe) : p.jLineSearchRatio;
         const Real gammaM = p.gammaM >= Real(0) ? p.gammaM : Real(1) / h;
-        const Real gammaH = p.gammaH >= Real(0) ? p.gammaH : Real(1) / h;
+        const Real gammaH = p.gammaH >= Real(0) ? p.gammaH : Real(0.0125) / h;
         const Real gammaDiv = p.gammaDiv >= Real(0) ? p.gammaDiv : gammaH;
-        const Real ellM = p.ellM >= Real(0) ? p.ellM : Real(3) * h;
+        const Real ellM = p.ellM >= Real(0) ? p.ellM : Real(0.75) * h;
         const Real activeRMSTol =
           p.activeRMSTol > Real(0) ? p.activeRMSTol : Real(4) * h * h;
         const Real activeSupTol =
@@ -199,6 +229,17 @@ namespace Rodin::Adaptation
         const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
         rep.normalJumpRMS = normalJump.rms;
         rep.normalJumpMax = normalJump.max;
+        std::vector<Index> validationCells;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const Index cellIndex = cell->getIndex();
+          if constexpr (requires { mesh.getShard().isOwned(meshDim, cellIndex); })
+          {
+            if (!mesh.getShard().isOwned(meshDim, cellIndex))
+              continue;
+          }
+          validationCells.push_back(cellIndex);
+        }
         const Real floorRMS = meshDim == 3 ? p.rmsFloor3D : p.rmsFloor2D;
         const Real floorSup = meshDim == 3 ? p.supFloor3D : p.supFloor2D;
         Real activeRMSOverHTol = p.activeRMSOverHTol;
@@ -225,9 +266,8 @@ namespace Rodin::Adaptation
           m_report = rep;
           return rep;
         }
-        const Real domainMeasure =
-          p.constraintFormulation == WNGIRConstraintFormulation::PrimalBarrierQP
-          ? getDomainMeasure(mesh, fes)
+        const Real domainMeasure = usePrimalBarrier
+          ? getDomainMeasure(mesh, fes, validationCells)
           : Real(0);
 
         // ============================================================
@@ -235,7 +275,7 @@ namespace Rodin::Adaptation
         // ============================================================
         using FastAdm = AdmissibilityState;
         auto fastAdmissibility = [&](const Displacement& gf) {
-          return getAdmissibilityState(mesh, fes, gf, meshDim);
+          return getAdmissibilityState(mesh, fes, validationCells, gf, meshDim);
         };
         auto surfaceState = [&](const Displacement& gf) {
           return getSurfaceState(
@@ -324,12 +364,14 @@ namespace Rodin::Adaptation
           }
 
           tic = Clock::now();
-          const bool useLineSearch = p.admissibilityChecks || p.energyLineSearch;
+          const bool useLineSearch = checkGeometry || p.energyLineSearch;
           Real eBase = 0;
           Real alpha = Real(1);
           bool accepted = false;
           FastAdm adm{};
           Real eTrial = std::numeric_limits<Real>::infinity();
+          SurfaceState trialSurface{};
+          bool trialSurfaceEvaluated = false;
           if (!useLineSearch)
           {
             u += vK;
@@ -347,16 +389,18 @@ namespace Rodin::Adaptation
               uTrial += previousU;
               bool jOK = true;
               bool qOK = true;
-              if (p.admissibilityChecks)
+              if (checkGeometry)
               {
                 adm = fastAdmissibility(uTrial);
-                jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+                jOK = adm.inadmissibleCount == 0 && adm.minJ > acceptedJacobianFloor;
                 qOK = adm.maxQ < p.qMax;
               }
               bool eOK = true;
               if (jOK && qOK && p.energyLineSearch)
               {
-                eTrial = surfaceState(uTrial).energy;
+                trialSurface = surfaceState(uTrial);
+                trialSurfaceEvaluated = true;
+                eTrial = trialSurface.energy;
                 eOK = std::isfinite(eTrial) && eTrial <= eBase;
               }
               if (jOK && qOK && eOK)
@@ -371,20 +415,36 @@ namespace Rodin::Adaptation
           rep.tLineSearch += secondsSince(tic);
           if (p.trace)
           {
-            const auto surf = surfaceState(u);
+            const auto surf = accepted && trialSurfaceEvaluated
+              ? trialSurface
+              : surfaceState(u);
             std::cout << "      wngir init=normal-offset"
                       << "  accepted=" << (accepted ? 1 : 0) << "  alpha=" << alpha
                       << "  actRMS=" << std::scientific << surf.activeRMS
                       << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
                       << "  min_j="
-                      << (p.admissibilityChecks && accepted
+                      << (checkGeometry && accepted
                              ? adm.minJ
                              : std::numeric_limits<Real>::quiet_NaN())
                       << "  max_Q="
-                      << (p.admissibilityChecks && accepted
+                      << (checkGeometry && accepted
                              ? adm.maxQ
                              : std::numeric_limits<Real>::quiet_NaN())
                       << '\n';
+          }
+        }
+
+        if (usePrimalBarrier)
+        {
+          const FastAdm initialAdm = fastAdmissibility(u);
+          if (initialAdm.inadmissibleCount > 0 || initialAdm.minJ <= p.jSafe ||
+            initialAdm.maxQ >= p.qMax)
+          {
+            rep.exitReason = "initial-state-not-strictly-feasible";
+            rep.minJ = initialAdm.minJ;
+            rep.maxQRel = initialAdm.maxQ;
+            m_report = rep;
+            return rep;
           }
         }
 
@@ -497,60 +557,73 @@ namespace Rodin::Adaptation
             if (!solveOk)
               break;
 
-            const Real modelDecrease = Real(0.5) *
-              std::max(Real(0),
-                getSurfaceForceAction(mesh, fes, u, vK, phi, grad, interfaceFacets,
-                  sigma2, meshDim, locator));
-            const Real barrierCoefficient = domainMeasure > Real(0)
-              ? p.primalBarrierMu * modelDecrease / domainMeasure
-              : Real(0);
-            rep.primalBarrierCoefficient = barrierCoefficient;
-
-            uTrial.getData().setZero();
-            const Real predictorAlpha =
-              getBarrierStepScale(mesh, fes, u, uTrial, vK, meshDim);
-            vK *= predictorAlpha;
-            const std::size_t innerIterations =
-              std::max<std::size_t>(1, p.primalBarrierIterations);
-            tic = Clock::now();
-            for (std::size_t inner = 0; inner < innerIterations; ++inner)
+            const bool useBarrier = usePrimalBarrier;
+            if (useBarrier)
             {
-              Detail::WNGIRPrimalBarrierMetric barrierMetric(
-                m_duStep, m_vStep, u, vK, p, barrierCoefficient);
-              Detail::WNGIRPrimalBarrierForce barrierForce(
-                m_vStep, u, vK, p, barrierCoefficient);
-              typename ProblemType::ProblemBodyType body(m_bulkForm);
-              body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
-              if (!p.dirichletAttributes.empty())
-                body = body +
-                  Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
-                    .on(p.dirichletAttributes);
-              m_stepProblem = body;
-              m_stepProblem.assemble();
-              rep.tAssembly += secondsSince(tic);
+              const Real modelDecrease = Real(0.5) *
+                std::max(Real(0),
+                  getSurfaceForceAction(mesh, fes, u, vK, phi, grad, interfaceFacets,
+                    sigma2, meshDim, locator));
+              const Real barrierCoefficient = domainMeasure > Real(0)
+                ? p.primalBarrierMu * modelDecrease / domainMeasure
+                : Real(0);
+              rep.primalBarrierCoefficient = barrierCoefficient;
 
-              tic = Clock::now();
-              std::size_t barrierIterations = 0;
-              Real barrierError = std::numeric_limits<Real>::infinity();
-              solveOk = solveStep(uTrial, barrierIterations, barrierError);
-              linearIterations += barrierIterations;
-              linearError = barrierError;
-              rep.tSolve += secondsSince(tic);
-              if (!solveOk)
-                break;
-
-              scratch = uTrial;
-              scratch -= vK;
-              const Real innerAlpha =
-                getBarrierStepScale(mesh, fes, u, vK, scratch, meshDim);
-              if (!(innerAlpha > Real(0)))
+              uTrial *= Real(0);
+              const Real predictorAlpha =
+                getBarrierStepScale(mesh, fes, validationCells, u, uTrial, vK, meshDim);
+              if (!(predictorAlpha > Real(0)))
               {
                 solveOk = false;
-                break;
               }
-              scratch *= innerAlpha;
-              vK += scratch;
-              tic = Clock::now();
+              else
+              {
+                // Start the barrier corrections from the feasible predictor,
+                // not from the origin of the affine increment problem.
+                vK *= predictorAlpha;
+                const std::size_t innerIterations =
+                  std::max<std::size_t>(1, p.primalBarrierIterations);
+                tic = Clock::now();
+                for (std::size_t inner = 0; inner < innerIterations; ++inner)
+                {
+                  Detail::WNGIRPrimalBarrierMetric barrierMetric(
+                    m_duStep, m_vStep, u, vK, p, barrierCoefficient);
+                  Detail::WNGIRPrimalBarrierForce barrierForce(
+                    m_vStep, u, vK, p, barrierCoefficient);
+                  typename ProblemType::ProblemBodyType body(m_bulkForm);
+                  body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
+                  if (!p.dirichletAttributes.empty())
+                    body = body +
+                      Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                        .on(p.dirichletAttributes);
+                  m_stepProblem = body;
+                  m_stepProblem.assemble();
+                  rep.tAssembly += secondsSince(tic);
+
+                  tic = Clock::now();
+                  std::size_t barrierIterations = 0;
+                  Real barrierError = std::numeric_limits<Real>::infinity();
+                  solveOk = solveStep(uTrial, barrierIterations, barrierError);
+                  linearIterations += barrierIterations;
+                  linearError = barrierError;
+                  rep.tSolve += secondsSince(tic);
+                  if (!solveOk)
+                    break;
+
+                  scratch = uTrial;
+                  scratch -= vK;
+                  const Real innerAlpha = getBarrierStepScale(
+                    mesh, fes, validationCells, u, vK, scratch, meshDim);
+                  if (!(innerAlpha > Real(0)))
+                  {
+                    solveOk = false;
+                    break;
+                  }
+                  scratch *= innerAlpha;
+                  vK += scratch;
+                  tic = Clock::now();
+                }
+              }
             }
           }
           else
@@ -592,7 +665,9 @@ namespace Rodin::Adaptation
               linearError = correctionError;
               rep.tSolve += secondsSince(tic);
               if (!solveOk ||
-                (safeguarded && getMarginScale(mesh, fes, u, vK, meshDim) >= Real(0.999)))
+                (safeguarded &&
+                  getMarginScale(mesh, fes, validationCells, u, vK, meshDim) >=
+                    Real(0.999)))
                 break;
               tic = Clock::now();
             }
@@ -615,7 +690,7 @@ namespace Rodin::Adaptation
           if (p.constraintFormulation ==
             WNGIRConstraintFormulation::SafeguardedMarginMetric)
           {
-            marginScale = getMarginScale(mesh, fes, u, vK, meshDim);
+            marginScale = getMarginScale(mesh, fes, validationCells, u, vK, meshDim);
             vK *= marginScale;
           }
           rep.lastMarginScale = marginScale;
@@ -626,18 +701,40 @@ namespace Rodin::Adaptation
           Real liftedTraceRMS = Real(0);
           if (!directional && (p.betaMax > Real(1) || p.trace))
           {
-            Real bNum = 0, bDen = 0, dDen = 0, gammaMeasure = 0;
-            DeformationMap deformation(u, locator);
-            for (const Index facetIdx : interfaceFacets)
+            struct TraceState
             {
+              Real numerator = 0;
+              Real directionSquared = 0;
+              Real demonsSquared = 0;
+              Real measure = 0;
+            };
+
+            if constexpr (requires { u.acquire(); })
+              u.acquire();
+            if constexpr (requires { vK.acquire(); })
+              vK.acquire();
+            if constexpr (requires { phi.acquire(); })
+              phi.acquire();
+            if constexpr (requires { grad.acquire(); })
+              grad.acquire();
+            std::vector<TraceState> facetTrace(interfaceFacets.size());
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+            for (Index i = 0; i < static_cast<Index>(interfaceFacets.size()); ++i)
+            {
+              TraceState& state = facetTrace[static_cast<std::size_t>(i)];
+              DeformationMap deformation(u, locator);
+              const Index facetIdx = interfaceFacets[static_cast<std::size_t>(i)];
               const auto face = mesh.getFace(facetIdx);
               const auto& qf = getQuadrature(*face, fes);
               const auto& quad = face->getQuadrature(qf);
+              const Detail::WNGIRValidationWeights positiveWeights(qf);
               for (std::size_t q = 0; q < quad.getSize(); ++q)
               {
                 const auto& src = quad.getPoint(q);
                 const Variational::IntegrationPoint ip(src, &qf, q);
-                const Real fqw = qf.getWeight(q) * src.getDistortion();
+                const Real fqw = positiveWeights.getWeight(q) * src.getDistortion();
                 const auto& moved = deformation.getMovedPoint(ip);
                 const Real r = phi.getValue(moved);
                 const SpatialVec g = grad.getValue(moved);
@@ -659,11 +756,20 @@ namespace Rodin::Adaptation
                     break;
                 }
                 const SpatialVec v = vK.getValue(src);
-                bNum += fqw * dVec.dot(v);
-                bDen += fqw * v.dot(v);
-                dDen += fqw * dVec.dot(dVec);
-                gammaMeasure += fqw;
+                state.numerator += fqw * dVec.dot(v);
+                state.directionSquared += fqw * v.dot(v);
+                state.demonsSquared += fqw * dVec.dot(dVec);
+                state.measure += fqw;
               }
+            }
+
+            Real bNum = 0, bDen = 0, dDen = 0, gammaMeasure = 0;
+            for (const TraceState& state : facetTrace)
+            {
+              bNum += state.numerator;
+              bDen += state.directionSquared;
+              dDen += state.demonsSquared;
+              gammaMeasure += state.measure;
             }
             if (gammaMeasure > Real(0))
             {
@@ -686,12 +792,14 @@ namespace Rodin::Adaptation
 
           // ---- Nonlinear line search on TRUE geometry ----
           tic = Clock::now();
-          const bool useLineSearch = p.admissibilityChecks || p.energyLineSearch;
+          const bool useLineSearch = checkGeometry || p.energyLineSearch;
           Real alpha = Real(1);
           bool accepted = false;
           std::size_t backtracks = 0;
           FastAdm adm{};
           Real eTrial = std::numeric_limits<Real>::infinity();
+          SurfaceState trialSurface{};
+          bool trialSurfaceEvaluated = false;
           if (!useLineSearch)
           {
             u += vK;
@@ -708,16 +816,18 @@ namespace Rodin::Adaptation
               uTrial += previousU;
               bool jOK = true;
               bool qOK = true;
-              if (p.admissibilityChecks)
+              if (checkGeometry)
               {
                 adm = fastAdmissibility(uTrial);
-                jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+                jOK = adm.inadmissibleCount == 0 && adm.minJ > acceptedJacobianFloor;
                 qOK = adm.maxQ < p.qMax;
               }
               bool eOK = true;
               if (jOK && qOK && p.energyLineSearch)
               {
-                eTrial = surfaceState(uTrial).energy;
+                trialSurface = surfaceState(uTrial);
+                trialSurfaceEvaluated = true;
+                eTrial = trialSurface.energy;
                 eOK = std::isfinite(eTrial) && eTrial <= ePrev;
               }
               if (jOK && qOK && eOK)
@@ -739,7 +849,9 @@ namespace Rodin::Adaptation
           }
 
           FastAdm acceptedAdm = adm;
-          SurfaceState acceptedSurf = surfaceState(u);
+          SurfaceState acceptedSurf = trialSurfaceEvaluated
+            ? trialSurface
+            : surfaceState(u);
           Real acceptedEnergy =
             p.energyLineSearch && std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
 
@@ -753,9 +865,9 @@ namespace Rodin::Adaptation
           }
           else
             rep.acceptedStep = maxStep;
-          rep.minJ = p.admissibilityChecks ? acceptedAdm.minJ
+          rep.minJ = checkGeometry ? acceptedAdm.minJ
                                            : std::numeric_limits<Real>::quiet_NaN();
-          rep.maxQRel = p.admissibilityChecks ? acceptedAdm.maxQ
+          rep.maxQRel = checkGeometry ? acceptedAdm.maxQ
                                               : std::numeric_limits<Real>::quiet_NaN();
 
           const auto surf = acceptedSurf;
@@ -771,10 +883,12 @@ namespace Rodin::Adaptation
                       << "  actRMS=" << surf.activeRMS
                       << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
                       << "  actSup=" << surf.activeSup
-                      << "  actFrac=" << rep.activeFraction
-                      << "  dΓ/h=" << (h > Real(0) ? rawDemonsRMS / h : Real(0))
-                      << "  vΓ/h=" << (h > Real(0) ? liftedTraceRMS / h : Real(0))
-                      << "  β=" << beta
+                      << "  actFrac=" << rep.activeFraction;
+            if (!directional)
+              std::cout << "  dΓ/h=" << (h > Real(0) ? rawDemonsRMS / h : Real(0))
+                        << "  vΓ/h=" << (h > Real(0) ? liftedTraceRMS / h : Real(0))
+                        << "  β=" << beta;
+            std::cout
                       << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
                       << "  linIt=" << rep.linearIterations << "  α=" << alpha
                       << "  marginScale=" << marginScale
@@ -825,19 +939,26 @@ namespace Rodin::Adaptation
           ePrev = eNow;
         }
 
-          // Local fit-admissibility alignment diagnostic; this is not a KKT
-          // multiplier or a certificate that no feasible descent remains.
+        // Local fit-admissibility alignment diagnostic; this is not a KKT
+        // multiplier or a certificate that no feasible descent remains.
         {
-          Variational::LinearForm forceForm(m_vStep);
-          Detail::WNGIRSurfaceForceCoefficient diagCoeff(
-            phi, grad, u, locator, p, sigma2, meshDim);
-          auto diagForce = Variational::FaceIntegral(diagCoeff, m_vStep);
-          diagForce.setOrder(surfaceOrder);
-          diagForce.over(p.interfaceAttribute);
-          forceForm = diagForce;
-          forceForm.assemble();
-          rep.conflictIndicator =
-            getConflictIndicator(mesh, fes, u, forceForm.getVector(), meshDim);
+          using DiagnosticLinearFormType =
+            std::decay_t<decltype(Variational::LinearForm(m_vStep))>;
+          using ForceVectorType = std::remove_cvref_t<decltype(
+            std::declval<DiagnosticLinearFormType&>().getVector())>;
+          if constexpr (std::is_same_v<ForceVectorType, Math::Vector<Real>>)
+          {
+            DiagnosticLinearFormType forceForm(m_vStep);
+            Detail::WNGIRSurfaceForceCoefficient diagCoeff(
+              phi, grad, u, locator, p, sigma2, meshDim);
+            auto diagForce = Variational::FaceIntegral(diagCoeff, m_vStep);
+            diagForce.setOrder(surfaceOrder);
+            diagForce.over(p.interfaceAttribute);
+            forceForm = diagForce;
+            forceForm.assemble();
+            rep.conflictIndicator =
+              getConflictIndicator(mesh, fes, u, forceForm.getVector(), meshDim);
+          }
         }
 
         m_report = rep;
@@ -949,17 +1070,26 @@ namespace Rodin::Adaptation
 
       /// @brief Measure of the fixed background domain used to normalize the QP.
       template <class Mesh, class FES>
-      Real getDomainMeasure(const Mesh& mesh, const FES& fes) const
+      Real getDomainMeasure(const Mesh& mesh, const FES& fes,
+        const std::vector<Index>& validationCells) const
       {
-        Real measure = 0;
-        for (auto cell = mesh.getCell(); cell; ++cell)
+        if constexpr (requires { mesh.getShard(); })
         {
-          const auto& qf = getQuadrature(*cell, fes);
-          const auto& quadrature = cell->getQuadrature(qf);
-          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-            measure += qf.getWeight(q) * quadrature.getPoint(q).getDistortion();
+          return mesh.getMeasure(mesh.getDimension());
         }
-        return measure;
+        else
+        {
+          Real measure = 0;
+          for (const Index cellIndex : validationCells)
+          {
+            const auto cell = mesh.getCell(cellIndex);
+            const auto& qf = getQuadrature(*cell, fes);
+            const auto& quadrature = cell->getQuadrature(qf);
+            for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+              measure += qf.getWeight(q) * quadrature.getPoint(q).getDistortion();
+          }
+          return measure;
+        }
       }
 
       /// @brief Action of the negative Welsch first variation on a direction.
@@ -969,67 +1099,115 @@ namespace Rodin::Adaptation
         const GradType& grad, const std::vector<Index>& interfaceFacets, Real sigma2,
         std::size_t dimension, const LocatorType& locator) const
       {
-        Detail::WNGIRSurfaceForceCoefficient force(
-          phi, grad, current, locator, m_parameters, sigma2, dimension);
-        Real action = 0;
-        for (const Index facetIndex : interfaceFacets)
+        if constexpr (requires { current.acquire(); })
+          current.acquire();
+        if constexpr (requires { direction.acquire(); })
+          direction.acquire();
+        if constexpr (requires { phi.acquire(); })
+          phi.acquire();
+        if constexpr (requires { grad.acquire(); })
+          grad.acquire();
+        std::vector<Real> facetActions(interfaceFacets.size(), Real(0));
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel
+#endif
         {
-          const auto face = mesh.getFace(facetIndex);
-          const auto& qf = getQuadrature(*face, fes);
-          const auto& quadrature = face->getQuadrature(qf);
-          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          Detail::WNGIRSurfaceForceCoefficient force(
+            phi, grad, current, locator, m_parameters, sigma2, dimension);
+#ifdef RODIN_USE_OPENMP
+#pragma omp for schedule(static)
+#endif
+          for (Index i = 0; i < static_cast<Index>(interfaceFacets.size()); ++i)
           {
-            const auto& point = quadrature.getPoint(q);
-            const Variational::IntegrationPoint ip(point, &qf, q);
-            action += qf.getWeight(q) * point.getDistortion() *
-              force.getValue(ip).dot(direction.getValue(point));
+            Real& facetAction = facetActions[static_cast<std::size_t>(i)];
+            const Index facetIndex = interfaceFacets[static_cast<std::size_t>(i)];
+            const auto face = mesh.getFace(facetIndex);
+            const auto& qf = getQuadrature(*face, fes);
+            const auto& quadrature = face->getQuadrature(qf);
+            for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+            {
+              const auto& point = quadrature.getPoint(q);
+              const Variational::IntegrationPoint ip(point, &qf, q);
+              facetAction += qf.getWeight(q) * point.getDistortion() *
+                force.getValue(ip).dot(direction.getValue(point));
+            }
           }
         }
+        Real action = 0;
+        for (const Real facetAction : facetActions)
+          action += facetAction;
         return action;
       }
 
       /// @brief Fraction-to-boundary factor for a primal barrier Newton update.
       template <class Mesh, class FES>
       Real getBarrierStepScale(const Mesh& mesh, const FES& fes,
-        const Displacement& current, const Displacement& inner,
-        const Displacement& increment, std::size_t dimension) const
+        const std::vector<Index>& validationCells, const Displacement& current,
+        const Displacement& inner, const Displacement& increment,
+        std::size_t dimension) const
       {
         const Real tau =
           std::clamp(m_parameters.fractionToBoundary, Real(0), Real(0.999));
+        if constexpr (requires { current.acquire(); })
+          current.acquire();
+        if constexpr (requires { inner.acquire(); })
+          inner.acquire();
+        if constexpr (requires { increment.acquire(); })
+          increment.acquire();
         Real alpha = Real(1);
-        CellDeformation deformation(dimension);
-        auto currentJacobian = Variational::Jacobian(current);
-        auto innerJacobian = Variational::Jacobian(inner);
-        auto incrementJacobian = Variational::Jacobian(increment);
-
-        for (auto cell = mesh.getCell(); cell; ++cell)
+        int feasible = 1;
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel reduction(min: alpha) reduction(&: feasible)
+#endif
         {
-          const auto& qf = getQuadrature(*cell, fes);
-          const auto& quadrature = cell->getQuadrature(qf);
-          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          CellDeformation deformation(dimension);
+          auto currentJacobian = Variational::Jacobian(current);
+          auto innerJacobian = Variational::Jacobian(inner);
+          auto incrementJacobian = Variational::Jacobian(increment);
+#ifdef RODIN_USE_OPENMP
+#pragma omp for schedule(static)
+#endif
+          for (Index i = 0; i < static_cast<Index>(validationCells.size()); ++i)
           {
-            const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
-            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-            if (!deformation.isAdmissible())
-              return Real(0);
-            const auto innerGradient = innerJacobian.getValue(ip);
-            const auto incrementGradient = incrementJacobian.getValue(ip);
-            const Real innerJ = -deformation.getJacobianAction(innerGradient);
-            const Real incrementJ = -deformation.getJacobianAction(incrementGradient);
-            const Real innerQ = deformation.getRelativeDistortionAction(innerGradient);
-            const Real incrementQ =
-              deformation.getRelativeDistortionAction(incrementGradient);
-            const Real slackJ = deformation.getJacobian() - m_parameters.jSafe - innerJ;
-            const Real slackQ =
-              m_parameters.qMax - deformation.getRelativeDistortion() - innerQ;
-            if (slackJ <= Real(0) || slackQ <= Real(0))
-              return Real(0);
-            if (incrementJ > Real(0))
-              alpha = std::min(alpha, tau * slackJ / incrementJ);
-            if (incrementQ > Real(0))
-              alpha = std::min(alpha, tau * slackQ / incrementQ);
+            const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
+            const auto cell = mesh.getCell(cellIndex);
+            const auto& qf = getQuadrature(*cell, fes);
+            const auto& quadrature = cell->getQuadrature(qf);
+            for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+            {
+              const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
+              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+              if (!deformation.isAdmissible())
+              {
+                feasible = 0;
+                continue;
+              }
+              const auto innerGradient = innerJacobian.getValue(ip);
+              const auto incrementGradient = incrementJacobian.getValue(ip);
+              const Real innerJ = -deformation.getJacobianAction(innerGradient);
+              const Real incrementJ = -deformation.getJacobianAction(incrementGradient);
+              const Real innerQ =
+                deformation.getRelativeDistortionAction(innerGradient);
+              const Real incrementQ =
+                deformation.getRelativeDistortionAction(incrementGradient);
+              const Real slackJ =
+                deformation.getJacobian() - m_parameters.jSafe - innerJ;
+              const Real slackQ =
+                m_parameters.qMax - deformation.getRelativeDistortion() - innerQ;
+              if (slackJ <= Real(0) || slackQ <= Real(0))
+              {
+                feasible = 0;
+                continue;
+              }
+              if (incrementJ > Real(0))
+                alpha = std::min(alpha, tau * slackJ / incrementJ);
+              if (incrementQ > Real(0))
+                alpha = std::min(alpha, tau * slackQ / incrementQ);
+            }
           }
         }
+        if (!feasible)
+          return Real(0);
         return std::clamp(alpha, Real(0), Real(1));
       }
 
@@ -1043,49 +1221,73 @@ namespace Rodin::Adaptation
        * first-order models of the true deformed geometry.
        */
       template <class Mesh, class FES>
-      Real getMarginScale(const Mesh& mesh, const FES& fes, const Displacement& current,
+      Real getMarginScale(const Mesh& mesh, const FES& fes,
+        const std::vector<Index>& validationCells, const Displacement& current,
         const Displacement& direction, std::size_t dimension) const
       {
         const Real fraction = std::clamp(m_parameters.marginFraction, Real(0), Real(1));
         const Real jacobianFloor =
           std::max(m_parameters.jSafe, m_parameters.jLineSearchRatio);
+        if constexpr (requires { current.acquire(); })
+          current.acquire();
+        if constexpr (requires { direction.acquire(); })
+          direction.acquire();
         Real scale = Real(1);
-        CellDeformation deformation(dimension);
-        auto currentJacobian = Variational::Jacobian(current);
-        auto directionJacobian = Variational::Jacobian(direction);
-
-        for (auto cell = mesh.getCell(); cell; ++cell)
+        int feasible = 1;
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel reduction(min: scale) reduction(&: feasible)
+#endif
         {
-          const auto& qf = getQuadrature(*cell, fes);
-          const auto& quad = cell->getQuadrature(qf);
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          CellDeformation deformation(dimension);
+          auto currentJacobian = Variational::Jacobian(current);
+          auto directionJacobian = Variational::Jacobian(direction);
+#ifdef RODIN_USE_OPENMP
+#pragma omp for schedule(static)
+#endif
+          for (Index i = 0; i < static_cast<Index>(validationCells.size()); ++i)
           {
-            const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
-            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-            if (!deformation.isAdmissible())
-              return Real(0);
-
-            const auto gradient = directionJacobian.getValue(ip);
-            const Real jacobianConsumption = -deformation.getJacobianAction(gradient);
-            if (jacobianConsumption > Real(0))
+            const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
+            const auto cell = mesh.getCell(cellIndex);
+            const auto& qf = getQuadrature(*cell, fes);
+            const auto& quad = cell->getQuadrature(qf);
+            for (std::size_t q = 0; q < quad.getSize(); ++q)
             {
-              const Real margin = deformation.getJacobian() - jacobianFloor;
-              if (margin <= Real(0))
-                return Real(0);
-              scale = std::min(scale, fraction * margin / jacobianConsumption);
-            }
+              const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
+              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+              if (!deformation.isAdmissible())
+              {
+                feasible = 0;
+                continue;
+              }
 
-            const Real distortionConsumption =
-              deformation.getRelativeDistortionAction(gradient);
-            if (distortionConsumption > Real(0))
-            {
-              const Real margin = m_parameters.qMax - deformation.getRelativeDistortion();
-              if (margin <= Real(0))
-                return Real(0);
-              scale = std::min(scale, fraction * margin / distortionConsumption);
+              const auto gradient = directionJacobian.getValue(ip);
+              const Real jacobianConsumption =
+                -deformation.getJacobianAction(gradient);
+              if (jacobianConsumption > Real(0))
+              {
+                const Real margin = deformation.getJacobian() - jacobianFloor;
+                if (margin <= Real(0))
+                  feasible = 0;
+                else
+                  scale = std::min(scale, fraction * margin / jacobianConsumption);
+              }
+
+              const Real distortionConsumption =
+                deformation.getRelativeDistortionAction(gradient);
+              if (distortionConsumption > Real(0))
+              {
+                const Real margin =
+                  m_parameters.qMax - deformation.getRelativeDistortion();
+                if (margin <= Real(0))
+                  feasible = 0;
+                else
+                  scale = std::min(scale, fraction * margin / distortionConsumption);
+              }
             }
           }
         }
+        if (!feasible)
+          return Real(0);
         return std::clamp(scale, Real(0), Real(1));
       }
 
@@ -1099,33 +1301,44 @@ namespace Rodin::Adaptation
        */
       template <class Mesh, class FES>
       AdmissibilityState getAdmissibilityState(const Mesh& mesh, const FES& fes,
-        const Displacement& u, std::size_t dimension) const
+        const std::vector<Index>& validationCells, const Displacement& u,
+        std::size_t dimension) const
       {
-        AdmissibilityState state;
-        CellDeformation deformation(dimension);
-        auto displacementJacobian = Variational::Jacobian(u);
-        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        if constexpr (requires { u.acquire(); })
+          u.acquire();
+        Real minJ = std::numeric_limits<Real>::infinity();
+        Real maxQ = Real(0);
+        std::size_t inadmissibleCount = 0;
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel reduction(min: minJ) reduction(max: maxQ) \
+  reduction(+: inadmissibleCount)
+#endif
         {
-          const auto& qf = getQuadrature(*cellIt, fes);
-          const auto& quad = cellIt->getQuadrature(qf);
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          CellDeformation deformation(dimension);
+          auto displacementJacobian = Variational::Jacobian(u);
+#ifdef RODIN_USE_OPENMP
+#pragma omp for schedule(static)
+#endif
+          for (Index i = 0; i < static_cast<Index>(validationCells.size()); ++i)
           {
-            const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
-            deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
-            const Real j = deformation.getJacobian();
-            if (j < state.minJ)
-              state.minJ = j;
-            if (j <= m_parameters.jMinRatio)
-              ++state.inadmissibleCount;
-            if (deformation.isAdmissible())
+            const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
+            const auto cell = mesh.getCell(cellIndex);
+            const auto& qf = getQuadrature(*cell, fes);
+            const auto& quad = cell->getQuadrature(qf);
+            for (std::size_t q = 0; q < quad.getSize(); ++q)
             {
-              const Real qRel = deformation.getRelativeDistortion();
-              if (qRel > state.maxQ)
-                state.maxQ = qRel;
+              const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
+              deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
+              const Real j = deformation.getJacobian();
+              minJ = std::min(minJ, j);
+              if (j <= m_parameters.jMinRatio)
+                ++inadmissibleCount;
+              if (deformation.isAdmissible())
+                maxQ = std::max(maxQ, deformation.getRelativeDistortion());
             }
           }
         }
-        return state;
+        return {minJ, maxQ, inadmissibleCount};
       }
 
       /**
@@ -1144,33 +1357,63 @@ namespace Rodin::Adaptation
         const std::vector<Index>& interfaceFacets, Real sigma2, std::size_t dimension,
         const LocatorType& locator) const
       {
-        SurfaceState state;
-        Real squared = 0;
-        DeformationMap deformation(u, locator);
-        for (const Index facetIdx : interfaceFacets)
+        if constexpr (requires { u.acquire(); })
+          u.acquire();
+        if constexpr (requires { phi.acquire(); })
+          phi.acquire();
+        struct SurfaceAccumulation
         {
+          SurfaceState state;
+          Real squaredResidual = 0;
+        };
+        std::vector<SurfaceAccumulation> facetStates(interfaceFacets.size());
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        for (Index i = 0; i < static_cast<Index>(interfaceFacets.size()); ++i)
+        {
+          auto& accumulation = facetStates[static_cast<std::size_t>(i)];
+          SurfaceState& facetState = accumulation.state;
+          DeformationMap deformation(u, locator);
+          const Index facetIdx = interfaceFacets[static_cast<std::size_t>(i)];
           const auto face = mesh.getFace(facetIdx);
           const auto& qf = getQuadrature(*face, fes);
           const auto& quad = face->getQuadrature(qf);
+          const Detail::WNGIRValidationWeights positiveWeights(qf);
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
             const auto& src = quad.getPoint(q);
             const Variational::IntegrationPoint ip(src, &qf, q);
-            const Real w = qf.getWeight(q) * src.getDistortion();
+            const Real w = positiveWeights.getWeight(q) * src.getDistortion();
             const Real r = phi.getValue(deformation.getMovedPoint(ip));
             const Real omega = std::exp(-r * r / sigma2);
-            state.totalLen += w;
-            state.energy += w * Real(0.5) * sigma2 * (Real(1) - omega);
+            facetState.totalLen += w;
+            facetState.energy += w * Real(0.5) * sigma2 * (Real(1) - omega);
             if (omega >= m_parameters.omegaMin)
             {
-              state.activeLen += w;
-              squared += w * r * r;
-              state.activeSup = std::max(state.activeSup, std::abs(r));
+              facetState.activeLen += w;
+              accumulation.squaredResidual += w * r * r;
+              facetState.activeSup = std::max(facetState.activeSup, std::abs(r));
             }
           }
         }
-        state.activeRMS =
-          state.activeLen > Real(0) ? std::sqrt(squared / state.activeLen) : Real(0);
+
+        SurfaceState state;
+        Real squared = 0;
+        // Combine the per-facet positive quadrature sums before normalizing the
+        // active residual over the complete interface.
+        for (const auto& accumulation : facetStates)
+        {
+          const SurfaceState& facetState = accumulation.state;
+          state.energy += facetState.energy;
+          state.activeLen += facetState.activeLen;
+          state.totalLen += facetState.totalLen;
+          state.activeSup = std::max(state.activeSup, facetState.activeSup);
+          squared += accumulation.squaredResidual;
+        }
+        state.activeRMS = state.activeLen > Real(0)
+          ? std::sqrt(std::max(Real(0), squared) / state.activeLen)
+          : Real(0);
         return state;
       }
 
@@ -1346,9 +1589,23 @@ namespace Rodin::Adaptation
       {
         m_stepProblem.solve(m_stepSolver);
         out = m_duStep.getSolution();
-        iterations = 0;
-        error = Real(0);
-        return std::isfinite(out.max()) && std::isfinite(out.min());
+        if constexpr (requires(const StepSolverType& solver) {
+          solver.getIterationNumber();
+        })
+          iterations = m_stepSolver.getIterationNumber();
+        else
+          iterations = 0;
+        if constexpr (requires(const StepSolverType& solver) { solver.getError(); })
+          error = m_stepSolver.getError();
+        else
+          error = Real(0);
+        const bool success = [&]() {
+          if constexpr (requires(const StepSolverType& solver) { solver.success(); })
+            return static_cast<bool>(m_stepSolver.success());
+          else
+            return true;
+        }();
+        return success && std::isfinite(out.max()) && std::isfinite(out.min());
       }
 
       Displacement* m_u;

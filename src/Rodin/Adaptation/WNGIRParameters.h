@@ -58,17 +58,17 @@ namespace Rodin::Adaptation
   {
       Real h = 0;                 ///< reference mesh size (required).
       Real gammaM = 0;            ///< L² weight; zero disables the mass term.
-      Real gammaH = -1;           ///< deviatoric-strain weight; <0 ⇒ 1/h.
+      Real gammaH = -1;           ///< deviatoric-strain weight; <0 ⇒ 0.0125/h.
       Real gammaDiv = -1;         ///< divergence weight; <0 ⇒ gammaH.
-      Real ellM = -1;             ///< Sobolev length; <0 ⇒ 3h.
+      Real ellM = -1;             ///< Sobolev length; <0 ⇒ 0.75h.
       Real gammaObs = 1;          ///< surface observation metric weight.
       WNGIRObservationMetric observationMetric =
         WNGIRObservationMetric::HybridRankOneIRLS; ///< Surface observation metric.
       Real observationTangentialFloor =
         Real(0.05); ///< Tangential weight of the hybrid rank-one metric.
       bool residualStabilizedObservationMetric =
-        true; ///< Add residual damping to observation metric.
-      Real initialGuessGamma = 1000; ///< Normal-offset initializer metric weight.
+        true; ///< Add residual damping to the isotropic observation metric.
+      Real initialGuessGamma = 0; ///< Normal-offset initializer; zero gives a cold start.
       Real initialGuessCapH =
         2; ///< Cap normal-offset initialization by this multiple of h.
       Real gammaJ = 1;            ///< j-barrier weight.
@@ -107,7 +107,8 @@ namespace Rodin::Adaptation
       Real fractionToBoundary = Real(0.95); ///< Strict-feasibility fraction.
       Real omegaMin = 0.1;        ///< active-set threshold on ω.
       Real alphaMin = 1e-4;       ///< line-search floor.
-      bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds.
+      bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds;
+                                       ///< mandatory when the primal barrier is active.
       bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
       Real jMinRatio = 1e-8;      ///< hard inadmissibility floor.
       Real jLineSearchRatio = 1e-2; ///< Jacobian floor ratio enforced by line search.
@@ -130,10 +131,6 @@ namespace Rodin::Adaptation
         Real(5e-3); ///< >0 stops best-effort when accepted step/h is small.
       Real cgRelativeTolerance = 1e-6; ///< relative residual tolerance for CG.
       std::size_t cgMaxIterations = 0; ///< 0 ⇒ min(2000, max(100, 2*ndofs)).
-      std::size_t andersonMemory = 3;  ///< 0 disables safeguarded Anderson.
-      std::size_t andersonStart = 2;   ///< first iteration where AA may be used.
-      Real andersonDamping = 1;        ///< first AA damping trial.
-      Real andersonMinDamping = 0.125; ///< smallest AA damping trial.
       std::size_t maxIterations = 200; ///< Maximum nonlinear WNGIR iterations.
       std::size_t quadratureOrder = 0; ///< 0 ⇒ 2·(FE order).
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
@@ -147,7 +144,7 @@ namespace Rodin::Adaptation
       /// If true, add the Q_rel and optional j-size hinge Gauss--Newton terms
       /// to the metric.
       bool includeQualityMetric = true;
-      /// Optimal 1-D rescale of the lifted step along itself:
+      /// Optional sign-blind-formulation rescale of the lifted step along itself:
       ///   β = ⟨d, v⟩_Γ / ⟨v, v⟩_Γ  (surface inner products),
       /// clamped to [1, betaMax]; line search starts at β·v instead of
       /// v. The H¹ lift systematically under-scales the skeleton trace
@@ -157,7 +154,7 @@ namespace Rodin::Adaptation
       /// smooth admissibility-aware shape. Since β only scales the same
       /// descent direction, the nonlinear line search remains the final
       /// admissibility and energy-decrease guard.
-      Real betaMax = 50;
+      Real betaMax = 50; ///< Used only by SignBlindMetric.
   };
 }
 

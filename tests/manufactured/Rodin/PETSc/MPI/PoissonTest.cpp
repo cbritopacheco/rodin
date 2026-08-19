@@ -219,6 +219,8 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 
     PETSc::Solver::CG solver(poisson);
     solver.solve();
+    EXPECT_GT(solver.getIterationNumber(), 0);
+    EXPECT_TRUE(std::isfinite(solver.getError()));
 
     auto solution = sin(pi * F::x) * sin(pi * F::y);
 

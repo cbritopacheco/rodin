@@ -131,6 +131,8 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     PETSc::Solver::CG solver(poisson);
     solver.setTolerances(1e-12, 1e-14, 1e5, 1000);
     solver.solve();
+    EXPECT_GT(solver.getIterationNumber(), 0);
+    EXPECT_TRUE(std::isfinite(solver.getError()));
 
     // Check solver residual.
     {

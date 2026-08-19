@@ -10,6 +10,7 @@
 #include "DeformationMap.h"
 #include "WNGIRParameters.h"
 #include "WNGIRResidualState.h"
+#include "WNGIRValidationWeights.h"
 
 namespace Rodin::Adaptation::Detail
 {
@@ -61,6 +62,7 @@ namespace Rodin::Adaptation::Detail
         constexpr Real epsG = Real(1e-12);
         const auto& params = m_parameters.get();
         const auto d = static_cast<std::uint8_t>(m_dimension);
+        const Real quadratureCorrection = WNGIRValidationWeights::getCorrection(ip);
         RangeType m = RangeType::Identity(d, d);
 
         if (params.observationMetric == WNGIRObservationMetric::Isotropic)
@@ -68,7 +70,7 @@ namespace Rodin::Adaptation::Detail
           const WNGIRResidualState state(
             *m_phi, *m_grad, m_deformation, ip, m_sigma2, false);
           const Real g2 = state.getGradient().dot(state.getGradient());
-          const Real a = params.gammaObs *
+          const Real a = quadratureCorrection * params.gammaObs *
             (g2 + epsG +
               (params.residualStabilizedObservationMetric
                   ? (state.getResidual() * state.getResidual()) / m_sigma2
@@ -82,14 +84,15 @@ namespace Rodin::Adaptation::Detail
         const bool hybrid =
           params.observationMetric == WNGIRObservationMetric::HybridRankOneIRLS;
         const bool weighted =
-          params.observationMetric == WNGIRObservationMetric::RankOneIRLS || hybrid;
+          params.observationMetric == WNGIRObservationMetric::RankOneIRLS || hybrid ||
+          params.observationMetric == WNGIRObservationMetric::RankOneGaussNewton;
         const WNGIRResidualState state(
           *m_phi, *m_grad, m_deformation, ip, m_sigma2, weighted);
         const auto& g = state.getGradient();
         const Real g2 = g.dot(g);
         const Real tau = hybrid ? params.observationTangentialFloor * g2 : Real(0);
         const Real tangential = hybrid ? tau / (g2 + epsG) : Real(0);
-        const Real scale = params.gammaObs * state.getWeight();
+        const Real scale = quadratureCorrection * params.gammaObs * state.getWeight();
         for (std::uint8_t r = 0; r < d; ++r)
         {
           for (std::uint8_t c = 0; c < d; ++c)

@@ -29,6 +29,9 @@ namespace Rodin::Tests::Unit
       validationWeight += weights.getWeight(q);
       hasNegativeWeight |= qf.getWeight(q) < Real(0);
       EXPECT_GE(weights.getWeight(q), Real(0));
+      EXPECT_NEAR(qf.getWeight(q) *
+          Adaptation::Detail::WNGIRValidationWeights::getCorrection(qf, q),
+        weights.getWeight(q), 1e-14);
     }
     EXPECT_TRUE(hasNegativeWeight);
     EXPECT_NEAR(validationWeight, signedWeight, 1e-14);

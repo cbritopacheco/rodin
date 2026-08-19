@@ -147,6 +147,24 @@ namespace Rodin::Solver
     return *this;
   }
 
+  std::size_t KSP::getIterationNumber() const
+  {
+    PetscInt iterations = 0;
+    const PetscErrorCode ierr = KSPGetIterationNumber(m_ksp, &iterations);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return static_cast<std::size_t>(iterations);
+  }
+
+  Real KSP::getError() const
+  {
+    PetscReal residual = 0;
+    const PetscErrorCode ierr = KSPGetResidualNorm(m_ksp, &residual);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return static_cast<Real>(residual);
+  }
+
   KSP& KSP::setPrefix(const Optional<std::string>& prefix) noexcept
   {
     m_prefix = prefix;

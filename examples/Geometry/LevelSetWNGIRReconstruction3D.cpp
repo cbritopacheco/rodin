@@ -461,7 +461,7 @@ int main(int argc, char** argv)
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes << "  center=("
             << cx << ", " << cy << ", " << cz << ")"
             << "  phase=" << phase << "  wngirEll=" << wngirParams.ellM
-            << "  betaMax=" << wngirParams.betaMax << '\n';
+            << '\n';
 
   clearXDMFRegionAttributes(mesh);
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)

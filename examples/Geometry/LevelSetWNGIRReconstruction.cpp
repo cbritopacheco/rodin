@@ -493,7 +493,7 @@ int main(int argc, char** argv)
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
             << "  phase=" << phase << "  wngirEll=" << wngirParams.ellM
-            << "  betaMax=" << wngirParams.betaMax << '\n';
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;

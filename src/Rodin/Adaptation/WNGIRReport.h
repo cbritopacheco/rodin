@@ -66,9 +66,6 @@ namespace Rodin::Adaptation
     /// normals, aggregated per cell. This is neither a KKT multiplier nor a
     /// certificate that no feasible descent direction remains.
       std::vector<Real> conflictIndicator;
-      std::size_t andersonTried = 0; ///< Number of Anderson trials.
-      std::size_t andersonAccepted = 0; ///< Number of accepted Anderson trials.
-      Real lastAndersonTheta = 0; ///< Last Anderson damping parameter.
   };
 }
 

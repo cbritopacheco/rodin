@@ -247,12 +247,6 @@ namespace Rodin::Examples
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
-    p.andersonMemory = sizeOption(argc, argv, "wngir-aa-memory", p.andersonMemory);
-    p.andersonStart = sizeOption(argc, argv, "wngir-aa-start", p.andersonStart);
-    p.andersonDamping = realOption(argc, argv, "wngir-aa-damping", p.andersonDamping);
-    p.andersonMinDamping =
-      realOption(argc, argv, "wngir-aa-min-damping", p.andersonMinDamping);
-
     p.includeQualityMetric = boolOption(argc, argv, "wngir-quality-metric", true);
     p.includeAdmissibilityMetric =
       boolOption(argc, argv, "wngir-admissibility-metric", true);

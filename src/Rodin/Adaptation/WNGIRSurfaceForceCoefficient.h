@@ -9,6 +9,7 @@
 
 #include "DeformationMap.h"
 #include "WNGIRResidualState.h"
+#include "WNGIRValidationWeights.h"
 
 namespace Rodin::Adaptation::Detail
 {
@@ -57,7 +58,9 @@ namespace Rodin::Adaptation::Detail
       {
         const WNGIRResidualState state(
           *m_phi, *m_grad, m_deformation, ip, m_sigma2, true);
-        return (-state.getWeight() * state.getResidual()) * state.getGradient();
+        const Real quadratureCorrection = WNGIRValidationWeights::getCorrection(ip);
+        return (-quadratureCorrection * state.getWeight() * state.getResidual()) *
+          state.getGradient();
       }
 
       /// @brief Dimension of the vector value.
