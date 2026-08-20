@@ -1255,18 +1255,22 @@ results as a control.
 \label{sec:ApplicationII}
 
 \cbp{
-The second application considers a coupled LV-0D/coronary-3D model
-(figure~\ref{fig:coronary-setup}). The
-three-dimensional problem represents the flow in a coronary artery, while the
-proximal haemodynamic state is supplied by the reduced left-ventricular model
-introduced in \S\ref{sec:ApplicationI}. The coupling is one-way at the inlet:
-the arterial pressure $p_{\rm ar}(t)$ produced by the LV-0D model is imposed
-as the inlet pressure of the coronary domain. The ventricular pressure
-$p_{\rm LV}(t)$ is also used in the coronary outlet models, where it plays
-the role of an intramyocardial pressure acting on the distal coronary
-compartments.
+The second application considers the coupled LV-0D/coronary-3D model of
+figure~\ref{fig:coronary-setup}. The computational domain $\Omega$ is a
+three-dimensional coronary artery with one inlet, one rigid arterial wall on
+which no-slip is imposed, and six terminal outlets $\Gamma_\mu^{(i)}$,
+$i=1,\ldots,6$. The flow in $\Omega$ is governed by the incompressible
+Navier--Stokes equations \eqref{eq:fluid-general-a}--\eqref{eq:fluid-general-b}
+with the Carreau--Yasuda apparent viscosity \eqref{eq:carreau-yasuda}. Each
+terminal outlet carries the single-state $\mathcal{R}_{\mu}$ model of
+\S\ref{sec:coronary-outlet-model}, which is where the closure of
+\S\ref{sec:Rmu} is exercised.
 
-The reduced circulation associated with the LV model follows the pathway
+The coupling to the driver of \S\ref{sec:ApplicationI} is one-way and uses its
+state at two locations: the arterial pressure $p_{\rm ar}(t)$ is imposed as
+the inlet traction of $\Omega$, and the ventricular pressure $p_{\rm LV}(t)$
+sets the intramyocardial pressure acting on the distal coronary compartments.
+The reduced circulation follows the pathway
 \begin{equation}
 p_{\rm LA}(t)
 \xrightarrow{\,Q_{\rm LA}\,}
@@ -1276,17 +1280,13 @@ p_{\rm ar}
 \xrightarrow{\,Q_p\,}
 p_d
 \xrightarrow{\,Q_d\,}
-p_{\rm sv}.
+p_{\rm sv},
 \label{eq:lv0d-flow-topology}
 \end{equation}
-Here $p_{\rm LA}$ denotes the prescribed left-atrial pressure, $p_{\rm LV}$
+where $p_{\rm LA}$ denotes the prescribed left-atrial pressure, $p_{\rm LV}$
 the left-ventricular pressure, $p_{\rm ar}$ the proximal arterial pressure,
 $p_d$ the systemic distal pressure and $p_{\rm sv}$ the systemic venous
-pressure. The coronary model uses this same LV-0D state at two different
-locations: $p_{\rm ar}$ drives the coronary inlet, whereas $p_{\rm LV}$
-enters the distal side of each coronary outlet model. Thus, for each
-terminal outlet $\Gamma_\mu^{(i)}$, $i=1,\ldots,6$, the coronary coupling can
-be represented as
+pressure, while each terminal outlet appends the coronary branch
 \begin{equation}
 p_{\rm ar}
 \longrightarrow
@@ -1299,82 +1299,18 @@ p_c^{(i)}
 p_{\rm LV}.
 \label{eq:coronary-flow-topology}
 \end{equation}
-The systemic distal pressure $p_d$ and the coronary capacitor pressures
-$p_c^{(i)}$ are therefore distinct variables.
-
-The computational domain $\Omega$ is a three-dimensional coronary artery
-with one inlet, one wall boundary and six terminal outlets. The mesh is
-rescaled to SI units and partitioned over 30  MPI ranks. It contains
-35k tetrahedral elements,
-11k vertices and
-19k boundary faces. The spatial
-discretisation uses Taylor--Hood finite elements~\citep{TaylorHood1973}, with continuous
-piecewise-quadratic velocity and continuous piecewise-linear pressure,
-\begin{equation}
-\boldsymbol{u}_h\in [\mathbb{P}_2]^3,
-\qquad
-p_h\in \mathbb{P}_1.
-\label{eq:coronary-taylor-hood}
-\end{equation}
-This gives 264768 velocity degrees of freedom,
-14135 pressure degrees of freedom, and
-\textbf{[TOTAL NUMBER OF DOFS]} total flow degrees of freedom.
-
-The blood flow is modelled by the incompressible Navier--Stokes equations
-with a Carreau--Yasuda generalised-Newtonian apparent viscosity. The
-regularised shear rate is
-\begin{equation}
-\dot{\gamma}_{\varepsilon}
-=
-\left(
-\varepsilon_{\gamma}^{2}
-+
-2\boldsymbol{D}(\boldsymbol{u}):\boldsymbol{D}(\boldsymbol{u})
-\right)^{1/2},
-\qquad
-\boldsymbol{D}(\boldsymbol{u})
-=
-\frac{1}{2}
-\left(
-\nabla\boldsymbol{u}
-+
-\nabla\boldsymbol{u}^{T}
-\right),
-\label{eq:coronary-regularised-shear-rate}
-\end{equation}
-% ---- Previous version (restated the Carreau--Yasuda law of \eqref{eq:carreau-yasuda}) ----
-% and the viscosity is evaluated as
-% \begin{equation}
-% \mu(\dot{\gamma}_{\varepsilon}) = \mu_{\infty} + (\mu_0-\mu_{\infty})\left[1+(\lambda\dot{\gamma}_{\varepsilon})^a\right]^{(n-1)/a}.
-% \label{eq:coronary-cy-viscosity}
-% \end{equation}
-and the apparent viscosity follows the Carreau--Yasuda law~\eqref{eq:carreau-yasuda},
-evaluated at the regularised shear rate $\dot{\gamma}_{\varepsilon}$.
-
-The variational formulation includes a small pressure regularisation term
-and inlet/outlet backflow stabilisation terms~\citep{EsmailyMoghadam2011}. The nonlinear convective term
-and the viscosity-dependent terms are treated by an Oseen--Picard
-linearisation~\citep{ElmanSilvesterWathen2014}. In practice, the advecting velocity, the Temam divergence
-factor~\citep{Temam2001} and the Carreau--Yasuda viscosity are evaluated using the velocity
-field from the previous time step. Each accepted time step therefore requires
-the solution of one linearised three-dimensional saddle-point problem.
-
-Time integration is first order. At each time step, the LV-0D model is first
-advanced to obtain $p_{\rm LV}^{n+1}$ and $p_{\rm ar}^{n+1}$. The pressure
-$p_{\rm ar}^{n+1}$ is then imposed at the coronary inlet and the
-three-dimensional flow problem is solved. The resulting outlet fluxes
-$Q_i^{n+1}$ are used to update the six outlet models, from which the outlet
-pressures $p_{\rm out}^{(i),n+1}$ are reconstructed and imposed as traction
-pressures on the corresponding terminal boundaries. The average
-computational cost was 12 seconds per accepted
-time step using 30 MPI ranks on
-\textbf{[HARDWARE / CPU DESCRIPTION]}. The total simulated physical time was
-2.55 seconds with time step
-$\Delta t=0.001$ seconds.
+The systemic distal pressure $p_d$ and the coronary microvascular pressures
+$p_c^{(i)}$ are therefore distinct variables. The discretisation and the
+solution algorithm are standard and deferred to \S\ref{sec:coronary-numerics};
+we describe the outlet model first, since it is where the closure of
+\S\ref{sec:Rmu} enters the problem.
 }
 % ---- NOTE: the outlet formulation below is deliberately NOT wrapped in \cbp{}.
 %      It is final text rather than an editorial annotation, and it should not be
 %      typeset in blue.
+
+\subsubsection{Single-state terminal outlet model}
+\label{sec:coronary-outlet-model}
 
 Each terminal coronary outlet carries an independent nonlinear
 $\mathcal{R}_{\mu}$ reduced model with a single state, the microvascular
@@ -1512,6 +1448,50 @@ and with them the need for any fallback approximation: the outlet update reduces
 a scalar Newton iteration on $p_{tm}^{(i)}$ whose residual derivative,
 $C^{(i)}/\Delta t+\partial Q_{d}^{(i)}/\partial p_{tm}^{(i)}$, is strictly
 positive, so the iteration converges globally from any iterate.
+
+\subsubsection{Discretisation and solution algorithm}
+\label{sec:coronary-numerics}
+
+\cbp{
+The mesh of $\Omega$ contains 35k tetrahedral elements, 11k vertices and 19k
+boundary faces, and is partitioned over 30 MPI ranks. The spatial
+discretisation uses Taylor--Hood finite elements~\citep{TaylorHood1973},
+$\boldsymbol{u}_h\in[\mathbb{P}_2]^3$ and $p_h\in\mathbb{P}_1$, giving
+$264\,768$ velocity and $14\,135$ pressure unknowns, $278\,903$ flow degrees
+of freedom in total. The apparent viscosity is evaluated at the regularised
+shear rate
+$\dot{\gamma}_{\varepsilon}=(\varepsilon_{\gamma}^{2}+\dot{\gamma}^{2})^{1/2}$,
+with $\dot{\gamma}$ as in \eqref{eq:shear-rate}, and the variational
+formulation is augmented by a small pressure regularisation term, by backflow
+stabilisation at the inlet and outlets~\citep{EsmailyMoghadam2011}, and by a
+weak normal impedance and tangential penalisation at the inlet.
+
+Time integration is first order and semi-implicit. The convective term is
+treated by an Oseen--Picard linearisation~\citep{ElmanSilvesterWathen2014}:
+the advecting velocity, the Temam divergence correction~\citep{Temam2001},
+the Carreau--Yasuda viscosity and the rheological factors of the outlet
+resistances are evaluated at the previous time step, so each accepted step
+requires a single linearised saddle-point solve. Within a step the coupling
+is staggered. The LV-0D driver is advanced first, providing
+$p_{\rm ar}^{n+1}$ and $p_{\rm LV}^{n+1}$; the three-dimensional problem is
+then solved with $p_{\rm ar}^{n+1}$ imposed at the inlet, the resistive part
+of each outlet traction assembled implicitly through
+\eqref{eq:coronary-implicit-resistance} and its compartmental part
+$p_{\rm im}+p_{tm}^{(i)}$ taken from the previous outlet state; the resulting
+outlet fluxes $Q_i^{n+1}$ finally feed the scalar Newton update of each
+$p_{tm}^{(i)}$. Only the compartmental pressure is therefore exposed to the
+one-step lag, and the stability argument of
+\S\ref{sec:coronary-outlet-model} covers the dominant resistive part.
+
+% NOTE: the implementation drains against max(p_im, P_RA), i.e. beta = 1;
+% confirm this is the value used for the reported runs before submission.
+The simulations of \S\ref{sec:results} use the strong-waterfall limit
+$\beta=1$ of \eqref{eq:coronary-starling}. The base time step is
+$\Delta t=10^{-3}$~s, halved and retried whenever the three-dimensional solve
+fails, for a total simulated time of $2.55$~s (three cardiac cycles of
+$0.85$~s). The average computational cost was 12 seconds per accepted time
+step on 30 MPI ranks of \textbf{[HARDWARE / CPU DESCRIPTION]}.
+}
 
 \subsubsection{Pathological protocol: venous drainage pressure}
 \label{sec:pathology-protocol}
