@@ -19,7 +19,15 @@
  * by the Robin-Robin loose coupling of Burman, Durst, Fernandez, Guzman &
  * Ruz (2025), incl. the interface convective stabilization and the
  * alpha = gamma sqrt(rho_s E) scaling.  0D heart model (CCMLC2014) at the
- * inlet; RCR windkessels with implicit outlet impedance at the outlets.
+ * inlet.  Outlets: the R-mu intramyocardial closure of CoupledLV0DCoronary3D
+ * -- Starling resistor on the transmural pressure p_tm, universal WRMS
+ * apparent-viscosity table (Carreau-Yasuda or Quemada), and the arteriolar
+ * resistance R_a Phi_a assembled IMPLICITLY as R_a Phi_a A (u.n)(v.n) so the
+ * 0D-3D coupling is unconditionally stable in dt.
+ *
+ * Stabilization parameters (tau_K, tau_C, tau_p) are evaluated POINTWISE from
+ * the local lagged Carreau-Yasuda viscosity (Atrium pattern); only the
+ * orthogonal-subscale projections Pi[(grad u)u], u' and pi~ are L2-projected.
  *
  * Startup: static follower-pressure prestress to par(0) (exact load
  * stiffness, quadratic Newton).  The dynamic wall load is split into a
@@ -30,7 +38,9 @@
  *   solid (SNES) -> harmonic ALE lift + mesh move -> fluid (Oseen, KSP);
  *   commit, interface fluxes, RCR update.
  *
- * Attributes: 2 = FSI wall, inlet/outlet caps, 99 = clamped FSI ring band.
+ * Attributes: 1 = FSI wall; caps: fluid 27 (inlet) / 24,25,26,28,30,31
+ * (outlets), solid 153 (inlet) / 150,151,152,154,155,156 (outlets);
+ * 99 = clamped FSI ring band; 110..120 = solid heart-contact patches.
  */
 
 #include "Rodin/Solid/Integrators/InternalVirtualWorkResidual.h"
@@ -61,8 +71,6 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
-#include <Rodin/Math/RootFinding/NewtonRaphson.h>
-#include <Rodin/Math/RungeKutta/RK4.h>
 #include <Rodin/PETSc.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Solver.h>
@@ -73,7 +81,8 @@
 // Projected-VMS convective stabilization (lagged Oseen), shared with the
 // working CoupledLV0DCoronary3D fluid solver.
 #include "CoronaryArtery/VMSConvectionIntegrator.h"
-#include "CoronaryArtery/ThrombosisModel.h"
+// Position-graded Yeoh law (transmural intima/media/adventitia profile).
+#include "CoronaryArtery/GradedYeoh.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -89,123 +98,143 @@ namespace
 
   struct BoundaryFluid
   {
-  // static constexpr Attribute FSI = 2;
-  // static constexpr Attribute Inlet = 4;
-  // static constexpr std::array<Attribute, 6> Outlets{{7, 8, 9, 10, 14, 15}};
-  // static constexpr Attribute FSIRing = 99;
-      static constexpr Attribute FSI = 1;
-      static constexpr Attribute Inlet = 27;
-      static constexpr std::array<Attribute, 6> Outlets{{24, 25, 26, 28, 30, 31}};
+      static constexpr Attribute FSI = 2;
+      static constexpr Attribute Inlet = 4;
+      static constexpr std::array<Attribute, 6> Outlets{{7, 8 , 9, 10, 14, 15}};
       static constexpr Attribute FSIRing = 99;
   };
 
   struct BoundarySolid
   {
-  // static constexpr Attribute FSI = 2;
-  // static constexpr Attribute Inlet = 17;
-  // static constexpr std::array<Attribute, 6> Outlets{{18, 19, 20, 21, 22, 31}};
-  // static constexpr Attribute FSIRing = 99;
       static constexpr Attribute FSI = 1;
-      static constexpr Attribute Inlet = 153;
-      static constexpr std::array<Attribute, 6> Outlets{{150, 151, 152, 154, 155, 156}};
+      static constexpr Attribute Inlet = 150;
+      static constexpr std::array<Attribute, 6> Outlets{{151, 152, 153, 154, 155, 156}};
       static constexpr Attribute FSIRing = 99;
-      static constexpr std::array<Attribute, 11> Contact{
-        {110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120}};
+      static constexpr std::array<Attribute, 1> Contact{
+        {101}};
+      /// Outer (adventitial) surface pieces; xi = 1 there for the transmural
+      /// coordinate (xi = 0 on the FSI/luminal surface).
+      static constexpr std::array<Attribute, 2> Outer{{2, 101}};
   };
 
+  // --------------------------------------------------------------------------
+  // R-mu coronary outlet (ported from CoupledLV0DCoronary3D): one state per
+  // outlet, the microvascular transmural pressure p_tm = p_c - p_im.  The
+  // compartment is intramyocardial, so p_im is the REFERENCE of the whole
+  // compartment (not a source added to the balance); the venous limb is a
+  // Starling resistor whose throat closes at p_im (Permutt-Riley; Downey &
+  // Kirk 1975).  The arteriolar resistance R_a Phi_a is assembled IMPLICITLY
+  // on the 3D outlet boundary as R_a Phi_a A (u.n)(v.n), so p_out carries only
+  // p_c and the coupling is unconditionally stable in dt.  Phi = mu_ap/mu_N is
+  // the rheological modulation read off the universal WRMS table.
+  // See RCR_formulacion_minima.tex and CoupledLV0DCoronary3D.{h,cpp}.
+  // --------------------------------------------------------------------------
   struct RCR
   {
-  // RCR windkessel parameters matched to the WORKING CoupledLV0DCoronary3D
-  // setup (Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000).
-  // The previous (C = 1e-12, Rd = 5e10) gave a windkessel with ~no capacitive
-  // damping (cap = C/dt ~ 0, so pc jumps instantly with every flux ripple)
-  // and a 50x too-large distal resistance: that combination is what makes the
-  // explicit 0D-3D outlet coupling oscillate and blow up.
-      Real Rp = 5.0e8;
-      Real C = 2.0e-11;
-      Real Rd = 1.0e9;
-      Real pd = 500.0;
-      Real pc = 10000.0;
-      Real pout = 10000.0;
+      /// Microvascular transmural pressure p_tm = p_c - p_im.  THE state.
+      Real ptm = 0.0;
+      /// Diagnostic: microvascular pressure, p_c = p_tm + p_im.
+      Real pc = 0.0;
+      /// Outlet pressure applied to the 3D model (the p_c part; R_a Phi_a Q is
+      /// assembled implicitly, see Ra below).
+      Real pout = 0.0;
+      /// Flow leaving the compartment towards the right atrium (Starling).
       Real qd = 0.0;
+      /// Intramyocardial (tissue) pressure, p_im = alpha p_LV.
+      Real pim = 0.0;
+      /// Arteriolar lumped resistance at the reference viscosity (implicit).
+      Real Ra = 0.0;
+      /// Venular lumped resistance at the reference viscosity.
+      Real Rv = 0.0;
+      /// Microvascular compliance, C_tot weighted by the Murray split.
+      Real C = 0.0;
+      /// Measured outlet area; scales the implicit term R_a Phi_a A (u.n)(v.n).
+      Real area = 0.0;
+      /// Calibrated branch flow, reference point of the modulation Phi(q).
+      Real q0 = 0.0;
+      /// Derived resting wall shear rate of the arteriolar limb (1/s).
+      Real gammaA = 0.0;
+      /// Derived resting wall shear rate of the venular limb (1/s).
+      Real gammaV = 0.0;
+      /// Diagnostic: apparent-viscosity multiplier of the arteriolar limb.
+      Real muA = 1.0;
+      /// Diagnostic: apparent-viscosity multiplier of the venular limb.
+      Real muV = 1.0;
+      /// Diagnostic: stored microvascular volume, V = C p_tm.
+      Real vol = 0.0;
   };
 
+  // Carreau-Yasuda blood viscosity, UNIFIED with CoupledLV0DCoronary3D's
+  // defaults so the two solvers integrate the same fluid.
   struct CarreauYasuda
   {
-      Real mu0 = 0.0186058;
-      Real muInf = 0.0042963;
-      Real lambda = 0.2435;
-      Real n = 0.2079;
-      Real yasuda = 1.5410;
+      Real mu0 = 0.301;
+      Real muInf = 0.0055;
+      Real lambda = 16.15;
+      Real n = 0.21;
+      Real yasuda = 0.77;
       Real gammaRegularization = 1.0e-3;
   };
 
-  struct GeoArtery
+  /// Rheological model used by the 0D outlet closure.
+  enum class RheologyModel
   {
-      Real Rp;
-      Real Lp;
-      Real Rd;
-      Real Ld;
+      CarreauYasuda,
+      Quemada
   };
 
+  /// Quemada blood viscosity parameters (haematocrit axis); see
+  /// CoupledLV0DCoronary3D.h for the rationale and the Cokelet correlations.
+  struct Quemada
+  {
+      Real plasmaViscosity = 0.0017963;
+      Real hematocrit = 0.45;
+      Real k0 = 3.7;      // derived from phi if <= 0
+      Real kInf = 1.66;   // derived from phi if <= 0
+      Real gammaC = 2.29; // derived from phi if <= 0
+  };
+
+  /// Tabulated WRMS closure and scalar-solve tolerances for the 0D outlet.
+  /// mu_ap(tau_w) = tau_w^4 / (4 I(tau_w)) is universal (independent of R, L
+  /// and branch), so it is tabulated ONCE and the outlet only interpolates.
   struct OutletFlowLaw
   {
-  /// @brief Proximal surrogate vessel radius.
-      Real proximalRadius = 6.e-4;
-  /// @brief Proximal surrogate vessel length.
-      Real proximalLength = 0.00075;
-  /// @brief Distal surrogate vessel radius.
-      Real distalRadius = 1e-4;
-  /// @brief Distal surrogate vessel length.
-      Real distalLength = 0.0025;
-  /// @brief Array with radius and large for each branch
-      std::unordered_map<Attribute, GeoArtery> geometricParam{
-        {26, {6.e-4, 0.002, 3e-4, 0.0025}},
-        {28, {5.e-4, 0.002, 2e-4, 0.004}},
-        {25, {5.5e-4, 0.002, 2e-4, 0.004}},
-        {24, {4.5e-4, 0.002, 2e-4, 0.004}},
-        {30, {6.e-4, 0.002, 3e-4, 0.0025}},
-        {31, {6.e-4, 0.002, 3e-4, 0.0025}},
-      };
-
-  // std::unordered_map<Attribute, GeoArtery> geometricParam{
-  //     {7,  {6.e-4,  0.0125, 3e-4, 0.0025}},
-  //     {8,  {5.e-4,  0.0125,  2e-4, 0.004 }},
-  //     {9,  {5.5e-4,  0.0125, 2e-4, 0.004}},
-  //     {10, {4.e-4,  0.01,  2e-4, 0.004 }},
-  //     {14, {6.e-4,  0.0125, 3e-4, 0.0025}},
-  //     {15, {6.e-4,  0.0125, 3e-4, 0.0025}},
-  // };
-  /// @brief Pressure-drop threshold for the Poiseuille fallback.
-      Real pressureDropTolerance = 1.0e-12;
-  /// @brief Minimum shear-rate bracket.
-      Real minShearRate = 1.0e-8;
-  /// @brief Number of RK4 substeps for the WRMS flow integral.
-      int integralSteps = 100;
-  /// @brief Maximum bracketing expansions for outlet scalar solves.
-      int maxBracketIterations = 100;
-  /// @brief Wall shear root solver absolute tolerance.
-      Real shearAbsoluteTolerance = 1.0e-12;
-  /// @brief Wall shear root solver relative tolerance.
-      Real shearRelativeTolerance = 1.0e-10;
-  /// @brief Wall shear root solver step tolerance.
+      Real tableTauMin = 1.0e-6;
+      Real tableTauMax = 1.0e4;
+      int tableNodes = 241;
+      int integralSteps = 2000;
       Real shearStepTolerance = 1.0e-12;
-  /// @brief Wall shear root solver maximum iterations.
-      int shearMaxIterations = 50;
-  /// @brief Flow inversion root solver absolute tolerance.
-      Real flowAbsoluteTolerance = 1.0e-10;
-  /// @brief Flow inversion root solver relative tolerance.
-      Real flowRelativeTolerance = 1.0e-9;
-  /// @brief Flow inversion root solver step tolerance.
-      Real flowStepTolerance = 1.0e-12;
-  /// @brief Flow inversion root solver maximum iterations.
-      int flowMaxIterations = 50;
-  /// @brief Flow magnitude treated as zero in pressure-drop inversion.
+      int shearMaxIterations = 200;
+      Real outletStepTolerance = 1.0e-9;
+      int outletMaxIterations = 50;
       Real zeroFlowTolerance = 1.0e-16;
-  /// @brief Minimum pressure-drop bracket.
-      Real pressureDropBracketMin = 1.0;
-  /// @brief Distal capacitor bracket pressure pad.
-      Real distalPressureBracketPad = 1000.0;
+  };
+
+  /// Universal WRMS apparent-viscosity table, log-log interpolated in the
+  /// nominal shear rate gammadot = 4Q/(pi R^3).  Clamped, not extrapolated.
+  struct WRMSTable
+  {
+      std::vector<Real> logGamma;
+      std::vector<Real> logMu;
+
+      Real operator()(Real gamma) const
+      {
+        if (logGamma.size() < 2)
+          return std::exp(logMu.empty() ? 0.0 : logMu.front());
+
+        const Real lg = std::log(std::max(gamma, 1e-300));
+
+        if (lg <= logGamma.front())
+          return std::exp(logMu.front());
+        if (lg >= logGamma.back())
+          return std::exp(logMu.back());
+
+        const auto it = std::upper_bound(logGamma.begin(), logGamma.end(), lg);
+        const std::size_t i = static_cast<std::size_t>(it - logGamma.begin()) - 1;
+        const Real w = (lg - logGamma[i]) / (logGamma[i + 1] - logGamma[i]);
+
+        return std::exp(logMu[i] + w * (logMu[i + 1] - logMu[i]));
+      }
   };
 
   struct Config
@@ -216,7 +245,7 @@ namespace
       std::string xdmfBasename =
         "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1";
       std::string csvPath = "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1.csv";
-      Real meshScale = 1.0e-2;
+      Real meshScale = 1.0e-3;
 
       Real dt = 1.0e-3;
       size_t nsteps = 4 * static_cast<int>(0.85 / 1.0e-3);
@@ -227,14 +256,40 @@ namespace
   //   p_out_3D = par - pressureDropScale*(par - p_out_RCR) - epicardialDrop.
       Real epicardialDrop = 0.0;
 
-  // Automatic Murray-law outlet calibration.  When true, at startup each
-  // outlet's RCR resistance is set from its ACTUAL area (Q ~ r^3, so larger
-  // branches carry proportionally more flow regardless of the mesh attribute
-  // numbering)
+  // Automatic anatomical outlet calibration (CoupledLV0DCoronary3D scheme):
+  // outlet areas measured on the mesh, Murray split Q_i ~ r_i^3, and the three
+  // lumped quantities that appear in the balance -- R_a, R_v, C -- built from
+  // the resting pressure budget dP = par(0) - P_RA:
+  //   R_v,i = f_v dP / Q_i,  R_a,i = (1 - f_v) dP / Q_i,  C_i = C_tot w_i.
       bool autoCalibrateOutlets = true;
-      Real lcaTargetFlow = 1.0e-6;     // m^3/s  (~180 mL/min; LCA ~150-250)
-      Real rcrTau = 0.2;               // s  (coronary RCR time constant)
-      Real proximalResistanceFraction = 0.075; // R_p / (R_p + R_d)
+      Real lcaTargetFlow = 1.5e-6;     // m^3/s  (~90 mL/min; LCA rest ~150-250)
+
+  // Newtonian calibration viscosity mu_N: R_a and R_v are the NEWTONIAN
+  // resistances of the budget, so a change of blood properties moves Phi and
+  // therefore the flow (normalizing by the running rheology would absorb it).
+      Real newtonianCalibrationViscosity = 0.0035;
+  // Total microvascular compliance (m^3/Pa), split by the Murray weight.
+      Real coronaryComplianceTotal = 4e-10;
+  // Venular share of the microvascular pressure budget (head-loss split).
+      Real venularPressureFraction = 0.13;
+  // Fraction of LV pressure transmitted to the intramyocardial compartment,
+  // p_im = intramyocardialFraction * p_LV (bed-averaged, 0.5-0.7).
+      Real intramyocardialFraction = 0.7;
+  // Right atrial (coronary sinus) drainage pressure.
+      Real rightAtrialPressure = 1800.0;
+
+  // Morphometric operating point (r, v) of each limb: intravital-microscopy
+  // measurables from which gamma_0 = 4v/r, N, L and T are derived.
+      Real arteriolarRadius = 25.0e-6;
+      Real arteriolarVelocity = 5.0e-3;
+      Real venularRadius = 30.0e-6;
+      Real venularVelocity = 3.0e-3;
+  // Reference mean transit time for the calibration consistency check (s).
+      Real referenceTransitTime = 1.5;
+
+  // Rheological model of the 0D outlet closure.
+      RheologyModel rheologyModel = RheologyModel::CarreauYasuda;
+      Quemada quemada;
 
       Real fluidDensity = 1060.0;
       Real pressurePenalty = 0.0;
@@ -284,8 +339,6 @@ namespace
       Real pgpScale = 1.0;
 
       Real solidDensity = 1060.0;
-      Real solidYoungModulus = 2.0e6;
-      Real solidPoissonRatio = 0.4;
 
       Real solidViscosity = 4.e3;
 
@@ -299,28 +352,70 @@ namespace
       Real robinGamma = 1.0; // scales the Robin alpha = gamma*sqrt(rho_s E); raise
         // to enforce no-slip harder (smaller interface slip)
 
-      Real heartDisplacementPenalty = 5.e7;
+      Real heartDisplacementPenalty = 1.e7;
       Real heartDisplacementScale = 1.0;
 
-      Real aViscCondition = 5.0e1;
-      Real bViscCondition = 1.0e1;
+  // Viscoelastic outlet tethering (spring/dashpot per unit area on the cap
+  // annuli).  With the ring band now confined to the INLET, these springs are
+  // the ONLY thing holding the outlet ends: 5e1 Pa/m left them essentially
+  // free-flying, so the defaults are raised to a perivascular-tethering level
+  // (1e4-1e6 Pa/m is the physiological ballpark).
+      Real aViscCondition = 1.0e5;
+      Real bViscCondition = 1.0e3;
+
+  // Transmural grading of the wall constitutive law, applied as a spatial
+  // multiplier m(xi) on the Yeoh energy (see GradedYeoh.h), where xi in [0,1]
+  // is the harmonic through-thickness coordinate (0 = lumen/intima side,
+  // 1 = adventitia).  Bands: xi < 1/3 intima, middle third media (reference),
+  // xi > 2/3 adventitia, blended with smoothsteps of half-width
+  // gradeTransitionWidth.
+  //
+  // Defaults follow the classical healthy-artery picture (Holzapfel-Gasser-
+  // Ogden 2000): a thin, mechanically insignificant intima (soft), the
+  // load-bearing media as reference, and a stiffer collagenous adventitial
+  // sleeve, normalized so the thickness-weighted mean is ~1 and the global
+  // compliance of the tuned homogenized wall is preserved.  NOTE: for aged /
+  // atherosclerotic coronaries Holzapfel et al. (2005) measured the OPPOSITE
+  // low-strain ordering (ground-matrix mu: intima 27.9, media 1.27,
+  // adventitia 7.56 kPa); to run that profile set roughly
+  // (intima, media, adventitia) = (2.3, 0.10, 0.76).
+      Real gradeIntima = 0.5;
+      Real gradeMedia = 1.0;
+      Real gradeAdventitia = 1.5;
+      Real gradeTransitionWidth = 0.08;
   };
 
+  // C1-continuous (smoothstep) LV activation, UNIFIED with the
+  // CoupledLV0DCoronary3D waveform: same plateau values, smooth ramps, and a
+  // smooth return from the negative plateau (the old piecewise-linear version
+  // jumped instantaneously from -20 to 0 at tau = 0.6).
   static Real periodic_activation(Real t)
   {
     const Real T = 0.85;
     const Real tau = t - T * std::floor(t / T);
-    if (tau < 0.15)
+
+    auto ss = [](Real s) {
+      s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
+      return s * s * (3.0 - 2.0 * s);
+    };
+
+    const Real tRampStart = 0.15, tRampEnd = 0.21, tPlateauEnd = 0.36;
+    const Real tRelaxEnd = 0.45, tNegativeEnd = 0.6;
+    const Real positiveValue = 35.0, negativeValue = -20.0;
+
+    if (tau < tRampStart)
       return 0.0;
-    if (tau < 0.2)
-      return 35.0 * ((tau - 0.15) / 0.05);
-    if (tau < 0.35)
-      return 35.0;
-    if (tau < 0.45)
-      return 35.0 - 55.0 * ((tau - 0.35) / 0.1);
-    if (tau < 0.6)
-      return -20.0;
-    return 0.0;
+    if (tau < tRampEnd)
+      return positiveValue * ss((tau - tRampStart) / (tRampEnd - tRampStart));
+    if (tau < tPlateauEnd)
+      return positiveValue;
+    if (tau < tRelaxEnd)
+      return positiveValue +
+        (negativeValue - positiveValue) *
+        ss((tau - tPlateauEnd) / (tRelaxEnd - tPlateauEnd));
+    if (tau < tNegativeEnd)
+      return negativeValue;
+    return negativeValue * (1.0 - ss((tau - tNegativeEnd) / (T - tNegativeEnd)));
   }
 
   static Real load_dependent_relaxation_m0(Real ec)
@@ -348,6 +443,9 @@ namespace
     return (highValue - lowValue) / (highEc - lowEc);
   }
 
+  // C1-continuous (smoothstep) atrial pressure between the same plateau values
+  // as before, so the prescribed atrial/venous pressure has no derivative
+  // kinks (UNIFIED with CoupledLV0DCoronary3D).
   static Real atrial_pressure(Real t)
   {
     const Real T = 0.85;
@@ -362,37 +460,25 @@ namespace
     const Real t5 = 0.62;
     const Real t6 = 0.85;
 
-    Real alpha = 0.0;
-    Real value = minValue;
+    auto ss = [](Real s) {
+      s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
+      return s * s * (3.0 - 2.0 * s);
+    };
+    auto ramp = [&](Real a, Real b, Real s) { return a + (b - a) * ss(s); };
+
     if (tau < t1)
-    {
-      alpha = -(tau - t1) / t1;
-      value = alpha * minValue + (1.0 - alpha) * maxValue;
-    }
-    else if (tau < t2)
-    {
-      value = maxValue;
-    }
-    else if (tau < t3)
-    {
-      alpha = -(tau - t3) / (t3 - t2);
-      value = alpha * maxValue + (1.0 - alpha) * minValue;
-    }
-    else if (tau < t4)
-    {
-      alpha = -(tau - t4) / (t4 - t3);
-      value = alpha * minValue + (1.0 - alpha) * secondThreshold;
-    }
-    else if (tau < t5)
-    {
-      value = secondThreshold;
-    }
-    else if (tau < t6)
-    {
-      alpha = -(tau - t6) / (t6 - t5);
-      value = alpha * secondThreshold + (1.0 - alpha) * minValue;
-    }
-    return value;
+      return ramp(minValue, maxValue, tau / t1);
+    if (tau < t2)
+      return maxValue;
+    if (tau < t3)
+      return ramp(maxValue, minValue, (tau - t2) / (t3 - t2));
+    if (tau < t4)
+      return ramp(minValue, secondThreshold, (tau - t3) / (t4 - t3));
+    if (tau < t5)
+      return secondThreshold;
+    if (tau < t6)
+      return ramp(secondThreshold, minValue, (tau - t5) / (t6 - t5));
+    return minValue;
   }
 
   static Model::Input makeModelInput()
@@ -416,12 +502,14 @@ namespace
     in.Rd = 1.0e8;
     in.Cd = 5.0e-10;
 
-    in.mu_0 = 0.0186058;
-    in.mu_Inf = 0.0042963;
-    in.lambda = 0.2435;
-    in.n = 0.2079;
+    // Carreau-Yasuda set UNIFIED with CoupledLV0DCoronary3D (same fluid in the
+    // 0D inlet windkessel, the 3D solver and the 0D outlet closure).
+    in.mu_0 = 0.301;
+    in.mu_Inf = 0.0055;
+    in.lambda = 16.152;
+    in.n = 0.21;
     in.m = 0.0035;
-    in.yasuda = 1.541;
+    in.yasuda = 0.77;
     in.mu_plasma = 0.0032704;
     in.k_0 = 3.5678;
     in.gamma_c = 10.2754;
@@ -996,13 +1084,6 @@ namespace
     if (lcaTargetFlowSet)
       cfg.lcaTargetFlow = std::max<Real>(1e-12, lcaTargetFlow);
 
-    PetscReal rcrTau = cfg.rcrTau;
-    PetscBool rcrTauSet = PETSC_FALSE;
-    PetscOptionsGetReal(
-      PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_rcr_tau", &rcrTau, &rcrTauSet);
-    if (rcrTauSet)
-      cfg.rcrTau = std::max<Real>(1e-6, rcrTau);
-
     PetscReal pgpScale = cfg.pgpScale;
     PetscBool pgpScaleSet = PETSC_FALSE;
     PetscOptionsGetReal(
@@ -1023,245 +1104,316 @@ namespace
       PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_robin_gamma", &robinGamma, &robinGammaSet);
     if (robinGammaSet)
       cfg.robinGamma = robinGamma;
+
+    // Transmural grading multipliers (intima / media / adventitia).
+    PetscReal gradeVal = 0.0;
+    PetscBool gradeSet = PETSC_FALSE;
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_grade_intima", &gradeVal, &gradeSet);
+    if (gradeSet)
+      cfg.gradeIntima = std::max<Real>(0.0, gradeVal);
+    gradeSet = PETSC_FALSE;
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_grade_media", &gradeVal, &gradeSet);
+    if (gradeSet)
+      cfg.gradeMedia = std::max<Real>(0.0, gradeVal);
+    gradeSet = PETSC_FALSE;
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_grade_adventitia",
+      &gradeVal, &gradeSet);
+    if (gradeSet)
+      cfg.gradeAdventitia = std::max<Real>(0.0, gradeVal);
   }
 
-  // Non-Newtonian (Carreau-Yasuda) RCR outlet update.
-  static void updateRCRNonNew(
-    const Config& cfg, const Attribute& tag, const Model& model, RCR& bc, Real Q, Real dt)
+  // --------------------------------------------------------------------------
+  // Universal WRMS apparent-viscosity table (ported from
+  // CoupledLV0DCoronary3D::buildWRMSTable).  The
+  // Weissenberg-Rabinowitsch-Mooney-Schofield closure gives, for a tube of
+  // radius R and length L carrying a generalized-Newtonian fluid,
+  //
+  //   Q = pi R^3 I(tau_w) / tau_w^3,   I(tau_w) = int_0^{tau_w} tau^2 gd dtau,
+  //
+  // and writing the same flow as Hagen-Poiseuille with an apparent viscosity
+  // the radius and the length cancel identically:
+  //
+  //   mu_ap(tau_w) = tau_w^4 / (4 I(tau_w)),  gd_nom = 4Q/(pi R^3) = tau_w/mu_ap.
+  //
+  // mu_ap is therefore a UNIVERSAL function of the wall shear stress for a
+  // given rheology: build it once, share it across every outlet and both
+  // limbs.  Newtonian check: I = tau_w^4/(4 mu) gives mu_ap = mu.
+  // --------------------------------------------------------------------------
+  static WRMSTable buildWRMSTable(const Config& cfg, const CarreauYasuda& visc)
   {
-    const auto& s = model.getState();
-    const auto& h = model.getHistory();
-
-    const Real cap = bc.C / dt;
-    const Real pcOld = bc.pc;
-
     const auto& law = cfg.outletFlowLaw;
-    const auto& cy = cfg.viscosity;
 
-    const Real radiusP = law.geometricParam.at(tag).Rp;
-    const Real lengthP = law.geometricParam.at(tag).Lp;
+    const Real mu0 = visc.mu0;
+    const Real muInf = visc.muInf;
+    const Real lambda = visc.lambda;
+    const Real n = visc.n;
+    const Real yasuda = visc.yasuda;
+    const Real delta = mu0 - muInf;
 
-    const Real radiusD = law.geometricParam.at(tag).Rd;
-    const Real lengthD = law.geometricParam.at(tag).Ld;
+    // Constitutive law.  Quemada separates what Carreau-Yasuda entangles: the
+    // haematocrit sets the high-shear level and k_0 the low-shear aggregation
+    // rise.  k_0, k_inf, gamma_c follow the Cokelet correlations when left
+    // non-positive (the law has a packing limit phi_max = 2/k).
+    const bool quemada = (cfg.rheologyModel == RheologyModel::Quemada);
+    const auto& qp = cfg.quemada;
 
-    auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real> {
-      const Real mu0 = cy.mu0;
-      const Real muInf = cy.muInf;
-      const Real lambda = cy.lambda;
-      const Real n = cy.n;
-      const Real yasuda = cy.yasuda;
-      const Real delta = mu0 - muInf;
+    const Real phi = std::clamp<Real>(qp.hematocrit, 0.0, 0.75);
+    const Real p2 = phi * phi;
+    const Real p3 = p2 * phi;
 
-      const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
-      const Real adp = std::abs(dp);
+    const Real qk0 = (qp.k0 > 0.0)
+      ? qp.k0 : std::exp(3.874 - 10.41 * phi + 13.8 * p2 - 6.738 * p3);
+    const Real qkInf = (qp.kInf > 0.0)
+      ? qp.kInf : std::exp(1.3435 - 2.803 * phi + 2.711 * p2 - 0.6479 * p3);
+    const Real qgc = (qp.gammaC > 0.0)
+      ? qp.gammaC : std::exp(-6.1508 + 27.923 * phi - 25.6 * p2 + 3.697 * p3);
 
-      const Real R0 = 8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
+    auto muQ = [&](Real g) -> Real {
+      const Real s = std::sqrt(std::max<Real>(g, 0.0) / qgc);
+      const Real k = (qk0 + qkInf * s) / (1.0 + s);
+      const Real b = std::max<Real>(1.0 - 0.5 * k * phi, 1e-3);
+      return qp.plasmaViscosity / (b * b);
+    };
 
-      if (adp < law.pressureDropTolerance)
-        return {dp / R0, 1.0 / R0};
+    auto mu = [&](Real g) -> Real {
+      if (quemada)
+        return muQ(g);
+      return muInf +
+        delta * std::pow(1.0 + std::pow(lambda * g, yasuda), (n - 1.0) / yasuda);
+    };
 
-      const Real tauW = radius * adp / (2.0 * L);
-
-      auto mu = [&](Real g) -> Real {
-        return muInf +
-          delta * std::pow(1.0 + std::pow(lambda * g, yasuda), (n - 1.0) / yasuda);
-      };
-
-      auto dmu = [&](Real g) -> Real {
-        const Real base = 1.0 + std::pow(lambda * g, yasuda);
-
-        return delta * (n - 1.0) * std::pow(base, (n - 1.0 - yasuda) / yasuda) *
-          std::pow(lambda, yasuda) * std::pow(g, yasuda - 1.0);
-      };
-
-      auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real> {
-        const Real m = mu(g);
-        const Real dm = dmu(g);
-        return {g * m - tauW, m + g * dm};
-      };
-
-      Math::RootFinding::NewtonRaphson<Real> rootFinder(law.shearAbsoluteTolerance,
-        law.shearRelativeTolerance, law.shearStepTolerance, law.shearMaxIterations);
-
-      Real gHi = std::max<Real>(tauW / muInf, law.minShearRate);
-
-      for (int k = 0; k < law.maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
-        gHi *= 2.0;
-
-      if (tauMinusTauW(gHi).first < 0.0)
+    auto dmu = [&](Real g) -> Real {
+      if (quemada)
       {
-        std::cerr << "Warning: failed to bracket wall shear rate. "
-                  << "Using Poiseuille fallback.\n";
-        return {dp / R0, 1.0 / R0};
+        const Real h = 1e-6 * std::max<Real>(g, 1e-12);
+        return (muQ(g + h) - muQ(std::max<Real>(g - h, 0.0))) / (2.0 * h);
       }
 
-      const auto gammaRoot =
-        rootFinder.solve(tauMinusTauW, 0.5 * gHi, law.shearStepTolerance, gHi);
+      const Real base = 1.0 + std::pow(lambda * g, yasuda);
 
-      if (!gammaRoot)
+      return delta * (n - 1.0) * std::pow(base, (n - 1.0 - yasuda) / yasuda) *
+        std::pow(lambda, yasuda) * std::pow(g, yasuda - 1.0);
+    };
+
+    // gd(tau_w): tau = mu(gd) gd is strictly increasing, so a bisection-
+    // safeguarded Newton on log gd converges globally.  Run once per node.
+    auto shearAt = [&](Real tauW) -> Real {
+      Real lo = std::log(1e-14);
+      Real hi = std::log(std::max<Real>(tauW / muInf, 1e-12)) + 1.0;
+      Real s = 0.5 * (lo + hi);
+
+      for (int it = 0; it < law.shearMaxIterations; ++it)
       {
-        std::cerr << "Warning: failed to solve wall shear rate. "
-                  << "Using Poiseuille fallback.\n";
-        return {dp / R0, 1.0 / R0};
+        const Real g = std::exp(s);
+        const Real f = mu(g) * g - tauW;
+
+        if (f < 0.0)
+          lo = s;
+        else
+          hi = s;
+
+        const Real df = (mu(g) + g * dmu(g)) * g; // d f / d log g
+        Real sNext = (std::abs(df) > 0.0) ? s - f / df : 0.5 * (lo + hi);
+
+        if (!(sNext > lo && sNext < hi))
+          sNext = 0.5 * (lo + hi);
+
+        const Real step = std::abs(sNext - s);
+        s = sNext;
+
+        if (step < law.shearStepTolerance)
+          break;
       }
 
-      const Real gammaW = *gammaRoot;
+      return std::exp(s);
+    };
 
-      auto integrand = [&](Real g) -> Real {
+    // I = int_0^{gd_w} gd^3 mu^2 (mu + gd mu') dgd (same integral after the
+    // change of variable tau = mu gd).  Composite Simpson.
+    auto rheologicalIntegral = [&](Real gammaW) -> Real {
+      const int m = 2 * (law.integralSteps / 2); // even
+      const Real h = gammaW / static_cast<Real>(m);
+
+      auto f = [&](Real g) -> Real {
         if (g <= 0.0)
           return 0.0;
-
-        const Real m = mu(g);
-        const Real dm = dmu(g);
-        const Real dtau = m + g * dm;
-
-        return std::pow(g, 3.0) * m * m * dtau;
+        const Real mg = mu(g);
+        return g * g * g * mg * mg * (mg + g * dmu(g));
       };
 
-      Math::RungeKutta::RK4 integrator;
+      Real sum = f(0.0) + f(gammaW);
 
-      const int steps = law.integralSteps;
-      const Real h = gammaW / static_cast<Real>(steps);
+      for (int i = 1; i < m; ++i)
+        sum += ((i % 2 == 1) ? 4.0 : 2.0) * f(static_cast<Real>(i) * h);
 
-      Real I = 0.0;
-
-      auto rhs = [&](Real g, Real y) -> Real {
-        (void)y;
-        return integrand(g);
-      };
-
-      for (int i = 0; i < steps; ++i)
-      {
-        const Real g = static_cast<Real>(i) * h;
-        integrator.step(I, g, h, I, rhs);
-      }
-
-      if (I <= 0.0 || !std::isfinite(I))
-      {
-        std::cerr << "Warning: invalid WRMS integral. " << "Using Poiseuille fallback.\n";
-        return {dp / R0, 1.0 / R0};
-      }
-
-      const Real qAbs =
-        std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I / std::pow(tauW, 3.0);
-
-      const Real dqAbs =
-        (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW - 3.0 * qAbs) / adp;
-
-      if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0)
-      {
-        std::cerr << "Warning: invalid WRMS flow derivative. "
-                  << "Using Poiseuille fallback.\n";
-        return {dp / R0, 1.0 / R0};
-      }
-
-      return {sgn * qAbs, dqAbs};
+      return sum * h / 3.0;
     };
 
-    auto solvePressureDropForFlow = [&](Real targetQ, Real L, Real radius,
-                                      Real guess) -> Real {
-      if (std::abs(targetQ) < law.zeroFlowTolerance)
-        return 0.0;
+    WRMSTable table;
 
-      const Real sgn = (targetQ >= 0.0) ? 1.0 : -1.0;
-      const Real qAbs = std::abs(targetQ);
+    const int nodes = std::max(2, law.tableNodes);
+    const Real logTauMin = std::log(law.tableTauMin);
+    const Real logTauMax = std::log(law.tableTauMax);
 
-      auto F = [&](Real x) -> std::pair<Real, Real> {
-        const auto [q, dq] = flowLaw(sgn * x, L, radius);
-        return {sgn * q - qAbs, dq};
-      };
+    table.logGamma.reserve(static_cast<std::size_t>(nodes));
+    table.logMu.reserve(static_cast<std::size_t>(nodes));
 
-      Real hi = std::max<Real>(std::abs(guess), law.pressureDropBracketMin);
+    for (int i = 0; i < nodes; ++i)
+    {
+      const Real tauW = std::exp(logTauMin +
+        (logTauMax - logTauMin) * static_cast<Real>(i) / static_cast<Real>(nodes - 1));
 
-      for (int k = 0; k < law.maxBracketIterations && F(hi).first < 0.0; ++k)
-        hi *= 2.0;
+      const Real gammaW = shearAt(tauW);
+      const Real I = rheologicalIntegral(gammaW);
 
-      if (F(hi).first < 0.0)
-      {
-        std::cerr << "Warning: failed to bracket pressure drop for targetQ = " << targetQ
-                  << ". Returning last upper bound.\n";
-        return sgn * hi;
-      }
+      if (!(I > 0.0) || !std::isfinite(I))
+        continue;
 
-      Math::RootFinding::NewtonRaphson<Real> solver(law.flowAbsoluteTolerance,
-        law.flowRelativeTolerance, law.flowStepTolerance, law.flowMaxIterations);
+      const Real muAp = std::pow(tauW, 4.0) / (4.0 * I);
 
-      const auto root = solver.solve(F, std::min(std::abs(guess), hi), 0.0, hi);
+      if (!(muAp > 0.0) || !std::isfinite(muAp))
+        continue;
 
-      if (!root)
-      {
-        std::cerr << "Warning: failed to invert flow law for targetQ = " << targetQ
-                  << ". Returning bracket upper bound.\n";
-        return sgn * hi;
-      }
+      const Real gammaNom = tauW / muAp;
 
-      return sgn * (*root);
+      // Nodes must stay strictly increasing for the lookup to be well posed.
+      if (!table.logGamma.empty() && std::log(gammaNom) <= table.logGamma.back())
+        continue;
+
+      table.logGamma.push_back(std::log(gammaNom));
+      table.logMu.push_back(std::log(muAp));
+    }
+
+    if (table.logGamma.size() < 2)
+    {
+      // Degenerate rheology: fall back to a constant apparent viscosity.
+      table.logGamma = {std::log(1e-6), std::log(1e6)};
+      table.logMu = {std::log(mu0), std::log(mu0)};
+    }
+
+    return table;
+  }
+
+  // --------------------------------------------------------------------------
+  // R-mu coronary outlet update (ported from
+  // CoupledLV0DCoronary3D::updateOutlet0D):
+  //
+  //   3D --[R_a Phi_a, assembled implicitly]--> (p_c, C) --[R_v Phi_v]--> P_RA
+  //                                                ^
+  //                                             p_im(t)
+  //
+  // One state, p_tm = p_c - p_im:
+  //   C d(p_tm)/dt = q_a - q_v,           q_a = Q  (the measured 3D flux)
+  //   q_v = [p_c - max(p_im, P_RA)] / (R_v Phi_v)  if the lumen is open
+  //   q_v = 0                                       if the throat is shut
+  //   p_out = p_im + p_tm       (+ R_a Phi_a Q, assembled in the 3D form).
+  //
+  // The gate sits on the STATE of the lumen, not on the sign of the driving
+  // pressure: with p_im <= P_RA nothing can collapse and q_v takes either
+  // sign; with p_im > P_RA the throat is a check valve, shut once p_tm <= 0.
+  // Implicit Euler + scalar Newton on p_tm; dq_v/dp_tm >= 0 everywhere, so
+  // R' = C/dt + dq_v/dp_tm > 0 and the iteration converges globally.
+  // --------------------------------------------------------------------------
+  static void updateOutlet0D(const Config& cfg, const WRMSTable& wrms,
+    const Model& model, RCR& bc, Real Q, Real dt)
+  {
+    const auto& s = model.getState();
+    const auto& law = cfg.outletFlowLaw;
+
+    const Real pim = cfg.intramyocardialFraction * s.pv;
+    const Real ptmOld = bc.ptm;
+
+    // Drainage pressure of the Starling throat: right atrium outside the
+    // myocardium, the collapse pressure p_im inside.
+    const Real pDrain = std::max<Real>(pim, cfg.rightAtrialPressure);
+
+    const bool waterfall = pim > cfg.rightAtrialPressure;
+
+    auto venousLumenOpen = [&](Real p) { return !waterfall || p > 0.0; };
+
+    const Real Rv = std::max<Real>(bc.Rv, 1e-300);
+    const Real C = std::max<Real>(bc.C, 1e-300);
+    const Real q0 = std::max<Real>(std::abs(bc.q0), 1e-300);
+
+    // Rheological modulation: the universal WRMS curve at the nominal shear
+    // rate of the limb, normalized by the FIXED Newtonian calibration
+    // viscosity mu_N (never the running rheology).
+    const Real muN = std::max<Real>(cfg.newtonianCalibrationViscosity, 1e-300);
+
+    auto viscosityFactorV = [&](Real q) -> Real {
+      const Real aq = std::abs(q);
+      const Real g = (aq < law.zeroFlowTolerance)
+        ? law.zeroFlowTolerance
+        : bc.gammaV * aq / q0;
+      return wrms(g) / muN;
     };
 
-    const Real alpha = 0.45;
-    const Real dPim = alpha * (s.pv - h.nm1.pv) / dt;
-    const Real Qim = bc.C * dPim;
+    // Phi_v depends on |q_v|, so it is held fixed inside each Newton step and
+    // refreshed between steps, seeded from the previous drainage (at zero flow
+    // the CY plateau gives mu_0, ~ 80x mu_inf).
+    Real ptm = ptmOld;
+    Real qv = bc.qd;
+    Real phiV = viscosityFactorV(qv);
+    bool converged = false;
 
-    auto distalResidual = [&](Real pc) -> std::pair<Real, Real> {
-      const Real pim = alpha * s.pv;
-      const Real x = std::max(pc - pim, Real(0.0));
-      const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
-
-      const Real f = cap * (pc - pcOld) - Qim + qd - Q;
-      const Real df = cap + (pc > pim ? dqd : Real(0.0));
-      return {f, df};
-    };
-
-    Math::RootFinding::NewtonRaphson<Real> solver(law.flowAbsoluteTolerance,
-      law.flowRelativeTolerance, law.flowStepTolerance, law.flowMaxIterations);
-
-    Real span = std::max<Real>(
-      std::abs(Q) / cap + law.distalPressureBracketPad, law.distalPressureBracketPad);
-
-    Real lo = std::min(pcOld, s.pv) - span;
-    Real hi = std::max(pcOld, s.pv) + span;
-
-    for (int k = 0; k < law.maxBracketIterations &&
-         distalResidual(lo).first * distalResidual(hi).first > 0.0;
-         ++k)
+    for (int it = 0; it < law.outletMaxIterations; ++it)
     {
-      span *= 2.0;
-      lo = std::min(pcOld, s.pv) - span;
-      hi = std::max(pcOld, s.pv) + span;
-    }
+      phiV = viscosityFactorV(qv);
 
-    if (distalResidual(lo).first * distalResidual(hi).first > 0.0)
-    {
-      std::cerr << "Warning: failed to bracket distal capacitor pressure. "
-                << "Keeping previous pc.\n";
-      bc.pc = pcOld;
-    }
-    else
-    {
-      const auto pcNew = solver.solve(distalResidual, pcOld, lo, hi);
+      const Real drive = (ptm + pim) - pDrain;
+      const Real Gv = 1.0 / (Rv * phiV);
+      const bool open = venousLumenOpen(ptm);
 
-      if (!pcNew)
+      qv = open ? drive * Gv : 0.0;
+
+      const Real R = C * (ptm - ptmOld) / dt - Q + qv;
+      const Real J = C / dt + (open ? Gv : 0.0);
+
+      const Real d = -R / J;
+      ptm += d;
+
+      if (std::abs(d) < law.outletStepTolerance * (1.0 + std::abs(ptm)))
       {
-        std::cerr << "Warning: failed to solve distal capacitor equation. "
-                  << "Keeping previous pc.\n";
-        bc.pc = pcOld;
-      }
-      else
-      {
-        bc.pc = *pcNew;
+        converged = true;
+        break;
       }
     }
 
-    const Real pim_f = alpha * s.pv;
-    const auto [qd, dqd_f] =
-      flowLaw(std::max(bc.pc - pim_f, Real(0.0)), lengthD, radiusD);
-    (void)dqd_f;
-    bc.qd = qd;
+    if (!converged || !std::isfinite(ptm))
+    {
+      std::cerr << "Warning: coronary outlet solve did not converge. "
+                << "Keeping previous state.\n";
+      ptm = ptmOld;
+    }
 
-    const Real oldGuess = bc.pout - bc.pc;
-    const Real dpP = solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
+    // Final consistent evaluation at the converged state.
+    const Real pc = ptm + pim;
+    const Real drive = pc - pDrain;
 
-    bc.pout = bc.pc + dpP;
+    phiV = viscosityFactorV(qv);
+    qv = venousLumenOpen(ptm) ? drive / (Rv * phiV) : 0.0;
+
+    bc.ptm = ptm;
+    bc.pim = pim;
+    bc.pc = pc;
+    bc.qd = qv;
+    bc.vol = C * std::max<Real>(ptm, 0.0);
+    bc.muV = phiV;
+
+    // Arteriolar modulation, exported here and consumed by the next 3D solve
+    // through the implicit boundary term R_a Phi_a A (u.n)(v.n).
+    const Real aQ = std::abs(Q);
+    const Real gammaA = (aQ < law.zeroFlowTolerance)
+      ? law.zeroFlowTolerance
+      : bc.gammaA * aQ / q0;
+    bc.muA = wrms(gammaA) / muN;
+
+    // Pressure applied to the 3D outlet as a Neumann traction.  The resistive
+    // part R_a Phi_a Q is NOT included here: assembling it implicitly is what
+    // removes the one-step lag on the dominant resistance.
+    bc.pout = pc;
   }
 
 } // namespace
@@ -1274,6 +1426,11 @@ int main(int argc, char** argv)
   setPETScDefault("-ksp_type", "preonly");
   setPETScDefault("-pc_type", "lu");
   setPETScDefault("-pc_factor_mat_solver_type", "mumps");
+
+  // Mass-matrix projections (VMS subscales, gradient recovery for the WSS)
+  // are SPD: CG + Jacobi, never the global direct solver (Atrium pattern).
+  setPETScDefault("-coronary_mass_ksp_type", "cg");
+  setPETScDefault("-coronary_mass_pc_type", "jacobi");
 
   // Sequential build: no boost::mpi environment / communicator / context.
   // PETSc runs in serial (PETSC_COMM_SELF) and isRoot is trivially true.
@@ -1299,21 +1456,34 @@ int main(int argc, char** argv)
     Model model(modelInput);
     initializeModel(model, modelInput);
 
-    const std::string fluidMesh = "../resources/examples/Heart/CoronaryArtery_fluid.mesh";
+    const std::string fluidMesh = "../resources/examples/Heart/coronaria_estenosis_80.mesh";
     MeshType meshFluid = makeMesh(cfg, fluidMesh);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
-    const std::string solidMesh = "../resources/examples/Heart/CoronaryArtery_solid.mesh";
+    const std::string solidMesh = "../resources/examples/Heart/coronaria_80_prismatica.mesh";
     MeshType meshSolid = makeMesh(cfg, solidMesh);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 
     // Spatial dimension shared by both blocks (used by the coupling fields).
     const size_t dim = dimFluid;
 
+    // Ring band ONLY around the INLET.  The outlets are held by the
+    // viscoelastic boundary condition (a, b below): ringing them too would
+    // clamp the one-element wall band next to every outlet cap and pin the
+    // outlet ends rigidly no matter how soft the springs are (with a single
+    // wedge layer every cap node is one edge away from the ring).  The
+    // "outlets" argument is therefore filled with the inlet attribute so only
+    // inlet-adjacent FSI faces are relabeled to 99.
+    const std::array<Attribute, 6> fluidInletOnly{{BoundaryFluid::Inlet,
+      BoundaryFluid::Inlet, BoundaryFluid::Inlet, BoundaryFluid::Inlet,
+      BoundaryFluid::Inlet, BoundaryFluid::Inlet}};
+    const std::array<Attribute, 6> solidInletOnly{{BoundarySolid::Inlet,
+      BoundarySolid::Inlet, BoundarySolid::Inlet, BoundarySolid::Inlet,
+      BoundarySolid::Inlet, BoundarySolid::Inlet}};
     const std::size_t fluidRingFaces = tagFSIRingBand(meshFluid, BoundaryFluid::FSI,
-      BoundaryFluid::FSIRing, BoundaryFluid::Inlet, BoundaryFluid::Outlets);
+      BoundaryFluid::FSIRing, BoundaryFluid::Inlet, fluidInletOnly);
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
-      BoundarySolid::FSIRing, BoundarySolid::Inlet, BoundarySolid::Outlets);
+      BoundarySolid::FSIRing, BoundarySolid::Inlet, solidInletOnly);
     if (isRoot)
       std::cout << "FSI ring band: fluid=" << fluidRingFaces
                 << " face(s), solid=" << solidRingFaces << " face(s)\n";
@@ -1323,7 +1493,7 @@ int main(int argc, char** argv)
 
     const InterfaceMap interfaceMap = buildInterfaceMap(meshFluid, meshSolid);
 
-    // Fluid problem -- EQUAL-ORDER P1/P1 (velocity AND pressure are P1).
+    // Fluid problem
     using VelocityFES = H1<1, Math::SpatialVector<Real>, MeshType>;
     using PressureFES = H1<1, Real, MeshType>;
     using DisplacementFluidFES = H1<1, Math::SpatialVector<Real>, MeshType>;
@@ -1392,6 +1562,16 @@ int main(int argc, char** argv)
     PETSc::Variational::TrialFunction l(lh);
     PETSc::Variational::TestFunction t(lh);
 
+    // Through-thickness (transmural) coordinate xi: harmonic between the
+    // luminal (FSI) surface, xi = 0, and the adventitial surface (Outer),
+    // xi = 1.  Solved once at startup (below, next to the heart-weight
+    // laplacian); works for ANY number of wedge layers.  Initialized to 0.5
+    // (media) so a premature evaluation before the solve grades to 1.
+    PETSc::Variational::TrialFunction xiT(lh);
+    PETSc::Variational::TestFunction xiTest(lh);
+    PETSc::Variational::GridFunction xi(lh);
+    xi = 0.5;
+
     auto zero = VectorFunction(dim, [&](const Point&) {
       Math::SpatialVector<Real> value(dim);
       value.setZero();
@@ -1458,6 +1638,9 @@ int main(int argc, char** argv)
       csv << "t,lv_y,lv_v,lv_pv,lv_par,lv_pd,q_in,q_out_total";
       for (const Attribute outlet : BoundaryFluid::Outlets)
         csv << ",q_out_" << outlet << ",p_out_" << outlet;
+      // R-mu mechanism diagnostics (averaged/summed over the outlets): p_im,
+      // mean p_tm, the two viscosity ratios and the stored volume V = C p_tm.
+      csv << ",pim,ptm_mean,phi_a_mean,phi_v_mean,stored_volume";
       csv << ",e_interface,coupling_rel\n";
     }
 
@@ -1465,48 +1648,155 @@ int main(int argc, char** argv)
     for (const Attribute outlet : BoundaryFluid::Outlets)
       wk.emplace(outlet, RCR{});
 
-    // ---- Automatic Murray-law outlet calibration ------------------------
-    if (cfg.autoCalibrateOutlets)
-    {
-      const Real mu0 = cfg.viscosity.mu0;
-      const Real pim = 0.45 * model.getState().pv; // alpha * pv (distal level)
-      const Real par0 = model.getState().par;
-      const Real dP = std::max<Real>(par0 - pim, 1.0);
-      const Real PI = std::numbers::pi_v<Real>;
+    // Universal WRMS apparent-viscosity table: built once, shared by every
+    // outlet and both limbs.
+    const WRMSTable wrms = buildWRMSTable(cfg, cfg.viscosity);
 
+    // ---- Anatomical outlet areas (needed by the implicit R_a Phi_a A term
+    // regardless of the calibration path) --------------------------------
+    const Real PI = std::numbers::pi_v<Real>;
+    std::map<Attribute, Real> rEq;
+    Real sumR3 = 0.0;
+    {
       PETSc::Variational::TestFunction qCal(ph);
       LinearForm<PressureFES, ::Vec> calForm(qCal);
-
-      std::map<Attribute, Real> rEq;
-      Real sumR3 = 0.0;
       for (const Attribute tag : BoundaryFluid::Outlets)
       {
         calForm = BoundaryIntegral(one, qCal).over(tag);
         calForm.assemble();
         const Real area = std::max<Real>(calForm(one), 1e-12);
+        wk.at(tag).area = area;
         rEq[tag] = std::sqrt(area / PI);
         sumR3 += rEq[tag] * rEq[tag] * rEq[tag];
       }
+    }
 
-      const Real fp = std::clamp(cfg.proximalResistanceFraction, 0.0, 0.5);
+    // ---- Anatomical outlet calibration (CoupledLV0DCoronary3D scheme) ---
+    //
+    // Three divisions per outlet: exactly the three lumped quantities that
+    // appear in the balance (R_a, R_v, C).  With dP = par(0) - P_RA the
+    // resting budget and the Murray split w_i = r_i^3 / sum r_j^3:
+    //   Q_i = Q_tot w_i,  C_i = C_tot w_i,
+    //   R_v,i = f_v dP / Q_i,  R_a,i = (1 - f_v) dP / Q_i,
+    //   p_tm,i(0) = P_RA + f_v dP Phi_v0 - alpha p_LV(0).
+    if (cfg.autoCalibrateOutlets)
+    {
+      const Real par0 = model.getState().par;
+      const Real dP = std::max<Real>(par0 - cfg.rightAtrialPressure, 1.0);
+
+      const Real fv = cfg.venularPressureFraction;
+      const Real dPv = std::max<Real>(fv * dP, 1.0);
+      const Real dPa = std::max<Real>((1.0 - fv) * dP, 1.0);
+
+      const Real pimRest = cfg.intramyocardialFraction * model.getState().pv;
+      const Real muN = std::max<Real>(cfg.newtonianCalibrationViscosity, 1e-300);
+
+      // Morphometric operating point (r, v) per limb; L and T are OUTPUTS:
+      //   g_0 = 4 v / r,  N = Q_i/(pi r^2 v),  L = r dP_share/(2 mu_N g_0),
+      //   T = L / v.
+      const Real ra = std::max<Real>(cfg.arteriolarRadius, 1e-12);
+      const Real va = std::max<Real>(cfg.arteriolarVelocity, 1e-12);
+      const Real rv = std::max<Real>(cfg.venularRadius, 1e-12);
+      const Real vv = std::max<Real>(cfg.venularVelocity, 1e-12);
+
+      const Real gammaA0 = 4.0 * va / ra;
+      const Real gammaV0 = 4.0 * vv / rv;
+
+      const Real La = ra * dPa / (2.0 * muN * gammaA0);
+      const Real Lv = rv * dPv / (2.0 * muN * gammaV0);
+
+      const Real Ta = La / va;
+      const Real Tv = Lv / vv;
+
+      const Real phiA0 = wrms(gammaA0) / muN;
+      const Real phiV0 = wrms(gammaV0) / muN;
+
+      // Initial condition: steady state of the ACTUAL (non-Newtonian) network,
+      // so the run does not open with a spurious transient.
+      const Real ptmRest = cfg.rightAtrialPressure + dPv * phiV0 - pimRest;
+
       for (const Attribute tag : BoundaryFluid::Outlets)
       {
         const Real w = (rEq[tag] * rEq[tag] * rEq[tag]) / std::max(sumR3, 1e-30);
         const Real Qi = std::max<Real>(cfg.lcaTargetFlow * w, 1e-12);
-        const Real Ri = dP / Qi; // total branch resistance
-        const Real Rd = (1.0 - fp) * Ri; // distal (peripheral)
-        const Real Rp = fp * Ri; // proximal (characteristic)
-        // Back out the surrogate radii (keep Lp, Ld): r = (8 mu0 L/(pi R))^1/4.
-        auto& g = cfg.outletFlowLaw.geometricParam.at(tag);
-        g.Rd = std::pow(8.0 * mu0 * g.Ld / (PI * Rd), 0.25);
-        g.Rp = std::pow(8.0 * mu0 * g.Lp / (PI * Rp), 0.25);
-        wk[tag].C = cfg.rcrTau / Rd; // uniform tau = Rd*C
+
+        auto& bc = wk.at(tag);
+
+        bc.q0 = Qi;
+        bc.Ra = dPa / Qi;
+        bc.Rv = dPv / Qi;
+        bc.C = std::max<Real>(cfg.coronaryComplianceTotal * w, 1e-300);
+
+        bc.gammaA = gammaA0;
+        bc.gammaV = gammaV0;
+
+        // Steady state of the calibrated network as initial condition.
+        bc.ptm = ptmRest;
+        bc.pim = pimRest;
+        bc.pc = ptmRest + pimRest;
+        bc.pout = bc.pc;
+        bc.qd = Qi;
+        bc.vol = bc.C * std::max<Real>(ptmRest, 0.0);
+        bc.muA = phiA0;
+        bc.muV = phiV0;
+
         if (isRoot)
-          Alert::Info() << "  [calib] outlet " << tag
-                        << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
-                        << "  Q=" << (Qi * 6.0e7) << " mL/min" << "  Rd=" << Rd
-                        << "  C=" << wk[tag].C << "  tau=" << (Rd * wk[tag].C) << " s"
+          Alert::Info() << "  [calib] outlet " << tag << "  A=" << bc.area
+                        << " m^2" << "  Q=" << (Qi * 6.0e7) << " mL/min"
+                        << "  Ra=" << bc.Ra << "  Rv=" << bc.Rv << " Pa s/m^3"
+                        << "  C=" << bc.C << " m^3/Pa"
+                        << "  tau=C*Rv=" << (bc.C * bc.Rv) << " s"
+                        << "  ptm0=" << ptmRest
+                        << "  pc0/pout0=" << bc.pc << "/" << bc.pout
+                        << " Pa (par=" << par0 << ", pim=" << pimRest << ")"
                         << Alert::Raise;
+      }
+
+      if (isRoot)
+      {
+        Alert::Info() << "  [calib] WRMS nodes=" << wrms.logGamma.size()
+                      << "  reologia="
+                      << (cfg.rheologyModel == RheologyModel::Quemada
+                            ? "Quemada" : "Carreau-Yasuda")
+                      << "  mu_ap(" << gammaA0 << ")=" << wrms(gammaA0)
+                      << "  mu_ap(" << gammaV0 << ")=" << wrms(gammaV0)
+                      << "  (mu_N=" << muN << ")"
+                      << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0
+                      << "  |  T_a=" << Ta << " s  T_v=" << Tv
+                      << " s  (referencia " << cfg.referenceTransitTime << " s)"
+                      << Alert::Raise;
+
+        const Real Tref = cfg.referenceTransitTime;
+        if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref ||
+          Tv > 2.0 * Tref)
+          Alert::Warning()
+            << "  [calib] el tiempo de transito derivado se aparta mas de 2x "
+            << "de la referencia: calibre, velocidad y reparto de presion no "
+            << "son consistentes con un solo tramo efectivo por rama."
+            << Alert::Raise;
+      }
+    }
+    else
+    {
+      // Diagnostic path: neutral, non-degenerate constants so the outlet
+      // still integrates without the calibration.
+      for (const Attribute tag : BoundaryFluid::Outlets)
+      {
+        auto& bc = wk.at(tag);
+        const Real Qi =
+          cfg.lcaTargetFlow / static_cast<Real>(BoundaryFluid::Outlets.size());
+        bc.q0 = Qi;
+        bc.Ra = 4.5e9;
+        bc.Rv = 6.8e8;
+        bc.C = cfg.coronaryComplianceTotal /
+          static_cast<Real>(BoundaryFluid::Outlets.size());
+        bc.ptm = 1400.0;
+        bc.pc = bc.ptm;
+        bc.pout = bc.pc;
+        bc.qd = Qi;
+        bc.gammaA = 4.0 * cfg.arteriolarVelocity / cfg.arteriolarRadius;
+        bc.gammaV = 4.0 * cfg.venularVelocity / cfg.venularRadius;
+        bc.vol = bc.C * std::max<Real>(bc.ptm, 0.0);
       }
     }
 
@@ -1532,10 +1822,6 @@ int main(int argc, char** argv)
     // ----------------------------------------------------------------------
     // Constitutive and time-integration constants.
     // ----------------------------------------------------------------------
-    const Real solidLambda = cfg.solidYoungModulus * cfg.solidPoissonRatio /
-      ((1.0 + cfg.solidPoissonRatio) * (1.0 - 2.0 * cfg.solidPoissonRatio));
-    const Real solidMu = cfg.solidYoungModulus / (2.0 * (1.0 + cfg.solidPoissonRatio));
-
     const Real dt = cfg.dt;
     const Real betaN = cfg.newmarkBeta;
     const Real gammaN = cfg.newmarkGamma;
@@ -1567,7 +1853,35 @@ int main(int argc, char** argv)
 
     const auto normalFluid = BoundaryNormal(meshFluid);
 
-    Solid::Yeoh law(yeohC1, yeohC2, yeohC3, yeohKappa);
+    // ------------------------------------------------------------------
+    // Transmural (intima/media/adventitia) grading of the wall law.  The
+    // multiplier m(xi) blends the three band values with smoothsteps at
+    // xi = 1/3 and 2/3 (half-width gradeTransitionWidth); the Yeoh energy is
+    // jointly linear in (c1, c2, c3, kappa), so GradedYeoh scales stress and
+    // tangent by exactly the same factor -- the Newton tangent stays
+    // consistent.  xi is evaluated through the P1 GridFunction solved below,
+    // so the profile is sampled AT EACH QUADRATURE POINT.
+    //
+    // NOTE: with a single wedge layer through the thickness the profile is
+    // under-resolved (each element spans all three bands); for a faithful
+    // three-band wall rebuild the solid with >= 3 wedge layers -- this code
+    // needs no change, xi is harmonic and mesh-agnostic.
+    // ------------------------------------------------------------------
+    auto wallGrade = [&](const Point& p) -> Real {
+      const Real s = std::clamp<Real>(xi.getValue(p), 0.0, 1.0);
+      auto ss = [](Real u) {
+        u = u < 0.0 ? 0.0 : (u > 1.0 ? 1.0 : u);
+        return u * u * (3.0 - 2.0 * u);
+      };
+      const Real hw = std::max<Real>(cfg.gradeTransitionWidth, 1.0e-6);
+      const Real f1 = ss((s - (1.0 / 3.0 - hw)) / (2.0 * hw)); // intima -> media
+      const Real f2 = ss((s - (2.0 / 3.0 - hw)) / (2.0 * hw)); // media -> adventitia
+      return cfg.gradeIntima + (cfg.gradeMedia - cfg.gradeIntima) * f1 +
+        (cfg.gradeAdventitia - cfg.gradeMedia) * f2;
+    };
+
+    Rodin::Examples::Heart::GradedYeoh law(
+      Solid::Yeoh(yeohC1, yeohC2, yeohC3, yeohKappa), wallGrade);
     Solid::InternalVirtualWorkTangent solidTangent(law, d, w, dState);
     Solid::InternalVirtualWorkResidual solidInternal(law, w, dState);
 
@@ -1590,8 +1904,6 @@ int main(int argc, char** argv)
     // lagged Robin datum sigma_f^{lag} n and the traction output field.
     const auto tractionFSI =
       (1.0 * pCur) * normalFluid - (1.0 * muFsi) * Mult(strainRateFsi, normalFluid);
-
-    const auto wallStress = tractionFSI - Dot(tractionFSI, normalFluid) * normalFluid;
 
     // ------------------------------------------------------------------
     // Volume-recovered wall shear stress (fixes the surface-gradient bug).
@@ -1616,15 +1928,17 @@ int main(int argc, char** argv)
     // (Component scalars don't compose under +).  (grad u . n)_i = gradRec_i . n
     // is the wall-NORMAL directional derivative of u; at a no-slip wall the
     // transpose part (grad u^T . n) vanishes (u_n ~ 0 -> d u_n/dn ~ 0), so this
-    // equals the full strain-rate traction in the TANGENTIAL direction.  A
-    // constant high-shear wall viscosity muInf is used (the wall is high-shear,
-    // where the Carreau-Yasuda mu -> muInf), avoiding the shear-rate tensor
-    // contraction.  wallStressRec = tangential part of mu (grad u . n).
+    // equals the full strain-rate traction in the TANGENTIAL direction.  The
+    // LOCAL Carreau-Yasuda viscosity muFsi is used (same expression as the
+    // momentum equation): a constant muInf decouples the WSS from the
+    // rheology and under-predicts tau_w exactly in the low-shear
+    // recirculation zones where mu departs from muInf (see
+    // CoupledLV0DCoronary3D::computeWallShear).
     const auto gradUn0 = Dot(gradRec0, normalFluid);
     const auto gradUn1 = Dot(gradRec1, normalFluid);
     const auto gradUn2 = Dot(gradRec2, normalFluid);
     const auto tracRec =
-      VectorFunction(cy.muInf * gradUn0, cy.muInf * gradUn1, cy.muInf * gradUn2);
+      VectorFunction(muFsi * gradUn0, muFsi * gradUn1, muFsi * gradUn2);
     const auto wallStressRec = tracRec - Dot(tracRec, normalFluid) * normalFluid;
 
     // Areal stretch J_a = A_t/A_0 at the CURRENT iterate dIter: pulls
@@ -1663,7 +1977,6 @@ int main(int argc, char** argv)
       }
       return stretch;
     };
-    const auto arealStretch = RealFunction(arealStretchAt);
 
     auto fluidStress = VectorFunction(dim, [&](const Point& xs) {
       const Point xf = forwardSolidPointToFluid(xs, meshFluid, interfaceMap);
@@ -1768,15 +2081,10 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction uConv(uh);
     uConv = uOld;
 
-    // P1 scalar tau and P2 vector projection/subscale fields (P2 = velocity
-    // space uh, matching CoupledLV0DCoronary3D's VMSFES).
-    PressureFES tauFes(std::integral_constant<size_t, 1>{}, meshFluid);
-    PETSc::Variational::TrialFunction vmsTau(tauFes);
-    PETSc::Variational::TestFunction vmsTauTest(tauFes);
 
-    // Grad-div (continuity) parameter tau_C = rho*tau2, projected onto P1.
-    PETSc::Variational::TrialFunction vmsTauC(tauFes);
-    PETSc::Variational::TestFunction vmsTauCTest(tauFes);
+    PressureFES tauFes(std::integral_constant<size_t, 1>{}, meshFluid);
+    PETSc::Variational::TestFunction vmsScalarTest(tauFes);
+    PETSc::Variational::TrialFunction vmsPiTilde(tauFes); // pi~ (projected)
 
     PETSc::Variational::TrialFunction vmsUp(uh); // Pi[(grad uConv) uConv]
     PETSc::Variational::TestFunction vmsVp(uh);
@@ -1784,44 +2092,65 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction vmsSubOld(uh); // subscale history u'^n
     vmsSubOld = zero;
 
-    PETSc::Variational::TrialFunction vmsSqrtTauC(tauFes);
-    PETSc::Variational::GridFunction vmsSqrtTauCOld(tauFes);
-    vmsSqrtTauCOld = 0.0;
-    PETSc::Variational::TrialFunction vmsPiTilde(tauFes);
-
-    // Pressure-gradient (PSPG / grad-p) parameter tau_p
-    PETSc::Variational::TrialFunction vmsTauP(tauFes);
-
     // Frozen convective acceleration (grad uConv) uConv.
     const auto vmsConvectionTarget = Mult(Jacobian(uConv), uConv);
 
-    // Shared stabilization parameter tau1 (Codina), with c1 = 4, c2 = 2,
-    // k = 1 (P1), h_K = |K|^{1/d}, nu = mu0/rho:
-    //   tau1 = ( c1 k^4 nu / h^2 + c2 k |u| / h )^-1.
+    auto viscosityAt = [&](const Point& pp) -> Real {
+      const auto sym = 0.5 * (Jacobian(uOld) + Transpose(Jacobian(uOld)));
+      const Real shear =
+        std::sqrt(gammaReg * gammaReg + 2.0 * Dot(sym, sym).getValue(pp));
+      return cy.muInf +
+        deltaMu *
+        std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda),
+          (cy.n - 1.0) / cy.yasuda);
+    };
+
+    // Shared stabilization parameter tau1 (Codina), c1 = 4, c2 = 2, k = 1
+    // (P1), h_K = |K|^{1/d}, nu = mu(x)/rho local; the transport speed is the
+    // ALE relative velocity |u^n - w|.
     auto tau1At = [&](const Point& pp) -> Real {
       const auto uc = uConv.getValue(pp);
-      const Real nu = cy.mu0 / cfg.fluidDensity;
+      const Real nu = viscosityAt(pp) / cfg.fluidDensity;
       const Real hK =
         std::pow(pp.getPolytope().getMeasure(), 1.0 / pp.getPolytope().getDimension());
-      const Real k = 1.0; // P1
       const Real speed = std::sqrt(Math::dot(uc, uc));
-      return 1.0 / (4.0 * std::pow(k, 4.0) * nu / (hK * hK) + 2.0 * k * speed / hK);
+      return 1.0 / (4.0 * nu / (hK * hK) + 2.0 * speed / hK);
     };
 
-    // Convective subscale parameter tau_K = vmsScale/(rho/dt + rho/tau1)
-    //   = vmsScale (1/rho)(1/dt + 1/tau1)^-1.
-    RealFunction vmsTauFn = [&, tau1At](const Point& pp) -> Real {
-      const Real tau1 = tau1At(pp);
-      return cfg.vmsScale * (1.0 / (cfg.fluidDensity / dt + cfg.fluidDensity / tau1));
+    // Convective subscale parameter tau_K = vmsScale/(rho/dt + rho/tau1),
+    // evaluated pointwise (fed straight into the VMS integrators).
+    auto vmsTauAt = [&](const Point& pp) -> Real {
+      return cfg.vmsScale * (1.0 / (cfg.fluidDensity / dt + cfg.fluidDensity / tau1At(pp)));
+    };
+    RealFunction vmsTauFn = [&](const Point& pp) -> Real { return vmsTauAt(pp); };
+
+    // Grad-div parameter tau_C = gradDivScale * rho * h^2/(4 tau1) and its
+    // square root, exact by construction (tau_C = (sqrt tau_C)^2 pointwise).
+    auto sqrtTauCAt = [&](const Point& pp) -> Real {
+      const Real hK =
+        std::pow(pp.getPolytope().getMeasure(), 1.0 / pp.getPolytope().getDimension());
+      return std::sqrt(std::max<Real>(
+        0.0, cfg.gradDivScale * cfg.fluidDensity * hK * hK / (4.0 * tau1At(pp))));
+    };
+    RealFunction sqrtTauCFn = [&](const Point& pp) -> Real { return sqrtTauCAt(pp); };
+    RealFunction tauCFn = [&](const Point& pp) -> Real {
+      const Real s = sqrtTauCAt(pp);
+      return s * s;
     };
 
-    // Dynamic subscale update (L2-projected into vmsSub).
+    // PSPG / grad-p coefficient tau_p = pgpScale * tau1/rho, pointwise.
+    RealFunction vmsTauPFn = [&](const Point& pp) -> Real {
+      return cfg.pgpScale * tau1At(pp) / cfg.fluidDensity;
+    };
+
+    // Dynamic subscale update (L2-projected into vmsSub: it must be STORED,
+    // it carries the history u'^n).
     auto vmsSubUpdate =
       VectorFunction(dim, [&](const Point& pp) -> Math::SpatialVector<Real> {
         const auto conv = vmsConvectionTarget.getValue(pp);
         const auto proj = vmsUp.getSolution().getValue(pp);
         const auto old = vmsSubOld.getValue(pp);
-        const Real tau = vmsTau.getSolution().getValue(pp);
+        const Real tau = vmsTauAt(pp);
 
         Math::SpatialVector<Real> out(dim);
         for (Index c = 0; c < static_cast<Index>(dim); ++c)
@@ -1829,75 +2158,51 @@ int main(int argc, char** argv)
         return out;
       });
 
-    // L2 projections (mass matrices reassembled each iterate as uConv moves).
+    // The two orthogonal-subscale L2 projections + the subscale history
+    // (mass matrices reassembled each iterate as the mesh moves).
     Problem vmsL2Conv(vmsUp, vmsVp);
     vmsL2Conv = Integral(vmsUp, vmsVp) - Integral(vmsConvectionTarget, vmsVp);
-
-    Problem vmsTauProj(vmsTau, vmsTauTest);
-    vmsTauProj = Integral(vmsTau, vmsTauTest) - Integral(vmsTauFn, vmsTauTest);
 
     Problem vmsSubProj(vmsSub, vmsVp);
     vmsSubProj = Integral(vmsSub, vmsVp) - Integral(vmsSubUpdate, vmsVp);
 
-    // Grad-div / pressure-subscale parameter tau_C = gradDivScale * rho * tau2,
-    //   tau2 = (h/k^2)^2 / (c1 tau1),  c1 = 4, k = 2.
-    auto rhoTau2At = [&, tau1At](const Point& pp) -> Real {
-      const Real tau1 = tau1At(pp);
-      const Real hK =
-        std::pow(pp.getPolytope().getMeasure(), 1.0 / pp.getPolytope().getDimension());
-      const Real k = 1.0, c1 = 4.0; // P1
-      const Real lref = hK / (k * k); // h / k^2
-      const Real tau2 = (lref * lref) / (c1 * tau1);
-      return cfg.gradDivScale * cfg.fluidDensity * tau2;
+    // pi~ = Pi( sqrt(tau_C) div u^n ).  The SAME sqrt(tau_C) multiplies
+    // div(v) in the linear term and squares into the implicit coefficient;
+    // lagging one of the two by a step leaves the explicit half larger than
+    // the implicit one on the step where the viscosity drops (see Atrium).
+    Problem vmsPiTildeProj(vmsPiTilde, vmsScalarTest);
+    vmsPiTildeProj = Integral(vmsPiTilde, vmsScalarTest) -
+      Integral(sqrtTauCFn * Div(uOld), vmsScalarTest);
+
+    // Mass-matrix solves are SPD and cheap with CG + Jacobi; never the global
+    // direct (MUMPS LU) solver used for the coupled flow system.  The prefixed
+    // defaults are set in main() and remain overridable on the command line.
+    auto solveMass = [](auto& problem) {
+      problem.assemble();
+      Solver::KSP ksp(problem);
+      ksp.setPrefix("coronary_mass_");
+      ksp.solve();
     };
-    // sqrt(tau_C) = sqrt(gradDivScale rho tau2) >= 0 is the ONLY tau field we
-    // project.
-    RealFunction sqrtRhoTau2Fn = [rhoTau2At](const Point& pp) -> Real {
-      return std::sqrt(std::max<Real>(0.0, rhoTau2At(pp)));
+
+    // The Neumann traction at an outlet is
+    // p_out = p_c + R_a Phi_a Q, and for a flat profile the resistive part is
+    //   int_G R_a Phi_a Q (v.n) = R_a Phi_a A int_G (u.n)(v.n),
+    // symmetric and positive semidefinite for any profile.  Assembling it here
+    // instead of lagging it is what makes the 0D-3D coupling unconditionally
+    // stable: the amplification factor goes from |1 - R dt / L_3D| to
+    // 1/(1 + R dt / L_3D) < 1 for any dt and any R.  Phi_a is refreshed by
+    // updateOutlet0D after each step and read here at reassembly (the flow
+    // form is reassembled every coupling iterate because the mesh moves).
+    auto outletZAt = [&](size_t i) -> Real {
+      const auto& bc = wk.at(BoundaryFluid::Outlets[i]);
+      return cfg.outletResistanceScale * bc.Ra * bc.muA * bc.area;
     };
-
-    // sqrt(tau_C^{n+1}) (current).
-    Problem vmsSqrtTauCProj(vmsSqrtTauC, vmsTauCTest);
-    vmsSqrtTauCProj =
-      Integral(vmsSqrtTauC, vmsTauCTest) - Integral(sqrtRhoTau2Fn, vmsTauCTest);
-
-    // pi~^n = Pi( sqrt(tau_C^n) div u^n )
-    Problem vmsPiTildeProj(vmsPiTilde, vmsTauCTest);
-    vmsPiTildeProj = Integral(vmsPiTilde, vmsTauCTest) -
-      Integral(vmsSqrtTauCOld * Div(uOld), vmsTauCTest);
-
-    // tau_p = pgpScale * tau1/rho (current) -- the PSPG / grad-p coefficient.
-    RealFunction vmsTauPFn = [&, tau1At](const Point& pp) -> Real {
-      return cfg.pgpScale * tau1At(pp) / cfg.fluidDensity;
-    };
-    Problem vmsTauPProj(vmsTauP, vmsTauCTest);
-    vmsTauPProj = Integral(vmsTauP, vmsTauCTest) - Integral(vmsTauPFn, vmsTauCTest);
-
-    // Per-outlet implicit local resistance Z = scale * R_lag * A, where
-    //   R_lag = LAGGED RCR proximal resistance slope (dp_out/dQ at the previous
-    //           flux Q^n, from the RCR update below)
-    std::array<Real, 6> outletArea{};
-    std::array<Real, 6> outletZ{};
-    {
-      PETSc::Variational::TestFunction qZ(ph);
-      LinearForm<PressureFES, ::Vec> zArea(qZ);
-      for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i)
-      {
-        zArea = BoundaryIntegral(one, qZ).over(BoundaryFluid::Outlets[i]);
-        zArea.assemble();
-        outletArea[i] = std::max<Real>(zArea(one), 1e-12);
-        const auto& g = cfg.outletFlowLaw.geometricParam.at(BoundaryFluid::Outlets[i]);
-        const Real Rpois = 8.0 * cfg.viscosity.mu0 * g.Lp /
-          (std::numbers::pi_v<Real> * std::pow(g.Rp, 4.0));
-        outletZ[i] = cfg.outletResistanceScale * Rpois * outletArea[i];
-      }
-    }
-    auto zFn0 = RealFunction([&](const Point&) { return outletZ[0]; });
-    auto zFn1 = RealFunction([&](const Point&) { return outletZ[1]; });
-    auto zFn2 = RealFunction([&](const Point&) { return outletZ[2]; });
-    auto zFn3 = RealFunction([&](const Point&) { return outletZ[3]; });
-    auto zFn4 = RealFunction([&](const Point&) { return outletZ[4]; });
-    auto zFn5 = RealFunction([&](const Point&) { return outletZ[5]; });
+    auto zFn0 = RealFunction([&](const Point&) { return outletZAt(0); });
+    auto zFn1 = RealFunction([&](const Point&) { return outletZAt(1); });
+    auto zFn2 = RealFunction([&](const Point&) { return outletZAt(2); });
+    auto zFn3 = RealFunction([&](const Point&) { return outletZAt(3); });
+    auto zFn4 = RealFunction([&](const Point&) { return outletZAt(4); });
+    auto zFn5 = RealFunction([&](const Point&) { return outletZAt(5); });
 
     // BDF1 mass split: (rho/dt)[(u,v)_{n+1} - (u^n,v)_n]; the implicit part
     // lives in 'flow', the explicit u^n part is 'massOld', assembled on the
@@ -1907,22 +2212,23 @@ int main(int argc, char** argv)
       cfg.fluidDensity * Integral(Dot(convU, v)) +
       0.5 * cfg.fluidDensity * Integral(divGeomTemam * Dot(u, v)) +
       // Projected-VMS convective stabilization (bilinear + subtracted
-      // linear); tau folds cfg.vmsScale so both vanish when vmsScale == 0.
-      VMSConvectionBilinearIntegrator(
-        u, v, uConv, vmsTau.getSolution(), cfg.fluidDensity) -
+      // linear); tau is evaluated POINTWISE (vmsTauFn folds cfg.vmsScale so
+      // both terms vanish when vmsScale == 0).
+      VMSConvectionBilinearIntegrator(u, v, uConv, vmsTauFn, cfg.fluidDensity) -
       VMSConvectionLinearIntegrator(v, vmsSub.getSolution(), uConv, vmsUp.getSolution(),
-        vmsTau.getSolution(), cfg.fluidDensity, dt) +
-      // Orthogonal grad-div / pressure subscale p~, STABLE IMEX split:
-      //   + int tau_C^{n+1} (div u^{n+1})(div v)          [implicit, LHS]
-      //   - int sqrt(tau_C^{n+1}) pi~^n (div v)           [lagged, RHS]
-      // with pi~^n = Pi( sqrt(tau_C^n) div u^n ).  tau_C folds
-      VMSGradDivBilinearIntegrator(u, v, vmsTauC.getSolution()) -
-      VMSGradDivLinearIntegrator(v, vmsPiTilde.getSolution(), vmsSqrtTauC.getSolution()) +
+        vmsTauFn, cfg.fluidDensity, dt) +
+      // Orthogonal grad-div / pressure subscale p~, IMEX split:
+      //   + int tau_C (div u^{n+1})(div v)        [implicit, LHS]
+      //   - int sqrt(tau_C) pi~ (div v)           [lagged, RHS]
+      // with pi~ = Pi( sqrt(tau_C) div u^n ); tau_C = (sqrt tau_C)^2 exactly,
+      // both evaluated pointwise at the SAME time level.
+      VMSGradDivBilinearIntegrator(u, v, tauCFn) -
+      VMSGradDivLinearIntegrator(v, vmsPiTilde.getSolution(), sqrtTauCFn) +
       2.0 * Integral(muLag * symU, symV) - Integral(p, Div(v)) + Integral(Div(u), q) +
       cfg.pressurePenalty * Integral(p, q) +
       // Pressure-gradient (PSPG / grad-p) stabilization, REQUIRED for the
-      // equal-order P1/P1 pair
-      Integral(vmsTauP.getSolution() * Grad(p), Grad(q)) +
+      // equal-order P1/P1 pair; tau_p pointwise.
+      Integral(vmsTauPFn * Grad(p), Grad(q)) +
       BoundaryIntegral(inletBackflow * Dot(u, v)).over(BoundaryFluid::Inlet) +
       BoundaryIntegral(outletBackflow * Dot(u, v))
         .over(BoundaryFluid::Outlets[0], BoundaryFluid::Outlets[1],
@@ -1935,34 +2241,21 @@ int main(int argc, char** argv)
       BoundaryIntegral(pout3 * Dot(v, normalFluid)).over(BoundaryFluid::Outlets[3]) +
       BoundaryIntegral(pout4 * Dot(v, normalFluid)).over(BoundaryFluid::Outlets[4]) +
       BoundaryIntegral(pout5 * Dot(v, normalFluid)).over(BoundaryFluid::Outlets[5])
-      // Implicit local outlet resistance (delta form, per outlet):
-      //   + Z_out (u.n)(v.n)  -  Z_out (u^n.n)(v.n).
-      // The implicit (u) part damps a step-to-step flux change; the lagged
-      // (u^n) part cancels it at steady state (u = u^n), so the converged
-      // RCR outlet pressure is unchanged -- only the oscillation is killed.
+      // Implicit outlet resistance R_a Phi_a A (u.n)(v.n), per outlet.  The
+      // resistive part of p_out is NOT in the Neumann datum (pout = p_c), so
+      // this term IS the arteriolar resistance, fully implicit -- no lagged
+      // cancellation needed, unconditionally stable (CoupledLV0DCoronary3D).
       + BoundaryIntegral(zFn0 * Dot(Dot(u, normalFluid) * normalFluid, v))
-          .over(BoundaryFluid::Outlets[0]) -
-      BoundaryIntegral(zFn0 * Dot(Dot(uOld, normalFluid) * normalFluid, v))
-        .over(BoundaryFluid::Outlets[0]) +
+          .over(BoundaryFluid::Outlets[0]) +
       BoundaryIntegral(zFn1 * Dot(Dot(u, normalFluid) * normalFluid, v))
-        .over(BoundaryFluid::Outlets[1]) -
-      BoundaryIntegral(zFn1 * Dot(Dot(uOld, normalFluid) * normalFluid, v))
         .over(BoundaryFluid::Outlets[1]) +
       BoundaryIntegral(zFn2 * Dot(Dot(u, normalFluid) * normalFluid, v))
-        .over(BoundaryFluid::Outlets[2]) -
-      BoundaryIntegral(zFn2 * Dot(Dot(uOld, normalFluid) * normalFluid, v))
         .over(BoundaryFluid::Outlets[2]) +
       BoundaryIntegral(zFn3 * Dot(Dot(u, normalFluid) * normalFluid, v))
-        .over(BoundaryFluid::Outlets[3]) -
-      BoundaryIntegral(zFn3 * Dot(Dot(uOld, normalFluid) * normalFluid, v))
         .over(BoundaryFluid::Outlets[3]) +
       BoundaryIntegral(zFn4 * Dot(Dot(u, normalFluid) * normalFluid, v))
-        .over(BoundaryFluid::Outlets[4]) -
-      BoundaryIntegral(zFn4 * Dot(Dot(uOld, normalFluid) * normalFluid, v))
         .over(BoundaryFluid::Outlets[4]) +
       BoundaryIntegral(zFn5 * Dot(Dot(u, normalFluid) * normalFluid, v))
-        .over(BoundaryFluid::Outlets[5]) -
-      BoundaryIntegral(zFn5 * Dot(Dot(uOld, normalFluid) * normalFluid, v))
         .over(BoundaryFluid::Outlets[5]) +
       cfg.inletImpedance *
         BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
@@ -2138,28 +2431,13 @@ int main(int argc, char** argv)
       //  [residual] = k (dState.n - disp_0D)(w.n)).
       + heartK *
         BoundaryIntegral(Dot(d, normalSolid), Dot(w, normalSolid))
-          .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1],
-            BoundarySolid::Contact[2], BoundarySolid::Contact[3],
-            BoundarySolid::Contact[4], BoundarySolid::Contact[5],
-            BoundarySolid::Contact[6], BoundarySolid::Contact[7],
-            BoundarySolid::Contact[8], BoundarySolid::Contact[9],
-            BoundarySolid::Contact[10]) +
+          .over(BoundarySolid::Contact[0]) +
       heartK *
         BoundaryIntegral(Dot(dState, normalSolid), Dot(w, normalSolid))
-          .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1],
-            BoundarySolid::Contact[2], BoundarySolid::Contact[3],
-            BoundarySolid::Contact[4], BoundarySolid::Contact[5],
-            BoundarySolid::Contact[6], BoundarySolid::Contact[7],
-            BoundarySolid::Contact[8], BoundarySolid::Contact[9],
-            BoundarySolid::Contact[10]) -
+          .over(BoundarySolid::Contact[0]) -
       heartK *
         BoundaryIntegral(disp0DFn * l.getSolution(), Dot(w, normalSolid))
-          .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1],
-            BoundarySolid::Contact[2], BoundarySolid::Contact[3],
-            BoundarySolid::Contact[4], BoundarySolid::Contact[5],
-            BoundarySolid::Contact[6], BoundarySolid::Contact[7],
-            BoundarySolid::Contact[8], BoundarySolid::Contact[9],
-            BoundarySolid::Contact[10])
+          .over(BoundarySolid::Contact[0])
       // Robin-Robin transmission (solid side), per current area (J_a):
       //   sigma_s n_s + alpha d_dot = alpha u_f^{lag} + t_f^{lag},
       //   d_dot = vPred + solidVelocityCoeff (dState - dPred)  (Newmark).
@@ -2211,174 +2489,30 @@ int main(int argc, char** argv)
 
     laplacian.assemble();
     Solver::KSP(laplacian).solve();
+
+    // Transmural coordinate: Delta xi = 0, xi = 0 on the luminal (FSI)
+    // surface, xi = 1 on the adventitial surface (Outer).  Natural BC on the
+    // caps gives the linear through-thickness profile.  Must be solved BEFORE
+    // the prestress: the graded law reads xi at every quadrature point.
+    Problem thickness(xiT, xiTest);
+    thickness = Integral(Grad(xiT), Grad(xiTest)) +
+      DirichletBC(xiT, RealFunction(0.0)).on(BoundarySolid::FSI) +
+      DirichletBC(xiT, RealFunction(1.0))
+        .on(BoundarySolid::Outer[0], BoundarySolid::Outer[1]);
+    thickness.assemble();
+    Solver::KSP(thickness).solve();
+    xi.setData(xiT.getSolution().getData());
+    if (isRoot)
+      Alert::Info() << "  [grade] transmural xi solved; multipliers"
+                    << "  intima=" << cfg.gradeIntima
+                    << "  media=" << cfg.gradeMedia
+                    << "  adventitia=" << cfg.gradeAdventitia
+                    << "  (transition half-width " << cfg.gradeTransitionWidth << ")"
+                    << Alert::Raise;
+
+    xdmf_laplacian.add("xi", xi);
     xdmf_laplacian.write().flush();
     xdmf_laplacian.close();
-
-    // ---- Coagulation kinetics (Qureshi et al. 2022) -------------------------
-    //
-    // Th:  dTh/dt = D_th DTh - u.grad Th + R_Th
-    // Fg:  dFg/dt = D_fg DFg - u.grad Fg - k_eff Fg Th
-    // Fn:  dFn/dt = D_fn DFn - u.grad Fn + k_eff Fg Th
-    //
-    // Signs of the Galerkin part of the previous draft were correct: moving
-    // every term to the left, the reaction enters +k_eff Th Fg in the Fg
-    // equation and -k_eff Th Fg in the Fn equation, which is what is written
-    // below. What was wrong was everything around them:
-    //
-    //  (1) a stray ';' terminated the assignment after the reaction terms, so
-    //      the previous-step terms and the whole stabilization were parsed as a
-    //      separate discarded expression -- and the file did not compile,
-    //      because that expression was then juxtaposed with protein.assemble();
-    //  (2) thcur/fgcur/fncur (lower case) were never declared;
-    //  (3) grad(...) is spelled Grad(...) in Rodin;
-    //  (4) Dth, Dfg, Dfn, keff and Rt were never declared;
-    //  (5) the stabilization carried no tau. The SUPG parameter has units of
-    //      time and is ~5e-4 s here, so omitting it weights the stabilizing
-    //      terms roughly 2000x too heavily and they dominate the system;
-    //  (6) R_Th is a flux per unit *area*, so it belongs in a boundary integral
-    //      over the wall, not in a volume integral;
-    //  (7) the Fn stabilization used thCur*fn where the Fn residual contains
-    //      k_eff Fg Th, i.e. fg, not fn;
-    //  (8) the Fn stabilization carried a +k_eff^2 (Th Fn)(Th v) term. The Fn
-    //      equation has no reactive term proportional to Fn -- k_eff Fg Th is a
-    //      source -- so its adjoint has no reactive part and that term is
-    //      spurious;
-    //  (9) the Fg reaction-adjoint term had the wrong sign and only one of its
-    //      four contributions;
-    // (10) the system was assembled and solved once, outside the time loop.
-    //
-    // See ThrombosisModel.h for the constants and for the scope of the model.
-    using ProteinFES = H1<1, Real, MeshType>;
-    ProteinFES proh(std::integral_constant<size_t, 1>{}, meshFluid);
-
-    PETSc::Variational::TrialFunction th(proh);
-    PETSc::Variational::TrialFunction fg(proh);
-    PETSc::Variational::TrialFunction fn(proh);
-
-    PETSc::Variational::TestFunction vth(proh);
-    PETSc::Variational::TestFunction vfg(proh);
-    PETSc::Variational::TestFunction vfn(proh);
-
-    PETSc::Variational::GridFunction thCur(proh);
-    PETSc::Variational::GridFunction fgCur(proh);
-    PETSc::Variational::GridFunction fnCur(proh);
-
-    Problem protein(th, fg, fn, vth, vfg, vfn);
-
-    const Rodin::Examples::Heart::ThrombosisParameters thrombosis;
-
-    const Real Dth = thrombosis.diffusivityThrombin;
-    const Real Dfg = thrombosis.diffusivityFibrinogen;
-    const Real Dfn = thrombosis.diffusivityFibrin;
-    const Real keff = thrombosis.reactionRate;
-
-    // Initial conditions: no thrombin, no fibrin, uniform fibrinogen at the
-    // rhythm-dependent plasma level converted from g/L to mol/m^3.
-    thCur = Real(0);
-    fnCur = Real(0);
-    fgCur = thrombosis.fibrinogenSinusRhythm / thrombosis.fibrinogenMolarMass;
-
-    // Stabilization parameter. Evaluated once per step from the representative
-    // element size and the current maximum speed; it is a scalar here, which is
-    // the usual compromise when the form language has no per-element context.
-    Real hMin = std::numeric_limits<Real>::infinity();
-    for (auto it = meshFluid.getCell(); !it.end(); ++it)
-      hMin = std::min<Real>(hMin, it->getAttribute() ? it->getMeasure() : it->getMeasure());
-    hMin = std::cbrt(std::max<Real>(hMin, 1e-300));
-
-    // The wall activation weight is filled once per cycle from the wall-shear
-    // indices; before the first cycle closes it is identically zero, which is
-    // what arms the source only after a full period (see ThrombosisModel.h).
-    PETSc::Variational::GridFunction activation(proh);
-    activation = Real(0);
-
-    const auto RthFlux = thrombosis.thrombinWallFlux * activation;
-
-    auto assembleProtein = [&](Real speed) {
-      const Real tauTh = thrombosis.stabilizationScale *
-        Rodin::Examples::Heart::supgTau(hMin, speed, Dth, 0.0, dt);
-      const Real tauFg = thrombosis.stabilizationScale *
-        Rodin::Examples::Heart::supgTau(hMin, speed, Dfg, keff * thCur.max(), dt);
-      const Real tauFn = thrombosis.stabilizationScale *
-        Rodin::Examples::Heart::supgTau(hMin, speed, Dfn, 0.0, dt);
-
-      // Adjoint test perturbations. Only Fg has a reactive term proportional to
-      // its own unknown, so only Fg carries a reactive adjoint.
-      const auto pTh = Dot(uCur, Grad(vth));
-      const auto pFg = Dot(uCur, Grad(vfg));
-      const auto pFn = Dot(uCur, Grad(vfn));
-
-      // NOTE. The residual cannot be formed as a single expression: writing
-      // (th - thCur) mixes a TrialFunction with a GridFunction, and the form
-      // language keeps the unknown and the data apart because it has to sort
-      // every term into the bilinear or the linear form. Each product of
-      // residual and perturbation is therefore expanded below, one term at a
-      // time. With P1 elements the Laplacian vanishes elementwise, so the
-      // diffusive part of the residual is legitimately absent rather than
-      // merely dropped; and the thrombin source is a wall flux, so it does not
-      // belong to the volumetric residual either.
-      //
-      //   R_th = (th - th^n)/dt + u.grad th
-      //   R_fg = (fg - fg^n)/dt + u.grad fg + k Th fg
-      //   R_fn = (fn - fn^n)/dt + u.grad fn - k Th fg
-      //   p_th = u.grad vth
-      //   p_fg = u.grad vfg + k Th vfg
-      //   p_fn = u.grad vfn
-
-      protein =
-        // ---- Galerkin ----
-          (1. / dt) * Integral(th, vth) - (1. / dt) * Integral(thCur, vth)
-        + Dth * Integral(Grad(th), Grad(vth)) + Integral(Dot(uCur, Grad(th)), vth)
-
-        + (1. / dt) * Integral(fg, vfg) - (1. / dt) * Integral(fgCur, vfg)
-        + Dfg * Integral(Grad(fg), Grad(vfg)) + Integral(Dot(uCur, Grad(fg)), vfg)
-        + keff * Integral(thCur * fg, vfg)
-
-        + (1. / dt) * Integral(fn, vfn) - (1. / dt) * Integral(fnCur, vfn)
-        + Dfn * Integral(Grad(fn), Grad(vfn)) + Integral(Dot(uCur, Grad(fn)), vfn)
-        - keff * Integral(thCur * fg, vfn)
-
-        // ---- Endothelial thrombin source: a wall flux, not a volume source ----
-        - BoundaryIntegral(RthFlux, vth).over(BoundaryFluid::FSI)
-
-        // ---- SUPG/VMS, expanded ----
-        // Th: R_th * (u.grad vth)
-        + (tauTh / dt) * Integral(th, pTh)
-        - (tauTh / dt) * Integral(thCur, pTh)
-        + tauTh * Integral(Dot(uCur, Grad(th)), pTh)
-
-        // Fg: R_fg * (u.grad vfg)
-        + (tauFg / dt) * Integral(fg, pFg)
-        - (tauFg / dt) * Integral(fgCur, pFg)
-        + tauFg * Integral(Dot(uCur, Grad(fg)), pFg)
-        + (tauFg * keff) * Integral(thCur * fg, pFg)
-
-        // Fg: R_fg * (k Th vfg), the reactive part of the adjoint. It exists
-        // only for Fg, whose reaction is proportional to its own unknown.
-        + (tauFg * keff / dt) * Integral(fg, thCur * vfg)
-        - (tauFg * keff / dt) * Integral(fgCur, thCur * vfg)
-        + (tauFg * keff) * Integral(Dot(uCur, Grad(fg)), thCur * vfg)
-        + (tauFg * keff * keff) * Integral(thCur * fg, thCur * vfg)
-
-        // Fn: R_fn * (u.grad vfn). The reactive term of R_fn carries fg, not
-        // fn, so it couples the Fg unknown to the Fn test function.
-        + (tauFn / dt) * Integral(fn, pFn)
-        - (tauFn / dt) * Integral(fnCur, pFn)
-        + tauFn * Integral(Dot(uCur, Grad(fn)), pFn)
-        - (tauFn * keff) * Integral(thCur * fg, pFn);
-    };
-
-    // NOTE: assembleProtein(...) must be called *inside* the time loop, after
-    // uCur has been updated and after the wall-shear accumulator has been
-    // advanced, and followed by
-    //     protein.assemble();
-    //     Solver::KSP(protein).solve();
-    //     thCur.setData(th.getSolution().getData());
-    //     fgCur.setData(fg.getSolution().getData());
-    //     fnCur.setData(fn.getSolution().getData());
-    // The previous draft did this once, before the loop, which integrated the
-    // kinetics for exactly one step.
-    (void)assembleProtein;
 
     if (cfg.prestressSteps > 0)
     {
@@ -2399,12 +2533,24 @@ int main(int argc, char** argv)
       Solid::FollowerPressureTangent preLoadK(prestressPressure, dPre, wPre, dState);
       preLoadK.over(BoundarySolid::FSI);
 
+      // The outlets are NOT clamped: they carry the same elastic tethering
+      // spring a used by the dynamic problem (tangent on dPre + residual on
+      // dState), so the prestressed state hands off to the dynamics without a
+      // jump when the springs take over.  Only the inlet and its ring band
+      // are pinned (the anchor of the tree).
       Problem prestress(dPre, wPre);
       prestress = preTangent + preInternal + preLoadK + preLoad +
-        DirichletBC(dPre, zero)
-          .on(BoundarySolid::Inlet, BoundarySolid::Outlets[0], BoundarySolid::Outlets[1],
-            BoundarySolid::Outlets[2], BoundarySolid::Outlets[3],
-            BoundarySolid::Outlets[4], BoundarySolid::Outlets[5], BoundarySolid::FSIRing);
+        a *
+          BoundaryIntegral(dPre, wPre).over(BoundarySolid::Outlets[0],
+            BoundarySolid::Outlets[1], BoundarySolid::Outlets[2],
+            BoundarySolid::Outlets[3], BoundarySolid::Outlets[4],
+            BoundarySolid::Outlets[5]) +
+        a *
+          BoundaryIntegral(dState, wPre).over(BoundarySolid::Outlets[0],
+            BoundarySolid::Outlets[1], BoundarySolid::Outlets[2],
+            BoundarySolid::Outlets[3], BoundarySolid::Outlets[4],
+            BoundarySolid::Outlets[5]) +
+        DirichletBC(dPre, zero).on(BoundarySolid::Inlet, BoundarySolid::FSIRing);
 
       prestress.assemble();
       Solver::KSP kspPre(prestress);
@@ -2635,25 +2781,11 @@ int main(int argc, char** argv)
 
           uConv = uOld;
           uConv -= meshVelocity;
-          vmsL2Conv.assemble();
-          Solver::KSP(vmsL2Conv).solve();
-          vmsTauProj.assemble();
-          Solver::KSP(vmsTauProj).solve();
-          vmsSubProj.assemble();
-          Solver::KSP(vmsSubProj).solve();
-          // Orthogonal grad-div IMEX projections.  Project sqrt(tau_C^{n+1})
-          // and form the bilinear coefficient as its EXACT pointwise square
-          // tau_C = (sqrt tau_C)^2.  Then the lagged pi~^n = Pi( sqrt(tau_C^n)
-          // div u^n ) (time-n data: uOld, vmsSqrtTauCOld).
-          vmsSqrtTauCProj.assemble();
-          Solver::KSP(vmsSqrtTauCProj).solve();
-          VecPointwiseMult(vmsTauC.getSolution().getData(),
-            vmsSqrtTauC.getSolution().getData(), vmsSqrtTauC.getSolution().getData());
-          vmsPiTildeProj.assemble();
-          Solver::KSP(vmsPiTildeProj).solve();
-          // PSPG / grad-p coefficient tau_p (equal-order pressure stab).
-          vmsTauPProj.assemble();
-          Solver::KSP(vmsTauPProj).solve();
+          // Only the orthogonal-subscale projections are solved: the taus are
+          // pointwise and enter the form directly.  CG + Jacobi mass solves.
+          solveMass(vmsL2Conv);
+          solveMass(vmsSubProj);
+          solveMass(vmsPiTildeProj);
 
           flow.assemble().setFieldSplits();
 
@@ -2685,63 +2817,68 @@ int main(int argc, char** argv)
           // velocity.
           tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
           uWall.project(Region::Faces, uCur, BoundaryFluid::FSI);
-
-          {
-            // Recover the three rows of grad(u) over the VOLUME (so du/dn is
-            // retained on the wall), then build the WSS from them.
-            gradRecProj0.assemble();
-            Solver::KSP(gradRecProj0).solve();
-            gradRec0.setData(gradRecTrial.getSolution().getData());
-            gradRecProj1.assemble();
-            Solver::KSP(gradRecProj1).solve();
-            gradRec1.setData(gradRecTrial.getSolution().getData());
-            gradRecProj2.assemble();
-            Solver::KSP(gradRecProj2).solve();
-            gradRec2.setData(gradRecTrial.getSolution().getData());
-
-            PETSc::Variational::TestFunction wssTest(uh);
-            const auto onesVec = VectorFunction(dim, [&](const Point&) {
-              Math::SpatialVector<Real> o(dim);
-              for (Index c = 0; c < static_cast<Index>(dim); ++c)
-                o(c) = 1.0;
-              return o;
-            });
-            LinearForm<VelocityFES, ::Vec> wssLoad(wssTest);
-            wssLoad = BoundaryIntegral(wallStressRec, wssTest).over(BoundaryFluid::FSI);
-            wssLoad.assemble();
-            LinearForm<VelocityFES, ::Vec> wssArea(wssTest);
-            wssArea = BoundaryIntegral(onesVec, wssTest).over(BoundaryFluid::FSI);
-            wssArea.assemble();
-
-            ::Vec bvec = wssLoad.getVector();
-            ::Vec mvec = wssArea.getVector();
-            ::Vec svec = shearWall.getData();
-            // Bound the loop by the MINIMUM local size of the three vectors so
-            // a mismatch can never overrun an array (silent heap corruption ->
-            // a SEGV many steps later).  All three are on uh and should match;
-            // the min is just a hard safety bound.
-            PetscInt nb = 0, nm = 0, ns = 0;
-            VecGetLocalSize(bvec, &nb);
-            VecGetLocalSize(mvec, &nm);
-            VecGetLocalSize(svec, &ns);
-            const PetscInt n = std::min(ns, std::min(nb, nm));
-            const PetscScalar *barr = nullptr, *marr = nullptr;
-            PetscScalar* sarr = nullptr;
-            VecGetArrayRead(bvec, &barr);
-            VecGetArrayRead(mvec, &marr);
-            VecGetArray(svec, &sarr);
-            for (PetscInt i = 0; i < n; ++i)
-              sarr[i] =
-                (std::abs(marr[i]) > 1.0e-30) ? (barr[i] / marr[i]) : PetscScalar(0);
-            VecRestoreArray(svec, &sarr);
-            VecRestoreArrayRead(mvec, &marr);
-            VecRestoreArrayRead(bvec, &barr);
-          }
         }
       }
 
       if (stepFailed)
         break;
+
+      // ------------------------------------------------------------------
+      // Wall shear stress -- an OUTPUT diagnostic, computed ONCE per step
+      // from the converged fluid state (not once per coupling iterate).
+      // The gradient recovery stays an L2 projection: a P1 gradient is
+      // elementwise-constant and multivalued at the nodes, and evaluating
+      // Jacobian(u) on a boundary face keeps only the TANGENTIAL (surface)
+      // derivatives -- exactly the bug the volume recovery fixes -- so this
+      // is NOT a candidate for pointwise evaluation (same conclusion as
+      // Atrium::computeWallShear and CoupledLV0DCoronary3D).
+      // ------------------------------------------------------------------
+      {
+        solveMass(gradRecProj0);
+        gradRec0.setData(gradRecTrial.getSolution().getData());
+        solveMass(gradRecProj1);
+        gradRec1.setData(gradRecTrial.getSolution().getData());
+        solveMass(gradRecProj2);
+        gradRec2.setData(gradRecTrial.getSolution().getData());
+
+        PETSc::Variational::TestFunction wssTest(uh);
+        const auto onesVec = VectorFunction(dim, [&](const Point&) {
+          Math::SpatialVector<Real> o(dim);
+          for (Index c = 0; c < static_cast<Index>(dim); ++c)
+            o(c) = 1.0;
+          return o;
+        });
+        LinearForm<VelocityFES, ::Vec> wssLoad(wssTest);
+        wssLoad = BoundaryIntegral(wallStressRec, wssTest).over(BoundaryFluid::FSI);
+        wssLoad.assemble();
+        LinearForm<VelocityFES, ::Vec> wssArea(wssTest);
+        wssArea = BoundaryIntegral(onesVec, wssTest).over(BoundaryFluid::FSI);
+        wssArea.assemble();
+
+        ::Vec bvec = wssLoad.getVector();
+        ::Vec mvec = wssArea.getVector();
+        ::Vec svec = shearWall.getData();
+        // Bound the loop by the MINIMUM local size of the three vectors so
+        // a mismatch can never overrun an array (silent heap corruption ->
+        // a SEGV many steps later).  All three are on uh and should match;
+        // the min is just a hard safety bound.
+        PetscInt nb = 0, nm = 0, ns = 0;
+        VecGetLocalSize(bvec, &nb);
+        VecGetLocalSize(mvec, &nm);
+        VecGetLocalSize(svec, &ns);
+        const PetscInt n = std::min(ns, std::min(nb, nm));
+        const PetscScalar *barr = nullptr, *marr = nullptr;
+        PetscScalar* sarr = nullptr;
+        VecGetArrayRead(bvec, &barr);
+        VecGetArrayRead(mvec, &marr);
+        VecGetArray(svec, &sarr);
+        for (PetscInt i = 0; i < n; ++i)
+          sarr[i] =
+            (std::abs(marr[i]) > 1.0e-30) ? (barr[i] / marr[i]) : PetscScalar(0);
+        VecRestoreArray(svec, &sarr);
+        VecRestoreArrayRead(mvec, &marr);
+        VecRestoreArrayRead(bvec, &barr);
+      }
 
       // Converged interface displacement and consistent kinematics.
       dState = dIter;
@@ -2809,22 +2946,11 @@ int main(int argc, char** argv)
                         << Alert::Raise;
       }
 
-      // RCR / Windkessel update from the converged interface flux.
+      // R-mu outlet update from the converged interface flux: advances p_tm
+      // (implicit Euler + scalar Newton), exports pout = p_c and the
+      // rheological factors Phi_a / Phi_v for the next 3D assembly.
       for (const Attribute outlet : BoundaryFluid::Outlets)
-        updateRCRNonNew(cfg, outlet, model, wk[outlet], qOut[outlet], dt);
-
-      // Lagged implicit-resistance update
-      for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i)
-      {
-        const Attribute tag = BoundaryFluid::Outlets[i];
-        const Real Qi = qOut[tag];
-        const Real dpP = wk[tag].pout - wk[tag].pc; // proximal drop
-        const auto& g = cfg.outletFlowLaw.geometricParam.at(tag);
-        const Real Rpois = 8.0 * cfg.viscosity.mu0 * g.Lp /
-          (std::numbers::pi_v<Real> * std::pow(g.Rp, 4.0));
-        const Real R = (std::abs(Qi) > 1e-10) ? std::abs(dpP / Qi) : Rpois;
-        outletZ[i] = cfg.outletResistanceScale * R * outletArea[i];
-      }
+        updateOutlet0D(cfg, wrms, model, wk[outlet], qOut[outlet], dt);
 
       // Commit the step-(n+1) state.
       uOld.setData(uCur.getData());
@@ -2834,8 +2960,6 @@ int main(int argc, char** argv)
       solidAccelerationOld.setData(solidAcceleration.getData());
       // Carry the dynamic VMS subscale u'^{n+1} -> u'^n for the next step.
       vmsSubOld.setData(vmsSub.getSolution().getData());
-      // Carry sqrt(tau_C^{n+1}) -> sqrt(tau_C^n) for the lagged pi~ projection.
-      vmsSqrtTauCOld.setData(vmsSqrtTauC.getSolution().getData());
 
       aleDispOld.setData(aleDisp.getData());
 
@@ -2848,6 +2972,24 @@ int main(int argc, char** argv)
             << s.pd << ',' << qIn << ',' << qOutSum;
         for (const Attribute outlet : BoundaryFluid::Outlets)
           csv << ',' << qOut[outlet] << ',' << wk[outlet].pout;
+        // R-mu mechanism diagnostics.  p_tm must stay positive over the
+        // whole cycle: it is the model's own check that the Starling throat
+        // is doing its job.
+        {
+          Real pimNow = 0.0, ptmSum = 0.0, muASum = 0.0, muVSum = 0.0;
+          Real volSum = 0.0;
+          for (const auto& [tag, bc] : wk)
+          {
+            pimNow = bc.pim;
+            ptmSum += bc.ptm;
+            muASum += bc.muA;
+            muVSum += bc.muV;
+            volSum += bc.vol;
+          }
+          const Real nOut = static_cast<Real>(wk.size());
+          csv << ',' << pimNow << ',' << (ptmSum / nOut) << ','
+              << (muASum / nOut) << ',' << (muVSum / nOut) << ',' << volSum;
+        }
         csv << ',' << eInterface << ',' << lastRel << '\n';
         csv.flush();
       }
