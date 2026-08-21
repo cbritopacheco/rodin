@@ -81,6 +81,11 @@ assembly/solver changes, the relevant manufactured tests pass too.
    fitting is always a smooth penalty term (see `doc/agents/conventions.md`).
 5. **Internal variables are first-class DOFs** in Solid — no per-quadrature
    Schur condensation (see `doc/agents/conventions.md`).
+6. **Explain every anomaly.** An unexplained measurement is a finding, not a
+   footnote; explore it to a root cause and write the cause down before
+   calling the work done. Anomalies are usually about the instrument rather
+   than the subject, so believing one costs more than chasing it (see
+   `doc/agents/conventions.md`).
 
 ## Housekeeping
 

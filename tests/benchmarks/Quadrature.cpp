@@ -41,9 +41,22 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
-  /// @brief Cost of obtaining a rule. Rules are pooled, so this measures the
-  /// lookup and not the construction; it bounds how much of an integrator's
-  /// time a change of family could possibly move.
+  /// @brief Cost of obtaining a rule.
+  ///
+  /// This measures the pooled lookup, not construction. Read it with care: it
+  /// is not a per-element-type cost. PolytopeQuadratureFormula holds a
+  /// thread-local cache of eight entries, inserted round-robin and scanned
+  /// linearly from slot zero, so the cost of a hit is proportional to the slot
+  /// the key landed in, hence to the order in which distinct keys were first
+  /// requested in the process. Running this family in full gives 3.5 ns for
+  /// the first case and 32 ns for the eighth, resetting every eight; running
+  /// any single case alone gives 3.5 ns whatever the element. The ramp is the
+  /// cache, not the geometry.
+  ///
+  /// It is kept because the envelope is the useful quantity: 3.5 to 32 ns
+  /// against a 375 ns degree-4 wedge sweep bounds the lookup at under 9% of an
+  /// integrator's time in the worst slot, so no plausible change of quadrature
+  /// family is limited by it.
   static void BM_QuadratureAccess(benchmark::State& state)
   {
     const auto g = geometryOf(state.range(0));

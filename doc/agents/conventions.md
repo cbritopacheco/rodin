@@ -14,6 +14,31 @@ was abandoned. When you do performance work, the acceptance bar is *identical
 numerics* (iteration counts, final energies/fits) against a baseline run —
 not just "tests pass".
 
+## Anomalies
+
+**An unexplained measurement is a finding, not a footnote. Do not ship a
+number you cannot account for.** Anomalies get explored to a root cause, and
+the cause gets written down, before the work that surfaced them is called
+done. A result that is merely noted as odd will be read later as evidence for
+whatever the reader already believes.
+
+The cost of skipping this is that the anomaly is usually about the
+*instrument*, not the subject. A quadrature benchmark once appeared to show
+that access on tetrahedra and pyramids cost four to six times that on
+triangles and wedges at equal order. It did not. `PolytopeQuadratureFormula`'s
+thread-local hot cache holds eight entries, inserts round-robin and scans
+linearly from slot zero, so lookup cost is proportional to the slot a key
+landed in --- that is, to the order in which distinct keys were first
+requested. Running the "slow" geometries first made them fast. The benchmark
+had been measuring its own registration order, and had it been believed it
+would have justified optimising a difference between element types that does
+not exist.
+
+Explore first, then decide whether to act. The explanation may show the effect
+is an artefact, in which case the fix is to the measurement; or that it is
+real but out of scope, in which case it is recorded as its own item rather
+than folded into the current change.
+
 ## Error handling in PETSc-facing code
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
