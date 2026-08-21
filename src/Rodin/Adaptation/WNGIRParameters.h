@@ -12,6 +12,8 @@
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Types.h"
 
+#include "WNGIRLoss.h"
+
 namespace Rodin::Adaptation
 {
   /// @brief Surface observation metric used by the WNGIR natural gradient.
@@ -23,7 +25,7 @@ namespace Rodin::Adaptation
     RankOneIRLS,
     /// @brief Rank-one IRLS metric with a tangential coercivity floor.
     HybridRankOneIRLS,
-    /// @brief Rank-one Gauss--Newton majorizer retaining Welsch force attenuation.
+    /// @brief Rank-one Gauss--Newton majorizer retaining robust force attenuation.
     RankOneGaussNewton
   };
 
@@ -56,12 +58,15 @@ namespace Rodin::Adaptation
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
-      Real h = 0;                 ///< reference mesh size (required).
-      Real gammaM = 0;            ///< L² weight; zero disables the mass term.
-      Real gammaH = -1;           ///< deviatoric-strain weight; <0 ⇒ 0.0125/h.
-      Real gammaDiv = -1;         ///< divergence weight; <0 ⇒ gammaH.
-      Real ellM = -1;             ///< Sobolev length; <0 ⇒ 0.75h.
-      Real gammaObs = 1;          ///< surface observation metric weight.
+      WNGIRLossType loss = WNGIRLossType::Welsch; ///< Robust interface loss.
+      Real robustScale =
+        0; ///< >0 fixes the physical robust scale; zero selects it automatically.
+      Real h = 0; ///< reference mesh size (required).
+      Real gammaM = 0; ///< L² weight; zero disables the mass term.
+      Real gammaH = -1; ///< deviatoric-strain weight; <0 ⇒ 0.0125/h.
+      Real gammaDiv = -1; ///< divergence weight; <0 ⇒ gammaH.
+      Real ellM = -1; ///< Sobolev length; <0 ⇒ 0.75h.
+      Real gammaObs = 1; ///< surface observation metric weight.
       WNGIRObservationMetric observationMetric =
         WNGIRObservationMetric::HybridRankOneIRLS; ///< Surface observation metric.
       Real observationTangentialFloor =
@@ -71,23 +76,23 @@ namespace Rodin::Adaptation
       Real initialGuessGamma = 0; ///< Normal-offset initializer; zero gives a cold start.
       Real initialGuessCapH =
         2; ///< Cap normal-offset initialization by this multiple of h.
-      Real gammaJ = 1;            ///< j-barrier weight.
-      Real gammaQ = 1;            ///< Q-barrier weight.
-      Real jSafe = 1e-2;          ///< barrier floor on j.
-      Real qMax = 10;             ///< barrier + line-search ceiling on Q.
-      Real s0J = 0.25;            ///< j-barrier activation width.
-      Real s0Q = 2;               ///< Q-barrier activation width.
-    /// One-sided relative-distortion quality metric:
-    ///   K_Q(v,z) = gammaQual ∫_{Q_rel>qStar} a_Q(v) a_Q(z) dX.
-    /// This changes the Riesz metric only; no quality force is added to the
-    /// right-hand side.
-    /// gammaQual ≤ 0 disables the Q hinge.
+      Real gammaJ = 1; ///< j-barrier weight.
+      Real gammaQ = 1; ///< Q-barrier weight.
+      Real jSafe = 1e-2; ///< barrier floor on j.
+      Real qMax = 10; ///< barrier + line-search ceiling on Q.
+      Real s0J = 0.25; ///< j-barrier activation width.
+      Real s0Q = 2; ///< Q-barrier activation width.
+      /// One-sided relative-distortion quality metric:
+      ///   K_Q(v,z) = gammaQual ∫_{Q_rel>qStar} a_Q(v) a_Q(z) dX.
+      /// This changes the Riesz metric only; no quality force is added to the
+      /// right-hand side.
+      /// gammaQual ≤ 0 disables the Q hinge.
       Real gammaQual = 0; ///< Relative-distortion quality metric weight.
       Real qStar = Real(1.75); ///< Relative-distortion hinge threshold.
-    /// Optional one-sided size hinge:
-    ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
-    /// Disabled by default. Inversion is handled by the near-zero j barrier
-    /// and the true-geometry line search, allowing small well-shaped cells.
+      /// Optional one-sided size hinge:
+      ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
+      /// Disabled by default. Inversion is handled by the near-zero j barrier
+      /// and the true-geometry line search, allowing small well-shaped cells.
       Real gammaSize = 0; ///< Size-hinge weight in the symmetric metric model.
       Real jStar = Real(0.3); ///< Jacobian size-hinge threshold.
       WNGIRMetricActivation metricActivation =
@@ -102,18 +107,28 @@ namespace Rodin::Adaptation
       Real marginFraction = Real(0.5); ///< Fraction of a margin available to one step.
       std::size_t marginCorrectionIterations = 3; ///< Safeguarded penalty corrections.
       Real marginPenaltyGrowth = 10; ///< Penalty growth between safeguard corrections.
-      std::size_t primalBarrierIterations = 3; ///< Newton corrections of the QP barrier.
+      std::size_t primalBarrierIterations =
+        8; ///< Maximum Newton corrections of the QP barrier.
+      Real primalBarrierRelativeTolerance =
+        Real(1e-2); ///< Relative Newton-correction tolerance for the QP barrier.
+      bool requirePrimalBarrierConvergence =
+        true; ///< Reject a primal-barrier direction without an inner certificate.
       Real primalBarrierMu = Real(0.3); ///< Dimensionless barrier/model-decrease ratio.
       Real fractionToBoundary = Real(0.95); ///< Strict-feasibility fraction.
-      Real omegaMin = 0.1;        ///< active-set threshold on ω.
-      Real alphaMin = 1e-4;       ///< line-search floor.
+      Real omegaMin = 0.1; ///< active-set threshold on ω.
+      Real alphaMin = 1e-4; ///< line-search floor.
       bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds;
-                                       ///< mandatory when the primal barrier is active.
+        ///< mandatory when the primal barrier is active.
       bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
-      Real jMinRatio = 1e-8;      ///< hard inadmissibility floor.
+      Real armijoCoefficient = Real(1e-4); ///< Armijo sufficient-decrease coefficient.
+      Real descentFraction =
+        Real(1e-4); ///< Minimum force action relative to the predictor.
+      Real directionNormFactor =
+        Real(10); ///< Maximum coefficient norm relative to the predictor.
+      Real jMinRatio = 1e-8; ///< hard inadmissibility floor.
       Real jLineSearchRatio = 1e-2; ///< Jacobian floor ratio enforced by line search.
-      Real activeRMSTol = 0;      ///< ≤0 ⇒ 4h².
-      Real activeSupTol = 0;      ///< ≤0 ⇒ 10h².
+      Real activeRMSTol = 0; ///< ≤0 ⇒ 4h².
+      Real activeSupTol = 0; ///< ≤0 ⇒ 10h².
       Real activeRMSOverHTol = 0; ///< >0 enables scale-aware RMS stopping.
       Real activeSupOverHTol = 0; ///< >0 enables scale-aware sup stopping.
       bool geometryAwareTolerances = true; ///< Enable dimension-aware residual floors.
@@ -126,7 +141,8 @@ namespace Rodin::Adaptation
       Real supNormalJumpFactor =
         Real(0.05); ///< Sup tolerance factor multiplying the normal-jump estimate.
       Real energyStagTol = 1e-4; ///< Relative energy stagnation tolerance.
-      Real stepTol = 0;           ///< ≤0 ⇒ 1e-4·h.
+      Real stationarityTolerance = 0; ///< >0 enables natural-gradient stopping.
+      Real stepTol = 0; ///< ≤0 ⇒ 1e-4·h.
       Real acceptedStepOverHTol =
         Real(5e-3); ///< >0 stops best-effort when accepted step/h is small.
       Real cgRelativeTolerance = 1e-6; ///< relative residual tolerance for CG.

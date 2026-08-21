@@ -44,3 +44,14 @@ gtest_discover_tests(RodinAdaptationWNGIRValidationWeightsTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinAdaptationWNGIRLossTest WNGIRLossTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRLossTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRLossTest
+  PROPERTIES
+    LABELS unit
+)

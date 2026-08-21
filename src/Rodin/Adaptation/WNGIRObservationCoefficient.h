@@ -33,7 +33,7 @@ namespace Rodin::Adaptation::Detail
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      /// @brief Constructs the w n g i r observation coefficient.
+      /// @brief Constructs the WNGIR observation coefficient.
       WNGIRObservationCoefficient(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator,
         const WNGIRParameters& parameters, Real sigma2, std::size_t dimension)
@@ -41,7 +41,7 @@ namespace Rodin::Adaptation::Detail
           m_grad(grad.copy()),
           m_deformation(current, locator),
           m_parameters(parameters),
-          m_sigma2(sigma2),
+          m_loss(parameters.loss, std::sqrt(sigma2)),
           m_dimension(dimension)
       {}
 
@@ -52,7 +52,7 @@ namespace Rodin::Adaptation::Detail
           m_grad(other.m_grad->copy()),
           m_deformation(other.m_deformation),
           m_parameters(other.m_parameters),
-          m_sigma2(other.m_sigma2),
+          m_loss(other.m_loss),
           m_dimension(other.m_dimension)
       {}
 
@@ -68,12 +68,12 @@ namespace Rodin::Adaptation::Detail
         if (params.observationMetric == WNGIRObservationMetric::Isotropic)
         {
           const WNGIRResidualState state(
-            *m_phi, *m_grad, m_deformation, ip, m_sigma2, false);
+            *m_phi, *m_grad, m_deformation, ip, m_loss, false);
           const Real g2 = state.getGradient().dot(state.getGradient());
           const Real a = quadratureCorrection * params.gammaObs *
             (g2 + epsG +
               (params.residualStabilizedObservationMetric
-                  ? (state.getResidual() * state.getResidual()) / m_sigma2
+                  ? (state.getResidual() * state.getResidual()) / m_loss.getScaleSquared()
                   : Real(0)));
           m.setZero();
           for (std::uint8_t r = 0; r < d; ++r)
@@ -87,7 +87,7 @@ namespace Rodin::Adaptation::Detail
           params.observationMetric == WNGIRObservationMetric::RankOneIRLS || hybrid ||
           params.observationMetric == WNGIRObservationMetric::RankOneGaussNewton;
         const WNGIRResidualState state(
-          *m_phi, *m_grad, m_deformation, ip, m_sigma2, weighted);
+          *m_phi, *m_grad, m_deformation, ip, m_loss, weighted);
         const auto& g = state.getGradient();
         const Real g2 = g.dot(g);
         const Real tau = hybrid ? params.observationTangentialFloor * g2 : Real(0);
@@ -134,7 +134,7 @@ namespace Rodin::Adaptation::Detail
       std::unique_ptr<GradType> m_grad;
       DeformationMap<Displacement, LocatorType> m_deformation;
       std::reference_wrapper<const WNGIRParameters> m_parameters;
-      Real m_sigma2;
+      WNGIRLoss m_loss;
       std::size_t m_dimension;
   };
 

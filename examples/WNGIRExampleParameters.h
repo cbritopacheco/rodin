@@ -110,6 +110,18 @@ namespace Rodin::Examples
     throw std::invalid_argument("Unknown --wngir-metric-activation value: " + value);
   }
 
+  inline Adaptation::WNGIRLossType parseWNGIRLoss(int argc, char** argv)
+  {
+    const auto value = stringOption(argc, argv, "wngir-loss", "welsch");
+    if (value == "welsch")
+      return Adaptation::WNGIRLossType::Welsch;
+    if (value == "cauchy")
+      return Adaptation::WNGIRLossType::Cauchy;
+    if (value == "pseudo-huber")
+      return Adaptation::WNGIRLossType::PseudoHuber;
+    throw std::invalid_argument("Unknown --wngir-loss value: " + value);
+  }
+
   inline Adaptation::WNGIRObservationMetric parseObservationMetric(int argc, char** argv)
   {
     const auto value =
@@ -150,6 +162,7 @@ namespace Rodin::Examples
   {
     Adaptation::WNGIRParameters p;
     p.h = h;
+    p.loss = parseWNGIRLoss(argc, argv);
 
     const Real gammaMFactor =
       realOption(argc, argv, "wngir-gamma-m", defaults.gammaMFactor);
@@ -171,6 +184,7 @@ namespace Rodin::Examples
     p.initialGuessGamma = Real(0);
     p.initialGuessGamma = realOption(argc, argv, "wngir-init-gamma", p.initialGuessGamma);
     p.initialGuessCapH = realOption(argc, argv, "wngir-init-cap-h", p.initialGuessCapH);
+    p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
     p.betaMax = realOption(argc, argv, "wngir-beta-max", defaults.betaMax);
 
     p.gammaJ = realOption(argc, argv, "wngir-gamma-j", defaults.gammaJ);
@@ -194,6 +208,10 @@ namespace Rodin::Examples
     p.primalBarrierIterations = std::max<std::size_t>(1,
       sizeOption(
         argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
+    p.primalBarrierRelativeTolerance = realOption(
+      argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
+    p.requirePrimalBarrierConvergence = boolOption(argc, argv,
+      "wngir-primal-barrier-require-convergence", p.requirePrimalBarrierConvergence);
     p.primalBarrierMu =
       realOption(argc, argv, "wngir-primal-barrier-mu", p.primalBarrierMu);
     p.fractionToBoundary =
@@ -208,6 +226,11 @@ namespace Rodin::Examples
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
     p.admissibilityChecks = boolOption(argc, argv, "wngir-admissibility-checks", true);
     p.energyLineSearch = !boolOption(argc, argv, "wngir-no-energy-ls", false);
+    p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
+    p.descentFraction =
+      realOption(argc, argv, "wngir-descent-fraction", p.descentFraction);
+    p.directionNormFactor =
+      realOption(argc, argv, "wngir-direction-norm-factor", p.directionNormFactor);
 
     p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
     const Real jSafeRatio = realOption(argc, argv, "j-safe", Real(1e-3));
@@ -235,6 +258,8 @@ namespace Rodin::Examples
     p.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", defaultRMSTol);
     p.activeSupTol = realOption(argc, argv, "wngir-sup-tol", defaultSupTol);
     p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
+    p.stationarityTolerance =
+      realOption(argc, argv, "wngir-stationarity-tol", p.stationarityTolerance);
     p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
     p.acceptedStepOverHTol =
       realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);

@@ -16,6 +16,7 @@ set(RodinAdaptation_HEADERS
   CellGeomCache.h
   WNGIRConstraintState.h
   WNGIRMarginForce.h
+  WNGIRLoss.h
   WNGIRParameters.h
   WNGIRPrimalBarrierForce.h
   WNGIRPrimalBarrierMetric.h

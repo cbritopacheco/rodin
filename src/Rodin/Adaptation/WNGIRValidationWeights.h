@@ -47,7 +47,7 @@ namespace Rodin::Adaptation::Detail
        *   w_q\,c_q=\frac{\sum_i w_i}{\sum_i|w_i|}|w_q|.
        * @f]
        * This is required for sampled non-negative functionals, such as the
-       * Welsch energy and its metric, for which cancellation by a signed
+       * robust energy and its metric, for which cancellation by a signed
        * polynomial cubature rule has no variational interpretation.
        */
       static Real getCorrection(const Variational::IntegrationPoint& ip)
@@ -73,7 +73,8 @@ namespace Rodin::Adaptation::Detail
             absoluteWeight += std::abs(qf.getWeight(q));
           }
           cachedFormula = &qf;
-          cachedScale = absoluteWeight > Real(0) ? signedWeight / absoluteWeight : Real(0);
+          cachedScale =
+            absoluteWeight > Real(0) ? signedWeight / absoluteWeight : Real(0);
         }
         const Real weight = qf.getWeight(quadraturePoint);
         if (weight == Real(0))

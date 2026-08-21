@@ -16,6 +16,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -91,10 +92,10 @@ namespace Rodin::Adaptation
       /// @brief Interface-fit summary of a displacement.
       struct SurfaceState
       {
-        /// @brief Welsch energy of the interface residual.
+        /// @brief Robust energy of the interface residual.
           Real energy = 0;
 
-        /// @brief Measure carrying a non-negligible Welsch weight.
+        /// @brief Measure carrying a non-negligible robust weight.
           Real activeLen = 0;
 
         /// @brief Measure of the whole interface.
@@ -139,23 +140,22 @@ namespace Rodin::Adaptation
       {
         m_parameters = parameters;
         const std::size_t defaultMaxIterations = std::min<std::size_t>(2000,
-          std::max<std::size_t>(100,
-            2 * m_duStep.getFiniteElementSpace().getSize()));
+          std::max<std::size_t>(100, 2 * m_duStep.getFiniteElementSpace().getSize()));
         const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
           ? m_parameters.cgMaxIterations
           : defaultMaxIterations;
         if constexpr (requires(StepSolverType& solver, Real tolerance) {
-          solver.setTolerance(tolerance);
-        })
+                        solver.setTolerance(tolerance);
+                      })
           m_stepSolver.setTolerance(m_parameters.cgRelativeTolerance);
         if constexpr (requires(StepSolverType& solver, std::size_t iterations) {
-          solver.setMaxIterations(iterations);
-        })
+                        solver.setMaxIterations(iterations);
+                      })
           m_stepSolver.setMaxIterations(maxIterations);
-        if constexpr (requires(StepSolverType& solver, Real tolerance,
-                        std::size_t iterations) {
-          solver.setTolerances(tolerance, tolerance, tolerance, iterations);
-        })
+        if constexpr (requires(
+                        StepSolverType& solver, Real tolerance, std::size_t iterations) {
+                        solver.setTolerances(tolerance, tolerance, tolerance, iterations);
+                      })
         {
           m_stepSolver.setTolerances(m_parameters.cgRelativeTolerance,
             StepSolverType::DEFAULT_ABSTOL, StepSolverType::DEFAULT_DTOL, maxIterations);
@@ -254,11 +254,12 @@ namespace Rodin::Adaptation
         rep.effectiveRMSOverHTol = activeRMSOverHTol;
         rep.effectiveSupOverHTol = activeSupOverHTol;
 
-          // One bounding-volume locator per solve: the background mesh is fixed
-          // for the frame, and the index builds lazily on first query.
+        // One bounding-volume locator per solve: the background mesh is fixed
+        // for the frame, and the index builds lazily on first query.
         const Location::AABB<Mesh> locator(mesh);
-        const Real sigma = getWelschScale(mesh, fes, phi, interfaceFacets, h);
+        const Real sigma = getRobustScale(mesh, fes, phi, interfaceFacets, h);
         const Real sigma2 = sigma * sigma;
+        const WNGIRLoss loss(p.loss, sigma);
         rep.sigma = sigma;
         if (!p.hasInterfaceAttribute)
         {
@@ -266,9 +267,8 @@ namespace Rodin::Adaptation
           m_report = rep;
           return rep;
         }
-        const Real domainMeasure = usePrimalBarrier
-          ? getDomainMeasure(mesh, fes, validationCells)
-          : Real(0);
+        const Real domainMeasure =
+          usePrimalBarrier ? getDomainMeasure(mesh, fes, validationCells) : Real(0);
 
         // ============================================================
         // Per-iteration field evaluations through the GridFunction.
@@ -279,7 +279,7 @@ namespace Rodin::Adaptation
         };
         auto surfaceState = [&](const Displacement& gf) {
           return getSurfaceState(
-            mesh, fes, gf, phi, interfaceFacets, sigma2, meshDim, locator);
+            mesh, fes, gf, phi, interfaceFacets, loss, meshDim, locator);
         };
 
         rep.tSetup = secondsSince(setupTic);
@@ -310,6 +310,7 @@ namespace Rodin::Adaptation
         }
 
         Displacement vK(fes);
+        Displacement predictor(fes);
         Displacement scratch(fes);
         Displacement previousU(fes);
         Displacement uTrial(fes);
@@ -415,9 +416,8 @@ namespace Rodin::Adaptation
           rep.tLineSearch += secondsSince(tic);
           if (p.trace)
           {
-            const auto surf = accepted && trialSurfaceEvaluated
-              ? trialSurface
-              : surfaceState(u);
+            const auto surf =
+              accepted && trialSurfaceEvaluated ? trialSurface : surfaceState(u);
             std::cout << "      wngir init=normal-offset"
                       << "  accepted=" << (accepted ? 1 : 0) << "  alpha=" << alpha
                       << "  actRMS=" << std::scientific << surf.activeRMS
@@ -472,6 +472,7 @@ namespace Rodin::Adaptation
           Math::Vector<Real> zero(meshDim);
           zero.setZero();
           bool solveOk = true;
+          Real predictorAction = Real(0);
           const bool directional =
             p.constraintFormulation != WNGIRConstraintFormulation::SignBlindMetric;
           const bool activeSetKKT =
@@ -557,13 +558,23 @@ namespace Rodin::Adaptation
             if (!solveOk)
               break;
 
+            predictor = vK;
+            predictorAction = std::max(Real(0),
+              getSurfaceForceAction(mesh, fes, u, predictor, phi, grad, interfaceFacets,
+                sigma2, meshDim, locator));
+            rep.stationarityNorm = std::sqrt(predictorAction);
+            if (p.stationarityTolerance > Real(0) &&
+              rep.stationarityNorm <= p.stationarityTolerance)
+            {
+              rep.energy = ePrev;
+              rep.exitReason = "stationary-converged";
+              break;
+            }
+
             const bool useBarrier = usePrimalBarrier;
             if (useBarrier)
             {
-              const Real modelDecrease = Real(0.5) *
-                std::max(Real(0),
-                  getSurfaceForceAction(mesh, fes, u, vK, phi, grad, interfaceFacets,
-                    sigma2, meshDim, locator));
+              const Real modelDecrease = Real(0.5) * predictorAction;
               const Real barrierCoefficient = domainMeasure > Real(0)
                 ? p.primalBarrierMu * modelDecrease / domainMeasure
                 : Real(0);
@@ -583,6 +594,10 @@ namespace Rodin::Adaptation
                 vK *= predictorAlpha;
                 const std::size_t innerIterations =
                   std::max<std::size_t>(1, p.primalBarrierIterations);
+                const Real predictorNorm =
+                  std::max(std::abs(predictor.max()), std::abs(predictor.min()));
+                bool innerConverged = false;
+                rep.lastPrimalBarrierIterations = 0;
                 tic = Clock::now();
                 for (std::size_t inner = 0; inner < innerIterations; ++inner)
                 {
@@ -594,7 +609,8 @@ namespace Rodin::Adaptation
                   body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
                   if (!p.dirichletAttributes.empty())
                     body = body +
-                      Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                      Variational::DirichletBC(
+                        m_duStep, Variational::VectorFunction(zero))
                         .on(p.dirichletAttributes);
                   m_stepProblem = body;
                   m_stepProblem.assemble();
@@ -612,6 +628,15 @@ namespace Rodin::Adaptation
 
                   scratch = uTrial;
                   scratch -= vK;
+                  const Real correctionNorm =
+                    std::max(std::abs(scratch.max()), std::abs(scratch.min()));
+                  const Real relativeCorrection = predictorNorm > Real(0)
+                    ? correctionNorm / predictorNorm
+                    : (correctionNorm == Real(0) ? Real(0)
+                                                 : std::numeric_limits<Real>::infinity());
+                  rep.primalBarrierRelativeCorrection = relativeCorrection;
+                  ++rep.primalBarrierIterations;
+                  ++rep.lastPrimalBarrierIterations;
                   const Real innerAlpha = getBarrierStepScale(
                     mesh, fes, validationCells, u, vK, scratch, meshDim);
                   if (!(innerAlpha > Real(0)))
@@ -621,7 +646,19 @@ namespace Rodin::Adaptation
                   }
                   scratch *= innerAlpha;
                   vK += scratch;
+                  innerConverged = p.primalBarrierRelativeTolerance > Real(0) &&
+                    relativeCorrection <= p.primalBarrierRelativeTolerance &&
+                    innerAlpha >= Real(0.999);
                   tic = Clock::now();
+                  if (innerConverged)
+                    break;
+                }
+                rep.primalBarrierConverged = innerConverged;
+                if (solveOk && p.requirePrimalBarrierConvergence &&
+                  p.primalBarrierRelativeTolerance > Real(0) && !innerConverged)
+                {
+                  rep.exitReason = "primal-barrier-inner-not-converged";
+                  solveOk = false;
                 }
               }
             }
@@ -674,7 +711,8 @@ namespace Rodin::Adaptation
           }
           if (!solveOk)
           {
-            rep.exitReason = "solve-linear-failed";
+            if (rep.exitReason == std::string_view("iter-budget"))
+              rep.exitReason = "solve-linear-failed";
             break;
           }
 
@@ -695,6 +733,52 @@ namespace Rodin::Adaptation
           }
           rep.lastMarginScale = marginScale;
 
+          Real directionAction = getSurfaceForceAction(
+            mesh, fes, u, vK, phi, grad, interfaceFacets, sigma2, meshDim, locator);
+          const Real predictorNorm = primalBarrierQP
+            ? std::max(std::abs(predictor.max()), std::abs(predictor.min()))
+            : Real(0);
+          Real directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
+          const bool insufficientDescent = p.descentFraction > Real(0) &&
+            predictorAction > Real(0) &&
+            directionAction < p.descentFraction * predictorAction;
+          const bool excessiveDirection = p.directionNormFactor > Real(0) &&
+            predictorNorm > Real(0) &&
+            directionNorm > p.directionNormFactor * predictorNorm;
+          if ((insufficientDescent || excessiveDirection) && primalBarrierQP)
+          {
+            vK = predictor;
+            if (usePrimalBarrier)
+            {
+              uTrial *= Real(0);
+              const Real predictorAlpha =
+                getBarrierStepScale(mesh, fes, validationCells, u, uTrial, vK, meshDim);
+              if (!(predictorAlpha > Real(0)))
+              {
+                rep.exitReason = "descent-fallback-not-feasible";
+                break;
+              }
+              vK *= predictorAlpha;
+            }
+            directionAction = getSurfaceForceAction(
+              mesh, fes, u, vK, phi, grad, interfaceFacets, sigma2, meshDim, locator);
+            directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
+            rep.usedDescentFallback = true;
+          }
+          rep.directionAction = directionAction;
+          rep.descentRatio =
+            predictorAction > Real(0) ? directionAction / predictorAction : Real(0);
+          rep.directionNormRatio =
+            predictorNorm > Real(0) ? directionNorm / predictorNorm : Real(0);
+          if (p.armijoCoefficient > Real(0) &&
+            (!(directionAction > Real(0)) ||
+              (p.descentFraction > Real(0) && predictorAction > Real(0) &&
+                directionAction < p.descentFraction * predictorAction)))
+          {
+            rep.exitReason = "no-gradient-related-feasible-direction";
+            break;
+          }
+
           // ---- Optimal step rescale β = ⟨d,v⟩_Γ / ⟨v,v⟩_Γ ----
           Real beta = Real(1);
           Real rawDemonsRMS = Real(0);
@@ -703,10 +787,10 @@ namespace Rodin::Adaptation
           {
             struct TraceState
             {
-              Real numerator = 0;
-              Real directionSquared = 0;
-              Real demonsSquared = 0;
-              Real measure = 0;
+                Real numerator = 0;
+                Real directionSquared = 0;
+                Real demonsSquared = 0;
+                Real measure = 0;
             };
 
             if constexpr (requires { u.acquire(); })
@@ -740,7 +824,7 @@ namespace Rodin::Adaptation
                 const SpatialVec g = grad.getValue(moved);
                 const Real obsWeight = g.dot(g) + epsG +
                   (p.residualStabilizedObservationMetric ? (r * r) / sigma2 : Real(0));
-                const Real omega = std::exp(-r * r / sigma2);
+                const Real omega = loss.getWeight(r);
                 SpatialVec dVec;
                 switch (p.observationMetric)
                 {
@@ -780,6 +864,14 @@ namespace Rodin::Adaptation
             {
               beta = std::clamp(bNum / bDen, Real(1), p.betaMax);
               vK *= beta;
+              directionAction = getSurfaceForceAction(
+                mesh, fes, u, vK, phi, grad, interfaceFacets, sigma2, meshDim, locator);
+              directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
+              rep.directionAction = directionAction;
+              rep.descentRatio =
+                predictorAction > Real(0) ? directionAction / predictorAction : Real(0);
+              rep.directionNormRatio =
+                predictorNorm > Real(0) ? directionNorm / predictorNorm : Real(0);
             }
           }
 
@@ -828,7 +920,10 @@ namespace Rodin::Adaptation
                 trialSurface = surfaceState(uTrial);
                 trialSurfaceEvaluated = true;
                 eTrial = trialSurface.energy;
-                eOK = std::isfinite(eTrial) && eTrial <= ePrev;
+                const Real sufficientDecrease = p.armijoCoefficient > Real(0)
+                  ? p.armijoCoefficient * alpha * directionAction
+                  : Real(0);
+                eOK = std::isfinite(eTrial) && eTrial <= ePrev - sufficientDecrease;
               }
               if (jOK && qOK && eOK)
               {
@@ -849,9 +944,8 @@ namespace Rodin::Adaptation
           }
 
           FastAdm acceptedAdm = adm;
-          SurfaceState acceptedSurf = trialSurfaceEvaluated
-            ? trialSurface
-            : surfaceState(u);
+          SurfaceState acceptedSurf =
+            trialSurfaceEvaluated ? trialSurface : surfaceState(u);
           Real acceptedEnergy =
             p.energyLineSearch && std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
 
@@ -865,13 +959,17 @@ namespace Rodin::Adaptation
           }
           else
             rep.acceptedStep = maxStep;
-          rep.minJ = checkGeometry ? acceptedAdm.minJ
-                                           : std::numeric_limits<Real>::quiet_NaN();
-          rep.maxQRel = checkGeometry ? acceptedAdm.maxQ
-                                              : std::numeric_limits<Real>::quiet_NaN();
+          rep.minJ =
+            checkGeometry ? acceptedAdm.minJ : std::numeric_limits<Real>::quiet_NaN();
+          rep.maxQRel =
+            checkGeometry ? acceptedAdm.maxQ : std::numeric_limits<Real>::quiet_NaN();
 
           const auto surf = acceptedSurf;
           const Real eNow = acceptedEnergy;
+          rep.backtracks += backtracks;
+          rep.actualPredictedDecrease = alpha * directionAction > Real(0)
+            ? (ePrev - eNow) / (alpha * directionAction)
+            : Real(0);
           rep.activeRMS = surf.activeRMS;
           rep.activeSup = surf.activeSup;
           rep.activeFraction =
@@ -884,17 +982,21 @@ namespace Rodin::Adaptation
                       << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
                       << "  actSup=" << surf.activeSup
                       << "  actFrac=" << rep.activeFraction;
-            if (!directional)
-              std::cout << "  dΓ/h=" << (h > Real(0) ? rawDemonsRMS / h : Real(0))
-                        << "  vΓ/h=" << (h > Real(0) ? liftedTraceRMS / h : Real(0))
-                        << "  β=" << beta;
-            std::cout
-                      << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
-                      << "  linIt=" << rep.linearIterations << "  α=" << alpha
-                      << "  marginScale=" << marginScale
-                      << "  muEff=" << rep.primalBarrierCoefficient
-                      << "  kktAct=" << rep.activeConstraints << "  bt=" << backtracks
-                      << "  min_j=" << rep.minJ << "  max_Q=" << rep.maxQRel << '\n';
+          if (!directional)
+            std::cout << "  dΓ/h=" << (h > Real(0) ? rawDemonsRMS / h : Real(0))
+                      << "  vΓ/h=" << (h > Real(0) ? liftedTraceRMS / h : Real(0))
+                      << "  β=" << beta;
+          std::cout << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
+                    << "  linIt=" << rep.linearIterations << "  α=" << alpha
+                    << "  marginScale=" << marginScale
+                    << "  muEff=" << rep.primalBarrierCoefficient
+                    << "  pbIt=" << rep.lastPrimalBarrierIterations
+                    << "  pbRel=" << rep.primalBarrierRelativeCorrection
+                    << "  stat=" << rep.stationarityNorm << "  desc=" << rep.descentRatio
+                    << "  dirNorm=" << rep.directionNormRatio
+                    << "  ared/pred=" << rep.actualPredictedDecrease
+                    << "  kktAct=" << rep.activeConstraints << "  bt=" << backtracks
+                    << "  min_j=" << rep.minJ << "  max_Q=" << rep.maxQRel << '\n';
 
           if (surf.activeRMS <= activeRMSTol)
           {
@@ -944,8 +1046,8 @@ namespace Rodin::Adaptation
         {
           using DiagnosticLinearFormType =
             std::decay_t<decltype(Variational::LinearForm(m_vStep))>;
-          using ForceVectorType = std::remove_cvref_t<decltype(
-            std::declval<DiagnosticLinearFormType&>().getVector())>;
+          using ForceVectorType = std::remove_cvref_t<
+            decltype(std::declval<DiagnosticLinearFormType&>().getVector())>;
           if constexpr (std::is_same_v<ForceVectorType, Math::Vector<Real>>)
           {
             DiagnosticLinearFormType forceForm(m_vStep);
@@ -1032,7 +1134,7 @@ namespace Rodin::Adaptation
               const Real aQ = deformation.getRelativeDistortionAction(jp);
               const Real fl = force(
                 static_cast<Eigen::Index>(fes.getGlobalIndex({dimension, cellIdx}, l)));
-                // c_j = -a_j, c_Q = +a_Q.
+              // c_j = -a_j, c_Q = +a_Q.
               gjf += (-aJ) * fl;
               gjg += aJ * aJ;
               gqf += aQ * fl;
@@ -1070,8 +1172,8 @@ namespace Rodin::Adaptation
 
       /// @brief Measure of the fixed background domain used to normalize the QP.
       template <class Mesh, class FES>
-      Real getDomainMeasure(const Mesh& mesh, const FES& fes,
-        const std::vector<Index>& validationCells) const
+      Real getDomainMeasure(
+        const Mesh& mesh, const FES& fes, const std::vector<Index>& validationCells) const
       {
         if constexpr (requires { mesh.getShard(); })
         {
@@ -1092,7 +1194,7 @@ namespace Rodin::Adaptation
         }
       }
 
-      /// @brief Action of the negative Welsch first variation on a direction.
+      /// @brief Action of the negative robust-energy first variation on a direction.
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       Real getSurfaceForceAction(const Mesh& mesh, const FES& fes,
         const Displacement& current, const Displacement& direction, const PhiType& phi,
@@ -1157,7 +1259,7 @@ namespace Rodin::Adaptation
         Real alpha = Real(1);
         int feasible = 1;
 #ifdef RODIN_USE_OPENMP
-#pragma omp parallel reduction(min: alpha) reduction(&: feasible)
+#pragma omp parallel reduction(min : alpha) reduction(& : feasible)
 #endif
         {
           CellDeformation deformation(dimension);
@@ -1186,12 +1288,10 @@ namespace Rodin::Adaptation
               const auto incrementGradient = incrementJacobian.getValue(ip);
               const Real innerJ = -deformation.getJacobianAction(innerGradient);
               const Real incrementJ = -deformation.getJacobianAction(incrementGradient);
-              const Real innerQ =
-                deformation.getRelativeDistortionAction(innerGradient);
+              const Real innerQ = deformation.getRelativeDistortionAction(innerGradient);
               const Real incrementQ =
                 deformation.getRelativeDistortionAction(incrementGradient);
-              const Real slackJ =
-                deformation.getJacobian() - m_parameters.jSafe - innerJ;
+              const Real slackJ = deformation.getJacobian() - m_parameters.jSafe - innerJ;
               const Real slackQ =
                 m_parameters.qMax - deformation.getRelativeDistortion() - innerQ;
               if (slackJ <= Real(0) || slackQ <= Real(0))
@@ -1235,7 +1335,7 @@ namespace Rodin::Adaptation
         Real scale = Real(1);
         int feasible = 1;
 #ifdef RODIN_USE_OPENMP
-#pragma omp parallel reduction(min: scale) reduction(&: feasible)
+#pragma omp parallel reduction(min : scale) reduction(& : feasible)
 #endif
         {
           CellDeformation deformation(dimension);
@@ -1261,8 +1361,7 @@ namespace Rodin::Adaptation
               }
 
               const auto gradient = directionJacobian.getValue(ip);
-              const Real jacobianConsumption =
-                -deformation.getJacobianAction(gradient);
+              const Real jacobianConsumption = -deformation.getJacobianAction(gradient);
               if (jacobianConsumption > Real(0))
               {
                 const Real margin = deformation.getJacobian() - jacobianFloor;
@@ -1310,8 +1409,8 @@ namespace Rodin::Adaptation
         Real maxQ = Real(0);
         std::size_t inadmissibleCount = 0;
 #ifdef RODIN_USE_OPENMP
-#pragma omp parallel reduction(min: minJ) reduction(max: maxQ) \
-  reduction(+: inadmissibleCount)
+#pragma omp parallel reduction(min : minJ) reduction(max : maxQ)                         \
+  reduction(+ : inadmissibleCount)
 #endif
         {
           CellDeformation deformation(dimension);
@@ -1345,7 +1444,7 @@ namespace Rodin::Adaptation
        * @brief Evaluates the interface fit of a displacement.
        *
        * The residual is the level set read at the deformed image of each
-       * interface quadrature point. Points whose Welsch weight has fallen below
+       * interface quadrature point. Points whose robust weight has fallen below
        * @ref WNGIRParameters::omegaMin are excluded from the residual norms:
        * they are the ones the robust weighting has already rejected as
        * outliers, and including them would let a distant feature dominate an
@@ -1354,8 +1453,8 @@ namespace Rodin::Adaptation
       template <class Mesh, class FES, class PhiType, class LocatorType>
       SurfaceState getSurfaceState(const Mesh& mesh, const FES& fes,
         const Displacement& u, const PhiType& phi,
-        const std::vector<Index>& interfaceFacets, Real sigma2, std::size_t dimension,
-        const LocatorType& locator) const
+        const std::vector<Index>& interfaceFacets, const WNGIRLoss& loss,
+        std::size_t dimension, const LocatorType& locator) const
       {
         if constexpr (requires { u.acquire(); })
           u.acquire();
@@ -1363,8 +1462,8 @@ namespace Rodin::Adaptation
           phi.acquire();
         struct SurfaceAccumulation
         {
-          SurfaceState state;
-          Real squaredResidual = 0;
+            SurfaceState state;
+            Real squaredResidual = 0;
         };
         std::vector<SurfaceAccumulation> facetStates(interfaceFacets.size());
 #ifdef RODIN_USE_OPENMP
@@ -1386,9 +1485,9 @@ namespace Rodin::Adaptation
             const Variational::IntegrationPoint ip(src, &qf, q);
             const Real w = positiveWeights.getWeight(q) * src.getDistortion();
             const Real r = phi.getValue(deformation.getMovedPoint(ip));
-            const Real omega = std::exp(-r * r / sigma2);
+            const Real omega = loss.getWeight(r);
             facetState.totalLen += w;
-            facetState.energy += w * Real(0.5) * sigma2 * (Real(1) - omega);
+            facetState.energy += w * loss.getValue(r);
             if (omega >= m_parameters.omegaMin)
             {
               facetState.activeLen += w;
@@ -1430,10 +1529,10 @@ namespace Rodin::Adaptation
       NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& interfaceFacets, std::size_t dimension) const
       {
-          // Averaged unit normal and measure of each facet. The normal is the
-          // quadrature average of the pointwise unit normals, so a curved facet
-          // contributes its mean orientation; a facet degenerate throughout
-          // falls back to a fixed direction rather than a null vector.
+        // Averaged unit normal and measure of each facet. The normal is the
+        // quadrature average of the pointwise unit normals, so a curved facet
+        // contributes its mean orientation; a facet degenerate throughout
+        // falls back to a fixed direction rather than a null vector.
         constexpr Real degenerate = Real(1e-30);
         std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
         std::vector<Real> measures(interfaceFacets.size(), Real(0));
@@ -1544,22 +1643,26 @@ namespace Rodin::Adaptation
       }
 
       /**
-       * @brief Welsch scale @f$\sigma@f$ of the interface residual.
+       * @brief Robust scale @f$\sigma@f$ of the interface residual.
        *
-       * The robust weight @f$\omega=e^{-r^2/\sigma^2}@f$ needs a scale
-       * separating the residuals to be fitted from those to be rejected as
-       * outliers. It is the 90th percentile of the undeformed residual, floored
-       * at @f$3h@f$: the percentile adapts to how far the interface actually
-       * starts from the mesh, while the floor keeps @f$\sigma@f$ above the
-       * resolution below which no displacement can distinguish features.
+       * The loss weight requires a scale separating the residuals to be fitted
+       * from those treated as outliers. It is the 90th percentile of the
+       * undeformed residual, floored at @f$3h@f$: the percentile adapts to the
+       * initial mismatch, while the floor keeps @f$\sigma@f$ above the geometric
+       * resolution.
        *
        * Fixed once per frame rather than re-estimated per iteration, which
        * would let the scale chase its own progress and never reject anything.
+       * A positive @ref WNGIRParameters::robustScale overrides the automatic
+       * mesh-dependent selection.
        */
       template <class Mesh, class FES, class PhiType>
-      Real getWelschScale(const Mesh& mesh, const FES& fes, const PhiType& phi,
+      Real getRobustScale(const Mesh& mesh, const FES& fes, const PhiType& phi,
         const std::vector<Index>& interfaceFacets, Real h) const
       {
+        if (m_parameters.robustScale > Real(0))
+          return m_parameters.robustScale;
+
         std::vector<Real> residuals;
         for (const Index facetIdx : interfaceFacets)
         {
@@ -1589,9 +1692,8 @@ namespace Rodin::Adaptation
       {
         m_stepProblem.solve(m_stepSolver);
         out = m_duStep.getSolution();
-        if constexpr (requires(const StepSolverType& solver) {
-          solver.getIterationNumber();
-        })
+        if constexpr (requires(
+                        const StepSolverType& solver) { solver.getIterationNumber(); })
           iterations = m_stepSolver.getIterationNumber();
         else
           iterations = 0;

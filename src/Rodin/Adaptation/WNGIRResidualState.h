@@ -13,22 +13,24 @@
 #include "Rodin/Types.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
+#include "WNGIRLoss.h"
+
 namespace Rodin::Adaptation::Detail
 {
-  /// @brief Pointwise Welsch residual state at a deformed interface point.
+  /// @brief Pointwise robust residual state at a deformed interface point.
   class WNGIRResidualState
   {
     public:
       template <class PhiType, class GradType, class DeformationType>
-      /// @brief Constructs the w n g i r residual state.
+      /// @brief Constructs the WNGIR residual state.
       WNGIRResidualState(const PhiType& phi, const GradType& grad,
         const DeformationType& deformation, const Variational::IntegrationPoint& ip,
-        Real sigma2, bool weighted)
+        const WNGIRLoss& loss, bool weighted)
       {
         const auto& moved = deformation.getMovedPoint(ip);
         m_residual = phi.getValue(moved);
         m_gradient = grad.getValue(moved);
-        m_weight = weighted ? std::exp(-m_residual * m_residual / sigma2) : Real(1);
+        m_weight = weighted ? loss.getWeight(m_residual) : Real(1);
       }
 
       /// @brief The residual.

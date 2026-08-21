@@ -16,7 +16,7 @@ namespace Rodin::Adaptation::Detail
   {
     public:
       template <class PhiType, class GradType>
-      /// @brief Constructs the w n g i r normal offset.
+      /// @brief Constructs the WNGIR normal offset.
       WNGIRNormalOffset(const PhiType& phi, const GradType& grad,
         const Geometry::Point& p, const WNGIRParameters& params, Real sigma2)
       {
@@ -38,7 +38,7 @@ namespace Rodin::Adaptation::Detail
           const Real cap = params.initialGuessCapH * params.h;
           m_offset = std::clamp(m_offset, -cap, cap);
         }
-        m_attenuation = std::exp(-m_offset * m_offset / sigma2);
+        m_attenuation = WNGIRLoss(params.loss, std::sqrt(sigma2)).getWeight(r);
       }
 
       /// @brief Whether degenerate.

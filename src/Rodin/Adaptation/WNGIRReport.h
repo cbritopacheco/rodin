@@ -18,53 +18,75 @@ namespace Rodin::Adaptation
   {
     /// @brief Number of nonlinear iterations performed.
       std::size_t iterations = 0;
-    /// @brief Welsch scale used for the interface residual.
+    /// @brief Robust-loss scale used for the interface residual.
       Real sigma = 0;
+    /// @brief Natural-gradient norm obtained from the unconstrained predictor.
+      Real stationarityNorm = 0;
+    /// @brief Action of the negative energy derivative on the accepted direction.
+      Real directionAction = 0;
+    /// @brief Direction action divided by the unconstrained predictor action.
+      Real descentRatio = 0;
+    /// @brief Direction coefficient norm divided by the predictor norm.
+      Real directionNormRatio = 0;
+    /// @brief Actual energy decrease divided by its linear prediction.
+      Real actualPredictedDecrease = 0;
+    /// @brief Number of outer backtracks accumulated by the solve.
+      std::size_t backtracks = 0;
+    /// @brief Whether the final direction used the predictor fallback.
+      bool usedDescentFallback = false;
     /// @brief Last accepted line-search factor.
       Real lastAlpha = 0;
     /// @brief Last affine margin-safeguard factor.
       Real lastMarginScale = 1;
     /// @brief Effective per-volume coefficient assembled for the last barrier QP.
       Real primalBarrierCoefficient = 0;
-    /// @brief Norm or magnitude of the last accepted step.
+    /// @brief Last primal-barrier Newton correction relative to the predictor.
+      Real primalBarrierRelativeCorrection = 0;
+      /// @brief Number of primal-barrier Newton corrections accumulated by the solve.
+      std::size_t primalBarrierIterations = 0;
+      /// @brief Number of primal-barrier Newton corrections in the final outer step.
+      std::size_t lastPrimalBarrierIterations = 0;
+      /// @brief Whether the final primal-barrier inner solve met its tolerance.
+      bool primalBarrierConverged = false;
+      /// @brief Norm or magnitude of the last accepted step.
       Real acceptedStep = 0;
-    /// @brief Minimum sampled Jacobian determinant.
+      /// @brief Minimum sampled Jacobian determinant.
       Real minJ = 1;
-    /// @brief Maximum sampled relative distortion.
+      /// @brief Maximum sampled relative distortion.
       Real maxQRel = 1;
-    /// @brief Active-interface RMS residual.
+      /// @brief Active-interface RMS residual.
       Real activeRMS = 0;
-    /// @brief Active-interface supremum residual.
+      /// @brief Active-interface supremum residual.
       Real activeSup = 0;
-    /// @brief Fraction of interface quadrature in the active set.
+      /// @brief Fraction of interface quadrature in the active set.
       Real activeFraction = 0;
-    /// @brief Effective RMS-over-h stopping tolerance.
+      /// @brief Effective RMS-over-h stopping tolerance.
       Real effectiveRMSOverHTol = 0;
-    /// @brief Effective sup-over-h stopping tolerance.
+      /// @brief Effective sup-over-h stopping tolerance.
       Real effectiveSupOverHTol = 0;
-    /// @brief RMS jump of the normal field across the interface.
+      /// @brief RMS jump of the normal field across the interface.
       Real normalJumpRMS = 0;
-    /// @brief Maximum jump of the normal field across the interface.
+      /// @brief Maximum jump of the normal field across the interface.
       Real normalJumpMax = 0;
-    /// @brief Final WNGIR energy.
+      /// @brief Final WNGIR energy.
       Real energy = 0;
-    /// @brief Textual reason the iteration stopped.
+      /// @brief Textual reason the iteration stopped.
       const char* exitReason = "iter-budget";
-    // Wall-clock breakdown (seconds, accumulated over iterations).
-      Real tAssembly = 0;   ///< WNGIR variational problem assembly.
-      Real tSetup = 0;      ///< WNGIR geometry/sigma/validation tabulation.
-      Real tBulk = 0;       ///< One-time constant bulk metric assembly.
-      Real tFactor = 0;     ///< CG setup/preconditioner.
-      Real tSolve = 0;      ///< CG iterations.
+      // Wall-clock breakdown (seconds, accumulated over iterations).
+      Real tAssembly = 0; ///< WNGIR variational problem assembly.
+      Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
+      Real tBulk = 0; ///< One-time constant bulk metric assembly.
+      Real tFactor = 0; ///< CG setup/preconditioner.
+      Real tSolve = 0; ///< CG iterations.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
       std::size_t activeConstraints = 0; ///< Accumulated KKT active-set size.
       Real linearError = 0; ///< Last linear solver residual/error estimate.
-    /// Per-cell fit--admissibility conflict indicator.
-    ///
-    /// Local alignment between the interface force and selected admissibility
-    /// normals, aggregated per cell. This is neither a KKT multiplier nor a
-    /// certificate that no feasible descent direction remains.
+      /// Per-cell fit--admissibility conflict indicator.
+      ///
+      /// Local alignment between the interface force and selected admissibility
+      /// normals, aggregated per cell. This is neither a KKT multiplier nor a
+      /// certificate that no feasible descent direction remains.
       std::vector<Real> conflictIndicator;
   };
 }
