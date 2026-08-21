@@ -10,6 +10,7 @@ set(RodinQF_HEADERS
   GaussLegendre.h
   GrundmannMoller.h
   SymmetricOrbit.h
+  SymmetricRuleSolver.h
   PolytopeQuadratureFormula.h
 )
 

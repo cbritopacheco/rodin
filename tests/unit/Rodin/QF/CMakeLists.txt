@@ -53,3 +53,17 @@ gtest_discover_tests(RodinSymmetricOrbitTest
   PROPERTIES
     LABELS unit
 )
+
+# Symmetric rule solver tests
+add_executable(RodinSymmetricRuleSolverTest SymmetricRuleSolverTest.cpp)
+target_link_libraries(RodinSymmetricRuleSolverTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin
+  Rodin::QF
+  )
+gtest_discover_tests(RodinSymmetricRuleSolverTest
+  PROPERTIES
+    LABELS unit
+)
