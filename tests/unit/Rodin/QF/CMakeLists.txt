@@ -39,3 +39,17 @@ gtest_discover_tests(RodinQuadratureExactnessTest
   PROPERTIES
     LABELS unit
 )
+
+# Symmetric orbit tests
+add_executable(RodinSymmetricOrbitTest SymmetricOrbitTest.cpp)
+target_link_libraries(RodinSymmetricOrbitTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin
+  Rodin::QF
+  )
+gtest_discover_tests(RodinSymmetricOrbitTest
+  PROPERTIES
+    LABELS unit
+)

@@ -9,6 +9,7 @@ set(RodinQF_HEADERS
   Centroid.h
   GaussLegendre.h
   GrundmannMoller.h
+  SymmetricOrbit.h
   PolytopeQuadratureFormula.h
 )
 
