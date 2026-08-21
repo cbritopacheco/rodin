@@ -250,6 +250,35 @@ namespace Rodin::QF
         return orbits;
       }
 
+      /**
+       * @brief Monomial exponents, exact moments and row scalings for one
+       * (element, degree) pair.
+       *
+       * The residual is evaluated O(unknowns) times per Levenberg-Marquardt
+       * iteration and was rebuilding all three every time: allocating the
+       * exponent list and recomputing factorials per call. They depend only on
+       * the element and the degree, so they are built once per solve.
+       */
+      struct MomentData
+      {
+        std::vector<std::vector<size_t>> alphas;
+        std::vector<Real> exact;
+        std::vector<Real> scale;
+
+        MomentData(Geometry::Polytope::Type g, size_t d, size_t degree)
+          : alphas(monomials(d, degree))
+        {
+          exact.reserve(alphas.size());
+          scale.reserve(alphas.size());
+          for (const auto& alpha : alphas)
+          {
+            const Real m = referenceMoment(g, alpha);
+            exact.push_back(m);
+            scale.push_back(Real(1) / std::max(std::abs(m), Real(1e-14)));
+          }
+        }
+      };
+
       /// @brief Integer power, avoiding std::pow in the residual hot loop.
       static Real ipow(Real x, size_t e)
       {
@@ -266,12 +295,9 @@ namespace Rodin::QF
       /// iteration for the finite-difference Jacobian, so an expansion inside
       /// the monomial loop dominates everything else.
       static Math::Vector<Real> residual(Geometry::Polytope::Type g,
-        size_t degree, const Configuration& config, const Math::Vector<Real>& x)
+        const Configuration& config, const Math::Vector<Real>& x,
+        const MomentData& moments, size_t d)
       {
-        const Geometry::Polytope::Traits traits(g);
-        const size_t d = traits.getDimension();
-        const auto alphas = monomials(d, degree);
-
         std::vector<Math::SpatialVector<Real>> points;
         std::vector<Real> weights;
         for (const auto& orbit : toOrbits(config, x))
@@ -283,10 +309,10 @@ namespace Rodin::QF
           }
         }
 
-        Math::Vector<Real> r(static_cast<Eigen::Index>(alphas.size()));
-        for (size_t e = 0; e < alphas.size(); ++e)
+        Math::Vector<Real> r(static_cast<Eigen::Index>(moments.alphas.size()));
+        for (size_t e = 0; e < moments.alphas.size(); ++e)
         {
-          const auto& alpha = alphas[e];
+          const auto& alpha = moments.alphas[e];
           Real sum = 0;
           for (size_t q = 0; q < points.size(); ++q)
           {
@@ -295,11 +321,18 @@ namespace Rodin::QF
               m *= ipow(points[q][static_cast<Eigen::Index>(k)], alpha[k]);
             sum += m;
           }
-          const Real exact = referenceMoment(g, alpha);
           r(static_cast<Eigen::Index>(e)) =
-            (sum - exact) / std::max(std::abs(exact), Real(1e-14));
+            (sum - moments.exact[e]) * moments.scale[e];
         }
         return r;
+      }
+
+      /// @brief Convenience overload building the moment data on the spot.
+      static Math::Vector<Real> residual(Geometry::Polytope::Type g,
+        size_t degree, const Configuration& config, const Math::Vector<Real>& x)
+      {
+        const size_t d = Geometry::Polytope::Traits(g).getDimension();
+        return residual(g, config, x, MomentData(g, d, degree), d);
       }
 
       /**
@@ -318,6 +351,8 @@ namespace Rodin::QF
         const size_t d = traits.getDimension();
         const Eigen::Index n = static_cast<Eigen::Index>(unknownCount(config));
         const Real measure = referenceMoment(g, std::vector<size_t>(d, 0));
+
+        const MomentData moments(g, d, degree);
 
         std::mt19937 rng(seed);
         std::uniform_real_distribution<Real> bary(Real(0.02), Real(0.6));
@@ -347,7 +382,7 @@ namespace Rodin::QF
           }
 
           Real lambda = 1e-3;
-          Math::Vector<Real> r = residual(g, degree, config, x);
+          Math::Vector<Real> r = residual(g, config, x, moments, d);
           Real cost = r.squaredNorm();
           for (size_t it = 0; it < maxIterations; ++it)
           {
@@ -358,15 +393,15 @@ namespace Rodin::QF
               Math::Vector<Real> xp = x, xm = x;
               xp(j) += h;
               xm(j) -= h;
-              J.col(j) = (residual(g, degree, config, xp)
-                        - residual(g, degree, config, xm)) / (2 * h);
+              J.col(j) = (residual(g, config, xp, moments, d)
+                        - residual(g, config, xm, moments, d)) / (2 * h);
             }
             const Math::Matrix<Real> H =
               J.transpose() * J
               + lambda * Math::Matrix<Real>::Identity(n, n);
             const Math::Vector<Real> step = H.ldlt().solve(-J.transpose() * r);
             const Math::Vector<Real> xn = x + step;
-            const Math::Vector<Real> rn = residual(g, degree, config, xn);
+            const Math::Vector<Real> rn = residual(g, config, xn, moments, d);
             const Real cn = rn.squaredNorm();
             if (cn < cost)
             {
