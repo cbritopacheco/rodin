@@ -86,16 +86,10 @@ namespace Rodin::Tests::QF
   }
 
   /// @brief Spatial dimension of the reference polytope.
+  /// @see Rodin::Geometry::Polytope::Traits::getDimension
   inline size_t dimensionOf(Geometry::Polytope::Type g)
   {
-    using Type = Geometry::Polytope::Type;
-    switch (g)
-    {
-      case Type::Point:                             return 0;
-      case Type::Segment:                           return 1;
-      case Type::Triangle: case Type::Quadrilateral: return 2;
-      default:                                      return 3;
-    }
+    return Geometry::Polytope::Traits(g).getDimension();
   }
 
   /// @brief Outcome of an exactness sweep over all monomials of a given degree.
@@ -197,36 +191,31 @@ namespace Rodin::Tests::QF
     return true;
   }
 
-  /// @brief Whether @p x lies in the reference polytope @p g, up to @p tol.
+  /**
+   * @brief Whether @p x lies in the reference polytope @p g, up to @p tol.
+   *
+   * Uses the half-space description @f$ Ax \le b @f$ published by
+   * Rodin::Geometry::Polytope::Traits, rather than a restatement of it: the
+   * reference elements are defined there and nowhere else, so a test that
+   * hard-codes them would pass against its own assumptions instead of against
+   * the library.
+   */
   inline bool isInside(Geometry::Polytope::Type g,
     const Math::SpatialVector<Real>& x, Real tol)
   {
-    using Type = Geometry::Polytope::Type;
-    const auto ge = [tol](Real v) { return v >= -tol; };
-    switch (g)
-    {
-      case Type::Point:
-        return true;
-      case Type::Segment:
-        return ge(x[0]) && ge(1 - x[0]);
-      case Type::Triangle:
-        return ge(x[0]) && ge(x[1]) && ge(1 - x[0] - x[1]);
-      case Type::Quadrilateral:
-        return ge(x[0]) && ge(1 - x[0]) && ge(x[1]) && ge(1 - x[1]);
-      case Type::Tetrahedron:
-        return ge(x[0]) && ge(x[1]) && ge(x[2]) && ge(1 - x[0] - x[1] - x[2]);
-      case Type::Hexahedron:
-        return ge(x[0]) && ge(1 - x[0]) && ge(x[1]) && ge(1 - x[1])
-            && ge(x[2]) && ge(1 - x[2]);
-      case Type::Wedge:
-        return ge(x[0]) && ge(x[1]) && ge(1 - x[0] - x[1])
-            && ge(x[2]) && ge(1 - x[2]);
-      case Type::Pyramid:
-        return ge(x[2]) && ge(1 - x[2])
-            && ge(x[0]) && ge(1 - x[2] - x[0])
-            && ge(x[1]) && ge(1 - x[2] - x[1]);
-    }
-    return false;
+    const Geometry::Polytope::Traits traits(g);
+    const size_t d = traits.getDimension();
+    if (d == 0)
+      return true;
+    const auto& hs = traits.getHalfSpace();
+    Math::Vector<Real> p(static_cast<Eigen::Index>(d));
+    for (size_t i = 0; i < d; ++i)
+      p(static_cast<Eigen::Index>(i)) = x[i];
+    const Math::Vector<Real> r = hs.matrix * p - hs.vector;
+    for (Eigen::Index i = 0; i < r.size(); ++i)
+      if (r(i) > tol)
+        return false;
+    return true;
   }
 
   /// @brief Whether every point lies in the reference polytope.

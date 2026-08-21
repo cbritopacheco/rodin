@@ -21,12 +21,18 @@ namespace
 {
   constexpr Real kExactTol = 1e-12;
 
-  const std::vector<Polytope::Type> kAllGeometries = {
-    Polytope::Type::Segment,  Polytope::Type::Triangle,
-    Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-    Polytope::Type::Wedge, Polytope::Type::Pyramid,
-    Polytope::Type::Hexahedron
-  };
+  /// @brief Every type Rodin publishes, minus Point, which carries no
+  /// quadrature of its own. Taken from Polytope::Types so that a new element
+  /// type is covered by these tests the moment it is declared, rather than
+  /// when someone remembers to extend a list here.
+  std::vector<Polytope::Type> allGeometries()
+  {
+    std::vector<Polytope::Type> gs;
+    for (const auto g : Polytope::Types)
+      if (g != Polytope::Type::Point)
+        gs.push_back(g);
+    return gs;
+  }
 
   const char* name(Polytope::Type g)
   {
@@ -54,7 +60,7 @@ namespace
 /// up here and nowhere else.
 TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
 {
-  for (const auto g : kAllGeometries)
+  for (const auto g : allGeometries())
   {
     for (size_t order = 1; order <= 8; ++order)
     {
@@ -120,7 +126,7 @@ TEST(QuadratureExactnessTest, WedgeIsExactAtOddOrders)
 /// rescaled or renormalised rule can satisfy while failing every other.
 TEST(QuadratureExactnessTest, WeightsSumToReferenceMeasure)
 {
-  for (const auto g : kAllGeometries)
+  for (const auto g : allGeometries())
   {
     for (size_t order = 1; order <= 8; ++order)
     {
@@ -136,7 +142,7 @@ TEST(QuadratureExactnessTest, WeightsSumToReferenceMeasure)
 /// polynomials correctly, because the geometric map need not be defined there.
 TEST(QuadratureExactnessTest, PointsLieInsideReferenceElement)
 {
-  for (const auto g : kAllGeometries)
+  for (const auto g : allGeometries())
   {
     for (size_t order = 1; order <= 8; ++order)
     {
@@ -149,7 +155,7 @@ TEST(QuadratureExactnessTest, PointsLieInsideReferenceElement)
 /// @brief Determinism: two constructions of the same rule agree bitwise.
 TEST(QuadratureExactnessTest, ConstructionIsDeterministic)
 {
-  for (const auto g : kAllGeometries)
+  for (const auto g : allGeometries())
   {
     GrundmannMoller a(2, g == Polytope::Type::Triangle ? g : Polytope::Type::Triangle);
     GrundmannMoller b(2, Polytope::Type::Triangle);
@@ -161,6 +167,41 @@ TEST(QuadratureExactnessTest, ConstructionIsDeterministic)
         EXPECT_EQ(a.getPoint(i)[k], b.getPoint(i)[k]) << "point " << i;
     }
     break;
+  }
+}
+
+/// @brief The closed-form moments are moments of *Rodin's* reference elements.
+///
+/// exactMoment() is written by hand so that the exactness sweep has an oracle
+/// independent of any quadrature code. That independence is only worth having
+/// if the domain it integrates over is the one Rodin actually uses, so this
+/// test pins the two together: every reference vertex published by
+/// Polytope::Traits must satisfy the half-space system, and the measure
+/// implied by the moments must agree with the measure obtained by integrating
+/// the constant 1 with a rule of the highest order under test.
+TEST(QuadratureExactnessTest, MomentOracleMatchesRodinReferenceElements)
+{
+  for (const auto g : allGeometries())
+  {
+    const Polytope::Traits traits(g);
+    for (size_t i = 0; i < traits.getVertexCount(); ++i)
+    {
+      const auto& v = traits.getVertex(i);
+      Math::SpatialVector<Real> x;
+      x.resize(static_cast<Eigen::Index>(traits.getDimension()));
+      for (size_t k = 0; k < traits.getDimension(); ++k)
+        x[static_cast<Eigen::Index>(k)] = v[static_cast<Eigen::Index>(k)];
+      EXPECT_TRUE(isInside(g, x, 1e-13))
+        << name(g) << ": reference vertex " << i
+        << " does not satisfy its own half-space system";
+    }
+
+    EXPECT_TRUE(isInside(g, traits.getCentroid(), 1e-13))
+      << name(g) << ": centroid outside its own element";
+
+    const auto& qf = PolytopeQuadratureFormula::get(8, g);
+    EXPECT_NEAR(weightSum(qf), referenceMeasure(g), kExactTol)
+      << name(g) << ": measure from the moment oracle disagrees with the rule";
   }
 }
 
@@ -241,7 +282,7 @@ namespace
 /// unperturbed rule passes.
 TEST(QuadratureExactnessTest, ExactnessSweepRejectsAPerturbedWeight)
 {
-  for (const auto g : kAllGeometries)
+  for (const auto g : allGeometries())
   {
     constexpr size_t order = 4;
     const auto& qf = PolytopeQuadratureFormula::get(order, g);
