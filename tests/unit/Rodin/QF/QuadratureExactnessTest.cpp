@@ -232,11 +232,25 @@ TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
   }
 }
 
-/// @brief Gauss-Legendre rules on tensor-product elements are positive.
-TEST(QuadratureExactnessTest, GaussLegendreWeightsArePositive)
+/// @brief Every non-simplex rule has strictly positive weights.
+///
+/// This is load-bearing rather than incidental. Negative weights are the
+/// reason Grundmann-Möller cannot assemble a form that must stay positive
+/// semidefinite, and the reason a positive simplex family is being introduced
+/// at all. That argument does not extend to the tensor-product and collapsed
+/// elements, whose weights are products of positive Gauss-Legendre weights
+/// with positive Jacobian factors --- @f$ (1-u) @f$ on the wedge and
+/// @f$ (1-z)^2 @f$ on the pyramid --- and so are positive by construction.
+///
+/// Because that structural fact is what justifies leaving these elements on
+/// their existing rules, it is asserted here rather than assumed. The
+/// amplification @f$ \sum|w| / \sum w @f$ must be exactly one: any departure
+/// means a sign appeared somewhere in the product.
+TEST(QuadratureExactnessTest, NonSimplexRulesHaveStrictlyPositiveWeights)
 {
   for (const auto g : {Polytope::Type::Segment, Polytope::Type::Quadrilateral,
-                       Polytope::Type::Hexahedron})
+                       Polytope::Type::Hexahedron, Polytope::Type::Wedge,
+                       Polytope::Type::Pyramid})
   {
     for (size_t order = 1; order <= 8; ++order)
     {
@@ -244,6 +258,28 @@ TEST(QuadratureExactnessTest, GaussLegendreWeightsArePositive)
       EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " order " << order;
       EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14)
         << name(g) << " order " << order;
+    }
+  }
+}
+
+/// @brief Positivity is a property of the rule, not of the element type: the
+/// simplices are the exception, and the suite must say so explicitly rather
+/// than leave it to be inferred from which elements the previous test omits.
+TEST(QuadratureExactnessTest, SimplexRulesAreTheOnlyOnesWithSignedWeights)
+{
+  for (const auto g : allGeometries())
+  {
+    const Geometry::Polytope::Traits traits(g);
+    const auto& qf = PolytopeQuadratureFormula::get(4, g);
+    if (traits.isSimplex() && traits.getDimension() >= 2)
+    {
+      EXPECT_FALSE(allWeightsPositive(qf))
+        << name(g) << ": simplices use Grundmann-Möller, which is signed";
+      EXPECT_GT(weightAmplification(qf), Real(1)) << name(g);
+    }
+    else
+    {
+      EXPECT_TRUE(allWeightsPositive(qf)) << name(g);
     }
   }
 }
