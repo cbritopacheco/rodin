@@ -25,3 +25,17 @@ gtest_discover_tests(RodinGaussLegendreTest
   PROPERTIES
     LABELS unit
 )
+
+# Quadrature exactness and table-integrity tests
+add_executable(RodinQuadratureExactnessTest QuadratureExactnessTest.cpp)
+target_link_libraries(RodinQuadratureExactnessTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin
+  Rodin::QF
+  )
+gtest_discover_tests(RodinQuadratureExactnessTest
+  PROPERTIES
+    LABELS unit
+)

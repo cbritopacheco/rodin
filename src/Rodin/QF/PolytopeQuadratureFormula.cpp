@@ -110,14 +110,26 @@ namespace Rodin::QF
 
       case Geometry::Polytope::Type::Wedge:
       {
-        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        // buildWedge collapses the triangular cross-section by
+        // (r, s) = (u, (1 - u) v), contributing a (1 - u) Jacobian. A monomial
+        // of total degree p therefore has degree p + 1 in u, so the collapsed
+        // direction needs ceil((p + 2) / 2) points. Flooring left the rule one
+        // degree short at every odd order.
+        const size_t n = std::max<size_t>(1, (order + 3) / 2);
         return std::make_unique<GaussLegendre>(g, n, n);
       }
 
       case Geometry::Polytope::Type::Pyramid:
       {
-        const size_t n = std::max<size_t>(1, (order + 3) / 2);
-        return std::make_unique<GaussLegendre>(g, n, n, n);
+        // The collapse (x, y, z) = ((1 - z) u, (1 - z) v, z) used by
+        // GaussLegendre::buildPyramid contributes a (1 - z)^2 Jacobian, so a
+        // monomial of total degree p has degree p + 2 in z while retaining
+        // degree p in u and v. The z rule therefore needs ceil((p + 3) / 2)
+        // points and the in-plane rules ceil((p + 1) / 2). Flooring the z
+        // count left the rule one degree short at every even order.
+        const size_t nxy = std::max<size_t>(1, (order + 2) / 2);
+        const size_t nz = std::max<size_t>(1, (order + 4) / 2);
+        return std::make_unique<GaussLegendre>(g, nxy, nxy, nz);
       }
 
       case Geometry::Polytope::Type::Hexahedron:

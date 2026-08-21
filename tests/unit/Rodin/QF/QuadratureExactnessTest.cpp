@@ -1,0 +1,268 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <gtest/gtest.h>
+
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/GrundmannMoller.h"
+#include "Rodin/QF/GaussLegendre.h"
+
+#include "QuadratureInvariants.h"
+
+using namespace Rodin;
+using namespace Rodin::QF;
+using namespace Rodin::Geometry;
+using namespace Rodin::Tests::QF;
+
+namespace
+{
+  constexpr Real kExactTol = 1e-12;
+
+  const std::vector<Polytope::Type> kAllGeometries = {
+    Polytope::Type::Segment,  Polytope::Type::Triangle,
+    Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+    Polytope::Type::Wedge, Polytope::Type::Pyramid,
+    Polytope::Type::Hexahedron
+  };
+
+  const char* name(Polytope::Type g)
+  {
+    switch (g)
+    {
+      case Polytope::Type::Point:         return "Point";
+      case Polytope::Type::Segment:       return "Segment";
+      case Polytope::Type::Triangle:      return "Triangle";
+      case Polytope::Type::Quadrilateral: return "Quadrilateral";
+      case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+      case Polytope::Type::Wedge:         return "Wedge";
+      case Polytope::Type::Pyramid:       return "Pyramid";
+      case Polytope::Type::Hexahedron:    return "Hexahedron";
+    }
+    return "?";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Numerical: the rule integrates what it claims to integrate.
+// ---------------------------------------------------------------------------
+
+/// @brief Every dispatched rule is exact to its requested degree, on every
+/// element type. This is the table-integrity gate: a wrong coefficient shows
+/// up here and nowhere else.
+TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
+{
+  for (const auto g : kAllGeometries)
+  {
+    for (size_t order = 1; order <= 8; ++order)
+    {
+      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      const auto report = exactnessSweep(qf, g, order);
+      EXPECT_LT(report.worstRelativeError, kExactTol)
+        << name(g) << " order " << order
+        << ": worst monomial x^" << report.worstExponents[0]
+        << " y^" << report.worstExponents[1]
+        << " z^" << report.worstExponents[2]
+        << " (" << report.monomialsTested << " monomials tested)";
+    }
+  }
+}
+
+/// @brief Regression: the pyramid rule under-integrated at every even order.
+///
+/// The collapse @f$ (x,y,z)=((1-z)u,(1-z)v,z) @f$ contributes a @f$ (1-z)^2 @f$
+/// Jacobian, so a monomial of total degree @f$ p @f$ has degree @f$ p+2 @f$ in
+/// @f$ z @f$ and the @f$ z @f$ rule needs @f$ \lceil (p+3)/2 \rceil @f$ points.
+/// The dispatch used integer division, which floors, and so was short by one
+/// whenever @f$ p @f$ was even. Reverting the fix in
+/// PolytopeQuadratureFormula::build reproduces a 17% error on @f$ z^2 @f$ at
+/// order 2.
+TEST(QuadratureExactnessTest, PyramidIsExactAtEvenOrders)
+{
+  for (size_t order = 2; order <= 8; order += 2)
+  {
+    const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Pyramid);
+    const auto report = exactnessSweep(qf, Polytope::Type::Pyramid, order);
+    EXPECT_LT(report.worstRelativeError, kExactTol)
+      << "Pyramid order " << order << ": worst at z^" << report.worstExponents[2];
+  }
+}
+
+/// @brief Regression: the wedge rule under-integrated at every odd order.
+///
+/// buildWedge collapses the triangular cross-section by
+/// @f$ (r,s) = (u, (1-u)v) @f$, contributing a @f$ (1-u) @f$ Jacobian, so a
+/// monomial of total degree @f$ p @f$ has degree @f$ p+1 @f$ in @f$ u @f$ and
+/// the collapsed direction needs @f$ \lceil (p+2)/2 \rceil @f$ points. As with
+/// the pyramid, the dispatch floored instead. Reverting the fix reproduces a
+/// 17% error on @f$ x @f$ at order 1.
+TEST(QuadratureExactnessTest, WedgeIsExactAtOddOrders)
+{
+  for (size_t order = 1; order <= 7; order += 2)
+  {
+    const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Wedge);
+    const auto report = exactnessSweep(qf, Polytope::Type::Wedge, order);
+    EXPECT_LT(report.worstRelativeError, kExactTol)
+      << "Wedge order " << order
+      << ": worst at x^" << report.worstExponents[0]
+      << " y^" << report.worstExponents[1];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Invariant: properties that hold for every rule, at every order.
+// ---------------------------------------------------------------------------
+
+/// @brief The weights reproduce the measure of the reference element. This is
+/// the degree-0 case of exactness, isolated because it is the one condition a
+/// rescaled or renormalised rule can satisfy while failing every other.
+TEST(QuadratureExactnessTest, WeightsSumToReferenceMeasure)
+{
+  for (const auto g : kAllGeometries)
+  {
+    for (size_t order = 1; order <= 8; ++order)
+    {
+      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      EXPECT_NEAR(weightSum(qf), referenceMeasure(g), kExactTol)
+        << name(g) << " order " << order;
+    }
+  }
+}
+
+/// @brief Every quadrature point lies in its reference element. A rule with
+/// exterior points is unusable on curved cells even when it integrates
+/// polynomials correctly, because the geometric map need not be defined there.
+TEST(QuadratureExactnessTest, PointsLieInsideReferenceElement)
+{
+  for (const auto g : kAllGeometries)
+  {
+    for (size_t order = 1; order <= 8; ++order)
+    {
+      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      EXPECT_TRUE(allPointsInside(qf, g)) << name(g) << " order " << order;
+    }
+  }
+}
+
+/// @brief Determinism: two constructions of the same rule agree bitwise.
+TEST(QuadratureExactnessTest, ConstructionIsDeterministic)
+{
+  for (const auto g : kAllGeometries)
+  {
+    GrundmannMoller a(2, g == Polytope::Type::Triangle ? g : Polytope::Type::Triangle);
+    GrundmannMoller b(2, Polytope::Type::Triangle);
+    ASSERT_EQ(a.getSize(), b.getSize());
+    for (size_t i = 0; i < a.getSize(); ++i)
+    {
+      EXPECT_EQ(a.getWeight(i), b.getWeight(i)) << "weight " << i;
+      for (Eigen::Index k = 0; k < a.getPoint(i).size(); ++k)
+        EXPECT_EQ(a.getPoint(i)[k], b.getPoint(i)[k]) << "point " << i;
+    }
+    break;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Characterisation: which rules are positive, and which are not.
+// ---------------------------------------------------------------------------
+
+/// @brief Grundmann-Möller has negative weights at every degree above one.
+///
+/// This is a characterisation test, not an aspiration: it documents why GM
+/// cannot be used to assemble a form that must stay positive semidefinite, and
+/// it will fail loudly if GM is ever silently swapped for a positive rule.
+/// The amplification @f$ \sum|w|/\sum w @f$ is the quantity that matters.
+TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
+{
+  for (const auto g : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    EXPECT_TRUE(allWeightsPositive(GrundmannMoller(0, g)))
+      << name(g) << ": s = 0 (degree 1) is the one positive case";
+    for (size_t s = 1; s <= 3; ++s)
+    {
+      const GrundmannMoller qf(s, g);
+      EXPECT_FALSE(allWeightsPositive(qf))
+        << name(g) << " s = " << s;
+      EXPECT_GT(weightAmplification(qf), Real(1))
+        << name(g) << " s = " << s;
+    }
+  }
+}
+
+/// @brief Gauss-Legendre rules on tensor-product elements are positive.
+TEST(QuadratureExactnessTest, GaussLegendreWeightsArePositive)
+{
+  for (const auto g : {Polytope::Type::Segment, Polytope::Type::Quadrilateral,
+                       Polytope::Type::Hexahedron})
+  {
+    for (size_t order = 1; order <= 8; ++order)
+    {
+      const auto& qf = PolytopeQuadratureFormula::get(order, g);
+      EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " order " << order;
+      EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14)
+        << name(g) << " order " << order;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Meta: the instrument has teeth.
+// ---------------------------------------------------------------------------
+
+namespace
+{
+  /// @brief A rule wrapper that perturbs one weight, used to prove the
+  /// exactness sweep rejects a corrupted table.
+  class PerturbedRule
+  {
+    public:
+      PerturbedRule(const QuadratureFormulaBase& base, size_t which, Real delta)
+        : m_base(base), m_which(which), m_delta(delta) {}
+
+      size_t getSize() const { return m_base.getSize(); }
+
+      Real getWeight(size_t i) const
+      { return m_base.getWeight(i) + (i == m_which ? m_delta : Real(0)); }
+
+      const Math::SpatialVector<Real>& getPoint(size_t i) const
+      { return m_base.getPoint(i); }
+
+    private:
+      const QuadratureFormulaBase& m_base;
+      size_t m_which;
+      Real m_delta;
+  };
+}
+
+/// @brief A tolerance test that cannot fail proves nothing. Perturbing a single
+/// weight by one part in @f$ 10^{9} @f$ must be rejected by the sweep that the
+/// unperturbed rule passes.
+TEST(QuadratureExactnessTest, ExactnessSweepRejectsAPerturbedWeight)
+{
+  for (const auto g : kAllGeometries)
+  {
+    constexpr size_t order = 4;
+    const auto& qf = PolytopeQuadratureFormula::get(order, g);
+    ASSERT_LT(exactnessSweep(qf, g, order).worstRelativeError, kExactTol)
+      << name(g) << ": baseline must pass before the mutation means anything";
+
+    const PerturbedRule bad(qf, 0, qf.getWeight(0) * Real(1e-9) + Real(1e-15));
+    EXPECT_GT(exactnessSweep(bad, g, order).worstRelativeError, kExactTol)
+      << name(g) << ": sweep failed to detect a perturbed weight";
+  }
+}
+
+/// @brief The interiority check must reject a point outside the element.
+TEST(QuadratureExactnessTest, InteriorityCheckRejectsAnExteriorPoint)
+{
+  Math::SpatialVector<Real> outside;
+  outside.resize(2);
+  outside[0] = 0.6;
+  outside[1] = 0.6;   // x + y = 1.2 > 1
+  EXPECT_FALSE(isInside(Polytope::Type::Triangle, outside, 1e-13));
+  outside[0] = 0.25;
+  outside[1] = 0.25;
+  EXPECT_TRUE(isInside(Polytope::Type::Triangle, outside, 1e-13));
+}
