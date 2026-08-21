@@ -230,7 +230,13 @@ namespace Rodin::QF
               tensor = {c, Real(1) - c};
             }
           }
-          const Real weight = x(cursor++);
+          // Weights enter as w = theta^2. Positivity is then a property of
+          // the parameterisation rather than something checked after the
+          // solve: at higher degrees the moment equations have many exact
+          // solutions, most of them with a negative weight, and a solver that
+          // only screens afterwards converges to them and discards the result.
+          const Real theta = x(cursor++);
+          const Real weight = theta * theta;
 
           SymmetricOrbit::Barycentric barycentric;
           for (size_t i = 0; i < k; ++i)
@@ -335,7 +341,8 @@ namespace Rodin::QF
                 x(cursor++) = bary(rng) / static_cast<Real>(pattern.size());
               if (c.tensor && !c.midPlane)
                 x(cursor++) = bary(rng);
-              x(cursor++) = measure / static_cast<Real>(totalPoints);
+              x(cursor++) =
+                std::sqrt(measure / static_cast<Real>(totalPoints));
             }
           }
 
