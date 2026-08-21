@@ -67,3 +67,7 @@ gtest_discover_tests(RodinSymmetricRuleSolverTest
   PROPERTIES
     LABELS unit
 )
+
+# Development driver for regenerating rule coefficients (not a test)
+add_executable(RodinGenerateRules EXCLUDE_FROM_ALL GenerateRules.cpp)
+target_link_libraries(RodinGenerateRules PUBLIC Rodin::Rodin Rodin::QF)

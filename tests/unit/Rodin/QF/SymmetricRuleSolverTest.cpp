@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <numeric>
 
 #include "Rodin/QF/SymmetricRuleSolver.h"
 
@@ -188,4 +189,143 @@ TEST(SymmetricRuleSolverTest, UnknownCountMatchesParameterLayout)
   EXPECT_EQ(SymmetricRuleSolver::unknownCount({{2, 1}}), 2u);
   EXPECT_EQ(SymmetricRuleSolver::unknownCount({{1, 1, 1}}), 3u);
   EXPECT_EQ(SymmetricRuleSolver::unknownCount({{2, 1}, {2, 1}}), 4u);
+}
+
+// --- Configuration search --------------------------------------------------
+
+/// @brief patternsFor enumerates the orbit classes of each simplex: the
+/// partitions of d+1. Triangle {3},{2,1},{1,1,1}; tetrahedron {4},{3,1},
+/// {2,2},{2,1,1},{1,1,1,1}.
+TEST(SymmetricRuleSolverTest, PatternsForEnumeratesTheOrbitClasses)
+{
+  const auto tri = SymmetricRuleSolver::patternsFor(Polytope::Type::Triangle);
+  EXPECT_EQ(tri.size(), 3u);
+  const auto tet = SymmetricRuleSolver::patternsFor(Polytope::Type::Tetrahedron);
+  EXPECT_EQ(tet.size(), 5u);
+  for (const auto& p : tri)
+    EXPECT_EQ(std::accumulate(p.begin(), p.end(), size_t{0}), 3u);
+  for (const auto& p : tet)
+    EXPECT_EQ(std::accumulate(p.begin(), p.end(), size_t{0}), 4u);
+}
+
+/// @brief patternSize is the multinomial coefficient of the pattern, i.e. the
+/// cardinality of the orbit it names.
+TEST(SymmetricRuleSolverTest, PatternSizeMatchesOrbitCardinality)
+{
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({3}), 1u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({2, 1}), 3u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({1, 1, 1}), 6u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({4}), 1u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({3, 1}), 4u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({2, 2}), 6u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({2, 1, 1}), 12u);
+  EXPECT_EQ(SymmetricRuleSolver::patternSize({1, 1, 1, 1}), 24u);
+  EXPECT_EQ(SymmetricRuleSolver::configurationSize({{3}, {2, 1}, {2, 1}}), 7u);
+}
+
+/// @brief The search recovers the published minimal point counts on the
+/// triangle. These are the figure of merit of the Xiao-Gimbutas and
+/// Witherden-Vincent families, so agreeing with them is evidence that the
+/// search finds the same rules and not merely valid ones.
+TEST(SymmetricRuleSolverTest, SearchRecoversPublishedTrianglePointCounts)
+{
+  const std::vector<std::pair<size_t, size_t>> expected = {
+    {1, 1}, {2, 3}, {3, 6}, {4, 6}, {5, 7}
+  };
+  for (const auto& [degree, points] : expected)
+  {
+    SymmetricRuleSolver::Configuration config;
+    const auto r = SymmetricRuleSolver::search(
+      Polytope::Type::Triangle, degree, 24, 96, &config);
+    ASSERT_TRUE(r.converged && r.admissible)
+      << "degree " << degree << " residual " << r.residual;
+    EXPECT_EQ(SymmetricRuleSolver::configurationSize(config), points)
+      << "degree " << degree;
+  }
+}
+
+/// @brief Known-answer: the degree-5 seven-point triangle rule carries
+/// centroid weight 9/80, a determined value the search cannot have invented.
+TEST(SymmetricRuleSolverTest, TriangleDegreeFiveCentroidWeightIsNineEightieths)
+{
+  const auto r = SymmetricRuleSolver::search(Polytope::Type::Triangle, 5, 24);
+  ASSERT_TRUE(r.converged && r.admissible);
+  bool found = false;
+  for (const auto& orbit : r.orbits)
+  {
+    if (orbit.getSize() == 1u)
+    {
+      EXPECT_NEAR(orbit.getWeight(), 9.0 / 80.0, 1e-9);
+      found = true;
+    }
+  }
+  EXPECT_TRUE(found) << "the degree-5 rule must contain a centroid orbit";
+}
+
+/// @brief Known-answer: the degree-4 six-point triangle rule has the
+/// classical barycentric parameters 0.445948490915965 and
+/// 0.091576213509771, with weights 0.111690794839005 and 0.054975871827661.
+TEST(SymmetricRuleSolverTest, TriangleDegreeFourMatchesClassicalParameters)
+{
+  const auto r = SymmetricRuleSolver::search(Polytope::Type::Triangle, 4, 24);
+  ASSERT_TRUE(r.converged && r.admissible);
+  ASSERT_EQ(r.orbits.size(), 2u);
+
+  std::vector<std::pair<Real, Real>> got;
+  for (const auto& orbit : r.orbits)
+  {
+    auto b = orbit.getBarycentric();
+    std::sort(b.begin(), b.end());
+    got.emplace_back(b.front(), orbit.getWeight());
+  }
+  std::sort(got.begin(), got.end());
+
+  EXPECT_NEAR(got[0].first, 0.091576213509771, 1e-9);
+  EXPECT_NEAR(got[0].second, 0.054975871827661, 1e-9);
+  EXPECT_NEAR(got[1].first, 0.108103018168070, 1e-9);
+  EXPECT_NEAR(got[1].second, 0.111690794839005, 1e-9);
+}
+
+/// @brief Every rule the search returns as admissible passes the independent
+/// exactness sweep, on both simplices.
+TEST(SymmetricRuleSolverTest, SearchedRulesAreExactOnBothSimplices)
+{
+  for (const auto g : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    for (size_t degree = 1; degree <= 4; ++degree)
+    {
+      const auto r = SymmetricRuleSolver::search(g, degree, 24);
+      ASSERT_TRUE(r.converged && r.admissible)
+        << "degree " << degree << " residual " << r.residual;
+      const OrbitRule rule(g, r.orbits);
+      EXPECT_LT(exactnessSweep(rule, g, degree).worstRelativeError, 1e-11)
+        << "degree " << degree;
+      EXPECT_TRUE(allWeightsPositive(rule));
+      EXPECT_TRUE(allPointsInside(rule, g));
+      EXPECT_NEAR(weightSum(rule), referenceMeasure(g), 1e-12);
+    }
+  }
+}
+
+/// @brief Boundary: a point budget below the minimal rule yields no
+/// admissible configuration rather than a wrong one.
+TEST(SymmetricRuleSolverTest, SearchRespectsThePointBudget)
+{
+  const auto r = SymmetricRuleSolver::search(Polytope::Type::Triangle, 5, 4);
+  EXPECT_FALSE(r.converged && r.admissible);
+}
+
+/// @brief The search is deterministic.
+TEST(SymmetricRuleSolverTest, SearchIsDeterministic)
+{
+  SymmetricRuleSolver::Configuration ca, cb;
+  const auto a = SymmetricRuleSolver::search(Polytope::Type::Triangle, 4, 24, 96, &ca);
+  const auto b = SymmetricRuleSolver::search(Polytope::Type::Triangle, 4, 24, 96, &cb);
+  EXPECT_EQ(ca, cb);
+  ASSERT_EQ(a.orbits.size(), b.orbits.size());
+  for (size_t i = 0; i < a.orbits.size(); ++i)
+  {
+    EXPECT_EQ(a.orbits[i].getWeight(), b.orbits[i].getWeight());
+    EXPECT_EQ(a.orbits[i].getBarycentric(), b.orbits[i].getBarycentric());
+  }
 }

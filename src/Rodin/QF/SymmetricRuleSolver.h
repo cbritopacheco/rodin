@@ -182,31 +182,50 @@ namespace Rodin::QF
         return orbits;
       }
 
+      /// @brief Integer power, avoiding std::pow in the residual hot loop.
+      static Real ipow(Real x, size_t e)
+      {
+        Real r = 1;
+        while (e--)
+          r *= x;
+        return r;
+      }
+
       /// @brief Normalised moment residual of the rule described by @p x.
+      ///
+      /// The orbits are expanded once per evaluation, not once per monomial:
+      /// the residual is called O(unknowns) times per Levenberg-Marquardt
+      /// iteration for the finite-difference Jacobian, so an expansion inside
+      /// the monomial loop dominates everything else.
       static Math::Vector<Real> residual(Geometry::Polytope::Type g,
         size_t degree, const Configuration& config, const Math::Vector<Real>& x)
       {
         const Geometry::Polytope::Traits traits(g);
         const size_t d = traits.getDimension();
         const auto alphas = monomials(d, degree);
-        const auto orbits = toOrbits(config, x);
+
+        std::vector<Math::SpatialVector<Real>> points;
+        std::vector<Real> weights;
+        for (const auto& orbit : toOrbits(config, x))
+        {
+          for (const auto& b : orbit.expand())
+          {
+            points.push_back(SymmetricOrbit::toReference(g, b));
+            weights.push_back(orbit.getWeight());
+          }
+        }
 
         Math::Vector<Real> r(static_cast<Eigen::Index>(alphas.size()));
         for (size_t e = 0; e < alphas.size(); ++e)
         {
           const auto& alpha = alphas[e];
           Real sum = 0;
-          for (const auto& orbit : orbits)
+          for (size_t q = 0; q < points.size(); ++q)
           {
-            for (const auto& b : orbit.expand())
-            {
-              const auto p = SymmetricOrbit::toReference(g, b);
-              Real m = 1;
-              for (size_t k = 0; k < d; ++k)
-                m *= std::pow(p[static_cast<Eigen::Index>(k)],
-                              static_cast<Real>(alpha[k]));
-              sum += orbit.getWeight() * m;
-            }
+            Real m = weights[q];
+            for (size_t k = 0; k < d; ++k)
+              m *= ipow(points[q][static_cast<Eigen::Index>(k)], alpha[k]);
+            sum += m;
           }
           const Real exact = simplexMoment(alpha);
           r(static_cast<Eigen::Index>(e)) =
@@ -310,6 +329,118 @@ namespace Rodin::QF
             best = candidate;
           if (candidate.converged && candidate.admissible)
             return candidate;
+        }
+        return best;
+      }
+
+      /// @brief The orbit classes available on a @f$ d @f$-simplex: every
+      /// partition of @f$ d+1 @f$. On the triangle these are @f$ \{3\} @f$,
+      /// @f$ \{2,1\} @f$, @f$ \{1,1,1\} @f$; on the tetrahedron
+      /// @f$ \{4\} @f$, @f$ \{3,1\} @f$, @f$ \{2,2\} @f$, @f$ \{2,1,1\} @f$
+      /// and @f$ \{1,1,1,1\} @f$.
+      static std::vector<Pattern> patternsFor(Geometry::Polytope::Type g)
+      {
+        const size_t n = Geometry::Polytope::Traits(g).getVertexCount();
+        std::vector<Pattern> out;
+        Pattern current;
+        const std::function<void(size_t, size_t)> rec =
+          [&](size_t remaining, size_t largest)
+          {
+            if (remaining == 0)
+            {
+              out.push_back(current);
+              return;
+            }
+            for (size_t part = std::min(remaining, largest); part >= 1; --part)
+            {
+              current.push_back(part);
+              rec(remaining - part, part);
+              current.pop_back();
+            }
+          };
+        rec(n, n);
+        return out;
+      }
+
+      /// @brief Number of points an orbit class contributes: the multinomial
+      /// coefficient of its multiplicity pattern.
+      static size_t patternSize(const Pattern& pattern)
+      {
+        SymmetricOrbit::Barycentric probe;
+        for (size_t i = 0; i < pattern.size(); ++i)
+          for (size_t m = 0; m < pattern[i]; ++m)
+            probe.push_back(static_cast<Real>(i + 1));
+        return SymmetricOrbit(probe, 0).getSize();
+      }
+
+      /// @brief Total number of points in a configuration.
+      static size_t configurationSize(const Configuration& config)
+      {
+        size_t n = 0;
+        for (const auto& pattern : config)
+          n += patternSize(pattern);
+        return n;
+      }
+
+      /**
+       * @brief Searches orbit configurations for the cheapest admissible rule
+       * of strength @p degree.
+       *
+       * Configurations are enumerated as multisets of orbit classes, ordered
+       * by total point count, and the first that converges with positive
+       * weights and interior points is returned. The centroid class appears at
+       * most once, since a second copy is the same point.
+       *
+       * This is the search Xiao and Gimbutas @cite xiao2010numerical and
+       * Witherden and Vincent @cite witherden2015identification each perform;
+       * the point counts it finds are therefore the figure of merit to compare
+       * against theirs.
+       */
+      static Result search(Geometry::Polytope::Type g, size_t degree,
+        size_t maxPoints = 32, size_t maxRestarts = 96,
+        Configuration* found = nullptr)
+      {
+        const auto patterns = patternsFor(g);
+        std::vector<Configuration> candidates;
+        Configuration current;
+        const std::function<void(size_t, size_t)> rec =
+          [&](size_t start, size_t points)
+          {
+            if (!current.empty())
+              candidates.push_back(current);
+            for (size_t i = start; i < patterns.size(); ++i)
+            {
+              const size_t sz = patternSize(patterns[i]);
+              if (points + sz > maxPoints)
+                continue;
+              // The centroid orbit is a single point; repeating it is
+              // degenerate, so it may appear at most once.
+              const bool centroid = (patterns[i].size() == 1);
+              if (centroid && std::count(current.begin(), current.end(), patterns[i]))
+                continue;
+              current.push_back(patterns[i]);
+              rec(centroid ? i + 1 : i, points + sz);
+              current.pop_back();
+            }
+          };
+        rec(0, 0);
+
+        std::stable_sort(candidates.begin(), candidates.end(),
+          [](const Configuration& a, const Configuration& b)
+          { return configurationSize(a) < configurationSize(b); });
+
+        Result best;
+        for (const auto& config : candidates)
+        {
+          const auto r = solve(g, degree, config, maxRestarts);
+          if (r.converged && r.admissible)
+          {
+            if (found)
+              *found = config;
+            return r;
+          }
+          if (r.residual < best.residual)
+            best = r;
         }
         return best;
       }
