@@ -74,11 +74,40 @@ namespace Rodin::QF
   class SymmetricRuleSolver
   {
     public:
-      /// @brief Partition of @f$ d+1 @f$ describing one orbit class.
+      /// @brief Partition of the base simplex's vertex count, describing the
+      /// multiplicity pattern of one orbit class.
       using Pattern = std::vector<size_t>;
 
+      /**
+       * @brief One orbit class of a candidate rule.
+       *
+       * On a simplex only @c barycentric is used. On a product element the
+       * class additionally says how the orbit sits along the tensor
+       * direction: @c midPlane places it on the single reflection-invariant
+       * value @f$ 1/2 @f$, otherwise it is the reflected pair
+       * @f$ \{c, 1-c\} @f$ with @f$ c @f$ a further unknown.
+       */
+      struct OrbitClass
+      {
+        Pattern barycentric;
+        bool tensor = false;   ///< Element has a tensor direction.
+        bool midPlane = true;  ///< Tensor part is {1/2} rather than {c, 1-c}.
+
+        OrbitClass() = default;
+        OrbitClass(Pattern p) : barycentric(std::move(p)) {}
+        OrbitClass(std::initializer_list<size_t> p) : barycentric(p) {}
+        OrbitClass(Pattern p, bool mid)
+          : barycentric(std::move(p)), tensor(true), midPlane(mid) {}
+
+        friend bool operator==(const OrbitClass& a, const OrbitClass& b)
+        {
+          return a.barycentric == b.barycentric && a.tensor == b.tensor
+              && a.midPlane == b.midPlane;
+        }
+      };
+
       /// @brief The orbit classes making up a candidate rule.
-      using Configuration = std::vector<Pattern>;
+      using Configuration = std::vector<OrbitClass>;
 
       /// @brief Outcome of a solve.
       struct Result
@@ -89,6 +118,18 @@ namespace Rodin::QF
         Real residual = std::numeric_limits<Real>::infinity(); ///< Final norm.
         size_t restarts = 0;                ///< Starting points consumed.
       };
+
+      /// @brief Exact moment @f$ \int_K x^\alpha @f$ on the reference element
+      /// @p g. The wedge is the unit triangle crossed with @f$ [0,1] @f$, so
+      /// its moment is the triangle moment times @f$ 1/(c+1) @f$.
+      static Real referenceMoment(Geometry::Polytope::Type g,
+        const std::vector<size_t>& alpha)
+      {
+        if (g != Geometry::Polytope::Type::Wedge)
+          return simplexMoment(alpha);
+        const std::vector<size_t> planar{alpha[0], alpha[1]};
+        return simplexMoment(planar) / static_cast<Real>(alpha[2] + 1);
+      }
 
       /// @brief Exact moment @f$ \int_K x^\alpha @f$ on the reference
       /// @f$ d @f$-simplex, @f$ \alpha! / (|\alpha| + d)! @f$.
@@ -140,8 +181,12 @@ namespace Rodin::QF
       static size_t unknownCount(const Configuration& config)
       {
         size_t n = 0;
-        for (const auto& pattern : config)
-          n += pattern.size();  // (parts - 1) parameters + 1 weight
+        for (const auto& c : config)
+        {
+          n += c.barycentric.size();  // (parts - 1) parameters + 1 weight
+          if (c.tensor && !c.midPlane)
+            ++n;                      // the reflected pair's free coordinate
+        }
         return n;
       }
 
@@ -157,8 +202,9 @@ namespace Rodin::QF
       {
         std::vector<SymmetricOrbit> orbits;
         Eigen::Index cursor = 0;
-        for (const auto& pattern : config)
+        for (const auto& orbitClass : config)
         {
+          const auto& pattern = orbitClass.barycentric;
           const size_t k = pattern.size();
           std::vector<Real> values(k);
           Real used = 0;
@@ -171,13 +217,29 @@ namespace Rodin::QF
           }
           const size_t remaining = pattern.back();
           values[k - 1] = (Real(1) - used) / static_cast<Real>(remaining);
+          SymmetricOrbit::Tensor tensor;
+          if (orbitClass.tensor)
+          {
+            if (orbitClass.midPlane)
+            {
+              tensor = {Real(0.5)};
+            }
+            else
+            {
+              const Real c = x(cursor++);
+              tensor = {c, Real(1) - c};
+            }
+          }
           const Real weight = x(cursor++);
 
           SymmetricOrbit::Barycentric barycentric;
           for (size_t i = 0; i < k; ++i)
             for (size_t m = 0; m < pattern[i]; ++m)
               barycentric.push_back(values[i]);
-          orbits.emplace_back(std::move(barycentric), weight);
+          if (tensor.empty())
+            orbits.emplace_back(std::move(barycentric), weight);
+          else
+            orbits.emplace_back(std::move(barycentric), std::move(tensor), weight);
         }
         return orbits;
       }
@@ -208,9 +270,9 @@ namespace Rodin::QF
         std::vector<Real> weights;
         for (const auto& orbit : toOrbits(config, x))
         {
-          for (const auto& b : orbit.expand())
+          for (auto& p : orbit.expandPoints(g))
           {
-            points.push_back(SymmetricOrbit::toReference(g, b));
+            points.push_back(std::move(p));
             weights.push_back(orbit.getWeight());
           }
         }
@@ -227,7 +289,7 @@ namespace Rodin::QF
               m *= ipow(points[q][static_cast<Eigen::Index>(k)], alpha[k]);
             sum += m;
           }
-          const Real exact = simplexMoment(alpha);
+          const Real exact = referenceMoment(g, alpha);
           r(static_cast<Eigen::Index>(e)) =
             (sum - exact) / std::max(std::abs(exact), Real(1e-14));
         }
@@ -249,7 +311,7 @@ namespace Rodin::QF
         const Geometry::Polytope::Traits traits(g);
         const size_t d = traits.getDimension();
         const Eigen::Index n = static_cast<Eigen::Index>(unknownCount(config));
-        const Real measure = simplexMoment(std::vector<size_t>(d, 0));
+        const Real measure = referenceMoment(g, std::vector<size_t>(d, 0));
 
         std::mt19937 rng(seed);
         std::uniform_real_distribution<Real> bary(Real(0.02), Real(0.6));
@@ -263,19 +325,16 @@ namespace Rodin::QF
           Math::Vector<Real> x(n);
           {
             size_t totalPoints = 0;
-            for (const auto& pattern : config)
-            {
-              SymmetricOrbit::Barycentric probe;
-              for (size_t i = 0; i < pattern.size(); ++i)
-                for (size_t m = 0; m < pattern[i]; ++m)
-                  probe.push_back(static_cast<Real>(i + 1));
-              totalPoints += SymmetricOrbit(probe, 0).getSize();
-            }
+            for (const auto& c : config)
+              totalPoints += classSize(c);
             Eigen::Index cursor = 0;
-            for (const auto& pattern : config)
+            for (const auto& c : config)
             {
+              const auto& pattern = c.barycentric;
               for (size_t i = 0; i + 1 < pattern.size(); ++i)
                 x(cursor++) = bary(rng) / static_cast<Real>(pattern.size());
+              if (c.tensor && !c.midPlane)
+                x(cursor++) = bary(rng);
               x(cursor++) = measure / static_cast<Real>(totalPoints);
             }
           }
@@ -340,7 +399,9 @@ namespace Rodin::QF
       /// and @f$ \{1,1,1,1\} @f$.
       static std::vector<Pattern> patternsFor(Geometry::Polytope::Type g)
       {
-        const size_t n = Geometry::Polytope::Traits(g).getVertexCount();
+        const size_t n = (g == Geometry::Polytope::Type::Wedge)
+          ? 3  // the base simplex of the reference wedge is the triangle
+          : Geometry::Polytope::Traits(g).getVertexCount();
         std::vector<Pattern> out;
         Pattern current;
         const std::function<void(size_t, size_t)> rec =
@@ -374,11 +435,18 @@ namespace Rodin::QF
       }
 
       /// @brief Total number of points in a configuration.
+      /// @brief Points contributed by one orbit class.
+      static size_t classSize(const OrbitClass& c)
+      {
+        return patternSize(c.barycentric) * (c.tensor && !c.midPlane ? 2 : 1);
+      }
+
+      /// @brief Total number of points in a configuration.
       static size_t configurationSize(const Configuration& config)
       {
         size_t n = 0;
-        for (const auto& pattern : config)
-          n += patternSize(pattern);
+        for (const auto& c : config)
+          n += classSize(c);
         return n;
       }
 
@@ -398,24 +466,43 @@ namespace Rodin::QF
        */
       static Result search(Geometry::Polytope::Type g, size_t degree,
         size_t maxPoints = 32, size_t maxRestarts = 96,
-        Configuration* found = nullptr)
+        Configuration* found = nullptr, size_t maxOrbits = 6)
       {
-        const auto patterns = patternsFor(g);
+        const bool product = (g == Geometry::Polytope::Type::Wedge);
+        std::vector<OrbitClass> patterns;
+        for (const auto& p : patternsFor(g))
+        {
+          if (!product)
+          {
+            patterns.emplace_back(p);
+          }
+          else
+          {
+            patterns.emplace_back(p, true);   // mid-plane
+            patterns.emplace_back(p, false);  // reflected pair
+          }
+        }
         std::vector<Configuration> candidates;
         Configuration current;
+        // Published symmetric rules use a handful of orbits; without a cap the
+        // multiset enumeration explodes long before any of it is solved, which
+        // on the wedge means no candidate is ever tried.
         const std::function<void(size_t, size_t)> rec =
           [&](size_t start, size_t points)
           {
             if (!current.empty())
               candidates.push_back(current);
+            if (current.size() >= maxOrbits)
+              return;
             for (size_t i = start; i < patterns.size(); ++i)
             {
-              const size_t sz = patternSize(patterns[i]);
+              const size_t sz = classSize(patterns[i]);
               if (points + sz > maxPoints)
                 continue;
-              // The centroid orbit is a single point; repeating it is
-              // degenerate, so it may appear at most once.
-              const bool centroid = (patterns[i].size() == 1);
+              // A class with no free parameters contributes the same points
+              // however often it is repeated, so it may appear at most once.
+              const bool centroid = (patterns[i].barycentric.size() == 1)
+                && (!patterns[i].tensor || patterns[i].midPlane);
               if (centroid && std::count(current.begin(), current.end(), patterns[i]))
                 continue;
               current.push_back(patterns[i]);
@@ -457,6 +544,9 @@ namespace Rodin::QF
             for (const auto v : b)
               if (v < tol || v > Real(1) - tol)
                 return false;
+          for (const auto t : orbit.getTensor())
+            if (t < tol || t > Real(1) - tol)
+              return false;
         }
         (void)g;
         return true;

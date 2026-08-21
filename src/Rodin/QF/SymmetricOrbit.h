@@ -56,6 +56,15 @@ namespace Rodin::QF
       /// @f$ d @f$-simplex.
       using Barycentric = std::vector<Real>;
 
+      /// @brief Values along the tensor direction of a product element.
+      ///
+      /// Empty on a simplex. On the wedge, which is a triangle crossed with
+      /// @f$ [0,1] @f$, the symmetry group is @f$ S_3 @f$ on the barycentric
+      /// coordinates times the reflection @f$ z \mapsto 1-z @f$, so an orbit
+      /// carries either the single mid-plane value @f$ \{1/2\} @f$ or the
+      /// reflected pair @f$ \{c, 1-c\} @f$.
+      using Tensor = std::vector<Real>;
+
       /**
        * @brief Constructs an orbit from a barycentric tuple and its weight.
        * @param barycentric Representative tuple, summing to one.
@@ -66,6 +75,27 @@ namespace Rodin::QF
         : m_barycentric(std::move(barycentric)),
           m_weight(weight)
       {}
+
+      /**
+       * @brief Constructs a product orbit on a tensor element.
+       * @param barycentric Representative tuple on the base simplex.
+       * @param tensor Values along the tensor direction.
+       * @param weight Weight carried by each point of the orbit.
+       *
+       * The orbit is the Cartesian product of the barycentric permutations
+       * with @p tensor, so its cardinality is the product of the two.
+       */
+      SymmetricOrbit(Barycentric barycentric, Tensor tensor, Real weight)
+        : m_barycentric(std::move(barycentric)),
+          m_tensor(std::move(tensor)),
+          m_weight(weight)
+      {}
+
+      /// @brief The tensor-direction values; empty on a simplex.
+      const Tensor& getTensor() const
+      {
+        return m_tensor;
+      }
 
       /// @brief The representative barycentric tuple.
       const Barycentric& getBarycentric() const
@@ -99,10 +129,11 @@ namespace Rodin::QF
         return out;
       }
 
-      /// @brief Number of points contributed by this orbit.
+      /// @brief Number of points contributed by this orbit: the number of
+      /// distinct barycentric permutations times the number of tensor values.
       size_t getSize() const
       {
-        return expand().size();
+        return expand().size() * std::max<size_t>(m_tensor.size(), 1);
       }
 
       /**
@@ -133,8 +164,59 @@ namespace Rodin::QF
         return x;
       }
 
+      /**
+       * @brief Every point of the orbit, in reference coordinates of @p g.
+       *
+       * On a simplex this is the barycentric expansion mapped by toReference.
+       * On a product element the barycentric part is mapped through the base
+       * simplex --- the triangle, for the reference wedge of
+       * Geometry::Polytope::Traits, which is the unit triangle crossed with
+       * @f$ [0,1] @f$ --- and each tensor value is appended as the last
+       * coordinate.
+       */
+      std::vector<Math::SpatialVector<Real>> expandPoints(
+        Geometry::Polytope::Type g) const
+      {
+        std::vector<Math::SpatialVector<Real>> out;
+        if (m_tensor.empty())
+        {
+          for (const auto& b : expand())
+            out.push_back(toReference(g, b));
+          return out;
+        }
+
+        const size_t d = Geometry::Polytope::Traits(g).getDimension();
+        const auto base = baseSimplex(m_barycentric.size());
+        for (const auto& b : expand())
+        {
+          const auto bx = toReference(base, b);
+          for (const auto t : m_tensor)
+          {
+            Math::SpatialVector<Real> x;
+            x.resize(static_cast<Eigen::Index>(d));
+            for (Eigen::Index k = 0; k < bx.size(); ++k)
+              x[k] = bx[k];
+            x[static_cast<Eigen::Index>(d - 1)] = t;
+            out.push_back(std::move(x));
+          }
+        }
+        return out;
+      }
+
+      /// @brief The simplex carrying @p vertices barycentric coordinates.
+      static Geometry::Polytope::Type baseSimplex(size_t vertices)
+      {
+        switch (vertices)
+        {
+          case 2:  return Geometry::Polytope::Type::Segment;
+          case 3:  return Geometry::Polytope::Type::Triangle;
+          default: return Geometry::Polytope::Type::Tetrahedron;
+        }
+      }
+
     private:
       Barycentric m_barycentric;
+      Tensor m_tensor;
       Real m_weight;
   };
 }

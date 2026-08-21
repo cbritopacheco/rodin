@@ -28,9 +28,9 @@ namespace
       {
         for (const auto& orbit : orbits)
         {
-          for (const auto& b : orbit.expand())
+          for (auto& p : orbit.expandPoints(g))
           {
-            m_points.push_back(SymmetricOrbit::toReference(g, b));
+            m_points.push_back(std::move(p));
             m_weights.push_back(orbit.getWeight());
           }
         }
@@ -327,5 +327,129 @@ TEST(SymmetricRuleSolverTest, SearchIsDeterministic)
   {
     EXPECT_EQ(a.orbits[i].getWeight(), b.orbits[i].getWeight());
     EXPECT_EQ(a.orbits[i].getBarycentric(), b.orbits[i].getBarycentric());
+  }
+}
+
+// --- Wedge: the product orbit model ----------------------------------------
+
+/// @brief A wedge orbit is the product of a triangle orbit with its tensor
+/// part, so its cardinality multiplies: S21(a) on the mid-plane is 3 points,
+/// and the same orbit on a reflected pair is 6.
+TEST(SymmetricRuleSolverTest, WedgeOrbitCardinalitiesMultiply)
+{
+  const SymmetricOrbit mid({0.2, 0.2, 0.6}, {0.5}, 1);
+  EXPECT_EQ(mid.getSize(), 3u);
+  const SymmetricOrbit pair({0.2, 0.2, 0.6}, {0.3, 0.7}, 1);
+  EXPECT_EQ(pair.getSize(), 6u);
+  const SymmetricOrbit centroidPair({1. / 3, 1. / 3, 1. / 3}, {0.3, 0.7}, 1);
+  EXPECT_EQ(centroidPair.getSize(), 2u);
+
+  using OrbitClass = SymmetricRuleSolver::OrbitClass;
+  EXPECT_EQ(SymmetricRuleSolver::classSize(OrbitClass({2, 1}, true)), 3u);
+  EXPECT_EQ(SymmetricRuleSolver::classSize(OrbitClass({2, 1}, false)), 6u);
+  EXPECT_EQ(SymmetricRuleSolver::classSize(OrbitClass({3}, false)), 2u);
+}
+
+/// @brief expandPoints places a wedge orbit inside the reference wedge, which
+/// is the unit triangle crossed with [0,1] as published by Polytope::Traits.
+TEST(SymmetricRuleSolverTest, WedgeOrbitPointsLieInsideReferenceWedge)
+{
+  const SymmetricOrbit orbit({0.1, 0.3, 0.6}, {0.25, 0.75}, 1);
+  const auto points = orbit.expandPoints(Polytope::Type::Wedge);
+  EXPECT_EQ(points.size(), 12u);
+  for (const auto& p : points)
+  {
+    EXPECT_EQ(p.size(), 3);
+    EXPECT_TRUE(isInside(Polytope::Type::Wedge, p, 1e-13));
+  }
+}
+
+/// @brief The wedge moment used by the solver agrees with the independently
+/// written test oracle. The wedge is a product, so its moment is the triangle
+/// moment times 1/(c+1); getting that factor wrong would still produce a rule
+/// that looked exact against itself.
+TEST(SymmetricRuleSolverTest, WedgeMomentAgreesWithTestOracle)
+{
+  for (size_t a = 0; a <= 4; ++a)
+    for (size_t b = 0; a + b <= 4; ++b)
+      for (size_t c = 0; a + b + c <= 4; ++c)
+        EXPECT_NEAR(
+          SymmetricRuleSolver::referenceMoment(Polytope::Type::Wedge, {a, b, c}),
+          exactMoment(Polytope::Type::Wedge, a, b, c), 1e-16)
+          << "x^" << a << " y^" << b << " z^" << c;
+}
+
+/// @brief The search recovers the published Witherden-Vincent prism point
+/// counts. These are the minima their paper reports, so agreeing with them is
+/// evidence the product orbit model is the same one they use.
+TEST(SymmetricRuleSolverTest, SearchRecoversPublishedWedgePointCounts)
+{
+  const std::vector<std::pair<size_t, size_t>> expected = {
+    {1, 1}, {2, 5}, {3, 8}, {4, 11}
+  };
+  for (const auto& [degree, points] : expected)
+  {
+    SymmetricRuleSolver::Configuration config;
+    const auto r = SymmetricRuleSolver::search(
+      Polytope::Type::Wedge, degree, 16, 96, &config);
+    ASSERT_TRUE(r.converged && r.admissible)
+      << "degree " << degree << " residual " << r.residual;
+    EXPECT_EQ(SymmetricRuleSolver::configurationSize(config), points)
+      << "degree " << degree;
+  }
+}
+
+/// @brief Wedge rules the search returns are exact, positive and interior,
+/// measured by the same instrument used for the simplices.
+TEST(SymmetricRuleSolverTest, SearchedWedgeRulesAreExact)
+{
+  for (size_t degree = 1; degree <= 4; ++degree)
+  {
+    const auto r = SymmetricRuleSolver::search(Polytope::Type::Wedge, degree, 16);
+    ASSERT_TRUE(r.converged && r.admissible)
+      << "degree " << degree << " residual " << r.residual;
+    const OrbitRule rule(Polytope::Type::Wedge, r.orbits);
+    const auto report = exactnessSweep(rule, Polytope::Type::Wedge, degree);
+    EXPECT_LT(report.worstRelativeError, 1e-11)
+      << "degree " << degree << " worst x^" << report.worstExponents[0]
+      << " y^" << report.worstExponents[1] << " z^" << report.worstExponents[2];
+    EXPECT_TRUE(allWeightsPositive(rule));
+    EXPECT_TRUE(allPointsInside(rule, Polytope::Type::Wedge));
+    EXPECT_NEAR(weightSum(rule), referenceMeasure(Polytope::Type::Wedge), 1e-12);
+  }
+}
+
+/// @brief Wedge orbits placed on the mid-plane carry the reflection-invariant
+/// value exactly, and reflected pairs are symmetric about it.
+TEST(SymmetricRuleSolverTest, WedgeTensorPartsRespectTheReflection)
+{
+  const auto r = SymmetricRuleSolver::search(Polytope::Type::Wedge, 4, 16);
+  ASSERT_TRUE(r.converged && r.admissible);
+  for (const auto& orbit : r.orbits)
+  {
+    const auto& t = orbit.getTensor();
+    ASSERT_FALSE(t.empty()) << "every wedge orbit carries a tensor part";
+    if (t.size() == 1)
+      EXPECT_NEAR(t[0], 0.5, 1e-15);
+    else
+    {
+      ASSERT_EQ(t.size(), 2u);
+      EXPECT_NEAR(t[0] + t[1], 1.0, 1e-14);
+    }
+  }
+}
+
+/// @brief The wedge search is deterministic.
+TEST(SymmetricRuleSolverTest, WedgeSearchIsDeterministic)
+{
+  SymmetricRuleSolver::Configuration ca, cb;
+  const auto a = SymmetricRuleSolver::search(Polytope::Type::Wedge, 3, 16, 96, &ca);
+  const auto b = SymmetricRuleSolver::search(Polytope::Type::Wedge, 3, 16, 96, &cb);
+  EXPECT_EQ(ca, cb);
+  ASSERT_EQ(a.orbits.size(), b.orbits.size());
+  for (size_t i = 0; i < a.orbits.size(); ++i)
+  {
+    EXPECT_EQ(a.orbits[i].getWeight(), b.orbits[i].getWeight());
+    EXPECT_EQ(a.orbits[i].getTensor(), b.orbits[i].getTensor());
   }
 }

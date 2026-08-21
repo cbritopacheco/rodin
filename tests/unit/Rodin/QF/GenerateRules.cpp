@@ -1,12 +1,15 @@
 // Development driver: prints the rules the solver finds, for inlining.
 #include <cstdio>
+#include <string>
 #include "Rodin/QF/SymmetricRuleSolver.h"
 using namespace Rodin;
 using namespace Rodin::QF;
 int main(int argc, char** argv)
 {
-  const auto g = (argc > 1 && std::string(argv[1]) == "tet")
-    ? Geometry::Polytope::Type::Tetrahedron : Geometry::Polytope::Type::Triangle;
+  const std::string which = (argc > 1) ? argv[1] : "tri";
+  const auto g = (which == "tet") ? Geometry::Polytope::Type::Tetrahedron
+               : (which == "wedge") ? Geometry::Polytope::Type::Wedge
+               : Geometry::Polytope::Type::Triangle;
   const size_t maxDeg = (argc > 2) ? std::stoul(argv[2]) : 8;
   for (size_t p = 1; p <= maxDeg; ++p)
   {
