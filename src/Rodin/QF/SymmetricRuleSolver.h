@@ -14,6 +14,7 @@
  */
 
 #include <random>
+#include <Eigen/Cholesky>
 #include <functional>
 #include <numeric>
 
@@ -281,7 +282,41 @@ namespace Rodin::QF
               exact.push_back(m);
               scale.push_back(Real(1) / std::max(std::abs(m), Real(1e-14)));
             }
+
+            const Eigen::Index n = static_cast<Eigen::Index>(alphas.size());
+            Math::Matrix<Real> gram(n, n);
+            std::vector<size_t> sum(d);
+            for (Eigen::Index i = 0; i < n; ++i)
+            {
+              for (Eigen::Index j = 0; j < n; ++j)
+              {
+                for (size_t k = 0; k < d; ++k)
+                  sum[k] = alphas[static_cast<size_t>(i)][k]
+                    + alphas[static_cast<size_t>(j)][k];
+                gram(i, j) = referenceMoment(g, sum);
+              }
+            }
+            Eigen::LLT<Math::Matrix<Real>> llt(gram);
+            if (llt.info() == Eigen::Success)
+              chol = llt.matrixL();
           }
+
+          /**
+           * @brief Cholesky factor of the monomial Gram matrix
+           * @f$ G_{\alpha\beta} = \int_K x^{\alpha+\beta} @f$.
+           *
+           * Normalising each moment equation by its own value fixes the row
+           * scaling but not the conditioning of the monomial basis itself,
+           * and that is what stalls the solve at higher degree. Multiplying
+           * the residual by @f$ L^{-1} @f$ expresses it in an orthonormal
+           * basis of the same space, which is what Xiao--Gimbutas and
+           * Witherden--Vincent both do.
+           *
+           * Left empty when the factorisation fails, so the caller falls back
+           * to the scaled monomial residual rather than using a corrupted
+           * transform.
+           */
+          Math::Matrix<Real> chol;
       };
 
       /// @brief Integer power, avoiding std::pow in the residual hot loop.

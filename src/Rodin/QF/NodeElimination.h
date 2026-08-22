@@ -15,6 +15,7 @@
 
 #include <Eigen/QR>
 
+#include "OrthogonalBasis.h"
 #include "SymmetricRuleSolver.h"
 
 namespace Rodin::QF
@@ -197,6 +198,55 @@ namespace Rodin::QF
       }
 
       /**
+       * @brief The Koornwinder-Dubiner moment system for one element and
+       * degree: basis indices, reciprocal norms, and the exact integrals.
+       *
+       * Against monomials the system is ill-conditioned enough that the solve
+       * stalls above degree 14, and the monomial Gram matrix cannot even be
+       * factorised past degree 12 in double precision, so it cannot be used to
+       * orthonormalise either. In this basis the exact right-hand side is
+       * trivial: @f$ \psi_0 \equiv 1 @f$, so its integral is
+       * @f$ \sqrt{|K|} @f$ after normalisation and every other integral
+       * vanishes by orthogonality.
+       */
+      struct KDMoments
+      {
+          std::vector<std::vector<size_t>> indices;
+          std::vector<Real> inverseNorm;
+          std::vector<Real> exact;
+
+          KDMoments() = default;
+
+          KDMoments(Geometry::Polytope::Type g, size_t degree)
+            : indices(OrthogonalBasis::indices(
+                Geometry::Polytope::Traits(g).getDimension(), degree))
+          {
+            // Norms are computed with a product rule of twice the degree,
+            // which the exactness suite has verified, rather than quoted from
+            // a closed form whose constant depends on which reference simplex
+            // is meant.
+            const auto rule = productSeed(g, 2 * degree + 2);
+            inverseNorm.reserve(indices.size());
+            exact.assign(indices.size(), Real(0));
+            for (size_t k = 0; k < indices.size(); ++k)
+            {
+              Real n2 = 0;
+              for (size_t q = 0; q < rule.getSize(); ++q)
+              {
+                const Real v =
+                  OrthogonalBasis::evaluate(indices[k], rule.getPoint(q));
+                n2 += rule.getWeight(q) * v * v;
+              }
+              inverseNorm.push_back(1 / std::sqrt(n2));
+            }
+            Real measure = 0;
+            for (size_t q = 0; q < rule.getSize(); ++q)
+              measure += rule.getWeight(q);
+            exact[0] = measure * inverseNorm[0];
+          }
+      };
+
+      /**
        * @brief Refines @p rule onto the moment equations by Gauss--Newton.
        *
        * Unknowns are the node coordinates together with @f$ \theta_q @f$,
@@ -216,13 +266,19 @@ namespace Rodin::QF
        * costs one, which is what makes elimination affordable at high degree.
        */
       static bool refine(Geometry::Polytope::Type g, size_t degree, Rule& rule,
-        size_t maxIterations = 200, Real tolerance = 1e-13)
+        size_t maxIterations = 200, Real tolerance = 1e-13,
+        const KDMoments* prebuilt = nullptr)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
-        const SymmetricRuleSolver::MomentData moments(g, d, degree);
+        // Building the basis norms needs a product rule of twice the degree,
+        // which is far more expensive than one Newton solve. It depends only
+        // on the element and the degree, so reduce() builds it once and passes
+        // it to every candidate rather than paying for it per elimination.
+        const KDMoments owned = prebuilt ? KDMoments() : KDMoments(g, degree);
+        const KDMoments& moments = prebuilt ? *prebuilt : owned;
         const size_t n = rule.getSize();
         const Eigen::Index nu = static_cast<Eigen::Index>(n * (d + 1));
-        const Eigen::Index ne = static_cast<Eigen::Index>(moments.alphas.size());
+        const Eigen::Index ne = static_cast<Eigen::Index>(moments.indices.size());
 
         Math::Vector<Real> x(nu);
         for (size_t q = 0; q < n; ++q)
@@ -236,42 +292,40 @@ namespace Rodin::QF
 
         Math::Vector<Real> r(ne);
         Math::Matrix<Real> J(ne, nu);
-        const auto evaluate = [&](const Math::Vector<Real>& v, bool jacobian) {
+        const auto evaluate = [&](const Math::Vector<Real>& v, bool jacobian)
+        {
           r.setZero();
           if (jacobian)
             J.setZero();
-          for (size_t e = 0; e < moments.alphas.size(); ++e)
+          for (size_t q = 0; q < n; ++q)
           {
-            const auto& alpha = moments.alphas[e];
-            const Real sc = moments.scale[e];
-            Real sum = 0;
-            for (size_t q = 0; q < n; ++q)
+            const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
+            const Real theta = v(base + static_cast<Eigen::Index>(d));
+            const Real w = theta * theta;
+            Math::SpatialVector<Real> pt;
+            pt.resize(static_cast<Eigen::Index>(d));
+            for (size_t k = 0; k < d; ++k)
+              pt[static_cast<Eigen::Index>(k)] =
+                v(base + static_cast<Eigen::Index>(k));
+
+            for (size_t e = 0; e < moments.indices.size(); ++e)
             {
-              const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
-              const Real theta = v(base + static_cast<Eigen::Index>(d));
-              const Real w = theta * theta;
-              Real mono = 1;
-              for (size_t k = 0; k < d; ++k)
-                mono *= ipow(v(base + static_cast<Eigen::Index>(k)), alpha[k]);
-              sum += w * mono;
+              const Real inv = moments.inverseNorm[e];
+              const Real psi = OrthogonalBasis::evaluate(moments.indices[e], pt) * inv;
+              r(static_cast<Eigen::Index>(e)) += w * psi;
               if (!jacobian)
                 continue;
-              J(static_cast<Eigen::Index>(e), base + static_cast<Eigen::Index>(d)) =
-                sc * 2 * theta * mono;
+              J(static_cast<Eigen::Index>(e),
+                base + static_cast<Eigen::Index>(d)) = 2 * theta * psi;
+              const auto grad = OrthogonalBasis::gradient(moments.indices[e], pt);
               for (size_t k = 0; k < d; ++k)
-              {
-                if (alpha[k] == 0)
-                  continue;
-                Real partial = 1;
-                for (size_t j = 0; j < d; ++j)
-                  partial *= ipow(v(base + static_cast<Eigen::Index>(j)),
-                    (j == k) ? alpha[j] - 1 : alpha[j]);
-                J(static_cast<Eigen::Index>(e), base + static_cast<Eigen::Index>(k)) =
-                  sc * w * static_cast<Real>(alpha[k]) * partial;
-              }
+                J(static_cast<Eigen::Index>(e),
+                  base + static_cast<Eigen::Index>(k)) =
+                    w * grad[static_cast<Eigen::Index>(k)] * inv;
             }
-            r(static_cast<Eigen::Index>(e)) = (sum - moments.exact[e]) * sc;
           }
+          for (size_t e = 0; e < moments.indices.size(); ++e)
+            r(static_cast<Eigen::Index>(e)) -= moments.exact[e];
         };
 
         // Penalised least-squares Newton, after Slobodkins and Tausch,
@@ -451,6 +505,7 @@ namespace Rodin::QF
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
+        const KDMoments kd(g, degree);
 
         for (;;)
         {
@@ -493,7 +548,7 @@ namespace Rodin::QF
               trial.points.push_back(rule.points[q]);
               trial.weights.push_back(rule.weights[q]);
             }
-            const bool converged = refine(g, degree, trial);
+            const bool converged = refine(g, degree, trial, 200, 1e-13, &kd);
             const bool admissible = isAdmissible(g, trial);
             if (converged && admissible)
             {
