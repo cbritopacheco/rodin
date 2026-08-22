@@ -186,7 +186,7 @@ namespace Rodin::QF
        * costs one, which is what makes elimination affordable at high degree.
        */
       static bool refine(Geometry::Polytope::Type g, size_t degree, Rule& rule,
-        size_t maxIterations = 60, Real tolerance = 1e-13)
+        size_t maxIterations = 200, Real tolerance = 1e-13)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
@@ -246,33 +246,48 @@ namespace Rodin::QF
           }
         };
 
-        Real lambda = 1e-8;
+        // The system is underdetermined --- 231 equations against 363
+        // unknowns at triangle degree 20 --- so J^T J is singular and the
+        // damping is what selects a step at all. Starting it small lets the
+        // first step be enormous and throw nodes outside the simplex, from
+        // which the solve never returns and every candidate elimination is
+        // rejected as inadmissible. Starting it at trust-region scale keeps
+        // early steps short.
+        // The system is underdetermined --- 231 equations against 363
+        // unknowns at triangle degree 20 --- so J^T J is singular and forming
+        // it squares an already poor condition number. Damped normal
+        // equations stalled at a residual of 1e-5, admissible but nowhere near
+        // exact, which reads as an admissibility failure and is not one.
+        //
+        // Solving with J directly through a complete orthogonal
+        // decomposition gives the minimum-norm Gauss-Newton step without ever
+        // forming J^T J, and backtracking on the step length supplies the
+        // globalisation that the damping used to.
         evaluate(x, true);
         Real cost = r.squaredNorm();
         for (size_t it = 0; it < maxIterations && std::sqrt(cost) > tolerance; ++it)
         {
-          const Math::Matrix<Real> H = J.transpose() * J
-            + lambda * Math::Matrix<Real>::Identity(nu, nu);
-          const Math::Vector<Real> step = H.ldlt().solve(-J.transpose() * r);
-          const Math::Vector<Real> xn = x + step;
-          const Math::Vector<Real> xsave = x;
-          x = xn;
-          evaluate(x, false);
-          const Real cn = r.squaredNorm();
-          if (cn < cost)
+          const Math::Vector<Real> full =
+            J.completeOrthogonalDecomposition().solve(-r);
+          bool progressed = false;
+          Real alpha = 1;
+          for (int back = 0; back < 30; ++back)
           {
-            cost = cn;
-            lambda = std::max(lambda * Real(0.3), Real(1e-14));
-            evaluate(x, true);
-          }
-          else
-          {
-            x = xsave;
-            lambda *= 10;
-            if (lambda > 1e10)
+            const Math::Vector<Real> xn = x + alpha * full;
+            evaluate(xn, false);
+            const Real cn = r.squaredNorm();
+            if (cn < cost)
+            {
+              x = xn;
+              cost = cn;
+              progressed = true;
               break;
-            evaluate(x, true);
+            }
+            alpha *= 0.5;
           }
+          if (!progressed)
+            break;
+          evaluate(x, true);
         }
 
         for (size_t q = 0; q < n; ++q)
