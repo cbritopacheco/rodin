@@ -78,3 +78,11 @@ gtest_discover_tests(RodinSeedCheckTest PROPERTIES LABELS unit)
 
 add_executable(RodinHighDegreeTest EXCLUDE_FROM_ALL HighDegreeTest.cpp)
 target_link_libraries(RodinHighDegreeTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+
+# Reference element agreement tests
+add_executable(RodinReferenceElementTest ReferenceElementTest.cpp)
+target_link_libraries(RodinReferenceElementTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinReferenceElementTest PROPERTIES LABELS unit)
+
+add_executable(RodinDiagTest EXCLUDE_FROM_ALL DiagTest.cpp)
+target_link_libraries(RodinDiagTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)

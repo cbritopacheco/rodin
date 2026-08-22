@@ -47,6 +47,26 @@ namespace Rodin::QF
   class NodeElimination
   {
     public:
+      /**
+       * @brief Why an elimination round failed.
+       *
+       * reduce() reports only whether a candidate was accepted, and the two
+       * ways of being rejected call for opposite responses: a solve that did
+       * not converge wants more iterations or better conditioning, whereas one
+       * that converged onto an inadmissible rule wants a stronger penalty.
+       * Told apart, they are actionable; conflated, the second reads as the
+       * first and sends you optimising the wrong thing.
+       */
+      struct Diagnostics
+      {
+          size_t candidatesTried = 0;    ///< Nodes attempted in the final round.
+          size_t notConverged = 0;       ///< Rejected: residual above tolerance.
+          size_t notAdmissible = 0;      ///< Rejected: converged but outside.
+          Real bestResidual = std::numeric_limits<Real>::infinity();
+          size_t worstNegativeWeights = 0; ///< In the best converged candidate.
+          size_t worstExteriorPoints = 0;  ///< In the best converged candidate.
+      };
+
       /// @brief A rule as free points and weights, with no symmetry imposed.
       struct Rule
       {
@@ -426,8 +446,8 @@ namespace Rodin::QF
        * is the one most likely to be removable, which is the selection Xiao
        * and Gimbutas use.
        */
-      static Rule reduce(
-        Geometry::Polytope::Type g, size_t degree, Rule rule, size_t maxCandidates = 0)
+      static Rule reduce(Geometry::Polytope::Type g, size_t degree, Rule rule,
+        size_t maxCandidates = 0, Diagnostics* diagnostics = nullptr)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
@@ -458,8 +478,10 @@ namespace Rodin::QF
 
           const size_t budget = maxCandidates ? std::min(maxCandidates, n) : n;
           bool removed = false;
+          Diagnostics round;
           for (size_t c = 0; c < budget && !removed; ++c)
           {
+            ++round.candidatesTried;
             const size_t victim = significance[c].second;
             Rule trial;
             trial.points.reserve(n - 1);
@@ -471,14 +493,47 @@ namespace Rodin::QF
               trial.points.push_back(rule.points[q]);
               trial.weights.push_back(rule.weights[q]);
             }
-            if (refine(g, degree, trial) && isAdmissible(g, trial))
+            const bool converged = refine(g, degree, trial);
+            const bool admissible = isAdmissible(g, trial);
+            if (converged && admissible)
             {
               rule = std::move(trial);
               removed = true;
+              break;
+            }
+
+            if (!converged)
+            {
+              ++round.notConverged;
+            }
+            else
+            {
+              ++round.notAdmissible;
+              size_t neg = 0, out = 0;
+              for (size_t q = 0; q < trial.getSize(); ++q)
+              {
+                if (!(trial.weights[q] > 0))
+                  ++neg;
+                Rule single;
+                single.points.push_back(trial.points[q]);
+                single.weights.push_back(1);
+                if (!isAdmissible(g, single, 1e-12))
+                  ++out;
+              }
+              if (neg + out < round.worstNegativeWeights + round.worstExteriorPoints ||
+                round.notAdmissible == 1)
+              {
+                round.worstNegativeWeights = neg;
+                round.worstExteriorPoints = out;
+              }
             }
           }
           if (!removed)
+          {
+            if (diagnostics)
+              *diagnostics = round;
             return rule;
+          }
         }
       }
   };
