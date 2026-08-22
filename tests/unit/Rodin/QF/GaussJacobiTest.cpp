@@ -13,7 +13,12 @@ namespace
   /// @brief int_0^1 z^k (1-z)^a dz = k! a! / (k+a+1)!
   Real exactJacobiMoment(size_t k, size_t a)
   {
-    const auto fact = [](size_t m) { Real r = 1; for (size_t i = 2; i <= m; ++i) r *= i; return r; };
+    const auto fact = [](size_t m) {
+      Real r = 1;
+      for (size_t i = 2; i <= m; ++i)
+        r *= i;
+      return r;
+    };
     return fact(k) * fact(a) / fact(k + a + 1);
   }
 }

@@ -263,8 +263,8 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::gj1dUnit(size_t n, size_t alpha, std::vector<Real>& x,
-    std::vector<Real>& w)
+  void GaussLegendre::gj1dUnit(
+    size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w)
   {
     // Golub-Welsch: the nodes are the eigenvalues of the Jacobi matrix of the
     // orthogonal polynomials for the weight, and the weights are mu0 times the
@@ -284,9 +284,8 @@ namespace Rodin::QF
       {
         const Real k1 = kk + 1;
         const Real d = 2 * k1 + a + b;
-        const Real off = 2 / d
-          * std::sqrt(k1 * (k1 + a) * (k1 + b) * (k1 + a + b)
-                      / ((d - 1) * (d + 1)));
+        const Real off = 2 / d *
+          std::sqrt(k1 * (k1 + a) * (k1 + b) * (k1 + a + b) / ((d - 1) * (d + 1)));
         J(static_cast<Eigen::Index>(k), static_cast<Eigen::Index>(k + 1)) = off;
         J(static_cast<Eigen::Index>(k + 1), static_cast<Eigen::Index>(k)) = off;
       }

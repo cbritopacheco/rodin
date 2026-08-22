@@ -86,8 +86,8 @@ namespace Rodin::QF
        * @param x Nodes, on @f$ [0,1] @f$.
        * @param w Weights, summing to @f$ 1/(\alpha+1) @f$.
        */
-      static void gj1dUnit(size_t n, size_t alpha, std::vector<Real>& x,
-        std::vector<Real>& w);
+      static void gj1dUnit(
+        size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w);
 
       /// Parent class type
       using Parent = QuadratureFormulaBase;
