@@ -364,7 +364,9 @@ namespace Rodin::QF
             const Math::Vector<Real> slack = hs.vector - hs.matrix * pt;
             for (Eigen::Index l = 0; l < slack.size(); ++l)
             {
-              const Real sl = std::max(slack(l), Real(1e-14));
+              // Iterates are kept strictly feasible, so the slack is
+              // positive; the floor guards only against underflow.
+              const Real sl = std::max(slack(l), Real(1e-300));
               for (size_t k = 0; k < d; ++k)
                 grad(base + static_cast<Eigen::Index>(k)) +=
                   hs.matrix(l, static_cast<Eigen::Index>(k)) / sl;
@@ -375,6 +377,35 @@ namespace Rodin::QF
           }
           return grad;
         };
+
+        // Strict feasibility of an iterate, with a fraction-to-boundary
+        // margin. A logarithmic barrier is only defined inside the feasible
+        // region: once a node is outside, its slack is negative and the
+        // gradient no longer repels, so the barrier cannot recover a step that
+        // has already jumped the boundary. Feasibility must therefore be
+        // maintained by the line search rather than repaired by the penalty,
+        // which is the same fraction-to-boundary safeguard an interior-point
+        // method uses.
+        const auto minSlack = [&](const Math::Vector<Real>& v)
+        {
+          Real worst = std::numeric_limits<Real>::infinity();
+          for (size_t q = 0; q < n; ++q)
+          {
+            const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
+            Math::Vector<Real> pt(static_cast<Eigen::Index>(d));
+            for (size_t k = 0; k < d; ++k)
+              pt(static_cast<Eigen::Index>(k)) =
+                v(base + static_cast<Eigen::Index>(k));
+            worst = std::min(worst, (hs.vector - hs.matrix * pt).minCoeff());
+          }
+          return worst;
+        };
+
+        // Fraction to boundary: a step may consume at most a fixed fraction of
+        // the distance to the constraint. An absolute floor instead pins nodes
+        // against the wall, where the barrier gradient is enormous and the
+        // conditioning it was meant to protect is destroyed.
+        constexpr Real tau = 0.95;
 
         evaluate(x, true);
         Real cost = r.squaredNorm();
@@ -431,25 +462,25 @@ namespace Rodin::QF
           const Real tstar = 0.5 * (lo + hi);
 
           bool progressed = false;
-          for (const Real t : {tstar, Real(0)})
+          // t = 0 is no longer a fallback: dropping the penalty is exactly
+          // what let nodes leave the element, and a step that needs the
+          // penalty dropped to reduce the residual is a step that trades
+          // feasibility for exactness.
+          const Real slack0 = minSlack(x);
+          for (Real alpha = 1; alpha > 1e-10; alpha *= 0.5)
           {
-            Real alpha = 1;
-            for (int back = 0; back < 24; ++back)
+            const Math::Vector<Real> xn = x + alpha * (dzf + tstar * dzg);
+            if (minSlack(xn) < (1 - tau) * slack0)
+              continue;
+            evaluate(xn, false);
+            const Real cn = r.squaredNorm();
+            if (cn < cost)
             {
-              const Math::Vector<Real> xn = x + alpha * (dzf + t * dzg);
-              evaluate(xn, false);
-              const Real cn = r.squaredNorm();
-              if (cn < cost)
-              {
-                x = xn;
-                cost = cn;
-                progressed = true;
-                break;
-              }
-              alpha *= 0.5;
-            }
-            if (progressed)
+              x = xn;
+              cost = cn;
+              progressed = true;
               break;
+            }
           }
           if (!progressed)
             break;
