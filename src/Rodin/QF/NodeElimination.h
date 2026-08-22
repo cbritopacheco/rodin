@@ -496,7 +496,16 @@ namespace Rodin::QF
           const Real theta = x(base + static_cast<Eigen::Index>(d));
           rule.weights[q] = theta * theta;
         }
+        lastResidual() = std::sqrt(cost);
         return std::sqrt(cost) <= tolerance;
+      }
+
+      /// @brief Residual reached by the most recent refine() on this thread,
+      /// for diagnostics only.
+      static Real& lastResidual()
+      {
+        static thread_local Real value = 0;
+        return value;
       }
 
       /// @brief Whether every weight is positive and every point interior.
@@ -532,7 +541,8 @@ namespace Rodin::QF
        * and Gimbutas use.
        */
       static Rule reduce(Geometry::Polytope::Type g, size_t degree, Rule rule,
-        size_t maxCandidates = 0, Diagnostics* diagnostics = nullptr)
+        size_t maxCandidates = 0, Diagnostics* diagnostics = nullptr,
+        size_t cheapBudget = 200, size_t patientBudget = 8000)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
@@ -565,6 +575,15 @@ namespace Rodin::QF
           const size_t budget = maxCandidates ? std::min(maxCandidates, n) : n;
           bool removed = false;
           Diagnostics round;
+          // Candidates get a cheap budget first. A hopeless one stops early on
+          // its own, having found no feasible improving step, but a solvable
+          // one can need an order of magnitude more iterations than its
+          // neighbours: tetrahedron degree 4 stalls at 5e-6 through 1000
+          // iterations and reaches 2.5e-16 by 5000, while degrees 3 and 5
+          // converge almost immediately. Spending that budget on every
+          // candidate is unaffordable, so it is spent once, on the candidate
+          // that got closest.
+          std::vector<std::pair<Real, size_t>> nearMisses;
           for (size_t c = 0; c < budget && !removed; ++c)
           {
             ++round.candidatesTried;
@@ -579,8 +598,10 @@ namespace Rodin::QF
               trial.points.push_back(rule.points[q]);
               trial.weights.push_back(rule.weights[q]);
             }
-            const bool converged = refine(g, degree, trial, 200, 1e-13, &kd);
+            const bool converged = refine(g, degree, trial, cheapBudget, 1e-13, &kd);
             const bool admissible = isAdmissible(g, trial);
+            if (!converged)
+              nearMisses.emplace_back(lastResidual(), victim);
             if (converged && admissible)
             {
               rule = std::move(trial);
@@ -611,6 +632,35 @@ namespace Rodin::QF
               {
                 round.worstNegativeWeights = neg;
                 round.worstExteriorPoints = out;
+              }
+            }
+          }
+          // Retry the closest few rather than only the closest one. At
+          // tetrahedron degree 4, thirteen of thirty-six removals converge to
+          // an admissible rule given the patient budget, but which of them is
+          // nearest after the cheap pass is not a reliable guide, so a single
+          // retry misses them all and the degree looks unreducible.
+          if (!removed && !nearMisses.empty())
+          {
+            std::sort(nearMisses.begin(), nearMisses.end());
+            const size_t retries = std::min<size_t>(nearMisses.size(), 8);
+            for (size_t k = 0; k < retries && !removed; ++k)
+            {
+              Rule trial;
+              trial.points.reserve(n - 1);
+              trial.weights.reserve(n - 1);
+              for (size_t q = 0; q < n; ++q)
+              {
+                if (q == nearMisses[k].second)
+                  continue;
+                trial.points.push_back(rule.points[q]);
+                trial.weights.push_back(rule.weights[q]);
+              }
+              if (refine(g, degree, trial, patientBudget, 1e-13, &kd)
+                  && isAdmissible(g, trial))
+              {
+                rule = std::move(trial);
+                removed = true;
               }
             }
           }
