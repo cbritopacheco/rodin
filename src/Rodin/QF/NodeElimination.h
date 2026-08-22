@@ -13,6 +13,8 @@
  * near-minimal one by removing nodes.
  */
 
+#include <Eigen/QR>
+
 #include "SymmetricRuleSolver.h"
 
 namespace Rodin::QF
@@ -246,44 +248,129 @@ namespace Rodin::QF
           }
         };
 
-        // The system is underdetermined --- 231 equations against 363
-        // unknowns at triangle degree 20 --- so J^T J is singular and the
-        // damping is what selects a step at all. Starting it small lets the
-        // first step be enormous and throw nodes outside the simplex, from
-        // which the solve never returns and every candidate elimination is
-        // rejected as inadmissible. Starting it at trust-region scale keeps
-        // early steps short.
-        // The system is underdetermined --- 231 equations against 363
-        // unknowns at triangle degree 20 --- so J^T J is singular and forming
-        // it squares an already poor condition number. Damped normal
-        // equations stalled at a residual of 1e-5, admissible but nowhere near
-        // exact, which reads as an admissibility failure and is not one.
+        // Penalised least-squares Newton, after Slobodkins and Tausch,
+        // "A node elimination algorithm for cubature of high-dimensional
+        // polytopes", arXiv:2207.10737.
         //
-        // Solving with J directly through a complete orthogonal
-        // decomposition gives the minimum-norm Gauss-Newton step without ever
-        // forming J^T J, and backtracking on the step length supplies the
-        // globalisation that the damping used to.
+        // The moment system is underdetermined --- 231 equations against 363
+        // unknowns at triangle degree 20 --- and that surplus is not a
+        // nuisance but the resource that keeps nodes admissible. Writing
+        // J = LQ for the economy LQ factorisation, the step splits as
+        //
+        //   dz_f = -Q^T L^{-1} f      (minimum-norm Newton step)
+        //   dz_g = -(I - Q^T Q) g     (projection of -g onto null(J))
+        //
+        // with g the gradient of a logarithmic barrier on the constraints. The
+        // first term restores exactness; the second slides along the solution
+        // manifold away from the boundary without disturbing it. Screening
+        // admissibility after the solve, as this did before, throws away
+        // rules that this step would have kept.
+        //
+        // The barrier uses the half-space description Ax <= b published by
+        // Geometry::Polytope::Traits, so the domain the solver respects is by
+        // construction the reference element the rest of Rodin uses.
+        const Geometry::Polytope::Traits traits(g);
+        const auto& hs = traits.getHalfSpace();
+
+        const auto barrierGradient = [&](const Math::Vector<Real>& v)
+        {
+          Math::Vector<Real> grad(nu);
+          grad.setZero();
+          for (size_t q = 0; q < n; ++q)
+          {
+            const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
+            Math::Vector<Real> pt(static_cast<Eigen::Index>(d));
+            for (size_t k = 0; k < d; ++k)
+              pt(static_cast<Eigen::Index>(k)) = v(base + static_cast<Eigen::Index>(k));
+            const Math::Vector<Real> slack = hs.vector - hs.matrix * pt;
+            for (Eigen::Index l = 0; l < slack.size(); ++l)
+            {
+              const Real sl = std::max(slack(l), Real(1e-14));
+              for (size_t k = 0; k < d; ++k)
+                grad(base + static_cast<Eigen::Index>(k)) +=
+                  hs.matrix(l, static_cast<Eigen::Index>(k)) / sl;
+            }
+            const Real theta = v(base + static_cast<Eigen::Index>(d));
+            grad(base + static_cast<Eigen::Index>(d)) =
+              -2 / (std::abs(theta) > 1e-14 ? theta : Real(1e-14));
+          }
+          return grad;
+        };
+
         evaluate(x, true);
         Real cost = r.squaredNorm();
         for (size_t it = 0; it < maxIterations && std::sqrt(cost) > tolerance; ++it)
         {
-          const Math::Vector<Real> full =
-            J.completeOrthogonalDecomposition().solve(-r);
-          bool progressed = false;
-          Real alpha = 1;
-          for (int back = 0; back < 30; ++back)
+          // J = LQ via the QR of J^T: J^T = Qt Rt gives L = Rt^T, Q = Qt^T.
+          const Math::Matrix<Real> Jt = J.transpose();
+          Eigen::HouseholderQR<Math::Matrix<Real>> qr(Jt);
+          const Math::Matrix<Real> Qt =
+            qr.householderQ() * Math::Matrix<Real>::Identity(nu, ne);
+          const Math::Matrix<Real> Rt =
+            qr.matrixQR().topLeftCorner(ne, ne).template triangularView<Eigen::Upper>();
+
+          const Math::Vector<Real> y =
+            Rt.transpose().template triangularView<Eigen::Lower>().solve(r);
+          const Math::Vector<Real> dzf = -(Qt * y);
+
+          const Math::Vector<Real> gb = barrierGradient(x);
+          const Math::Vector<Real> dzg = -(gb - Qt * (Qt.transpose() * gb));
+
+          // t is chosen to push the next iterate as far inside as possible.
+          // max_k (beta_k + t alpha_k) is convex in t, so a ternary search
+          // over a bounded interval finds its minimiser without enumerating
+          // the intersections.
+          const auto worstConstraint = [&](Real t)
           {
-            const Math::Vector<Real> xn = x + alpha * full;
-            evaluate(xn, false);
-            const Real cn = r.squaredNorm();
-            if (cn < cost)
+            Real worst = -std::numeric_limits<Real>::infinity();
+            const Math::Vector<Real> xn = x + dzf + t * dzg;
+            for (size_t q = 0; q < n; ++q)
             {
-              x = xn;
-              cost = cn;
-              progressed = true;
-              break;
+              const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
+              Math::Vector<Real> pt(static_cast<Eigen::Index>(d));
+              for (size_t k = 0; k < d; ++k)
+                pt(static_cast<Eigen::Index>(k)) = xn(base + static_cast<Eigen::Index>(k));
+              const Math::Vector<Real> res = hs.matrix * pt - hs.vector;
+              for (Eigen::Index l = 0; l < res.size(); ++l)
+                worst = std::max(worst, res(l));
+              const Real theta = xn(base + static_cast<Eigen::Index>(d));
+              worst = std::max(worst, -theta * theta);
             }
-            alpha *= 0.5;
+            return worst;
+          };
+
+          Real lo = 0, hi = 1;
+          for (int k = 0; k < 60; ++k)
+          {
+            const Real m1 = lo + (hi - lo) / 3;
+            const Real m2 = hi - (hi - lo) / 3;
+            if (worstConstraint(m1) < worstConstraint(m2))
+              hi = m2;
+            else
+              lo = m1;
+          }
+          const Real tstar = 0.5 * (lo + hi);
+
+          bool progressed = false;
+          for (const Real t : {tstar, Real(0)})
+          {
+            Real alpha = 1;
+            for (int back = 0; back < 24; ++back)
+            {
+              const Math::Vector<Real> xn = x + alpha * (dzf + t * dzg);
+              evaluate(xn, false);
+              const Real cn = r.squaredNorm();
+              if (cn < cost)
+              {
+                x = xn;
+                cost = cn;
+                progressed = true;
+                break;
+              }
+              alpha *= 0.5;
+            }
+            if (progressed)
+              break;
           }
           if (!progressed)
             break;

@@ -75,3 +75,6 @@ target_link_libraries(RodinGenerateRules PUBLIC Rodin::Rodin Rodin::QF)
 add_executable(RodinSeedCheckTest SeedCheckTest.cpp)
 target_link_libraries(RodinSeedCheckTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinSeedCheckTest PROPERTIES LABELS unit)
+
+add_executable(RodinHighDegreeTest EXCLUDE_FROM_ALL HighDegreeTest.cpp)
+target_link_libraries(RodinHighDegreeTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
