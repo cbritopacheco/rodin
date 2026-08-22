@@ -86,3 +86,7 @@ gtest_discover_tests(RodinReferenceElementTest PROPERTIES LABELS unit)
 
 add_executable(RodinDiagTest EXCLUDE_FROM_ALL DiagTest.cpp)
 target_link_libraries(RodinDiagTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+
+add_executable(RodinGaussJacobiTest GaussJacobiTest.cpp)
+target_link_libraries(RodinGaussJacobiTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinGaussJacobiTest PROPERTIES LABELS unit)

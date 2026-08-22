@@ -121,15 +121,12 @@ namespace Rodin::QF
 
       case Geometry::Polytope::Type::Pyramid:
       {
-        // The collapse (x, y, z) = ((1 - z) u, (1 - z) v, z) used by
-        // GaussLegendre::buildPyramid contributes a (1 - z)^2 Jacobian, so a
-        // monomial of total degree p has degree p + 2 in z while retaining
-        // degree p in u and v. The z rule therefore needs ceil((p + 3) / 2)
-        // points and the in-plane rules ceil((p + 1) / 2). Flooring the z
-        // count left the rule one degree short at every even order.
-        const size_t nxy = std::max<size_t>(1, (order + 2) / 2);
-        const size_t nz = std::max<size_t>(1, (order + 4) / 2);
-        return std::make_unique<GaussLegendre>(g, nxy, nxy, nz);
+        // The (1 - z)^2 Jacobian of the collapse now rides in the Gauss-Jacobi
+        // weight rather than being evaluated at the nodes, so the integrand in
+        // the collapsed coordinates is polynomial of degree p in each
+        // direction and every direction needs ceil((p + 1) / 2) points.
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n, n);
       }
 
       case Geometry::Polytope::Type::Hexahedron:

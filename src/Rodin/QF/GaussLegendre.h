@@ -62,6 +62,33 @@ namespace Rodin::QF
   class GaussLegendre final : public QuadratureFormulaBase
   {
     public:
+      /**
+       * @brief @f$ n @f$-point Gauss--Jacobi rule on @f$ [0,1] @f$ for the
+       * weight @f$ (1-z)^\alpha @f$, exact for polynomials of degree
+       * @f$ 2n-1 @f$ against that weight.
+       *
+       * The reference pyramid collapses as
+       * @f$ (x,y,z) = ((1-z)u, (1-z)v, z) @f$, contributing a Jacobian
+       * @f$ (1-z)^2 @f$, and its P1 basis is *rational*: with @f$ q = 1-z @f$
+       * the shape functions are @f$ (q-x)(q-y)/q @f$, @f$ x(q-y)/q @f$ and
+       * @f$ xy/q @f$. A product of two of them carries @f$ q^{-2} @f$, which
+       * the Jacobian cancels exactly --- but only if the @f$ q^2 @f$ is
+       * carried by the quadrature weight rather than evaluated at the nodes.
+       *
+       * Evaluating it pointwise, as a Gauss--Legendre rule does, leaves the
+       * @f$ q^{-2} @f$ in the integrand, so nodes approaching the apex
+       * evaluate an unbounded function and the assembled operator degrades
+       * the more accurate the rule is made. Absorbing the weight into a
+       * Jacobi rule makes the integrand polynomial again.
+       *
+       * @param n Number of points.
+       * @param alpha Exponent of the @f$ (1-z) @f$ weight.
+       * @param x Nodes, on @f$ [0,1] @f$.
+       * @param w Weights, summing to @f$ 1/(\alpha+1) @f$.
+       */
+      static void gj1dUnit(size_t n, size_t alpha, std::vector<Real>& x,
+        std::vector<Real>& w);
+
       /// Parent class type
       using Parent = QuadratureFormulaBase;
 

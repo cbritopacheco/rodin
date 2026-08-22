@@ -10,6 +10,8 @@
  * @brief Implementation of the GaussLegendre quadrature formula.
  */
 
+#include <Eigen/Eigenvalues>
+
 #include "GaussLegendre.h"
 
 namespace Rodin::QF
@@ -261,12 +263,69 @@ namespace Rodin::QF
     }
   }
 
+  void GaussLegendre::gj1dUnit(size_t n, size_t alpha, std::vector<Real>& x,
+    std::vector<Real>& w)
+  {
+    // Golub-Welsch: the nodes are the eigenvalues of the Jacobi matrix of the
+    // orthogonal polynomials for the weight, and the weights are mu0 times the
+    // squared first components of its eigenvectors.
+    const Real a = static_cast<Real>(alpha);
+    const Real b = 0;
+    Math::Matrix<Real> J(static_cast<Eigen::Index>(n), static_cast<Eigen::Index>(n));
+    J.setZero();
+    for (size_t k = 0; k < n; ++k)
+    {
+      const Real kk = static_cast<Real>(k);
+      const Real den = 2 * kk + a + b;
+      J(static_cast<Eigen::Index>(k), static_cast<Eigen::Index>(k)) =
+        (den == 0 || den + 2 == 0) ? (b - a) / (a + b + 2)
+                                   : (b * b - a * a) / (den * (den + 2));
+      if (k + 1 < n)
+      {
+        const Real k1 = kk + 1;
+        const Real d = 2 * k1 + a + b;
+        const Real off = 2 / d
+          * std::sqrt(k1 * (k1 + a) * (k1 + b) * (k1 + a + b)
+                      / ((d - 1) * (d + 1)));
+        J(static_cast<Eigen::Index>(k), static_cast<Eigen::Index>(k + 1)) = off;
+        J(static_cast<Eigen::Index>(k + 1), static_cast<Eigen::Index>(k)) = off;
+      }
+    }
+
+    Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> es(J);
+    // mu0 = int_{-1}^{1} (1-t)^a dt = 2^{a+1} / (a+1).
+    const Real mu0 = std::pow(Real(2), a + 1) / (a + 1);
+
+    x.resize(n);
+    w.resize(n);
+    for (size_t i = 0; i < n; ++i)
+    {
+      const Real t = es.eigenvalues()(static_cast<Eigen::Index>(i));
+      const Real v0 = es.eigenvectors()(0, static_cast<Eigen::Index>(i));
+      // t in [-1,1] maps to z = (1+t)/2 in [0,1], under which
+      // (1-t)^a dt = 2^{a+1} (1-z)^a dz, hence the rescaling of the weights.
+      x[i] = Real(0.5) * (1 + t);
+      w[i] = mu0 * v0 * v0 / std::pow(Real(2), a + 1);
+    }
+  }
+
   void GaussLegendre::buildPyramid(size_t nx, size_t ny, size_t nz)
   {
+    // The collapse (x, y, z) = ((1 - z) u, (1 - z) v, z) contributes a
+    // (1 - z)^2 Jacobian, and the pyramid's P1 basis is rational: with
+    // q = 1 - z its shape functions are (q - x)(q - y)/q, x(q - y)/q and
+    // xy/q, so a product of two carries q^{-2}. The Jacobian cancels it
+    // exactly, but only if the q^2 rides in the quadrature weight instead of
+    // being evaluated at the nodes. Evaluated pointwise, as it was, nodes
+    // approaching the apex sample an unbounded integrand and the assembled
+    // operator degrades the more accurate the rule is made.
+    //
+    // A Gauss-Jacobi rule with weight (1 - z)^2 absorbs it, leaving a
+    // polynomial integrand in the collapsed coordinates.
     std::vector<Real> u, wu, v, wv, z, wz;
     gl1dUnit(nx, u, wu);
     gl1dUnit(ny, v, wv);
-    gl1dUnit(nz, z, wz);
+    gj1dUnit(nz, 2, z, wz);
 
     const size_t N = nx * ny * nz;
     m_points.clear();
@@ -288,7 +347,8 @@ namespace Rodin::QF
           p[2] = z[kk];
           m_points.push_back(std::move(p));
 
-          m_weights[k++] = wu[i] * wv[j] * wz[kk] * q * q;
+          // No q * q here: it is carried by the Jacobi weight.
+          m_weights[k++] = wu[i] * wv[j] * wz[kk];
         }
       }
     }
