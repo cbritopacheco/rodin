@@ -70,11 +70,11 @@ namespace Rodin::Tests::QF
       case Type::Tetrahedron:
         return factorial(a) * factorial(b) * factorial(c) / factorial(a + b + c + 3);
       case Type::Wedge:
-        return (factorial(a) * factorial(b) / factorial(a + b + 2))
-             / static_cast<Real>(c + 1);
+        return (factorial(a) * factorial(b) / factorial(a + b + 2)) /
+          static_cast<Real>(c + 1);
       case Type::Pyramid:
-        return factorial(c) * factorial(a + b + 2)
-             / (factorial(a + b + c + 3) * static_cast<Real>((a + 1) * (b + 1)));
+        return factorial(c) * factorial(a + b + 2) /
+          (factorial(a + b + c + 3) * static_cast<Real>((a + 1) * (b + 1)));
     }
     return std::numeric_limits<Real>::quiet_NaN();
   }
@@ -95,10 +95,10 @@ namespace Rodin::Tests::QF
   /// @brief Outcome of an exactness sweep over all monomials of a given degree.
   struct ExactnessReport
   {
-    Real worstAbsoluteError = 0;   ///< Largest @f$ |Q(m) - I(m)| @f$ observed.
-    Real worstRelativeError = 0;   ///< Largest error relative to @f$ |I(m)| @f$.
-    size_t worstExponents[3] = {0, 0, 0}; ///< Monomial attaining the worst error.
-    size_t monomialsTested = 0;    ///< Number of monomials in the sweep.
+      Real worstAbsoluteError = 0;   ///< Largest @f$ |Q(m) - I(m)| @f$ observed.
+      Real worstRelativeError = 0;   ///< Largest error relative to @f$ |I(m)| @f$.
+      size_t worstExponents[3] = {0, 0, 0}; ///< Monomial attaining the worst error.
+      size_t monomialsTested = 0;    ///< Number of monomials in the sweep.
   };
 
   /**
@@ -128,9 +128,12 @@ namespace Rodin::Tests::QF
           {
             const auto& x = qf.getPoint(i);
             Real m = 1;
-            if (d >= 1) m *= std::pow(x[0], static_cast<Real>(a));
-            if (d >= 2) m *= std::pow(x[1], static_cast<Real>(b));
-            if (d >= 3) m *= std::pow(x[2], static_cast<Real>(c));
+            if (d >= 1)
+              m *= std::pow(x[0], static_cast<Real>(a));
+            if (d >= 2)
+              m *= std::pow(x[1], static_cast<Real>(b));
+            if (d >= 3)
+              m *= std::pow(x[2], static_cast<Real>(c));
             numeric += qf.getWeight(i) * m;
           }
           const Real exact = exactMoment(g, a, b, c);
@@ -200,8 +203,8 @@ namespace Rodin::Tests::QF
    * hard-codes them would pass against its own assumptions instead of against
    * the library.
    */
-  inline bool isInside(Geometry::Polytope::Type g,
-    const Math::SpatialVector<Real>& x, Real tol)
+  inline bool isInside(
+    Geometry::Polytope::Type g, const Math::SpatialVector<Real>& x, Real tol)
   {
     const Geometry::Polytope::Traits traits(g);
     const size_t d = traits.getDimension();

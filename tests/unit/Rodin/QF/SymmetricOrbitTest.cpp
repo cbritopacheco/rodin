@@ -59,10 +59,9 @@ TEST(SymmetricOrbitTest, TetrahedronOrbitCardinalities)
 /// construction rather than prove.
 TEST(SymmetricOrbitTest, ExpansionIsClosedUnderPermutation)
 {
-  for (const SymmetricOrbit& orbit : {
-    SymmetricOrbit({0.1, 0.3, 0.6}, 1),
-    SymmetricOrbit({0.1, 0.1, 0.3, 0.5}, 1),
-    SymmetricOrbit({0.1, 0.2, 0.3, 0.4}, 1)})
+  for (const SymmetricOrbit& orbit :
+    {SymmetricOrbit({0.1, 0.3, 0.6}, 1), SymmetricOrbit({0.1, 0.1, 0.3, 0.5}, 1),
+      SymmetricOrbit({0.1, 0.2, 0.3, 0.4}, 1)})
   {
     const auto points = orbit.expand();
     std::set<std::multiset<long long>> patterns;
@@ -114,8 +113,8 @@ TEST(SymmetricOrbitTest, ToReferenceLandsOnPolytopeTraitsVertices)
       const auto& v = traits.getVertex(i);
       for (size_t k = 0; k < traits.getDimension(); ++k)
       {
-        EXPECT_NEAR(x[static_cast<Eigen::Index>(k)],
-                    v[static_cast<Eigen::Index>(k)], 1e-15)
+        EXPECT_NEAR(
+          x[static_cast<Eigen::Index>(k)], v[static_cast<Eigen::Index>(k)], 1e-15)
           << "vertex " << i << " component " << k;
       }
     }
@@ -148,8 +147,8 @@ TEST(SymmetricOrbitTest, CentroidOrbitMapsToTraitsCentroid)
     const auto x = SymmetricOrbit::toReference(g, b);
     const auto& c = traits.getCentroid();
     for (size_t k = 0; k < traits.getDimension(); ++k)
-      EXPECT_NEAR(x[static_cast<Eigen::Index>(k)],
-                  c[static_cast<Eigen::Index>(k)], 1e-15);
+      EXPECT_NEAR(
+        x[static_cast<Eigen::Index>(k)], c[static_cast<Eigen::Index>(k)], 1e-15);
   }
 }
 

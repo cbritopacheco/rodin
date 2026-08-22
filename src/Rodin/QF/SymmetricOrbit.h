@@ -124,8 +124,7 @@ namespace Rodin::QF
         do
         {
           out.push_back(sorted);
-        }
-        while (std::next_permutation(sorted.begin(), sorted.end()));
+        } while (std::next_permutation(sorted.begin(), sorted.end()));
         return out;
       }
 
@@ -208,9 +207,12 @@ namespace Rodin::QF
       {
         switch (vertices)
         {
-          case 2:  return Geometry::Polytope::Type::Segment;
-          case 3:  return Geometry::Polytope::Type::Triangle;
-          default: return Geometry::Polytope::Type::Tetrahedron;
+          case 2:
+            return Geometry::Polytope::Type::Segment;
+          case 3:
+            return Geometry::Polytope::Type::Triangle;
+          default:
+            return Geometry::Polytope::Type::Tetrahedron;
         }
       }
 

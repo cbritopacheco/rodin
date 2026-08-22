@@ -38,14 +38,22 @@ namespace
   {
     switch (g)
     {
-      case Polytope::Type::Point:         return "Point";
-      case Polytope::Type::Segment:       return "Segment";
-      case Polytope::Type::Triangle:      return "Triangle";
-      case Polytope::Type::Quadrilateral: return "Quadrilateral";
-      case Polytope::Type::Tetrahedron:   return "Tetrahedron";
-      case Polytope::Type::Wedge:         return "Wedge";
-      case Polytope::Type::Pyramid:       return "Pyramid";
-      case Polytope::Type::Hexahedron:    return "Hexahedron";
+      case Polytope::Type::Point:
+        return "Point";
+      case Polytope::Type::Segment:
+        return "Segment";
+      case Polytope::Type::Triangle:
+        return "Triangle";
+      case Polytope::Type::Quadrilateral:
+        return "Quadrilateral";
+      case Polytope::Type::Tetrahedron:
+        return "Tetrahedron";
+      case Polytope::Type::Wedge:
+        return "Wedge";
+      case Polytope::Type::Pyramid:
+        return "Pyramid";
+      case Polytope::Type::Hexahedron:
+        return "Hexahedron";
     }
     return "?";
   }
@@ -67,11 +75,10 @@ TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
       const auto& qf = PolytopeQuadratureFormula::get(order, g);
       const auto report = exactnessSweep(qf, g, order);
       EXPECT_LT(report.worstRelativeError, kExactTol)
-        << name(g) << " order " << order
-        << ": worst monomial x^" << report.worstExponents[0]
-        << " y^" << report.worstExponents[1]
-        << " z^" << report.worstExponents[2]
-        << " (" << report.monomialsTested << " monomials tested)";
+        << name(g) << " order " << order << ": worst monomial x^"
+        << report.worstExponents[0] << " y^" << report.worstExponents[1] << " z^"
+        << report.worstExponents[2] << " (" << report.monomialsTested
+        << " monomials tested)";
     }
   }
 }
@@ -111,9 +118,8 @@ TEST(QuadratureExactnessTest, WedgeIsExactAtOddOrders)
     const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Wedge);
     const auto report = exactnessSweep(qf, Polytope::Type::Wedge, order);
     EXPECT_LT(report.worstRelativeError, kExactTol)
-      << "Wedge order " << order
-      << ": worst at x^" << report.worstExponents[0]
-      << " y^" << report.worstExponents[1];
+      << "Wedge order " << order << ": worst at x^" << report.worstExponents[0] << " y^"
+      << report.worstExponents[1];
   }
 }
 
@@ -191,9 +197,8 @@ TEST(QuadratureExactnessTest, MomentOracleMatchesRodinReferenceElements)
       x.resize(static_cast<Eigen::Index>(traits.getDimension()));
       for (size_t k = 0; k < traits.getDimension(); ++k)
         x[static_cast<Eigen::Index>(k)] = v[static_cast<Eigen::Index>(k)];
-      EXPECT_TRUE(isInside(g, x, 1e-13))
-        << name(g) << ": reference vertex " << i
-        << " does not satisfy its own half-space system";
+      EXPECT_TRUE(isInside(g, x, 1e-13)) << name(g) << ": reference vertex " << i
+                                         << " does not satisfy its own half-space system";
     }
 
     EXPECT_TRUE(isInside(g, traits.getCentroid(), 1e-13))
@@ -224,10 +229,8 @@ TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
     for (size_t s = 1; s <= 3; ++s)
     {
       const GrundmannMoller qf(s, g);
-      EXPECT_FALSE(allWeightsPositive(qf))
-        << name(g) << " s = " << s;
-      EXPECT_GT(weightAmplification(qf), Real(1))
-        << name(g) << " s = " << s;
+      EXPECT_FALSE(allWeightsPositive(qf)) << name(g) << " s = " << s;
+      EXPECT_GT(weightAmplification(qf), Real(1)) << name(g) << " s = " << s;
     }
   }
 }
@@ -249,8 +252,7 @@ TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
 TEST(QuadratureExactnessTest, NonSimplexRulesHaveStrictlyPositiveWeights)
 {
   for (const auto g : {Polytope::Type::Segment, Polytope::Type::Quadrilateral,
-                       Polytope::Type::Hexahedron, Polytope::Type::Wedge,
-                       Polytope::Type::Pyramid})
+         Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
   {
     for (size_t order = 1; order <= 8; ++order)
     {
@@ -296,15 +298,25 @@ namespace
   {
     public:
       PerturbedRule(const QuadratureFormulaBase& base, size_t which, Real delta)
-        : m_base(base), m_which(which), m_delta(delta) {}
+        : m_base(base),
+          m_which(which),
+          m_delta(delta)
+      {}
 
-      size_t getSize() const { return m_base.getSize(); }
+      size_t getSize() const
+      {
+        return m_base.getSize();
+      }
 
       Real getWeight(size_t i) const
-      { return m_base.getWeight(i) + (i == m_which ? m_delta : Real(0)); }
+      {
+        return m_base.getWeight(i) + (i == m_which ? m_delta : Real(0));
+      }
 
       const Math::SpatialVector<Real>& getPoint(size_t i) const
-      { return m_base.getPoint(i); }
+      {
+        return m_base.getPoint(i);
+      }
 
     private:
       const QuadratureFormulaBase& m_base;

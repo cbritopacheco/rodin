@@ -6,8 +6,10 @@
 #include <chrono>
 #include "Rodin/QF/NodeElimination.h"
 #include "QuadratureInvariants.h"
-using namespace Rodin; using namespace Rodin::QF;
-using namespace Rodin::Geometry; using namespace Rodin::Tests::QF;
+using namespace Rodin;
+using namespace Rodin::QF;
+using namespace Rodin::Geometry;
+using namespace Rodin::Tests::QF;
 
 TEST(NodeEliminationTest, ProductSeedIsExactPositiveAndInterior)
 {
@@ -29,14 +31,14 @@ TEST(NodeEliminationTest, ReduceKeepsExactnessAndShrinks)
     const auto seed = NodeElimination::productSeed(Polytope::Type::Triangle, p);
     const auto t0 = std::chrono::steady_clock::now();
     const auto out = NodeElimination::reduce(Polytope::Type::Triangle, p, seed);
-    const double secs = std::chrono::duration<double>(
-      std::chrono::steady_clock::now() - t0).count();
+    const double secs =
+      std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
     EXPECT_LE(out.getSize(), seed.getSize());
     EXPECT_LT(exactnessSweep(out, Polytope::Type::Triangle, p).worstRelativeError, 1e-11)
       << "degree " << p;
     EXPECT_TRUE(allWeightsPositive(out)) << "degree " << p;
     EXPECT_TRUE(allPointsInside(out, Polytope::Type::Triangle)) << "degree " << p;
-    std::printf("deg %zu: seed %zu -> %zu points (%.1fs)\n",
-      p, seed.getSize(), out.getSize(), secs);
+    std::printf("deg %zu: seed %zu -> %zu points (%.1fs)\n", p, seed.getSize(),
+      out.getSize(), secs);
   }
 }

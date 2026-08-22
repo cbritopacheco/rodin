@@ -825,7 +825,7 @@ namespace Rodin::Variational
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
         }
-        (void) ierr;
+        (void)ierr;
         return *this;
       }
 

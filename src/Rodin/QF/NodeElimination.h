@@ -50,13 +50,21 @@ namespace Rodin::QF
       /// @brief A rule as free points and weights, with no symmetry imposed.
       struct Rule
       {
-        std::vector<Math::SpatialVector<Real>> points;
-        std::vector<Real> weights;
+          std::vector<Math::SpatialVector<Real>> points;
+          std::vector<Real> weights;
 
-        size_t getSize() const { return weights.size(); }
-        Real getWeight(size_t i) const { return weights[i]; }
-        const Math::SpatialVector<Real>& getPoint(size_t i) const
-        { return points[i]; }
+          size_t getSize() const
+          {
+            return weights.size();
+          }
+          Real getWeight(size_t i) const
+          {
+            return weights[i];
+          }
+          const Math::SpatialVector<Real>& getPoint(size_t i) const
+          {
+            return points[i];
+          }
       };
 
       /**
@@ -75,7 +83,8 @@ namespace Rodin::QF
       static Real ipow(Real x, size_t e)
       {
         Real r = 1;
-        while (e--) r *= x;
+        while (e--)
+          r *= x;
         return r;
       }
 
@@ -83,14 +92,13 @@ namespace Rodin::QF
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         // Gauss-Legendre on [0,1] with n points is exact to degree 2n - 1.
-        const auto gauss = [](size_t n)
-        {
+        const auto gauss = [](size_t n) {
           std::vector<Real> x(n), w(n);
           for (size_t i = 0; i < n; ++i)
           {
             // Newton on the Legendre polynomial, mapped to [0, 1].
-            Real t = std::cos(M_PI * (static_cast<Real>(i) + 0.75)
-                              / (static_cast<Real>(n) + 0.5));
+            Real t = std::cos(
+              M_PI * (static_cast<Real>(i) + 0.75) / (static_cast<Real>(n) + 0.5));
             for (int it = 0; it < 100; ++it)
             {
               Real p0 = 1, p1 = 0;
@@ -98,11 +106,11 @@ namespace Rodin::QF
               {
                 const Real p2 = p1;
                 p1 = p0;
-                p0 = ((2 * static_cast<Real>(k) + 1) * t * p1
-                      - static_cast<Real>(k) * p2) / static_cast<Real>(k + 1);
+                p0 =
+                  ((2 * static_cast<Real>(k) + 1) * t * p1 - static_cast<Real>(k) * p2) /
+                  static_cast<Real>(k + 1);
               }
-              const Real dp = static_cast<Real>(n) * (t * p0 - p1)
-                            / (t * t - 1);
+              const Real dp = static_cast<Real>(n) * (t * p0 - p1) / (t * t - 1);
               const Real dt = -p0 / dp;
               t += dt;
               if (std::abs(dt) < 1e-16)
@@ -113,8 +121,8 @@ namespace Rodin::QF
             {
               const Real p2 = p1;
               p1 = p0;
-              p0 = ((2 * static_cast<Real>(k) + 1) * t * p1
-                    - static_cast<Real>(k) * p2) / static_cast<Real>(k + 1);
+              p0 = ((2 * static_cast<Real>(k) + 1) * t * p1 - static_cast<Real>(k) * p2) /
+                static_cast<Real>(k + 1);
             }
             const Real dp = static_cast<Real>(n) * (t * p0 - p1) / (t * t - 1);
             x[i] = 0.5 * (1 - t);
@@ -208,8 +216,7 @@ namespace Rodin::QF
 
         Math::Vector<Real> r(ne);
         Math::Matrix<Real> J(ne, nu);
-        const auto evaluate = [&](const Math::Vector<Real>& v, bool jacobian)
-        {
+        const auto evaluate = [&](const Math::Vector<Real>& v, bool jacobian) {
           r.setZero();
           if (jacobian)
             J.setZero();
@@ -229,8 +236,8 @@ namespace Rodin::QF
               sum += w * mono;
               if (!jacobian)
                 continue;
-              J(static_cast<Eigen::Index>(e),
-                base + static_cast<Eigen::Index>(d)) = sc * 2 * theta * mono;
+              J(static_cast<Eigen::Index>(e), base + static_cast<Eigen::Index>(d)) =
+                sc * 2 * theta * mono;
               for (size_t k = 0; k < d; ++k)
               {
                 if (alpha[k] == 0)
@@ -239,9 +246,8 @@ namespace Rodin::QF
                 for (size_t j = 0; j < d; ++j)
                   partial *= ipow(v(base + static_cast<Eigen::Index>(j)),
                     (j == k) ? alpha[j] - 1 : alpha[j]);
-                J(static_cast<Eigen::Index>(e),
-                  base + static_cast<Eigen::Index>(k)) =
-                    sc * w * static_cast<Real>(alpha[k]) * partial;
+                J(static_cast<Eigen::Index>(e), base + static_cast<Eigen::Index>(k)) =
+                  sc * w * static_cast<Real>(alpha[k]) * partial;
               }
             }
             r(static_cast<Eigen::Index>(e)) = (sum - moments.exact[e]) * sc;
@@ -272,8 +278,7 @@ namespace Rodin::QF
         const Geometry::Polytope::Traits traits(g);
         const auto& hs = traits.getHalfSpace();
 
-        const auto barrierGradient = [&](const Math::Vector<Real>& v)
-        {
+        const auto barrierGradient = [&](const Math::Vector<Real>& v) {
           Math::Vector<Real> grad(nu);
           grad.setZero();
           for (size_t q = 0; q < n; ++q)
@@ -320,8 +325,7 @@ namespace Rodin::QF
           // max_k (beta_k + t alpha_k) is convex in t, so a ternary search
           // over a bounded interval finds its minimiser without enumerating
           // the intersections.
-          const auto worstConstraint = [&](Real t)
-          {
+          const auto worstConstraint = [&](Real t) {
             Real worst = -std::numeric_limits<Real>::infinity();
             const Math::Vector<Real> xn = x + dzf + t * dzg;
             for (size_t q = 0; q < n; ++q)
@@ -329,7 +333,8 @@ namespace Rodin::QF
               const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
               Math::Vector<Real> pt(static_cast<Eigen::Index>(d));
               for (size_t k = 0; k < d; ++k)
-                pt(static_cast<Eigen::Index>(k)) = xn(base + static_cast<Eigen::Index>(k));
+                pt(static_cast<Eigen::Index>(k)) =
+                  xn(base + static_cast<Eigen::Index>(k));
               const Math::Vector<Real> res = hs.matrix * pt - hs.vector;
               for (Eigen::Index l = 0; l < res.size(); ++l)
                 worst = std::max(worst, res(l));
@@ -390,8 +395,8 @@ namespace Rodin::QF
       }
 
       /// @brief Whether every weight is positive and every point interior.
-      static bool isAdmissible(Geometry::Polytope::Type g, const Rule& rule,
-        Real tol = 1e-12)
+      static bool isAdmissible(
+        Geometry::Polytope::Type g, const Rule& rule, Real tol = 1e-12)
       {
         const Geometry::Polytope::Traits traits(g);
         const auto& hs = traits.getHalfSpace();
@@ -421,8 +426,8 @@ namespace Rodin::QF
        * is the one most likely to be removable, which is the selection Xiao
        * and Gimbutas use.
        */
-      static Rule reduce(Geometry::Polytope::Type g, size_t degree,
-        Rule rule, size_t maxCandidates = 0)
+      static Rule reduce(
+        Geometry::Polytope::Type g, size_t degree, Rule rule, size_t maxCandidates = 0)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
@@ -442,8 +447,8 @@ namespace Rodin::QF
             {
               Real mono = 1;
               for (size_t k = 0; k < d; ++k)
-                mono *= ipow(rule.points[q][static_cast<Eigen::Index>(k)],
-                             moments.alphas[e][k]);
+                mono *= ipow(
+                  rule.points[q][static_cast<Eigen::Index>(k)], moments.alphas[e][k]);
               const Real v = mono * moments.scale[e];
               norm += v * v;
             }

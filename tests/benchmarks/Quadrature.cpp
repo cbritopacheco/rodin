@@ -33,10 +33,14 @@ namespace Rodin::Tests::Benchmarks
     {
       switch (i)
       {
-        case 0:  return Polytope::Type::Triangle;
-        case 1:  return Polytope::Type::Tetrahedron;
-        case 2:  return Polytope::Type::Wedge;
-        default: return Polytope::Type::Pyramid;
+        case 0:
+          return Polytope::Type::Triangle;
+        case 1:
+          return Polytope::Type::Tetrahedron;
+        case 2:
+          return Polytope::Type::Wedge;
+        default:
+          return Polytope::Type::Pyramid;
       }
     }
   }
@@ -90,18 +94,16 @@ namespace Rodin::Tests::Benchmarks
         Math::SpatialMatrix<Real> F(d, d);
         for (size_t i = 0; i < d; ++i)
           for (size_t j = 0; j < d; ++j)
-            F(i, j) = (i == j ? Real(1) : Real(0))
-                    + Real(0.1) * x[static_cast<Eigen::Index>((i + j) % d)];
+            F(i, j) = (i == j ? Real(1) : Real(0)) +
+              Real(0.1) * x[static_cast<Eigen::Index>((i + j) % d)];
         const Real j0 = F.determinant();
         acc += qf.getWeight(q) * (j0 + F.squaredNorm() / j0);
       }
       benchmark::DoNotOptimize(acc);
     }
     state.counters["points"] = static_cast<double>(qf.getSize());
-    state.counters["ns_per_point"] = benchmark::Counter(
-      static_cast<double>(qf.getSize()),
-      benchmark::Counter::kIsIterationInvariantRate
-        | benchmark::Counter::kInvert);
+    state.counters["ns_per_point"] = benchmark::Counter(static_cast<double>(qf.getSize()),
+      benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   }
 
   static void Cases(benchmark::internal::Benchmark* b)

@@ -89,21 +89,28 @@ namespace Rodin::QF
        */
       struct OrbitClass
       {
-        Pattern barycentric;
-        bool tensor = false;   ///< Element has a tensor direction.
-        bool midPlane = true;  ///< Tensor part is {1/2} rather than {c, 1-c}.
+          Pattern barycentric;
+          bool tensor = false;   ///< Element has a tensor direction.
+          bool midPlane = true;  ///< Tensor part is {1/2} rather than {c, 1-c}.
 
-        OrbitClass() = default;
-        OrbitClass(Pattern p) : barycentric(std::move(p)) {}
-        OrbitClass(std::initializer_list<size_t> p) : barycentric(p) {}
-        OrbitClass(Pattern p, bool mid)
-          : barycentric(std::move(p)), tensor(true), midPlane(mid) {}
+          OrbitClass() = default;
+          OrbitClass(Pattern p)
+            : barycentric(std::move(p))
+          {}
+          OrbitClass(std::initializer_list<size_t> p)
+            : barycentric(p)
+          {}
+          OrbitClass(Pattern p, bool mid)
+            : barycentric(std::move(p)),
+              tensor(true),
+              midPlane(mid)
+          {}
 
-        friend bool operator==(const OrbitClass& a, const OrbitClass& b)
-        {
-          return a.barycentric == b.barycentric && a.tensor == b.tensor
-              && a.midPlane == b.midPlane;
-        }
+          friend bool operator==(const OrbitClass& a, const OrbitClass& b)
+          {
+            return a.barycentric == b.barycentric && a.tensor == b.tensor &&
+              a.midPlane == b.midPlane;
+          }
       };
 
       /// @brief The orbit classes making up a candidate rule.
@@ -112,18 +119,18 @@ namespace Rodin::QF
       /// @brief Outcome of a solve.
       struct Result
       {
-        bool converged = false;             ///< Residual met the tolerance.
-        bool admissible = false;            ///< Positive weights, interior points.
-        std::vector<SymmetricOrbit> orbits; ///< The rule, as orbits.
-        Real residual = std::numeric_limits<Real>::infinity(); ///< Final norm.
-        size_t restarts = 0;                ///< Starting points consumed.
+          bool converged = false;             ///< Residual met the tolerance.
+          bool admissible = false;            ///< Positive weights, interior points.
+          std::vector<SymmetricOrbit> orbits; ///< The rule, as orbits.
+          Real residual = std::numeric_limits<Real>::infinity(); ///< Final norm.
+          size_t restarts = 0;                ///< Starting points consumed.
       };
 
       /// @brief Exact moment @f$ \int_K x^\alpha @f$ on the reference element
       /// @p g. The wedge is the unit triangle crossed with @f$ [0,1] @f$, so
       /// its moment is the triangle moment times @f$ 1/(c+1) @f$.
-      static Real referenceMoment(Geometry::Polytope::Type g,
-        const std::vector<size_t>& alpha)
+      static Real referenceMoment(
+        Geometry::Polytope::Type g, const std::vector<size_t>& alpha)
       {
         if (g != Geometry::Polytope::Type::Wedge)
           return simplexMoment(alpha);
@@ -135,10 +142,10 @@ namespace Rodin::QF
       /// @f$ d @f$-simplex, @f$ \alpha! / (|\alpha| + d)! @f$.
       static Real simplexMoment(const std::vector<size_t>& alpha)
       {
-        const auto fact = [](size_t n)
-        {
+        const auto fact = [](size_t n) {
           Real r = 1;
-          for (size_t i = 2; i <= n; ++i) r *= static_cast<Real>(i);
+          for (size_t i = 2; i <= n; ++i)
+            r *= static_cast<Real>(i);
           return r;
         };
         Real num = 1;
@@ -157,21 +164,19 @@ namespace Rodin::QF
       {
         std::vector<std::vector<size_t>> out;
         std::vector<size_t> alpha(d, 0);
-        const std::function<void(size_t, size_t)> rec =
-          [&](size_t k, size_t budget)
+        const std::function<void(size_t, size_t)> rec = [&](size_t k, size_t budget) {
+          if (k == d)
           {
-            if (k == d)
-            {
-              out.push_back(alpha);
-              return;
-            }
-            for (size_t a = 0; a <= budget; ++a)
-            {
-              alpha[k] = a;
-              rec(k + 1, budget - a);
-            }
-            alpha[k] = 0;
-          };
+            out.push_back(alpha);
+            return;
+          }
+          for (size_t a = 0; a <= budget; ++a)
+          {
+            alpha[k] = a;
+            rec(k + 1, budget - a);
+          }
+          alpha[k] = 0;
+        };
         rec(0, p);
         return out;
       }
@@ -261,22 +266,22 @@ namespace Rodin::QF
        */
       struct MomentData
       {
-        std::vector<std::vector<size_t>> alphas;
-        std::vector<Real> exact;
-        std::vector<Real> scale;
+          std::vector<std::vector<size_t>> alphas;
+          std::vector<Real> exact;
+          std::vector<Real> scale;
 
-        MomentData(Geometry::Polytope::Type g, size_t d, size_t degree)
-          : alphas(monomials(d, degree))
-        {
-          exact.reserve(alphas.size());
-          scale.reserve(alphas.size());
-          for (const auto& alpha : alphas)
+          MomentData(Geometry::Polytope::Type g, size_t d, size_t degree)
+            : alphas(monomials(d, degree))
           {
-            const Real m = referenceMoment(g, alpha);
-            exact.push_back(m);
-            scale.push_back(Real(1) / std::max(std::abs(m), Real(1e-14)));
+            exact.reserve(alphas.size());
+            scale.reserve(alphas.size());
+            for (const auto& alpha : alphas)
+            {
+              const Real m = referenceMoment(g, alpha);
+              exact.push_back(m);
+              scale.push_back(Real(1) / std::max(std::abs(m), Real(1e-14)));
+            }
           }
-        }
       };
 
       /// @brief Integer power, avoiding std::pow in the residual hot loop.
@@ -321,15 +326,14 @@ namespace Rodin::QF
               m *= ipow(points[q][static_cast<Eigen::Index>(k)], alpha[k]);
             sum += m;
           }
-          r(static_cast<Eigen::Index>(e)) =
-            (sum - moments.exact[e]) * moments.scale[e];
+          r(static_cast<Eigen::Index>(e)) = (sum - moments.exact[e]) * moments.scale[e];
         }
         return r;
       }
 
       /// @brief Convenience overload building the moment data on the spot.
-      static Math::Vector<Real> residual(Geometry::Polytope::Type g,
-        size_t degree, const Configuration& config, const Math::Vector<Real>& x)
+      static Math::Vector<Real> residual(Geometry::Polytope::Type g, size_t degree,
+        const Configuration& config, const Math::Vector<Real>& x)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         return residual(g, config, x, MomentData(g, d, degree), d);
@@ -343,9 +347,8 @@ namespace Rodin::QF
        * same request always produces the same rule.
        */
       static Result solve(Geometry::Polytope::Type g, size_t degree,
-        const Configuration& config, size_t maxRestarts = 256,
-        Real tolerance = 1e-13, size_t maxIterations = 200,
-        unsigned seed = 20260101u)
+        const Configuration& config, size_t maxRestarts = 256, Real tolerance = 1e-13,
+        size_t maxIterations = 200, unsigned seed = 20260101u)
       {
         const Geometry::Polytope::Traits traits(g);
         const size_t d = traits.getDimension();
@@ -376,8 +379,7 @@ namespace Rodin::QF
                 x(cursor++) = bary(rng) / static_cast<Real>(pattern.size());
               if (c.tensor && !c.midPlane)
                 x(cursor++) = bary(rng);
-              x(cursor++) =
-                std::sqrt(measure / static_cast<Real>(totalPoints));
+              x(cursor++) = std::sqrt(measure / static_cast<Real>(totalPoints));
             }
           }
 
@@ -393,12 +395,12 @@ namespace Rodin::QF
               Math::Vector<Real> xp = x, xm = x;
               xp(j) += h;
               xm(j) -= h;
-              J.col(j) = (residual(g, config, xp, moments, d)
-                        - residual(g, config, xm, moments, d)) / (2 * h);
+              J.col(j) = (residual(g, config, xp, moments, d) -
+                           residual(g, config, xm, moments, d)) /
+                (2 * h);
             }
             const Math::Matrix<Real> H =
-              J.transpose() * J
-              + lambda * Math::Matrix<Real>::Identity(n, n);
+              J.transpose() * J + lambda * Math::Matrix<Real>::Identity(n, n);
             const Math::Vector<Real> step = H.ldlt().solve(-J.transpose() * r);
             const Math::Vector<Real> xn = x + step;
             const Math::Vector<Real> rn = residual(g, config, xn, moments, d);
@@ -446,21 +448,20 @@ namespace Rodin::QF
           : Geometry::Polytope::Traits(g).getVertexCount();
         std::vector<Pattern> out;
         Pattern current;
-        const std::function<void(size_t, size_t)> rec =
-          [&](size_t remaining, size_t largest)
+        const std::function<void(size_t, size_t)> rec = [&](size_t remaining,
+                                                          size_t largest) {
+          if (remaining == 0)
           {
-            if (remaining == 0)
-            {
-              out.push_back(current);
-              return;
-            }
-            for (size_t part = std::min(remaining, largest); part >= 1; --part)
-            {
-              current.push_back(part);
-              rec(remaining - part, part);
-              current.pop_back();
-            }
-          };
+            out.push_back(current);
+            return;
+          }
+          for (size_t part = std::min(remaining, largest); part >= 1; --part)
+          {
+            current.push_back(part);
+            rec(remaining - part, part);
+            current.pop_back();
+          }
+        };
         rec(n, n);
         return out;
       }
@@ -507,8 +508,8 @@ namespace Rodin::QF
        * against theirs.
        */
       static Result search(Geometry::Polytope::Type g, size_t degree,
-        size_t maxPoints = 32, size_t maxRestarts = 96,
-        Configuration* found = nullptr, size_t maxOrbits = 6)
+        size_t maxPoints = 32, size_t maxRestarts = 96, Configuration* found = nullptr,
+        size_t maxOrbits = 6)
       {
         const bool product = (g == Geometry::Polytope::Type::Wedge);
         std::vector<OrbitClass> patterns;
@@ -529,34 +530,33 @@ namespace Rodin::QF
         // Published symmetric rules use a handful of orbits; without a cap the
         // multiset enumeration explodes long before any of it is solved, which
         // on the wedge means no candidate is ever tried.
-        const std::function<void(size_t, size_t)> rec =
-          [&](size_t start, size_t points)
+        const std::function<void(size_t, size_t)> rec = [&](size_t start, size_t points) {
+          if (!current.empty())
+            candidates.push_back(current);
+          if (current.size() >= maxOrbits)
+            return;
+          for (size_t i = start; i < patterns.size(); ++i)
           {
-            if (!current.empty())
-              candidates.push_back(current);
-            if (current.size() >= maxOrbits)
-              return;
-            for (size_t i = start; i < patterns.size(); ++i)
-            {
-              const size_t sz = classSize(patterns[i]);
-              if (points + sz > maxPoints)
-                continue;
+            const size_t sz = classSize(patterns[i]);
+            if (points + sz > maxPoints)
+              continue;
               // A class with no free parameters contributes the same points
               // however often it is repeated, so it may appear at most once.
-              const bool centroid = (patterns[i].barycentric.size() == 1)
-                && (!patterns[i].tensor || patterns[i].midPlane);
-              if (centroid && std::count(current.begin(), current.end(), patterns[i]))
-                continue;
-              current.push_back(patterns[i]);
-              rec(centroid ? i + 1 : i, points + sz);
-              current.pop_back();
-            }
-          };
+            const bool centroid = (patterns[i].barycentric.size() == 1) &&
+              (!patterns[i].tensor || patterns[i].midPlane);
+            if (centroid && std::count(current.begin(), current.end(), patterns[i]))
+              continue;
+            current.push_back(patterns[i]);
+            rec(centroid ? i + 1 : i, points + sz);
+            current.pop_back();
+          }
+        };
         rec(0, 0);
 
         std::stable_sort(candidates.begin(), candidates.end(),
-          [](const Configuration& a, const Configuration& b)
-          { return configurationSize(a) < configurationSize(b); });
+          [](const Configuration& a, const Configuration& b) {
+            return configurationSize(a) < configurationSize(b);
+          });
 
         Result best;
         for (const auto& config : candidates)

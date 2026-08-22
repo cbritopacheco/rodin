@@ -46,9 +46,8 @@ namespace
   {
     char buf[256];
     std::string out;
-    std::snprintf(buf, sizeof(buf), "d%zu n=%zu res=%.3e t=%.1fs :",
-      degree, SymmetricRuleSolver::configurationSize(config), r.residual,
-      seconds);
+    std::snprintf(buf, sizeof(buf), "d%zu n=%zu res=%.3e t=%.1fs :", degree,
+      SymmetricRuleSolver::configurationSize(config), r.residual, seconds);
     out += buf;
     for (const auto& orbit : r.orbits)
     {
@@ -57,8 +56,7 @@ namespace
       out += " {";
       for (size_t i = 0; i < b.size(); ++i)
       {
-        std::snprintf(buf, sizeof(buf), "%.17g%s", b[i],
-          (i + 1 < b.size()) ? "," : "");
+        std::snprintf(buf, sizeof(buf), "%.17g%s", b[i], (i + 1 < b.size()) ? "," : "");
         out += buf;
       }
       for (const auto t : orbit.getTensor())
@@ -77,12 +75,12 @@ namespace
 int main(int argc, char** argv)
 {
   const std::string which = (argc > 1) ? argv[1] : "tri";
-  const auto g = (which == "tet")   ? Geometry::Polytope::Type::Tetrahedron
-               : (which == "wedge") ? Geometry::Polytope::Type::Wedge
-                                    : Geometry::Polytope::Type::Triangle;
+  const auto g = (which == "tet") ? Geometry::Polytope::Type::Tetrahedron
+    : (which == "wedge")          ? Geometry::Polytope::Type::Wedge
+                                  : Geometry::Polytope::Type::Triangle;
   const size_t maxDegree = (argc > 2) ? std::stoul(argv[2]) : 8;
   const size_t maxPoints = (argc > 3) ? std::stoul(argv[3]) : 96;
-  const size_t restarts  = (argc > 4) ? std::stoul(argv[4]) : 256;
+  const size_t restarts = (argc > 4) ? std::stoul(argv[4]) : 256;
 
   const size_t workers = std::min<size_t>(
     std::max<size_t>(std::thread::hardware_concurrency(), 1u), maxDegree);
@@ -91,8 +89,7 @@ int main(int argc, char** argv)
   std::vector<std::thread> pool;
   for (size_t w = 0; w < workers; ++w)
   {
-    pool.emplace_back([&]
-    {
+    pool.emplace_back([&] {
       for (;;)
       {
         const size_t degree = next++;
@@ -101,10 +98,10 @@ int main(int argc, char** argv)
 
         const auto t0 = std::chrono::steady_clock::now();
         SymmetricRuleSolver::Configuration config;
-        const auto r = SymmetricRuleSolver::search(
-          g, degree, maxPoints, restarts, &config);
-        const double seconds = std::chrono::duration<double>(
-          std::chrono::steady_clock::now() - t0).count();
+        const auto r =
+          SymmetricRuleSolver::search(g, degree, maxPoints, restarts, &config);
+        const double seconds =
+          std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
 
         std::string line;
         if (r.converged && r.admissible)
@@ -114,10 +111,9 @@ int main(int argc, char** argv)
         else
         {
           char buf[192];
-          std::snprintf(buf, sizeof(buf),
-            "d%zu FAILED conv=%d adm=%d res=%.3e t=%.1fs",
-            degree, static_cast<int>(r.converged),
-            static_cast<int>(r.admissible), r.residual, seconds);
+          std::snprintf(buf, sizeof(buf), "d%zu FAILED conv=%d adm=%d res=%.3e t=%.1fs",
+            degree, static_cast<int>(r.converged), static_cast<int>(r.admissible),
+            r.residual, seconds);
           line = buf;
         }
 

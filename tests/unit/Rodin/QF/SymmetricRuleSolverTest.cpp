@@ -36,9 +36,18 @@ namespace
         }
       }
 
-      size_t getSize() const { return m_weights.size(); }
-      Real getWeight(size_t i) const { return m_weights[i]; }
-      const Math::SpatialVector<Real>& getPoint(size_t i) const { return m_points[i]; }
+      size_t getSize() const
+      {
+        return m_weights.size();
+      }
+      Real getWeight(size_t i) const
+      {
+        return m_weights[i];
+      }
+      const Math::SpatialVector<Real>& getPoint(size_t i) const
+      {
+        return m_points[i];
+      }
 
     private:
       std::vector<Math::SpatialVector<Real>> m_points;
@@ -90,30 +99,27 @@ TEST(SymmetricRuleSolverTest, ConvergedRulesPassTheExactnessSweep)
 {
   struct Case
   {
-    Polytope::Type g;
-    size_t degree;
-    SymmetricRuleSolver::Configuration config;
+      Polytope::Type g;
+      size_t degree;
+      SymmetricRuleSolver::Configuration config;
   };
 
-  const std::vector<Case> cases = {
-    {Polytope::Type::Triangle,    1, {{3}}},
-    {Polytope::Type::Triangle,    2, {{2, 1}}},
-    {Polytope::Type::Triangle,    3, {{2, 1}, {2, 1}}},
-    {Polytope::Type::Triangle,    4, {{2, 1}, {2, 1}}},
+  const std::vector<Case> cases = {{Polytope::Type::Triangle, 1, {{3}}},
+    {Polytope::Type::Triangle, 2, {{2, 1}}},
+    {Polytope::Type::Triangle, 3, {{2, 1}, {2, 1}}},
+    {Polytope::Type::Triangle, 4, {{2, 1}, {2, 1}}},
     {Polytope::Type::Tetrahedron, 2, {{3, 1}}},
-    {Polytope::Type::Tetrahedron, 3, {{3, 1}, {3, 1}}}
-  };
+    {Polytope::Type::Tetrahedron, 3, {{3, 1}, {3, 1}}}};
 
   for (const auto& c : cases)
   {
     const auto r = SymmetricRuleSolver::solve(c.g, c.degree, c.config);
-    ASSERT_TRUE(r.converged)
-      << "degree " << c.degree << " residual " << r.residual;
+    ASSERT_TRUE(r.converged) << "degree " << c.degree << " residual " << r.residual;
     const OrbitRule rule(c.g, r.orbits);
     const auto report = exactnessSweep(rule, c.g, c.degree);
     EXPECT_LT(report.worstRelativeError, 1e-11)
-      << "degree " << c.degree << " worst x^" << report.worstExponents[0]
-      << " y^" << report.worstExponents[1] << " z^" << report.worstExponents[2];
+      << "degree " << c.degree << " worst x^" << report.worstExponents[0] << " y^"
+      << report.worstExponents[1] << " z^" << report.worstExponents[2];
   }
 }
 
@@ -121,8 +127,8 @@ TEST(SymmetricRuleSolverTest, ConvergedRulesPassTheExactnessSweep)
 /// points, which is what makes it usable for a barrier or a metric.
 TEST(SymmetricRuleSolverTest, AdmissibleRulesArePositiveAndInterior)
 {
-  const auto r = SymmetricRuleSolver::solve(Polytope::Type::Triangle, 4,
-    {{2, 1}, {2, 1}});
+  const auto r =
+    SymmetricRuleSolver::solve(Polytope::Type::Triangle, 4, {{2, 1}, {2, 1}});
   ASSERT_TRUE(r.converged) << "residual " << r.residual;
   ASSERT_TRUE(r.admissible);
   const OrbitRule rule(Polytope::Type::Triangle, r.orbits);
@@ -138,8 +144,10 @@ TEST(SymmetricRuleSolverTest, AdmissibleRulesArePositiveAndInterior)
 /// change every assembled integral in the library.
 TEST(SymmetricRuleSolverTest, SolveIsDeterministic)
 {
-  const auto a = SymmetricRuleSolver::solve(Polytope::Type::Triangle, 4, {{2, 1}, {2, 1}});
-  const auto b = SymmetricRuleSolver::solve(Polytope::Type::Triangle, 4, {{2, 1}, {2, 1}});
+  const auto a =
+    SymmetricRuleSolver::solve(Polytope::Type::Triangle, 4, {{2, 1}, {2, 1}});
+  const auto b =
+    SymmetricRuleSolver::solve(Polytope::Type::Triangle, 4, {{2, 1}, {2, 1}});
   ASSERT_EQ(a.orbits.size(), b.orbits.size());
   for (size_t i = 0; i < a.orbits.size(); ++i)
   {
@@ -155,8 +163,8 @@ TEST(SymmetricRuleSolverTest, SolveIsDeterministic)
 /// the solver must report failure rather than a plausible wrong rule.
 TEST(SymmetricRuleSolverTest, UnderparameterisedConfigurationDoesNotConverge)
 {
-  const auto r = SymmetricRuleSolver::solve(Polytope::Type::Triangle, 2, {{3}},
-    8 /* restarts */);
+  const auto r =
+    SymmetricRuleSolver::solve(Polytope::Type::Triangle, 2, {{3}}, 8 /* restarts */);
   EXPECT_FALSE(r.converged);
   EXPECT_GT(r.residual, 1e-6);
 }
@@ -170,12 +178,12 @@ TEST(SymmetricRuleSolverTest, SolverMomentsAgreeWithTestOracle)
     for (size_t b = 0; a + b <= 4; ++b)
     {
       EXPECT_NEAR(SymmetricRuleSolver::simplexMoment({a, b}),
-                  exactMoment(Polytope::Type::Triangle, a, b, 0), 1e-16)
+        exactMoment(Polytope::Type::Triangle, a, b, 0), 1e-16)
         << "triangle x^" << a << " y^" << b;
       for (size_t c = 0; a + b + c <= 4; ++c)
       {
         EXPECT_NEAR(SymmetricRuleSolver::simplexMoment({a, b, c}),
-                    exactMoment(Polytope::Type::Tetrahedron, a, b, c), 1e-16)
+          exactMoment(Polytope::Type::Tetrahedron, a, b, c), 1e-16)
           << "tet x^" << a << " y^" << b << " z^" << c;
       }
     }
@@ -230,13 +238,12 @@ TEST(SymmetricRuleSolverTest, PatternSizeMatchesOrbitCardinality)
 TEST(SymmetricRuleSolverTest, SearchRecoversPublishedTrianglePointCounts)
 {
   const std::vector<std::pair<size_t, size_t>> expected = {
-    {1, 1}, {2, 3}, {3, 6}, {4, 6}, {5, 7}
-  };
+    {1, 1}, {2, 3}, {3, 6}, {4, 6}, {5, 7}};
   for (const auto& [degree, points] : expected)
   {
     SymmetricRuleSolver::Configuration config;
-    const auto r = SymmetricRuleSolver::search(
-      Polytope::Type::Triangle, degree, 24, 96, &config);
+    const auto r =
+      SymmetricRuleSolver::search(Polytope::Type::Triangle, degree, 24, 96, &config);
     ASSERT_TRUE(r.converged && r.admissible)
       << "degree " << degree << " residual " << r.residual;
     EXPECT_EQ(SymmetricRuleSolver::configurationSize(config), points)
@@ -385,13 +392,12 @@ TEST(SymmetricRuleSolverTest, WedgeMomentAgreesWithTestOracle)
 TEST(SymmetricRuleSolverTest, SearchRecoversPublishedWedgePointCounts)
 {
   const std::vector<std::pair<size_t, size_t>> expected = {
-    {1, 1}, {2, 5}, {3, 8}, {4, 11}
-  };
+    {1, 1}, {2, 5}, {3, 8}, {4, 11}};
   for (const auto& [degree, points] : expected)
   {
     SymmetricRuleSolver::Configuration config;
-    const auto r = SymmetricRuleSolver::search(
-      Polytope::Type::Wedge, degree, 16, 96, &config);
+    const auto r =
+      SymmetricRuleSolver::search(Polytope::Type::Wedge, degree, 16, 96, &config);
     ASSERT_TRUE(r.converged && r.admissible)
       << "degree " << degree << " residual " << r.residual;
     EXPECT_EQ(SymmetricRuleSolver::configurationSize(config), points)
@@ -411,8 +417,8 @@ TEST(SymmetricRuleSolverTest, SearchedWedgeRulesAreExact)
     const OrbitRule rule(Polytope::Type::Wedge, r.orbits);
     const auto report = exactnessSweep(rule, Polytope::Type::Wedge, degree);
     EXPECT_LT(report.worstRelativeError, 1e-11)
-      << "degree " << degree << " worst x^" << report.worstExponents[0]
-      << " y^" << report.worstExponents[1] << " z^" << report.worstExponents[2];
+      << "degree " << degree << " worst x^" << report.worstExponents[0] << " y^"
+      << report.worstExponents[1] << " z^" << report.worstExponents[2];
     EXPECT_TRUE(allWeightsPositive(rule));
     EXPECT_TRUE(allPointsInside(rule, Polytope::Type::Wedge));
     EXPECT_NEAR(weightSum(rule), referenceMeasure(Polytope::Type::Wedge), 1e-12);
