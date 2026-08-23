@@ -40,8 +40,7 @@ namespace
       Math::SpatialVector<Real> v;
       v.resize(static_cast<Eigen::Index>(t.getDimension()));
       for (size_t k = 0; k < t.getDimension(); ++k)
-        v[static_cast<Eigen::Index>(k)] =
-          t.getVertex(i)[static_cast<Eigen::Index>(k)];
+        v[static_cast<Eigen::Index>(k)] = t.getVertex(i)[static_cast<Eigen::Index>(k)];
       out.push_back(std::move(v));
     }
     return out;
@@ -71,16 +70,17 @@ namespace
       for (size_t b = 0; a + b <= p; ++b)
         for (size_t c = 0; a + b + c <= p; ++c)
         {
-          if (d == 2 && c > 0) continue;
+          if (d == 2 && c > 0)
+            continue;
           terms.push_back({{a, b, c}, uni(rng)});
         }
-    return [terms, d](const Math::SpatialVector<Real>& x)
-    {
+    return [terms, d](const Math::SpatialVector<Real>& x) {
       Real s = 0;
       for (const auto& [e, k] : terms)
       {
         Real m = std::pow(x[0], (Real)e[0]) * std::pow(x[1], (Real)e[1]);
-        if (d == 3) m *= std::pow(x[2], (Real)e[2]);
+        if (d == 3)
+          m *= std::pow(x[2], (Real)e[2]);
         s += k * m;
       }
       return s;
@@ -91,15 +91,16 @@ namespace
   /// facet. The centroid is one choice among infinitely many; any interior
   /// point tiles the element just as well, and a rule that only survives the
   /// symmetric split is not correct.
-  std::vector<Vertices> subdivideAt(const Vertices& verts,
-    const Math::SpatialVector<Real>& inner)
+  std::vector<Vertices> subdivideAt(
+    const Vertices& verts, const Math::SpatialVector<Real>& inner)
   {
     std::vector<Vertices> out;
     for (size_t skip = 0; skip < verts.size(); ++skip)
     {
       Vertices piece{inner};
       for (size_t i = 0; i < verts.size(); ++i)
-        if (i != skip) piece.push_back(verts[i]);
+        if (i != skip)
+          piece.push_back(verts[i]);
       out.push_back(std::move(piece));
     }
     return out;
@@ -119,15 +120,17 @@ namespace
         x[static_cast<Eigen::Index>(k)] = uni(rng);
         tot += x[static_cast<Eigen::Index>(k)];
       }
-      if (tot < 0.92) return x;
+      if (tot < 0.92)
+        return x;
     }
   }
 
   const std::vector<Polytope::Type> kSimplices = {
-    Polytope::Type::Triangle, Polytope::Type::Tetrahedron
-  };
+    Polytope::Type::Triangle, Polytope::Type::Tetrahedron};
   const char* name(Polytope::Type g)
-  { return g == Polytope::Type::Triangle ? "triangle" : "tetrahedron"; }
+  {
+    return g == Polytope::Type::Triangle ? "triangle" : "tetrahedron";
+  }
 }
 
 /// @brief Subdivision additivity over randomly placed split points.
@@ -172,27 +175,30 @@ TEST(QuadratureFuzzTest, AffineCovariantUnderManyRandomMaps)
       for (int trial = 0; trial < 30; ++trial)
       {
         Math::Matrix<Real> A((Eigen::Index)d, (Eigen::Index)d);
-        do {
+        do
+        {
           for (Eigen::Index i = 0; i < A.rows(); ++i)
             for (Eigen::Index j = 0; j < A.cols(); ++j)
               A(i, j) = uni(rng);
         } while (std::abs(A.determinant()) < 0.05);
         Math::SpatialVector<Real> shift;
         shift.resize((Eigen::Index)d);
-        for (Eigen::Index k = 0; k < shift.size(); ++k) shift[k] = uni(rng);
+        for (Eigen::Index k = 0; k < shift.size(); ++k)
+          shift[k] = uni(rng);
 
         Vertices mapped;
         for (const auto& v : verts)
           mapped.push_back(Math::SpatialVector<Real>(shift + A * v));
         const auto f = randomPolynomial(d, p, rng);
-        const auto composed = [&](const Math::SpatialVector<Real>& x)
-        { return f(Math::SpatialVector<Real>(shift + A * x)); };
+        const auto composed = [&](const Math::SpatialVector<Real>& x) {
+          return f(Math::SpatialVector<Real>(shift + A * x));
+        };
 
         const Real direct = integrateOn(qf, mapped, f);
         const Real viaRef = std::abs(A.determinant()) * integrateOn(qf, verts, composed);
         ASSERT_NEAR(direct, viaRef, 1e-9 * std::max(Real(1), std::abs(direct)))
-          << name(g) << " degree " << p << " trial " << trial
-          << " det " << A.determinant();
+          << name(g) << " degree " << p << " trial " << trial << " det "
+          << A.determinant();
       }
     }
   }
@@ -206,8 +212,8 @@ TEST(QuadratureFuzzTest, FamiliesAgreeOverManyRandomPolynomials)
   {
     const size_t d = Polytope::Traits(g).getDimension();
     const auto verts = referenceVertices(g);
-    const size_t top = std::min(XiaoGimbutas::getMaxDegree(g),
-                                WitherdenVincent::getMaxDegree(g));
+    const size_t top =
+      std::min(XiaoGimbutas::getMaxDegree(g), WitherdenVincent::getMaxDegree(g));
     for (size_t p = 1; p <= top; ++p)
     {
       const XiaoGimbutas xg(p, g);
@@ -252,25 +258,30 @@ TEST(QuadratureFuzzTest, AnyPerturbedCoefficientIsDetected)
 
         struct Perturbed
         {
-          const XiaoGimbutas& base;
-          size_t q, slot, d;
-          Real delta;
-          mutable Math::SpatialVector<Real> scratch;
-          size_t getSize() const { return base.getSize(); }
-          Real getWeight(size_t i) const
-          { return base.getWeight(i) * ((i == q && slot == d) ? 1 + delta : 1); }
-          const Math::SpatialVector<Real>& getPoint(size_t i) const
-          {
-            scratch = base.getPoint(i);
-            if (i == q && slot < d)
-              scratch[static_cast<Eigen::Index>(slot)] += delta;
-            return scratch;
-          }
+            const XiaoGimbutas& base;
+            size_t q, slot, d;
+            Real delta;
+            mutable Math::SpatialVector<Real> scratch;
+            size_t getSize() const
+            {
+              return base.getSize();
+            }
+            Real getWeight(size_t i) const
+            {
+              return base.getWeight(i) * ((i == q && slot == d) ? 1 + delta : 1);
+            }
+            const Math::SpatialVector<Real>& getPoint(size_t i) const
+            {
+              scratch = base.getPoint(i);
+              if (i == q && slot < d)
+                scratch[static_cast<Eigen::Index>(slot)] += delta;
+              return scratch;
+            }
         } bad{qf, q, slot, d, delta, {}};
 
         ASSERT_GT(exactnessSweep(bad, g, p).worstRelativeError, 1e-11)
-          << name(g) << " degree " << p << " node " << q << " slot " << slot
-          << " delta " << delta << " went undetected";
+          << name(g) << " degree " << p << " node " << q << " slot " << slot << " delta "
+          << delta << " went undetected";
       }
     }
   }

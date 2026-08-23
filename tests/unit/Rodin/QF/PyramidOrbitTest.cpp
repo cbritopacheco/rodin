@@ -65,8 +65,7 @@ TEST(PyramidOrbitTest, OrbitIsDihedralInCentredCoordinates)
     for (const auto& p : pts)
       uv.emplace_back((p[0] - half) / half, (p[1] - half) / half);
 
-    const auto contains = [&](Real u, Real v)
-    {
+    const auto contains = [&](Real u, Real v) {
       for (const auto& [a, b] : uv)
         if (std::abs(a - u) < 1e-12 && std::abs(b - v) < 1e-12)
           return true;
@@ -96,8 +95,7 @@ TEST(PyramidOrbitTest, ShearPreservesVolume)
       minx = std::min(minx, p[0]);
       maxx = std::max(maxx, p[0]);
     }
-    EXPECT_NEAR(maxx - minx, 1 - z, 1e-14)
-      << "cross-section width wrong at z = " << z;
+    EXPECT_NEAR(maxx - minx, 1 - z, 1e-14) << "cross-section width wrong at z = " << z;
     EXPECT_NEAR(minx, 0.0, 1e-14) << "cross-section not anchored at the corner";
   }
 }

@@ -124,3 +124,8 @@ gtest_discover_tests(RodinQuadratureFuzzTest PROPERTIES LABELS unit)
 add_executable(RodinPyramidOrbitTest PyramidOrbitTest.cpp)
 target_link_libraries(RodinPyramidOrbitTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinPyramidOrbitTest PROPERTIES LABELS unit)
+
+# External cross-check against published rules
+add_executable(RodinPublishedRuleTest PublishedRuleTest.cpp)
+target_link_libraries(RodinPublishedRuleTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinPublishedRuleTest PROPERTIES LABELS unit)
