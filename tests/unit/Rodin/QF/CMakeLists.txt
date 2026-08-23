@@ -107,3 +107,11 @@ gtest_discover_tests(RodinXiaoGimbutasTest PROPERTIES LABELS unit)
 add_executable(RodinQuadraturePropertyTest QuadraturePropertyTest.cpp)
 target_link_libraries(RodinQuadraturePropertyTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinQuadraturePropertyTest PROPERTIES LABELS unit)
+
+add_executable(RodinGenerateSymmetric EXCLUDE_FROM_ALL GenerateSymmetric.cpp)
+target_link_libraries(RodinGenerateSymmetric PUBLIC Rodin::Rodin Rodin::QF)
+
+# WitherdenVincent shipped-coefficient tests
+add_executable(RodinWitherdenVincentTest WitherdenVincentTest.cpp)
+target_link_libraries(RodinWitherdenVincentTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinWitherdenVincentTest PROPERTIES LABELS unit)

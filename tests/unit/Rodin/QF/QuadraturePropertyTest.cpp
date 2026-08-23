@@ -39,8 +39,7 @@ namespace
       Math::SpatialVector<Real> v;
       v.resize(static_cast<Eigen::Index>(t.getDimension()));
       for (size_t k = 0; k < t.getDimension(); ++k)
-        v[static_cast<Eigen::Index>(k)] =
-          t.getVertex(i)[static_cast<Eigen::Index>(k)];
+        v[static_cast<Eigen::Index>(k)] = t.getVertex(i)[static_cast<Eigen::Index>(k)];
       out.push_back(std::move(v));
     }
     return out;
@@ -103,13 +102,12 @@ namespace
             continue;
           terms.push_back({{a, b, c}, uni(rng)});
         }
-    return [terms, d](const Math::SpatialVector<Real>& x)
-    {
+    return [terms, d](const Math::SpatialVector<Real>& x) {
       Real s = 0;
       for (const auto& [e, coeff] : terms)
       {
-        Real m = std::pow(x[0], static_cast<Real>(e[0]))
-               * std::pow(x[1], static_cast<Real>(e[1]));
+        Real m = std::pow(x[0], static_cast<Real>(e[0])) *
+          std::pow(x[1], static_cast<Real>(e[1]));
         if (d == 3)
           m *= std::pow(x[2], static_cast<Real>(e[2]));
         s += coeff * m;
@@ -119,10 +117,11 @@ namespace
   }
 
   const std::vector<Polytope::Type> kSimplices = {
-    Polytope::Type::Triangle, Polytope::Type::Tetrahedron
-  };
+    Polytope::Type::Triangle, Polytope::Type::Tetrahedron};
   const char* name(Polytope::Type g)
-  { return g == Polytope::Type::Triangle ? "triangle" : "tetrahedron"; }
+  {
+    return g == Polytope::Type::Triangle ? "triangle" : "tetrahedron";
+  }
 }
 
 /**
@@ -177,9 +176,9 @@ TEST(QuadraturePropertyTest, IntegralScalesWithTheAffineDeterminant)
       for (int trial = 0; trial < 5; ++trial)
       {
         // A random affine image of the reference element.
-        Math::Matrix<Real> A(static_cast<Eigen::Index>(d),
-                             static_cast<Eigen::Index>(d));
-        do {
+        Math::Matrix<Real> A(static_cast<Eigen::Index>(d), static_cast<Eigen::Index>(d));
+        do
+        {
           for (Eigen::Index i = 0; i < A.rows(); ++i)
             for (Eigen::Index j = 0; j < A.cols(); ++j)
               A(i, j) = uni(rng);
@@ -196,14 +195,14 @@ TEST(QuadraturePropertyTest, IntegralScalesWithTheAffineDeterminant)
         const auto f = randomPolynomial(d, p, rng);
         // f composed with the map is a polynomial of the same degree, so
         // integrating it on the reference and scaling must agree.
-        const auto fComposed = [&](const Math::SpatialVector<Real>& x)
-        { return f(Math::SpatialVector<Real>(shift + A * x)); };
+        const auto fComposed = [&](const Math::SpatialVector<Real>& x) {
+          return f(Math::SpatialVector<Real>(shift + A * x));
+        };
 
         const Real direct = integrateOn(qf, mapped, f);
         const Real viaReference =
           std::abs(A.determinant()) * integrateOn(qf, verts, fComposed);
-        EXPECT_NEAR(direct, viaReference,
-          1e-10 * std::max(Real(1), std::abs(direct)))
+        EXPECT_NEAR(direct, viaReference, 1e-10 * std::max(Real(1), std::abs(direct)))
           << name(g) << " degree " << p;
       }
     }
@@ -228,8 +227,7 @@ TEST(QuadraturePropertyTest, ExactOnRandomPolynomialsNotOnlyMonomials)
     {
       const XiaoGimbutas qf(p, g);
       // A rule of the next degree up is an independent reference.
-      const XiaoGimbutas ref(
-        std::min(p + 2, XiaoGimbutas::getMaxDegree(g)), g);
+      const XiaoGimbutas ref(std::min(p + 2, XiaoGimbutas::getMaxDegree(g)), g);
       for (int trial = 0; trial < 5; ++trial)
       {
         const auto f = randomPolynomial(d, p, rng);
@@ -261,8 +259,10 @@ TEST(QuadraturePropertyTest, NonNegativeIntegrandGivesNonNegativeIntegral)
       {
         const auto h = randomPolynomial(d, p / 2, rng);
         // h^2 is non-negative and of degree at most p.
-        const auto f = [&](const Math::SpatialVector<Real>& x)
-        { const Real v = h(x); return v * v; };
+        const auto f = [&](const Math::SpatialVector<Real>& x) {
+          const Real v = h(x);
+          return v * v;
+        };
         EXPECT_GE(integrateOn(qf, verts, f), 0.0) << name(g) << " degree " << p;
       }
     }

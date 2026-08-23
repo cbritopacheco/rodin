@@ -66,9 +66,9 @@ namespace Rodin::QF
         {
           const Real kk = static_cast<Real>(k);
           const Real c = 2 * kk * (kk + alpha + beta) * (2 * kk + alpha + beta - 2);
-          const Real c1 = (2 * kk + alpha + beta - 1)
-            * ((2 * kk + alpha + beta) * (2 * kk + alpha + beta - 2) * x
-               + alpha * alpha - beta * beta);
+          const Real c1 = (2 * kk + alpha + beta - 1) *
+            ((2 * kk + alpha + beta) * (2 * kk + alpha + beta - 2) * x + alpha * alpha -
+              beta * beta);
           const Real c2 =
             2 * (kk + alpha - 1) * (kk + beta - 1) * (2 * kk + alpha + beta);
           const Real p2 = (c1 * p1 - c2 * p0) / c;
@@ -100,8 +100,8 @@ namespace Rodin::QF
       }
 
       /// @brief Unnormalised @f$ \psi @f$ at @p x on the unit simplex.
-      static Real evaluate(const std::vector<size_t>& idx,
-        const Math::SpatialVector<Real>& x)
+      static Real evaluate(
+        const std::vector<size_t>& idx, const Math::SpatialVector<Real>& x)
       {
         constexpr Real eps = 1e-14;
         if (idx.size() == 2)
@@ -110,8 +110,8 @@ namespace Rodin::QF
           const Real q = 1 - py;
           const Real a = (q > eps) ? (2 * px / q - 1) : Real(-1);
           const Real b = 2 * py - 1;
-          return jacobi(idx[0], 0, 0, a) * ipow(q, idx[0])
-               * jacobi(idx[1], 2 * static_cast<Real>(idx[0]) + 1, 0, b);
+          return jacobi(idx[0], 0, 0, a) * ipow(q, idx[0]) *
+            jacobi(idx[1], 2 * static_cast<Real>(idx[0]) + 1, 0, b);
         }
         const Real px = x[0], py = x[1], pz = x[2];
         const Real q1 = 1 - py - pz;
@@ -119,10 +119,9 @@ namespace Rodin::QF
         const Real a = (q1 > eps) ? (2 * px / q1 - 1) : Real(-1);
         const Real b = (q2 > eps) ? (2 * py / q2 - 1) : Real(-1);
         const Real c = 2 * pz - 1;
-        return jacobi(idx[0], 0, 0, a) * ipow(q1, idx[0])
-             * jacobi(idx[1], 2 * static_cast<Real>(idx[0]) + 1, 0, b)
-             * ipow(q2, idx[1])
-             * jacobi(idx[2], 2 * static_cast<Real>(idx[0] + idx[1]) + 2, 0, c);
+        return jacobi(idx[0], 0, 0, a) * ipow(q1, idx[0]) *
+          jacobi(idx[1], 2 * static_cast<Real>(idx[0]) + 1, 0, b) * ipow(q2, idx[1]) *
+          jacobi(idx[2], 2 * static_cast<Real>(idx[0] + idx[1]) + 2, 0, c);
       }
 
       /// @brief @f$ \frac{d}{dx} P_n^{(\alpha,\beta)}(x)
@@ -131,8 +130,8 @@ namespace Rodin::QF
       {
         if (n == 0)
           return 0;
-        return Real(0.5) * (static_cast<Real>(n) + alpha + beta + 1)
-             * jacobi(n - 1, alpha + 1, beta + 1, x);
+        return Real(0.5) * (static_cast<Real>(n) + alpha + beta + 1) *
+          jacobi(n - 1, alpha + 1, beta + 1, x);
       }
 
       /**
@@ -145,8 +144,8 @@ namespace Rodin::QF
        * @f$ 10^{-8} @f$. Gated by an FD-consistency test, as the house
        * pattern requires for a residual and tangent pair.
        */
-      static Math::SpatialVector<Real> gradient(const std::vector<size_t>& idx,
-        const Math::SpatialVector<Real>& x)
+      static Math::SpatialVector<Real> gradient(
+        const std::vector<size_t>& idx, const Math::SpatialVector<Real>& x)
       {
         constexpr Real eps = 1e-12;
         Math::SpatialVector<Real> out;
@@ -168,9 +167,8 @@ namespace Rodin::QF
           const Real qm1 = (m == 0) ? Real(0) : ipow(q, m - 1);
 
           out[0] = 2 * dPm * qm1 * Pn;
-          out[1] = dPm * (2 * px / (q * q)) * qm * Pn
-                 - static_cast<Real>(m) * qm1 * Pm * Pn
-                 + Pm * qm * dPn * 2;
+          out[1] = dPm * (2 * px / (q * q)) * qm * Pn -
+            static_cast<Real>(m) * qm1 * Pm * Pn + Pm * qm * dPn * 2;
           return out;
         }
 
@@ -195,15 +193,15 @@ namespace Rodin::QF
         // d/dx: only a depends on x.
         out[0] = 2 * dPm * q1m1 * Pn * q2n * Po;
         // d/dy: a through q1, q1^m, and b.
-        out[1] = dPm * (2 * px / (q1 * q1)) * q1m * Pn * q2n * Po
-               - static_cast<Real>(m) * q1m1 * Pm * Pn * q2n * Po
-               + Pm * q1m * dPn * (2 / q2) * q2n * Po;
+        out[1] = dPm * (2 * px / (q1 * q1)) * q1m * Pn * q2n * Po -
+          static_cast<Real>(m) * q1m1 * Pm * Pn * q2n * Po +
+          Pm * q1m * dPn * (2 / q2) * q2n * Po;
         // d/dz: a through q1, q1^m, b through q2, q2^n, and c.
-        out[2] = dPm * (2 * px / (q1 * q1)) * q1m * Pn * q2n * Po
-               - static_cast<Real>(m) * q1m1 * Pm * Pn * q2n * Po
-               + Pm * q1m * dPn * (2 * py / (q2 * q2)) * q2n * Po
-               - static_cast<Real>(n) * Pm * q1m * Pn * q2n1 * Po
-               + Pm * q1m * Pn * q2n * dPo * 2;
+        out[2] = dPm * (2 * px / (q1 * q1)) * q1m * Pn * q2n * Po -
+          static_cast<Real>(m) * q1m1 * Pm * Pn * q2n * Po +
+          Pm * q1m * dPn * (2 * py / (q2 * q2)) * q2n * Po -
+          static_cast<Real>(n) * Pm * q1m * Pn * q2n1 * Po +
+          Pm * q1m * Pn * q2n * dPo * 2;
         return out;
       }
 

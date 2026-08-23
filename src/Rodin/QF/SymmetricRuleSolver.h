@@ -291,8 +291,8 @@ namespace Rodin::QF
               for (Eigen::Index j = 0; j < n; ++j)
               {
                 for (size_t k = 0; k < d; ++k)
-                  sum[k] = alphas[static_cast<size_t>(i)][k]
-                    + alphas[static_cast<size_t>(j)][k];
+                  sum[k] =
+                    alphas[static_cast<size_t>(i)][k] + alphas[static_cast<size_t>(j)][k];
                 gram(i, j) = referenceMoment(g, sum);
               }
             }

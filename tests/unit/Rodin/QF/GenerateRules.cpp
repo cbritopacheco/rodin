@@ -23,7 +23,10 @@
 using namespace Rodin;
 using namespace Rodin::QF;
 
-namespace { std::mutex g_mutex; }
+namespace
+{
+  std::mutex g_mutex;
+}
 
 int main(int argc, char** argv)
 {
@@ -37,22 +40,23 @@ int main(int argc, char** argv)
   std::vector<std::thread> pool;
   const size_t W = std::min<size_t>(std::thread::hardware_concurrency(), maxDegree);
   for (size_t w = 0; w < W; ++w)
-    pool.emplace_back([&]{
+    pool.emplace_back([&] {
       for (;;)
       {
         const size_t p = next++;
-        if (p > maxDegree) return;
+        if (p > maxDegree)
+          return;
         const auto seed = NodeElimination::productSeed(g, p);
         const auto out = NodeElimination::reduce(g, p, seed);
-        std::string line = "  // degree " + std::to_string(p) + ": "
-          + std::to_string(out.getSize()) + " points\n  {";
+        std::string line = "  // degree " + std::to_string(p) + ": " +
+          std::to_string(out.getSize()) + " points\n  {";
         char buf[128];
         for (size_t q = 0; q < out.getSize(); ++q)
         {
           for (size_t k = 0; k < d; ++k)
           {
-            std::snprintf(buf, sizeof(buf), "%.17g, ",
-              out.getPoint(q)[static_cast<Eigen::Index>(k)]);
+            std::snprintf(
+              buf, sizeof(buf), "%.17g, ", out.getPoint(q)[static_cast<Eigen::Index>(k)]);
             line += buf;
           }
           std::snprintf(buf, sizeof(buf), "%.17g,%s", out.getWeight(q),
@@ -65,6 +69,7 @@ int main(int argc, char** argv)
         std::fflush(stdout);
       }
     });
-  for (auto& t : pool) t.join();
+  for (auto& t : pool)
+    t.join();
   return 0;
 }

@@ -233,8 +233,7 @@ namespace Rodin::QF
               Real n2 = 0;
               for (size_t q = 0; q < rule.getSize(); ++q)
               {
-                const Real v =
-                  OrthogonalBasis::evaluate(indices[k], rule.getPoint(q));
+                const Real v = OrthogonalBasis::evaluate(indices[k], rule.getPoint(q));
                 n2 += rule.getWeight(q) * v * v;
               }
               inverseNorm.push_back(1 / std::sqrt(n2));
@@ -292,8 +291,7 @@ namespace Rodin::QF
 
         Math::Vector<Real> r(ne);
         Math::Matrix<Real> J(ne, nu);
-        const auto evaluate = [&](const Math::Vector<Real>& v, bool jacobian)
-        {
+        const auto evaluate = [&](const Math::Vector<Real>& v, bool jacobian) {
           r.setZero();
           if (jacobian)
             J.setZero();
@@ -305,8 +303,7 @@ namespace Rodin::QF
             Math::SpatialVector<Real> pt;
             pt.resize(static_cast<Eigen::Index>(d));
             for (size_t k = 0; k < d; ++k)
-              pt[static_cast<Eigen::Index>(k)] =
-                v(base + static_cast<Eigen::Index>(k));
+              pt[static_cast<Eigen::Index>(k)] = v(base + static_cast<Eigen::Index>(k));
 
             for (size_t e = 0; e < moments.indices.size(); ++e)
             {
@@ -315,13 +312,12 @@ namespace Rodin::QF
               r(static_cast<Eigen::Index>(e)) += w * psi;
               if (!jacobian)
                 continue;
-              J(static_cast<Eigen::Index>(e),
-                base + static_cast<Eigen::Index>(d)) = 2 * theta * psi;
+              J(static_cast<Eigen::Index>(e), base + static_cast<Eigen::Index>(d)) =
+                2 * theta * psi;
               const auto grad = OrthogonalBasis::gradient(moments.indices[e], pt);
               for (size_t k = 0; k < d; ++k)
-                J(static_cast<Eigen::Index>(e),
-                  base + static_cast<Eigen::Index>(k)) =
-                    w * grad[static_cast<Eigen::Index>(k)] * inv;
+                J(static_cast<Eigen::Index>(e), base + static_cast<Eigen::Index>(k)) =
+                  w * grad[static_cast<Eigen::Index>(k)] * inv;
             }
           }
           for (size_t e = 0; e < moments.indices.size(); ++e)
@@ -386,16 +382,14 @@ namespace Rodin::QF
         // maintained by the line search rather than repaired by the penalty,
         // which is the same fraction-to-boundary safeguard an interior-point
         // method uses.
-        const auto minSlack = [&](const Math::Vector<Real>& v)
-        {
+        const auto minSlack = [&](const Math::Vector<Real>& v) {
           Real worst = std::numeric_limits<Real>::infinity();
           for (size_t q = 0; q < n; ++q)
           {
             const Eigen::Index base = static_cast<Eigen::Index>(q * (d + 1));
             Math::Vector<Real> pt(static_cast<Eigen::Index>(d));
             for (size_t k = 0; k < d; ++k)
-              pt(static_cast<Eigen::Index>(k)) =
-                v(base + static_cast<Eigen::Index>(k));
+              pt(static_cast<Eigen::Index>(k)) = v(base + static_cast<Eigen::Index>(k));
             worst = std::min(worst, (hs.vector - hs.matrix * pt).minCoeff());
           }
           return worst;
@@ -573,8 +567,8 @@ namespace Rodin::QF
        * step is rejected unless it stays strictly inside, so the result is
        * still a usable rule.
        */
-      static bool diversify(Geometry::Polytope::Type g, size_t degree,
-        Rule& rule, const KDMoments& kd, unsigned seed, Real amplitude = 0.05)
+      static bool diversify(Geometry::Polytope::Type g, size_t degree, Rule& rule,
+        const KDMoments& kd, unsigned seed, Real amplitude = 0.05)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
@@ -631,8 +625,8 @@ namespace Rodin::QF
        */
       static Rule reduce(Geometry::Polytope::Type g, size_t degree, Rule rule,
         size_t maxCandidates = 0, Diagnostics* diagnostics = nullptr,
-        size_t cheapBudget = 200, size_t patientBudget = 8000,
-        bool finalPush = true, size_t diversifications = 12)
+        size_t cheapBudget = 200, size_t patientBudget = 8000, bool finalPush = true,
+        size_t diversifications = 12)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
@@ -749,8 +743,8 @@ namespace Rodin::QF
                 trial.points.push_back(rule.points[q]);
                 trial.weights.push_back(rule.weights[q]);
               }
-              if (refine(g, degree, trial, patientBudget, 1e-13, &kd)
-                  && isAdmissible(g, trial))
+              if (refine(g, degree, trial, patientBudget, 1e-13, &kd) &&
+                isAdmissible(g, trial))
               {
                 rule = std::move(trial);
                 removed = true;
@@ -778,8 +772,8 @@ namespace Rodin::QF
                 trial.points.push_back(rule.points[q]);
                 trial.weights.push_back(rule.weights[q]);
               }
-              if (refine(g, degree, trial, patientBudget * 4, 1e-13, &kd)
-                  && isAdmissible(g, trial))
+              if (refine(g, degree, trial, patientBudget * 4, 1e-13, &kd) &&
+                isAdmissible(g, trial))
               {
                 rule = std::move(trial);
                 removed = true;
@@ -799,11 +793,11 @@ namespace Rodin::QF
             {
               --diversificationsLeft;
               Rule moved = rule;
-              if (!diversify(g, degree, moved, kd,
-                             static_cast<unsigned>(20260101u + attempt)))
+              if (!diversify(
+                    g, degree, moved, kd, static_cast<unsigned>(20260101u + attempt)))
                 continue;
               rule = std::move(moved);
-              removed = true;  // re-enter the loop with the moved rule
+              removed = true; // re-enter the loop with the moved rule
             }
             if (removed)
               continue;

@@ -14,6 +14,7 @@ set(RodinQF_HEADERS
   NodeElimination.h
   OrthogonalBasis.h
   XiaoGimbutas.h
+  WitherdenVincent.h
   PolytopeQuadratureFormula.h
 )
 
@@ -22,6 +23,7 @@ set(RodinQF_SRCS
   GaussLegendre.cpp
   GrundmannMoller.cpp
   XiaoGimbutas.cpp
+  WitherdenVincent.cpp
   PolytopeQuadratureFormula.cpp
 )
 
