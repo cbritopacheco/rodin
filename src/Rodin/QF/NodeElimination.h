@@ -557,6 +557,70 @@ namespace Rodin::QF
       }
 
       /**
+       * @brief Moves a rule to a different point of the solution manifold
+       * without changing what it integrates.
+       *
+       * Elimination is greedy and path dependent: once no single node can be
+       * removed, the rule is at a dead end of its own path, not necessarily at
+       * a minimum. Budget does not help --- tetrahedron degrees 5 and 8 stay
+       * at 15 and 45 points with every candidate given four times the patient
+       * budget.
+       *
+       * The moment system is underdetermined, so its solutions form a manifold
+       * and the null space of @f$ J @f$ is tangent to it. Stepping along a
+       * random null-space direction gives a different rule of the same
+       * strength, from which the eliminations that were blocked may open. The
+       * step is rejected unless it stays strictly inside, so the result is
+       * still a usable rule.
+       */
+      static bool diversify(Geometry::Polytope::Type g, size_t degree,
+        Rule& rule, const KDMoments& kd, unsigned seed, Real amplitude = 0.05)
+      {
+        const size_t d = Geometry::Polytope::Traits(g).getDimension();
+        const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+        const size_t n = rule.getSize();
+        const Eigen::Index nu = static_cast<Eigen::Index>(n * (d + 1));
+
+        std::mt19937 rng(seed);
+        std::uniform_real_distribution<Real> uni(-1, 1);
+        Math::Vector<Real> dir(nu);
+        for (Eigen::Index i = 0; i < nu; ++i)
+          dir(i) = uni(rng);
+        dir.normalize();
+
+        // Project onto null(J) so the perturbation preserves the moments to
+        // first order, then restore exactness with a refine.
+        Rule trial = rule;
+        Real scale = amplitude;
+        for (int attempt = 0; attempt < 6; ++attempt, scale *= 0.5)
+        {
+          trial = rule;
+          for (size_t q = 0; q < n; ++q)
+            for (size_t k = 0; k < d; ++k)
+              trial.points[q][static_cast<Eigen::Index>(k)] +=
+                scale * dir(static_cast<Eigen::Index>(q * (d + 1) + k));
+
+          bool inside = true;
+          for (size_t q = 0; q < n && inside; ++q)
+          {
+            Math::Vector<Real> pt(static_cast<Eigen::Index>(d));
+            for (size_t k = 0; k < d; ++k)
+              pt(static_cast<Eigen::Index>(k)) =
+                trial.points[q][static_cast<Eigen::Index>(k)];
+            inside = (hs.vector - hs.matrix * pt).minCoeff() > 1e-10;
+          }
+          if (!inside)
+            continue;
+          if (refine(g, degree, trial, 4000, 1e-13, &kd) && isAdmissible(g, trial))
+          {
+            rule = std::move(trial);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      /**
        * @brief Eliminates nodes until none can be removed.
        *
        * Candidates are tried in increasing order of significance
@@ -567,11 +631,13 @@ namespace Rodin::QF
        */
       static Rule reduce(Geometry::Polytope::Type g, size_t degree, Rule rule,
         size_t maxCandidates = 0, Diagnostics* diagnostics = nullptr,
-        size_t cheapBudget = 200, size_t patientBudget = 8000)
+        size_t cheapBudget = 200, size_t patientBudget = 8000,
+        bool finalPush = true, size_t diversifications = 12)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         const SymmetricRuleSolver::MomentData moments(g, d, degree);
         const KDMoments kd(g, degree);
+        size_t diversificationsLeft = diversifications;
 
         for (;;)
         {
@@ -690,6 +756,57 @@ namespace Rodin::QF
                 removed = true;
               }
             }
+          }
+          // Final push. When the ordinary pass finds nothing, every candidate
+          // gets the patient budget rather than only those that were still
+          // descending: the progress signal is a good filter mid-run, but at
+          // the last round it is worth paying for certainty, since one more
+          // elimination is the difference between matching a published count
+          // and missing it by one.
+          if (!removed && finalPush)
+          {
+            for (size_t c = 0; c < n && !removed; ++c)
+            {
+              const size_t victim = significance[c].second;
+              Rule trial;
+              trial.points.reserve(n - 1);
+              trial.weights.reserve(n - 1);
+              for (size_t q = 0; q < n; ++q)
+              {
+                if (q == victim)
+                  continue;
+                trial.points.push_back(rule.points[q]);
+                trial.weights.push_back(rule.weights[q]);
+              }
+              if (refine(g, degree, trial, patientBudget * 4, 1e-13, &kd)
+                  && isAdmissible(g, trial))
+              {
+                rule = std::move(trial);
+                removed = true;
+              }
+            }
+          }
+          if (!removed && diversificationsLeft > 0)
+          {
+            // Dead end of this path, not necessarily a minimum. Move to a
+            // different point of the solution manifold and try again. The
+            // budget is global rather than per round: a diversification that
+            // succeeds re-enters the loop at the same node count, so a
+            // per-round budget would never be exhausted and the search would
+            // not terminate.
+            for (size_t attempt = 0; attempt < diversificationsLeft && !removed;
+                 ++attempt)
+            {
+              --diversificationsLeft;
+              Rule moved = rule;
+              if (!diversify(g, degree, moved, kd,
+                             static_cast<unsigned>(20260101u + attempt)))
+                continue;
+              rule = std::move(moved);
+              removed = true;  // re-enter the loop with the moved rule
+            }
+            if (removed)
+              continue;
           }
           if (!removed)
           {
