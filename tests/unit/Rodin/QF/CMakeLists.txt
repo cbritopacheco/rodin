@@ -97,3 +97,8 @@ target_link_libraries(RodinGramTest PUBLIC GTest::gtest GTest::gtest_main Rodin:
 add_executable(RodinOrthTest OrthTest.cpp)
 target_link_libraries(RodinOrthTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinOrthTest PROPERTIES LABELS unit)
+
+# XiaoGimbutas shipped-coefficient tests
+add_executable(RodinXiaoGimbutasTest XiaoGimbutasTest.cpp)
+target_link_libraries(RodinXiaoGimbutasTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinXiaoGimbutasTest PROPERTIES LABELS unit)

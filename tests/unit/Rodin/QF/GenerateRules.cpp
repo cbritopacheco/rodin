@@ -1,27 +1,15 @@
 /*
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
- *       (See accompanying file LICENSE or copy at
- *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
 /**
  * @file
- * @brief Development driver that generates symmetric quadrature rules for
- * inlining.
+ * @brief Development driver emitting inlinable quadrature coefficients.
  *
- * Not a test. Rules are searched offline and their coefficients inlined; this
- * is what produces them.
- *
- * Degrees are mutually independent, so they are searched in parallel, one
- * worker per degree. Results are appended to the output file the moment a
- * degree completes rather than at the end, so a run that is interrupted still
- * yields everything it had found. Determinism is unaffected: each degree is a
- * separate deterministic search and the file is sorted on read, not on write.
- *
- * Usage: RodinGenerateRules <tri|tet|wedge> <maxDegree> [maxPoints] [restarts]
+ * Not a test. Degrees are independent, so they are searched in parallel, and
+ * each is flushed as it completes so an interrupted run keeps what it found.
  */
-
 #include <cstdio>
 #include <string>
 #include <mutex>
@@ -29,102 +17,54 @@
 #include <atomic>
 #include <vector>
 #include <algorithm>
-#include <chrono>
 
-#include "Rodin/QF/SymmetricRuleSolver.h"
+#include "Rodin/QF/NodeElimination.h"
 
 using namespace Rodin;
 using namespace Rodin::QF;
 
-namespace
-{
-  std::mutex g_mutex;
-
-  std::string format(Geometry::Polytope::Type g, size_t degree,
-    const SymmetricRuleSolver::Configuration& config,
-    const SymmetricRuleSolver::Result& r, double seconds)
-  {
-    char buf[256];
-    std::string out;
-    std::snprintf(buf, sizeof(buf), "d%zu n=%zu res=%.3e t=%.1fs :", degree,
-      SymmetricRuleSolver::configurationSize(config), r.residual, seconds);
-    out += buf;
-    for (const auto& orbit : r.orbits)
-    {
-      auto b = orbit.getBarycentric();
-      std::sort(b.begin(), b.end());
-      out += " {";
-      for (size_t i = 0; i < b.size(); ++i)
-      {
-        std::snprintf(buf, sizeof(buf), "%.17g%s", b[i], (i + 1 < b.size()) ? "," : "");
-        out += buf;
-      }
-      for (const auto t : orbit.getTensor())
-      {
-        std::snprintf(buf, sizeof(buf), "|z=%.17g", t);
-        out += buf;
-      }
-      std::snprintf(buf, sizeof(buf), "|w=%.17g}", orbit.getWeight());
-      out += buf;
-    }
-    (void)g;
-    return out;
-  }
-}
+namespace { std::mutex g_mutex; }
 
 int main(int argc, char** argv)
 {
   const std::string which = (argc > 1) ? argv[1] : "tri";
   const auto g = (which == "tet") ? Geometry::Polytope::Type::Tetrahedron
-    : (which == "wedge")          ? Geometry::Polytope::Type::Wedge
                                   : Geometry::Polytope::Type::Triangle;
-  const size_t maxDegree = (argc > 2) ? std::stoul(argv[2]) : 8;
-  const size_t maxPoints = (argc > 3) ? std::stoul(argv[3]) : 96;
-  const size_t restarts = (argc > 4) ? std::stoul(argv[4]) : 256;
-
-  const size_t workers = std::min<size_t>(
-    std::max<size_t>(std::thread::hardware_concurrency(), 1u), maxDegree);
+  const size_t maxDegree = (argc > 2) ? std::stoul(argv[2]) : 20;
+  const size_t d = Geometry::Polytope::Traits(g).getDimension();
 
   std::atomic<size_t> next{1};
   std::vector<std::thread> pool;
-  for (size_t w = 0; w < workers; ++w)
-  {
-    pool.emplace_back([&] {
+  const size_t W = std::min<size_t>(std::thread::hardware_concurrency(), maxDegree);
+  for (size_t w = 0; w < W; ++w)
+    pool.emplace_back([&]{
       for (;;)
       {
-        const size_t degree = next++;
-        if (degree > maxDegree)
-          return;
-
-        const auto t0 = std::chrono::steady_clock::now();
-        SymmetricRuleSolver::Configuration config;
-        const auto r =
-          SymmetricRuleSolver::search(g, degree, maxPoints, restarts, &config);
-        const double seconds =
-          std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-
-        std::string line;
-        if (r.converged && r.admissible)
+        const size_t p = next++;
+        if (p > maxDegree) return;
+        const auto seed = NodeElimination::productSeed(g, p);
+        const auto out = NodeElimination::reduce(g, p, seed);
+        std::string line = "  // degree " + std::to_string(p) + ": "
+          + std::to_string(out.getSize()) + " points\n  {";
+        char buf[128];
+        for (size_t q = 0; q < out.getSize(); ++q)
         {
-          line = format(g, degree, config, r, seconds);
+          for (size_t k = 0; k < d; ++k)
+          {
+            std::snprintf(buf, sizeof(buf), "%.17g, ",
+              out.getPoint(q)[static_cast<Eigen::Index>(k)]);
+            line += buf;
+          }
+          std::snprintf(buf, sizeof(buf), "%.17g,%s", out.getWeight(q),
+            (q + 1 < out.getSize()) ? " " : "");
+          line += buf;
         }
-        else
-        {
-          char buf[192];
-          std::snprintf(buf, sizeof(buf), "d%zu FAILED conv=%d adm=%d res=%.3e t=%.1fs",
-            degree, static_cast<int>(r.converged), static_cast<int>(r.admissible),
-            r.residual, seconds);
-          line = buf;
-        }
-
-        // Flush per degree: an interrupted run keeps what it has found.
-        std::lock_guard<std::mutex> lock(g_mutex);
+        line += "},";
+        std::lock_guard<std::mutex> lk(g_mutex);
         std::printf("%s\n", line.c_str());
         std::fflush(stdout);
       }
     });
-  }
-  for (auto& t : pool)
-    t.join();
+  for (auto& t : pool) t.join();
   return 0;
 }

@@ -11,6 +11,9 @@ set(RodinQF_HEADERS
   GrundmannMoller.h
   SymmetricOrbit.h
   SymmetricRuleSolver.h
+  NodeElimination.h
+  OrthogonalBasis.h
+  XiaoGimbutas.h
   PolytopeQuadratureFormula.h
 )
 
@@ -18,6 +21,7 @@ set(RodinQF_SRCS
   Centroid.cpp
   GaussLegendre.cpp
   GrundmannMoller.cpp
+  XiaoGimbutas.cpp
   PolytopeQuadratureFormula.cpp
 )
 
