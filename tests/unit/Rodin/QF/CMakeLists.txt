@@ -115,3 +115,8 @@ target_link_libraries(RodinGenerateSymmetric PUBLIC Rodin::Rodin Rodin::QF)
 add_executable(RodinWitherdenVincentTest WitherdenVincentTest.cpp)
 target_link_libraries(RodinWitherdenVincentTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinWitherdenVincentTest PROPERTIES LABELS unit)
+
+# Randomised quadrature checks
+add_executable(RodinQuadratureFuzzTest QuadratureFuzzTest.cpp)
+target_link_libraries(RodinQuadratureFuzzTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinQuadratureFuzzTest PROPERTIES LABELS unit)

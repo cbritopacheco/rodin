@@ -290,8 +290,8 @@ TEST(QuadraturePropertyTest, TheTwoFamiliesAgree)
   {
     const size_t d = Polytope::Traits(g).getDimension();
     const auto verts = referenceVertices(g);
-    const size_t top = std::min(XiaoGimbutas::getMaxDegree(g),
-                                WitherdenVincent::getMaxDegree(g));
+    const size_t top =
+      std::min(XiaoGimbutas::getMaxDegree(g), WitherdenVincent::getMaxDegree(g));
     ASSERT_GT(top, 0u) << name(g);
     for (size_t p = 1; p <= top; ++p)
     {
@@ -303,8 +303,8 @@ TEST(QuadraturePropertyTest, TheTwoFamiliesAgree)
         const Real a = integrateOn(xg, verts, f);
         const Real b = integrateOn(wv, verts, f);
         EXPECT_NEAR(a, b, 1e-11 * std::max(Real(1), std::abs(b)))
-          << name(g) << " degree " << p
-          << " (XG " << xg.getSize() << " pts, WV " << wv.getSize() << " pts)";
+          << name(g) << " degree " << p << " (XG " << xg.getSize() << " pts, WV "
+          << wv.getSize() << " pts)";
       }
     }
   }
@@ -358,10 +358,10 @@ TEST(QuadraturePropertyTest, IntegralIsInvariantUnderVertexPermutation)
         [](const auto& a, const auto& b) { return a[0] < b[0]; });
       do
       {
-        EXPECT_NEAR(integrateOn(qf, permuted, f), base,
-          1e-11 * std::max(Real(1), std::abs(base))) << name(g) << " degree " << p;
-      }
-      while (std::next_permutation(permuted.begin(), permuted.end(),
+        EXPECT_NEAR(
+          integrateOn(qf, permuted, f), base, 1e-11 * std::max(Real(1), std::abs(base)))
+          << name(g) << " degree " << p;
+      } while (std::next_permutation(permuted.begin(), permuted.end(),
         [](const auto& a, const auto& b) { return a[0] < b[0]; }));
     }
   }
@@ -418,8 +418,8 @@ TEST(QuadraturePropertyTest, NodesHaveValidBarycentricCoordinates)
           EXPECT_GT(c, -1e-13) << name(g) << " degree " << p;
           sum += c;
         }
-        EXPECT_LT(sum, 1 + 1e-13) << name(g) << " degree " << p
-          << ": barycentric coordinates exceed one";
+        EXPECT_LT(sum, 1 + 1e-13)
+          << name(g) << " degree " << p << ": barycentric coordinates exceed one";
       }
     }
   }
@@ -439,8 +439,7 @@ TEST(QuadraturePropertyTest, AccuracyImprovesWithDegreeOnASmoothIntegrand)
   {
     const size_t d = Polytope::Traits(g).getDimension();
     const auto verts = referenceVertices(g);
-    const auto f = [d](const Math::SpatialVector<Real>& x)
-    {
+    const auto f = [d](const Math::SpatialVector<Real>& x) {
       Real s = x[0] + 2 * x[1];
       if (d == 3)
         s += 3 * x[2];
@@ -458,8 +457,7 @@ TEST(QuadraturePropertyTest, AccuracyImprovesWithDegreeOnASmoothIntegrand)
     size_t compared = 0;
     for (size_t p = 1; p + 4 <= top; p += 2)
     {
-      const Real err =
-        std::abs(integrateOn(XiaoGimbutas(p, g), verts, f) - reference);
+      const Real err = std::abs(integrateOn(XiaoGimbutas(p, g), verts, f) - reference);
       if (previous > floor)
       {
         EXPECT_LT(err, previous * 1.05)
@@ -468,8 +466,8 @@ TEST(QuadraturePropertyTest, AccuracyImprovesWithDegreeOnASmoothIntegrand)
       }
       previous = err;
     }
-    EXPECT_GT(compared, 2u)
-      << name(g) << ": too few degrees above the noise floor to say anything";
+    EXPECT_GT(compared, 2u) << name(g)
+                            << ": too few degrees above the noise floor to say anything";
   }
 }
 

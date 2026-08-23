@@ -24,15 +24,17 @@ using namespace Rodin::Tests::QF;
 namespace
 {
   const std::vector<Polytope::Type> kElements = {
-    Polytope::Type::Triangle, Polytope::Type::Tetrahedron, Polytope::Type::Wedge
-  };
+    Polytope::Type::Triangle, Polytope::Type::Tetrahedron, Polytope::Type::Wedge};
   const char* name(Polytope::Type g)
   {
     switch (g)
     {
-      case Polytope::Type::Triangle:    return "triangle";
-      case Polytope::Type::Tetrahedron: return "tetrahedron";
-      default:                          return "wedge";
+      case Polytope::Type::Triangle:
+        return "triangle";
+      case Polytope::Type::Tetrahedron:
+        return "tetrahedron";
+      default:
+        return "wedge";
     }
   }
 }
@@ -49,8 +51,7 @@ TEST(WitherdenVincentTest, ShippedRulesAreExactAtEveryDegree)
       const auto report = exactnessSweep(qf, g, p);
       EXPECT_LT(report.worstRelativeError, 1e-11)
         << name(g) << " degree " << p << " (" << qf.getSize() << " points)"
-        << " worst x^" << report.worstExponents[0]
-        << " y^" << report.worstExponents[1]
+        << " worst x^" << report.worstExponents[0] << " y^" << report.worstExponents[1]
         << " z^" << report.worstExponents[2];
     }
   }
@@ -64,8 +65,7 @@ TEST(WitherdenVincentTest, ShippedWeightsArePositive)
     {
       const WitherdenVincent qf(p, g);
       EXPECT_TRUE(allWeightsPositive(qf)) << name(g) << " degree " << p;
-      EXPECT_NEAR(weightAmplification(qf), 1.0, 1e-14)
-        << name(g) << " degree " << p;
+      EXPECT_NEAR(weightAmplification(qf), 1.0, 1e-14) << name(g) << " degree " << p;
     }
 }
 
@@ -152,12 +152,19 @@ TEST(WitherdenVincentTest, ExactnessCheckRejectsAPerturbedCoefficient)
 
   struct Perturbed
   {
-    const WitherdenVincent& base;
-    size_t getSize() const { return base.getSize(); }
-    Real getWeight(size_t i) const
-    { return base.getWeight(i) * (i == 0 ? 1.0 + 1e-9 : 1.0); }
-    const Math::SpatialVector<Real>& getPoint(size_t i) const
-    { return base.getPoint(i); }
+      const WitherdenVincent& base;
+      size_t getSize() const
+      {
+        return base.getSize();
+      }
+      Real getWeight(size_t i) const
+      {
+        return base.getWeight(i) * (i == 0 ? 1.0 + 1e-9 : 1.0);
+      }
+      const Math::SpatialVector<Real>& getPoint(size_t i) const
+      {
+        return base.getPoint(i);
+      }
   } bad{qf};
 
   EXPECT_GT(exactnessSweep(bad, Polytope::Type::Triangle, 6).worstRelativeError, 1e-11);
