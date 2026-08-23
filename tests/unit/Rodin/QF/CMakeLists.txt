@@ -102,3 +102,8 @@ gtest_discover_tests(RodinOrthTest PROPERTIES LABELS unit)
 add_executable(RodinXiaoGimbutasTest XiaoGimbutasTest.cpp)
 target_link_libraries(RodinXiaoGimbutasTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinXiaoGimbutasTest PROPERTIES LABELS unit)
+
+# Quadrature property tests, independent of the moment oracle
+add_executable(RodinQuadraturePropertyTest QuadraturePropertyTest.cpp)
+target_link_libraries(RodinQuadraturePropertyTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinQuadraturePropertyTest PROPERTIES LABELS unit)

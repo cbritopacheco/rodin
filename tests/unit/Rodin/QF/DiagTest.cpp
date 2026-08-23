@@ -4,18 +4,20 @@
 #include "QuadratureInvariants.h"
 using namespace Rodin; using namespace Rodin::QF;
 using namespace Rodin::Geometry; using namespace Rodin::Tests::QF;
-TEST(Diag, TetPush)
+TEST(Diag, TetD5Hard)
 {
-  const int xg[] = {1,4,6,11,14,23,31,44,57};
-  for (size_t p : {5u, 8u})
+  // At the counting bound the system is square, so the basin of the isolated
+  // solution is small. Many manifold moves give many starting points.
+  for (size_t div : {size_t(50), size_t(400)})
   {
-    const auto seed = NodeElimination::productSeed(Polytope::Type::Tetrahedron, p);
+    const auto seed = NodeElimination::productSeed(Polytope::Type::Tetrahedron, 5);
     const auto t0 = std::chrono::steady_clock::now();
-    const auto out = NodeElimination::reduce(Polytope::Type::Tetrahedron, p, seed);
+    const auto out = NodeElimination::reduce(Polytope::Type::Tetrahedron, 5, seed,
+                                             0, nullptr, 200, 8000, true, div);
     const double s = std::chrono::duration<double>(std::chrono::steady_clock::now()-t0).count();
-    const auto rep = exactnessSweep(out, Polytope::Type::Tetrahedron, p);
-    std::printf("tet d%zu -> %3zu (XG %d) err %.1e ok %d %.0fs\n", p, out.getSize(),
-      xg[p-1], rep.worstRelativeError,
+    const auto rep = exactnessSweep(out, Polytope::Type::Tetrahedron, 5);
+    std::printf("diversifications %4zu -> %2zu points (bound 14) err %.1e ok %d %.0fs\n",
+      div, out.getSize(), rep.worstRelativeError,
       (int)(allWeightsPositive(out) && allPointsInside(out, Polytope::Type::Tetrahedron)), s);
     std::fflush(stdout);
   }
