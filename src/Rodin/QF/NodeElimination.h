@@ -483,7 +483,11 @@ namespace Rodin::QF
             }
           }
           if (!progressed)
+          {
+            exhausted() = false;
             break;
+          }
+          exhausted() = true;
           evaluate(x, true);
         }
 
@@ -496,8 +500,29 @@ namespace Rodin::QF
           const Real theta = x(base + static_cast<Eigen::Index>(d));
           rule.weights[q] = theta * theta;
         }
+        if (std::sqrt(cost) <= tolerance)
+          exhausted() = false;
         lastResidual() = std::sqrt(cost);
         return std::sqrt(cost) <= tolerance;
+      }
+
+      /**
+       * @brief Whether the most recent refine() on this thread stopped because
+       * it ran out of iterations while still making progress, as opposed to
+       * finding no feasible improving step.
+       *
+       * These are opposite situations and conflating them is what made
+       * tetrahedron degree 4 look unreducible. A solve that stalls has nowhere
+       * to go and more budget will not help; one that is still descending when
+       * the budget expires needs only more of it. The residual reached does
+       * not distinguish them --- at that degree every removal sits near 5e-6
+       * after the cheap budget, and which of them go on to converge is not
+       * predicted by which sits lowest.
+       */
+      static bool& exhausted()
+      {
+        static thread_local bool value = false;
+        return value;
       }
 
       /// @brief Residual reached by the most recent refine() on this thread,
@@ -600,7 +625,9 @@ namespace Rodin::QF
             }
             const bool converged = refine(g, degree, trial, cheapBudget, 1e-13, &kd);
             const bool admissible = isAdmissible(g, trial);
-            if (!converged)
+            // Retry only candidates that were still descending when the
+            // cheap budget expired; a stalled one will not improve with more.
+            if (!converged && exhausted())
               nearMisses.emplace_back(lastResidual(), victim);
             if (converged && admissible)
             {
@@ -635,15 +662,15 @@ namespace Rodin::QF
               }
             }
           }
-          // Retry the closest few rather than only the closest one. At
-          // tetrahedron degree 4, thirteen of thirty-six removals converge to
-          // an admissible rule given the patient budget, but which of them is
-          // nearest after the cheap pass is not a reliable guide, so a single
-          // retry misses them all and the degree looks unreducible.
+          // Retry every candidate that was still descending. At tetrahedron
+          // degree 4, thirteen of thirty-six removals converge to an
+          // admissible rule given the patient budget, and which of them is
+          // nearest after the cheap pass does not predict which, so selecting
+          // by residual missed all thirteen.
           if (!removed && !nearMisses.empty())
           {
             std::sort(nearMisses.begin(), nearMisses.end());
-            const size_t retries = std::min<size_t>(nearMisses.size(), 8);
+            const size_t retries = nearMisses.size();
             for (size_t k = 0; k < retries && !removed; ++k)
             {
               Rule trial;
