@@ -120,3 +120,7 @@ gtest_discover_tests(RodinWitherdenVincentTest PROPERTIES LABELS unit)
 add_executable(RodinQuadratureFuzzTest QuadratureFuzzTest.cpp)
 target_link_libraries(RodinQuadratureFuzzTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinQuadratureFuzzTest PROPERTIES LABELS unit)
+
+add_executable(RodinPyramidOrbitTest PyramidOrbitTest.cpp)
+target_link_libraries(RodinPyramidOrbitTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinPyramidOrbitTest PROPERTIES LABELS unit)

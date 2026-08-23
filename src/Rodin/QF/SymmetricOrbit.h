@@ -202,6 +202,100 @@ namespace Rodin::QF
         return out;
       }
 
+      /**
+       * @brief Orbit classes of the square cross-section of a pyramid.
+       *
+       * The reference pyramid of Geometry::Polytope::Traits has its apex over
+       * the base corner @f$ (0,0,0) @f$, so it carries almost no symmetry: only
+       * the swap @f$ x \leftrightarrow y @f$. It is however the image, under a
+       * shear of unit determinant, of the pyramid whose apex sits over the base
+       * centre, and that one has the full dihedral symmetry @f$ D_4 @f$ of the
+       * square.
+       *
+       * Orbits are therefore built in centred coordinates
+       * @f$ (u,v) \in [-\tfrac{1-z}{2}, \tfrac{1-z}{2}]^2 @f$ and sheared onto
+       * the reference element by
+       * @f$ x = u + \tfrac{1-z}{2},\ y = v + \tfrac{1-z}{2} @f$. Exactness is
+       * affine invariant and the determinant is one, so weights transfer
+       * unchanged. Symmetry in the reference coordinates is lost, which is
+       * expected: it was a device for constructing the rule, not a property
+       * required of it.
+       */
+      enum class PyramidClass
+      {
+        Centre,    ///< @f$ (0,0) @f$, one point.
+        Axis,      ///< @f$ (\pm a, 0), (0, \pm a) @f$, four points.
+        Diagonal,  ///< @f$ (\pm a, \pm a) @f$, four points.
+        General    ///< the eight images of @f$ (a,b) @f$ under @f$ D_4 @f$.
+      };
+
+      /// @brief Number of points an orbit of @p c contributes.
+      static size_t pyramidClassSize(PyramidClass c)
+      {
+        switch (c)
+        {
+          case PyramidClass::Centre:   return 1;
+          case PyramidClass::Axis:     return 4;
+          case PyramidClass::Diagonal: return 4;
+          default:                     return 8;
+        }
+      }
+
+      /// @brief Free parameters of @p c, besides its height and its weight.
+      static size_t pyramidClassParameters(PyramidClass c)
+      {
+        switch (c)
+        {
+          case PyramidClass::Centre:   return 0;
+          case PyramidClass::General:  return 2;
+          default:                     return 1;
+        }
+      }
+
+      /**
+       * @brief The points of a pyramid orbit, in reference coordinates.
+       * @param c Orbit class.
+       * @param alpha First shape parameter, in @f$ (-1,1) @f$, scaled by the
+       * half-width of the cross-section at height @p z.
+       * @param beta Second shape parameter, used by PyramidClass::General.
+       * @param z Height of the orbit.
+       */
+      static std::vector<Math::SpatialVector<Real>> expandPyramid(
+        PyramidClass c, Real alpha, Real beta, Real z)
+      {
+        const Real half = (1 - z) / 2;
+        std::vector<std::pair<Real, Real>> uv;
+        switch (c)
+        {
+          case PyramidClass::Centre:
+            uv = {{0, 0}};
+            break;
+          case PyramidClass::Axis:
+            uv = {{alpha, 0}, {-alpha, 0}, {0, alpha}, {0, -alpha}};
+            break;
+          case PyramidClass::Diagonal:
+            uv = {{alpha, alpha}, {-alpha, alpha},
+                  {alpha, -alpha}, {-alpha, -alpha}};
+            break;
+          default:
+            uv = {{alpha, beta}, {-alpha, beta}, {alpha, -beta}, {-alpha, -beta},
+                  {beta, alpha}, {-beta, alpha}, {beta, -alpha}, {-beta, -alpha}};
+            break;
+        }
+        std::vector<Math::SpatialVector<Real>> out;
+        out.reserve(uv.size());
+        for (const auto& [u, v] : uv)
+        {
+          Math::SpatialVector<Real> p;
+          p.resize(3);
+          p[0] = u * half + half;   // shear onto the corner-apex element
+          p[1] = v * half + half;
+          p[2] = z;
+          out.push_back(std::move(p));
+        }
+        return out;
+      }
+
       /// @brief The simplex carrying @p vertices barycentric coordinates.
       static Geometry::Polytope::Type baseSimplex(size_t vertices)
       {
