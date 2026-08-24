@@ -35,12 +35,14 @@ int main(int argc, char** argv)
   const size_t maxDegree = (argc > 2) ? std::stoul(argv[2]) : 20;
   const size_t maxPoints = (argc > 3) ? std::stoul(argv[3]) : 130;
   const double seconds = (argc > 4) ? std::stod(argv[4]) : 900.0;
+  const size_t from = (argc > 5) ? std::stoul(argv[5]) : 1;
+  const size_t jobs = (argc > 6) ? std::stoul(argv[6]) : 0;
   const size_t d = Geometry::Polytope::Traits(g).getDimension();
 
-  for (size_t degree = 1; degree <= maxDegree; ++degree)
+  for (size_t degree = from; degree <= maxDegree; ++degree)
   {
     const auto rule =
-      SymmetricRuleGenerator::search(g, degree, maxPoints, 64, 1e-12, 0, seconds);
+      SymmetricRuleGenerator::search(g, degree, maxPoints, 64, 1e-12, jobs, seconds);
     if (!rule.converged || !rule.admissible)
     {
       std::printf(

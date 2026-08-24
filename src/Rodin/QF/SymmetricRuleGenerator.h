@@ -546,6 +546,40 @@ namespace Rodin::QF
             }
           }
 
+          // Accepting at the tolerance leaves a rule that merely clears the
+          // bar; a few more steps of the same iteration usually take it to
+          // rounding, since the Jacobian is exact and the iteration converges
+          // quadratically once close. The cost is negligible -- it happens
+          // once, on a rule already found -- and the difference shows up
+          // directly in how exactly the table integrates.
+          if (std::sqrt(cost) < tolerance)
+          {
+            Math::Vector<Real> polished = z;
+            Real best = cost;
+            for (size_t it = 0; it < 24; ++it)
+            {
+              Math::Vector<Real> r2;
+              Math::Matrix<Real> J2;
+              problem.evaluate(polished, r2, &J2);
+              const Math::Matrix<Real> H =
+                J2.transpose() * J2 + Real(1e-14) * Math::Matrix<Real>::Identity(nz, nz);
+              const Math::Vector<Real> next =
+                polished + H.ldlt().solve(-J2.transpose() * r2);
+              Math::Vector<Real> rn;
+              problem.evaluate(next, rn, nullptr);
+              const Real cn = rn.squaredNorm();
+              if (!(cn < best))
+                break;
+              polished = next;
+              best = cn;
+            }
+            if (best < cost)
+            {
+              z = polished;
+              cost = best;
+            }
+          }
+
           Rule candidate = build(g, degree, decomposition, problem, z);
           candidate.restarts = restart + 1;
           candidate.residual = std::max(std::sqrt(cost), problem.fullResidual(z));
@@ -759,12 +793,26 @@ namespace Rodin::QF
           // settling a high strength in seconds and grinding through thousands
           // of hopeless decompositions first. The ordering is fixed, so the
           // rule found does not depend on it having been reached quickly.
+          const auto unknownsOf = [&](const Decomposition& decomposition) {
+            const auto& strata = SymmetryGroup::strata(g);
+            size_t unknowns = decomposition.size();
+            for (const size_t which : decomposition)
+              unknowns += strata[which].getFreedom();
+            return unknowns;
+          };
           std::stable_sort(candidates.begin(), candidates.end(),
             [&](const Decomposition& a, const Decomposition& b) {
-              const bool pa = restartBudget(g, a, conditions, maxRestarts) == maxRestarts;
-              const bool pb = restartBudget(g, b, conditions, maxRestarts) == maxRestarts;
+              const size_t ua = unknownsOf(a), ub = unknownsOf(b);
+              const bool pa = ua >= conditions, pb = ub >= conditions;
               if (pa != pb)
                 return pa;
+              // Among the workable ones, the tightest fit first. A rule that
+              // exists generally has barely enough freedom to exist: published
+              // rules sit just above the condition count, and decompositions
+              // carrying far more freedom than that are the ones with slack to
+              // wander in and rarely close.
+              if (pa && ua != ub)
+                return ua < ub;
               return a.size() < b.size();
             });
 
