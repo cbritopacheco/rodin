@@ -52,7 +52,8 @@ int main(int argc, char** argv)
         {
           SymmetricRuleSolver::Configuration cfg;
           r = SymmetricRuleSolver::search(g, p, maxPoints, 256, &cfg);
-          for (const auto& o : r.orbits) npts += o.getSize();
+          for (const auto& o : r.orbits)
+            npts += o.getSize();
         }
         std::lock_guard<std::mutex> lk(g_mutex);
         if (!(r.converged && r.admissible))
@@ -72,7 +73,8 @@ int main(int argc, char** argv)
           {
             Math::SpatialVector<Real> q;
             q.resize(3);
-            for (int k = 0; k < 3; ++k) q[k] = o.getBarycentric()[k];
+            for (int k = 0; k < 3; ++k)
+              q[k] = o.getBarycentric()[k];
             pts.push_back(std::move(q));
           }
           else

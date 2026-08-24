@@ -23,9 +23,8 @@ using namespace Rodin::Tests::QF;
 
 namespace
 {
-  const std::vector<Polytope::Type> kElements = {
-    Polytope::Type::Triangle, Polytope::Type::Tetrahedron, Polytope::Type::Wedge,
-    Polytope::Type::Pyramid};
+  const std::vector<Polytope::Type> kElements = {Polytope::Type::Triangle,
+    Polytope::Type::Tetrahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid};
   const char* name(Polytope::Type g)
   {
     switch (g)
