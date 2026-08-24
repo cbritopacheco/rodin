@@ -459,3 +459,76 @@ TEST(SymmetricRuleSolverTest, WedgeSearchIsDeterministic)
     EXPECT_EQ(a.orbits[i].getTensor(), b.orbits[i].getTensor());
   }
 }
+
+/**
+ * @brief The analytic Jacobian of the eliminated system agrees with a
+ * difference quotient.
+ *
+ * A Jacobian that is quietly wrong does not announce itself: the search still
+ * runs, converges more slowly, and returns rules a few digits short of exact.
+ * The comparison sweeps the difference step and takes the best agreement,
+ * because a single step proves nothing --- too large and truncation dominates,
+ * too small and roundoff does.
+ */
+TEST(SymmetricRuleSolverTest, AnalyticJacobianMatchesDifferenceQuotient)
+{
+  using Pattern = SymmetricRuleSolver::Pattern;
+  const Pattern t3{3}, t21{2, 1}, t111{1, 1, 1};
+  const Pattern q4{4}, q31{3, 1}, q22{2, 2}, q211{2, 1, 1};
+
+  struct Case
+  {
+      const char* name;
+      Polytope::Type g;
+      size_t degree;
+      SymmetricRuleSolver::Configuration config;
+  };
+  const std::vector<Case> cases = {
+    {"triangle, two edge orbits", Polytope::Type::Triangle, 4, {t21, t21}},
+    {"triangle, general orbit", Polytope::Type::Triangle, 8, {t21, t21, t111}},
+    {"triangle, high degree", Polytope::Type::Triangle, 12, {t3, t21, t111, t111}},
+    {"tetrahedron, face orbits", Polytope::Type::Tetrahedron, 5, {q31, q31, q22}},
+    {"tetrahedron, general orbit", Polytope::Type::Tetrahedron, 7, {q4, q31, q211}},
+    {"wedge, mid-plane orbit", Polytope::Type::Wedge, 4, {{t21, true}}},
+    {"wedge, reflected pair", Polytope::Type::Wedge, 4, {{t21, false}}},
+    {"wedge, mixed orbits", Polytope::Type::Wedge, 5, {{t111, false}, {t3, true}}},
+  };
+
+  for (const auto& c : cases)
+  {
+    const Real worst =
+      SymmetricRuleSolver::verifyJacobian(c.g, c.degree, c.config);
+    EXPECT_LT(worst, 1e-6) << "analytic Jacobian disagrees with the difference "
+                              "quotient on " << c.name;
+  }
+}
+
+/**
+ * @brief Searched triangle rules are exact, positive and interior, and reach
+ * the published point counts.
+ *
+ * The counts are those of Xiao and Gimbutas. Matching them is the point of the
+ * exercise; the exactness sweep is what says the match is real rather than a
+ * rule that merely has the right number of points.
+ */
+TEST(SymmetricRuleSolverTest, SearchedTriangleRulesMatchPublishedCounts)
+{
+  const std::vector<size_t> published = {0, 1, 3, 6, 6, 7, 12, 15, 16};
+  for (size_t degree = 1; degree < published.size(); ++degree)
+  {
+    const auto result =
+      SymmetricRuleSolver::search(Polytope::Type::Triangle, degree, 40, 256);
+    ASSERT_TRUE(result.converged) << "degree " << degree;
+    ASSERT_TRUE(result.admissible) << "degree " << degree;
+
+    const OrbitRule rule(Polytope::Type::Triangle, result.orbits);
+    EXPECT_EQ(rule.getSize(), published[degree])
+      << "degree " << degree << " should reach the published count";
+
+    const auto report = exactnessSweep(rule, Polytope::Type::Triangle, degree);
+    EXPECT_LT(report.worstRelativeError, 1e-12) << "degree " << degree;
+    EXPECT_TRUE(allWeightsPositive(rule)) << "degree " << degree;
+    EXPECT_TRUE(allPointsInside(rule, Polytope::Type::Triangle))
+      << "degree " << degree;
+  }
+}

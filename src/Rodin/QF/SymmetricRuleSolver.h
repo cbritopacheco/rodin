@@ -13,12 +13,18 @@
  * fully symmetric simplex quadrature rule.
  */
 
+#include <limits>
+#include <algorithm>
 #include <random>
+#include <Eigen/SVD>
 #include <Eigen/Cholesky>
 #include <functional>
 #include <numeric>
 
 #include "SymmetricOrbit.h"
+#include "GaussLegendre.h"
+#include "CollapsedBasis.h"
+#include "OrthogonalBasis.h"
 
 namespace Rodin::QF
 {
@@ -70,7 +76,24 @@ namespace Rodin::QF
    * deterministically, so a given (geometry, degree, configuration) always
    * yields the same rule: coefficients that are regenerated must not drift.
    *
+   * @par Reach, and what this solver is not for
+   * Every rule this class can produce is fully symmetric by construction, so
+   * its reach is bounded by which point counts a symmetry decomposition can
+   * express at all. That bound is real and it is not a defect of the search.
+   * The published Xiao--Gimbutas tetrahedron rule of strength four, for
+   * instance, has eleven points carrying eleven distinct weights and no
+   * symmetry whatsoever --- it comes from node elimination, and no symmetric
+   * decomposition of eleven points reproduces it. Measuring this solver
+   * against such a table therefore compares it with a rule of a kind it
+   * cannot represent.
+   *
+   * Use NodeElimination for asymmetric tables and this solver for symmetric
+   * ones, and take whichever is smaller per degree; the two generators have
+   * complementary reach, which is why the published tables of the two
+   * families disagree on point counts.
+   *
    * @see SymmetricOrbit
+   * @see NodeElimination
    */
   class SymmetricRuleSolver
   {
@@ -388,6 +411,580 @@ namespace Rodin::QF
         return residual(g, config, x, MomentData(g, d, degree), d);
       }
 
+      /// Smallest weight, as a fraction of the equal-weight value, that a rule
+      /// may carry. Published rules sit orders of magnitude above this.
+      static constexpr Real s_floor = 1e-4;
+
+      /// Total number of points a configuration expands to.
+      static size_t expandOf(const Configuration& config, Geometry::Polytope::Type g)
+      {
+        size_t n = 0;
+        for (const auto& c : config)
+          n += classSize(c);
+        return n;
+      }
+
+      /// Maps a search variable onto the open unit interval.
+      static Real logistic(Real z)
+      {
+        return (z >= 0) ? 1 / (1 + std::exp(-z)) : std::exp(z) / (1 + std::exp(z));
+      }
+
+      /**
+       * @brief The moment system of a configuration with the weights
+       * eliminated.
+       *
+       * This is the formulation of Witherden and Vincent
+       * @cite witherden2015identification, and it differs from solve() in the
+       * decisive place. Once the points are prescribed the moment equations
+       * are *linear* in the weights, so the weights need not be search
+       * variables at all: they are recovered as the least squares solution of
+       * a small linear system, and the nonlinear search runs over the orbit
+       * shape parameters alone. Weights are roughly a third of the degrees of
+       * freedom of a symmetric decomposition, and removing them greatly
+       * reduces the iterations needed to converge --- more than paying for the
+       * decomposition solved per evaluation.
+       *
+       * Writing @f$ A_{ij} = \sum_{x \in S_j} \psi_i(x) @f$ for the sum of
+       * basis function @f$ i @f$ over orbit @f$ j @f$, and @f$ b_i @f$ for its
+       * integral, the weights are @f$ \omega = A^+ b @f$ and the residual is
+       * @f$ A\omega - b @f$.
+       *
+       * Three details decide whether this reaches machine precision.
+       *
+       * First, the residual is stated in an orthonormal basis, by applying the
+       * inverse Cholesky factor of the monomial Gram matrix. Row scaling alone
+       * leaves the monomial basis ill-conditioned, and that is what otherwise
+       * limits the reachable degree.
+       *
+       * Second, orbit parameters are mapped from unconstrained search
+       * variables by a stick-breaking transform rather than clamped. A clamp
+       * has zero derivative once it binds, so a Jacobian column collapses and
+       * the iterate is stuck where it stands; stick-breaking keeps every
+       * iterate strictly inside the element and everywhere differentiable.
+       *
+       * Third, the Jacobian is analytic. The whole chain --- stick-breaking,
+       * the barycentric expansion, the affine map to the reference element,
+       * the monomials, and the elimination of @f$ \omega @f$ itself --- is
+       * differentiable in closed form, the elimination by the variable
+       * projection formula of Golub and Pereyra. A central-difference Jacobian
+       * caps the attainable residual near @f$ 10^{-10} @f$ however the step is
+       * tuned, which is a rule good to ten digits rather than sixteen.
+       *
+       * Convergence is judged on the residual *and* on positivity: a
+       * configuration generally admits several roots, and the ones a bare
+       * moment residual finds first routinely carry a negative weight. The
+       * barrier makes negativity part of what the search minimises rather than
+       * a verdict passed after the fact.
+       *
+       * @see verifyJacobian, which checks the analytic derivative against a
+       * difference quotient.
+       */
+      class Eliminated
+      {
+        public:
+          /// A point of an orbit together with its derivative in every
+          /// search variable.
+          struct Node
+          {
+              Math::SpatialVector<Real> x;
+              Math::Matrix<Real> dx;   ///< Spatial dimension by variable count.
+          };
+
+          Eliminated(Geometry::Polytope::Type g, size_t degree, Configuration config)
+            : m_g(g),
+              m_d(Geometry::Polytope::Traits(g).getDimension()),
+              m_config(std::move(config))
+          {
+            size_t shape = 0;
+            size_t points = 0;
+            for (const auto& c : m_config)
+            {
+              shape += c.barycentric.size() - 1;
+              if (c.tensor && !c.midPlane)
+                ++shape;
+              points += classSize(c);
+            }
+            // A configuration with no free parameter still needs one variable
+            // for the solver to hold; it simply has nothing to vary.
+            m_degenerate = (shape == 0);
+            m_nz = static_cast<Eigen::Index>(m_degenerate ? 1 : shape);
+            m_no = static_cast<Eigen::Index>(m_config.size());
+
+            // One orthogonal basis serves every element. Orthonormalising
+            // monomials instead would mean a Cholesky of their Gram matrix,
+            // which is Hilbert-like: already marginal near degree eight and
+            // meaningless beyond, and that -- not the search -- is what caps
+            // the attainable residual there. It is also the expensive part of
+            // the setup, being quadratic in the number of moments.
+            m_degree = degree;
+            m_basis = CollapsedBasis::indices(m_g, degree);
+            m_ne = static_cast<Eigen::Index>(m_basis.size());
+
+            // Norms come from a collapsed Gauss--Jacobi rule, whose weights
+            // are positive and which is exact well past the degree needed, so
+            // there is no cancellation to amplify.
+            std::vector<Math::SpatialVector<Real>> qp;
+            std::vector<Real> qw;
+            CollapsedBasis::exactRule(m_g, degree + 2, qp, qw);
+            const Real measure = std::accumulate(qw.begin(), qw.end(), Real(0));
+            m_average = measure / static_cast<Real>(points);
+
+            m_invNorm.assign(m_basis.size(), 1);
+            for (size_t e = 0; e < m_basis.size(); ++e)
+            {
+              Real square = 0;
+              for (size_t q = 0; q < qw.size(); ++q)
+              {
+                const Real v = CollapsedBasis::evaluate(m_g, m_basis[e], qp[q]);
+                square += qw[q] * v * v;
+              }
+              m_invNorm[e] = 1 / std::sqrt(std::max(square, Real(1e-300)));
+            }
+
+            // The integral of every non-constant mode is zero exactly, by
+            // orthogonality to the constant one. Taking these numerically
+            // instead would put quadrature noise where an exact zero belongs,
+            // and the search would then solve equations that are quietly
+            // wrong -- converging to a small residual against the wrong right
+            // hand side, which no amount of searching detects.
+            m_A.resize(m_ne, m_no);
+            m_dA.assign(static_cast<size_t>(m_nz), Math::Matrix<Real>(m_ne, m_no));
+            m_omega.resize(m_no);
+            m_b = Math::Vector<Real>::Zero(m_ne);
+            m_b(0) = measure * m_invNorm[0];
+          }
+
+          /// Number of search variables.
+          Eigen::Index getVariableCount() const
+          {
+            return m_nz;
+          }
+
+          /// Number of residual entries.
+          Eigen::Index getResidualCount() const
+          {
+            return m_ne + m_no;
+          }
+
+          /// Whether the configuration has any free parameter at all.
+          bool isDegenerate() const
+          {
+            return m_degenerate;
+          }
+
+          /// The weights recovered by the most recent evaluation.
+          const Math::Vector<Real>& getWeights() const
+          {
+            return m_omega;
+          }
+
+          /// The smallest weight the most recent evaluation produced,
+          /// relative to the equal-weight value.
+          Real getRelativeFloor() const
+          {
+            Real least = std::numeric_limits<Real>::max();
+            for (Eigen::Index j = 0; j < m_no; ++j)
+              least = std::min(least, m_omega(j) / m_average);
+            return least;
+          }
+
+          /**
+           * @brief Expands a search vector into the points of each orbit,
+           * carrying the derivative of every point along the way.
+           */
+          std::vector<std::vector<Node>> expand(const Math::Vector<Real>& z) const
+          {
+            std::vector<std::vector<Node>> orbits(m_config.size());
+            Eigen::Index cursor = 0;
+            for (size_t c = 0; c < m_config.size(); ++c)
+            {
+              const auto& pattern = m_config[c].barycentric;
+              const size_t k = pattern.size();
+
+              // Stick-breaking: each part takes a fraction of the barycentric
+              // budget still unspent, so the coordinates sum to one by
+              // construction and stay positive for every value of z.
+              std::vector<Real> value(k);
+              std::vector<Math::Vector<Real>> dvalue(k, Math::Vector<Real>::Zero(m_nz));
+              Real rest = 1;
+              Math::Vector<Real> drest = Math::Vector<Real>::Zero(m_nz);
+              for (size_t i = 0; i + 1 < k; ++i)
+              {
+                const Eigen::Index slot = cursor++;
+                const Real fraction = logistic(z(slot));
+                const Real dfraction = fraction * (1 - fraction);
+                const Real m = static_cast<Real>(pattern[i]);
+                value[i] = rest * fraction / m;
+                dvalue[i] = drest * (fraction / m);
+                dvalue[i](slot) += rest * dfraction / m;
+                const Math::Vector<Real> keep = drest * (1 - fraction);
+                drest = keep;
+                drest(slot) -= rest * dfraction;
+                rest *= (1 - fraction);
+              }
+              value[k - 1] = rest / static_cast<Real>(pattern.back());
+              dvalue[k - 1] = drest / static_cast<Real>(pattern.back());
+
+              // The tensor direction, when the element has one.
+              std::vector<Real> tvalue;
+              std::vector<Math::Vector<Real>> dtvalue;
+              if (m_config[c].tensor)
+              {
+                if (m_config[c].midPlane)
+                {
+                  tvalue = {Real(0.5)};
+                  dtvalue = {Math::Vector<Real>::Zero(m_nz)};
+                }
+                else
+                {
+                  const Eigen::Index slot = cursor++;
+                  const Real t = logistic(z(slot));
+                  Math::Vector<Real> row = Math::Vector<Real>::Zero(m_nz);
+                  row(slot) = t * (1 - t);
+                  tvalue = {t, 1 - t};
+                  dtvalue = {row, Math::Vector<Real>(-row)};
+                }
+              }
+
+              // Distinct permutations of the multiset of parts. Which part a
+              // slot came from is tracked by index rather than by value, so
+              // the derivative is attributed correctly even where two parts
+              // happen to coincide.
+              std::vector<size_t> index;
+              for (size_t i = 0; i < k; ++i)
+                for (size_t m = 0; m < pattern[i]; ++m)
+                  index.push_back(i);
+              std::sort(index.begin(), index.end());
+
+              const bool product = m_config[c].tensor;
+              const Geometry::Polytope::Type base =
+                product ? SymmetricOrbit::baseSimplex(index.size()) : m_g;
+              const Geometry::Polytope::Traits baseTraits(base);
+              const size_t bd = baseTraits.getDimension();
+
+              do
+              {
+                // The map to the reference element is affine in the
+                // barycentric tuple, so the derivative maps the same way.
+                Math::SpatialVector<Real> x;
+                x.resize(static_cast<Eigen::Index>(m_d));
+                x.setZero();
+                Math::Matrix<Real> dx =
+                  Math::Matrix<Real>::Zero(static_cast<Eigen::Index>(m_d), m_nz);
+                for (size_t i = 0; i < index.size(); ++i)
+                {
+                  const auto& vertex = baseTraits.getVertex(i);
+                  for (size_t r = 0; r < bd; ++r)
+                  {
+                    const Eigen::Index rr = static_cast<Eigen::Index>(r);
+                    x[rr] += value[index[i]] * vertex[rr];
+                    dx.row(rr) += dvalue[index[i]].transpose() * vertex[rr];
+                  }
+                }
+                if (!product)
+                {
+                  orbits[c].push_back({x, dx});
+                }
+                else
+                {
+                  for (size_t t = 0; t < tvalue.size(); ++t)
+                  {
+                    Node node{x, dx};
+                    const Eigen::Index last = static_cast<Eigen::Index>(m_d - 1);
+                    node.x[last] = tvalue[t];
+                    node.dx.row(last) = dtvalue[t].transpose();
+                    orbits[c].push_back(std::move(node));
+                  }
+                }
+              } while (std::next_permutation(index.begin(), index.end()));
+            }
+            return orbits;
+          }
+
+          /**
+           * @brief Evaluates the residual, and the Jacobian when @p jacobian
+           * is given.
+           *
+           * Nothing in the Jacobian is a difference quotient.
+           */
+          void evaluate(const Math::Vector<Real>& z, Math::Vector<Real>& residual,
+            Math::Matrix<Real>* jacobian) const
+          {
+            const auto orbits = expand(z);
+            m_A.setZero();
+            for (auto& m : m_dA)
+              m.setZero();
+
+            for (Eigen::Index j = 0; j < m_no; ++j)
+            {
+              for (const auto& node : orbits[static_cast<size_t>(j)])
+              {
+                // Tabulated once for the point, then read off per mode: the
+                // basis is evaluated in full at every point of every orbit on
+                // every iteration, so repeating the recurrence per mode is the
+                // dominant cost of the whole search.
+                const auto table =
+                  CollapsedBasis::tabulate(m_g, m_degree, node.x, jacobian);
+                for (Eigen::Index e = 0; e < m_ne; ++e)
+                {
+                  const size_t i = static_cast<size_t>(e);
+                  m_A(e, j) +=
+                    CollapsedBasis::evaluate(m_g, table, m_basis[i]) * m_invNorm[i];
+                  if (!jacobian)
+                    continue;
+                  const auto grad = CollapsedBasis::gradient(m_g, table, m_basis[i]);
+                  for (Eigen::Index l = 0; l < m_nz; ++l)
+                  {
+                    Real chain = 0;
+                    for (size_t r = 0; r < m_d; ++r)
+                    {
+                      const Eigen::Index rr = static_cast<Eigen::Index>(r);
+                      chain += grad[rr] * node.dx(rr, l);
+                    }
+                    m_dA[static_cast<size_t>(l)](e, j) += chain * m_invNorm[i];
+                  }
+                }
+              }
+            }
+
+            m_svd.compute(m_A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+            m_omega = m_svd.solve(m_b);
+
+            residual.resize(m_ne + m_no);
+            residual.head(m_ne) = m_A * m_omega - m_b;
+            for (Eigen::Index j = 0; j < m_no; ++j)
+              residual(m_ne + j) = std::max(Real(0), s_floor - m_omega(j) / m_average);
+            if (!jacobian)
+              return;
+
+            // Variable projection. With omega itself a function of z,
+            //   dr   = (I - U U^T) dA w  -  U S^-1 V^T dA^T r,
+            //   dw   = -V S^-2 V^T dA^T r  -  V S^-1 U^T dA w.
+            const auto& U = m_svd.matrixU();
+            const auto& V = m_svd.matrixV();
+            const auto& sv = m_svd.singularValues();
+            const Math::Vector<Real> r = residual.head(m_ne);
+            jacobian->resize(m_ne + m_no, m_nz);
+            for (Eigen::Index l = 0; l < m_nz; ++l)
+            {
+              const auto& D = m_dA[static_cast<size_t>(l)];
+              const Math::Vector<Real> Dw = D * m_omega;
+              const Math::Vector<Real> Dtr = D.transpose() * r;
+              const Math::Vector<Real> a = U.transpose() * Dw;
+              const Math::Vector<Real> c = V.transpose() * Dtr;
+              Math::Vector<Real> sa(m_no), sc(m_no), scc(m_no);
+              for (Eigen::Index i = 0; i < m_no; ++i)
+              {
+                const Real si = (sv(i) > 0) ? sv(i) : Real(1);
+                sa(i) = a(i) / si;
+                sc(i) = c(i) / si;
+                scc(i) = c(i) / (si * si);
+              }
+              jacobian->col(l).head(m_ne) = Dw - U * a - U * sc;
+              const Math::Vector<Real> domega = -(V * scc) - (V * sa);
+              for (Eigen::Index j = 0; j < m_no; ++j)
+              {
+                const bool active = (s_floor - m_omega(j) / m_average) > 0;
+                (*jacobian)(m_ne + j, l) = active ? -domega(j) / m_average : Real(0);
+              }
+            }
+          }
+
+          /// Rebuilds the orbits of the configuration, carrying the weights
+          /// the most recent evaluation produced.
+          std::vector<SymmetricOrbit> toOrbits(const Math::Vector<Real>& z) const
+          {
+            std::vector<SymmetricOrbit> out;
+            Eigen::Index cursor = 0;
+            for (size_t c = 0; c < m_config.size(); ++c)
+            {
+              const auto& pattern = m_config[c].barycentric;
+              const size_t k = pattern.size();
+              std::vector<Real> value(k);
+              Real rest = 1;
+              for (size_t i = 0; i + 1 < k; ++i)
+              {
+                const Real fraction = logistic(z(cursor++));
+                value[i] = rest * fraction / static_cast<Real>(pattern[i]);
+                rest *= (1 - fraction);
+              }
+              value[k - 1] = rest / static_cast<Real>(pattern.back());
+
+              SymmetricOrbit::Tensor tensor;
+              if (m_config[c].tensor)
+              {
+                if (m_config[c].midPlane)
+                  tensor = {Real(0.5)};
+                else
+                {
+                  const Real t = logistic(z(cursor++));
+                  tensor = {t, 1 - t};
+                }
+              }
+
+              SymmetricOrbit::Barycentric bary;
+              for (size_t i = 0; i < k; ++i)
+                for (size_t m = 0; m < pattern[i]; ++m)
+                  bary.push_back(value[i]);
+              const Real w = m_omega(static_cast<Eigen::Index>(c));
+              out.push_back(tensor.empty()
+                  ? SymmetricOrbit(std::move(bary), w)
+                  : SymmetricOrbit(std::move(bary), std::move(tensor), w));
+            }
+            return out;
+          }
+
+        private:
+          Geometry::Polytope::Type m_g;
+          size_t m_d;
+          size_t m_degree = 0;
+          Configuration m_config;
+          Eigen::Index m_nz = 0;
+          Eigen::Index m_ne = 0;
+          Eigen::Index m_no = 0;
+          Real m_average = 1;
+          bool m_degenerate = false;
+          std::vector<std::vector<size_t>> m_basis;
+          std::vector<Real> m_invNorm;
+
+          mutable Math::Matrix<Real> m_A;
+          mutable std::vector<Math::Matrix<Real>> m_dA;
+          mutable Math::Vector<Real> m_b;
+          mutable Math::Vector<Real> m_omega;
+          mutable Eigen::JacobiSVD<Math::Matrix<Real>> m_svd;
+      };
+
+      /**
+       * @brief Largest relative disagreement between the analytic Jacobian of
+       * Eliminated and a central difference of its residual.
+       *
+       * An analytic Jacobian that is quietly wrong does not announce itself:
+       * the search still runs, converges more slowly, and returns rules a few
+       * digits short. This is the check that would catch it.
+       */
+      static Real verifyJacobian(Geometry::Polytope::Type g, size_t degree,
+        const Configuration& config, unsigned seed = 20260101u)
+      {
+        const Eliminated problem(g, degree, config);
+        const Eigen::Index nz = problem.getVariableCount();
+        std::mt19937 rng(seed);
+        std::normal_distribution<Real> gauss(0, 1);
+
+        Real worst = 0;
+        for (size_t trial = 0; trial < 8; ++trial)
+        {
+          Math::Vector<Real> z(nz);
+          for (Eigen::Index i = 0; i < nz; ++i)
+            z(i) = gauss(rng);
+
+          Math::Vector<Real> r;
+          Math::Matrix<Real> J;
+          problem.evaluate(z, r, &J);
+
+          for (Eigen::Index l = 0; l < nz; ++l)
+          {
+            // A single step size proves nothing: too large and truncation
+            // dominates, too small and roundoff does, and at high degree the
+            // residual curves sharply enough that the usable window moves.
+            // Sweeping and taking the best agreement compares the analytic
+            // derivative against the difference quotient at its own optimum.
+            Real closest = std::numeric_limits<Real>::max();
+            for (const Real relative : {1e-3, 1e-4, 1e-5, 1e-6, 1e-7})
+            {
+              const Real h = relative * std::max(std::abs(z(l)), Real(1));
+              Math::Vector<Real> zp = z, zm = z, rp, rm;
+              zp(l) += h;
+              zm(l) -= h;
+              problem.evaluate(zp, rp, nullptr);
+              problem.evaluate(zm, rm, nullptr);
+              const Math::Vector<Real> fd = (rp - rm) / (2 * h);
+              const Real scale = std::max(
+                {fd.cwiseAbs().maxCoeff(), J.col(l).cwiseAbs().maxCoeff(), Real(1e-8)});
+              closest = std::min(closest, (fd - J.col(l)).cwiseAbs().maxCoeff() / scale);
+            }
+            worst = std::max(worst, closest);
+          }
+        }
+        return worst;
+      }
+
+      /**
+       * @brief Solves a configuration with the weights eliminated.
+       *
+       * A Levenberg--Marquardt loop over Eliminated, restarted from
+       * pseudo-random points until it finds a rule that is both exact and
+       * positive. The generator is seeded deterministically, so a given
+       * (geometry, degree, configuration) always yields the same rule:
+       * coefficients that are regenerated must not drift.
+       */
+      static Result solveEliminated(Geometry::Polytope::Type g, size_t degree,
+        const Configuration& config, size_t maxRestarts = 256, Real tolerance = 1e-12,
+        size_t maxIterations = 600, unsigned seed = 20260101u)
+      {
+        const Eliminated problem(g, degree, config);
+        const Eigen::Index nz = problem.getVariableCount();
+
+        std::mt19937 rng(seed);
+        // Search variables live on the whole line; this spread covers the unit
+        // interval of stick fractions without crowding either end.
+        std::normal_distribution<Real> gauss(0, 1.5);
+
+        Result best;
+        for (size_t restart = 0; restart < maxRestarts; ++restart)
+        {
+          Math::Vector<Real> z(nz);
+          for (Eigen::Index i = 0; i < nz; ++i)
+            z(i) = problem.isDegenerate() ? Real(0) : gauss(rng);
+
+          Real lambda = 1e-3;
+          Math::Vector<Real> r;
+          Math::Matrix<Real> J;
+          problem.evaluate(z, r, &J);
+          Real cost = r.squaredNorm();
+          for (size_t it = 0; it < maxIterations && std::sqrt(cost) > tolerance; ++it)
+          {
+            const Math::Matrix<Real> H =
+              J.transpose() * J + lambda * Math::Matrix<Real>::Identity(nz, nz);
+            const Math::Vector<Real> zn = z + H.ldlt().solve(-J.transpose() * r);
+            Math::Vector<Real> rn;
+            problem.evaluate(zn, rn, nullptr);
+            const Real cn = rn.squaredNorm();
+            if (cn < cost)
+            {
+              z = zn;
+              cost = cn;
+              problem.evaluate(z, r, &J);
+              lambda = std::max(lambda * Real(0.3), Real(1e-14));
+            }
+            else
+            {
+              lambda *= 10;
+              if (lambda > 1e12)
+                break;
+            }
+          }
+
+          Math::Vector<Real> settled;
+          problem.evaluate(z, settled, nullptr);
+
+          Result candidate;
+          candidate.residual = std::sqrt(cost);
+          candidate.converged = candidate.residual < tolerance;
+          candidate.restarts = restart + 1;
+          candidate.orbits = problem.toOrbits(z);
+          candidate.admissible = problem.getRelativeFloor() > s_floor;
+
+          if (candidate.residual < best.residual)
+            best = candidate;
+          if (candidate.converged && candidate.admissible)
+            return candidate;
+          if (problem.isDegenerate())
+            break; // nothing left to re-seed
+        }
+        return best;
+      }
+
       /**
        * @brief Searches for a rule of strength @p degree with the orbit
        * classes @p config.
@@ -493,7 +1090,7 @@ namespace Rodin::QF
       static std::vector<Pattern> patternsFor(Geometry::Polytope::Type g)
       {
         const size_t n = (g == Geometry::Polytope::Type::Wedge)
-          ? 3  // the base simplex of the reference wedge is the triangle
+          ? 3 // the base simplex of the reference wedge is the triangle
           : Geometry::Polytope::Traits(g).getVertexCount();
         std::vector<Pattern> out;
         Pattern current;
@@ -577,7 +1174,7 @@ namespace Rodin::QF
        */
       static Result search(Geometry::Polytope::Type g, size_t degree,
         size_t maxPoints = 32, size_t maxRestarts = 96, Configuration* found = nullptr,
-        size_t maxOrbits = 6)
+        size_t maxOrbits = 6, bool eliminate = true, Real tolerance = 1e-12)
       {
         const bool product = (g == Geometry::Polytope::Type::Wedge);
         std::vector<OrbitClass> patterns;
@@ -589,8 +1186,8 @@ namespace Rodin::QF
           }
           else
           {
-            patterns.emplace_back(p, true);   // mid-plane
-            patterns.emplace_back(p, false);  // reflected pair
+            patterns.emplace_back(p, true); // mid-plane
+            patterns.emplace_back(p, false); // reflected pair
           }
         }
         std::vector<Configuration> candidates;
@@ -608,8 +1205,8 @@ namespace Rodin::QF
             const size_t sz = classSize(patterns[i]);
             if (points + sz > maxPoints)
               continue;
-              // A class with no free parameters contributes the same points
-              // however often it is repeated, so it may appear at most once.
+            // A class with no free parameters contributes the same points
+            // however often it is repeated, so it may appear at most once.
             const bool centroid = (patterns[i].barycentric.size() == 1) &&
               (!patterns[i].tensor || patterns[i].midPlane);
             if (centroid && std::count(current.begin(), current.end(), patterns[i]))
@@ -629,7 +1226,9 @@ namespace Rodin::QF
         Result best;
         for (const auto& config : candidates)
         {
-          const auto r = solve(g, degree, config, maxRestarts);
+          const auto r = eliminate
+            ? solveEliminated(g, degree, config, maxRestarts, tolerance)
+            : solve(g, degree, config, maxRestarts, tolerance);
           if (r.converged && r.admissible)
           {
             if (found)

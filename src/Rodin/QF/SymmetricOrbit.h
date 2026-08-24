@@ -109,6 +109,13 @@ namespace Rodin::QF
         return m_weight;
       }
 
+      /// @brief Sets the weight carried by each point of the orbit.
+      SymmetricOrbit& setWeight(Real w)
+      {
+        m_weight = w;
+        return *this;
+      }
+
       /**
        * @brief The distinct permutations of the representative tuple.
        *

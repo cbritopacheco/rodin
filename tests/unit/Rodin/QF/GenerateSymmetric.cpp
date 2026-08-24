@@ -7,6 +7,7 @@
  * @brief Development driver emitting symmetric rule coefficients.
  */
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <mutex>
 #include <thread>
@@ -32,7 +33,13 @@ int main(int argc, char** argv)
 
   std::atomic<size_t> next{1};
   std::vector<std::thread> pool;
-  const size_t W = std::min<size_t>(std::thread::hardware_concurrency(), maxDegree);
+  // Capped rather than sized to the machine: this driver is run alongside
+  // ordinary work, and saturating every core is not worth the few minutes it
+  // saves. RODIN_QF_JOBS overrides it.
+  const char* jobs = std::getenv("RODIN_QF_JOBS");
+  const size_t budget = jobs ? std::stoul(jobs) : 8;
+  const size_t W = std::min<size_t>(
+    std::min<size_t>(std::thread::hardware_concurrency(), budget), maxDegree);
   for (size_t w = 0; w < W; ++w)
     pool.emplace_back([&] {
       for (;;)

@@ -89,6 +89,21 @@ namespace Rodin::QF
       static void gj1dUnit(
         size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w);
 
+      /**
+       * @brief Computes 1D Gauss-Legendre nodes and weights on [0,1].
+       * @param n Number of quadrature points
+       * @param x Output vector for quadrature point coordinates
+       * @param w Output vector for quadrature weights
+       * @param maxIt Maximum Newton iterations for finding nodes (default: 100)
+       * @param tol Convergence tolerance for Newton iteration (default: 1e-14)
+       *
+       * Computes the @f$ n @f$ Gauss-Legendre quadrature nodes and weights
+       * on the unit interval @f$ [0,1] @f$. Nodes are the zeros of the
+       * Legendre polynomial @f$ P_n(x) @f$, found using Newton's method.
+       */
+      static void gl1dUnit(size_t n, std::vector<Real>& x, std::vector<Real>& w,
+        size_t maxIt = 100, Real tol = 1e-14);
+
       /// Parent class type
       using Parent = QuadratureFormulaBase;
 
@@ -203,20 +218,6 @@ namespace Rodin::QF
       }
 
     private:
-      /**
-       * @brief Computes 1D Gauss-Legendre nodes and weights on [0,1].
-       * @param n Number of quadrature points
-       * @param x Output vector for quadrature point coordinates
-       * @param w Output vector for quadrature weights
-       * @param maxIt Maximum Newton iterations for finding nodes (default: 100)
-       * @param tol Convergence tolerance for Newton iteration (default: 1e-14)
-       *
-       * Computes the @f$ n @f$ Gauss-Legendre quadrature nodes and weights
-       * on the unit interval @f$ [0,1] @f$. Nodes are the zeros of the
-       * Legendre polynomial @f$ P_n(x) @f$, found using Newton's method.
-       */
-      static void gl1dUnit(size_t n, std::vector<Real>& x, std::vector<Real>& w,
-        size_t maxIt = 100, Real tol = 1e-14);
 
       /**
        * @brief Builds the quadrature rule for the selected geometry.
