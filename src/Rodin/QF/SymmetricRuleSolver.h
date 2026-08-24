@@ -529,6 +529,25 @@ namespace Rodin::QF
       }
 
       /**
+       * @note The Koornwinder-Dubiner basis, which lifted node elimination
+       * from degree 14 to 20, was tried here and made this solver worse: the
+       * triangle ceiling fell from 9 to 8, and degree 3 stopped converging
+       * within 256 restarts where it had succeeded before.
+       *
+       * The two problems have opposite shape. Node elimination carries the
+       * node coordinates as unknowns, so its moment system is heavily
+       * underdetermined and its difficulty is conditioning; an orthogonal
+       * basis addresses exactly that. Here the unknowns are a handful of orbit
+       * parameters, so the system is strongly overdetermined -- ten equations
+       * against four unknowns at triangle degree 3 -- and the difficulty is
+       * finding the basin of an isolated root. Changing the basis rescales the
+       * residual landscape without making that search easier, and empirically
+       * makes it harder.
+       *
+       * Recorded so the experiment is not repeated.
+       */
+
+      /**
        * @brief Searches orbit configurations for the cheapest admissible rule
        * of strength @p degree.
        *

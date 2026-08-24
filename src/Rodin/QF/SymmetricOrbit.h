@@ -234,10 +234,14 @@ namespace Rodin::QF
       {
         switch (c)
         {
-          case PyramidClass::Centre:   return 1;
-          case PyramidClass::Axis:     return 4;
-          case PyramidClass::Diagonal: return 4;
-          default:                     return 8;
+          case PyramidClass::Centre:
+            return 1;
+          case PyramidClass::Axis:
+            return 4;
+          case PyramidClass::Diagonal:
+            return 4;
+          default:
+            return 8;
         }
       }
 
@@ -246,9 +250,12 @@ namespace Rodin::QF
       {
         switch (c)
         {
-          case PyramidClass::Centre:   return 0;
-          case PyramidClass::General:  return 2;
-          default:                     return 1;
+          case PyramidClass::Centre:
+            return 0;
+          case PyramidClass::General:
+            return 2;
+          default:
+            return 1;
         }
       }
 
@@ -274,12 +281,11 @@ namespace Rodin::QF
             uv = {{alpha, 0}, {-alpha, 0}, {0, alpha}, {0, -alpha}};
             break;
           case PyramidClass::Diagonal:
-            uv = {{alpha, alpha}, {-alpha, alpha},
-                  {alpha, -alpha}, {-alpha, -alpha}};
+            uv = {{alpha, alpha}, {-alpha, alpha}, {alpha, -alpha}, {-alpha, -alpha}};
             break;
           default:
             uv = {{alpha, beta}, {-alpha, beta}, {alpha, -beta}, {-alpha, -beta},
-                  {beta, alpha}, {-beta, alpha}, {beta, -alpha}, {-beta, -alpha}};
+              {beta, alpha}, {-beta, alpha}, {beta, -alpha}, {-beta, -alpha}};
             break;
         }
         std::vector<Math::SpatialVector<Real>> out;
