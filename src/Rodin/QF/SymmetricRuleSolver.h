@@ -133,6 +133,16 @@ namespace Rodin::QF
       static Real referenceMoment(
         Geometry::Polytope::Type g, const std::vector<size_t>& alpha)
       {
+        if (g == Geometry::Polytope::Type::Pyramid)
+        {
+          // Reference pyramid {0 <= z <= 1, 0 <= x, y <= 1 - z}:
+          //   int x^a y^b z^c = c! (a+b+2)! / [ (a+b+c+3)! (a+1)(b+1) ]
+          const auto fact = [](size_t n)
+          { Real r = 1; for (size_t i = 2; i <= n; ++i) r *= static_cast<Real>(i); return r; };
+          return fact(alpha[2]) * fact(alpha[0] + alpha[1] + 2)
+               / (fact(alpha[0] + alpha[1] + alpha[2] + 3)
+                  * static_cast<Real>((alpha[0] + 1) * (alpha[1] + 1)));
+        }
         if (g != Geometry::Polytope::Type::Wedge)
           return simplexMoment(alpha);
         const std::vector<size_t> planar{alpha[0], alpha[1]};
@@ -624,6 +634,220 @@ namespace Rodin::QF
           }
           if (r.residual < best.residual)
             best = r;
+        }
+        return best;
+      }
+
+      /// @brief A candidate pyramid rule: one orbit class per entry.
+      using PyramidConfiguration = std::vector<SymmetricOrbit::PyramidClass>;
+
+      /// @brief Points contributed by a pyramid configuration.
+      static size_t pyramidConfigurationSize(const PyramidConfiguration& config)
+      {
+        size_t n = 0;
+        for (const auto c : config)
+          n += SymmetricOrbit::pyramidClassSize(c);
+        return n;
+      }
+
+      /// @brief Unknowns of a pyramid configuration: the shape parameters of
+      /// each orbit, its height, and its weight.
+      static size_t pyramidUnknownCount(const PyramidConfiguration& config)
+      {
+        size_t n = 0;
+        for (const auto c : config)
+          n += SymmetricOrbit::pyramidClassParameters(c) + 2;
+        return n;
+      }
+
+      /// @brief Expands a pyramid parameter vector into points and weights.
+      static void pyramidPoints(const PyramidConfiguration& config,
+        const Math::Vector<Real>& x,
+        std::vector<Math::SpatialVector<Real>>& points,
+        std::vector<Real>& weights)
+      {
+        points.clear();
+        weights.clear();
+        Eigen::Index cursor = 0;
+        for (const auto c : config)
+        {
+          const size_t np = SymmetricOrbit::pyramidClassParameters(c);
+          const Real alpha = (np >= 1) ? x(cursor++) : Real(0);
+          const Real beta = (np >= 2) ? x(cursor++) : Real(0);
+          const Real z = x(cursor++);
+          const Real theta = x(cursor++);
+          const Real w = theta * theta;
+          for (auto& p : SymmetricOrbit::expandPyramid(c, alpha, beta, z))
+          {
+            points.push_back(std::move(p));
+            weights.push_back(w);
+          }
+        }
+      }
+
+      /**
+       * @brief Searches pyramid orbit configurations for an admissible rule.
+       *
+       * Orbits live in the centred coordinates of SymmetricOrbit::expandPyramid
+       * and are sheared onto the reference element, whose apex sits over a base
+       * corner. Weights enter as theta^2, and the shape parameters are confined
+       * to (-1, 1) by construction, so every iterate is a rule of the right
+       * shape even before it is exact.
+       */
+      static Result searchPyramid(size_t degree, size_t maxPoints = 40,
+        size_t maxRestarts = 400, PyramidConfiguration* found = nullptr,
+        size_t maxOrbits = 5, unsigned seed = 20260101u)
+      {
+        using PC = SymmetricOrbit::PyramidClass;
+        const auto g = Geometry::Polytope::Type::Pyramid;
+        const MomentData moments(g, 3, degree);
+
+        std::vector<PyramidConfiguration> candidates;
+        PyramidConfiguration current;
+        const std::vector<PC> classes = {PC::Centre, PC::Axis, PC::Diagonal,
+                                         PC::General};
+        const std::function<void(size_t, size_t)> rec =
+          [&](size_t start, size_t points)
+          {
+            if (!current.empty())
+              candidates.push_back(current);
+            if (current.size() >= maxOrbits)
+              return;
+            for (size_t i = start; i < classes.size(); ++i)
+            {
+              const size_t sz = SymmetricOrbit::pyramidClassSize(classes[i]);
+              if (points + sz > maxPoints)
+                continue;
+              current.push_back(classes[i]);
+              rec(i, points + sz);
+              current.pop_back();
+            }
+          };
+        rec(0, 0);
+        std::stable_sort(candidates.begin(), candidates.end(),
+          [](const PyramidConfiguration& a, const PyramidConfiguration& b)
+          { return pyramidConfigurationSize(a) < pyramidConfigurationSize(b); });
+
+        Result best;
+        for (const auto& config : candidates)
+        {
+          const Eigen::Index n =
+            static_cast<Eigen::Index>(pyramidUnknownCount(config));
+          std::mt19937 rng(seed);
+          std::uniform_real_distribution<Real> shape(0.05, 0.95);
+          std::uniform_real_distribution<Real> height(0.05, 0.9);
+
+          std::vector<Math::SpatialVector<Real>> pts;
+          std::vector<Real> wts;
+          const auto residualOf = [&](const Math::Vector<Real>& v)
+          {
+            pyramidPoints(config, v, pts, wts);
+            Math::Vector<Real> r(
+              static_cast<Eigen::Index>(moments.alphas.size()));
+            for (size_t e = 0; e < moments.alphas.size(); ++e)
+            {
+              const auto& a = moments.alphas[e];
+              Real sum = 0;
+              for (size_t q = 0; q < pts.size(); ++q)
+                sum += wts[q] * ipow(pts[q][0], a[0]) * ipow(pts[q][1], a[1])
+                              * ipow(pts[q][2], a[2]);
+              r(static_cast<Eigen::Index>(e)) =
+                (sum - moments.exact[e]) * moments.scale[e];
+            }
+            return r;
+          };
+
+          for (size_t restart = 0; restart < maxRestarts; ++restart)
+          {
+            Math::Vector<Real> x(n);
+            {
+              Eigen::Index cursor = 0;
+              const size_t total = pyramidConfigurationSize(config);
+              for (const auto c : config)
+              {
+                for (size_t k = 0;
+                     k < SymmetricOrbit::pyramidClassParameters(c); ++k)
+                  x(cursor++) = shape(rng);
+                x(cursor++) = height(rng);
+                x(cursor++) =
+                  std::sqrt(Real(1) / (3 * static_cast<Real>(total)));
+              }
+            }
+
+            Real lambda = 1e-3;
+            Math::Vector<Real> r = residualOf(x);
+            Real cost = r.squaredNorm();
+            for (size_t it = 0; it < 200 && std::sqrt(cost) > 1e-13; ++it)
+            {
+              Math::Matrix<Real> J(r.size(), n);
+              for (Eigen::Index j = 0; j < n; ++j)
+              {
+                const Real h = 1e-7 * std::max(std::abs(x(j)), Real(1));
+                Math::Vector<Real> xp = x, xm = x;
+                xp(j) += h;
+                xm(j) -= h;
+                J.col(j) = (residualOf(xp) - residualOf(xm)) / (2 * h);
+              }
+              const Math::Matrix<Real> H = J.transpose() * J
+                + lambda * Math::Matrix<Real>::Identity(n, n);
+              const Math::Vector<Real> xn =
+                x + H.ldlt().solve(-J.transpose() * r);
+              const Math::Vector<Real> rn = residualOf(xn);
+              const Real cn = rn.squaredNorm();
+              if (cn < cost)
+              {
+                x = xn;
+                r = rn;
+                cost = cn;
+                lambda = std::max(lambda * Real(0.3), Real(1e-12));
+              }
+              else
+              {
+                lambda *= 10;
+                if (lambda > 1e12)
+                  break;
+              }
+            }
+
+            Result candidate;
+            candidate.residual = std::sqrt(cost);
+            candidate.converged = candidate.residual < 1e-13;
+            candidate.restarts = restart + 1;
+            pyramidPoints(config, x, pts, wts);
+            candidate.admissible = true;
+            const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+            for (size_t q = 0; q < pts.size() && candidate.admissible; ++q)
+            {
+              if (!(wts[q] > 0))
+                candidate.admissible = false;
+              Math::Vector<Real> pt(3);
+              for (int k = 0; k < 3; ++k)
+                pt(k) = pts[q][k];
+              if ((hs.matrix * pt - hs.vector).maxCoeff() > -1e-12)
+                candidate.admissible = false;
+            }
+            if (candidate.residual < best.residual)
+            {
+              best = candidate;
+              best.orbits.clear();
+              for (size_t q = 0; q < pts.size(); ++q)
+                best.orbits.emplace_back(
+                  SymmetricOrbit::Barycentric{pts[q][0], pts[q][1], pts[q][2]},
+                  wts[q]);
+            }
+            if (candidate.converged && candidate.admissible)
+            {
+              if (found)
+                *found = config;
+              Result out = candidate;
+              out.orbits.clear();
+              for (size_t q = 0; q < pts.size(); ++q)
+                out.orbits.emplace_back(
+                  SymmetricOrbit::Barycentric{pts[q][0], pts[q][1], pts[q][2]},
+                  wts[q]);
+              return out;
+            }
+          }
         }
         return best;
       }
