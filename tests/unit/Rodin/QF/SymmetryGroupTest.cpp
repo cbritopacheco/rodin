@@ -181,9 +181,13 @@ TEST(SymmetryGroupTest, OrbitTypesMatchThePublishedOnes)
 {
   for (const auto& expected : expectations())
   {
+    // Compared against the interior orbits only: the published tables
+    // enumerate the orbit kinds of the open element, while the derivation also
+    // yields those confined to its faces, which some rules do use.
     std::vector<size_t> sizes;
     for (const auto& stratum : SymmetryGroup::strata(expected.type))
-      sizes.push_back(stratum.orbitSize);
+      if (!stratum.boundary)
+        sizes.push_back(stratum.orbitSize);
     EXPECT_EQ(sizes, expected.orbitSizes)
       << expected.name << ": derived orbit sizes differ from the published ones";
   }
