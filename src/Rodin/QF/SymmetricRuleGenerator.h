@@ -17,6 +17,11 @@
 #include <limits>
 #include <numeric>
 #include <random>
+#include <functional>
+#include <atomic>
+#include <thread>
+#include <map>
+#include <mutex>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -124,26 +129,16 @@ namespace Rodin::QF
             m_nz = static_cast<Eigen::Index>(std::max<size_t>(variables, 1));
             m_points = points;
 
-            m_basis = CollapsedBasis::indices(m_g, m_degree);
+            // The basis and its norms depend only on the element and the
+            // degree, never on the decomposition, and measuring them costs a
+            // full quadrature per mode. Recomputing that for each of the many
+            // decompositions of a high degree dwarfs the search itself.
+            const Normalisation& shared = normalisation(m_g, m_degree);
+            m_basis = shared.basis;
+            m_invNorm = shared.inverseNorm;
             m_ne = static_cast<Eigen::Index>(m_basis.size());
-
-            std::vector<Math::SpatialVector<Real>> qp;
-            std::vector<Real> qw;
-            CollapsedBasis::exactRule(m_g, m_degree + 2, qp, qw);
-            const Real measure = std::accumulate(qw.begin(), qw.end(), Real(0));
+            const Real measure = shared.measure;
             m_average = measure / static_cast<Real>(points);
-
-            m_invNorm.assign(m_basis.size(), 1);
-            for (size_t e = 0; e < m_basis.size(); ++e)
-            {
-              Real square = 0;
-              for (size_t q = 0; q < qw.size(); ++q)
-              {
-                const Real v = CollapsedBasis::evaluate(m_g, m_basis[e], qp[q]);
-                square += qw[q] * v * v;
-              }
-              m_invNorm[e] = 1 / std::sqrt(std::max(square, Real(1e-300)));
-            }
 
             m_A.resize(m_ne, m_no);
             m_dA.assign(static_cast<size_t>(m_nz), Math::Matrix<Real>(m_ne, m_no));
@@ -421,6 +416,50 @@ namespace Rodin::QF
             m_dA.assign(static_cast<size_t>(m_nz), Math::Matrix<Real>(m_ne, m_no));
           }
 
+          /// @brief Basis norms, shared by every decomposition of a degree.
+          struct Normalisation
+          {
+              std::vector<std::vector<size_t>> basis;
+              std::vector<Real> inverseNorm;
+              Real measure = 1;
+          };
+
+          static const Normalisation& normalisation(
+            Geometry::Polytope::Type g, size_t degree)
+          {
+            static std::mutex guard;
+            static std::map<std::pair<Geometry::Polytope::Type, size_t>, Normalisation>
+              cache;
+            const std::lock_guard<std::mutex> lock(guard);
+            const auto key = std::make_pair(g, degree);
+            const auto found = cache.find(key);
+            if (found != cache.end())
+              return found->second;
+
+            Normalisation built;
+            built.basis = CollapsedBasis::indices(g, degree);
+            std::vector<Math::SpatialVector<Real>> qp;
+            std::vector<Real> qw;
+            CollapsedBasis::exactRule(g, degree + 2, qp, qw);
+            built.measure = std::accumulate(qw.begin(), qw.end(), Real(0));
+            // Tabulated per quadrature point, so the Jacobi recurrences run
+            // once for the whole basis rather than once per mode.
+            std::vector<Real> square(built.basis.size(), 0);
+            for (size_t q = 0; q < qw.size(); ++q)
+            {
+              const auto table = CollapsedBasis::tabulate(g, degree, qp[q], false);
+              for (size_t e = 0; e < built.basis.size(); ++e)
+              {
+                const Real v = CollapsedBasis::evaluate(g, table, built.basis[e]);
+                square[e] += qw[q] * v * v;
+              }
+            }
+            built.inverseNorm.resize(built.basis.size());
+            for (size_t e = 0; e < built.basis.size(); ++e)
+              built.inverseNorm[e] = 1 / std::sqrt(std::max(square[e], Real(1e-300)));
+            return cache.emplace(key, std::move(built)).first->second;
+          }
+
           Geometry::Polytope::Type m_g;
           size_t m_degree;
           size_t m_d;
@@ -653,7 +692,8 @@ namespace Rodin::QF
        * the first rule found is the smallest this method can express.
        */
       static Rule search(Geometry::Polytope::Type g, size_t degree,
-        size_t maxPoints = 128, size_t maxRestarts = 64, Real tolerance = 1e-12)
+        size_t maxPoints = 128, size_t maxRestarts = 64, Real tolerance = 1e-12,
+        size_t threads = 0)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         size_t moments = 1;
@@ -662,16 +702,51 @@ namespace Rodin::QF
         const size_t lower = (moments + d) / (d + 1);
 
         const size_t conditions = invariantDimension(g, degree);
+        const size_t workers = (threads > 0)
+          ? threads
+          : std::max<size_t>(1, std::min<size_t>(std::thread::hardware_concurrency(), 8));
 
         Rule best;
         for (size_t points = lower; points <= maxPoints; ++points)
         {
-          for (const auto& decomposition : decompositions(g, points))
+          std::vector<Decomposition> candidates;
+          for (auto& decomposition : decompositions(g, points))
+            if (isWorthTrying(g, decomposition, conditions))
+              candidates.push_back(std::move(decomposition));
+          if (candidates.empty())
+            continue;
+
+          // Decompositions are independent, so they are tried in parallel. The
+          // rule returned is still the one from the earliest decomposition that
+          // succeeds, not whichever thread happens to finish first, so the
+          // result does not depend on the scheduling.
+          std::vector<Rule> results(candidates.size());
+          std::atomic<size_t> next{0};
+          std::atomic<size_t> earliest{candidates.size()};
+          std::vector<std::thread> pool;
+          for (size_t w = 0; w < std::min(workers, candidates.size()); ++w)
           {
-            if (!isWorthTrying(g, decomposition, conditions))
-              continue;
-            const Rule candidate =
-              solve(g, degree, decomposition, maxRestarts, tolerance);
+            pool.emplace_back([&] {
+              for (;;)
+              {
+                const size_t i = next++;
+                if (i >= candidates.size() || i > earliest.load())
+                  return;
+                results[i] = solve(g, degree, candidates[i], maxRestarts, tolerance);
+                if (results[i].converged && results[i].admissible)
+                {
+                  size_t seen = earliest.load();
+                  while (i < seen && !earliest.compare_exchange_weak(seen, i))
+                    ;
+                }
+              }
+            });
+          }
+          for (auto& worker : pool)
+            worker.join();
+
+          for (const auto& candidate : results)
+          {
             if (candidate.converged && candidate.admissible)
               return candidate;
             if (candidate.residual < best.residual)
