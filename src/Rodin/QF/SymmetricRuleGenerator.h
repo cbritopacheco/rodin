@@ -832,10 +832,17 @@ namespace Rodin::QF
                 const size_t i = next++;
                 if (i >= candidates.size() || i > earliest.load() || expired())
                   return;
-                const size_t budget =
-                  restartBudget(g, candidates[i], conditions, maxRestarts);
+                size_t budget = restartBudget(g, candidates[i], conditions, maxRestarts);
                 if (budget == 0)
                   continue;
+                // Effort is concentrated on the decompositions the ordering
+                // put first. A rule that exists is usually found in one of a
+                // handful of shapes, and finding it is a matter of seeding the
+                // iteration often enough to land in its basin; spreading the
+                // same restarts thinly over hundreds of unlikely shapes
+                // instead is how a strength ends up one point count too high.
+                if (budget == maxRestarts && i < 8)
+                  budget *= 8;
                 results[i] = solve(g, degree, candidates[i], budget, tolerance);
                 if (results[i].converged && results[i].admissible)
                 {
