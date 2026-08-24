@@ -141,3 +141,10 @@ target_link_libraries(RodinSymmetryGroupTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 target_include_directories(RodinSymmetryGroupTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 gtest_discover_tests(RodinSymmetryGroupTest PROPERTIES LABELS unit)
+
+add_executable(RodinSymmetricRuleGeneratorTest SymmetricRuleGeneratorTest.cpp)
+target_link_libraries(RodinSymmetricRuleGeneratorTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+target_include_directories(RodinSymmetricRuleGeneratorTest
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+gtest_discover_tests(RodinSymmetricRuleGeneratorTest PROPERTIES LABELS unit)

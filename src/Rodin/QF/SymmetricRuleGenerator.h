@@ -664,24 +664,34 @@ namespace Rodin::QF
       }
 
       /**
-       * @brief Whether a decomposition has enough freedom to be worth trying.
+       * @brief How hard a decomposition is worth trying.
        *
        * Each orbit contributes its seed's free parameters and one weight, and
-       * the rule must satisfy every invariant mode. A decomposition offering
-       * fewer unknowns than there are conditions cannot work, and at the higher
-       * degrees these are the overwhelming majority --- a triangle rule of
-       * seventy-nine points has a great many decompositions and almost none of
-       * them are of the right shape. Discarding them by counting, before any
-       * iteration is spent, is what makes those degrees reachable at all.
+       * a rule must satisfy every invariant mode. A decomposition with at
+       * least as many unknowns as conditions can be expected to work if any
+       * does, and is given the full budget of restarts. One with fewer is
+       * overdetermined and can succeed only by a coincidence of the geometry,
+       * so it is tried briefly rather than not at all.
+       *
+       * Not at all would be wrong. The six-point rule on a cube is its face
+       * centres: a single orbit with no freedom whatever, one unknown against
+       * two conditions, which works precisely because those points are
+       * special. Treating the count as a necessary condition and discarding
+       * such decompositions loses exactly the most economical rules, and the
+       * search returned eight points there instead of six. Being
+       * overdetermined also makes them rigid, so a few restarts settle them
+       * and the full budget would only re-confirm the same outcome.
        */
-      static bool isWorthTrying(
-        Geometry::Polytope::Type g, const Decomposition& decomposition, size_t conditions)
+      static size_t restartBudget(Geometry::Polytope::Type g,
+        const Decomposition& decomposition, size_t conditions, size_t maxRestarts)
       {
         const auto& strata = SymmetryGroup::strata(g);
         size_t unknowns = decomposition.size(); // one weight per orbit
         for (const size_t which : decomposition)
           unknowns += strata[which].getFreedom();
-        return unknowns >= conditions;
+        if (unknowns < conditions)
+          return std::min<size_t>(maxRestarts, 4);
+        return maxRestarts;
       }
 
       /**
@@ -709,10 +719,7 @@ namespace Rodin::QF
         Rule best;
         for (size_t points = lower; points <= maxPoints; ++points)
         {
-          std::vector<Decomposition> candidates;
-          for (auto& decomposition : decompositions(g, points))
-            if (isWorthTrying(g, decomposition, conditions))
-              candidates.push_back(std::move(decomposition));
+          std::vector<Decomposition> candidates = decompositions(g, points);
           if (candidates.empty())
             continue;
 
@@ -732,7 +739,8 @@ namespace Rodin::QF
                 const size_t i = next++;
                 if (i >= candidates.size() || i > earliest.load())
                   return;
-                results[i] = solve(g, degree, candidates[i], maxRestarts, tolerance);
+                results[i] = solve(g, degree, candidates[i],
+                  restartBudget(g, candidates[i], conditions, maxRestarts), tolerance);
                 if (results[i].converged && results[i].admissible)
                 {
                   size_t seen = earliest.load();
