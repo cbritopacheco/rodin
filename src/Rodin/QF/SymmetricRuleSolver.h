@@ -553,6 +553,101 @@ namespace Rodin::QF
             m_omega.resize(m_no);
             m_b = Math::Vector<Real>::Zero(m_ne);
             m_b(0) = measure * m_invNorm[0];
+
+            prune();
+          }
+
+          /**
+           * @brief Drops the modes that symmetry satisfies identically.
+           *
+           * Summing a basis function over a symmetry orbit is its
+           * symmetrisation, which vanishes for every mode carrying no
+           * invariant component. Those rows are zero whatever the orbit
+           * parameters are, so they constrain nothing and merely enlarge the
+           * system --- and the system is rebuilt at every point of every orbit
+           * on every iteration. On a tetrahedron of strength twenty they are
+           * the overwhelming majority: the symmetry group has twenty-four
+           * elements, and the invariant subspace shrinks roughly in
+           * proportion.
+           *
+           * Which rows those are is discovered rather than derived, by
+           * probing at random parameters, so no per-element table of invariant
+           * modes has to be written or maintained. A row that survives every
+           * probe is kept. The pruning is verified before any rule is
+           * accepted, by measuring the residual of the *full* system, so a row
+           * dropped in error cannot pass unnoticed.
+           */
+          void prune()
+          {
+            std::mt19937 rng(97531u);
+            std::normal_distribution<Real> gauss(0, 1.5);
+            Math::Vector<Real> scale = Math::Vector<Real>::Zero(m_ne);
+            for (size_t probe = 0; probe < 4; ++probe)
+            {
+              Math::Vector<Real> z(m_nz);
+              for (Eigen::Index i = 0; i < m_nz; ++i)
+                z(i) = m_degenerate ? Real(0) : gauss(rng);
+              assemble(z, false);
+              for (Eigen::Index e = 0; e < m_ne; ++e)
+                scale(e) = std::max(scale(e), m_A.row(e).cwiseAbs().maxCoeff());
+            }
+
+            m_keep.clear();
+            for (Eigen::Index e = 0; e < m_ne; ++e)
+              if (scale(e) > 1e-11 || std::abs(m_b(e)) > 1e-11)
+                m_keep.push_back(e);
+
+            m_full = m_ne;
+            m_fullBasis = m_basis;
+            m_fullInvNorm = m_invNorm;
+            std::vector<std::vector<size_t>> basis;
+            std::vector<Real> inverseNorm;
+            Math::Vector<Real> b(static_cast<Eigen::Index>(m_keep.size()));
+            for (size_t i = 0; i < m_keep.size(); ++i)
+            {
+              const size_t e = static_cast<size_t>(m_keep[i]);
+              basis.push_back(m_basis[e]);
+              inverseNorm.push_back(m_invNorm[e]);
+              b(static_cast<Eigen::Index>(i)) = m_b(m_keep[i]);
+            }
+            m_basis = std::move(basis);
+            m_invNorm = std::move(inverseNorm);
+            m_b = std::move(b);
+            m_ne = static_cast<Eigen::Index>(m_keep.size());
+            m_A.resize(m_ne, m_no);
+            m_dA.assign(static_cast<size_t>(m_nz), Math::Matrix<Real>(m_ne, m_no));
+          }
+
+          /**
+           * @brief Residual of the *whole* moment system, pruned rows included.
+           *
+           * The search works with the pruned system; this is what says the
+           * pruning was sound.
+           */
+          Real fullResidual(const Math::Vector<Real>& z) const
+          {
+            Math::Vector<Real> residual;
+            evaluate(z, residual, nullptr);
+            const auto orbits = expand(z);
+            Real worst = 0;
+            for (size_t e = 0; e < m_fullBasis.size(); ++e)
+            {
+              Real got = 0;
+              for (Eigen::Index j = 0; j < m_no; ++j)
+                for (const auto& node : orbits[static_cast<size_t>(j)])
+                  got += m_omega(j) *
+                    CollapsedBasis::evaluate(m_g, m_fullBasis[e], node.x) *
+                    m_fullInvNorm[e];
+              const Real want = (e == 0) ? m_b(0) : Real(0);
+              worst = std::max(worst, std::abs(got - want));
+            }
+            return worst;
+          }
+
+          /// @brief Number of modes before pruning.
+          Eigen::Index getFullCount() const
+          {
+            return m_full;
           }
 
           /// Number of search variables.
@@ -702,20 +797,14 @@ namespace Rodin::QF
             return orbits;
           }
 
-          /**
-           * @brief Evaluates the residual, and the Jacobian when @p jacobian
-           * is given.
-           *
-           * Nothing in the Jacobian is a difference quotient.
-           */
-          void evaluate(const Math::Vector<Real>& z, Math::Vector<Real>& residual,
-            Math::Matrix<Real>* jacobian) const
+          /// @brief Builds the moment matrix, and its derivatives when asked.
+          void assemble(const Math::Vector<Real>& z, bool wantDerivatives) const
           {
             const auto orbits = expand(z);
             m_A.setZero();
             for (auto& m : m_dA)
               m.setZero();
-
+            const bool jacobian = wantDerivatives;
             for (Eigen::Index j = 0; j < m_no; ++j)
             {
               for (const auto& node : orbits[static_cast<size_t>(j)])
@@ -747,6 +836,19 @@ namespace Rodin::QF
                 }
               }
             }
+
+          }
+
+          /**
+           * @brief Evaluates the residual, and the Jacobian when @p jacobian
+           * is given.
+           *
+           * Nothing in the Jacobian is a difference quotient.
+           */
+          void evaluate(const Math::Vector<Real>& z, Math::Vector<Real>& residual,
+            Math::Matrix<Real>* jacobian) const
+          {
+            assemble(z, jacobian != nullptr);
 
             m_svd.compute(m_A, Eigen::ComputeThinU | Eigen::ComputeThinV);
             m_omega = m_svd.solve(m_b);
@@ -847,6 +949,10 @@ namespace Rodin::QF
           bool m_degenerate = false;
           std::vector<std::vector<size_t>> m_basis;
           std::vector<Real> m_invNorm;
+          std::vector<Eigen::Index> m_keep;
+          std::vector<std::vector<size_t>> m_fullBasis;
+          std::vector<Real> m_fullInvNorm;
+          Eigen::Index m_full = 0;
 
           mutable Math::Matrix<Real> m_A;
           mutable std::vector<Math::Matrix<Real>> m_dA;
@@ -969,7 +1075,9 @@ namespace Rodin::QF
           problem.evaluate(z, settled, nullptr);
 
           Result candidate;
-          candidate.residual = std::sqrt(cost);
+          // Judged on the whole moment system rather than the pruned one, so
+          // a mode dropped in error cannot be mistaken for a rule.
+          candidate.residual = std::max(std::sqrt(cost), problem.fullResidual(z));
           candidate.converged = candidate.residual < tolerance;
           candidate.restarts = restart + 1;
           candidate.orbits = problem.toOrbits(z);

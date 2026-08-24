@@ -135,3 +135,9 @@ target_link_libraries(RodinCollapsedBasisTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 target_include_directories(RodinCollapsedBasisTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 gtest_discover_tests(RodinCollapsedBasisTest PROPERTIES LABELS unit)
+
+add_executable(RodinSymmetryGroupTest SymmetryGroupTest.cpp)
+target_link_libraries(RodinSymmetryGroupTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+target_include_directories(RodinSymmetryGroupTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+gtest_discover_tests(RodinSymmetryGroupTest PROPERTIES LABELS unit)
