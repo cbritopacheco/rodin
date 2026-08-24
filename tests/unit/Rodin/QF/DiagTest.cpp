@@ -1,56 +1,38 @@
-#include <gtest/gtest.h>
-#include <chrono>
-#include "Rodin/QF/SymmetricRuleSolver.h"
+#include <cstdio>
+#include <string>
+#include "PublishedCounts.h"
 #include "QuadratureInvariants.h"
-using namespace Rodin;
-using namespace Rodin::QF;
-using namespace Rodin::Geometry;
-using namespace Rodin::Tests::QF;
-namespace
-{
-  struct R
-  {
-      const std::vector<SymmetricOrbit>& o;
-      size_t getSize() const
-      {
-        return o.size();
-      }
-      Real getWeight(size_t i) const
-      {
-        return o[i].getWeight();
-      }
-      Math::SpatialVector<Real> getPoint(size_t i) const
-      {
-        Math::SpatialVector<Real> p;
-        p.resize(3);
-        for (int k = 0; k < 3; ++k)
-          p[k] = o[i].getBarycentric()[k];
-        return p;
-      }
-  };
-}
-TEST(Diag, PyramidRules)
-{
-  const int wv[] = {1, 5, 6, 10, 15, 24, 31, 44};
-  for (size_t p = 1; p <= 4; ++p)
-  {
-    const auto t0 = std::chrono::steady_clock::now();
-    SymmetricRuleSolver::PyramidConfiguration cfg;
-    const auto r = SymmetricRuleSolver::searchPyramid(p, 24, 120, &cfg);
-    const double s =
-      std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-    if (!(r.converged && r.admissible))
-    {
-      std::printf("pyr d%zu FAILED res %.2e (%.0fs)\n", p, r.residual, s);
-      std::fflush(stdout);
-      continue;
-    }
-    const R rule{r.orbits};
-    const auto rep = exactnessSweep(rule, Polytope::Type::Pyramid, p);
-    std::printf("pyr d%zu -> %2zu pts (WV %d) err %.1e ok %d (%.0fs)\n", p,
-      r.orbits.size(), wv[p - 1], rep.worstRelativeError,
-      (int)(allWeightsPositive(rule) && allPointsInside(rule, Polytope::Type::Pyramid)),
-      s);
+#include "Rodin/QF/SymmetricRuleGenerator.h"
+using namespace Rodin; using namespace Rodin::QF; using namespace Rodin::Tests::QF;
+int main(int argc, char** argv){
+  const std::string w = (argc > 1) ? argv[1] : "tri";
+  const auto g = (w=="tet") ? Geometry::Polytope::Type::Tetrahedron
+    : (w=="wedge") ? Geometry::Polytope::Type::Wedge
+    : (w=="pyr") ? Geometry::Polytope::Type::Pyramid
+    : (w=="quad") ? Geometry::Polytope::Type::Quadrilateral
+    : (w=="hex") ? Geometry::Polytope::Type::Hexahedron
+    : Geometry::Polytope::Type::Triangle;
+  const size_t maxDeg = (argc>2) ? std::stoul(argv[2]) : 10;
+  const size_t maxPts = (argc>3) ? std::stoul(argv[3]) : 120;
+  const size_t lo = (argc>4) ? std::stoul(argv[4]) : 1;
+  const double budget = (argc>5) ? std::stod(argv[5]) : 0.0;
+  const size_t d = Geometry::Polytope::Traits(g).getDimension();
+  std::printf("deg  ours  WV    XG    bound cond  status oracle\n");
+  for (size_t p = lo; p <= maxDeg; ++p) {
+    const auto r = SymmetricRuleGenerator::search(g, p, maxPts, 64, 1e-12, 0, budget);
+    const bool ok = r.converged && r.admissible;
+    const auto rep = exactnessSweep(r, g, ok ? p : 0);
+    const size_t wv = publishedCount(witherdenVincentCounts(g), p);
+    const size_t xg = publishedCount(xiaoGimbutasCounts(g), p);
+    std::printf("%-4zu %-5s %-5s %-5s %-5zu %-5zu %-6s %.2e%s%s\n", p,
+      ok ? std::to_string(r.getSize()).c_str() : "-",
+      wv ? std::to_string(wv).c_str() : ".",
+      xg ? std::to_string(xg).c_str() : ".", countingBound(d, p),
+      SymmetricRuleGenerator::invariantDimension(g, p),
+      ok ? "ok" : "FAIL", ok ? rep.worstRelativeError : r.residual,
+      (ok && allWeightsPositive(r)) ? "" : " NEGW",
+      (ok && allPointsInside(r, g, 1e-12)) ? "" : " OUTSIDE");
     std::fflush(stdout);
   }
+  return 0;
 }

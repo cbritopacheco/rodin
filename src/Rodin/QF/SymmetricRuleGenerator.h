@@ -13,6 +13,7 @@
 #define RODIN_QF_SYMMETRICRULEGENERATOR_H
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <limits>
 #include <numeric>
@@ -487,6 +488,10 @@ namespace Rodin::QF
       /// carry.
       static constexpr Real s_floor = 1e-4;
 
+      /// @brief How far short of the counting condition a decomposition may
+      /// fall and still be tried.
+      static constexpr size_t s_slack = 2;
+
       /**
        * @brief Solves one decomposition.
        *
@@ -689,9 +694,19 @@ namespace Rodin::QF
         size_t unknowns = decomposition.size(); // one weight per orbit
         for (const size_t which : decomposition)
           unknowns += strata[which].getFreedom();
-        if (unknowns < conditions)
+        if (unknowns >= conditions)
+          return maxRestarts;
+        // Short of the count, but only just: a coincidence of the geometry can
+        // still close a small gap, and this is where the economical rules live
+        // --- the cube's six-point rule is one unknown short of two conditions.
+        // Being overdetermined makes these rigid, so a few restarts settle
+        // them. Further short than this nothing is ever found, and at the
+        // higher strengths there are thousands of such decompositions at every
+        // point count; trying them all is the difference between minutes and
+        // hours.
+        if (unknowns + s_slack >= conditions)
           return std::min<size_t>(maxRestarts, 4);
-        return maxRestarts;
+        return 0;
       }
 
       /**
@@ -703,7 +718,7 @@ namespace Rodin::QF
        */
       static Rule search(Geometry::Polytope::Type g, size_t degree,
         size_t maxPoints = 128, size_t maxRestarts = 64, Real tolerance = 1e-12,
-        size_t threads = 0)
+        size_t threads = 0, Real seconds = 0)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         size_t moments = 1;
@@ -716,12 +731,42 @@ namespace Rodin::QF
           ? threads
           : std::max<size_t>(1, std::min<size_t>(std::thread::hardware_concurrency(), 8));
 
+        // Unattended sweeps must not disappear into a single strength, so the
+        // search may be given a deadline. Reaching it returns the best rule
+        // found rather than nothing, and the caller can tell the difference
+        // because such a rule has not converged.
+        const auto started = std::chrono::steady_clock::now();
+        const auto expired = [&] {
+          if (seconds <= 0)
+            return false;
+          const std::chrono::duration<Real> spent =
+            std::chrono::steady_clock::now() - started;
+          return spent.count() > seconds;
+        };
+
         Rule best;
-        for (size_t points = lower; points <= maxPoints; ++points)
+        for (size_t points = lower; points <= maxPoints && !expired(); ++points)
         {
           std::vector<Decomposition> candidates = decompositions(g, points);
           if (candidates.empty())
             continue;
+
+          // Ordered by how likely each is to work: those with enough unknowns
+          // to meet the conditions first, and among them the ones using fewest
+          // orbits, which is what published rules look like and what solves
+          // fastest. Since a success stops the others, the order decides how
+          // much of the list is ever examined -- the difference between
+          // settling a high strength in seconds and grinding through thousands
+          // of hopeless decompositions first. The ordering is fixed, so the
+          // rule found does not depend on it having been reached quickly.
+          std::stable_sort(candidates.begin(), candidates.end(),
+            [&](const Decomposition& a, const Decomposition& b) {
+              const bool pa = restartBudget(g, a, conditions, maxRestarts) == maxRestarts;
+              const bool pb = restartBudget(g, b, conditions, maxRestarts) == maxRestarts;
+              if (pa != pb)
+                return pa;
+              return a.size() < b.size();
+            });
 
           // Decompositions are independent, so they are tried in parallel. The
           // rule returned is still the one from the earliest decomposition that
@@ -737,10 +782,13 @@ namespace Rodin::QF
               for (;;)
               {
                 const size_t i = next++;
-                if (i >= candidates.size() || i > earliest.load())
+                if (i >= candidates.size() || i > earliest.load() || expired())
                   return;
-                results[i] = solve(g, degree, candidates[i],
-                  restartBudget(g, candidates[i], conditions, maxRestarts), tolerance);
+                const size_t budget =
+                  restartBudget(g, candidates[i], conditions, maxRestarts);
+                if (budget == 0)
+                  continue;
+                results[i] = solve(g, degree, candidates[i], budget, tolerance);
                 if (results[i].converged && results[i].admissible)
                 {
                   size_t seen = earliest.load();
