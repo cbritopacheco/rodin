@@ -1384,6 +1384,11 @@ namespace Rodin::QF
       },
     };
 
+    /// Filled by tests/unit/Rodin/QF/GenerateTables.cpp, as the others are.
+    const std::vector<std::vector<Real>> s_quadrilateral = {};
+
+    const std::vector<std::vector<Real>> s_hexahedron = {};
+
     const std::vector<std::vector<Real>>& tableFor(Geometry::Polytope::Type g)
     {
       static const std::vector<std::vector<Real>> s_empty;
@@ -1397,6 +1402,10 @@ namespace Rodin::QF
           return s_wedge;
         case Geometry::Polytope::Type::Pyramid:
           return s_pyramid;
+        case Geometry::Polytope::Type::Quadrilateral:
+          return s_quadrilateral;
+        case Geometry::Polytope::Type::Hexahedron:
+          return s_hexahedron;
         default:
           return s_empty;
       }

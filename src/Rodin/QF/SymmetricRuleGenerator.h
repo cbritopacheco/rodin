@@ -721,6 +721,17 @@ namespace Rodin::QF
        * overdetermined also makes them rigid, so a few restarts settle them
        * and the full budget would only re-confirm the same outcome.
        */
+      /// @brief Whether any orbit of @p decomposition lies on a face.
+      static bool usesBoundary(
+        Geometry::Polytope::Type g, const Decomposition& decomposition)
+      {
+        const auto& strata = SymmetryGroup::strata(g);
+        for (const size_t which : decomposition)
+          if (strata[which].boundary)
+            return true;
+        return false;
+      }
+
       static size_t restartBudget(Geometry::Polytope::Type g,
         const Decomposition& decomposition, size_t conditions, size_t maxRestarts)
       {
@@ -740,7 +751,15 @@ namespace Rodin::QF
         // hours.
         if (unknowns + s_slack >= conditions)
           return std::min<size_t>(maxRestarts, 4);
-        return 0;
+        // Still not nothing. The count is not a necessary condition, and the
+        // rules that violate it are the economical ones: the cube's six-point
+        // rule is one unknown short, and the pyramid's twenty-three point rule
+        // at strength six is three short of twenty conditions and exists all
+        // the same, because the conditions are not independent in the
+        // parameters that decomposition offers. Skipping these outright lost
+        // both. What keeps the search affordable is the ordering, which puts
+        // them last, and the deadline, which stops it.
+        return std::min<size_t>(maxRestarts, 2);
       }
 
       /**
@@ -806,6 +825,15 @@ namespace Rodin::QF
               const bool pa = ua >= conditions, pb = ub >= conditions;
               if (pa != pb)
                 return pa;
+              // Interior decompositions before those placing an orbit on a
+              // face. Boundary orbits are admitted because a few published
+              // rules need them, but they are the exception, and letting them
+              // multiply the list ahead of the ordinary ones buries what
+              // usually works: the pyramid at strength six found nothing until
+              // the interior shapes were tried first.
+              const bool ba = usesBoundary(g, a), bb = usesBoundary(g, b);
+              if (ba != bb)
+                return bb;
               // Among the workable ones, the tightest fit first. A rule that
               // exists generally has barely enough freedom to exist: published
               // rules sit just above the condition count, and decompositions
@@ -833,8 +861,6 @@ namespace Rodin::QF
                 if (i >= candidates.size() || i > earliest.load() || expired())
                   return;
                 size_t budget = restartBudget(g, candidates[i], conditions, maxRestarts);
-                if (budget == 0)
-                  continue;
                 // Effort is concentrated on the decompositions the ordering
                 // put first. A rule that exists is usually found in one of a
                 // handful of shapes, and finding it is a matter of seeding the
