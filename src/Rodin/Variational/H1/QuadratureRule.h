@@ -1590,31 +1590,31 @@ namespace Rodin::Variational
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
+    class TrialRange, class TestRange, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+        H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
+        ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<
         typename FormLanguage::Traits<
           Dot<
             ShapeFunctionBase<
-              Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
+              Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+              H1<KTrial, TrialRange, Mesh>, TrialSpace>,
             ShapeFunctionBase<
-              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+              ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+              H1<KTest, TestRange, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType  = H1<KTest, Scalar, Mesh>;
+      using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      using TestFESType  = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
       using LHSType =
@@ -1829,23 +1829,23 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class TrialRange, class TestRange, class Mesh>
   QuadratureRule(
     const Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+        H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+        ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>&)
     -> QuadratureRule<
         Dot<
           ShapeFunctionBase<
-            Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
+            Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+            H1<KTrial, TrialRange, Mesh>, TrialSpace>,
           ShapeFunctionBase<
-            ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+            ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+            H1<KTest, TestRange, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1871,31 +1871,31 @@ namespace Rodin::Variational
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
+    class TrialRange, class TestRange, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+        H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
+        Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<
         typename FormLanguage::Traits<
           Dot<
             ShapeFunctionBase<
-              ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
+              ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+              H1<KTrial, TrialRange, Mesh>, TrialSpace>,
             ShapeFunctionBase<
-              Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+              Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+              H1<KTest, TestRange, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType  = H1<KTest, Scalar, Mesh>;
+      using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      using TestFESType  = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
       using LHSType =
@@ -2109,23 +2109,23 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class TrialRange, class TestRange, class Mesh>
   QuadratureRule(
     const Dot<
       ShapeFunctionBase<
-        ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+        H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+        Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>&)
     -> QuadratureRule<
         Dot<
           ShapeFunctionBase<
-            ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
+            ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+            H1<KTrial, TrialRange, Mesh>, TrialSpace>,
           ShapeFunctionBase<
-            Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+            Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+            H1<KTest, TestRange, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations

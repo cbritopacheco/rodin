@@ -143,53 +143,10 @@ TEST(QuadratureRuleDispatchTest, H1ExpressionsSelectTheirSpecializations)
     "H1 Jacobian-Jacobian is no longer specialized");
   static_assert(selectsOptimized<decltype(Integral(c * Jacobian(w), Jacobian(z)))>(),
     "H1 weighted Jacobian-Jacobian is no longer specialized");
-  SUCCEED();
-}
-
-/**
- * @brief The H1 divergence specializations cannot be selected, and are not.
- *
- * Both name a single @c Scalar parameter shared by the trial and test spaces:
- * @code{.cpp}
- * Dot<ShapeFunctionBase<Div<ShapeFunction<L, H1<KTrial, Scalar, Mesh>, ...
- *     ShapeFunctionBase<ShapeFunction<R, H1<KTest, Scalar, Mesh>,  ...
- * @endcode
- * A divergence form pairs a vector-valued trial space with a scalar test
- * space, so those two ranges necessarily differ and one parameter cannot bind
- * to both. Neither handler can therefore ever match, and every H1 divergence
- * integral is taken by the generic handler.
- *
- * The P1 counterparts get this right by naming the ranges separately ---
- * @c P1<Math::SpatialVector<Real>, LHSMesh> against @c P1<Real, RHSMesh> ---
- * and are asserted as specialized above.
- *
- * This is recorded rather than fixed here because repairing it changes which
- * handler runs for an existing form. When the H1 signatures are corrected,
- * these assertions will fail and should move to the positive test above.
- */
-TEST(QuadratureRuleDispatchTest, H1DivergenceSpecializationsAreUnmatchable)
-{
-  LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
-  mesh.getConnectivity().compute(2, 1);
-  mesh.getConnectivity().compute(1, 0);
-
-  constexpr size_t order = 2;
-  H1<order, Real, LocalMesh> fes(std::integral_constant<size_t, order>{}, mesh);
-  H1<order, Math::SpatialVector<Real>, LocalMesh> vfes(
-    std::integral_constant<size_t, order>{}, mesh, 2);
-
-  TrialFunction u(fes);
-  TestFunction v(fes);
-  TrialFunction w(vfes);
-  TestFunction z(vfes);
-
-  static_assert(!selectsOptimized<decltype(Integral(Div(w), v))>(),
-    "the H1 divergence-pressure specialization now matches; move this to the "
-    "positive test");
-  static_assert(!selectsOptimized<decltype(Integral(u, Div(z)))>(),
-    "the H1 pressure-divergence specialization now matches; move this to the "
-    "positive test");
-
+  static_assert(selectsOptimized<decltype(Integral(Div(w), v))>(),
+    "H1 divergence-pressure is no longer specialized");
+  static_assert(selectsOptimized<decltype(Integral(u, Div(z)))>(),
+    "H1 pressure-divergence is no longer specialized");
   SUCCEED();
 }
 
