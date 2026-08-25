@@ -54,6 +54,9 @@ namespace Rodin::Variational
             H1<K, Scalar, Mesh>, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
       /// @brief Integrand expression type.
@@ -252,6 +255,9 @@ namespace Rodin::Variational
             H1<K, Scalar, Mesh>, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
 
@@ -482,6 +488,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -744,6 +753,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -1020,6 +1032,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -1355,6 +1370,9 @@ namespace Rodin::Variational
                 H1<KTest, Scalar, Mesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -1592,6 +1610,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -1870,6 +1891,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -2155,6 +2179,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -2553,6 +2580,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -2902,6 +2932,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -3264,6 +3297,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 

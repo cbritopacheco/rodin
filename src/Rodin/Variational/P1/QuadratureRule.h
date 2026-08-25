@@ -87,6 +87,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
 
@@ -264,6 +267,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType =
         P1<Range, Mesh>;
@@ -496,6 +502,9 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -829,6 +838,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -1151,6 +1163,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -1402,6 +1417,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -1740,6 +1758,9 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
@@ -1969,6 +1990,9 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
@@ -2196,6 +2220,9 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Real, LHSMesh>;
@@ -2433,6 +2460,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -2736,6 +2766,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -3100,6 +3133,9 @@ namespace Rodin::Variational
               P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = P1<LHSRange, LHSMesh>;
       using TestFESType  = P1<RHSRange, RHSMesh>;
 
@@ -3384,6 +3420,9 @@ namespace Rodin::Variational
     : public GlobalBilinearFormIntegratorBase<typename FormLanguage::Traits<Range>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 

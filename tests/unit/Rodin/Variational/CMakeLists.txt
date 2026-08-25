@@ -664,3 +664,15 @@ gtest_discover_tests(RodinVariationalIntegratorOrderTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalQuadratureRuleDispatchTest
+  QuadratureRuleDispatchTest.cpp)
+target_link_libraries(RodinVariationalQuadratureRuleDispatchTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalQuadratureRuleDispatchTest
+  PROPERTIES
+    LABELS unit
+)
