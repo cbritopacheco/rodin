@@ -13,6 +13,8 @@
  * generator that produced them.
  */
 #include <gtest/gtest.h>
+#include "PublishedCounts.h"
+#include <set>
 #include "Rodin/QF/XiaoGimbutas.h"
 #include "QuadratureInvariants.h"
 
@@ -154,4 +156,49 @@ TEST(XiaoGimbutasTest, ExactnessCheckRejectsAPerturbedCoefficient)
   } bad{qf};
 
   EXPECT_GT(exactnessSweep(bad, Polytope::Type::Triangle, 6).worstRelativeError, 1e-11);
+}
+
+/**
+ * @brief Every tabulated rule is no larger than the published one, and none is
+ * below the counting bound.
+ *
+ * These rules come from node elimination and are asymmetric, so they are
+ * measured against the Xiao--Gimbutas counts rather than the symmetric ones;
+ * the two families publish different numbers for the same element and
+ * comparing across them is meaningless.
+ *
+ * Most strengths here are *below* the published count, and several sit exactly
+ * on the counting bound, which no rule can beat. The bound is asserted in the
+ * other direction for that reason: a count below it would not be a discovery
+ * but a moment system that had stopped spanning.
+ */
+TEST(XiaoGimbutasTest, TabulatedCountsMeetThePublishedOnes)
+{
+  // Strengths where elimination does not reach the published count. The
+  // tetrahedron at five is structural rather than a matter of effort: the
+  // fourteen-point rule attains the counting bound exactly, which leaves the
+  // moment system square and its solutions isolated, and elimination works by
+  // moving along the null space of an underdetermined one.
+  const std::set<std::pair<Polytope::Type, size_t>> outstanding = {
+    {Polytope::Type::Triangle, 8},     // 17 points against a published 16
+    {Polytope::Type::Tetrahedron, 5},  // 15 points against a published 14
+  };
+
+  for (const auto g : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const size_t d = Polytope::Traits(g).getDimension();
+    for (size_t degree = 1; degree <= XiaoGimbutas::getMaxDegree(g); ++degree)
+    {
+      const XiaoGimbutas rule(degree, g);
+      EXPECT_GE(rule.getSize(), Rodin::Tests::QF::countingBound(d, degree))
+        << name(g) << ", strength " << degree << ": below the counting bound";
+
+      const size_t published =
+        Rodin::Tests::QF::publishedCount(Rodin::Tests::QF::xiaoGimbutasCounts(g), degree);
+      if (published == 0 || outstanding.count({g, degree}))
+        continue;
+      EXPECT_LE(rule.getSize(), published)
+        << name(g) << ", strength " << degree << ": more points than the published rule";
+    }
+  }
 }

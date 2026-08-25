@@ -13,6 +13,8 @@
  * generator that produced them.
  */
 #include <gtest/gtest.h>
+#include "PublishedCounts.h"
+#include <set>
 #include "Rodin/QF/WitherdenVincent.h"
 #include "QuadratureInvariants.h"
 
@@ -174,4 +176,44 @@ TEST(WitherdenVincentTest, ExactnessCheckRejectsAPerturbedCoefficient)
   } bad{qf};
 
   EXPECT_GT(exactnessSweep(bad, Polytope::Type::Triangle, 6).worstRelativeError, 1e-11);
+}
+
+/**
+ * @brief Every tabulated rule meets the published point count, and none is
+ * below the counting bound.
+ *
+ * This is the claim the tables exist to make, so it is asserted rather than
+ * left to a changelog: a regression that quietly ships a larger rule would
+ * otherwise pass every other test here, since a larger rule is still exact.
+ *
+ * The counting bound guards the other direction. A rule below it cannot exist,
+ * so one that appears is not a discovery but a moment system that has stopped
+ * spanning the space it is supposed to.
+ */
+TEST(WitherdenVincentTest, TabulatedCountsMeetThePublishedOnes)
+{
+  // Strengths not yet brought down to the published count. Each is a rule
+  // that is exact, positive and interior, and simply larger than the best
+  // known; the entry comes out when the generator reaches it.
+  const std::set<std::pair<Polytope::Type, size_t>> outstanding = {
+    {Polytope::Type::Wedge, 7},   // 39 points against a published 35
+  };
+
+  for (const auto g : kElements)
+  {
+    const size_t d = Polytope::Traits(g).getDimension();
+    for (size_t degree = 1; degree <= WitherdenVincent::getMaxDegree(g); ++degree)
+    {
+      const WitherdenVincent rule(degree, g);
+      EXPECT_GE(rule.getSize(), Rodin::Tests::QF::countingBound(d, degree))
+        << name(g) << ", strength " << degree << ": below the counting bound";
+
+      const size_t published = Rodin::Tests::QF::publishedCount(
+        Rodin::Tests::QF::witherdenVincentCounts(g), degree);
+      if (published == 0 || outstanding.count({g, degree}))
+        continue;
+      EXPECT_LE(rule.getSize(), published)
+        << name(g) << ", strength " << degree << ": more points than the published rule";
+    }
+  }
 }
