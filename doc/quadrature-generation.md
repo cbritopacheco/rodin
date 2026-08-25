@@ -58,6 +58,35 @@ method; the symmetric generator finds 14 directly, which is why WV tet 5 is 14.
 
 ## 2. Remaining gaps, in priority order
 
+**The target is strength 20 on every element.** Against that, 66 of the 160
+element-strengths are missing, not the nine rows below:
+
+| element | have | missing |
+|---|---|---|
+| triangle (WV) | 20/20 | — |
+| triangle (XG) | 20/20 | — |
+| quadrilateral | 15/20 | 5 (16–20) |
+| hexahedron | 9/20 | 11 (10–20) |
+| tetrahedron (XG) | 9/20 | 11 (10–20) |
+| tetrahedron (WV) | 8/20 | 12 (9–20) |
+| wedge | 7/20 | 13 (8–20) |
+| pyramid | 6/20 | 14 (7–20) |
+
+The table below ranks only the strengths where a *published count* exists to
+aim at, because that is where "did we meet it" has an answer. Beyond the
+published range — strength 11+ in three dimensions, 16+ on the quadrilateral —
+there is no target count, and a rule is judged by existing at all, by the
+counting bound from below, and by the oracle. Do not read the absence of a
+published number as the absence of a requirement; that framing is what made an
+earlier version of this note stop ten strengths short on four elements.
+
+Be aware of the scale involved. The counting bound at strength 20 in three
+dimensions is **443 points**; the largest three-dimensional rule here is 58.
+Nothing in this search has been exercised near that size, the per-solve cost at
+that scale is untested, and the pyramid at strength 8 already enumerates 1.2M
+decompositions. Strength 20 in three dimensions is not the same work with more
+of it, and there is no evidence yet that this machinery reaches it.
+
 Measured 2026-08-25. `cands@pub` is the number of decompositions at the
 published point count; `≤6 orb` is how many of those use at most six orbits and
 lie strictly inside the element.
