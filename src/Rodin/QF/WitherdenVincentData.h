@@ -1,4 +1,10 @@
 /*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/*
  * Quadrature data adapted from John Burkardt's MIT-licensed transcription of
  * the Witherden--Vincent published rules.
  * Copyright (C) 2023 John Burkardt.
@@ -12,6 +18,11 @@
  */
 #ifndef RODIN_QF_WITHERDENVINCENTDATA_H
 #define RODIN_QF_WITHERDENVINCENTDATA_H
+
+/**
+ * @file
+ * @brief Defines the vendored Witherden--Vincent quadrature coefficients.
+ */
 
 #include <vector>
 

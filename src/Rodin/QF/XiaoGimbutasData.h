@@ -1,4 +1,10 @@
 /*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/*
  * Quadrature data adapted from the Xiao--Gimbutas triasymq distribution.
  * Copyright (C) 2009-2012 Zydrunas Gimbutas and Hong Xiao.
  * Distributed under the BSD 3-Clause license; see
@@ -11,6 +17,11 @@
  */
 #ifndef RODIN_QF_XIAOGIMBUTASDATA_H
 #define RODIN_QF_XIAOGIMBUTASDATA_H
+
+/**
+ * @file
+ * @brief Defines the vendored Xiao--Gimbutas quadrature coefficients.
+ */
 
 #include <vector>
 
