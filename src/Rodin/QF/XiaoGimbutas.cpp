@@ -10,7 +10,7 @@
  * @brief Coefficients of the XiaoGimbutas simplex rules.
  *
  * Generated, not transcribed. Every number below was produced by
- * NodeElimination::reduce through tests/unit/Rodin/QF/GenerateTables.cpp, and
+ * NodeElimination::reduce through tests/unit/Rodin/QF/GenerateXiaoGimbutas.cpp, and
  * can be reproduced by running it. Nothing here was copied from a published
  * table, so nothing here can carry a transcription error; what it can carry is
  * a solver error, which is why the tables are checked against an independent
@@ -20,10 +20,11 @@
  *
  * @par Regenerating a table
  * @code
- *   RodinGenerateTables xg tri > triangle.txt
- *   RodinGenerateTables xg tet > tetrahedron.txt
+ *   RodinXiaoGimbutas tri > triangle.txt
+ *   RodinXiaoGimbutas tet > tetrahedron.txt
  * @endcode
- * The first argument names the family. These rules come from node elimination
+ * The driver is named for the family it writes. These rules come from node
+ * elimination
  * and are asymmetric, which is a different construction from the symmetric
  * rules of WitherdenVincent.cpp and reaches different counts; the two publish
  * different numbers for the same element and strength, so a table is only ever

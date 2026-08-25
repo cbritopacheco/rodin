@@ -11,22 +11,21 @@
  *
  * Generated, not transcribed. Every number below was produced by
  * SymmetricRuleGenerator and can be reproduced by running
- * tests/unit/Rodin/QF/GenerateTables.cpp. Nothing here was copied from a
+ * tests/unit/Rodin/QF/GenerateWitherdenVincent.cpp. Nothing here was copied from a
  * published table, so nothing here can carry a transcription error; what it
  * can carry is a solver error, which is why the tables are checked against an
  * independent moment oracle and against properties that use no oracle at all.
  *
  * @par Regenerating a table
- * One command per element. The first argument names the family --- these
- * are the symmetric rules, so @c wv --- and the second the element, which
- * together pick out exactly one array below:
+ * One command per element, the driver named for the family it writes and the
+ * argument naming the array:
  * @code
- *   RodinGenerateTables wv tri     > triangle.txt
- *   RodinGenerateTables wv quad    > quadrilateral.txt
- *   RodinGenerateTables wv tet     > tetrahedron.txt
- *   RodinGenerateTables wv wedge   > wedge.txt
- *   RodinGenerateTables wv pyr     > pyramid.txt
- *   RodinGenerateTables wv hex     > hexahedron.txt
+ *   RodinWitherdenVincent tri     > triangle.txt
+ *   RodinWitherdenVincent quad    > quadrilateral.txt
+ *   RodinWitherdenVincent tet     > tetrahedron.txt
+ *   RodinWitherdenVincent wedge   > wedge.txt
+ *   RodinWitherdenVincent pyr     > pyramid.txt
+ *   RodinWitherdenVincent hex     > hexahedron.txt
  * @endcode
  * The search is deterministic --- decompositions are enumerated and ordered by
  * a fixed rule and seeded from a fixed generator --- so a given version of it
@@ -3360,15 +3359,15 @@ namespace Rodin::QF
       },
     };
 
-    /// Filled by tests/unit/Rodin/QF/GenerateTables.cpp, as the others are.
+    /// Filled by tests/unit/Rodin/QF/GenerateWitherdenVincent.cpp, as the others are.
     const std::vector<std::vector<Real>> s_quadrilateral = {
-    // degree 1: 1 points, oracle 4.44e-16
+      // degree 1: 1 points, oracle 4.44e-16
       {
         0.5,
         0.5,
         0.99999999999999956,
       },
-    // degree 2: 4 points, oracle 6.66e-16
+      // degree 2: 4 points, oracle 6.66e-16
       {
         0.21132486540518708,
         0.21132486540518708,
@@ -3383,7 +3382,7 @@ namespace Rodin::QF
         0.78867513459481287,
         0.25000000000000017,
       },
-    // degree 3: 4 points, oracle 1.67e-16
+      // degree 3: 4 points, oracle 1.67e-16
       {
         0.21132486540518708,
         0.21132486540518708,
@@ -3398,7 +3397,7 @@ namespace Rodin::QF
         0.78867513459481287,
         0.25,
       },
-    // degree 4: 8 points, oracle 2.78e-16
+      // degree 4: 8 points, oracle 2.78e-16
       {
         0.059041448155901552,
         0.059041448155901552,
@@ -3425,7 +3424,7 @@ namespace Rodin::QF
         0.15843497446801336,
         0.20408163265306126,
       },
-    // degree 5: 8 points, oracle 5.55e-16
+      // degree 5: 8 points, oracle 5.55e-16
       {
         0.05904144815590151,
         0.05904144815590151,
@@ -3452,7 +3451,7 @@ namespace Rodin::QF
         0.15843497446801336,
         0.20408163265306115,
       },
-    // degree 6: 12 points, oracle 9.99e-16
+      // degree 6: 12 points, oracle 9.99e-16
       {
         0.097010108540700635,
         0.097010108540700635,
@@ -3491,7 +3490,7 @@ namespace Rodin::QF
         0.037089950113724179,
         0.060493827160493889,
       },
-    // degree 7: 12 points, oracle 6.66e-16
+      // degree 7: 12 points, oracle 6.66e-16
       {
         0.097010108540700635,
         0.097010108540700635,
@@ -3530,7 +3529,7 @@ namespace Rodin::QF
         0.037089950113724179,
         0.060493827160493861,
       },
-    // degree 8: 20 points, oracle 5.00e-16
+      // degree 8: 20 points, oracle 5.00e-16
       {
         0.030172370951581144,
         0.030172370951581144,
@@ -3593,7 +3592,7 @@ namespace Rodin::QF
         0.32756398731779823,
         0.036113055815076699,
       },
-    // degree 9: 20 points, oracle 8.33e-16
+      // degree 9: 20 points, oracle 8.33e-16
       {
         0.030172370951581144,
         0.030172370951581144,
@@ -3656,7 +3655,7 @@ namespace Rodin::QF
         0.32756398731779823,
         0.036113055815076706,
       },
-    // degree 10: 28 points, oracle 2.44e-15
+      // degree 10: 28 points, oracle 2.44e-15
       {
         0.6368286050857298,
         0.6368286050857298,
@@ -3743,7 +3742,7 @@ namespace Rodin::QF
         0.024184805607983084,
         0.011018642278745773,
       },
-    // degree 11: 28 points, oracle 7.49e-16
+      // degree 11: 28 points, oracle 7.49e-16
       {
         0.6368286050857298,
         0.6368286050857298,
@@ -3830,7 +3829,7 @@ namespace Rodin::QF
         0.024184805607983084,
         0.01101864227874577,
       },
-    // degree 12: 37 points, oracle 2.04e-15
+      // degree 12: 37 points, oracle 2.04e-15
       {
         0.5,
         0.5,
@@ -3944,7 +3943,7 @@ namespace Rodin::QF
         0.15158503144939861,
         0.049117707816941601,
       },
-    // degree 13: 37 points, oracle 1.33e-15
+      // degree 13: 37 points, oracle 1.33e-15
       {
         0.5,
         0.5,
@@ -4058,7 +4057,7 @@ namespace Rodin::QF
         0.1515850314493985,
         0.049117707816941726,
       },
-    // degree 14: 48 points, oracle 9.02e-16
+      // degree 14: 48 points, oracle 9.02e-16
       {
         0.88201453587446133,
         0.88201453587446133,
@@ -4205,7 +4204,7 @@ namespace Rodin::QF
         0.065958549335958461,
         0.026448347644387089,
       },
-    // degree 15: 48 points, oracle 1.11e-15
+      // degree 15: 48 points, oracle 1.11e-15
       {
         0.032908175614757743,
         0.032908175614757743,
@@ -4355,14 +4354,14 @@ namespace Rodin::QF
     };
 
     const std::vector<std::vector<Real>> s_hexahedron = {
-    // degree 1: 1 points, oracle 1.11e-15
+      // degree 1: 1 points, oracle 1.11e-15
       {
         0.49999999999999989,
         0.5,
         0.5,
         0.99999999999999911,
       },
-    // degree 2: 6 points, oracle 6.66e-16
+      // degree 2: 6 points, oracle 6.66e-16
       {
         0.5,
         0.5,
@@ -4389,7 +4388,7 @@ namespace Rodin::QF
         1,
         0.16666666666666677,
       },
-    // degree 3: 6 points, oracle 1.67e-16
+      // degree 3: 6 points, oracle 1.67e-16
       {
         0.5,
         0.5,
@@ -4416,7 +4415,7 @@ namespace Rodin::QF
         1,
         0.16666666666666666,
       },
-    // degree 4: 14 points, oracle 1.67e-15
+      // degree 4: 14 points, oracle 1.67e-15
       {
         0.5,
         0.5,
@@ -4475,7 +4474,7 @@ namespace Rodin::QF
         0.87939345531966406,
         0.041897506925207807,
       },
-    // degree 5: 14 points, oracle 6.66e-16
+      // degree 5: 14 points, oracle 6.66e-16
       {
         0.5,
         0.5,
@@ -4534,7 +4533,7 @@ namespace Rodin::QF
         0.87939345531966406,
         0.041897506925207779,
       },
-    // degree 6: 34 points, oracle 3.00e-15
+      // degree 6: 34 points, oracle 3.00e-15
       {
         0.5,
         0.5,
@@ -4673,7 +4672,7 @@ namespace Rodin::QF
         0.081669794506262772,
         0.021595880422119063,
       },
-    // degree 7: 34 points, oracle 2.00e-15
+      // degree 7: 34 points, oracle 2.00e-15
       {
         0.5,
         0.5,
@@ -4812,7 +4811,7 @@ namespace Rodin::QF
         0.081669794506279092,
         0.02159588042212425,
       },
-    // degree 8: 58 points, oracle 2.95e-15
+      // degree 8: 58 points, oracle 2.95e-15
       {
         0.5,
         0.5,
@@ -5047,7 +5046,7 @@ namespace Rodin::QF
         0.28386604868456888,
         0.012014600439171706,
       },
-    // degree 9: 58 points, oracle 5.77e-15
+      // degree 9: 58 points, oracle 5.77e-15
       {
         0.5,
         0.5,

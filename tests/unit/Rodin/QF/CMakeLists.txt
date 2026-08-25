@@ -151,6 +151,11 @@ add_executable(RodinStatusXG EXCLUDE_FROM_ALL StatusXG.cpp)
 target_link_libraries(RodinStatusXG PUBLIC Rodin::Rodin Rodin::QF)
 target_include_directories(RodinStatusXG PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(RodinGenerateTables EXCLUDE_FROM_ALL GenerateTables.cpp)
-target_link_libraries(RodinGenerateTables PUBLIC Rodin::Rodin Rodin::QF)
-target_include_directories(RodinGenerateTables PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(RodinWitherdenVincent EXCLUDE_FROM_ALL GenerateWitherdenVincent.cpp)
+target_link_libraries(RodinWitherdenVincent PUBLIC Rodin::Rodin Rodin::QF)
+target_include_directories(RodinWitherdenVincent PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(RodinXiaoGimbutas EXCLUDE_FROM_ALL GenerateXiaoGimbutas.cpp)
+target_link_libraries(RodinXiaoGimbutas PUBLIC Rodin::Rodin Rodin::QF)
+target_include_directories(RodinXiaoGimbutas PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
