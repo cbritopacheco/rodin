@@ -21,7 +21,6 @@
  */
 #define RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER 1
 
-
 #include "QuadratureFormula.h"
 
 namespace Rodin::QF
@@ -40,10 +39,15 @@ namespace Rodin::QF
    * ## Automatic Rule Selection
    *
    * The class internally selects the most appropriate quadrature rule:
-   * - For simplices (triangles, tetrahedra): Grundmann-Möller rules
-   * - For tensor-product elements (quads, hexahedra, wedges): Gauss-Legendre rules
-   * - For segments: Gauss-Legendre rules
-   * - For points: Single point with unit weight
+   * - Points: the trivial one-point rule
+   * - Segments: Gauss--Legendre
+   * - Triangles and tetrahedra: Xiao--Gimbutas, with positive Gauss--Jacobi
+   *   conical-product rules beyond the tabulated degrees
+   * - Quadrilaterals and hexahedra: tensor products of Gauss--Legendre rules
+   * - Wedges: a Xiao--Gimbutas triangle times a Gauss--Legendre segment, with
+   *   the same conical-product triangle beyond the tabulated degrees
+   * - Pyramids: Witherden--Vincent, with a positive Gauss--Jacobi
+   *   conical-product fallback
    *
    * ## Usage
    *
@@ -57,7 +61,8 @@ namespace Rodin::QF
    *
    * @see QuadratureFormulaBase
    * @see GaussLegendre
-   * @see GrundmannMoller
+   * @see XiaoGimbutas
+   * @see WitherdenVincent
    */
   class PolytopeQuadratureFormula : public QuadratureFormulaBase
   {
@@ -79,7 +84,8 @@ namespace Rodin::QF
        * @param g Polytope geometry type.
        * @return Owning pointer to the selected quadrature formula.
        */
-      static std::unique_ptr<const QuadratureFormulaBase> build(size_t order, Geometry::Polytope::Type g);
+      static std::unique_ptr<const QuadratureFormulaBase> build(
+        size_t order, Geometry::Polytope::Type g);
 
       /**
        * @brief Constructs quadrature with default order.
@@ -90,7 +96,8 @@ namespace Rodin::QF
        * RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER).
        */
       PolytopeQuadratureFormula(Geometry::Polytope::Type g)
-        : PolytopeQuadratureFormula(RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER, g)
+        : PolytopeQuadratureFormula(
+            RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER, g)
       {}
 
       /**
@@ -138,8 +145,7 @@ namespace Rodin::QF
        * @brief Gets the number of quadrature points.
        * @return Total number of quadrature points in the underlying formula
        */
-      inline
-      size_t getSize() const override
+      inline size_t getSize() const override
       {
         return m_qf->getSize();
       }
@@ -149,8 +155,7 @@ namespace Rodin::QF
        * @param i Index of the quadrature point
        * @return Weight @f$ w_i @f$ from the underlying formula
        */
-      inline
-      Real getWeight(size_t i) const override
+      inline Real getWeight(size_t i) const override
       {
         return m_qf->getWeight(i);
       }
@@ -160,8 +165,7 @@ namespace Rodin::QF
        * @param i Index of the quadrature point
        * @return Reference to the point coordinates from the underlying formula
        */
-      inline
-      const Math::SpatialVector<Real>& getPoint(size_t i) const override
+      inline const Math::SpatialVector<Real>& getPoint(size_t i) const override
       {
         return m_qf->getPoint(i);
       }
@@ -170,14 +174,14 @@ namespace Rodin::QF
        * @brief Creates a copy of this quadrature formula.
        * @return Pointer to a new PolytopeQuadratureFormula instance
        */
-      inline
-      PolytopeQuadratureFormula* copy() const noexcept override
+      inline PolytopeQuadratureFormula* copy() const noexcept override
       {
         return new PolytopeQuadratureFormula(*this);
       }
 
     private:
-      std::unique_ptr<const QuadratureFormulaBase> m_qf; ///< Underlying quadrature formula
+      std::unique_ptr<const QuadratureFormulaBase>
+        m_qf; ///< Underlying quadrature formula
       const size_t m_order; ///< Polynomial degree of exactness
       const Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
   };

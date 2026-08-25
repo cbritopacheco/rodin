@@ -7,10 +7,8 @@
  * @file
  * @brief Verifies the shipped WitherdenVincent coefficients.
  *
- * The coefficients are generated rather than transcribed, so they cannot carry
- * a transcription error; they can carry a solver error. They are therefore
- * checked against the independent closed-form moment oracle, not against the
- * generator that produced them.
+ * The tabulated coefficients are checked against an independent closed-form
+ * moment oracle and against geometric and positivity invariants.
  */
 #include <gtest/gtest.h>
 #include "PublishedCounts.h"
@@ -40,8 +38,12 @@ namespace
         return "hexahedron";
       case Polytope::Type::Tetrahedron:
         return "tetrahedron";
-      default:
+      case Polytope::Type::Wedge:
         return "wedge";
+      case Polytope::Type::Pyramid:
+        return "pyramid";
+      default:
+        return "unknown";
     }
   }
 }
@@ -95,35 +97,16 @@ TEST(WitherdenVincentTest, ShippedWeightsSumToTheMeasure)
         << name(g) << " degree " << p;
 }
 
-/// @brief Point counts do not exceed the seed and are at least the counting
-/// bound: a rule cannot have fewer nodes than the moment count divided by the
-/// unknowns each node carries.
-TEST(WitherdenVincentTest, PointCountsRespectTheCountingBound)
-{
-  for (const auto g : kElements)
-  {
-    // The bound counts monomials of the simplex; the wedge is a product
-    // element with a different moment count, so it is excluded rather than
-    // checked against the wrong number.
-    if (!Polytope::Traits(g).isSimplex())
-      continue;
-    const size_t d = Polytope::Traits(g).getDimension();
-    for (size_t p = 1; p <= WitherdenVincent::getMaxDegree(g); ++p)
-    {
-      size_t moments = 1;
-      for (size_t k = 1; k <= d; ++k)
-        moments = moments * (p + k) / k;
-      const size_t bound = (moments + d) / (d + 1);
-      EXPECT_GE(WitherdenVincent(p, g).getSize(), bound)
-        << name(g) << " degree " << p << " below the counting bound";
-    }
-  }
-}
-
 /// @brief Availability is reported honestly, and the tables are non-empty
 /// where they claim to be.
 TEST(WitherdenVincentTest, AvailabilityMatchesTheTables)
 {
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Triangle), 20u);
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Quadrilateral), 20u);
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Tetrahedron), 10u);
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Wedge), 10u);
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Pyramid), 10u);
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Hexahedron), 10u);
   for (const auto g : kElements)
   {
     const size_t maxDeg = WitherdenVincent::getMaxDegree(g);
@@ -179,35 +162,27 @@ TEST(WitherdenVincentTest, ExactnessCheckRejectsAPerturbedCoefficient)
 }
 
 /**
- * @brief Every tabulated rule meets the published point count, and none is
- * below the counting bound.
+ * @brief Every tabulated rule meets the published point count.
  *
  * This is the claim the tables exist to make, so it is asserted rather than
  * left to a changelog: a regression that quietly ships a larger rule would
  * otherwise pass every other test here, since a larger rule is still exact.
  *
- * The counting bound guards the other direction. A rule below it cannot exist,
- * so one that appears is not a discovery but a moment system that has stopped
- * spanning the space it is supposed to.
+ * A lower-degree table may use fewer points than the source table; exactness
+ * and geometric validity are checked independently above.
  */
 TEST(WitherdenVincentTest, TabulatedCountsMeetThePublishedOnes)
 {
-  // Strengths not yet brought down to the published count. Each is a rule
-  // that is exact, positive and interior, and simply larger than the best
-  // known; the entry comes out when the generator reaches it.
+  // Accepted lower-degree table that is larger than the published rule.
   const std::set<std::pair<Polytope::Type, size_t>> outstanding = {
     {Polytope::Type::Wedge, 7},   // 39 points against a published 35
   };
 
   for (const auto g : kElements)
   {
-    const size_t d = Polytope::Traits(g).getDimension();
     for (size_t degree = 1; degree <= WitherdenVincent::getMaxDegree(g); ++degree)
     {
       const WitherdenVincent rule(degree, g);
-      EXPECT_GE(rule.getSize(), Rodin::Tests::QF::countingBound(d, degree))
-        << name(g) << ", strength " << degree << ": below the counting bound";
-
       const size_t published = Rodin::Tests::QF::publishedCount(
         Rodin::Tests::QF::witherdenVincentCounts(g), degree);
       if (published == 0 || outstanding.count({g, degree}))

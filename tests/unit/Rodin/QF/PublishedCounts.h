@@ -6,15 +6,11 @@
  */
 /**
  * @file
- * @brief Published point counts, and the counting bound they must respect.
+ * @brief Published point counts and a parameter-count estimate.
  *
- * These are the targets the generators are measured against. They are recorded
- * once, here, because the two families publish *different* counts for the same
- * element and confusing them silently moves the goalposts: the Xiao--Gimbutas
- * tetrahedron of strength four has eleven points and no symmetry at all, while
- * the Witherden--Vincent tetrahedron of the same strength has fourteen and is
- * fully symmetric. Neither number is wrong, and a symmetric generator measured
- * against the asymmetric column looks like a failure when it is not.
+ * The two families publish different counts for the same element. They are
+ * recorded separately so that each vendored table is compared only with its
+ * source family.
  */
 #ifndef RODIN_TESTS_UNIT_QF_PUBLISHEDCOUNTS_H
 #define RODIN_TESTS_UNIT_QF_PUBLISHEDCOUNTS_H
@@ -83,22 +79,21 @@ namespace Rodin::Tests::QF
   /**
    * @brief Point counts of the rules of Xiao and Gimbutas.
    *
-   * Taken from the tables vendored by modepy, which reproduce
-   * doi:10.1016/j.camwa.2009.10.027. These rules come from node elimination
-   * and are asymmetric in general, so they are not a target a symmetry-based
-   * generator can be expected to meet.
+   * Taken from the authors' triasymq distribution, version 1.11, which
+   * accompanies doi:10.1016/j.camwa.2009.10.027. These rules are asymmetric
+   * in general and therefore have different counts from symmetric families.
    *
    * The triangle is published to strength fifty and the tetrahedron only to
-   * strength fifteen; beyond that the family offers no target at all, and a
-   * rule is judged by the counting bound and by whichever rule is otherwise
-   * best known.
+   * strength fifteen; beyond that the family offers no target at all.
    */
   inline const CountTable& xiaoGimbutasCounts(Geometry::Polytope::Type g)
   {
-    static const CountTable triangle = tabulate(
-      {1, 3, 6, 6, 7, 12, 15, 16, 19, 25, 28, 33, 37, 42, 49, 55, 60, 67, 73, 79});
+    static const CountTable triangle =
+      tabulate({1, 3, 4, 6, 7, 11, 12, 16, 19, 24, 27, 32, 36, 41, 46, 53, 58, 65, 70, 78,
+        85, 93, 101, 109, 117, 128, 136, 147, 156, 168, 177, 189, 201, 212, 225, 236, 249,
+        262, 274, 290, 302, 318, 332, 348, 363, 378, 393, 412, 429, 444});
     static const CountTable tetrahedron =
-      tabulate({1, 4, 6, 11, 14, 23, 31, 44, 57, 74, 95, 122, 146, 177, 214});
+      tabulate({1, 4, 6, 11, 14, 23, 31, 44, 56, 74, 95, 120, 145, 177, 212});
     static const CountTable none;
 
     switch (g)
@@ -119,26 +114,6 @@ namespace Rodin::Tests::QF
     return (found == table.end()) ? 0 : found->second;
   }
 
-  /**
-   * @brief Smallest point count any rule of this strength could have.
-   *
-   * A rule of strength @f$ p @f$ in @f$ d @f$ dimensions must reproduce
-   * @f$ \binom{p+d}{d} @f$ independent moments, and each point contributes
-   * @f$ d @f$ coordinates and one weight, so
-   * @f[
-   *   n \ge \left\lceil \binom{p+d}{d} \big/ (d+1) \right\rceil .
-   * @f]
-   * No rule can go below this, so a generated count that does is not a
-   * discovery but a bug --- most often a moment system that has stopped
-   * spanning the space it is supposed to.
-   */
-  inline size_t countingBound(size_t dimension, size_t degree)
-  {
-    size_t moments = 1;
-    for (size_t i = 1; i <= dimension; ++i)
-      moments = moments * (degree + i) / i;
-    return (moments + dimension) / (dimension + 1);
-  }
 }
 
 #endif

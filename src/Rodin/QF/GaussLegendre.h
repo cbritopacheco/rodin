@@ -17,7 +17,6 @@
 
 #include "QuadratureFormula.h"
 
-
 namespace Rodin::QF
 {
   /**
@@ -42,13 +41,17 @@ namespace Rodin::QF
    *
    * ## Higher Dimensions
    *
-   * For tensor-product geometries (quadrilaterals, wedges), the multi-dimensional
-   * rule is constructed via tensor products of 1D Gauss-Legendre rules. For
-   * simplicial geometries (triangles, tetrahedra), the Duffy transformation
-   * maps tensor-product rules to the simplex:
+   * For tensor-product geometries, the multi-dimensional rule is constructed
+   * from one-dimensional Gauss--Legendre rules. For triangles and
+   * tetrahedra, the Duffy transformation maps a tensor-product domain to the
+   * simplex:
    * - Triangle: @f$ (r,s) = (u, (1-u)v) @f$ with Jacobian @f$ (1-u) @f$
    * - Tetrahedron: @f$ (r,s,t) = (u, (1-u)v, (1-u)(1-v)w) @f$ with Jacobian
-   *   @f$ (1-u)^2(1-v) @f$
+   *   @f$ (1-u)^2(1-v) @f$.
+   *
+   * The Jacobian factors are incorporated into Gauss--Jacobi weights. Thus,
+   * an @f$ n @f$-point rule in every collapsed coordinate is exact for total
+   * polynomial degree @f$ 2n-1 @f$ and has strictly positive weights.
    *
    * ## Supported Geometries
    * - Point
@@ -116,7 +119,10 @@ namespace Rodin::QF
        * directions. Requires @f$ \text{order} \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t order)
-        : m_geometry(g), m_nx(order), m_ny(order), m_nz(order)
+        : m_geometry(g),
+          m_nx(order),
+          m_ny(order),
+          m_nz(order)
       {
         assert(order >= 1);
         build();
@@ -132,7 +138,10 @@ namespace Rodin::QF
        * Requires @f$ nx, ny \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t nx, size_t ny)
-        : m_geometry(g), m_nx(nx), m_ny(ny), m_nz(1)
+        : m_geometry(g),
+          m_nx(nx),
+          m_ny(ny),
+          m_nz(1)
       {
         assert(nx >= 1 && ny >= 1);
         build();
@@ -149,7 +158,10 @@ namespace Rodin::QF
        * Requires @f$ nu, nv, nw \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw)
-        : m_geometry(g), m_nx(nu), m_ny(nv), m_nz(nw)
+        : m_geometry(g),
+          m_nx(nu),
+          m_ny(nv),
+          m_nz(nw)
       {
         assert(nu >= 1 && nv >= 1 && nw >= 1);
         build();
@@ -163,7 +175,10 @@ namespace Rodin::QF
        * polynomials of degree up to 3 in 1D.
        */
       GaussLegendre(Geometry::Polytope::Type g)
-        : m_geometry(g), m_nx(2), m_ny(2), m_nz(2)
+        : m_geometry(g),
+          m_nx(2),
+          m_ny(2),
+          m_nz(2)
       {
         build();
       }
@@ -218,7 +233,6 @@ namespace Rodin::QF
       }
 
     private:
-
       /**
        * @brief Builds the quadrature rule for the selected geometry.
        */
@@ -281,7 +295,7 @@ namespace Rodin::QF
       void buildHex(size_t nx, size_t ny, size_t nz);
 
       Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
-      size_t m_nx { 2 }, m_ny { 2 }, m_nz { 2 }; ///< Number of points per direction
+      size_t m_nx{2}, m_ny{2}, m_nz{2}; ///< Number of points per direction
       std::vector<Math::SpatialVector<Real>> m_points; ///< Quadrature point coordinates
       Math::Vector<Real> m_weights; ///< Quadrature weights
       size_t m_maxIt; ///< Maximum Newton iterations

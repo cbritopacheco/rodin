@@ -13,6 +13,21 @@ Rodin is a modular C++20 finite element framework. It is designed as a set of or
 
 When adding code, preserve this separation. New functionality should fit into the existing architecture instead of bypassing it.
 
+## Where the rules live
+
+This file carries the architectural and style rules. Two other places are
+authoritative and should be read rather than restated:
+
+- **`AGENTS.md`** (repo root) — entry point for all AI agents: the
+  non-negotiable rules and the build/test summary. It indexes **`doc/agents/`**,
+  a hierarchical knowledge base: `philosophy.md` (read before writing code),
+  `conventions.md` (the hard rules), `architecture.md` (module map), per-domain
+  notes, and `doc/agents/theory/` for the mathematics behind a formulation.
+- **`CONTRIBUTING.md`** — the five style layers and how to run each check
+  locally.
+
+When a fact changes, update the file that owns it; do not fork it here.
+
 ## How to think before writing code
 
 Before implementing anything, ask:
@@ -111,17 +126,25 @@ src/Rodin/
 │   ├── P0g/            # P0 with gradient enrichment
 │   ├── P1/             # Piecewise linear
 │   └── H1/             # Arbitrary-order Lagrange
+├── Test/               # Library-side test helpers (header-only)
 ├── Advection/          # Lagrangian advection (header-only)
+├── Distance/           # Distance / redistancing models (header-only)
 ├── Eikonal/            # Fast Marching Method (header-only)
-├── LinearElasticity/   # Linear elasticity integrators (header-only)
+├── Hilbert/            # H1 extension-regularization, H1a (header-only)
+├── Adaptation/         # Moving-interface mesh adaptation, WNGIR (header-only)
 ├── Solid/              # Hyperelastic solid mechanics (header-only)
+│   └── Linear/         # Small-strain elasticity integrators
+├── Heart/              # Reduced-order (0D) cardiac models (header-only)
 ├── MMG/                # Mesh adaptation via Mmg (compiled)
+├── MFEM/               # MFEM interop (header-only)
 ├── PETSc/              # PETSc solvers and distributed assembly (compiled)
 ├── MPI/                # Distributed mesh and parallel assembly (compiled)
 └── Scotch/             # Mesh partitioning (conditional)
 ```
 
-Physics/model modules (`Advection`, `Eikonal`, `LinearElasticity`, `Solid`) are header-only INTERFACE libraries. They follow the pattern: `add_library(RodinX INTERFACE)`, `add_library(Rodin::X ALIAS)`, link `Rodin::Geometry` + `Rodin::Variational`, and install via the `RodinTargets` export set.
+Physics/model modules (`Advection`, `Distance`, `Eikonal`, `Hilbert`, `Adaptation`, `Solid`, `Heart`) are header-only INTERFACE libraries. They follow the pattern: `add_library(RodinX INTERFACE)`, `add_library(Rodin::X ALIAS)`, link `Rodin::Geometry` + `Rodin::Variational`, and install via the `RodinTargets` export set.
+
+Linear elasticity lives in `Solid/Linear/`, not in a top-level module. `doc/agents/architecture.md` carries the full map and is the file to update when this changes.
 
 ## Key abstractions to know
 
@@ -439,6 +462,54 @@ Common Homebrew dependencies across Build/Installation workflows:
 - `RODIN_USE_ASAN=ON/OFF`
 - `RODIN_USE_UBSAN=ON/OFF`
 - `RODIN_CODE_COVERAGE=ON/OFF`
+
+## Style gates and the ratchet principle
+
+Four mechanical checks run in CI (`.github/workflows/Style.yml`) and report
+inline on the pull request. Run them before claiming a change is finished:
+
+```bash
+python3 dev/check_format.py --base origin/develop   # then: git clang-format origin/develop
+python3 dev/style_lint.py                           # guards, license blocks, @file docs, PETSc containment
+python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
+python3 dev/check_doxygen_warnings.py               # requires doxygen 1.14.0 exactly
+```
+
+Each compares against a committed baseline in `dev/`. **A baseline may only
+shrink.** Never add an entry to silence something you introduced — fix it.
+Check a baseline's current size before reasoning about it
+(`grep -vc '^#' dev/<name>.baseline`); a baseline at zero means the next
+violation is yours. Formatting applies to **changed lines only**: never
+reformat a whole file or the tree.
+
+Two naming exemptions in `.clang-tidy` are deliberate — do not "fix" code to
+satisfy a linter that already permits it:
+
+- CamelCase **functions** are allowed (mathematical operators like `T()`, named
+  constructors like `Hooke::YoungPoisson`, API-concept factories).
+- Mathematical **variable** notation is allowed (`F`, `Jinv`, `FinvT_dF`, `I1`,
+  `m_I4`, `mu_0`). Plain snake_case is not.
+
+## Commit and pull request conventions
+
+Commit subjects are imperative prose with no type prefix and no trailing
+period, optionally scoped by area (`QF:`, `tests/QF:`, `Format:`):
+
+```
+Order decompositions by promise, and let a search be given a deadline
+QF: escape dead ends by moving along the solution manifold
+Format: clang-format the changed lines against develop
+```
+
+Bodies are flowing paragraphs wrapped at ~80 columns, not bullet lists: state
+the problem that existed, then what the change does about it, with concrete
+numbers where they carry the argument, and record what did not work and what it
+cost. Keep mechanical `clang-format` results in their own `Format:` commit,
+never mixed with logic. End with a `Co-Authored-By:` trailer.
+
+Branches: `module/*`, `model/*`, `feature/*`, `doc/*` off `develop`; agent
+branches are prefixed (`copilot/*`, `agents/*`). `develop` is the integration
+branch.
 
 ## What not to do
 

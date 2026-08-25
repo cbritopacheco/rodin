@@ -7,8 +7,12 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GrundmannMoller.h"
 #include "Rodin/QF/GaussLegendre.h"
+#include "Rodin/QF/TensorProduct.h"
+#include "Rodin/QF/WitherdenVincent.h"
+#include "Rodin/QF/XiaoGimbutas.h"
 
 #include "QuadratureInvariants.h"
 
@@ -70,7 +74,7 @@ TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
 {
   for (const auto g : allGeometries())
   {
-    for (size_t order = 1; order <= 8; ++order)
+    for (size_t order = 1; order <= 20; ++order)
     {
       const auto& qf = PolytopeQuadratureFormula::get(order, g);
       const auto report = exactnessSweep(qf, g, order);
@@ -83,18 +87,10 @@ TEST(QuadratureExactnessTest, DispatchedRuleIsExactToRequestedDegree)
   }
 }
 
-/// @brief Regression: the pyramid rule under-integrated at every even order.
-///
-/// The collapse @f$ (x,y,z)=((1-z)u,(1-z)v,z) @f$ contributes a @f$ (1-z)^2 @f$
-/// Jacobian, so a monomial of total degree @f$ p @f$ has degree @f$ p+2 @f$ in
-/// @f$ z @f$ and the @f$ z @f$ rule needs @f$ \lceil (p+3)/2 \rceil @f$ points.
-/// The dispatch used integer division, which floors, and so was short by one
-/// whenever @f$ p @f$ was even. Reverting the fix in
-/// PolytopeQuadratureFormula::build reproduces a 17% error on @f$ z^2 @f$ at
-/// order 2.
+/// @brief The arbitrary-order pyramid fallback remains exact beyond the table.
 TEST(QuadratureExactnessTest, PyramidIsExactAtEvenOrders)
 {
-  for (size_t order = 2; order <= 8; order += 2)
+  for (size_t order = 12; order <= 20; order += 2)
   {
     const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Pyramid);
     const auto report = exactnessSweep(qf, Polytope::Type::Pyramid, order);
@@ -103,23 +99,81 @@ TEST(QuadratureExactnessTest, PyramidIsExactAtEvenOrders)
   }
 }
 
-/// @brief Regression: the wedge rule under-integrated at every odd order.
-///
-/// buildWedge collapses the triangular cross-section by
-/// @f$ (r,s) = (u, (1-u)v) @f$, contributing a @f$ (1-u) @f$ Jacobian, so a
-/// monomial of total degree @f$ p @f$ has degree @f$ p+1 @f$ in @f$ u @f$ and
-/// the collapsed direction needs @f$ \lceil (p+2)/2 \rceil @f$ points. As with
-/// the pyramid, the dispatch floored instead. Reverting the fix reproduces a
-/// 17% error on @f$ x @f$ at order 1.
+/// @brief The wedge tensor product is exact at odd orders.
 TEST(QuadratureExactnessTest, WedgeIsExactAtOddOrders)
 {
-  for (size_t order = 1; order <= 7; order += 2)
+  for (size_t order = 1; order <= 19; order += 2)
   {
     const auto& qf = PolytopeQuadratureFormula::get(order, Polytope::Type::Wedge);
     const auto report = exactnessSweep(qf, Polytope::Type::Wedge, order);
     EXPECT_LT(report.worstRelativeError, kExactTol)
       << "Wedge order " << order << ": worst at x^" << report.worstExponents[0] << " y^"
       << report.worstExponents[1];
+  }
+}
+
+/// @brief The dispatcher selects the documented family at every table boundary.
+TEST(QuadratureExactnessTest, DispatchesDocumentedFamiliesAndFallbacks)
+{
+  using Type = Polytope::Type;
+
+  EXPECT_NE(
+    dynamic_cast<const Centroid*>(PolytopeQuadratureFormula::build(1, Type::Point).get()),
+    nullptr);
+  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
+              PolytopeQuadratureFormula::build(5, Type::Segment).get()),
+    nullptr);
+
+  EXPECT_NE(dynamic_cast<const XiaoGimbutas*>(
+              PolytopeQuadratureFormula::build(50, Type::Triangle).get()),
+    nullptr);
+  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
+              PolytopeQuadratureFormula::build(51, Type::Triangle).get()),
+    nullptr);
+  EXPECT_NE(dynamic_cast<const TensorProduct*>(
+              PolytopeQuadratureFormula::build(20, Type::Quadrilateral).get()),
+    nullptr);
+
+  EXPECT_NE(dynamic_cast<const XiaoGimbutas*>(
+              PolytopeQuadratureFormula::build(15, Type::Tetrahedron).get()),
+    nullptr);
+  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
+              PolytopeQuadratureFormula::build(16, Type::Tetrahedron).get()),
+    nullptr);
+  EXPECT_NE(dynamic_cast<const TensorProduct*>(
+              PolytopeQuadratureFormula::build(20, Type::Hexahedron).get()),
+    nullptr);
+
+  const auto wedge50 = PolytopeQuadratureFormula::build(50, Type::Wedge);
+  const auto wedge51 = PolytopeQuadratureFormula::build(51, Type::Wedge);
+  EXPECT_NE(dynamic_cast<const TensorProduct*>(wedge50.get()), nullptr);
+  EXPECT_NE(dynamic_cast<const TensorProduct*>(wedge51.get()), nullptr);
+  EXPECT_EQ(wedge50->getSize(), XiaoGimbutas(50, Type::Triangle).getSize() * 26);
+  EXPECT_EQ(wedge51->getSize(), 26u * 26u * 26u);
+
+  EXPECT_NE(dynamic_cast<const WitherdenVincent*>(
+              PolytopeQuadratureFormula::build(10, Type::Pyramid).get()),
+    nullptr);
+  EXPECT_NE(dynamic_cast<const GaussLegendre*>(
+              PolytopeQuadratureFormula::build(11, Type::Pyramid).get()),
+    nullptr);
+}
+
+/// @brief The positive conical-product fallbacks are exact beyond the
+/// published simplex tables.
+TEST(QuadratureExactnessTest, ConicalProductFallbacksAreExact)
+{
+  for (const auto& [g, order] : {std::pair{Polytope::Type::Triangle, size_t{51}},
+         std::pair{Polytope::Type::Tetrahedron, size_t{16}}})
+  {
+    const auto qf = PolytopeQuadratureFormula::build(order, g);
+    const auto report = exactnessSweep(*qf, g, order);
+    EXPECT_LT(report.worstRelativeError, 1e-11)
+      << name(g) << " order " << order << ": worst monomial x^"
+      << report.worstExponents[0] << " y^" << report.worstExponents[1] << " z^"
+      << report.worstExponents[2];
+    EXPECT_TRUE(allWeightsPositive(*qf));
+    EXPECT_TRUE(allPointsInside(*qf, g));
   }
 }
 
@@ -235,21 +289,20 @@ TEST(QuadratureExactnessTest, GrundmannMollerHasSignedWeightsAboveDegreeOne)
   }
 }
 
-/// @brief Every non-simplex rule has strictly positive weights.
+/// @brief Every tensor-product and collapsed rule has positive weights.
 ///
 /// This is load-bearing rather than incidental. Negative weights are the
 /// reason Grundmann-Möller cannot assemble a form that must stay positive
 /// semidefinite, and the reason a positive simplex family is being introduced
 /// at all. That argument does not extend to the tensor-product and collapsed
-/// elements, whose weights are products of positive Gauss-Legendre weights
-/// with positive Jacobian factors --- @f$ (1-u) @f$ on the wedge and
-/// @f$ (1-z)^2 @f$ on the pyramid --- and so are positive by construction.
+/// elements, whose weights are products of positive Gaussian weights. The
+/// collapse Jacobians are carried by positive Gauss--Jacobi weights.
 ///
 /// Because that structural fact is what justifies leaving these elements on
 /// their existing rules, it is asserted here rather than assumed. The
 /// amplification @f$ \sum|w| / \sum w @f$ must be exactly one: any departure
 /// means a sign appeared somewhere in the product.
-TEST(QuadratureExactnessTest, NonSimplexRulesHaveStrictlyPositiveWeights)
+TEST(QuadratureExactnessTest, TensorAndCollapsedRulesHaveStrictlyPositiveWeights)
 {
   for (const auto g : {Polytope::Type::Segment, Polytope::Type::Quadrilateral,
          Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
@@ -264,25 +317,14 @@ TEST(QuadratureExactnessTest, NonSimplexRulesHaveStrictlyPositiveWeights)
   }
 }
 
-/// @brief Positivity is a property of the rule, not of the element type: the
-/// simplices are the exception, and the suite must say so explicitly rather
-/// than leave it to be inferred from which elements the previous test omits.
-TEST(QuadratureExactnessTest, SimplexRulesAreTheOnlyOnesWithSignedWeights)
+/// @brief The default dispatcher uses positive rules throughout the tabulated range.
+TEST(QuadratureExactnessTest, DispatchedRulesHavePositiveWeights)
 {
   for (const auto g : allGeometries())
   {
-    const Geometry::Polytope::Traits traits(g);
     const auto& qf = PolytopeQuadratureFormula::get(4, g);
-    if (traits.isSimplex() && traits.getDimension() >= 2)
-    {
-      EXPECT_FALSE(allWeightsPositive(qf))
-        << name(g) << ": simplices use Grundmann-Möller, which is signed";
-      EXPECT_GT(weightAmplification(qf), Real(1)) << name(g);
-    }
-    else
-    {
-      EXPECT_TRUE(allWeightsPositive(qf)) << name(g);
-    }
+    EXPECT_TRUE(allWeightsPositive(qf)) << name(g);
+    EXPECT_NEAR(weightAmplification(qf), Real(1), 1e-14) << name(g);
   }
 }
 

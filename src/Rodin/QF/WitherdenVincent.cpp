@@ -9,61 +9,22 @@
  * @file
  * @brief Coefficients of the WitherdenVincent symmetric rules.
  *
- * Generated, not transcribed. Every number below was produced by
- * SymmetricRuleGenerator and can be reproduced by running
- * tests/unit/Rodin/QF/GenerateWitherdenVincent.cpp. Nothing here was copied from a
- * published table, so nothing here can carry a transcription error; what it
- * can carry is a solver error, which is why the tables are checked against an
- * independent moment oracle and against properties that use no oracle at all.
- *
- * @par Regenerating a table
- * One command per element, the driver named for the family it writes and the
- * argument naming the array:
- * @code
- *   RodinWitherdenVincent tri     > triangle.txt
- *   RodinWitherdenVincent quad    > quadrilateral.txt
- *   RodinWitherdenVincent tet     > tetrahedron.txt
- *   RodinWitherdenVincent wedge   > wedge.txt
- *   RodinWitherdenVincent pyr     > pyramid.txt
- *   RodinWitherdenVincent hex     > hexahedron.txt
- * @endcode
- * The search is deterministic --- decompositions are enumerated and ordered by
- * a fixed rule and seeded from a fixed generator --- so a given version of it
- * returns the coefficients below whatever machine it runs on and however many
- * threads it is given. Determinism is per version: changing the order
- * candidates are tried in, or how many seeds each is given, can land on a
- * different rule of the same size, equally exact and equally valid. These
- * tables are therefore regenerated whenever the search changes, and the test
- * that guards them asks for the point count rather than the coordinates.
- *
- * The one parameter that changes what a search can reach is the per-strength
- * deadline, which truncates it; it is off by default and should stay off when
- * the point is to reproduce a table.
- *
- * @par Time, and how these fail when hurried
- * The two-dimensional elements are slow per decomposition and few to
- * enumerate; the three-dimensional ones are the reverse. The triangle at
- * strength twenty spends about ten seconds on each of 756 candidates. The
- * prism at strength six enumerates 30 806 candidates at a tenth of a second
- * each, and its 28-point rule is a six-orbit decomposition lying well down
- * that list --- stop the search early and it returns 29 points instead. The
- * hexahedron at strengths six to nine costs about thirty seconds to sweep
- * exhaustively and was nonetheless recorded as unreachable once, having been
- * run on two threads against a deadline. Give a strength the machine and no
- * deadline before concluding it is out of reach.
+ * The lower-degree tables remain in this translation unit. The remaining
+ * published coefficients are vendored from the Witherden--Vincent tables in
+ * WitherdenVincentData.h. Every table is checked against an independent
+ * moment oracle and against properties that use no oracle.
  *
  * @par Counts
- * Where Witherden and Vincent publish a count, these match it, with two
- * exceptions: the pyramid at strength six needs twenty-three points against a
- * published twenty-four, and the prism at strengths six and seven carries the
- * older solver's twenty-nine and thirty-nine against a published twenty-eight
- * and thirty-five. Published counts are tabulated in
- * tests/unit/Rodin/QF/PublishedCounts.h and asserted by the tests.
+ * Published counts are tabulated in tests/unit/Rodin/QF/PublishedCounts.h and
+ * asserted by the tests. The pyramid rule at strength six uses 23 points
+ * instead of the published 24, while the wedge rule at strength seven uses 39
+ * instead of the published 35.
  *
  * Each entry is a flat run of (x, y[, z], w) per node.
  */
 
 #include "WitherdenVincent.h"
+#include "WitherdenVincentData.h"
 
 namespace Rodin::QF
 {
@@ -3359,7 +3320,6 @@ namespace Rodin::QF
       },
     };
 
-    /// Filled by tests/unit/Rodin/QF/GenerateWitherdenVincent.cpp, as the others are.
     const std::vector<std::vector<Real>> s_quadrilateral = {
       // degree 1: 1 points, oracle 4.44e-16
       {
@@ -5304,11 +5264,31 @@ namespace Rodin::QF
           return s_empty;
       }
     }
+
+    const std::vector<std::vector<Real>>& publishedTableFor(Geometry::Polytope::Type g)
+    {
+      static const std::vector<std::vector<Real>> s_empty;
+      switch (g)
+      {
+        case Geometry::Polytope::Type::Quadrilateral:
+          return Data::WitherdenVincent::quadrilateral;
+        case Geometry::Polytope::Type::Tetrahedron:
+          return Data::WitherdenVincent::tetrahedron;
+        case Geometry::Polytope::Type::Wedge:
+          return Data::WitherdenVincent::wedge;
+        case Geometry::Polytope::Type::Pyramid:
+          return Data::WitherdenVincent::pyramid;
+        case Geometry::Polytope::Type::Hexahedron:
+          return Data::WitherdenVincent::hexahedron;
+        default:
+          return s_empty;
+      }
+    }
   }
 
   size_t WitherdenVincent::getMaxDegree(Geometry::Polytope::Type g)
   {
-    return tableFor(g).size();
+    return tableFor(g).size() + publishedTableFor(g).size();
   }
 
   WitherdenVincent::WitherdenVincent(size_t degree, Geometry::Polytope::Type g)
@@ -5316,7 +5296,10 @@ namespace Rodin::QF
       m_dimension(Geometry::Polytope::Traits(g).getDimension())
   {
     assert(isAvailable(degree, g));
-    const auto& entry = tableFor(g)[degree - 1];
+    const auto& local = tableFor(g);
+    const auto& entry = degree <= local.size()
+      ? local[degree - 1]
+      : publishedTableFor(g)[degree - local.size() - 1];
     m_data = entry.data();
     m_count = entry.size() / (m_dimension + 1);
     m_points.reserve(m_count);

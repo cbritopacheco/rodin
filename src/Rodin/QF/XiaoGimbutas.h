@@ -20,31 +20,15 @@ namespace Rodin::QF
    * @ingroup RodinQuadrature
    * @brief Near-minimal positive interior quadrature on simplices.
    *
-   * Implements rules of the family described by Xiao and Gimbutas
-   * @cite xiao2010numerical: begin from a rule that is already exact, remove
-   * the node contributing least to the moments, and solve the moment
-   * equations again from the reduced rule, repeating until nothing more can
-   * go. The result has positive weights and interior nodes, and uses close to
-   * the fewest points the moment count allows.
+   * Provides the tabulated positive interior rules described by Xiao and
+   * Gimbutas @cite xiao2010numerical. The published coefficients are vendored
+   * from the authors' triasymq distribution under its BSD 3-Clause license.
+   * The triangle table reaches degree 50 and the tetrahedron table degree 15.
+   * Every entry is independently tested for polynomial exactness, positive
+   * weights, and interior nodes.
    *
-   * The coefficients shipped here were computed by Rodin, by
-   * NodeElimination::reduce, and not transcribed from any published table.
-   * They are therefore not guaranteed to coincide with the rules of
-   * @cite xiao2010numerical even where the point counts agree: the moment
-   * equations have many solutions and the search finds one of them. What is
-   * guaranteed, and tested, is the property that matters --- exactness to the
-   * stated degree, positive weights, and nodes inside the element.
-   *
-   * Node elimination does not preserve symmetry, so these rules are not
-   * symmetric, unlike those of Witherden and Vincent
-   * @cite witherden2015identification. At tetrahedron degree 4 that lets the
-   * count fall below the published symmetric minimum.
-   *
-   * Grundmann-Möller remains the fallback beyond the tabulated degrees and for
-   * simplices of dimension above three, where it is the only rule available.
-   *
-   * @see NodeElimination
-   * @see GrundmannMoller
+   * Beyond the tabulated range, the default dispatcher uses a positive
+   * Gauss--Jacobi conical-product rule.
    */
   class XiaoGimbutas final : public QuadratureFormulaBase
   {

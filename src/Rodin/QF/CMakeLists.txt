@@ -9,12 +9,11 @@ set(RodinQF_HEADERS
   Centroid.h
   GaussLegendre.h
   GrundmannMoller.h
-  SymmetricOrbit.h
-  SymmetricRuleSolver.h
-  NodeElimination.h
-  OrthogonalBasis.h
+  TensorProduct.h
   XiaoGimbutas.h
+  XiaoGimbutasData.h
   WitherdenVincent.h
+  WitherdenVincentData.h
   PolytopeQuadratureFormula.h
 )
 

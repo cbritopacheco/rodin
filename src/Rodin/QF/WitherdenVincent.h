@@ -20,36 +20,13 @@ namespace Rodin::QF
    * @ingroup RodinQuadrature
    * @brief Fully symmetric positive interior quadrature.
    *
-   * Implements rules of the family described by Witherden and Vincent
-   * @cite witherden2015identification. Where NodeElimination discovers a rule
-   * by removing nodes from a larger one, and in doing so destroys any
-   * symmetry it had, these rules are symmetric by construction: the nodes are
-   * organised into orbits of the element's symmetry group and the moment
-   * equations are solved for the orbit parameters directly.
+   * Provides the fully symmetric positive interior rules described by
+   * Witherden and Vincent @cite witherden2015identification. The published
+   * coefficients are vendored from John Burkardt's MIT-licensed transcription
+   * of the Witherden--Vincent tables. Every entry is independently tested for
+   * polynomial exactness, positive weights, and interior nodes.
    *
-   * Symmetry costs points and buys structure. A symmetric rule commutes with
-   * vertex renumbering, so neighbouring elements of a mesh integrate a shared
-   * face identically however their vertices happen to be ordered, which an
-   * asymmetric rule does not guarantee.
-   *
-   * It also reaches counts an eliminating search cannot. At tetrahedron degree
-   * 5 the minimum attains the counting bound exactly --- 56 moments against 14
-   * nodes carrying 4 unknowns each --- which leaves the moment system square
-   * and its solutions isolated. NodeElimination relies throughout on the null
-   * space of an underdetermined system and stops at 15 points there; imposing
-   * symmetry reduces the unknowns to a handful of orbit parameters and finds
-   * the 14-point rule directly.
-   *
-   * The coefficients shipped here were computed by Rodin, by
-   * SymmetricRuleSolver::search, and not transcribed from any published table.
-   * They are therefore not guaranteed to coincide with the rules of
-   * @cite witherden2015identification even where the point counts agree. What
-   * is guaranteed, and tested, is exactness to the stated degree, positive
-   * weights, and nodes inside the element.
-   *
-   * @see SymmetricRuleSolver
    * @see XiaoGimbutas
-   * @see GrundmannMoller
    */
   class WitherdenVincent final : public QuadratureFormulaBase
   {

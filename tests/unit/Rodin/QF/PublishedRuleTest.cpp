@@ -23,10 +23,8 @@
  * unit simplex through modepy's own equilateral-to-unit map followed by the
  * biunit-to-unit scaling, with the weights carrying both Jacobians.
  *
- * If these integrate correctly under our oracle, then our reference element
- * and our moment formulas agree with the published ones, and any difference in
- * point count between our rules and theirs is a difference in the search
- * rather than in the problem being solved.
+ * If these integrate correctly under our oracle, then Rodin's reference
+ * element and moment formulas agree with the published ones.
  */
 #include <gtest/gtest.h>
 #include <map>

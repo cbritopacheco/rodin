@@ -40,61 +40,9 @@ gtest_discover_tests(RodinQuadratureExactnessTest
     LABELS unit
 )
 
-# Symmetric orbit tests
-add_executable(RodinSymmetricOrbitTest SymmetricOrbitTest.cpp)
-target_link_libraries(RodinSymmetricOrbitTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Rodin
-  Rodin::QF
-  )
-gtest_discover_tests(RodinSymmetricOrbitTest
-  PROPERTIES
-    LABELS unit
-)
-
-# Symmetric rule solver tests
-add_executable(RodinSymmetricRuleSolverTest SymmetricRuleSolverTest.cpp)
-target_link_libraries(RodinSymmetricRuleSolverTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Rodin
-  Rodin::QF
-  )
-gtest_discover_tests(RodinSymmetricRuleSolverTest
-  PROPERTIES
-    LABELS unit
-)
-
-# Development driver for regenerating rule coefficients (not a test)
-
-add_executable(RodinSeedCheckTest SeedCheckTest.cpp)
-target_link_libraries(RodinSeedCheckTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-gtest_discover_tests(RodinSeedCheckTest PROPERTIES LABELS unit)
-
-add_executable(RodinHighDegreeTest EXCLUDE_FROM_ALL HighDegreeTest.cpp)
-target_link_libraries(RodinHighDegreeTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-
-# Reference element agreement tests
-add_executable(RodinReferenceElementTest ReferenceElementTest.cpp)
-target_link_libraries(RodinReferenceElementTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-gtest_discover_tests(RodinReferenceElementTest PROPERTIES LABELS unit)
-
-add_executable(RodinDiagTest EXCLUDE_FROM_ALL DiagTest.cpp)
-target_link_libraries(RodinDiagTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-
 add_executable(RodinGaussJacobiTest GaussJacobiTest.cpp)
 target_link_libraries(RodinGaussJacobiTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinGaussJacobiTest PROPERTIES LABELS unit)
-
-add_executable(RodinGramTest EXCLUDE_FROM_ALL GramTest.cpp)
-target_link_libraries(RodinGramTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-
-add_executable(RodinOrthTest OrthTest.cpp)
-target_link_libraries(RodinOrthTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-gtest_discover_tests(RodinOrthTest PROPERTIES LABELS unit)
 
 # XiaoGimbutas shipped-coefficient tests
 add_executable(RodinXiaoGimbutasTest XiaoGimbutasTest.cpp)
@@ -106,9 +54,6 @@ add_executable(RodinQuadraturePropertyTest QuadraturePropertyTest.cpp)
 target_link_libraries(RodinQuadraturePropertyTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinQuadraturePropertyTest PROPERTIES LABELS unit)
 
-add_executable(RodinGenerateSymmetric EXCLUDE_FROM_ALL GenerateSymmetric.cpp)
-target_link_libraries(RodinGenerateSymmetric PUBLIC Rodin::Rodin Rodin::QF)
-
 # WitherdenVincent shipped-coefficient tests
 add_executable(RodinWitherdenVincentTest WitherdenVincentTest.cpp)
 target_link_libraries(RodinWitherdenVincentTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
@@ -119,43 +64,7 @@ add_executable(RodinQuadratureFuzzTest QuadratureFuzzTest.cpp)
 target_link_libraries(RodinQuadratureFuzzTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinQuadratureFuzzTest PROPERTIES LABELS unit)
 
-add_executable(RodinPyramidOrbitTest PyramidOrbitTest.cpp)
-target_link_libraries(RodinPyramidOrbitTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-gtest_discover_tests(RodinPyramidOrbitTest PROPERTIES LABELS unit)
-
 # External cross-check against published rules
 add_executable(RodinPublishedRuleTest PublishedRuleTest.cpp)
 target_link_libraries(RodinPublishedRuleTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
 gtest_discover_tests(RodinPublishedRuleTest PROPERTIES LABELS unit)
-
-add_executable(RodinCollapsedBasisTest CollapsedBasisTest.cpp)
-target_link_libraries(RodinCollapsedBasisTest
-  PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-target_include_directories(RodinCollapsedBasisTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-gtest_discover_tests(RodinCollapsedBasisTest PROPERTIES LABELS unit)
-
-add_executable(RodinSymmetryGroupTest SymmetryGroupTest.cpp)
-target_link_libraries(RodinSymmetryGroupTest
-  PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-target_include_directories(RodinSymmetryGroupTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-gtest_discover_tests(RodinSymmetryGroupTest PROPERTIES LABELS unit)
-
-add_executable(RodinSymmetricRuleGeneratorTest SymmetricRuleGeneratorTest.cpp)
-target_link_libraries(RodinSymmetricRuleGeneratorTest
-  PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
-target_include_directories(RodinSymmetricRuleGeneratorTest
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-gtest_discover_tests(RodinSymmetricRuleGeneratorTest PROPERTIES LABELS unit)
-
-add_executable(RodinStatusXG EXCLUDE_FROM_ALL StatusXG.cpp)
-target_link_libraries(RodinStatusXG PUBLIC Rodin::Rodin Rodin::QF)
-target_include_directories(RodinStatusXG PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-
-add_executable(RodinWitherdenVincent EXCLUDE_FROM_ALL GenerateWitherdenVincent.cpp)
-target_link_libraries(RodinWitherdenVincent PUBLIC Rodin::Rodin Rodin::QF)
-target_include_directories(RodinWitherdenVincent PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-add_executable(RodinXiaoGimbutas EXCLUDE_FROM_ALL GenerateXiaoGimbutas.cpp)
-target_link_libraries(RodinXiaoGimbutas PUBLIC Rodin::Rodin Rodin::QF)
-target_include_directories(RodinXiaoGimbutas PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -9,33 +9,24 @@
  * @file
  * @brief Coefficients of the XiaoGimbutas simplex rules.
  *
- * Generated, not transcribed. Every number below was produced by
- * NodeElimination::reduce through tests/unit/Rodin/QF/GenerateXiaoGimbutas.cpp, and
- * can be reproduced by running it. Nothing here was copied from a published
- * table, so nothing here can carry a transcription error; what it can carry is
- * a solver error, which is why the tables are checked against an independent
- * moment oracle rather than against their source.
+ * The lower-degree tables remain in this translation unit. The remaining
+ * published coefficients are vendored from the Xiao--Gimbutas triasymq
+ * distribution in XiaoGimbutasData.h. Every table is checked against an
+ * independent moment oracle.
  *
  * Each entry is a flat run of (x, y[, z], w) per node.
  *
- * @par Regenerating a table
- * @code
- *   RodinXiaoGimbutas tri > triangle.txt
- *   RodinXiaoGimbutas tet > tetrahedron.txt
- * @endcode
- * The driver is named for the family it writes. These rules come from node
- * elimination
- * and are asymmetric, which is a different construction from the symmetric
- * rules of WitherdenVincent.cpp and reaches different counts; the two publish
- * different numbers for the same element and strength, so a table is only ever
- * compared against its own family. Node elimination applies to simplices only,
- * which is also where Xiao and Gimbutas publish.
+ * These rules are generally asymmetric, which is a different construction
+ * from the symmetric rules of WitherdenVincent.cpp and reaches different
+ * counts. A table is therefore compared only with its own family.
  *
- * Most strengths here are below the published count, and several sit exactly
- * on the counting bound, which no rule of that strength can beat.
+ * Some lower-degree entries have different point counts from the published
+ * source rule. Exactness and geometric validity determine whether such a rule
+ * is valid.
  */
 
 #include "XiaoGimbutas.h"
+#include "XiaoGimbutasData.h"
 
 namespace Rodin::QF
 {
@@ -2745,11 +2736,25 @@ namespace Rodin::QF
           return s_empty;
       }
     }
+
+    const std::vector<std::vector<Real>>& publishedTableFor(Geometry::Polytope::Type g)
+    {
+      static const std::vector<std::vector<Real>> s_empty;
+      switch (g)
+      {
+        case Geometry::Polytope::Type::Triangle:
+          return Data::XiaoGimbutas::triangle;
+        case Geometry::Polytope::Type::Tetrahedron:
+          return Data::XiaoGimbutas::tetrahedron;
+        default:
+          return s_empty;
+      }
+    }
   }
 
   size_t XiaoGimbutas::getMaxDegree(Geometry::Polytope::Type g)
   {
-    return tableFor(g).size();
+    return tableFor(g).size() + publishedTableFor(g).size();
   }
 
   XiaoGimbutas::XiaoGimbutas(size_t degree, Geometry::Polytope::Type g)
@@ -2757,7 +2762,10 @@ namespace Rodin::QF
       m_dimension(Geometry::Polytope::Traits(g).getDimension())
   {
     assert(isAvailable(degree, g));
-    const auto& entry = tableFor(g)[degree - 1];
+    const auto& local = tableFor(g);
+    const auto& entry = degree <= local.size()
+      ? local[degree - 1]
+      : publishedTableFor(g)[degree - local.size() - 1];
     m_data = entry.data();
     m_count = entry.size() / (m_dimension + 1);
     m_points.reserve(m_count);

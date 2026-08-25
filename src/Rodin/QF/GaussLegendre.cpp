@@ -44,7 +44,8 @@ namespace Rodin::QF
         const Real dpn = (static_cast<Real>(n) * (xk * pn - pnm1)) / (xk * xk - 1.0);
         const Real dx = pn / dpn;
         xk -= dx;
-        if (std::abs(dx) < tol) break;
+        if (std::abs(dx) < tol)
+          break;
       }
 
       Real p0 = 1.0;
@@ -61,10 +62,10 @@ namespace Rodin::QF
       const Real dpn = (static_cast<Real>(n) * (xk * pn - pnm1)) / (xk * xk - 1.0);
       const Real wv = 2.0 / ((1.0 - xk * xk) * dpn * dpn);
 
-      xi[k]         = -xk;
-      xi[n - 1 - k] =  xk;
-      wi[k]         =  wv;
-      wi[n - 1 - k] =  wv;
+      xi[k] = -xk;
+      xi[n - 1 - k] = xk;
+      wi[k] = wv;
+      wi[n - 1 - k] = wv;
     }
 
     x.resize(n);
@@ -165,7 +166,7 @@ namespace Rodin::QF
   void GaussLegendre::buildTri(size_t nu, size_t nv)
   {
     std::vector<Real> u, wu, v, wv;
-    gl1dUnit(nu, u, wu);
+    gj1dUnit(nu, 1, u, wu);
     gl1dUnit(nv, v, wv);
 
     const size_t N = nu * nv;
@@ -185,7 +186,7 @@ namespace Rodin::QF
         p[0] = r;
         p[1] = s;
         m_points.push_back(std::move(p));
-        m_weights[k++] = wu[i] * wv[j] * (1.0 - u[i]);
+        m_weights[k++] = wu[i] * wv[j];
       }
     }
   }
@@ -193,8 +194,8 @@ namespace Rodin::QF
   void GaussLegendre::buildTet(size_t nu, size_t nv, size_t nw)
   {
     std::vector<Real> u, wu, v, wv, w, ww;
-    gl1dUnit(nu, u, wu);
-    gl1dUnit(nv, v, wv);
+    gj1dUnit(nu, 2, u, wu);
+    gj1dUnit(nv, 1, v, wv);
     gl1dUnit(nw, w, ww);
 
     const size_t N = nu * nv * nw;
@@ -220,8 +221,7 @@ namespace Rodin::QF
           p[2] = t;
           m_points.push_back(std::move(p));
 
-          m_weights[k++] = wu[k1] * wv[k2] * ww[k3]
-                         * (1.0 - u[k1]) * (1.0 - u[k1]) * (1.0 - v[k2]);
+          m_weights[k++] = wu[k1] * wv[k2] * ww[k3];
         }
       }
     }
@@ -230,7 +230,7 @@ namespace Rodin::QF
   void GaussLegendre::buildWedge(size_t ntri, size_t nz)
   {
     std::vector<Real> u, wu, v, wv, z, wz;
-    gl1dUnit(ntri, u, wu);
+    gj1dUnit(ntri, 1, u, wu);
     gl1dUnit(ntri, v, wv);
     gl1dUnit(nz, z, wz);
 
@@ -257,7 +257,7 @@ namespace Rodin::QF
           p[2] = t;
           m_points.push_back(std::move(p));
 
-          m_weights[k++] = wu[i] * wv[j] * (1.0 - u[i]) * wz[kk];
+          m_weights[k++] = wu[i] * wv[j] * wz[kk];
         }
       }
     }

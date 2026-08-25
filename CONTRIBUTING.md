@@ -91,11 +91,19 @@ in one direction.
 
 ## Tests
 
-A change is not done until the unit test executable for the touched module
-passes (`build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test` —
-ctest is not wired up), and, for assembly/solver changes, the relevant
-`tests/manufactured` suites pass too. Numerical claims are made with
-measurements (see `doc/agents/testing.md` for the house test patterns).
+A change is not done until the tests for the touched module pass, and, for
+assembly/solver changes, the relevant `tests/manufactured` suites pass too.
+Scope the run with the same labels CI uses:
+
+```sh
+ctest --test-dir build/tests -L unit -LE "slow|distributed" --output-on-failure
+ctest --test-dir build/tests -L manufactured -LE "slow|distributed" --output-on-failure
+```
+
+Unit tests may be built `Debug`; manufactured tests must be `Release` or
+`RelWithDebInfo` (they verify convergence rates and are impractically slow
+otherwise). Numerical claims are made with measurements (see
+`doc/agents/testing.md` for the house test patterns).
 
 ## Housekeeping
 

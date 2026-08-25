@@ -18,7 +18,9 @@
 
 #include "Centroid.h"
 #include "GaussLegendre.h"
-#include "GrundmannMoller.h"
+#include "TensorProduct.h"
+#include "WitherdenVincent.h"
+#include "XiaoGimbutas.h"
 
 namespace Rodin::QF
 {
@@ -26,20 +28,20 @@ namespace Rodin::QF
   {
     struct Key
     {
-      size_t order;
-      Geometry::Polytope::Type g;
+        size_t order;
+        Geometry::Polytope::Type g;
 
-      friend bool operator<(const Key& a, const Key& b)
-      {
-        if (a.g != b.g)
-          return a.g < b.g;
-        return a.order < b.order;
-      }
+        friend bool operator<(const Key& a, const Key& b)
+        {
+          if (a.g != b.g)
+            return a.g < b.g;
+          return a.order < b.order;
+        }
 
-      friend bool operator==(const Key& a, const Key& b)
-      {
-        return a.order == b.order && a.g == b.g;
-      }
+        friend bool operator==(const Key& a, const Key& b)
+        {
+          return a.order == b.order && a.g == b.g;
+        }
     };
 
     /**
@@ -50,17 +52,17 @@ namespace Rodin::QF
      */
     struct HotCache
     {
-      static constexpr size_t Capacity = 8;
+        static constexpr size_t Capacity = 8;
 
-      struct Entry
-      {
-        Key key{0, Geometry::Polytope::Type::Point};
-        const QuadratureFormulaBase* ptr = nullptr;
-        bool valid = false;
-      };
+        struct Entry
+        {
+            Key key{0, Geometry::Polytope::Type::Point};
+            const QuadratureFormulaBase* ptr = nullptr;
+            bool valid = false;
+        };
 
-      std::array<Entry, Capacity> entries;
-      size_t next = 0;
+        std::array<Entry, Capacity> entries;
+        size_t next = 0;
     };
 
     /**
@@ -71,13 +73,13 @@ namespace Rodin::QF
      */
     struct CanonicalPool
     {
-      FlatMap<Key, std::unique_ptr<const QuadratureFormulaBase>> formulas;
-      std::mutex mutex;
+        FlatMap<Key, std::unique_ptr<const QuadratureFormulaBase>> formulas;
+        std::mutex mutex;
     };
   }
 
-  std::unique_ptr<const QuadratureFormulaBase>
-  PolytopeQuadratureFormula::build(size_t order, Geometry::Polytope::Type g)
+  std::unique_ptr<const QuadratureFormulaBase> PolytopeQuadratureFormula::build(
+    size_t order, Geometry::Polytope::Type g)
   {
     switch (g)
     {
@@ -92,35 +94,46 @@ namespace Rodin::QF
 
       case Geometry::Polytope::Type::Triangle:
       {
-        const size_t s = (order + 1) / 2;
-        return std::make_unique<GrundmannMoller>(s, g);
+        if (XiaoGimbutas::isAvailable(order, g))
+          return std::make_unique<XiaoGimbutas>(order, g);
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n);
       }
 
       case Geometry::Polytope::Type::Quadrilateral:
       {
         const size_t n = std::max<size_t>(1, (order + 2) / 2);
-        return std::make_unique<GaussLegendre>(g, n, n);
+        const GaussLegendre line(Geometry::Polytope::Type::Segment, n);
+        return std::make_unique<TensorProduct>(g, line, line);
       }
 
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        const size_t i = (order / 2) * 2 + 1;
-        return std::make_unique<GrundmannMoller>(i / 2, g);
+        if (XiaoGimbutas::isAvailable(order, g))
+          return std::make_unique<XiaoGimbutas>(order, g);
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n, n);
       }
 
       case Geometry::Polytope::Type::Wedge:
       {
-        // buildWedge collapses the triangular cross-section by
-        // (r, s) = (u, (1 - u) v), contributing a (1 - u) Jacobian. A monomial
-        // of total degree p therefore has degree p + 1 in u, so the collapsed
-        // direction needs ceil((p + 2) / 2) points. Flooring left the rule one
-        // degree short at every odd order.
-        const size_t n = std::max<size_t>(1, (order + 3) / 2);
-        return std::make_unique<GaussLegendre>(g, n, n);
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        const GaussLegendre line(Geometry::Polytope::Type::Segment, n);
+        if (XiaoGimbutas::isAvailable(order, Geometry::Polytope::Type::Triangle))
+        {
+          const XiaoGimbutas triangle(order, Geometry::Polytope::Type::Triangle);
+          return std::make_unique<TensorProduct>(g, triangle, line);
+        }
+        const size_t nt = std::max<size_t>(1, (order + 2) / 2);
+        const GaussLegendre triangle(Geometry::Polytope::Type::Triangle, nt, nt);
+        return std::make_unique<TensorProduct>(g, triangle, line);
       }
 
       case Geometry::Polytope::Type::Pyramid:
       {
+        if (WitherdenVincent::isAvailable(order, g))
+          return std::make_unique<WitherdenVincent>(order, g);
+
         // The (1 - z)^2 Jacobian of the collapse now rides in the Gauss-Jacobi
         // weight rather than being evaluated at the nodes, so the integrand in
         // the collapsed coordinates is polynomial of degree p in each
@@ -132,7 +145,8 @@ namespace Rodin::QF
       case Geometry::Polytope::Type::Hexahedron:
       {
         const size_t n = std::max<size_t>(1, (order + 2) / 2);
-        return std::make_unique<GaussLegendre>(g, n, n, n);
+        const GaussLegendre line(Geometry::Polytope::Type::Segment, n);
+        return std::make_unique<TensorProduct>(g, line, line, line);
       }
 
       default:
@@ -143,8 +157,8 @@ namespace Rodin::QF
     }
   }
 
-  const QuadratureFormulaBase&
-  PolytopeQuadratureFormula::get(size_t order, Geometry::Polytope::Type g)
+  const QuadratureFormulaBase& PolytopeQuadratureFormula::get(
+    size_t order, Geometry::Polytope::Type g)
   {
     static CanonicalPool pool;
     static thread_local HotCache hot;
@@ -194,8 +208,7 @@ namespace Rodin::QF
   }
 
   PolytopeQuadratureFormula::PolytopeQuadratureFormula(
-      size_t order,
-      Geometry::Polytope::Type g)
+    size_t order, Geometry::Polytope::Type g)
     : m_qf(build(order, g)),
       m_order(order),
       m_geometry(g)
