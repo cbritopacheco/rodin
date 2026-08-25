@@ -24,13 +24,18 @@ using namespace Rodin::Tests::QF;
 namespace
 {
   const std::vector<Polytope::Type> kElements = {Polytope::Type::Triangle,
-    Polytope::Type::Tetrahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid};
+    Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Wedge,
+    Polytope::Type::Pyramid, Polytope::Type::Hexahedron};
   const char* name(Polytope::Type g)
   {
     switch (g)
     {
       case Polytope::Type::Triangle:
         return "triangle";
+      case Polytope::Type::Quadrilateral:
+        return "quadrilateral";
+      case Polytope::Type::Hexahedron:
+        return "hexahedron";
       case Polytope::Type::Tetrahedron:
         return "tetrahedron";
       default:
@@ -125,8 +130,9 @@ TEST(WitherdenVincentTest, AvailabilityMatchesTheTables)
     EXPECT_TRUE(WitherdenVincent::isAvailable(maxDeg, g));
     EXPECT_FALSE(WitherdenVincent::isAvailable(maxDeg + 1, g));
   }
-  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Hexahedron), 0u);
-  EXPECT_FALSE(WitherdenVincent::isAvailable(2, Polytope::Type::Hexahedron));
+  // A geometry with no rules at all still answers coherently.
+  EXPECT_EQ(WitherdenVincent::getMaxDegree(Polytope::Type::Point), 0u);
+  EXPECT_FALSE(WitherdenVincent::isAvailable(2, Polytope::Type::Point));
 }
 
 /// @brief The rule is copyable and the copy carries the same data.
