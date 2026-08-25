@@ -12,7 +12,6 @@
  */
 #include <gtest/gtest.h>
 #include "PublishedCounts.h"
-#include <set>
 #include "Rodin/QF/XiaoGimbutas.h"
 #include "QuadratureInvariants.h"
 
@@ -139,7 +138,7 @@ TEST(XiaoGimbutasTest, ExactnessCheckRejectsAPerturbedCoefficient)
 }
 
 /**
- * @brief Every tabulated rule is no larger than the published one.
+ * @brief Every tabulated rule has the published point count.
  *
  * These rules are measured against the Xiao--Gimbutas counts rather than the
  * symmetric Witherden--Vincent counts. The two families publish different
@@ -147,15 +146,6 @@ TEST(XiaoGimbutasTest, ExactnessCheckRejectsAPerturbedCoefficient)
  */
 TEST(XiaoGimbutasTest, TabulatedCountsMeetThePublishedOnes)
 {
-  // Accepted lower-degree tables whose counts differ from the published rule.
-  const std::set<std::pair<Polytope::Type, size_t>> outstanding = {
-    {Polytope::Type::Triangle, 8},     // 17 points against a published 16
-    {Polytope::Type::Triangle, 19},    // 71 points against a published 70
-    {Polytope::Type::Triangle, 20},    // 79 points against a published 78
-    {Polytope::Type::Tetrahedron, 5},  // 15 points against a published 14
-    {Polytope::Type::Tetrahedron, 9},  // 57 points against a published 56
-  };
-
   for (const auto g : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
   {
     for (size_t degree = 1; degree <= XiaoGimbutas::getMaxDegree(g); ++degree)
@@ -163,10 +153,11 @@ TEST(XiaoGimbutasTest, TabulatedCountsMeetThePublishedOnes)
       const XiaoGimbutas rule(degree, g);
       const size_t published =
         Rodin::Tests::QF::publishedCount(Rodin::Tests::QF::xiaoGimbutasCounts(g), degree);
-      if (published == 0 || outstanding.count({g, degree}))
+      if (published == 0)
         continue;
-      EXPECT_LE(rule.getSize(), published)
-        << name(g) << ", strength " << degree << ": more points than the published rule";
+      EXPECT_EQ(rule.getSize(), published)
+        << name(g) << ", strength " << degree
+        << ": point count differs from the published rule";
     }
   }
 }

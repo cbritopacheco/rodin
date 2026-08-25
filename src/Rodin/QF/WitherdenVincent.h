@@ -22,8 +22,8 @@ namespace Rodin::QF
    *
    * Provides the fully symmetric positive interior rules described by
    * Witherden and Vincent @cite witherden2015identification. The published
-   * coefficients are vendored from John Burkardt's MIT-licensed transcription
-   * of the Witherden--Vincent tables. Every entry is independently tested for
+   * coefficients are vendored from PyFR's BSD-licensed distribution of the
+   * Witherden--Vincent tables. Every entry is independently tested for
    * polynomial exactness, positive weights, and interior nodes.
    *
    * @see XiaoGimbutas

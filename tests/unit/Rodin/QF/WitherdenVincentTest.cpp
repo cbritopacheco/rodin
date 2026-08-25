@@ -12,7 +12,6 @@
  */
 #include <gtest/gtest.h>
 #include "PublishedCounts.h"
-#include <set>
 #include "Rodin/QF/WitherdenVincent.h"
 #include "QuadratureInvariants.h"
 
@@ -168,16 +167,10 @@ TEST(WitherdenVincentTest, ExactnessCheckRejectsAPerturbedCoefficient)
  * left to a changelog: a regression that quietly ships a larger rule would
  * otherwise pass every other test here, since a larger rule is still exact.
  *
- * A lower-degree table may use fewer points than the source table; exactness
- * and geometric validity are checked independently above.
+ * Exactness and geometric validity are checked independently above.
  */
 TEST(WitherdenVincentTest, TabulatedCountsMeetThePublishedOnes)
 {
-  // Accepted lower-degree table that is larger than the published rule.
-  const std::set<std::pair<Polytope::Type, size_t>> outstanding = {
-    {Polytope::Type::Wedge, 7},   // 39 points against a published 35
-  };
-
   for (const auto g : kElements)
   {
     for (size_t degree = 1; degree <= WitherdenVincent::getMaxDegree(g); ++degree)
@@ -185,10 +178,11 @@ TEST(WitherdenVincentTest, TabulatedCountsMeetThePublishedOnes)
       const WitherdenVincent rule(degree, g);
       const size_t published = Rodin::Tests::QF::publishedCount(
         Rodin::Tests::QF::witherdenVincentCounts(g), degree);
-      if (published == 0 || outstanding.count({g, degree}))
+      if (published == 0)
         continue;
-      EXPECT_LE(rule.getSize(), published)
-        << name(g) << ", strength " << degree << ": more points than the published rule";
+      EXPECT_EQ(rule.getSize(), published)
+        << name(g) << ", strength " << degree
+        << ": point count differs from the published rule";
     }
   }
 }

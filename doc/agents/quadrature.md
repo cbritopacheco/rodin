@@ -90,8 +90,11 @@ points than optimized tables.
   process-wide pool. An eight-entry thread-local cache serves repeated hot-path
   lookups without locking; cache misses enter the locked canonical pool.
 
-The published coefficients live in `XiaoGimbutasData.h` and
-`WitherdenVincentData.h`. Their attribution licenses live in `LICENSES/`.
+The Xiao--Gimbutas coefficients are taken from the authors' `triasymq`
+distribution. The Witherden--Vincent coefficients are taken from PyFR's
+published quadrature tables. The transformed coefficients, exact source
+revisions, and complete attribution licenses live in `XiaoGimbutasData.h` and
+`WitherdenVincentData.h`.
 Numerical search, fitting, orbit enumeration, and table-emission code do not
 belong to the runtime module.
 
