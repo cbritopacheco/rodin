@@ -549,7 +549,8 @@ namespace Rodin::QF
        */
       static Rule solve(Geometry::Polytope::Type g, size_t degree,
         const Decomposition& decomposition, size_t maxRestarts = 64,
-        Real tolerance = 1e-12, size_t maxIterations = 400, unsigned seed = 20260101u)
+        Real tolerance = 1e-12, size_t maxIterations = 400, unsigned seed = 20260101u,
+        size_t firstRestart = 0)
       {
         const System problem(g, degree, decomposition);
         const Eigen::Index nz = problem.getVariableCount();
@@ -557,8 +558,19 @@ namespace Rodin::QF
         std::mt19937 rng(seed);
         std::normal_distribution<Real> gauss(0, 1.0);
 
+        // A round of the search resumes this sequence of seeds rather than
+        // beginning it again, so that asking for restarts sixteen to
+        // thirty-two tries the seeds a single run of thirty-two would have
+        // tried. Drawing the earlier ones and discarding them keeps the two
+        // equivalent; without it every round samples afresh and the search
+        // deepens nowhere. The prism at strength six exposed this: it needs
+        // thirty-two seeds of one sequence, and rounds of eight that each
+        // start over never reach it, however many rounds are run.
         Rule best;
         best.decomposition = decomposition;
+        for (size_t skipped = 0; skipped < firstRestart; ++skipped)
+          for (Eigen::Index i = 0; i < nz; ++i)
+            (void)gauss(rng);
         for (size_t restart = 0; restart < maxRestarts; ++restart)
         {
           Math::Vector<Real> z(nz);
@@ -929,9 +941,11 @@ namespace Rodin::QF
                     return;
                   const size_t budget =
                     restartBudget(g, candidates[i], conditions, maxRestarts);
-                  Rule attempt =
-                    solve(g, degree, candidates[i], std::min(budget, perRound), tolerance,
-                      400, 20260101u + static_cast<unsigned>(round) * 7919u);
+                  Rule attempt = solve(g, degree, candidates[i],
+                    (round * perRound >= budget)
+                      ? 0
+                      : std::min(perRound, budget - round * perRound),
+                    tolerance, 400, 20260101u, round * perRound);
                   if (attempt.residual < results[i].residual)
                     results[i] = std::move(attempt);
                   if (results[i].converged && results[i].admissible)
