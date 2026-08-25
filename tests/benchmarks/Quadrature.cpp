@@ -113,6 +113,9 @@ namespace Rodin::Tests::Benchmarks
         b->Args({g, order});
   }
 
+  /// @brief Registers point-access benchmarks for the quadrature cases.
   BENCHMARK(BM_QuadratureAccess)->Apply(Cases);
+
+  /// @brief Registers integrand-sweep benchmarks for the quadrature cases.
   BENCHMARK(BM_QuadratureSweep)->Apply(Cases);
 }
