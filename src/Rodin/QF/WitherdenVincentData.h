@@ -19,6 +19,7 @@
 
 namespace Rodin::QF::Data::WitherdenVincent
 {
+  // clang-format off
     inline const std::vector<std::vector<Real>> quadrilateral = {
       // degree 16: 60 points
       {
@@ -3697,6 +3698,7 @@ namespace Rodin::QF::Data::WitherdenVincent
         0.0028267870173526999,
       },
     };
+  // clang-format on
 }
 
 #endif

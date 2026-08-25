@@ -18,6 +18,7 @@
 
 namespace Rodin::QF::Data::XiaoGimbutas
 {
+  // clang-format off
     inline const std::vector<std::vector<Real>> triangle = {
       // degree 21: 85 points
       {
@@ -25244,6 +25245,7 @@ namespace Rodin::QF::Data::XiaoGimbutas
         0.000118027381160308,
       },
     };
+  // clang-format on
 }
 
 #endif

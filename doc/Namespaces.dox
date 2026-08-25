@@ -1,10 +1,10 @@
 /**
-  Directory src/
-  @brief Source directory for Rodin.
+  @dir src/
+  @brief Source @dir for Rodin.
  */
 
 /**
-  Directory src/Rodin
+  @dir src/Rodin
   @brief Namespace @ref Rodin
  */
 
@@ -30,7 +30,7 @@
  */
 
 /**
-  Directory src/Rodin/Context
+  @dir src/Rodin/Context
   @brief Namespace @ref Rodin::Context
  */
 
@@ -50,7 +50,7 @@
  */
 
 /**
-  Directory src/Rodin/Alert
+  @dir src/Rodin/Alert
   @brief Namespace @ref Rodin::Alert
  */
 
@@ -96,7 +96,7 @@
  */
 
 /**
-  Directory src/Rodin/Geometry
+  @dir src/Rodin/Geometry
   @brief Namespace @ref Rodin::Geometry
  */
 
@@ -168,7 +168,7 @@
  */
 
 /**
-  Directory src/Rodin/Assembly
+  @dir src/Rodin/Assembly
   @brief Namespace @ref Rodin::Assembly
  */
 
@@ -228,7 +228,7 @@
  */
 
 /**
-  Directory Rodin/Threads
+  @dir Rodin/Threads
   @brief Namespace @ref Rodin::Threads
  */
 
@@ -238,7 +238,7 @@
  */
 
 /**
-  Directory src/Rodin/Geometry/Euclidean
+  @dir src/Rodin/Geometry/Euclidean
   @brief Namespace @ref Rodin::Geometry::Euclidean
  */
 
@@ -248,7 +248,7 @@
  */
 
 /**
-  Directory src/Rodin/IO
+  @dir src/Rodin/IO
   @brief Namespace @ref Rodin::IO
  */
 
@@ -301,7 +301,7 @@
  */
 
 /**
-  Directory Rodin/Plot
+  @dir Rodin/Plot
   @brief Namespace @ref Rodin::Plot
  */
 
@@ -311,7 +311,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Artist
+  @dir Rodin/Plot/Artist
   @brief Namespace @ref Rodin::Plot::Artist
  */
 
@@ -321,7 +321,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Artist/Axes
+  @dir Rodin/Plot/Artist/Axes
   @brief Namespace @ref Rodin::Plot::Artist::Axes
  */
 
@@ -331,7 +331,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Artist/Axis
+  @dir Rodin/Plot/Artist/Axis
   @brief Namespace @ref Rodin::Plot::Artist::Axis
  */
 
@@ -341,7 +341,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Artist/Lines
+  @dir Rodin/Plot/Artist/Lines
   @brief Namespace @ref Rodin::Plot::Artist::Lines
  */
 
@@ -351,7 +351,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend
+  @dir Rodin/Plot/Backend
   @brief Namespace @ref Rodin::Plot::Backend
  */
 
@@ -361,7 +361,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend/Bases
+  @dir Rodin/Plot/Backend/Bases
   @brief Namespace @ref Rodin::Plot::Backend::Bases
  */
 
@@ -371,7 +371,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend/Renderer
+  @dir Rodin/Plot/Backend/Renderer
   @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
@@ -381,7 +381,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend/Renderer/Drawables
+  @dir Rodin/Plot/Backend/Renderer/Drawables
   @brief Namespace @ref Rodin::Plot::Backend::Renderer::Drawables
  */
 
@@ -391,7 +391,7 @@
  */
 
 /**
-  Directory Rodin/Plot/Backend/Event
+  @dir Rodin/Plot/Backend/Event
   @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
@@ -401,7 +401,7 @@
  */
 
 /**
-  Directory Rodin/Plot/GUI
+  @dir Rodin/Plot/GUI
   @brief Namespace @ref Rodin::Plot::GUI
  */
 
@@ -412,7 +412,7 @@
 
 
 /**
-  Directory src/Rodin/Variational
+  @dir src/Rodin/Variational
   @brief Namespace @ref Rodin::Variational
  */
 
@@ -521,7 +521,7 @@
  */
 
 /**
-  Directory src/Rodin/Distance
+  @dir src/Rodin/Distance
   @brief Namespace @ref Rodin::Distance
  */
 
@@ -604,7 +604,7 @@
  */
 
 /**
-  Directory src/Rodin/Hilbert
+  @dir src/Rodin/Hilbert
   @brief Namespace @ref Rodin::Hilbert
  */
 
@@ -642,7 +642,7 @@
  */
 
 /**
-  Directory src/Rodin/Advection
+  @dir src/Rodin/Advection
   @brief Namespace @ref Rodin::Advection
  */
 
@@ -718,7 +718,7 @@
  */
 
 /**
-  Directory src/Rodin/Eikonal
+  @dir src/Rodin/Eikonal
   @brief Namespace @ref Rodin::Eikonal
  */
 
@@ -771,7 +771,7 @@
  */
 
 /**
-  Directory Rodin/Elasticity
+  @dir Rodin/Elasticity
   @brief Namespace @ref Rodin::Elasticity
  */
 
@@ -966,7 +966,7 @@
  */
 
 /**
-  Directory src/Rodin/QF
+  @dir src/Rodin/QF
   @brief Namespace @ref Rodin::QF
  */
 
@@ -983,39 +983,20 @@
   * where @f$ \hat{K} @f$ is a reference polytope, @f$ \hat{x}_i @f$ are the
   * quadrature points, and @f$ w_i @f$ are the associated weights.
   *
-  * ## Available Quadrature Rules
+  * The default dispatcher combines published positive-interior
+  * Xiao--Gimbutas and Witherden--Vincent tables with positive Gaussian
+  * product rules. Tensor-product and conical-product constructions provide
+  * deterministic arbitrary-order coverage on every supported reference
+  * polytope. Grundmann--Moller and Gauss--Lobatto remain available as explicit
+  * alternatives; they are not selected by the default dispatcher.
   *
-  * | Rule | Class | Polytopes | Exactness |
-  * |------|-------|-----------|-----------|
-  * | **Centroid** | `QF::Centroid` | All types | Degree 1 (linear). Single point at barycenter. |
-  * | **Gauss-Legendre** | `QF::GaussLegendre` | All types | Degree @f$ 2n-1 @f$ for @f$ n @f$ points (1D). Tensor-product or Duffy transform for higher dimensions. |
-  * | **Gauss-Lobatto** | `QF::GaussLobatto` | Segments | Degree @f$ 2n-3 @f$ for @f$ n @f$ points. Includes endpoints (useful for spectral methods). |
-  * | **Grundmann-Möller** | `QF::GrundmannMoller` | Simplices only | Degree @f$ 2s+1 @f$ for parameter @f$ s \geq 0 @f$. Designed specifically for simplicial elements. |
-  *
-  * ## Automatic Selection
-  *
-  * During assembly, the quadrature order is automatically chosen based on the
-  * polynomial degree of the finite element space and the integrands. Users can
-  * also specify a quadrature rule explicitly:
-  *
-  * @code{.cpp}
-  * QF::GaussLegendre qf(Polytope::Type::Triangle, 5); // order 5 on triangles
-  * @endcode
-  *
-  * ## Higher-Dimensional Construction
-  *
-  * - **Tensor-product geometries** (quadrilaterals, hexahedra): constructed via
-  *   tensor products of 1D Gauss-Legendre rules.
-  * - **Simplicial geometries** (triangles, tetrahedra): the Duffy transformation
-  *   maps tensor-product rules to the simplex, or Grundmann-Möller rules are
-  *   used natively.
-  *
-  * Rodin provides quadrature rules for all supported polytope types
-  * (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).
+  * The requested order is the polynomial degree of exactness. The precise
+  * family ranges, fallback constructions, ownership API, cache semantics, and
+  * curved-element considerations are specified in @ref guides-quadrature.
  */
 
 /**
-  Directory src/Rodin/FormLanguage
+  @dir src/Rodin/FormLanguage
   @brief Namespace @ref Rodin::FormLanguage
  */
 
@@ -1068,7 +1049,7 @@
  */
 
 /**
-  Directory src/Rodin/Math
+  @dir src/Rodin/Math
   @brief Namespace @ref Rodin::Math
  */
 
@@ -1138,7 +1119,7 @@
 
 
 /**
-  Directory src/Rodin/Solver
+  @dir src/Rodin/Solver
   @brief Namespace @ref Rodin::Solver
  */
 
@@ -1202,7 +1183,7 @@
  */
 
 /**
-  Directory src/Rodin/Test
+  @dir src/Rodin/Test
   @brief Namespace @ref Rodin::Test
  */
 
@@ -1213,7 +1194,7 @@
  */
 
 /**
-  Directory src/Rodin/Utility
+  @dir src/Rodin/Utility
   @brief Namespace @ref Rodin::Utility
  */
 
@@ -1223,12 +1204,12 @@
  */
 
 /**
-  Directory Rodin/Traits
+  @dir Rodin/Traits
   @brief Namespace @ref Rodin::Traits
  */
 
 /**
-  Directory src/Rodin/MMG
+  @dir src/Rodin/MMG
   @brief Namespace @ref Rodin::MMG
  */
 
@@ -1594,7 +1575,7 @@
  */
 
 /**
-  Directory Rodin/tests
+  @dir Rodin/tests
   @brief Namespace @ref Rodin::Tests
  */
 
@@ -1604,7 +1585,7 @@
  */
 
 /**
-  Directory Rodin/tests/unit
+  @dir Rodin/tests/unit
   @brief Namespace @ref Rodin::Tests::Unit
  */
 
@@ -1614,7 +1595,7 @@
  */
 
 /**
-  Directory Rodin/tests/manufactured
+  @dir Rodin/tests/manufactured
   @brief Namespace @ref Rodin::Tests::Manufactured
  */
 
@@ -1624,12 +1605,12 @@
  */
 
 /**
-  Directory Rodin/tests/benchmarks
+  @dir Rodin/tests/benchmarks
   @brief Namespace @ref Rodin::Tests::Benchmarks
  */
 
 /**
-  Directory src/Rodin/Adaptation
+  @dir src/Rodin/Adaptation
   @brief Namespace @ref Rodin::Adaptation
  */
 
@@ -1672,7 +1653,7 @@
  */
 
 /**
-  Directory src/Rodin/Heart
+  @dir src/Rodin/Heart
   @brief Namespace @ref Rodin::Heart
  */
 
@@ -1694,7 +1675,7 @@
  */
 
 /**
-  Directory Rodin/Location
+  @dir Rodin/Location
   @brief Namespace @ref Rodin::Location
  */
 
@@ -1709,7 +1690,7 @@
  */
 
 /**
-  Directory src/Rodin/Serialization
+  @dir src/Rodin/Serialization
   @brief Namespace support for serialization of Rodin types.
  */
 
