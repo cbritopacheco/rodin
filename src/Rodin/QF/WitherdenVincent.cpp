@@ -10,12 +10,54 @@
  * @brief Coefficients of the WitherdenVincent symmetric rules.
  *
  * Generated, not transcribed. Every number below was produced by
- * SymmetricRuleSolver::search through
- * tests/unit/Rodin/QF/GenerateSymmetric.cpp and can be reproduced by running
- * it. Nothing here was copied from a published table, so nothing here can
- * carry a transcription error; what it can carry is a solver error, which is
- * why the tables are checked against an independent moment oracle and against
- * properties that use no oracle at all.
+ * SymmetricRuleGenerator and can be reproduced by running
+ * tests/unit/Rodin/QF/GenerateTables.cpp. Nothing here was copied from a
+ * published table, so nothing here can carry a transcription error; what it
+ * can carry is a solver error, which is why the tables are checked against an
+ * independent moment oracle and against properties that use no oracle at all.
+ *
+ * @par Regenerating a table
+ * One command per element, needing nothing but the element:
+ * @code
+ *   RodinGenerateTables tri     > triangle.txt
+ *   RodinGenerateTables quad    > quadrilateral.txt
+ *   RodinGenerateTables tet     > tetrahedron.txt
+ *   RodinGenerateTables wedge   > wedge.txt
+ *   RodinGenerateTables pyr     > pyramid.txt
+ *   RodinGenerateTables hex     > hexahedron.txt
+ * @endcode
+ * The search is deterministic --- decompositions are enumerated and ordered by
+ * a fixed rule and seeded from a fixed generator --- so a given version of it
+ * returns the coefficients below whatever machine it runs on and however many
+ * threads it is given. Determinism is per version: changing the order
+ * candidates are tried in, or how many seeds each is given, can land on a
+ * different rule of the same size, equally exact and equally valid. These
+ * tables are therefore regenerated whenever the search changes, and the test
+ * that guards them asks for the point count rather than the coordinates.
+ *
+ * The one parameter that changes what a search can reach is the per-strength
+ * deadline, which truncates it; it is off by default and should stay off when
+ * the point is to reproduce a table.
+ *
+ * @par Time, and how these fail when hurried
+ * The two-dimensional elements are slow per decomposition and few to
+ * enumerate; the three-dimensional ones are the reverse. The triangle at
+ * strength twenty spends about ten seconds on each of 756 candidates. The
+ * prism at strength six enumerates 30 806 candidates at a tenth of a second
+ * each, and its 28-point rule is a six-orbit decomposition lying well down
+ * that list --- stop the search early and it returns 29 points instead. The
+ * hexahedron at strengths six to nine costs about thirty seconds to sweep
+ * exhaustively and was nonetheless recorded as unreachable once, having been
+ * run on two threads against a deadline. Give a strength the machine and no
+ * deadline before concluding it is out of reach.
+ *
+ * @par Counts
+ * Where Witherden and Vincent publish a count, these match it, with two
+ * exceptions: the pyramid at strength six needs twenty-three points against a
+ * published twenty-four, and the prism at strengths six and seven carries the
+ * older solver's twenty-nine and thirty-nine against a published twenty-eight
+ * and thirty-five. Published counts are tabulated in
+ * tests/unit/Rodin/QF/PublishedCounts.h and asserted by the tests.
  *
  * Each entry is a flat run of (x, y[, z], w) per node.
  */

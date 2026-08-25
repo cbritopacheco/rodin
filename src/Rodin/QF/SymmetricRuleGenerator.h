@@ -64,6 +64,54 @@ namespace Rodin::QF
    * unlike a clamp, whose derivative vanishes once it binds, freezing any
    * iterate that reaches the boundary.
    *
+   * @par Reproducing the tables
+   * The search is deterministic: decompositions are enumerated and ordered by
+   * a fixed rule, each is seeded from a fixed generator, and the rule returned
+   * is the one from the earliest decomposition that succeeds rather than
+   * whichever thread finishes first. Thread count therefore changes how long a
+   * search takes but not what it returns, and
+   * @code
+   *   SymmetricRuleGenerator::search(g, degree);
+   * @endcode
+   * reproduces them for any element and strength.
+   *
+   * Determinism is per version of the search. Changing the order candidates
+   * are tried in, or how many seeds each is given, can land on a different
+   * rule of the same size --- equally exact, equally valid, different
+   * coordinates. The tables are regenerated when the search changes, and the
+   * test that guards them asks for the point count rather than the
+   * coordinates, so an improvement to the search does not read as a
+   * regression.
+   *
+   * The one parameter that can change the answer is the deadline. It exists so
+   * an unattended sweep cannot disappear into a single strength, and it does so
+   * by truncating the search --- so a search that is cut short may return a
+   * larger rule, or none, where a complete one would have succeeded. It is off
+   * by default, and should stay off whenever the point is to reproduce a table.
+   *
+   * @par What the search costs, and where it goes wrong
+   * Two quite different regimes, and confusing them wastes hours:
+   *
+   * - **Few decompositions, expensive each.** The two-dimensional elements at
+   *   high strength. A triangle of strength twenty faces 756 decompositions but
+   *   spends about ten seconds on each, since the basis has 231 modes evaluated
+   *   at 79 points with a decomposition solved every iteration. Time scales with
+   *   the degree, and there is no way around it.
+   * - **Many decompositions, cheap each.** The three-dimensional elements. A
+   *   prism of strength six faces 30 806 decompositions across the point counts
+   *   swept, at about a tenth of a second each. What matters here is reaching
+   *   far enough down the list: its 28-point rule --- the published count --- is
+   *   a six-orbit decomposition well beyond the first candidates tried, and a
+   *   search stopped early returns 29 points instead.
+   *
+   * Failures observed have almost always been the budget rather than the
+   * search. The hexahedron at strengths six to nine was recorded as unreachable
+   * and is found in about two minutes, an exhaustive sweep of every candidate
+   * costing roughly thirty seconds; it had been given two threads and a fifteen
+   * minute deadline while other sweeps competed for the cores. Before
+   * concluding that a strength is out of reach, give it the machine and no
+   * deadline.
+   *
    * @see SymmetryGroup
    * @see CollapsedBasis
    */
@@ -750,7 +798,7 @@ namespace Rodin::QF
         // point count; trying them all is the difference between minutes and
         // hours.
         if (unknowns + s_slack >= conditions)
-          return std::min<size_t>(maxRestarts, 4);
+          return std::min<size_t>(maxRestarts, 16);
         // Still not nothing. The count is not a necessary condition, and the
         // rules that violate it are the economical ones: the cube's six-point
         // rule is one unknown short, and the pyramid's twenty-three point rule
@@ -759,7 +807,7 @@ namespace Rodin::QF
         // parameters that decomposition offers. Skipping these outright lost
         // both. What keeps the search affordable is the ordering, which puts
         // them last, and the deadline, which stops it.
-        return std::min<size_t>(maxRestarts, 2);
+        return std::min<size_t>(maxRestarts, 8);
       }
 
       /**
@@ -769,15 +817,20 @@ namespace Rodin::QF
        * decomposition of each is attempted before the count is increased, so
        * the first rule found is the smallest this method can express.
        */
-      static Rule search(Geometry::Polytope::Type g, size_t degree,
-        size_t maxPoints = 128, size_t maxRestarts = 64, Real tolerance = 1e-12,
-        size_t threads = 0, Real seconds = 0)
+      static Rule search(Geometry::Polytope::Type g, size_t degree, size_t maxPoints = 0,
+        size_t maxRestarts = 64, Real tolerance = 1e-12, size_t threads = 0,
+        Real seconds = 0)
       {
         const size_t d = Geometry::Polytope::Traits(g).getDimension();
         size_t moments = 1;
         for (size_t i = 1; i <= d; ++i)
           moments = moments * (degree + i) / i;
         const size_t lower = (moments + d) / (d + 1);
+        // A ceiling of four times the counting bound has covered every rule
+        // found so far with room to spare --- the published counts run between
+        // one and two times the bound --- so the caller need not supply one.
+        if (maxPoints == 0)
+          maxPoints = 4 * lower;
 
         const size_t conditions = invariantDimension(g, degree);
         const size_t workers = (threads > 0)
@@ -848,39 +901,53 @@ namespace Rodin::QF
           // rule returned is still the one from the earliest decomposition that
           // succeeds, not whichever thread happens to finish first, so the
           // result does not depend on the scheduling.
+          // Restarts are spread across the candidates in rounds rather
+          // than spent candidate by candidate. Which decomposition works is
+          // not known in advance, and on the three-dimensional elements there
+          // are many of them --- the prism admits eighteen orbit kinds --- so
+          // pouring the whole budget into the first few means never reaching
+          // the one that closes. A round gives each candidate a few seeds;
+          // successive rounds deepen. The ordering still decides who is asked
+          // first, and within a round the earliest success wins, so the rule
+          // found does not depend on scheduling.
           std::vector<Rule> results(candidates.size());
-          std::atomic<size_t> next{0};
-          std::atomic<size_t> earliest{candidates.size()};
-          std::vector<std::thread> pool;
-          for (size_t w = 0; w < std::min(workers, candidates.size()); ++w)
+          const size_t perRound = std::max<size_t>(4, maxRestarts / 8);
+          const size_t rounds = std::max<size_t>(1, maxRestarts / perRound);
+          bool solved = false;
+          for (size_t round = 0; round < rounds && !expired() && !solved; ++round)
           {
-            pool.emplace_back([&] {
-              for (;;)
-              {
-                const size_t i = next++;
-                if (i >= candidates.size() || i > earliest.load() || expired())
-                  return;
-                size_t budget = restartBudget(g, candidates[i], conditions, maxRestarts);
-                // Effort is concentrated on the decompositions the ordering
-                // put first. A rule that exists is usually found in one of a
-                // handful of shapes, and finding it is a matter of seeding the
-                // iteration often enough to land in its basin; spreading the
-                // same restarts thinly over hundreds of unlikely shapes
-                // instead is how a strength ends up one point count too high.
-                if (budget == maxRestarts && i < 8)
-                  budget *= 8;
-                results[i] = solve(g, degree, candidates[i], budget, tolerance);
-                if (results[i].converged && results[i].admissible)
+            std::atomic<size_t> next{0};
+            std::atomic<size_t> earliest{candidates.size()};
+            std::vector<std::thread> pool;
+            for (size_t w = 0; w < std::min(workers, candidates.size()); ++w)
+            {
+              pool.emplace_back([&, round] {
+                for (;;)
                 {
-                  size_t seen = earliest.load();
-                  while (i < seen && !earliest.compare_exchange_weak(seen, i))
-                    ;
+                  const size_t i = next++;
+                  if (i >= candidates.size() || i > earliest.load() || expired())
+                    return;
+                  const size_t budget =
+                    restartBudget(g, candidates[i], conditions, maxRestarts);
+                  Rule attempt =
+                    solve(g, degree, candidates[i], std::min(budget, perRound), tolerance,
+                      400, 20260101u + static_cast<unsigned>(round) * 7919u);
+                  if (attempt.residual < results[i].residual)
+                    results[i] = std::move(attempt);
+                  if (results[i].converged && results[i].admissible)
+                  {
+                    size_t seen = earliest.load();
+                    while (i < seen && !earliest.compare_exchange_weak(seen, i))
+                      ;
+                  }
                 }
-              }
-            });
+              });
+            }
+            for (auto& worker : pool)
+              worker.join();
+            for (const auto& candidate : results)
+              solved = solved || (candidate.converged && candidate.admissible);
           }
-          for (auto& worker : pool)
-            worker.join();
 
           for (const auto& candidate : results)
           {

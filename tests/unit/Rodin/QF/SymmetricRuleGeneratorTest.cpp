@@ -21,6 +21,7 @@
 #include <random>
 
 #include "Rodin/QF/SymmetricRuleGenerator.h"
+#include "Rodin/QF/WitherdenVincent.h"
 
 #include "PublishedCounts.h"
 #include "QuadratureInvariants.h"
@@ -229,6 +230,48 @@ TEST(SymmetricRuleGeneratorTest, GenerationIsDeterministic)
       EXPECT_EQ(first.getWeight(i), second.getWeight(i)) << element.name;
       for (Eigen::Index k = 0; k < first.getPoint(i).size(); ++k)
         EXPECT_EQ(first.getPoint(i)[k], second.getPoint(i)[k]) << element.name;
+    }
+  }
+}
+
+/**
+ * @brief The generator reproduces the shipped tables, rule for rule in size.
+ *
+ * The coefficients in WitherdenVincent.cpp are generated rather than
+ * transcribed, which is only meaningful if running the generator again returns
+ * an equivalent rule. This asks for nothing but the element and the strength
+ * --- no point ceiling, no deadline, no thread count.
+ *
+ * What is required is the point count and exactness, not the coordinates. For
+ * a fixed version of the search the coordinates are reproduced exactly, since
+ * decompositions are ordered by a fixed rule and seeded from a fixed
+ * generator. But a change to the search --- to the order candidates are tried
+ * in, or how many seeds each is given --- can land on a different rule of the
+ * same size, equally exact and equally valid. Demanding the coordinates back
+ * would then fail for a change that improved the search, which is the wrong
+ * thing to test. Tables are regenerated when the search changes; the count is
+ * what has to hold in the meantime.
+ */
+TEST(SymmetricRuleGeneratorTest, DefaultsReproduceTheShippedCounts)
+{
+  for (const auto& element : elements())
+  {
+    for (size_t degree = 1; degree <= 4; ++degree)
+    {
+      if (!WitherdenVincent::isAvailable(degree, element.type))
+        continue;
+      const WitherdenVincent shipped(degree, element.type);
+      const auto generated = SymmetricRuleGenerator::search(element.type, degree);
+
+      ASSERT_TRUE(generated.converged && generated.admissible)
+        << element.name << ", strength " << degree;
+      EXPECT_EQ(generated.getSize(), shipped.getSize())
+        << element.name << ", strength " << degree
+        << ": the generator no longer reaches the shipped count";
+
+      const auto report = exactnessSweep(generated, element.type, degree);
+      EXPECT_LT(report.worstRelativeError, 1e-12)
+        << element.name << ", strength " << degree;
     }
   }
 }
