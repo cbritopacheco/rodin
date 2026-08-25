@@ -5,6 +5,7 @@ set(RodinBenchmarks_SRCS
   MeshIO.cpp
   UniformGrid.cpp
   Connectivity.cpp
+  Integrators.cpp
   Quadrature.cpp
   )
 
