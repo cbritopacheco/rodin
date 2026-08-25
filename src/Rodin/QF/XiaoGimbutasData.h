@@ -30,6 +30,7 @@
 namespace Rodin::QF::Data::XiaoGimbutas
 {
   // clang-format off
+    /// @brief Tabulated triangle rules indexed by degree.
     inline const std::vector<std::vector<Real>> triangle = {
       // degree 21: 85 points
       {
@@ -21944,6 +21945,7 @@ namespace Rodin::QF::Data::XiaoGimbutas
         0.0020397478851847026,
       },
     };
+    /// @brief Tabulated tetrahedron rules indexed by degree.
     inline const std::vector<std::vector<Real>> tetrahedron = {
       // degree 10: 74 points
       {

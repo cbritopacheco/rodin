@@ -23,6 +23,7 @@ namespace Rodin::QF
   class TensorProduct final : public QuadratureFormulaBase
   {
     public:
+      /// @brief Constructs the Cartesian product of two quadrature formulae.
       TensorProduct(Geometry::Polytope::Type g, const QuadratureFormulaBase& left,
         const QuadratureFormulaBase& right)
         : m_geometry(g)
@@ -30,6 +31,7 @@ namespace Rodin::QF
         append(left, right);
       }
 
+      /// @brief Constructs the Cartesian product of three quadrature formulae.
       TensorProduct(Geometry::Polytope::Type g, const QuadratureFormulaBase& first,
         const QuadratureFormulaBase& second, const QuadratureFormulaBase& third)
         : m_geometry(g)
@@ -38,6 +40,7 @@ namespace Rodin::QF
         append(pair, third);
       }
 
+      /// @brief Copies a tensor-product quadrature formula.
       TensorProduct(const TensorProduct&) = default;
 
       size_t getSize() const override
@@ -57,6 +60,7 @@ namespace Rodin::QF
         return m_points[i];
       }
 
+      /// @brief Returns the reference element associated with the product rule.
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

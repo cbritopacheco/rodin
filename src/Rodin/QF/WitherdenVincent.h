@@ -46,6 +46,7 @@ namespace Rodin::QF
        */
       WitherdenVincent(size_t degree, Geometry::Polytope::Type g);
 
+      /// @brief Copies a tabulated quadrature formula.
       WitherdenVincent(const WitherdenVincent&) = default;
 
       size_t getSize() const override

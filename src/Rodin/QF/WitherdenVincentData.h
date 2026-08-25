@@ -31,6 +31,7 @@
 namespace Rodin::QF::Data::WitherdenVincent
 {
   // clang-format off
+    /// @brief Tabulated quadrilateral rules indexed by degree.
     inline const std::vector<std::vector<Real>> quadrilateral = {
       // degree 16: 60 points
       {
@@ -1095,6 +1096,7 @@ namespace Rodin::QF::Data::WitherdenVincent
         0.0026280760395628001,
       },
     };
+    /// @brief Tabulated tetrahedron rules indexed by degree.
     inline const std::vector<std::vector<Real>> tetrahedron = {
       // degree 9: 59 points
       {
@@ -1663,6 +1665,7 @@ namespace Rodin::QF::Data::WitherdenVincent
         0.0021511726331436649,
       },
     };
+    /// @brief Tabulated wedge rules indexed by degree.
     inline const std::vector<std::vector<Real>> wedge = {
       // degree 8: 46 points
       {
@@ -2438,6 +2441,7 @@ namespace Rodin::QF::Data::WitherdenVincent
         0.0030961923149263001,
       },
     };
+    /// @brief Tabulated pyramid rules indexed by degree.
     inline const std::vector<std::vector<Real>> pyramid = {
       // degree 7: 31 points
       {
@@ -3344,6 +3348,7 @@ namespace Rodin::QF::Data::WitherdenVincent
         0.00084051628642680006,
       },
     };
+    /// @brief Tabulated hexahedron rules indexed by degree.
     inline const std::vector<std::vector<Real>> hexahedron = {
       // degree 10: 90 points
       {
