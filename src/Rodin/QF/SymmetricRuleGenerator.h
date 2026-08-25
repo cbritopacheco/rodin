@@ -899,14 +899,22 @@ namespace Rodin::QF
               const bool ba = usesBoundary(g, a), bb = usesBoundary(g, b);
               if (ba != bb)
                 return bb;
-              // Among the workable ones, the tightest fit first. A rule that
-              // exists generally has barely enough freedom to exist: published
-              // rules sit just above the condition count, and decompositions
-              // carrying far more freedom than that are the ones with slack to
-              // wander in and rarely close.
+              // Then fewest orbits. Published rules are built from a handful
+              // of large orbits, while the enumeration is overwhelmingly
+              // many-small-orbit shapes that never close: of the 26 400 ways
+              // to make thirty-five points on a prism, nine use six orbits or
+              // fewer, and one of those nine is the rule. Ordering by orbit
+              // count puts that handful first, which on the three-dimensional
+              // elements is the difference between finding a rule in seconds
+              // and not finding it in an hour.
+              if (a.size() != b.size())
+                return a.size() < b.size();
+              // Then the tightest fit. A rule that exists generally has barely
+              // enough freedom to exist; decompositions carrying far more have
+              // slack to wander in and rarely close.
               if (pa && ua != ub)
                 return ua < ub;
-              return a.size() < b.size();
+              return false;
             });
 
           // Decompositions are independent, so they are tried in parallel. The

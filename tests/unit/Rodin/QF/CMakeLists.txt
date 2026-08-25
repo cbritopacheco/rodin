@@ -69,9 +69,6 @@ gtest_discover_tests(RodinSymmetricRuleSolverTest
 )
 
 # Development driver for regenerating rule coefficients (not a test)
-add_executable(RodinGenerateRules EXCLUDE_FROM_ALL GenerateRules.cpp)
-target_link_libraries(RodinGenerateRules PUBLIC Rodin::Rodin Rodin::QF)
-target_include_directories(RodinGenerateRules PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(RodinSeedCheckTest SeedCheckTest.cpp)
 target_link_libraries(RodinSeedCheckTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)

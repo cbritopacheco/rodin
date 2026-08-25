@@ -17,14 +17,16 @@
  * independent moment oracle and against properties that use no oracle at all.
  *
  * @par Regenerating a table
- * One command per element, needing nothing but the element:
+ * One command per element. The first argument names the family --- these
+ * are the symmetric rules, so @c wv --- and the second the element, which
+ * together pick out exactly one array below:
  * @code
- *   RodinGenerateTables tri     > triangle.txt
- *   RodinGenerateTables quad    > quadrilateral.txt
- *   RodinGenerateTables tet     > tetrahedron.txt
- *   RodinGenerateTables wedge   > wedge.txt
- *   RodinGenerateTables pyr     > pyramid.txt
- *   RodinGenerateTables hex     > hexahedron.txt
+ *   RodinGenerateTables wv tri     > triangle.txt
+ *   RodinGenerateTables wv quad    > quadrilateral.txt
+ *   RodinGenerateTables wv tet     > tetrahedron.txt
+ *   RodinGenerateTables wv wedge   > wedge.txt
+ *   RodinGenerateTables wv pyr     > pyramid.txt
+ *   RodinGenerateTables wv hex     > hexahedron.txt
  * @endcode
  * The search is deterministic --- decompositions are enumerated and ordered by
  * a fixed rule and seeded from a fixed generator --- so a given version of it
