@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GrundmannMoller.h"
@@ -212,22 +214,54 @@ TEST(QuadratureExactnessTest, PointsLieInsideReferenceElement)
   }
 }
 
-/// @brief Determinism: two constructions of the same rule agree bitwise.
-TEST(QuadratureExactnessTest, ConstructionIsDeterministic)
+namespace
 {
-  for (const auto g : allGeometries())
+  /// @brief Asserts that two rules agree bitwise, node for node.
+  template <class Rule>
+  void expectIdentical(const Rule& a, const Rule& b, const std::string& where)
   {
-    GrundmannMoller a(2, g == Polytope::Type::Triangle ? g : Polytope::Type::Triangle);
-    GrundmannMoller b(2, Polytope::Type::Triangle);
-    ASSERT_EQ(a.getSize(), b.getSize());
+    ASSERT_EQ(a.getSize(), b.getSize()) << where;
     for (size_t i = 0; i < a.getSize(); ++i)
     {
-      EXPECT_EQ(a.getWeight(i), b.getWeight(i)) << "weight " << i;
+      EXPECT_EQ(a.getWeight(i), b.getWeight(i)) << where << " weight " << i;
+      ASSERT_EQ(a.getPoint(i).size(), b.getPoint(i).size()) << where << " point " << i;
       for (Eigen::Index k = 0; k < a.getPoint(i).size(); ++k)
-        EXPECT_EQ(a.getPoint(i)[k], b.getPoint(i)[k]) << "point " << i;
+        EXPECT_EQ(a.getPoint(i)[k], b.getPoint(i)[k]) << where << " point " << i;
     }
-    break;
   }
+}
+
+/**
+ * @brief Determinism: two constructions of the same rule agree bitwise.
+ *
+ * The constructors are exercised directly rather than through
+ * @ref Rodin::QF::PolytopeQuadratureFormula::get, which pools its rules and
+ * would hand back the very same object twice -- comparing that with itself
+ * would pass however the tables were read.
+ */
+TEST(QuadratureExactnessTest, ConstructionIsDeterministic)
+{
+  // Neither family covers every geometry -- Xiao-Gimbutas is simplices only,
+  // and the segment is served by Gauss-Legendre -- so each is exercised only
+  // where it ships rules, and the count guards against testing nothing.
+  size_t compared = 0;
+  for (const auto g : allGeometries())
+  {
+    for (size_t p = 1; p <= WitherdenVincent::getMaxDegree(g); ++p)
+    {
+      expectIdentical(WitherdenVincent(p, g), WitherdenVincent(p, g),
+        std::string("Witherden-Vincent ") + name(g) + " degree " + std::to_string(p));
+      ++compared;
+    }
+
+    for (size_t p = 1; p <= XiaoGimbutas::getMaxDegree(g); ++p)
+    {
+      expectIdentical(XiaoGimbutas(p, g), XiaoGimbutas(p, g),
+        std::string("Xiao-Gimbutas ") + name(g) + " degree " + std::to_string(p));
+      ++compared;
+    }
+  }
+  EXPECT_GT(compared, 0u) << "no shipped rule was compared";
 }
 
 /// @brief The closed-form moments are moments of *Rodin's* reference elements.

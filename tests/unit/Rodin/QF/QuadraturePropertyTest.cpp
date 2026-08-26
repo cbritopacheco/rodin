@@ -17,6 +17,7 @@
  */
 #include <gtest/gtest.h>
 #include <random>
+#include <numeric>
 #include "Rodin/QF/XiaoGimbutas.h"
 #include "Rodin/QF/WitherdenVincent.h"
 #include "QuadratureInvariants.h"
@@ -345,16 +346,31 @@ TEST(QuadraturePropertyTest, IntegralIsInvariantUnderVertexPermutation)
       const XiaoGimbutas qf(p, g);
       const auto f = randomPolynomial(d, p, rng);
       const Real base = integrateOn(qf, verts, f);
+
+      // Permute indices rather than the vertices themselves. Ordering the
+      // vertices by a single coordinate makes those that share it compare
+      // equal, and next_permutation then walks a multiset: the triangle's
+      // x-coordinates are {0, 1, 0} and yield three orderings instead of
+      // six, the tetrahedron's {0, 1, 0, 0} four instead of twenty-four.
+      std::vector<size_t> ordering(verts.size());
+      std::iota(ordering.begin(), ordering.end(), size_t{0});
+      size_t visited = 0;
       auto permuted = verts;
-      std::sort(permuted.begin(), permuted.end(),
-        [](const auto& a, const auto& b) { return a[0] < b[0]; });
       do
       {
+        for (size_t i = 0; i < ordering.size(); ++i)
+          permuted[i] = verts[ordering[i]];
         EXPECT_NEAR(
           integrateOn(qf, permuted, f), base, 1e-11 * std::max(Real(1), std::abs(base)))
           << name(g) << " degree " << p;
-      } while (std::next_permutation(permuted.begin(), permuted.end(),
-        [](const auto& a, const auto& b) { return a[0] < b[0]; }));
+        ++visited;
+      } while (std::next_permutation(ordering.begin(), ordering.end()));
+
+      size_t expected = 1;
+      for (size_t i = 2; i <= verts.size(); ++i)
+        expected *= i;
+      EXPECT_EQ(visited, expected)
+        << name(g) << ": the whole symmetry group should have been visited";
     }
   }
 }
