@@ -637,7 +637,7 @@ target_link_libraries(RodinVariationalMixedProblemPreassembledBFTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational
-  Rodin::Solver)
+  Rodin::Variational)
 gtest_discover_tests(RodinVariationalMixedProblemPreassembledBFTest
   PROPERTIES
     LABELS unit
@@ -688,3 +688,4 @@ gtest_discover_tests(RodinVariationalQuadratureRuleSpecializationTest
   PROPERTIES
     LABELS unit
 )
+

@@ -429,12 +429,21 @@ TEST(QuadratureRuleSpecializationTest, H1HandlersSatisfyTheSameIdentities)
  */
 TEST(QuadratureRuleSpecializationTest, ConstantKernelPotentialIntegratesToTheMeasure)
 {
-  // The triangle is short by 14.75 against 16 while every other element is
-  // exact to rounding. That is a real discrepancy in the potential on
-  // simplices in two dimensions, not a tolerance: stating the order does not
-  // move it, and the tetrahedron, hexahedron, prism, pyramid and quadrilateral
-  // all agree exactly. It is recorded here rather than hidden by a loose
-  // bound, and this list should shrink rather than grow.
+  // The triangle is wrong, and by a fixed amount per cell: 0.15625 whatever
+  // the refinement, against quadrilaterals exact to zero. That isolates it to
+  // the coincident-cell term, one per cell, which the handler integrates by a
+  // Sauter-Schwab splitting into six sub-domains evaluated at a single point.
+  // The exact self term is the cell's measure squared, 0.25 here, and the
+  // handler returns 0.09375 --- three eighths of it.
+  //
+  // A one-point rule on a smooth integrand would err by an amount that varies
+  // with the cell; a clean factor of three eighths does not, and points to the
+  // splitting itself rather than to the order it is evaluated at. The scheme
+  // exists for singular kernels, where the transformation is what makes the
+  // integral finite, so a constant kernel is not what it was built for --- but
+  // it should still integrate one correctly.
+  //
+  // Recorded rather than hidden behind a loose bound. The list should shrink.
   const std::set<Polytope::Type> outstanding = {Polytope::Type::Triangle};
 
   for (const auto& element : elements())
