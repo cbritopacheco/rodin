@@ -140,269 +140,233 @@ namespace
 }
 
 /**
- * @brief Mass and load operators reproduce the measure of the domain.
+ * @brief The finite element families the specializations are written for.
  *
- * Basis functions form a partition of unity, so summing every entry of a mass
- * operator integrates the constant one over the mesh, and the same sum of a
- * weighted form integrates its coefficient. The volume is read from the
- * geometry rather than from another integral, so a systematic error in the
- * quadrature cannot cancel between the two sides.
+ * Dispatch does not depend on the element a mesh is made of --- no handler
+ * signature mentions a geometry --- so the space is the axis that separates
+ * them, and each family below selects a different set of handlers. What the
+ * element does change is the local kernel each handler computes, which is why
+ * the identities are checked on every element for every family.
  */
-TEST(QuadratureRuleSpecializationTest, MassAndLoadReproduceTheMeasure)
+namespace
 {
-  for (const auto& element : elements())
+  struct P1Family
   {
-    LocalMesh mesh = makeMesh(element);
-    const Real volume = measureOf(mesh);
-    ASSERT_GT(volume, 0) << element.name;
+      static constexpr const char* name = "P1";
 
-    P1<Real, LocalMesh> fes(mesh);
-    TrialFunction u(fes);
-    TestFunction v(fes);
-    RealFunction two([](const Point&) { return 2.0; });
+      static P1<Real, LocalMesh> scalar(const LocalMesh& mesh)
+      {
+        return P1<Real, LocalMesh>(mesh);
+      }
 
-    {   // basis load
-      LinearForm load(v);
-      load = Integral(v);
-      load.assemble();
-      EXPECT_NEAR(load.getVector().sum(), volume, tolerance)
-        << element.name << ": basis load does not integrate one";
+      static P1<Math::SpatialVector<Real>, LocalMesh> vector(
+        const LocalMesh& mesh, size_t dimension)
+      {
+        return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, dimension);
+      }
+  };
+
+  template <size_t K>
+  struct H1Family
+  {
+      static constexpr const char* name = "H1";
+
+      static H1<K, Real, LocalMesh> scalar(const LocalMesh& mesh)
+      {
+        return H1<K, Real, LocalMesh>(std::integral_constant<size_t, K>{}, mesh);
+      }
+
+      static H1<K, Math::SpatialVector<Real>, LocalMesh> vector(
+        const LocalMesh& mesh, size_t dimension)
+      {
+        return H1<K, Math::SpatialVector<Real>, LocalMesh>(
+          std::integral_constant<size_t, K>{}, mesh, dimension);
+      }
+  };
+
+  /// @brief Scalar identities: mass and loads reproduce the measure, and
+  /// derivative forms annihilate constants.
+  template <class Family>
+  void checkScalarIdentities(const std::string& label)
+  {
+    for (const auto& element : elements())
+    {
+      const std::string where = label + " on " + element.name;
+      LocalMesh mesh = makeMesh(element);
+      const Real volume = measureOf(mesh);
+      ASSERT_GT(volume, 0) << where;
+
+      auto fes = Family::scalar(mesh);
+      TrialFunction u(fes);
+      TestFunction v(fes);
+      RealFunction two([](const Point&) { return 2.0; });
+
+      {
+        LinearForm load(v);
+        load = Integral(v);
+        load.assemble();
+        EXPECT_NEAR(load.getVector().sum(), volume, tolerance)
+          << where << ": basis load should integrate one";
+      }
+      {
+        LinearForm load(v);
+        load = Integral(two, v);
+        load.assemble();
+        EXPECT_NEAR(load.getVector().sum(), 2 * volume, tolerance)
+          << where << ": source load should integrate its coefficient";
+      }
+      {
+        BilinearForm mass(u, v);
+        mass = Integral(u, v);
+        mass.assemble();
+        EXPECT_NEAR(mass.getOperator().sum(), volume, tolerance)
+          << where << ": mass should integrate one";
+      }
+      {
+        BilinearForm mass(u, v);
+        mass = Integral(two * u, v);
+        mass.assemble();
+        EXPECT_NEAR(mass.getOperator().sum(), 2 * volume, tolerance)
+          << where << ": weighted mass should integrate its coefficient";
+      }
+      {
+        BilinearForm mass(u, v);
+        mass = Integral(two * Dot(u, v));
+        mass.assemble();
+        EXPECT_NEAR(mass.getOperator().sum(), 2 * volume, tolerance)
+          << where << ": outer-weighted mass should integrate its coefficient";
+      }
+      {
+        BilinearForm stiffness(u, v);
+        stiffness = Integral(Grad(u), Grad(v));
+        stiffness.assemble();
+        expectAnnihilatesConstants(
+          stiffness.getOperator(), where + ": gradient-gradient");
+      }
+      {
+        BilinearForm stiffness(u, v);
+        stiffness = Integral(two * Grad(u), Grad(v));
+        stiffness.assemble();
+        expectAnnihilatesConstants(
+          stiffness.getOperator(), where + ": weighted gradient-gradient");
+      }
     }
-    {   // source load
-      LinearForm load(v);
-      load = Integral(two, v);
-      load.assemble();
-      EXPECT_NEAR(load.getVector().sum(), 2 * volume, tolerance)
-        << element.name << ": source load does not integrate its coefficient";
-    }
-    {   // mass
-      BilinearForm mass(u, v);
-      mass = Integral(u, v);
-      mass.assemble();
-      EXPECT_NEAR(mass.getOperator().sum(), volume, tolerance)
-        << element.name << ": mass does not integrate one";
-    }
-    {   // weighted mass
-      BilinearForm mass(u, v);
-      mass = Integral(two * u, v);
-      mass.assemble();
-      EXPECT_NEAR(mass.getOperator().sum(), 2 * volume, tolerance)
-        << element.name << ": weighted mass does not integrate its coefficient";
-    }
-    {   // coefficient outside the product
-      BilinearForm mass(u, v);
-      mass = Integral(two * Dot(u, v));
-      mass.assemble();
-      EXPECT_NEAR(mass.getOperator().sum(), 2 * volume, tolerance)
-        << element.name
-        << ": outer-weighted mass does not integrate its "
-           "coefficient";
+  }
+
+  /// @brief Vector identities: derivative forms annihilate constant fields,
+  /// and the two divergence orderings are transposes of one another.
+  template <class Family>
+  void checkVectorIdentities(const std::string& label)
+  {
+    for (const auto& element : elements())
+    {
+      const std::string where = label + " on " + element.name;
+      LocalMesh mesh = makeMesh(element);
+      const size_t d = element.dimension;
+
+      auto scalarFES = Family::scalar(mesh);
+      auto vectorFES = Family::vector(mesh, d);
+      TrialFunction w(vectorFES);
+      TestFunction z(vectorFES);
+      TrialFunction p(scalarFES);
+      TestFunction q(scalarFES);
+      RealFunction two([](const Point&) { return 2.0; });
+
+      {
+        BilinearForm form(w, z);
+        form = Integral(Jacobian(w), Jacobian(z));
+        form.assemble();
+        expectAnnihilatesConstants(form.getOperator(), where + ": Jacobian-Jacobian");
+      }
+      {
+        BilinearForm form(w, z);
+        form = Integral(two * Jacobian(w), Jacobian(z));
+        form.assemble();
+        expectAnnihilatesConstants(
+          form.getOperator(), where + ": weighted Jacobian-Jacobian");
+      }
+      {
+        BilinearForm divergence(w, q);
+        divergence = Integral(Div(w), q);
+        divergence.assemble();
+        expectAnnihilatesConstants(
+          divergence.getOperator(), where + ": divergence-pressure");
+
+        BilinearForm pressure(p, z);
+        pressure = Integral(p, Div(z));
+        pressure.assemble();
+
+        const Math::Matrix<Real> lhs = Math::Matrix<Real>(divergence.getOperator());
+        const Math::Matrix<Real> rhs = Math::Matrix<Real>(pressure.getOperator());
+        ASSERT_EQ(lhs.rows(), rhs.cols()) << where;
+        ASSERT_EQ(lhs.cols(), rhs.rows()) << where;
+        ASSERT_GT(lhs.norm(), tolerance)
+          << where
+          << ": both divergence operators are empty, so the transpose "
+             "relation would hold vacuously";
+        EXPECT_NEAR((lhs - rhs.transpose()).norm() / lhs.norm(), 0, tolerance)
+          << where << ": the divergence orderings should be transposes";
+      }
+      // The transport field's arity follows the dimension, so the two cases
+      // are written out rather than selected: their types differ.
+      if (d == 2)
+      {
+        VectorFunction beta{1.0, 1.0};
+        BilinearForm form(w, z);
+        form = Integral(Dot(Jacobian(w) * beta, z));
+        form.assemble();
+        expectAnnihilatesConstants(form.getOperator(), where + ": advection");
+      }
+      else
+      {
+        VectorFunction beta{1.0, 1.0, 1.0};
+        BilinearForm form(w, z);
+        form = Integral(Dot(Jacobian(w) * beta, z));
+        form.assemble();
+        expectAnnihilatesConstants(form.getOperator(), where + ": advection");
+      }
     }
   }
 }
 
-/**
- * @brief Derivative forms annihilate constants.
- *
- * The gradient of a constant is zero, so a gradient-gradient operator applied
- * to the vector of ones must vanish. This catches a kernel that has the wrong
- * geometric factor or a transposed Jacobian, which a symmetric check on the
- * measure alone would not.
- */
-TEST(QuadratureRuleSpecializationTest, DerivativeFormsAnnihilateConstants)
+TEST(QuadratureRuleSpecializationTest, P1ScalarIdentities)
 {
-  for (const auto& element : elements())
-  {
-    LocalMesh mesh = makeMesh(element);
-
-    P1<Real, LocalMesh> fes(mesh);
-    TrialFunction u(fes);
-    TestFunction v(fes);
-    RealFunction two([](const Point&) { return 2.0; });
-
-    {   // gradient-gradient
-      BilinearForm stiffness(u, v);
-      stiffness = Integral(Grad(u), Grad(v));
-      stiffness.assemble();
-      expectAnnihilatesConstants(
-        stiffness.getOperator(), (std::string(element.name) + ": gradient-gradient"));
-    }
-    {   // weighted gradient-gradient
-      BilinearForm stiffness(u, v);
-      stiffness = Integral(two * Grad(u), Grad(v));
-      stiffness.assemble();
-      expectAnnihilatesConstants(stiffness.getOperator(),
-        (std::string(element.name) + ": weighted gradient-gradient"));
-    }
-  }
+  checkScalarIdentities<P1Family>("P1");
 }
 
-/**
- * @brief Vector forms annihilate constant fields, and the two divergence
- * orderings are transposes.
- *
- * A constant vector field has zero Jacobian and zero divergence. The transpose
- * relation is the check that carries the most: the two orderings are separate
- * specializations of one bilinear form, so they are two independent kernels
- * that must agree, and neither is used as the other's reference.
- */
-TEST(QuadratureRuleSpecializationTest, VectorFormsAgreeAndAnnihilateConstants)
+TEST(QuadratureRuleSpecializationTest, P1VectorIdentities)
 {
-  for (const auto& element : elements())
-  {
-    LocalMesh mesh = makeMesh(element);
-    const size_t d = element.dimension;
-
-    P1<Real, LocalMesh> scalarFES(mesh);
-    P1<Math::SpatialVector<Real>, LocalMesh> vectorFES(mesh, d);
-
-    TrialFunction w(vectorFES);
-    TestFunction z(vectorFES);
-    TrialFunction p(scalarFES);
-    TestFunction q(scalarFES);
-    RealFunction two([](const Point&) { return 2.0; });
-
-    {   // Jacobian-Jacobian
-      BilinearForm form(w, z);
-      form = Integral(Jacobian(w), Jacobian(z));
-      form.assemble();
-      expectAnnihilatesConstants(
-        form.getOperator(), (std::string(element.name) + ": Jacobian-Jacobian"));
-    }
-    {   // weighted Jacobian-Jacobian
-      BilinearForm form(w, z);
-      form = Integral(two * Jacobian(w), Jacobian(z));
-      form.assemble();
-      expectAnnihilatesConstants(
-        form.getOperator(), (std::string(element.name) + ": weighted Jacobian-Jacobian"));
-    }
-    {   // divergence-pressure, and its transpose
-      BilinearForm divergence(w, q);
-      divergence = Integral(Div(w), q);
-      divergence.assemble();
-      expectAnnihilatesConstants(divergence.getOperator(),
-        (std::string(element.name) + ": divergence-pressure does not annihilate a "));
-
-      BilinearForm pressure(p, z);
-      pressure = Integral(p, Div(z));
-      pressure.assemble();
-
-      const Math::Matrix<Real> lhs = Math::Matrix<Real>(divergence.getOperator());
-      const Math::Matrix<Real> rhs = Math::Matrix<Real>(pressure.getOperator());
-      ASSERT_EQ(lhs.rows(), rhs.cols()) << element.name;
-      ASSERT_EQ(lhs.cols(), rhs.rows()) << element.name;
-      ASSERT_GT(lhs.norm(), tolerance) << element.name
-                                       << ": both divergence operators are empty, so the "
-                                          "transpose relation would hold vacuously";
-      EXPECT_NEAR((lhs - rhs.transpose()).norm() / lhs.norm(), 0, tolerance)
-        << element.name
-        << ": the two divergence orderings are not transposes of one another";
-    }
-  }
+  checkVectorIdentities<P1Family>("P1");
 }
 
-/// @brief The advection form annihilates constant fields, its trial function
-/// being differentiated.
-TEST(QuadratureRuleSpecializationTest, AdvectionAnnihilatesConstants)
+TEST(QuadratureRuleSpecializationTest, H1P1ScalarIdentities)
 {
-  for (const auto& element : elements())
-  {
-    LocalMesh mesh = makeMesh(element);
-    const size_t d = element.dimension;
-
-    P1<Math::SpatialVector<Real>, LocalMesh> vectorFES(mesh, d);
-    TrialFunction w(vectorFES);
-    TestFunction z(vectorFES);
-
-    if (d == 2)
-    {
-      VectorFunction beta{1.0, 1.0};
-      BilinearForm form(w, z);
-      form = Integral(Dot(Jacobian(w) * beta, z));
-      form.assemble();
-      expectAnnihilatesConstants(
-        form.getOperator(), (std::string(element.name) + ": advection"));
-    }
-    else
-    {
-      VectorFunction beta{1.0, 1.0, 1.0};
-      BilinearForm form(w, z);
-      form = Integral(Dot(Jacobian(w) * beta, z));
-      form.assemble();
-      expectAnnihilatesConstants(
-        form.getOperator(), (std::string(element.name) + ": advection"));
-    }
-  }
+  checkScalarIdentities<H1Family<1>>("H1P1");
 }
 
-/// @brief The same identities hold for the H1 handlers, which are a separate
-/// set of specializations.
-TEST(QuadratureRuleSpecializationTest, H1HandlersSatisfyTheSameIdentities)
+TEST(QuadratureRuleSpecializationTest, H1P1VectorIdentities)
 {
-  constexpr size_t order = 2;
-  for (const auto& element : elements())
-  {
-    LocalMesh mesh = makeMesh(element);
-    const Real volume = measureOf(mesh);
-    const size_t d = element.dimension;
+  checkVectorIdentities<H1Family<1>>("H1P1");
+}
 
-    H1<order, Real, LocalMesh> fes(std::integral_constant<size_t, order>{}, mesh);
-    H1<order, Math::SpatialVector<Real>, LocalMesh> vfes(
-      std::integral_constant<size_t, order>{}, mesh, d);
+TEST(QuadratureRuleSpecializationTest, H1P2ScalarIdentities)
+{
+  checkScalarIdentities<H1Family<2>>("H1P2");
+}
 
-    TrialFunction u(fes);
-    TestFunction v(fes);
-    TrialFunction w(vfes);
-    TestFunction z(vfes);
-    RealFunction two([](const Point&) { return 2.0; });
+TEST(QuadratureRuleSpecializationTest, H1P2VectorIdentities)
+{
+  checkVectorIdentities<H1Family<2>>("H1P2");
+}
 
-    {
-      BilinearForm mass(u, v);
-      mass = Integral(u, v);
-      mass.assemble();
-      EXPECT_NEAR(mass.getOperator().sum(), volume, tolerance)
-        << element.name << ": H1 mass does not integrate one";
-    }
-    {
-      BilinearForm mass(u, v);
-      mass = Integral(two * u, v);
-      mass.assemble();
-      EXPECT_NEAR(mass.getOperator().sum(), 2 * volume, tolerance)
-        << element.name
-        << ": H1 weighted mass does not integrate its "
-           "coefficient";
-    }
-    {
-      BilinearForm stiffness(u, v);
-      stiffness = Integral(Grad(u), Grad(v));
-      stiffness.assemble();
-      expectAnnihilatesConstants(
-        stiffness.getOperator(), (std::string(element.name) + ": H1 gradient-gradient"));
-    }
-    {
-      BilinearForm form(w, z);
-      form = Integral(Jacobian(w), Jacobian(z));
-      form.assemble();
-      expectAnnihilatesConstants(
-        form.getOperator(), (std::string(element.name) + ": H1 Jacobian-Jacobian"));
-    }
-    {   // the divergence pair, which until recently could not be selected
-      BilinearForm divergence(w, v);
-      divergence = Integral(Div(w), v);
-      divergence.assemble();
-      expectAnnihilatesConstants(divergence.getOperator(),
-        (std::string(element.name) + ": H1 divergence-pressure does not annihilate a "));
+TEST(QuadratureRuleSpecializationTest, H1P3ScalarIdentities)
+{
+  checkScalarIdentities<H1Family<3>>("H1P3");
+}
 
-      BilinearForm pressure(u, z);
-      pressure = Integral(u, Div(z));
-      pressure.assemble();
-      const Math::Matrix<Real> lhs = Math::Matrix<Real>(divergence.getOperator());
-      const Math::Matrix<Real> rhs = Math::Matrix<Real>(pressure.getOperator());
-      EXPECT_NEAR((lhs - rhs.transpose()).norm() / lhs.norm(), 0, tolerance)
-        << element.name
-        << ": the H1 divergence orderings are not transposes of one another";
-    }
-  }
+TEST(QuadratureRuleSpecializationTest, H1P3VectorIdentities)
+{
+  checkVectorIdentities<H1Family<3>>("H1P3");
 }
 
 /**
@@ -575,4 +539,121 @@ TEST(QuadratureRuleSpecializationTest, CoincidentTriangleTermIsExactEntrywise)
     for (Eigen::Index j = 0; j < P.cols(); ++j)
       EXPECT_NEAR(P(i, j), expected, tolerance)
         << "entry (" << i << ", " << j << ") of the coincident term";
+}
+
+/**
+ * @brief Expressions no specialization matches are integrated correctly too.
+ *
+ * These are the forms the benchmarks carry as controls --- divergence
+ * divergence, symmetric-gradient elasticity, flux-gradient loads, piecewise
+ * constant mass, and boundary forms --- and nothing tested them. A control
+ * exists to show that a change helped the optimized path rather than the mesh
+ * traversal underneath, which it cannot do if the control is itself wrong.
+ *
+ * The same identities serve: the divergence and symmetric gradient of a
+ * constant field vanish, a constant flux dotted with the gradient of a
+ * partition of unity integrates to nothing, and piecewise constant basis
+ * functions sum to one just as nodal ones do. Boundary forms reproduce the
+ * measure of the boundary rather than of the domain, taken from the faces
+ * themselves.
+ */
+TEST(QuadratureRuleSpecializationTest, UnspecializedFormsAreAlsoCorrect)
+{
+  for (const auto& element : elements())
+  {
+    const std::string where = std::string("on ") + element.name;
+    LocalMesh mesh = makeMesh(element);
+    const size_t d = element.dimension;
+    const Real volume = measureOf(mesh);
+
+    P1<Real, LocalMesh> scalarFES(mesh);
+    P1<Math::SpatialVector<Real>, LocalMesh> vectorFES(mesh, d);
+    TrialFunction w(vectorFES);
+    TestFunction z(vectorFES);
+    TrialFunction u(scalarFES);
+    TestFunction v(scalarFES);
+
+    {   // divergence-divergence, which no handler specializes
+      BilinearForm form(w, z);
+      form = Integral(Div(w), Div(z));
+      form.assemble();
+      expectAnnihilatesConstants(form.getOperator(), where + ": divergence-divergence");
+    }
+    {   // symmetric-gradient elasticity
+      BilinearForm form(w, z);
+      form =
+        Integral(Jacobian(w) + Jacobian(w).T(), 0.5 * (Jacobian(z) + Jacobian(z).T()));
+      form.assemble();
+      expectAnnihilatesConstants(form.getOperator(), where + ": elasticity");
+    }
+    {   // a constant flux against the gradient of a partition of unity
+      LinearForm load(v);
+      if (d == 2)
+        load = Integral(VectorFunction{1.0, 1.0}, Grad(v));
+      else
+        load = Integral(VectorFunction{1.0, 1.0, 1.0}, Grad(v));
+      load.assemble();
+      EXPECT_NEAR(load.getVector().sum(), 0, tolerance)
+        << where
+        << ": a constant flux against Grad of a partition of unity "
+           "should integrate to nothing";
+    }
+    {   // piecewise constants, whose basis also sums to one
+      P0<Real, LocalMesh> fes(mesh);
+      TrialFunction p(fes);
+      TestFunction q(fes);
+
+      LinearForm load(q);
+      load = Integral(q);
+      load.assemble();
+      EXPECT_NEAR(load.getVector().sum(), volume, tolerance)
+        << where << ": P0 load should integrate one";
+
+      BilinearForm mass(p, q);
+      mass = Integral(p, q);
+      mass.assemble();
+      EXPECT_NEAR(mass.getOperator().sum(), volume, tolerance)
+        << where << ": P0 mass should integrate one";
+    }
+  }
+}
+
+/**
+ * @brief Boundary forms reproduce the measure of the boundary.
+ *
+ * Separate from the volume forms because the reference is different: the sum
+ * is over the faces, not the cells, and it is computed from the faces
+ * themselves so that neither side of the comparison is an integral.
+ */
+TEST(QuadratureRuleSpecializationTest, BoundaryFormsReproduceTheBoundaryMeasure)
+{
+  for (const auto& element : elements())
+  {
+    const std::string where = std::string("on ") + element.name;
+    LocalMesh mesh = makeMesh(element);
+
+    Real perimeter = 0;
+    for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      perimeter += it->getMeasure();
+    ASSERT_GT(perimeter, 0) << where << ": the mesh reports no boundary";
+
+    P1<Real, LocalMesh> fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    {
+      LinearForm load(v);
+      load = BoundaryIntegral(v);
+      load.assemble();
+      EXPECT_NEAR(load.getVector().sum(), perimeter, tolerance)
+        << where << ": a boundary load should integrate one over the boundary";
+    }
+    {
+      BilinearForm mass(u, v);
+      mass = BoundaryIntegral(u, v);
+      mass.assemble();
+      EXPECT_NEAR(mass.getOperator().sum(), perimeter, tolerance)
+        << where << ": a boundary mass should integrate one over the boundary";
+    }
+  }
 }

@@ -106,17 +106,29 @@ TEST(QuadratureRuleDispatchTest, P1ExpressionsSelectTheirSpecializations)
   SUCCEED();
 }
 
-/// @brief Each H1 expression with a specialization selects it.
-TEST(QuadratureRuleDispatchTest, H1ExpressionsSelectTheirSpecializations)
+/**
+ * @brief Each H1 expression with a specialization selects it, at every order.
+ *
+ * The handlers are templated on the polynomial order, so one order passing
+ * does not establish the others: a specialization that accidentally required a
+ * particular degree would still match at that degree and silently fall through
+ * elsewhere. First, second and third are checked.
+ *
+ * The element is not a variable here. No handler signature mentions a
+ * geometry, so which handler is selected cannot depend on one; the elements
+ * matter to what the handlers compute, which is checked separately.
+ */
+template <size_t K>
+static void checkH1Dispatch()
 {
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 0);
+  mesh.getConnectivity().compute(1, 2);
 
-  constexpr size_t order = 2;
-  H1<order, Real, LocalMesh> fes(std::integral_constant<size_t, order>{}, mesh);
-  H1<order, Math::SpatialVector<Real>, LocalMesh> vfes(
-    std::integral_constant<size_t, order>{}, mesh, 2);
+  H1<K, Real, LocalMesh> fes(std::integral_constant<size_t, K>{}, mesh);
+  H1<K, Math::SpatialVector<Real>, LocalMesh> vfes(
+    std::integral_constant<size_t, K>{}, mesh, 2);
 
   TrialFunction u(fes);
   TestFunction v(fes);
@@ -147,6 +159,13 @@ TEST(QuadratureRuleDispatchTest, H1ExpressionsSelectTheirSpecializations)
     "H1 divergence-pressure is no longer specialized");
   static_assert(selectsOptimized<decltype(Integral(u, Div(z)))>(),
     "H1 pressure-divergence is no longer specialized");
+}
+
+TEST(QuadratureRuleDispatchTest, H1ExpressionsSelectTheirSpecializations)
+{
+  checkH1Dispatch<1>();
+  checkH1Dispatch<2>();
+  checkH1Dispatch<3>();
   SUCCEED();
 }
 
