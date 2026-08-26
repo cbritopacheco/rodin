@@ -69,6 +69,29 @@ TEST(XiaoGimbutasTest, ShippedNodesAreInterior)
       EXPECT_TRUE(allPointsInside(XiaoGimbutas(p, g), g)) << name(g) << " degree " << p;
 }
 
+/**
+ * @brief The shipped rules are not fully symmetric, and that is the point.
+ *
+ * Node elimination buys a smaller rule by giving up invariance under the
+ * element's symmetry group, which is the trade this family makes against
+ * @ref Rodin::QF::WitherdenVincent. Asserting the asymmetry keeps the two
+ * families honestly distinguished, and confirms that the symmetry check used
+ * on the symmetric family can in fact fail.
+ */
+TEST(XiaoGimbutasTest, ShippedRulesAreNotFullySymmetric)
+{
+  for (const auto g : kSimplices)
+  {
+    size_t asymmetric = 0;
+    for (size_t p = 1; p <= XiaoGimbutas::getMaxDegree(g); ++p)
+      if (!isFullySymmetric(XiaoGimbutas(p, g), g))
+        ++asymmetric;
+    EXPECT_GT(asymmetric, 0u)
+      << name(g) << ": every shipped rule is symmetric, so nothing was gained"
+      << " over the symmetric family";
+  }
+}
+
 /// @brief Weights reproduce the measure of the reference element.
 TEST(XiaoGimbutasTest, ShippedWeightsSumToTheMeasure)
 {

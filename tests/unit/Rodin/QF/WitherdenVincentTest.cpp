@@ -87,6 +87,88 @@ TEST(WitherdenVincentTest, ShippedNodesAreInterior)
         << name(g) << " degree " << p;
 }
 
+/**
+ * @brief The discovered symmetry groups have their textbook orders.
+ *
+ * This guards the symmetry test against passing vacuously: were the search to
+ * return only the identity, every rule would be trivially invariant. The
+ * orders are those of the vertex symmetries of each reference element.
+ */
+TEST(WitherdenVincentTest, SymmetryGroupsHaveTheExpectedOrder)
+{
+  const std::vector<std::pair<Polytope::Type, size_t>> expected = {
+    {Polytope::Type::Triangle, 6},   // S3
+    {Polytope::Type::Quadrilateral, 8},   // D4
+    {Polytope::Type::Tetrahedron, 24},  // S4
+    {Polytope::Type::Wedge, 12},  // D3 x C2
+    {Polytope::Type::Pyramid, 8},   // C4v
+    {Polytope::Type::Hexahedron, 48}};  // the full octahedral group
+  for (const auto& [g, order] : expected)
+    EXPECT_EQ(symmetryGroup(g).size(), order) << name(g);
+}
+
+/**
+ * @brief Every shipped rule is invariant under the element's symmetry group.
+ *
+ * Full symmetry is what distinguishes this family from
+ * @ref Rodin::QF::XiaoGimbutas, and it is a property of the nodes and weights
+ * themselves, not of the integrals they produce: an asymmetric rule can still
+ * integrate exactly. The group is discovered from the reference vertices, and
+ * hoisted out of the degree loop because discovering it is the expensive part.
+ */
+TEST(WitherdenVincentTest, ShippedRulesAreFullySymmetric)
+{
+  for (const auto g : kElements)
+  {
+    const auto group = symmetryGroup(g);
+    ASSERT_GT(group.size(), 1u) << name(g) << " has no symmetries to check";
+    for (size_t p = 1; p <= WitherdenVincent::getMaxDegree(g); ++p)
+    {
+      const WitherdenVincent qf(p, g);
+      for (size_t s = 0; s < group.size(); ++s)
+        EXPECT_TRUE(isInvariantUnder(qf, group[s]))
+          << name(g) << " degree " << p << " is not invariant under symmetry " << s;
+    }
+  }
+}
+
+/**
+ * @brief The symmetry check rejects a rule whose nodes have been displaced.
+ *
+ * Moving a single node off its orbit leaves the rule's size and its element
+ * untouched, so this pins the check to the node positions.
+ */
+TEST(WitherdenVincentTest, SymmetryCheckRejectsADisplacedNode)
+{
+  struct Displaced
+  {
+      size_t getSize() const
+      {
+        return m_qf.getSize();
+      }
+
+      Math::SpatialVector<Real> getPoint(size_t i) const
+      {
+        auto x = m_qf.getPoint(i);
+        if (i == 0)
+          x[0] += 1e-3;
+        return x;
+      }
+
+      Real getWeight(size_t i) const
+      {
+        return m_qf.getWeight(i);
+      }
+
+      const WitherdenVincent& m_qf;
+  };
+
+  const auto g = Polytope::Type::Triangle;
+  const WitherdenVincent qf(4, g);
+  ASSERT_TRUE(isFullySymmetric(qf, g));
+  EXPECT_FALSE(isFullySymmetric(Displaced{qf}, g));
+}
+
 /// @brief Weights reproduce the measure of the reference element.
 TEST(WitherdenVincentTest, ShippedWeightsSumToTheMeasure)
 {

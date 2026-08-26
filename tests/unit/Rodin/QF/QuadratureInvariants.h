@@ -230,6 +230,117 @@ namespace Rodin::Tests::QF
         return false;
     return true;
   }
+
+  /// @brief An affine map @f$ x \mapsto A x + b @f$ of the reference element.
+  struct AffineMap
+  {
+      Math::Matrix<Real> matrix; ///< The linear part @f$ A @f$.
+      Math::Vector<Real> vector; ///< The translation @f$ b @f$.
+  };
+
+  /**
+   * @brief The affine symmetry group of a reference polytope.
+   *
+   * The group is discovered rather than tabulated: every permutation of the
+   * vertices is fitted with an affine map in the least-squares sense, and the
+   * fit is kept only when it reproduces every vertex exactly. This admits
+   * precisely the permutations realised by an affine self-map, so the same
+   * code yields the six maps of the triangle, the twenty-four of the
+   * tetrahedron, the forty-eight of the hexahedron, and the smaller groups of
+   * the wedge and the pyramid, whose vertices are not interchangeable.
+   */
+  inline std::vector<AffineMap> symmetryGroup(
+    Geometry::Polytope::Type g, Real tol = 1e-12)
+  {
+    const Geometry::Polytope::Traits traits(g);
+    const auto d = static_cast<Eigen::Index>(traits.getDimension());
+    const auto n = static_cast<Eigen::Index>(traits.getVertexCount());
+    if (d == 0)
+      return {};
+    // Vertices in homogeneous form, so that one solve yields A and b together.
+    Math::Matrix<Real> source(n, d + 1);
+    for (Eigen::Index i = 0; i < n; ++i)
+    {
+      const auto& v = traits.getVertex(static_cast<size_t>(i));
+      for (Eigen::Index k = 0; k < d; ++k)
+        source(i, k) = v(k);
+      source(i, d) = 1;
+    }
+    std::vector<size_t> permutation(static_cast<size_t>(n));
+    std::iota(permutation.begin(), permutation.end(), size_t{0});
+    const Eigen::FullPivHouseholderQR<Math::Matrix<Real>> qr(source);
+    std::vector<AffineMap> group;
+    do
+    {
+      Math::Matrix<Real> target(n, d);
+      for (Eigen::Index i = 0; i < n; ++i)
+      {
+        const auto& v = traits.getVertex(permutation[static_cast<size_t>(i)]);
+        for (Eigen::Index k = 0; k < d; ++k)
+          target(i, k) = v(k);
+      }
+      const Math::Matrix<Real> fit = qr.solve(target);
+      if ((source * fit - target).cwiseAbs().maxCoeff() > tol)
+        continue;
+      AffineMap map;
+      map.matrix = fit.topRows(d).transpose();
+      map.vector = fit.row(d).transpose();
+      group.push_back(std::move(map));
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
+    return group;
+  }
+
+  /**
+   * @brief Whether a rule is carried onto itself by an affine map.
+   *
+   * Each image point must coincide with a node carrying the same weight, and
+   * each node must be used once, so the nodes and weights together form an
+   * invariant multiset rather than merely an invariant point set.
+   */
+  template <class Rule>
+  bool isInvariantUnder(const Rule& qf, const AffineMap& map, Real tol = 1e-12)
+  {
+    const auto d = map.matrix.rows();
+    const size_t size = qf.getSize();
+    std::vector<bool> matched(size, false);
+    for (size_t i = 0; i < size; ++i)
+    {
+      const auto& x = qf.getPoint(i);
+      Math::Vector<Real> p(d);
+      for (Eigen::Index k = 0; k < d; ++k)
+        p(k) = x[static_cast<size_t>(k)];
+      const Math::Vector<Real> image = map.matrix * p + map.vector;
+      bool found = false;
+      for (size_t j = 0; j < size && !found; ++j)
+      {
+        if (matched[j])
+          continue;
+        const auto& y = qf.getPoint(j);
+        Real distance = 0;
+        for (Eigen::Index k = 0; k < d; ++k)
+          distance = std::max(distance, std::abs(image(k) - y[static_cast<size_t>(k)]));
+        if (distance > tol)
+          continue;
+        if (std::abs(qf.getWeight(i) - qf.getWeight(j)) > tol)
+          continue;
+        matched[j] = true;
+        found = true;
+      }
+      if (!found)
+        return false;
+    }
+    return true;
+  }
+
+  /// @brief Whether a rule is invariant under the whole symmetry group.
+  template <class Rule>
+  bool isFullySymmetric(const Rule& qf, Geometry::Polytope::Type g, Real tol = 1e-12)
+  {
+    for (const auto& map : symmetryGroup(g))
+      if (!isInvariantUnder(qf, map, tol))
+        return false;
+    return true;
+  }
 }
 
 #endif
