@@ -43,6 +43,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
+#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "P1.h"
@@ -3540,6 +3541,25 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(
           tep.getDimension(), tep.getIndex());
 
+        // The regularised integrand is smooth but not polynomial for the
+        // singular kernels this exists for, so the order is an accuracy
+        // choice rather than a degree that can be inferred. Seven is exact
+        // for the Jacobian and the first-order bases over it, and is the
+        // default when the caller states nothing.
+        {
+          const size_t order = this->getOrder(trp).value_or(7);
+          const size_t n = std::max<size_t>(1, (order + 2) / 2);
+          if (m_collapsed.size() != n)
+          {
+            std::vector<Real> nodes, weights;
+            QF::GaussLegendre::gl1dUnit(n, nodes, weights);
+            m_collapsed.clear();
+            m_collapsed.reserve(n);
+            for (size_t i = 0; i < n; ++i)
+              m_collapsed.emplace_back(nodes[i], weights[i]);
+          }
+        }
+
         if constexpr (std::is_same_v<Range, ScalarType>)
         {
 
@@ -3557,97 +3577,139 @@ namespace Rodin::Variational
                                                 rx4(2), rz4(2),
                                                 rx5(2), rz5(2);
 
-                assert(m_qfs.getSize() == 1);
-                const auto r = m_qfs.getPoint(0).value();
-                const auto w = m_qfs.getWeight(0);
-
-                const ScalarType xi = 1 - r;
-                const ScalarType eta1 = r;
-                const ScalarType eta2 = r;
-                const ScalarType eta3 = r;
-
-                rx0[0] = xi;
-                rx0[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz1[0] = xi;
-                rz1[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz2[0] = xi * (1 - eta1 * eta2);
-                rz2[1] = xi * eta1 * (1 - eta2);
-
-                rx3[0] = xi * (1 - eta1 * eta2);
-                rx3[1] = xi * eta1 * (1 - eta2);
-
-                rz4[0] = xi;
-                rz4[1] = xi * eta1 * (1 - eta2);
-
-                rx5[0] = xi;
-                rx5[1] = xi * eta1 * (1 - eta2);
-
-                rz0[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz0[1] = xi * (1 - eta1);
-
-                rx1[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx1[1] = xi * (1 - eta1);
-
-                rx2[0] = xi;
-                rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rz3[0] = xi;
-                rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rx4[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx4[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                rz5[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz5[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                const Geometry::Point x0(polytope, rx0);
-                const Geometry::Point x1(polytope, rx1);
-                const Geometry::Point x2(polytope, rx2);
-                const Geometry::Point x3(polytope, rx3);
-                const Geometry::Point x4(polytope, rx4);
-                const Geometry::Point x5(polytope, rx5);
-
-                const Geometry::Point z0(polytope, rz0);
-                const Geometry::Point z1(polytope, rz1);
-                const Geometry::Point z2(polytope, rz2);
-                const Geometry::Point z3(polytope, rz3);
-                const Geometry::Point z4(polytope, rz4);
-                const Geometry::Point z5(polytope, rz5);
-
-                m_distortion = xi * xi * xi * eta1 * eta1 * eta2;
-                m_weight = w * w * w * w;
-                m_matrix.resize(testfe.getCount(), trialfe.getCount());
-
-                const Real s0 = x0.getDistortion() * z0.getDistortion();
-                const Real s1 = x1.getDistortion() * z1.getDistortion();
-                const Real s2 = x2.getDistortion() * z2.getDistortion();
-                const Real s3 = x3.getDistortion() * z3.getDistortion();
-                const Real s4 = x4.getDistortion() * z4.getDistortion();
-                const Real s5 = x5.getDistortion() * z5.getDistortion();
-
-                assert(std::isfinite(s0));
-                assert(std::isfinite(s1));
-                assert(std::isfinite(s2));
-                assert(std::isfinite(s3));
-                assert(std::isfinite(s4));
-                assert(std::isfinite(s5));
-
-                for (size_t l = 0; l < testfe.getCount(); ++l)
+                // Sauter-Schwab for coincident panels: the four-dimensional
+                // integral is regularised onto the unit cube in the collapsed
+                // variables, and what remains is smooth and integrated by a
+                // tensor Gauss rule --- the same rule in each direction, as
+                // the construction intends.
+                //
+                // Evaluating it at one point instead, as this did, does not
+                // integrate even the Jacobian: xi^3 eta1^2 eta2 has midpoint
+                // value 1/64 against an exact 1/24 over the cube, so a
+                // constant kernel came out at three eighths of its value on
+                // every coincident pair. The transformation was never the
+                // problem.
+                m_matrix.setZero(testfe.getCount(), trialfe.getCount());
+                for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const auto& teb = testfe.getBasis(l);
-                  for (size_t m = 0; m < trialfe.getCount(); ++m)
+                  const ScalarType eta3 = m_collapsed[i3].first;
+                  const Real w3 = m_collapsed[i3].second;
+                  for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const auto& trb = trialfe.getBasis(m);
-                    m_matrix(l, m) = s0 * kernel(x0, z0) * trb(rx0) * teb(rz0);
-                    m_matrix(l, m) += s1 * kernel(x1, z1) * trb(rx1) * teb(rz1);
-                    m_matrix(l, m) += s2 * kernel(x2, z2) * trb(rx2) * teb(rz2);
-                    m_matrix(l, m) += s3 * kernel(x3, z3) * trb(rx3) * teb(rz3);
-                    m_matrix(l, m) += s4 * kernel(x4, z4) * trb(rx4) * teb(rz4);
-                    m_matrix(l, m) += s5 * kernel(x5, z5) * trb(rx5) * teb(rz5);
+                    const ScalarType eta2 = m_collapsed[i2].first;
+                    const Real w2 = m_collapsed[i2].second;
+                    for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
+                    {
+                      const ScalarType eta1 = m_collapsed[i1].first;
+                      const Real w1 = m_collapsed[i1].second;
+                      for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
+                      {
+                        const ScalarType xi = m_collapsed[i0].first;
+                        const Real w0 = m_collapsed[i0].second;
+                        const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                        const Real factor = w0 * w1 * w2 * w3 * jacobian;
+
+                        // The six sub-domains of the identical-panel case,
+                        // in the variables of Sauter and Schwab. Written as
+                        // they appear there: the first coordinate carries
+                        // 1 - xi and the second carries xi, which a symmetric
+                        // one-point rule cannot tell apart and a real rule
+                        // can. Getting these the wrong way round leaves the
+                        // Jacobian integrating correctly, so the entries sum
+                        // to the right total while being distributed wrongly
+                        // among the basis functions.
+                        const ScalarType a = xi - xi * eta1;
+                        const ScalarType b = xi - xi * eta1 * eta2 * eta3;
+                        const ScalarType c = xi - xi * eta1 * eta2;
+                        const ScalarType d = xi * eta1 * (1 - eta2);
+                        const ScalarType e = xi * eta1 * (1 - eta2 * eta3);
+                        const ScalarType f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const ScalarType g = xi - xi * eta1 + xi * eta1 * eta2;
+
+                        rx0[0] = 1 - xi;
+                        rx0[1] = g;
+                        rz0[0] = 1 - b;
+                        rz0[1] = a;
+
+                        rx1[0] = 1 - b;
+                        rx1[1] = a;
+                        rz1[0] = 1 - xi;
+                        rz1[1] = g;
+
+                        rx2[0] = 1 - xi;
+                        rx2[1] = f;
+                        rz2[0] = 1 - c;
+                        rz2[1] = d;
+
+                        rx3[0] = 1 - c;
+                        rx3[1] = d;
+                        rz3[0] = 1 - xi;
+                        rz3[1] = f;
+
+                        rx4[0] = 1 - b;
+                        rx4[1] = e;
+                        rz4[0] = 1 - xi;
+                        rz4[1] = d;
+
+                        rx5[0] = 1 - xi;
+                        rx5[1] = d;
+                        rz5[0] = 1 - b;
+                        rz5[1] = e;
+
+                        const Geometry::Point x0(polytope, rx0);
+                        const Geometry::Point x1(polytope, rx1);
+                        const Geometry::Point x2(polytope, rx2);
+                        const Geometry::Point x3(polytope, rx3);
+                        const Geometry::Point x4(polytope, rx4);
+                        const Geometry::Point x5(polytope, rx5);
+
+                        const Geometry::Point z0(polytope, rz0);
+                        const Geometry::Point z1(polytope, rz1);
+                        const Geometry::Point z2(polytope, rz2);
+                        const Geometry::Point z3(polytope, rz3);
+                        const Geometry::Point z4(polytope, rz4);
+                        const Geometry::Point z5(polytope, rz5);
+
+                        const Real s0 = x0.getDistortion() * z0.getDistortion();
+                        const Real s1 = x1.getDistortion() * z1.getDistortion();
+                        const Real s2 = x2.getDistortion() * z2.getDistortion();
+                        const Real s3 = x3.getDistortion() * z3.getDistortion();
+                        const Real s4 = x4.getDistortion() * z4.getDistortion();
+                        const Real s5 = x5.getDistortion() * z5.getDistortion();
+
+                        assert(std::isfinite(s0));
+                        assert(std::isfinite(s1));
+                        assert(std::isfinite(s2));
+                        assert(std::isfinite(s3));
+                        assert(std::isfinite(s4));
+                        assert(std::isfinite(s5));
+
+                        for (size_t l = 0; l < testfe.getCount(); ++l)
+                        {
+                          const auto& teb = testfe.getBasis(l);
+                          for (size_t m = 0; m < trialfe.getCount(); ++m)
+                          {
+                            const auto& trb = trialfe.getBasis(m);
+                            m_matrix(l, m) +=
+                              factor * s0 * kernel(x0, z0) * trb(rx0) * teb(rz0);
+                            m_matrix(l, m) +=
+                              factor * s1 * kernel(x1, z1) * trb(rx1) * teb(rz1);
+                            m_matrix(l, m) +=
+                              factor * s2 * kernel(x2, z2) * trb(rx2) * teb(rz2);
+                            m_matrix(l, m) +=
+                              factor * s3 * kernel(x3, z3) * trb(rx3) * teb(rz3);
+                            m_matrix(l, m) +=
+                              factor * s4 * kernel(x4, z4) * trb(rx4) * teb(rz4);
+                            m_matrix(l, m) +=
+                              factor * s5 * kernel(x5, z5) * trb(rx5) * teb(rz5);
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                m_distortion = 1;
+                m_weight = 1;
                 break;
               }
               default:
@@ -3727,117 +3789,136 @@ namespace Rodin::Variational
                                                 rx4(2), rz4(2),
                                                 rx5(2), rz5(2);
 
-                assert(m_qfs.getSize() == 1);
-                const auto r = m_qfs.getPoint(0).value();
-                const auto w = m_qfs.getWeight(0);
-
-                const ScalarType xi = 1 - r;
-                const ScalarType eta1 = r;
-                const ScalarType eta2 = r;
-                const ScalarType eta3 = r;
-
-                rx0[0] = xi;
-                rx0[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz1[0] = xi;
-                rz1[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz2[0] = xi * (1 - eta1 * eta2);
-                rz2[1] = xi * eta1 * (1 - eta2);
-
-                rx3[0] = xi * (1 - eta1 * eta2);
-                rx3[1] = xi * eta1 * (1 - eta2);
-
-                rz4[0] = xi;
-                rz4[1] = xi * eta1 * (1 - eta2);
-
-                rx5[0] = xi;
-                rx5[1] = xi * eta1 * (1 - eta2);
-
-                rz0[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz0[1] = xi * (1 - eta1);
-
-                rx1[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx1[1] = xi * (1 - eta1);
-
-                rx2[0] = xi;
-                rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rz3[0] = xi;
-                rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rx4[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx4[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                rz5[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz5[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                const Geometry::Point x0(polytope, rx0);
-                const Geometry::Point x1(polytope, rx1);
-                const Geometry::Point x2(polytope, rx2);
-                const Geometry::Point x3(polytope, rx3);
-                const Geometry::Point x4(polytope, rx4);
-                const Geometry::Point x5(polytope, rx5);
-
-                const Geometry::Point z0(polytope, rz0);
-                const Geometry::Point z1(polytope, rz1);
-                const Geometry::Point z2(polytope, rz2);
-                const Geometry::Point z3(polytope, rz3);
-                const Geometry::Point z4(polytope, rz4);
-                const Geometry::Point z5(polytope, rz5);
-
-                m_distortion = xi * xi * xi * eta1 * eta1 * eta2;
-                m_weight = w * w * w * w;
-                m_matrix.resize(testfe.getCount(), trialfe.getCount());
-
-                const Real s0 = x0.getDistortion() * z0.getDistortion();
-                const Real s1 = x1.getDistortion() * z1.getDistortion();
-                const Real s2 = x2.getDistortion() * z2.getDistortion();
-                const Real s3 = x3.getDistortion() * z3.getDistortion();
-                const Real s4 = x4.getDistortion() * z4.getDistortion();
-                const Real s5 = x5.getDistortion() * z5.getDistortion();
-
-                assert(std::isfinite(s0));
-                assert(std::isfinite(s1));
-                assert(std::isfinite(s2));
-                assert(std::isfinite(s3));
-                assert(std::isfinite(s4));
-                assert(std::isfinite(s5));
-
-                kernel(m_k0, x0, z0);
-                kernel(m_k1, x1, z1);
-                kernel(m_k2, x2, z2);
-                kernel(m_k3, x3, z3);
-                kernel(m_k4, x4, z4);
-                kernel(m_k5, x5, z5);
-
-                for (size_t l = 0; l < testfe.getCount(); ++l)
+                // The vector-valued counterpart of the scalar case above, and
+                // the same two corrections: a tensor Gauss rule over the
+                // collapsed variables rather than a single point, and the
+                // sub-domain maps written as Sauter and Schwab give them.
+                m_matrix.setZero(testfe.getCount(), trialfe.getCount());
+                for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const auto& teb = testfe.getBasis(l);
-                  for (size_t m = 0; m < trialfe.getCount(); ++m)
+                  const ScalarType eta3 = m_collapsed[i3].first;
+                  const Real w3 = m_collapsed[i3].second;
+                  for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const auto& trb = trialfe.getBasis(m);
-                    const auto trv0 = trb(rx0);
-                    const auto tev0 = teb(rz0);
-                    const auto trv1 = trb(rx1);
-                    const auto tev1 = teb(rz1);
-                    const auto trv2 = trb(rx2);
-                    const auto tev2 = teb(rz2);
-                    const auto trv3 = trb(rx3);
-                    const auto tev3 = teb(rz3);
-                    const auto trv4 = trb(rx4);
-                    const auto tev4 = teb(rz4);
-                    const auto trv5 = trb(rx5);
-                    const auto tev5 = teb(rz5);
+                    const ScalarType eta2 = m_collapsed[i2].first;
+                    const Real w2 = m_collapsed[i2].second;
+                    for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
+                    {
+                      const ScalarType eta1 = m_collapsed[i1].first;
+                      const Real w1 = m_collapsed[i1].second;
+                      for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
+                      {
+                        const ScalarType xi = m_collapsed[i0].first;
+                        const Real w0 = m_collapsed[i0].second;
+                        const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                        const Real factor = w0 * w1 * w2 * w3 * jacobian;
 
-                    m_matrix(l, m) = s0 * (m_k0 * trv0).dot(tev0);
-                    m_matrix(l, m) += s1 * (m_k1 * trv1).dot(tev1);
-                    m_matrix(l, m) += s2 * (m_k2 * trv2).dot(tev2);
-                    m_matrix(l, m) += s3 * (m_k3 * trv3).dot(tev3);
-                    m_matrix(l, m) += s4 * (m_k4 * trv4).dot(tev4);
-                    m_matrix(l, m) += s5 * (m_k5 * trv5).dot(tev5);
+                        const ScalarType a = xi - xi * eta1;
+                        const ScalarType b = xi - xi * eta1 * eta2 * eta3;
+                        const ScalarType c = xi - xi * eta1 * eta2;
+                        const ScalarType d = xi * eta1 * (1 - eta2);
+                        const ScalarType e = xi * eta1 * (1 - eta2 * eta3);
+                        const ScalarType f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const ScalarType g = xi - xi * eta1 + xi * eta1 * eta2;
+
+                        rx0[0] = 1 - xi;
+                        rx0[1] = g;
+                        rz0[0] = 1 - b;
+                        rz0[1] = a;
+
+                        rx1[0] = 1 - b;
+                        rx1[1] = a;
+                        rz1[0] = 1 - xi;
+                        rz1[1] = g;
+
+                        rx2[0] = 1 - xi;
+                        rx2[1] = f;
+                        rz2[0] = 1 - c;
+                        rz2[1] = d;
+
+                        rx3[0] = 1 - c;
+                        rx3[1] = d;
+                        rz3[0] = 1 - xi;
+                        rz3[1] = f;
+
+                        rx4[0] = 1 - b;
+                        rx4[1] = e;
+                        rz4[0] = 1 - xi;
+                        rz4[1] = d;
+
+                        rx5[0] = 1 - xi;
+                        rx5[1] = d;
+                        rz5[0] = 1 - b;
+                        rz5[1] = e;
+
+                        const Geometry::Point x0(polytope, rx0);
+                        const Geometry::Point x1(polytope, rx1);
+                        const Geometry::Point x2(polytope, rx2);
+                        const Geometry::Point x3(polytope, rx3);
+                        const Geometry::Point x4(polytope, rx4);
+                        const Geometry::Point x5(polytope, rx5);
+
+                        const Geometry::Point z0(polytope, rz0);
+                        const Geometry::Point z1(polytope, rz1);
+                        const Geometry::Point z2(polytope, rz2);
+                        const Geometry::Point z3(polytope, rz3);
+                        const Geometry::Point z4(polytope, rz4);
+                        const Geometry::Point z5(polytope, rz5);
+
+                        const Real s0 = x0.getDistortion() * z0.getDistortion();
+                        const Real s1 = x1.getDistortion() * z1.getDistortion();
+                        const Real s2 = x2.getDistortion() * z2.getDistortion();
+                        const Real s3 = x3.getDistortion() * z3.getDistortion();
+                        const Real s4 = x4.getDistortion() * z4.getDistortion();
+                        const Real s5 = x5.getDistortion() * z5.getDistortion();
+
+                        assert(std::isfinite(s0));
+                        assert(std::isfinite(s1));
+                        assert(std::isfinite(s2));
+                        assert(std::isfinite(s3));
+                        assert(std::isfinite(s4));
+                        assert(std::isfinite(s5));
+
+                        kernel(m_k0, x0, z0);
+                        kernel(m_k1, x1, z1);
+                        kernel(m_k2, x2, z2);
+                        kernel(m_k3, x3, z3);
+                        kernel(m_k4, x4, z4);
+                        kernel(m_k5, x5, z5);
+
+                        for (size_t l = 0; l < testfe.getCount(); ++l)
+                        {
+                          const auto& teb = testfe.getBasis(l);
+                          for (size_t m = 0; m < trialfe.getCount(); ++m)
+                          {
+                            const auto& trb = trialfe.getBasis(m);
+                            const auto trv0 = trb(rx0);
+                            const auto tev0 = teb(rz0);
+                            const auto trv1 = trb(rx1);
+                            const auto tev1 = teb(rz1);
+                            const auto trv2 = trb(rx2);
+                            const auto tev2 = teb(rz2);
+                            const auto trv3 = trb(rx3);
+                            const auto tev3 = teb(rz3);
+                            const auto trv4 = trb(rx4);
+                            const auto tev4 = teb(rz4);
+                            const auto trv5 = trb(rx5);
+                            const auto tev5 = teb(rz5);
+
+                            m_matrix(l, m) += factor * s0 * (m_k0 * trv0).dot(tev0);
+                            m_matrix(l, m) += factor * s1 * (m_k1 * trv1).dot(tev1);
+                            m_matrix(l, m) += factor * s2 * (m_k2 * trv2).dot(tev2);
+                            m_matrix(l, m) += factor * s3 * (m_k3 * trv3).dot(tev3);
+                            m_matrix(l, m) += factor * s4 * (m_k4 * trv4).dot(tev4);
+                            m_matrix(l, m) += factor * s5 * (m_k5 * trv5).dot(tev5);
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                m_distortion = 1;
+                m_weight = 1;
                 break;
               }
               default:
@@ -3927,6 +4008,17 @@ namespace Rodin::Variational
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_trp;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_tep;
+
+      /**
+       * @brief Points and weights on @f$ [0, 1] @f$ for the collapsed
+       * variables of a Sauter--Schwab transformation.
+       *
+       * One rule, applied in each of the four directions as a tensor product.
+       * Its size follows from the integrator's order, so setOrder() controls
+       * how finely the regularised integrand is resolved --- which is the only
+       * knob that matters once the transformation has removed the singularity.
+       */
+      std::vector<std::pair<Real, Real>> m_collapsed;
 
       const QF::Centroid m_qfs;
       Optional<QF::Centroid> m_qftr;
