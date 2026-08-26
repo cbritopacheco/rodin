@@ -526,3 +526,53 @@ TEST(QuadratureRuleSpecializationTest, PotentialOrderReachesTheCollapsedRule)
     << "an order-1 rule cannot integrate the transformation's Jacobian; if it "
        "does, setOrder is not reaching the collapsed quadrature";
 }
+
+/**
+ * @brief On one triangle the coincident term is the whole operator, and exact.
+ *
+ * This is the case that exercises the Sauter--Schwab path directly. Only the
+ * triangle has one: every other geometry sends a coincident pair to the plain
+ * centroid branch, so the tests above, though they run on six elements, reach
+ * this code on one of them.
+ *
+ * A single cell leaves nothing but the coincident term, and with a constant
+ * kernel the answer is known entrywise --- every entry is
+ * @f$ (\int \phi_i)(\int \phi_j) = (|K|/3)^2 @f$ on a first-order triangle,
+ * the basis functions being interchangeable. Checking the entries rather than
+ * their total is the point: the sub-domain maps were transposed, which left
+ * the total correct while putting a zero row where every entry should have
+ * been equal, and no test of the sum could have seen it.
+ */
+TEST(QuadratureRuleSpecializationTest, CoincidentTriangleTermIsExactEntrywise)
+{
+  LocalMesh mesh = LocalMesh::Builder()
+                     .initialize(2)
+                     .nodes(3)
+                     .vertex({0, 0})
+                     .vertex({1, 0})
+                     .vertex({0, 1})
+                     .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                     .finalize();
+
+  const Real area = measureOf(mesh);
+  ASSERT_NEAR(area, 0.5, tolerance);
+
+  P1<Real, LocalMesh> fes(mesh);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  const auto kernel = [](const Point&, const Point&) { return 1.0; };
+
+  DenseProblem potential(u, v);
+  potential = Integral(Potential(kernel, u), v);
+  potential.assemble();
+
+  const Math::Matrix<Real> P = potential.getLinearSystem().getOperator();
+  ASSERT_EQ(P.rows(), 3);
+  ASSERT_EQ(P.cols(), 3);
+
+  const Real expected = (area / 3) * (area / 3);
+  for (Eigen::Index i = 0; i < P.rows(); ++i)
+    for (Eigen::Index j = 0; j < P.cols(); ++j)
+      EXPECT_NEAR(P(i, j), expected, tolerance)
+        << "entry (" << i << ", " << j << ") of the coincident term";
+}
