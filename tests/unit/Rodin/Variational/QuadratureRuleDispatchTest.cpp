@@ -161,6 +161,7 @@ static void checkH1Dispatch()
     "H1 pressure-divergence is no longer specialized");
 }
 
+/// @brief Every H1 expression with a specialization selects it, at each order.
 TEST(QuadratureRuleDispatchTest, H1ExpressionsSelectTheirSpecializations)
 {
   checkH1Dispatch<1>();

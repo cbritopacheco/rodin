@@ -329,41 +329,49 @@ namespace
   }
 }
 
+/// @brief The scalar identities hold for P1 on every element.
 TEST(QuadratureRuleSpecializationTest, P1ScalarIdentities)
 {
   checkScalarIdentities<P1Family>("P1");
 }
 
+/// @brief The vector identities hold for P1 on every element.
 TEST(QuadratureRuleSpecializationTest, P1VectorIdentities)
 {
   checkVectorIdentities<P1Family>("P1");
 }
 
+/// @brief The scalar identities hold for first-order H1 on every element.
 TEST(QuadratureRuleSpecializationTest, H1P1ScalarIdentities)
 {
   checkScalarIdentities<H1Family<1>>("H1P1");
 }
 
+/// @brief The vector identities hold for first-order H1 on every element.
 TEST(QuadratureRuleSpecializationTest, H1P1VectorIdentities)
 {
   checkVectorIdentities<H1Family<1>>("H1P1");
 }
 
+/// @brief The scalar identities hold for second-order H1 on every element.
 TEST(QuadratureRuleSpecializationTest, H1P2ScalarIdentities)
 {
   checkScalarIdentities<H1Family<2>>("H1P2");
 }
 
+/// @brief The vector identities hold for second-order H1 on every element.
 TEST(QuadratureRuleSpecializationTest, H1P2VectorIdentities)
 {
   checkVectorIdentities<H1Family<2>>("H1P2");
 }
 
+/// @brief The scalar identities hold for third-order H1 on every element.
 TEST(QuadratureRuleSpecializationTest, H1P3ScalarIdentities)
 {
   checkScalarIdentities<H1Family<3>>("H1P3");
 }
 
+/// @brief The vector identities hold for third-order H1 on every element.
 TEST(QuadratureRuleSpecializationTest, H1P3VectorIdentities)
 {
   checkVectorIdentities<H1Family<3>>("H1P3");
