@@ -96,8 +96,20 @@ namespace Rodin::Variational
        * @brief Restores order inference from the integrand.
        *
        * This is the default: the order is derived per polytope from the
-       * polynomial degrees of the finite elements living on it. Correct
-       * whenever the integrand is polynomial.
+       * polynomial degrees of the finite elements living on it, and is
+       * therefore right exactly when the integrand's degree is the sum of
+       * those degrees --- when nothing else in the expression contributes any.
+       *
+       * A coefficient does contribute. Where it can report its degree that is
+       * accounted for; where it cannot, inference undercounts and the form is
+       * under-integrated, and this happens whether or not the integrand is
+       * polynomial. A mass form weighted by a lambda returning @f$ x + y @f$
+       * is cubic in a first-order basis, but the lambda reports nothing, so
+       * inference sees the basis alone and asks for a quadratic rule. The
+       * integrand is a polynomial and the answer is still wrong.
+       *
+       * State the order with @ref setOrder(size_t) whenever the degree the
+       * integrand actually has is not the degree inference can see.
        */
       Integrator& setOrder(std::nullopt_t)
       {
@@ -107,6 +119,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets a constant integration order.
+       *
+       * The order is the degree the quadrature rule must integrate exactly,
+       * so this is how a caller says what its integrand actually needs: the
+       * degree of a polynomial integrand that inference cannot see in full,
+       * or, for an integrand that is not polynomial at all, the accuracy
+       * being asked for.
        *
        * Note that the inferred order is a function of the polytope, so a
        * constant is only equivalent to inference on a mesh whose elements all
@@ -124,10 +142,12 @@ namespace Rodin::Variational
        * @brief Sets a rule computing the integration order per polytope.
        *
        * On an integrator the order is the degree of the quadrature rule, not
-       * the polynomial degree of an expression; the two coincide only when the
-       * integrand is polynomial. Set it explicitly whenever it is not — a
-       * coefficient composing a level set with a mesh lookup, say — since the
-       * inferred order is then meaningless and typically too low.
+       * the polynomial degree of an expression. Set it whenever the degree
+       * inference can see is not the degree the integrand has: a coefficient
+       * that reports no degree undercounts a polynomial integrand, and one
+       * that is not polynomial at all --- a level set composed with a mesh
+       * lookup, say --- has no degree to infer, so the inferred order is
+       * meaningless and typically too low in both cases.
        *
        * @param[in] order Rule invoked with the polytope being integrated
        */
