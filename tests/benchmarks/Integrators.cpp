@@ -32,6 +32,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Benchmarks
 {
+
   namespace
   {
     template <size_t Order>
@@ -75,7 +76,7 @@ namespace Rodin::Tests::Benchmarks
     {
       if constexpr (Dimension == 2)
       {
-        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {17, 17});
+        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {10, 10});
         mesh.getConnectivity().compute(2, 1);
         mesh.getConnectivity().compute(1, 0);
         mesh.getConnectivity().compute(1, 2);
@@ -83,7 +84,7 @@ namespace Rodin::Tests::Benchmarks
       }
       else
       {
-        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {7, 7, 7});
+        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
         mesh.getConnectivity().compute(3, 2);
         mesh.getConnectivity().compute(2, 1);
         mesh.getConnectivity().compute(1, 0);
@@ -97,15 +98,15 @@ namespace Rodin::Tests::Benchmarks
       switch (geometry)
       {
         case Polytope::Type::Segment:
-          return LocalMesh::UniformGrid(geometry, {17});
+          return LocalMesh::UniformGrid(geometry, {10});
         case Polytope::Type::Triangle:
         case Polytope::Type::Quadrilateral:
-          return LocalMesh::UniformGrid(geometry, {17, 17});
+          return LocalMesh::UniformGrid(geometry, {10, 10});
         case Polytope::Type::Tetrahedron:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
         case Polytope::Type::Pyramid:
-          return LocalMesh::UniformGrid(geometry, {7, 7, 7});
+          return LocalMesh::UniformGrid(geometry, {4, 4, 4});
         default:
           assert(false);
           return {};
@@ -821,13 +822,20 @@ namespace Rodin::Tests::Benchmarks
   BENCHMARK_TEMPLATE(BM_ElasticityAssembly, FAMILY, DIMENSION)                           \
     ->Name("Integrator/Assembly/" LABEL "/D" #DIMENSION "/Elasticity")
 
+    // These run on CI, so the matrix is kept to what distinguishes the
+    // integrators rather than to what the machine can be made to do. Meshes are
+    // small deliberately: every case reports its cell and entry counts, so cost
+    // per element is what is being compared, and a larger mesh multiplies the
+    // bill without sharpening that comparison. Cubic elements in three
+    // dimensions are registered for assembly only; as a local kernel one such
+    // case took over a second an iteration against milliseconds for the rest,
+    // which buys a number nobody reads at a price paid on every run.
     RODIN_REGISTER_KERNELS(P1Family, "P1", 2);
     RODIN_REGISTER_KERNELS(H1Family<1>, "H1P1", 2);
     RODIN_REGISTER_KERNELS(H1Family<2>, "H1P2", 2);
     RODIN_REGISTER_KERNELS(H1Family<3>, "H1P3", 2);
     RODIN_REGISTER_KERNELS(P1Family, "P1", 3);
     RODIN_REGISTER_KERNELS(H1Family<2>, "H1P2", 3);
-    RODIN_REGISTER_KERNELS(H1Family<3>, "H1P3", 3);
 
     RODIN_REGISTER_ASSEMBLY(P1Family, "P1", 2);
     RODIN_REGISTER_ASSEMBLY(H1Family<2>, "H1P2", 2);
