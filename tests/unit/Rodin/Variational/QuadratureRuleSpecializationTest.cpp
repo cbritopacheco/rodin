@@ -665,3 +665,135 @@ TEST(QuadratureRuleSpecializationTest, BoundaryFormsReproduceTheBoundaryMeasure)
     }
   }
 }
+
+namespace
+{
+  /// @brief Largest entry-wise difference between two operators, relative to
+  /// the larger one.
+  Real relativeDifference(const Math::Matrix<Real>& a, const Math::Matrix<Real>& b)
+  {
+    const Real scale = std::max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
+    if (scale == 0)
+      return 0;
+    return (a - b).cwiseAbs().maxCoeff() / scale;
+  }
+
+  /// @brief Assembles a bilinear form at a stated quadrature order.
+  template <class Trial, class Test, class Make>
+  Math::Matrix<Real> assembleAt(Trial& u, Test& v, Make make, size_t order)
+  {
+    BilinearForm bf(u, v);
+    auto integrand = make();
+    integrand.setOrder(order);
+    bf = integrand;
+    bf.assemble();
+    return Math::Matrix<Real>(bf.getOperator().toDense());
+  }
+
+  /**
+   * @brief Asserts that a form's operator does not depend on the quadrature
+   * order once the order is high enough to integrate it exactly.
+   *
+   * The specialized handlers cache reference basis values and derivatives so
+   * that they are evaluated once per element rather than once per quadrature
+   * point. That caching is only sound if it is done for each point of the
+   * rule: basis values vary inside every element, and reference gradients
+   * vary inside every element that is not a simplex. A handler that froze
+   * them at the first point agreed with the generic code only for a
+   * single-point rule, which is what the inferred order happens to produce
+   * for the lowest-degree forms -- so the defect stayed hidden until a
+   * coefficient or an explicit order asked for more points.
+   *
+   * Comparing two high orders rather than the inferred one against a high one
+   * keeps this a test of the caching alone, and not of whether the inferred
+   * order is generous enough to integrate the form exactly.
+   *
+   * The pyramid is excluded from exactness: its basis is rational, so no rule
+   * integrates these forms exactly and the operator is expected to keep
+   * changing with the order. It is required to converge instead.
+   */
+  template <class Family>
+  void checkOrderInvariance(const std::string& label)
+  {
+    for (const auto& element : elements())
+    {
+      const std::string where = label + " on " + element.name;
+      const bool rationalBasis = element.type == Polytope::Type::Pyramid;
+      LocalMesh mesh = makeMesh(element);
+
+      auto fes = Family::scalar(mesh);
+      auto vfes = Family::vector(mesh, element.dimension);
+
+      RealFunction gamma([](const Point& p) { return 1.0 + p.x() + p.y(); });
+      VectorFunction beta{RealFunction([](const Point&) { return 1.0; }),
+        RealFunction([](const Point&) { return 2.0; })};
+
+      // Each entry assembles one form at a stated order.
+      const auto forms = [&](size_t order) {
+        std::vector<std::pair<std::string, Math::Matrix<Real>>> out;
+        {
+          TrialFunction u(fes);
+          TestFunction v(fes);
+          out.emplace_back(
+            "mass", assembleAt(u, v, [&] { return Integral(u, v); }, order));
+          out.emplace_back("stiffness",
+            assembleAt(u, v, [&] { return Integral(Grad(u), Grad(v)); }, order));
+          out.emplace_back("weighted stiffness",
+            assembleAt(u, v, [&] { return Integral(gamma * Grad(u), Grad(v)); }, order));
+        }
+        {
+          TrialFunction w(vfes);
+          TestFunction q(fes);
+          out.emplace_back("divergence against a scalar",
+            assembleAt(w, q, [&] { return Integral(Div(w), q); }, order));
+        }
+        {
+          TrialFunction s(fes);
+          TestFunction z(vfes);
+          out.emplace_back("scalar against a divergence",
+            assembleAt(s, z, [&] { return Integral(s, Div(z)); }, order));
+        }
+        {
+          TrialFunction w(vfes);
+          TestFunction z(vfes);
+          out.emplace_back("jacobian",
+            assembleAt(w, z, [&] { return Integral(Jacobian(w), Jacobian(z)); }, order));
+          out.emplace_back("weighted jacobian",
+            assembleAt(
+              w, z, [&] { return Integral(gamma * Jacobian(w), Jacobian(z)); }, order));
+        }
+        return out;
+      };
+
+      const auto low = forms(6);
+      const auto high = forms(10);
+      ASSERT_EQ(low.size(), high.size()) << where;
+
+      for (size_t i = 0; i < low.size(); ++i)
+      {
+        const Real difference = relativeDifference(low[i].second, high[i].second);
+        if (rationalBasis)
+        {
+          // Only require that refining the rule stops changing the answer.
+          const auto higher = forms(14);
+          const Real next = relativeDifference(high[i].second, higher[i].second);
+          EXPECT_LT(next, std::max(difference, 1e-14))
+            << where << ": " << low[i].first << " should converge as the rule is refined";
+        }
+        else
+        {
+          EXPECT_LT(difference, 1e-12)
+            << where << ": " << low[i].first
+            << " changed with the quadrature order, but is integrated exactly"
+            << " at both";
+        }
+      }
+    }
+  }
+}
+
+/// @brief P1 handlers do not depend on the quadrature order.
+TEST(QuadratureRuleSpecializationTest, P1HandlersAreOrderInvariant)
+{
+  checkOrderInvariance<P1Family>("P1");
+}
