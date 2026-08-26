@@ -766,6 +766,16 @@ namespace Rodin::Tests::Benchmarks
       runLinearKernel(state, integral, fes);
     }
 
+/**
+ * @brief Registers the local-kernel cases of one family and dimension.
+ * @param FAMILY Finite element family providing scalar() and vector()
+ * @param LABEL Name the family appears under in the benchmark output
+ * @param DIMENSION Spatial dimension of the mesh
+ *
+ * Covers every expression a QuadratureRule specializes, and the generic
+ * controls alongside them, so a regression cannot hide behind the optimized
+ * cases alone.
+ */
 #define RODIN_REGISTER_KERNELS(FAMILY, LABEL, DIMENSION)                                 \
   BENCHMARK_TEMPLATE(BM_BasisLoadKernel, FAMILY, DIMENSION)                              \
     ->Name("Integrator/Kernel/" LABEL "/D" #DIMENSION "/BasisLoad");                     \
@@ -808,6 +818,16 @@ namespace Rodin::Tests::Benchmarks
   BENCHMARK_TEMPLATE(BM_ElasticityGenericKernel, FAMILY, DIMENSION)                      \
     ->Name("Integrator/Kernel/" LABEL "/D" #DIMENSION "/GenericElasticity")
 
+/**
+ * @brief Registers the full-assembly cases of one family and dimension.
+ * @param FAMILY Finite element family providing scalar() and vector()
+ * @param LABEL Name the family appears under in the benchmark output
+ * @param DIMENSION Spatial dimension of the mesh
+ *
+ * A subset of the expressions, since assembly adds mesh traversal and sparse
+ * construction to every case and the matrix would otherwise grow past what a
+ * runner can afford.
+ */
 #define RODIN_REGISTER_ASSEMBLY(FAMILY, LABEL, DIMENSION)                                \
   BENCHMARK_TEMPLATE(BM_MassAssembly, FAMILY, DIMENSION)                                 \
     ->Name("Integrator/Assembly/" LABEL "/D" #DIMENSION "/ReassemblyMass");              \
