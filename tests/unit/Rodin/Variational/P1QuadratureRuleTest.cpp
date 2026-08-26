@@ -28,7 +28,12 @@ namespace Rodin::Tests::Unit
     LinearForm lf(v);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
-    lf = Integral(c, v);
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto integ = Integral(c, v);
+    integ.setOrder(2);
+    lf = integ;
     lf.assemble();
 
     const auto& b = lf.getVector();
@@ -61,7 +66,12 @@ namespace Rodin::Tests::Unit
     BilinearForm bf(u, v);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
-    bf = Integral(Dot(Mult(c, u), v));
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto integ = Integral(Dot(Mult(c, u), v));
+    integ.setOrder(3);
+    bf = integ;
     bf.assemble();
 
     const auto& A = bf.getOperator();
@@ -203,11 +213,20 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
 
     BilinearForm mass(u, v);
-    mass = Integral(Dot(Mult(coeff, u), v));
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto massInteg = Integral(Dot(Mult(coeff, u), v));
+    massInteg.setOrder(3);
+    mass = massInteg;
     mass.assemble();
 
     LinearForm load(v);
-    load = Integral(Dot(coeff * gf, v));
+    // The same order as the bilinear form above, so both are integrated
+    // with one rule and the identity between them is exact.
+    auto loadInteg = Integral(Dot(coeff * gf, v));
+    loadInteg.setOrder(3);
+    load = loadInteg;
     load.assemble();
 
     const auto residual = mass.getOperator() * x - load.getVector();
@@ -242,11 +261,20 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
 
     BilinearForm mass(u, v);
-    mass = Integral(coeff * Dot(u, v));
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto massInteg = Integral(coeff * Dot(u, v));
+    massInteg.setOrder(3);
+    mass = massInteg;
     mass.assemble();
 
     LinearForm load(v);
-    load = Integral(coeff * Dot(gf, v));
+    // The same order as the bilinear form above, so both are integrated
+    // with one rule and the identity between them is exact.
+    auto loadInteg = Integral(coeff * Dot(gf, v));
+    loadInteg.setOrder(3);
+    load = loadInteg;
     load.assemble();
 
     const auto residual = mass.getOperator() * x - load.getVector();

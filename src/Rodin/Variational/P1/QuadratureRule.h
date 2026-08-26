@@ -361,9 +361,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
-            fe.getOrder() + coefficientOrder(f, polytope)));
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -953,7 +952,7 @@ namespace Rodin::Variational
 
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            trialfe.getOrder() + testfe.getOrder() + coefficientOrder(coeff, polytope)));
+            trialfe.getOrder() + testfe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1541,8 +1540,7 @@ namespace Rodin::Variational
         const size_t k_te = testfe.getOrder();
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)) +
-            coefficientOrder(coeff, polytope)));
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1861,7 +1859,7 @@ namespace Rodin::Variational
 
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            trialfe.getOrder() + testfe.getOrder() + coefficientOrder(coeff, polytope)));
+            trialfe.getOrder() + testfe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2899,8 +2897,7 @@ namespace Rodin::Variational
         const size_t k_te = testfe.getOrder();
         const size_t order =
           this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
-            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)) +
-            coefficientOrder(coeff, polytope)));
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;

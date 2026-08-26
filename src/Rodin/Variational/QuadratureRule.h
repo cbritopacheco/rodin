@@ -63,33 +63,6 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Degree assumed for a coefficient that cannot report its own.
-   *
-   * A coefficient built from a lambda has no degree the library can know, and
-   * reports none. Integrating a weighted form as though it were unweighted
-   * then under-integrates it: a mass form with a linear coefficient is cubic
-   * in the P1 basis, not quadratic, and a rule chosen for the basis alone gets
-   * it wrong in the third digit.
-   *
-   * Two is enough for the coefficients that occur in practice, and no choice
-   * is exact for every one of them --- a coefficient need not be polynomial at
-   * all. Where the degree *is* known, coefficientOrder() uses it and the form
-   * is integrated exactly.
-   */
-  inline constexpr size_t s_unknownCoefficientOrder = 2;
-
-  /**
-   * @brief Degree to allow for @p coefficient when choosing a quadrature rule.
-   * @see s_unknownCoefficientOrder
-   */
-  template <class Coefficient>
-  size_t coefficientOrder(
-    const Coefficient& coefficient, const Geometry::Polytope& polytope)
-  {
-    return coefficient.getOrder(polytope).value_or(s_unknownCoefficientOrder);
-  }
-
-  /**
    * @defgroup QuadratureRuleSpecializations QuadratureRule Template Specializations
    * @brief Template specializations of the QuadratureRule class.
    *
