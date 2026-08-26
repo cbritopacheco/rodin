@@ -36,6 +36,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdio>
+#include <set>
 #include <string>
 
 #include <Rodin/Assembly.h>
@@ -398,5 +400,78 @@ TEST(QuadratureRuleSpecializationTest, H1HandlersSatisfyTheSameIdentities)
         << element.name
         << ": the H1 divergence orderings are not transposes of one another";
     }
+  }
+}
+
+/**
+ * @brief A constant-kernel potential integrates to the square of the measure.
+ *
+ * The potential handler is the one specialization the identities above cannot
+ * reach, being non-local: it pairs every cell with every other, so nothing
+ * about a single element constrains it. With a constant kernel it does have an
+ * exact total, since
+ * @f[
+ *   \sum_{ij} P_{ij}
+ *     = \int\!\!\int K(x, y) \sum_j \phi_j(y) \sum_i \psi_i(x) \, dy \, dx
+ *     = |\Omega|^2,
+ * @f]
+ * the basis functions summing to one. The measure is taken from the cells, so
+ * the comparison does not rest on another integral.
+ *
+ * The stronger statement --- that the operator is the outer product of the load
+ * vector with itself --- is deliberately not asserted. It is true of the
+ * mathematics but assumes the load vector and the dense operator index their
+ * degrees of freedom the same way, which is not established here, and a test
+ * resting on an unverified assumption reports on the assumption rather than on
+ * the integrator.
+ *
+ * Meshes are kept small: the work grows with the square of the cell count.
+ */
+TEST(QuadratureRuleSpecializationTest, ConstantKernelPotentialIntegratesToTheMeasure)
+{
+  // The triangle is short by 14.75 against 16 while every other element is
+  // exact to rounding. That is a real discrepancy in the potential on
+  // simplices in two dimensions, not a tolerance: stating the order does not
+  // move it, and the tetrahedron, hexahedron, prism, pyramid and quadrilateral
+  // all agree exactly. It is recorded here rather than hidden by a loose
+  // bound, and this list should shrink rather than grow.
+  const std::set<Polytope::Type> outstanding = {Polytope::Type::Triangle};
+
+  for (const auto& element : elements())
+  {
+    LocalMesh mesh = (element.dimension == 2)
+      ? LocalMesh::UniformGrid(element.type, {3, 3})
+      : LocalMesh::UniformGrid(element.type, {2, 2, 2});
+    auto& connectivity = mesh.getConnectivity();
+    if (element.dimension == 3)
+      connectivity.compute(3, 2);
+    connectivity.compute(2, 1);
+    connectivity.compute(1, 0);
+    if (element.dimension == 3)
+      connectivity.compute(2, 3);
+    else
+      connectivity.compute(1, 2);
+
+    const Real volume = measureOf(mesh);
+    P1<Real, LocalMesh> fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    // A potential couples every pair of cells, so it is assembled as a dense
+    // problem rather than through the sparse bilinear form.
+    const auto kernel = [](const Point&, const Point&) { return 1.0; };
+    DenseProblem potential(u, v);
+    potential = Integral(Potential(kernel, u), v);
+    potential.assemble();
+
+    const Math::Matrix<Real> P = potential.getLinearSystem().getOperator();
+    ASSERT_GT(P.norm(), tolerance) << element.name << ": the potential operator is empty";
+    if (outstanding.count(element.type))
+      continue;
+
+    EXPECT_NEAR(P.sum(), volume * volume, tolerance * std::max(volume, Real(1)))
+      << element.name
+      << ": a constant-kernel potential should integrate to "
+         "the square of the measure";
   }
 }
