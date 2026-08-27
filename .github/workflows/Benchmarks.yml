@@ -63,7 +63,13 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build
       - name: Run benchmarks
-        run: ${{github.workspace}}/build/tests/benchmarks/RodinBenchmarks --benchmark_format=json --benchmark_out=${{github.workspace}}/RodinBenchmarks.json
+        # A fifth of a second a case rather than the default second. The
+        # reported numbers are per iteration, so this changes their precision
+        # and not their meaning, and it is the difference between minutes and
+        # a quarter of an hour across the suite. Set here rather than on the
+        # registrations because MinTime() appends to a benchmark's name, and
+        # these names are the keys the results are tracked under.
+        run: ${{github.workspace}}/build/tests/benchmarks/RodinBenchmarks --benchmark_min_time=0.2s --benchmark_format=json --benchmark_out=${{github.workspace}}/RodinBenchmarks.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
