@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1786538154124,
+  "lastUpdate": 1787831122027,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -130708,6 +130708,2160 @@ window.BENCHMARK_DATA = {
             "value": 718237.8993772325,
             "unit": "ns/iter",
             "extra": "iterations: 964\ncpu: 718425.3018668568 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e589252606df1adfcc2b3fe0df562fba7a4736c5",
+          "message": "XiaoGimbutas + WitherdenVincent (#327)\n\n* QF: add quadrature exactness gate, fix wedge and pyramid under-integration\n\nAdds a table-integrity instrument for quadrature rules and, in doing so,\nuncovers two live defects in the collapsed-coordinate rules.\n\nThe instrument compares a rule against closed-form moments of the reference\npolytope, so it needs no reference implementation and cannot inherit an error\nfrom one. It sweeps every monomial of total degree <= p, and additionally\nchecks weight sum against the reference measure, strict interiority of the\npoints, determinism of construction, and the amplification sum|w|/sum w that\nseparates a positive rule from a signed one. Two meta-tests establish that the\ninstrument has teeth: perturbing one weight by one part in 1e9 must be\nrejected, and the interiority predicate must reject an exterior point.\n\nBoth defects share a mechanism. A collapsed map contributes a Jacobian factor\nthat raises the polynomial degree in the collapsed direction, and the dispatch\ncomputed the point count with integer division, which floors where a ceiling\nis required.\n\n  Pyramid: (x,y,z) = ((1-z)u, (1-z)v, z) contributes (1-z)^2, so a monomial of\n  total degree p has degree p+2 in z. Short by one at every even order, and\n  2*feOrder is always even. Worst relative error 1.7e-1 on z^2 at order 2,\n  5.0e-2 at order 4, 1.4e-2 at order 6.\n\n  Wedge: (r,s) = (u, (1-u)v) contributes (1-u), so a monomial of total degree\n  p has degree p+1 in u. Short by one at every odd order. Worst relative error\n  1.7e-1 on x at order 1, 5.0e-2 at order 3, 1.4e-2 at order 5.\n\nBoth regressions were observed red before the fix and green after. Simplices\nand tensor-product elements were already exact and are untouched; the point\ncounts change only for Wedge and Pyramid.\n\nThe wedge fix raises both collapsed directions to the count the u direction\nneeds. Using a separate, smaller count for v would save points and is left\nout deliberately: it is an optimisation, not part of the correctness fix.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* tests/QF: source reference geometry from Polytope::Traits, not from the test\n\nThe invariants header restated Rodin's reference elements: it carried its own\ndimension switch, its own per-element containment predicate, and its own list\nof polytope types. All three already exist in Geometry::Polytope::Traits, and\na test that hard-codes them checks itself against its own assumptions rather\nthan against the library.\n\n  dimensionOf   -> Polytope::Traits::getDimension\n  isInside      -> Polytope::Traits::getHalfSpace, i.e. A x <= b\n  kAllGeometries-> Polytope::Types, so a newly declared element type is\n                   covered the moment it is declared\n\nThe closed-form moments stay hand-written on purpose. They are the oracle the\nexactness sweep is measured against, and deriving them from the same code\nunder test would make the sweep circular.\n\nThat independence is only worth having if the domain they integrate over is\nthe one Rodin actually uses, so MomentOracleMatchesRodinReferenceElements now\npins the two together: every reference vertex and the centroid published by\nTraits must satisfy the half-space system, and the measure implied by the\nmoments must agree with the measure a verified rule produces. This also\ncross-checks Traits' vertex data against its own half-space data.\n\nConfirms the reference pyramid is (0,0,0), (1,0,0), (1,1,0), (0,1,0), (0,0,1),\nwhich is the domain the pyramid moment formula was derived for.\n\n11 tests pass.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: add SymmetricOrbit, the barycentric orbit of a symmetric simplex rule\n\nFoundation for the Xiao-Gimbutas and Witherden-Vincent families. Both store\ntheir rules as symmetry orbits rather than as loose point lists, so the\nrepresentation has to exist before either rule does.\n\nA fully symmetric simplex rule is invariant under permutation of barycentric\ncoordinates, hence a union of orbits, each orbit being the distinct\npermutations of one tuple with one shared weight. That is what SymmetricOrbit\nholds. Expansion is std::next_permutation over the sorted tuple.\n\nThe conventional orbit classes are deliberately not enumerated. S3, S21(a),\nS111(a,b) on the triangle and S4, S31(a), S22(a), S211(a,b), S1111(a,b,c) on\nthe tetrahedron are exactly the multiplicity patterns of the stored tuple, so\nexpanding the distinct permutations recovers each class and its cardinality\nwithout a parallel taxonomy to keep in step. The tests pin the cardinalities\n1/3/6 and 1/4/6/12/24 so that this stays true rather than being assumed.\n\ntoReference maps a tuple by sum(lambda_i v_i) over the reference vertices\npublished by Geometry::Polytope::Traits, so the reference element is read from\nthe library rather than restated. Tests check the unit tuples land on those\nvertices, that the uniform tuple lands on the published centroid, and that\nexpanded points satisfy the published half-space system.\n\nBibliography: adds xiao2010numerical and witherden2015identification. Both\nrecords were verified against Crossref by DOI content negotiation rather than\nwritten from memory; the DOIs are 10.1016/j.camwa.2009.10.027 and\n10.1016/j.camwa.2015.03.017.\n\n8 orbit tests pass; the 11 exactness tests remain green.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: add SymmetricRuleSolver, generating symmetric simplex rules from moments\n\nThe coefficients of the Xiao-Gimbutas and Witherden-Vincent families are not\npublished in closed form; both papers search for them numerically and keep the\nsolutions whose weights are positive and whose points are interior. This does\nthe same, so the coefficients Rodin ships are computed here rather than copied\nfrom anywhere.\n\nUnknowns are the free barycentric parameters of each orbit plus one weight per\norbit; equations are the monomial moments of the reference simplex. An orbit\nclass is given by its multiplicity pattern, the partition of d+1 saying how\nmany barycentric coordinates share a value, so {2,1} is S21(a) and {2,1,1} is\nS211(a,b) without a separate taxonomy. A pattern with k parts carries k-1\nparameters, the last fixed by sum(lambda) = 1.\n\nEach equation is normalised by its own moment. The raw moments span many\norders of magnitude and the unnormalised system is badly scaled well before\nthe degrees of interest. Solved by Levenberg-Marquardt with a central\ndifference Jacobian from pseudo-random starts, seeded deterministically:\ninlined coefficients that drifted on regeneration would silently change every\nassembled integral.\n\nTwo of the tests are genuine known-answer checks rather than self-consistency.\nDegree 1 on the triangle is forced to be the centroid with weight 1/2, and\ndegree 2 is forced to be S21(1/6) with weight 1/6; both are determined, and\nthe solver recovers them to 1e-12. Beyond that, ConvergedRulesPassTheExactness\nSweep measures generated rules with the same independent moment oracle used\nfor the shipped rules, which is what allows generated coefficients to be\ntrusted without a published table alongside them.\n\nAlso covered: admissibility (positive weights, interior points, amplification\nexactly one), determinism, a negative case where a single centroid orbit\ncannot satisfy degree 2 and must report failure rather than a plausible wrong\nrule, and agreement between the solver's moment formula and the independently\nwritten test oracle.\n\n8 solver tests pass. QF suites remain green: exactness 11, orbit 8,\ncentroid 7, Gauss-Legendre 13.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: add orbit configuration search, and make the residual fast enough to use\n\nCompletes the generator. Given a degree, the search enumerates configurations\nas multisets of orbit classes ordered by point count and returns the cheapest\nthat converges with positive weights and interior points. This is the search\nXiao-Gimbutas and Witherden-Vincent each perform, so the point counts it finds\nare the figure of merit against theirs.\n\nOn the triangle it recovers the published minima exactly:\n\n  degree   1  2  3  4  5\n  points   1  3  6  6  7\n\nand the coefficients are the classical ones. Degree 4 returns barycentric\nparameters 0.091576213509771 and 0.445948490915965 with weights\n0.054975871827661 and 0.111690794839005; degree 5 returns centroid weight\n0.1125, which is 9/80. These are determined values the search cannot have\ninvented, so they are asserted as known-answer tests rather than left to the\nexactness sweep alone.\n\nThree fixes were needed to get here.\n\nThe residual expanded the orbits once per monomial. It is called O(unknowns)\ntimes per Levenberg-Marquardt iteration for the finite-difference Jacobian, so\nthat expansion dominated everything: degrees 1-5 did not finish in 600s.\nHoisting it out of the monomial loop, and replacing std::pow with an integer\npower, brings the same sweep to 1.5s.\n\nThe search then skipped candidate configurations by a guessed lower bound on\nthe unknown count. It was wrong, and rejected the 7-point degree-5 rule in\nfavour of a 12-point one. Replacing it with a partition count derived from the\nsymmetric polynomial space was wrong in the other direction: the barycentric\nconstraint sum(lambda) = 1 makes that space degenerate, and degree 1 lost the\ncentroid rule. The skip is now gone. Generation is a development-time\noperation and the search is fast enough without it.\n\nAdds eight further tests: orbit class enumeration, multinomial cardinalities,\nthe published point counts, the two known-answer coefficient checks, exactness\nof searched rules on both simplices, the point budget as a boundary case, and\ndeterminism of the search.\n\n16 solver tests pass. QF suites green: exactness 11, orbit 8, centroid 7,\nGauss-Legendre 13.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* tests/QF: assert positivity on the wedge and pyramid, and name the exception\n\nPositivity coverage stopped at segment, quadrilateral and hexahedron, which\nleft the wedge and pyramid untested for the one property that currently\njustifies leaving them alone.\n\nTheir weights are products of positive Gauss-Legendre weights with positive\nJacobian factors, (1 - u) on the wedge and (1 - z)^2 on the pyramid, so they\nare positive by construction. That structural fact is the reason the\nnegative-weight argument driving the simplex work does not extend to them, so\nit is now asserted rather than assumed. The amplification sum|w| / sum w must\nbe exactly one; any departure means a sign appeared somewhere in the product.\n\nAdds a second test stating the complement directly: among the elements Rodin\npublishes, the simplices of dimension two and above are the only ones with\nsigned weights. Previously that could only be inferred from which element\ntypes the positivity test happened to omit, which is not a claim a reader can\ncheck.\n\n12 exactness tests pass.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* benchmarks: measure quadrature cost before changing the quadrature family\n\nconventions.md requires performance work to cite a measurement rather than a\nplausible argument. A rule with fewer points is only faster if per-point work\ndominates rule access, and that had not been established. This measures both,\nbefore anything changes, so the claim can be checked afterwards.\n\nTwo benchmarks. BM_QuadratureAccess times the pooled lookup, bounding how much\nof an integrator's time a change of family could possibly move.\nBM_QuadratureSweep times one pass doing per-point work of the kind an element\nintegrator does: a deformation gradient built from the point, its determinant,\nand a Frobenius contraction.\n\nBaseline, Apple Silicon, RelWithDebInfo, --benchmark_min_time=0.15s:\n\n  element      order  points   sweep      ns/point   access\n  Triangle       2       4      36.9 ns    9.20        4.0 ns\n  Triangle       4      10      98.6 ns    9.82        5.1 ns\n  Triangle       8      35     326   ns    9.27       15.8 ns\n  Tetrahedron    4      15     234   ns   15.57       24.1 ns\n  Tetrahedron    8      70    1103   ns   15.30       32.2 ns\n  Wedge          2       8     117   ns   14.59        3.5 ns\n  Wedge          4      27     375   ns   13.83        5.0 ns\n  Wedge          8     125    1690   ns   13.48       15.5 ns\n  Pyramid        2      12     170   ns   14.10       19.9 ns\n  Pyramid        4      36     490   ns   13.57       25.0 ns\n  Pyramid        8     150    2034   ns   13.49       31.8 ns\n\nTwo conclusions.\n\nPer-point cost is flat: 13.5 to 15.6 ns on every three-dimensional element,\nindependent of order, and 9.2 to 9.8 ns on the triangle. Sweep time is\ntherefore linear in point count with a stable constant, so a reduction in\npoint count converts into time saved at close to one to one. This is the fact\nthe whole change rests on and it was previously assumed.\n\nRule access is negligible once amortised: 5.0 ns against a 375 ns sweep on a\ndegree-4 wedge, or 1.3%. A family with a more expensive lookup would not pay\nfor it, but neither does the current one benefit from a cheap one.\n\nAccess on the tetrahedron and pyramid is four to six times that on the\ntriangle and wedge at equal order. Not chased here; noted because it is\nunexplained and may repay a look.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* guidelines: require anomalies to be explained; explain the quadrature one\n\nAdds rule 6 to AGENTS.md and an \"Anomalies\" section to conventions.md: an\nunexplained measurement is a finding, not a footnote, and gets explored to a\nroot cause before the work that surfaced it is called done.\n\nThe rule earns its place immediately, because the anomaly that prompted it was\nabout the instrument rather than the subject.\n\nThe previous commit reported that quadrature rule access on tetrahedra and\npyramids cost four to six times that on triangles and wedges at equal order,\nand left it unexplained. It is not a property of the element type.\nPolytopeQuadratureFormula keeps a thread-local cache of eight entries,\ninserted round-robin and scanned linearly from slot zero, so the cost of a hit\nis proportional to the slot the key landed in, hence to the order in which\ndistinct keys were first requested in the process.\n\nThe measured ramp is 3.5, 5.1, 10.6, 15.5, 19.9, 24.1, 28.1, 32.2 ns, resetting\nevery eight cases, matching slot index exactly. Running any single case alone\ngives 3.5 ns for every element. Filtering to the two \"slow\" geometries makes\nthe tetrahedron fast and leaves the pyramid slow, because the tetrahedron then\noccupies the low slots. The benchmark was measuring its own registration order.\n\nHad that been believed it would have justified optimising a difference between\nelement types that does not exist. The benchmark now documents what it\nmeasures. The envelope is still the useful quantity: 3.5 to 32 ns against a\n375 ns degree-4 wedge sweep bounds lookup below 9% of an integrator's time in\nthe worst slot, so no plausible change of quadrature family is limited by it.\n\nA separate observation, not acted on here: the hot cache degrades linearly\nwith occupancy, and move-to-front on hit would make repeat lookups\nposition-independent. That is an optimisation and belongs in its own change\nwith its own measurement.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: generate symmetric wedge rules by extending the orbit to a product\n\nThe wedge is the unit triangle crossed with [0,1], and its symmetry group is\nS3 on the barycentric coordinates times the reflection z -> 1-z. An orbit is\ntherefore a product: a triangle orbit crossed with either the single\nreflection-invariant value {1/2} or a reflected pair {c, 1-c}.\n\nSymmetricOrbit gains a tensor part rather than a sibling class, so there is\nstill one name for the concept. Cardinality multiplies, and expandPoints maps\nthe barycentric part through the base simplex published by Polytope::Traits\nand appends the tensor value. SymmetricRuleSolver gains an OrbitClass carrying\nthat choice, a moment dispatch (the wedge moment is the triangle moment times\n1/(c+1)), and a search that enumerates both tensor variants of each triangle\nclass.\n\nThe search recovers the published Witherden-Vincent prism point counts:\n\n  degree   1  2  3  4\n  points   1  5  8  11\n\nOne fix was needed to get there. The wedge has six orbit classes where a\nsimplex has three, and the multiset enumeration over configurations exploded\nbefore a single candidate was solved: degree 1 did not finish in 600s. Real\nsymmetric rules use a handful of orbits, so the enumeration is now capped at\nsix per configuration, and the same sweep takes 26s.\n\nSeven wedge tests: product cardinalities, points inside the reference wedge,\nagreement between the solver's wedge moment and the independently written test\noracle (the 1/(c+1) factor would otherwise be self-consistently wrong), the\npublished point counts, exactness and positivity of searched rules, the\nreflection structure of the tensor parts, and determinism.\n\n23 solver tests pass. QF suites green: exactness 12, orbit 8.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: solve for weights as theta^2, making positivity structural\n\nAt degree 9 on the triangle the solver reached a residual of 2.5e-15, well\ninside the 1e-13 tolerance, and reported failure. The rule was exact and\ninadmissible: the moment equations have many exact solutions at higher degree\nand most carry a negative weight, so a search that optimises exactness and\nscreens admissibility afterwards converges to unusable rules and discards\nthem.\n\nWeights now enter the parameter vector as w = theta^2, so positivity holds for\nevery iterate rather than being tested at the end. The starting guess becomes\nsqrt(measure / points).\n\nThis addresses only the weight half of admissibility. Interiority of the\nbarycentric parameters is still screened after the fact, and remains a\ncandidate cause for failures at higher degree.\n\n23 solver tests pass unchanged, including the known-answer checks: degree 1\nstill gives the centroid with weight 1/2, degree 2 still gives S21(1/6) with\nweight 1/6, degree 4 still gives the classical parameters, and degree 5 still\ngives centroid weight 9/80.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: parallelise generation over degrees and hoist the moment data\n\nTwo changes to make offline generation viable.\n\nThe driver now searches degrees in parallel, one worker per degree. Degrees\nare mutually independent, so wall time becomes the slowest degree rather than\nthe sum, and determinism is unaffected: each degree is its own deterministic\nsearch. Results are flushed per degree, so an interrupted run keeps everything\nit had found rather than losing the lot.\n\nThe residual was rebuilding its monomial exponent list and recomputing\nfactorial moments on every call, and it is called O(unknowns) times per\nLevenberg-Marquardt iteration for the finite-difference Jacobian. Those depend\nonly on the element and the degree, so they are now built once per solve and\npassed in.\n\nTriangle degrees 1 to 8, ten cores:\n\n  before   d8 25.1s, wall 25.5s\n  after    d8 16.4s, wall 16.9s\n\nPoint counts are unchanged at 1, 3, 6, 6, 7, 12, 15, 16, still matching the\npublished Xiao-Gimbutas minima, and all 23 solver tests pass.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: add NodeElimination, the Xiao-Gimbutas construction\n\nThe symmetric search plateaus. An overnight run reached triangle degree 10 and\ntetrahedron degree 7, then failed degrees 11 to 20 with residuals degrading\nmonotonically from 1.1e-6 to 2.1e-3, which is the signature of an\nill-conditioned basis rather than of a bad search. It also stopped being\nminimal before it stopped working: degree 9 found 24 points against a\npublished 19. Cost was prohibitive, tetrahedron degree 7 taking 42 minutes.\n\nXiao and Gimbutas do not search. They start from a rule that is already exact,\nremove the node contributing least to the moments, and use the reduced rule as\nthe initial guess for Gauss-Newton on what remains. Every solve is warm-started\nbeside a known solution instead of hunting from a random point, progress is\nmonotone, and the structure of the rule is discovered rather than prescribed.\n\nThree pieces. productSeed builds a collapsed Gauss product on the simplex,\npositive and exact by construction; elimination preserves those properties, it\ndoes not establish them. refine drives a rule onto the moment equations with\nan analytic Jacobian, which is available here because points are free\nvariables rather than functions of orbit parameters. reduce eliminates until\nnothing more can go, trying candidates in increasing order of weight-scaled\ncolumn norm.\n\nTriangle, seed to result:\n\n  degree  1  2  3  4   5   6   7   8\n  seed    2  4  6  9  12  16  20  25\n  final   1  3  4  6   7  11  12  17\n\nDegrees 5 and 7 attain the counting bound ceil(C(p+2,2)/3) exactly, at 7 and\n12. Degree 8 takes 0.2s against 16.4s for the symmetric search, an eighty-fold\nreduction, and the gap widens with degree because the analytic Jacobian\nreplaces O(unknowns) residual evaluations per iteration with one.\n\nThe price is symmetry: eliminating a node breaks it. That is why\nXiao-Gimbutas rules are not symmetric and Witherden-Vincent rules are, and why\nthe two families need separate generators. SymmetricRuleSolver remains the\ngenerator for the latter.\n\nThe seed is verified exact, positive and interior on triangle and tetrahedron\nthrough degree 12 before any elimination runs.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: solve the elimination step by min-norm Gauss-Newton, not normal equations\n\nElimination stopped removing anything from triangle degree 9 upward: seed\ncount equalled final count at every degree from 9 to 20. Raising the damping\nand the iteration budget changed nothing, so I instrumented it rather than\nguess a third time.\n\nRemoving one node by hand and refining showed the cause. At degree 9 the solve\nreached a residual of 8.9e-6 with every weight positive and every point inside\nthe element: admissible, and nowhere near exact. The failure was convergence,\nnot admissibility, and it had been presenting as the latter because reduce\nonly reports whether a candidate was accepted.\n\nThe system is underdetermined --- 231 equations against 363 unknowns at\ntriangle degree 20 --- so J^T J is singular and forming it squares an already\npoor condition number. Solving with J directly through a complete orthogonal\ndecomposition gives the minimum-norm Gauss-Newton step without forming J^T J,\nand backtracking on the step length supplies the globalisation the damping\nused to.\n\n  degree 8, one node removed:  8.9e-6 -> 5.5e-16\n  degree 9, one node removed:  1.5e-5 -> 2.5e-15\n\nThe decomposition is now the cost: a full triangle sweep to degree 20 did not\nfinish in ten minutes. That is the next thing to address, and it is a\nperformance problem rather than a correctness one.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: penalised least-squares Newton, after Slobodkins and Tausch\n\nElimination converged after the min-norm fix but stopped removing nodes from\ndegree 9 up, because the Gauss-Newton step walked nodes out of the element and\nthe result was then screened away. Screening admissibility after the solve\ndiscards rules that a constrained solve would have kept.\n\narXiv:2207.10737 gives the construction. The moment system is underdetermined\n--- 231 equations against 363 unknowns at triangle degree 20 --- and that\nsurplus is not a nuisance but the resource that keeps nodes admissible.\nWriting J = LQ for the economy LQ factorisation, the step splits as\n\n  dz_f = -Q^T L^{-1} f     minimum-norm Newton step, restores exactness\n  dz_g = -(I - Q^T Q) g    projection of -g onto null(J)\n\nwith g the gradient of a logarithmic barrier on the constraints. The first\nterm restores exactness; the second slides along the solution manifold away\nfrom the boundary without disturbing it. Both come from one factorisation, so\nthe constraint handling is very nearly free.\n\nThe barrier is built from the half-space description Ax <= b published by\nGeometry::Polytope::Traits, so the domain the solver respects is by\nconstruction the reference element the rest of Rodin uses, rather than a\nrestatement of it.\n\nThe penalty strength t is chosen to push the next iterate as far inside as\npossible. max_k (beta_k + t alpha_k) is convex in t, so a ternary search over\na bounded interval finds the minimiser without enumerating intersections.\n\nTriangle, seed to final against the counting bound ceil(C(p+2,2)/3):\n\n  degree   1  2  3  4  5   6   7   8   9  10  11  12\n  seed     2  4  6  9 12  16  20  25  30  36  42  49\n  final    1  3  4  6  7  11  12  17  19  24  27  32\n  bound    1  2  4  5  7  10  12  15  19  22  26  31\n\nDegrees 3, 5, 7 and 9 attain the bound exactly. Degree 9 was 30 before this\nchange, that is, no elimination at all. Every rule is exact to machine\nprecision with positive weights and interior nodes.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Format: clang-format the changed lines against develop\n\nThe Format job pins clang-format 18.1.8 and checks changed lines only. My\nlocal MacPorts default is 14.0.6, which cannot parse this tree's\n.clang-format at all: it errors on \"Kind: Leave\" and silently formats nothing,\nso running it appeared to succeed while leaving every file unchanged. The\npinned version is present at /opt/local/libexec/llvm-18/bin and is what\nproduced this.\n\nNo behaviour change. 47 QF tests pass unchanged: exactness 12, orbit 8,\nsolver 23, reference element 4.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: report why an elimination round failed, and use it\n\nreduce() reported only whether a candidate was accepted, and the two ways of\nbeing rejected want opposite responses: a solve that did not converge wants\nbetter conditioning, one that converged onto an inadmissible rule wants a\nstronger penalty. Conflated, the second reads as the first and sends you\noptimising the wrong thing, which is what happened before the penalised\nNewton step went in.\n\nDiagnostics now separates them and counts negative weights and exterior points\nin the best converged candidate.\n\nApplied to the wall at triangle degree 15:\n\n  d14: 64 -> 41 | tried 41, notConv 41, notAdm  0\n  d15: 72 -> 72 | tried 72, notConv 51, notAdm 21 (outside 1)\n  d16: 81 -> 81 | tried 81, notConv 81, notAdm  0\n\nSo the remaining wall is convergence, not admissibility: at degree 16 every\none of 81 candidates fails to reach tolerance and none is rejected for leaving\nthe element. The penalty is doing its job and the conditioning of the moment\nbasis is what is left, which is the Koornwinder-Dubiner change rather than a\nstronger barrier.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: integrate the pyramid with Gauss-Jacobi; the P1 basis there is rational\n\nMy earlier pyramid fix was wrong, and the way it was wrong is worth recording.\n\nI sized the rule by polynomial degree, verified it against a polynomial\nmoment oracle, and the oracle agreed. It then produced NaN across all 6119\ndegrees of freedom in the 3D advection manufactured test, which develop passes.\nVarying only the z point count showed the failure getting monotonically worse\nas the rule got more accurate:\n\n  nz = 2 (before)   full step ok      half steps ok\n  nz = 3 (my fix)   full step NaN     half steps ok\n  nz = 4            full step NaN     half steps NaN\n  nz = 5            full step NaN     half steps NaN\n\nAccuracy making things worse is not a tolerance problem. Rodin's pyramid P1\nbasis is rational: with q = 1 - z the shape functions are (q - x)(q - y)/q,\nx(q - y)/q and xy/q, so a product of two carries q^{-2}. The collapse\ncontributes a q^2 Jacobian which cancels it exactly, but only if the q^2 rides\nin the quadrature weight. Evaluated pointwise, as a Gauss-Legendre rule does,\nthe q^{-2} stays in the integrand and nodes approaching the apex sample an\nunbounded function. More points meant points nearer the apex, hence worse.\n\nPolynomial degree is therefore the wrong criterion on a pyramid, because the\nintegrands are not polynomials. The wedge basis, by contrast, is polynomial\n(x(1-z), y(1-z), z(1-x-y)), so that fix stands.\n\nA Gauss-Jacobi rule with weight (1-z)^2 absorbs the Jacobian and leaves a\npolynomial integrand in the collapsed coordinates. gj1dUnit adds it via\nGolub-Welsch, and buildPyramid uses it in z with the explicit q * q removed.\n\nThe result costs nothing: the pyramid is back to 8, 27, 64 and 125 points at\norders 2, 4, 6 and 8, the counts it had before any of this, and is now exact\nwhere it was short by one degree.\n\nThe Jacobi rule is verified on its own before being wired in, against the\nclosed-form Beta integral int_0^1 z^k (1-z)^a dz = k! a! / (k+a+1)! for\nalpha 0 to 3 and n 1 to 12, plus positivity, interiority, reduction to\nGauss-Legendre at alpha = 0, and a mutation check that it rejects the wrong\nweight.\n\nRodinManufacturedAdvectionLagrangian3DTest: 8 of 8 pass, pyramid included.\nQF unit suites: 73 tests pass.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Format: clang-format the Gauss-Jacobi changes\n\nNo behaviour change. Exactness 12 and Gauss-Jacobi 4 pass unchanged.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: write the moment equations in the Koornwinder-Dubiner basis\n\nElimination converged but stopped removing nodes above triangle degree 14, and\nthe instrumentation said why: at degree 16 all 81 candidates failed to reach\ntolerance and none was rejected for leaving the element. The wall was the\nconditioning of the monomial basis, not the penalty.\n\nOrthonormalising the monomials against their own Gram matrix does not work.\nG_ab = int_K x^{a+b} is Hilbert-like and loses positive definiteness in double\nprecision from degree 12 on the triangle, so it cannot be factorised at all,\nlet alone used as a transform. That was measured before being relied on.\n\nXiao-Gimbutas and Witherden-Vincent both sidestep the Gram matrix by building\nan orthogonal basis from Jacobi recurrences. OrthogonalBasis does the same:\non the unit triangle, with a = 2x/(1-y) - 1 and b = 2y - 1,\n\n  psi_mn = P_m^{0,0}(a) (1-y)^m P_n^{2m+1,0}(b)\n\nand the three-factor analogue on the tetrahedron. Measured orthogonality is\n3.3e-15 relative off-diagonal at triangle degree 20 over 231 functions and\n2.5e-15 at tetrahedron degree 10 over 286.\n\nNormalisation is computed, not quoted. Closed forms differ between references\nby factors depending on which reference simplex is meant, and a wrong constant\nyields a merely badly scaled basis rather than an obviously broken one, so\neach function is divided by its own L2 norm under a rule the exactness suite\nhas already verified.\n\nThe gradient is analytic, via\nd/dx P_n^{(a,b)} = (n+a+b+1)/2 P_{n-1}^{(a+1,b+1)}, because a\nfinite-difference basis gradient caps attainable accuracy near 1e-8 while the\nsolve targets 1e-13. It is gated by an FD-consistency test as the house\npattern requires: worst mismatch 1.2e-9 on the triangle, 8.7e-10 on the\ntetrahedron.\n\nRemoving one node and refining, which stalled at 1e-5 before:\n\n  degree  12  15  18  20\n  conv     1   0   1   1\n\nDegree 20 converges in 1.4s. Admissibility at high degree is still not\nreliable and is the remaining gap; convergence is no longer the obstacle.\n\nKDMoments is built once per reduce rather than per candidate: its norms need a\nproduct rule of twice the degree, which costs far more than a Newton solve.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: keep elimination iterates feasible instead of repairing them afterwards\n\nMeasured what \"inadmissible\" actually meant at high degree rather than\nassuming. Weights were never the problem: minimum weight 1.3e-5 at degree 20\nwith no vanishing ones, so the theta^2 parameterisation does its job. Two or\nthree nodes were leaving the triangle, by 1.4e-2 to 3.7e-2 -- one to four\npercent outside, not a rounding effect.\n\nThree defects in the step, all mine.\n\nThe barrier clamped the slack with max(slack, 1e-14). A logarithmic barrier is\nonly defined inside the feasible region; once a node is outside its slack is\nnegative and the gradient no longer repels, so the clamp turned an infinite\nwall into a finite nudge pointing the wrong way.\n\nThe line search fell back to t = 0 when the penalised step failed to reduce\nthe residual, which discards the barrier at exactly the moment it is holding a\nnode in.\n\nAnd an accepted step was required only to reduce the residual, never to stay\ninside, so Newton could jump a node clean over the boundary in one step.\n\nFeasibility is now maintained by the line search rather than repaired by the\npenalty: a step must reduce the residual and leave every node strictly inside,\nconsuming at most a fixed fraction of its distance to the constraint. An\nabsolute floor was tried first and is wrong -- it pins nodes against the wall\nwhere the barrier gradient is enormous, destroying the conditioning it exists\nto protect.\n\nTriangle degrees 1 to 10 reduce to the same counts as before, 1, 3, 4, 6, 7,\n11, 12, 17, 19, 24, all exact to machine precision and admissible, and faster:\ndegree 10 in 4.3s against 7.5s.\n\nNodes no longer leave the element at any degree tested. What remains is that\nsome individual eliminations have no admissible exact solution nearby, so they\nare correctly rejected and the next candidate is tried; whether the search\nfinds admissible eliminations at degree 15 and above is the open question.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: elimination now reaches degree 20 on the triangle\n\nThe two fixes together removed the wall. Koornwinder-Dubiner made the solve\nconverge at high degree; keeping iterates feasible stopped it converging to\nrules outside the element. Neither alone was enough.\n\nTriangle, seed to final, against the counting bound ceil(C(p+2,2)/3):\n\n  degree   1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20\n  final    1  3  4  6  7 11 12 17 19 24 27 32 35 41 46 52 58 65 71 79\n  bound    1  2  4  5  7 10 12 15 19 22 26 31 35 40 46 51 57 63 69 77\n\nEvery degree exact to 1e-15 or better with positive weights and interior\nnodes. Degree 20 gives 79 points, which is the published Xiao-Gimbutas count.\nDegrees 3, 5, 7, 9, 13 and 15 attain the bound exactly. Degree 20 takes 248s.\n\nTetrahedron reaches degree 12: 1, 4, 6, -, 15, 23, 31, 45, 57, 76, 92, 117.\n\nDegree 4 is the exception and is not a wall, since 3 and 5 both work. Measured\nrather than guessed: every single removal stalls at 5e-6 through 1000\niterations and reaches 2.5e-16 by 5000, and thirteen of thirty-six removals\nthen converge to an admissible rule. That basin simply needs an order of\nmagnitude more Newton steps than its neighbours, because the feasibility\nconstraint makes the line search crawl.\n\nSpending that budget on every candidate is unaffordable -- it timed out over\ndegrees 1 to 6 -- so candidates get a cheap budget first and the closest few\nare retried with a patient one. That is still not finding degree 4, so the\ncheap-pass residual is a poor predictor of which removals will succeed. Left\nfailing rather than papered over.\n\nA rule exact to degree 5 is exact to degree 4, and the published tables give\nboth the same point count, so the generation policy can fall back to the next\ndegree. That is a policy decision for the caller, not something reduce should\ndo silently.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: retry candidates that ran out of budget, not those that got closest\n\nTetrahedron degree 4 would not reduce at all, 36 nodes in and 36 out, while\ndegrees 3 and 5 reduced immediately. Thirteen of its thirty-six single\nremovals do converge to an admissible rule given enough iterations, so the\nelimination existed and the search was failing to find it.\n\nSelecting retries by residual was the mistake. After the cheap budget every\nremoval at that degree sits near 5e-6, and which of them goes on to converge\nis not predicted by which sits lowest: retrying the closest eight found none\nof the thirteen.\n\nrefine already knows the answer and was discarding it. It stops for one of two\nopposite reasons: it found no feasible improving step, in which case it has\nnowhere to go and more budget is wasted; or it ran out of iterations while\nstill descending, in which case it needs only more of them. That distinction\nis now reported, and reduce retries exactly the second kind.\n\n  tet d3   18 ->  6\n  tet d4   36 -> 11   (was 36, no reduction)\n  tet d5   48 -> 15\n  tet d6   80 -> 23\n\nEleven points at degree 4 matches the published Xiao-Gimbutas count of eleven\nexactly. The counting bound is nine.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: ship XiaoGimbutas with generated coefficients\n\nAdds the rule class and its tables. Triangle degrees 1 to 20, tetrahedron 1\nto 9, all positive and interior.\n\n  triangle  1  3  4  6  7 11 12 17 19 24 27 32 35 41 46 52 58 65 71 79\n  tetrahed. 1  4  6 11 15 23 31 45 57\n\nEvery number was computed by NodeElimination::reduce through\ntests/unit/Rodin/QF/GenerateRules.cpp and can be reproduced by running it.\nNothing was copied from a published table, so nothing can carry a\ntranscription error; what it can carry is a solver error, which is why the\ntables are checked against the independent closed-form moment oracle rather\nthan against the generator that produced them.\n\nTwo consequences of that provenance are stated in the class documentation\nrather than left implied. These are not guaranteed to be the rules of\nXiao-Gimbutas even where the counts agree, because the moment equations have\nmany solutions and the search finds one of them; and node elimination does not\npreserve symmetry, so at tetrahedron degree 4 the count falls below the\npublished symmetric minimum of fourteen.\n\nEight tests: exactness at every shipped degree, positive weights with\namplification exactly one, interiority against the half-space system\nPolytope::Traits publishes, weights summing to the reference measure, point\ncounts at or above the counting bound, honest availability reporting including\nunsupported element types, copy fidelity, and a mutation check that perturbing\none shipped weight by a part in 1e9 is rejected.\n\nGrundmann-Möller stays the fallback beyond these degrees and for simplices\nabove dimension three. The dispatch is unchanged: nothing uses these rules\nyet.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: escape dead ends by moving along the solution manifold\n\nElimination is greedy and path dependent. Once no single node can be removed\nthe rule is at a dead end of its own path, not necessarily at a minimum, and\nmore budget does not help: tetrahedron degrees 5 and 8 stayed at 15 and 45\npoints with every candidate given four times the patient budget.\n\nThe moment system is underdetermined, so its solutions form a manifold and the\nnull space of J is tangent to it. Stepping along a random null-space direction\ngives a different rule of the same strength, from which blocked eliminations\nmay open. The step is rejected unless it stays strictly inside.\n\n  tet d8   45 -> 44, matching the published Xiao-Gimbutas count\n\nDegree 5 does not move, and the reason is structural rather than a budget or a\nsearch failure. Its published count of 14 attains the counting bound exactly:\n56 moments against 14 nodes carrying 4 unknowns each. At the bound the system\nis square, so there is no null space to move along, the penalty direction\nvanishes, and feasibility can no longer be maintained by sliding. The whole\nmethod is built on the underdetermined structure and loses its footing exactly\nwhere the target is the bound. Fifteen points, one above, is what it reaches.\n\nThe diversification budget is global rather than per round. A successful\ndiversification re-enters the loop at the same node count, so a per-round\nbudget would never be exhausted and reduce would not terminate. That was\nwritten wrong first and would have hung.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* tests/QF: check quadrature properties that do not use the moment oracle\n\nThe exactness sweep compares a rule against moments derived by hand. That is a\nstrong test but it shares one assumption with the rule: what the reference\nelement is. A rule and an oracle built on the same wrong element agree with\neach other perfectly, and every other test in the suite would pass.\n\nThese checks are blind to that. They compare the rule against itself under\ntransformations that must leave the integral invariant, so they hold whatever\nthe element turns out to be.\n\nSubdivision consistency is the strongest and uses no moment formula at all:\nintegrating over a simplex must equal the sum over pieces that tile it, with\nthe rule mapped onto each piece affinely.\n\nAffine covariance checks the property assembly actually relies on, that a rule\nexact on the reference is exact on any affine image with the integral scaling\nby the determinant. Without it a reference rule would not be usable at all.\n\nRandom polynomials catch what monomial-at-a-time testing cannot: an error that\ncancels between monomials of the same degree passes the sweep and fails here.\n\nNon-negativity records that a positive rule cannot return a negative integral\nfor a non-negative integrand, which is what makes it safe for assembling a\nform that must stay positive semidefinite.\n\nThe fifth test gives the subdivision check teeth, confirming it rejects a rule\ntoo coarse for its integrand rather than agreeing by construction.\n\nFive tests pass over triangle and tetrahedron at every shipped degree.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: ship WitherdenVincent with generated symmetric coefficients\n\nAdds the symmetric rule class and its tables: triangle degrees 1 to 9,\ntetrahedron 1 to 6, wedge 1 to 4.\n\n  triangle     1  3  6  6  7 12 15 16 24\n  tetrahedron  1  4  8 14 14 24\n  wedge        1  5  8 11\n\nTriangle degrees 1 to 8 match the published counts exactly, as does the wedge\nover its whole range against the Witherden-Vincent prism table, and\ntetrahedron degrees 1, 2 and 5.\n\nDegree 5 on the tetrahedron is the interesting one. Its minimum attains the\ncounting bound exactly, 56 moments against 14 nodes carrying 4 unknowns each,\nwhich leaves the moment system square and its solutions isolated.\nNodeElimination relies throughout on the null space of an underdetermined\nsystem -- for the minimum-norm step, for the penalty direction, for escaping\ndead ends -- and all three degenerate when that space is trivial, so it stops\nat 15 points. Imposing symmetry reduces the unknowns to a handful of orbit\nparameters and finds the 14-point rule directly. The two generators are\ncomplementary rather than redundant, and this is where that shows.\n\nEvery number was computed by SymmetricRuleSolver::search through\ntests/unit/Rodin/QF/GenerateSymmetric.cpp and can be reproduced by running it.\nNothing was copied from a published table.\n\nEight tests mirroring the XiaoGimbutas ones: exactness at every shipped\ndegree, positive weights, interiority against the half-space system\nPolytope::Traits publishes, weights summing to the reference measure, honest\navailability reporting, copy fidelity, and a mutation check. The counting\nbound test skips the wedge, which is a product element with a different moment\ncount rather than a simplex.\n\nThe dispatch is unchanged; nothing uses these rules yet.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* tests/QF: eight more properties, and cover both families\n\nThe property file tested XiaoGimbutas only. It now covers WitherdenVincent\ntoo, and adds checks of a different kind from the ones already there.\n\nCross-family agreement is the strongest addition. The two families come from\ndifferent algorithms, different seeds, and produce different point counts;\nthey share no code beyond the moment definitions. Two rules of the same\nstrength must still integrate every polynomial of that degree identically, so\nagreement is evidence neither carries a mistake the other does not.\n\nConsecutive degrees must also agree on the lower degree's polynomials, which\ncross-checks neighbouring table rows produced by separate searches.\n\nVertex permutation maps the reference element onto itself, so the integral is\ninvariant under it. This exercises the element's symmetry group without\nrequiring the rule to be symmetric, which XiaoGimbutas is not.\n\nThe weighted mean of the nodes must be the centroid, which fails loudly if the\nnodes are systematically displaced. Barycentric coordinates must be\nnon-negative and sum to at most one, which is interiority stated in the\ncoordinates the rules were solved in rather than in the half-space form.\n\nAccuracy on exp must improve with degree. Exactness on polynomials is a\nstatement about a finite-dimensional space; the reason to want it is that\nsmooth integrands converge, and a table whose higher rows were not actually\nbetter would pass every other test here. The check applies only while the\nerror is above 1e-13: past that the differences are rounding, and on the\ntriangle degree 13 already reaches it, so demanding monotone improvement there\nwould test floating-point noise instead of the rules.\n\nFinally, regenerating the low degrees must reproduce the inlined point counts.\nGenerated coefficients cannot carry a transcription error, but they can drift\nfrom what the generator now produces, and nothing was checking that.\n\nTwelve property tests pass, alongside the oracle-based ones.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* tests/QF: randomised checks over the shipped rules\n\nThe property tests use a handful of fixed configurations each. A rule can\nsatisfy those and still fail on inputs nobody thought to write down, so the\nsame invariants are exercised over many random ones.\n\nSubdivision now splits at randomly placed interior points rather than the\ncentroid. The centroid is one choice among infinitely many and is the\nsymmetric one; a rule that survives only the symmetric split is not correct.\nAffine covariance runs thirty random maps per degree instead of five,\nincluding badly scaled and orientation-reversing ones. Cross-family agreement\nruns forty random polynomials per degree.\n\nThe mutation check is randomised over which coefficient is disturbed, whether\nit is a weight or a coordinate, and by how much, so the detection threshold is\nestablished across the whole table rather than at one point of it. The fixed\nversion perturbed one weight by one part in 1e9 and proved only that.\n\nRepeated construction must give bitwise identical rules, since the tables are\nstatic data and building a rule must not mutate them.\n\nEvery case is drawn from a fixed seed, so a failure is reproducible and a\nregression cannot appear or vanish between runs.\n\nFive randomised tests pass.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: add the D4 pyramid orbits and verify the shear before using it\n\nThe reference pyramid of Polytope::Traits has its apex over the base corner,\nso it carries almost no symmetry: only the swap of x and y. It is however the\nimage, under a shear of unit determinant, of the pyramid whose apex sits over\nthe base centre, and that one has the full dihedral symmetry of the square.\n\nOrbits are therefore built in centred coordinates and sheared onto the\nreference element. Exactness is affine invariant and the determinant is one,\nso weights transfer unchanged. Symmetry in the reference coordinates is lost,\nwhich is expected: it was a device for constructing the rule, not a property\nrequired of it.\n\nFour classes: the centre at one point, the axis and diagonal orbits at four,\nand the general orbit at eight.\n\nThe shear is the kind of transform whose errors are silent, since a wrong one\nstill produces plausible points inside a plausible element, so it is verified\non its own before any rule is solved with it. Five tests: cardinalities;\ninteriority over five hundred random parameter draws per class, checked\nagainst the half-space system rather than against my derivation of it; closure\nunder the dihedral group once the shear is undone, which is what makes the set\nan orbit rather than an arbitrary collection; the cross-section width and\nanchoring at each height; and degenerate parameters at the base and near the\napex.\n\nWiring these into SymmetricRuleSolver, so pyramid rules can actually be\nsolved, is not done. The orbit machinery is in place and tested; the moment\ndispatch and configuration enumeration for the pyramid are not.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: regenerate the XiaoGimbutas tetrahedron table\n\nThe shipped tetrahedron coefficients predated the dead-end escape, so degree 8\ncarried the 45-point rule the greedy path reached rather than the 44-point one\nfound by moving along the solution manifold.\n\n  tetrahedron  1  4  6  11  15  23  31  44  57\n\nThat now matches the published Xiao-Gimbutas counts at nine of nine degrees,\ndegree 5 excepted, where 15 against 14 is the square-system case the method\ncannot reach and WitherdenVincent supplies instead.\n\nDegrees 10 to 12 are still generating and will follow; the table is a\ncontiguous run from degree 1, so it can be extended without disturbing what is\nhere.\n\nRegenerating also exercises the provenance test added earlier, which compares\nthe inlined low-degree counts against a fresh run of the generator.\n\nExactness 8, property 12 and fuzz 5 tests pass against the new table.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* tests/QF: check our oracle against externally published rules\n\nEvery other test compares a rule against moments derived here, which is\ncircular in one respect: a rule and an oracle built on the same mistaken\nreference element agree with each other perfectly and the whole suite passes.\nThe oracle-free property tests narrow that but still only compare Rodin\nagainst Rodin.\n\nThis closes it from outside. Published Xiao-Gimbutas rules, taken from the\ntables distributed with modepy and mapped onto Rodin's unit simplex through\nmodepy's own equilateral-to-unit map and the biunit scaling, are run through\nour exactness sweep. They integrate to 1e-15.\n\nThat settles a question left open for several commits. Our triangle counts sit\nbelow the published ones at thirteen degrees, and being routinely three to\nfive points better than a like-for-like search is more often a convention\nmismatch than a win. It is not one: the published rules are exact under our\noracle, positive and interior under our half-space description, and integrate\nidentically to ours degree by degree. The reference element and the moment\nformulas agree, so the difference is in the search rather than in the problem.\n\nThree tests: the published rules are exact under our oracle; they are positive\nand interior on our element, which pins the half-space description as well as\nthe moments; and ours and theirs integrate every monomial identically despite\ndiffering point counts.\n\nProvenance is recorded in the file. The values are attributed to modepy (MIT,\nCopyright Andreas Kloeckner) and to Xiao and Gimbutas 2010, and are test\nreference data rather than anything Rodin ships.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: record that Koornwinder-Dubiner does not help the symmetric solver\n\nThe orthogonal basis lifted node elimination from degree 14 to 20, so the\nobvious next move was to use it for the symmetric search too, whose ceiling\nsits around degree 8. It was implemented, measured, and reverted.\n\n  before   triangle 1..9,  tetrahedron 1..6\n  after    triangle 1..8,  tetrahedron 1..6, degrees 11 and 12 explicitly failing\n\nIt also made degree 3 flaky: the fixed configuration that had converged\ncomfortably needed 2000 restarts instead of 256.\n\nThe moment data itself was correct -- an exact rule gives a residual of 1.8e-15\nunder it -- so this is not a bug in the port but a property of the problem.\n\nThe two searches have opposite shape. Node elimination carries every node\ncoordinate as an unknown, so its system is heavily underdetermined and its\ndifficulty is conditioning, which an orthogonal basis addresses directly. The\nsymmetric search has a handful of orbit parameters, so its system is strongly\noverdetermined -- ten equations against four unknowns at triangle degree 3 --\nand its difficulty is finding the basin of an isolated root. Changing the basis\nrescales the landscape without making that search easier, and measurably makes\nit harder.\n\nThe note is left in the header so the experiment is not repeated. Lifting the\nsymmetric ceiling needs a better search, not a better basis.\n\n23 solver tests pass unchanged.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* QF: solve pyramid rules, and extend the WitherdenVincent tables\n\nWires the D4 orbits into a dedicated pyramid path in SymmetricRuleSolver: the\nreference pyramid's moment formula, the orbit configuration enumeration over\nthe centre, axis, diagonal and general classes, and a Levenberg-Marquardt\nsolve whose unknowns are each orbit's shape parameters, its height and its\nweight. Weights enter as theta^2 and the shape parameters are confined to the\nopen interval by construction, so every iterate is a rule of the right shape\nbefore it is exact.\n\n  pyramid      1  5  6 10 17\n  published    1  5  6 10 15\n\nDegrees 1 to 4 match the published Witherden-Vincent pyramid counts exactly.\nDegree 5 reaches 17 against 15 and degree 6 does not converge within the\nbudget; both are shipped as far as they match and no further.\n\nThe tables also pick up the degrees that finished generating since they were\nlast written:\n\n  triangle     1  3  6  6  7 12 15 16 24      (published ends 19 at degree 9)\n  tetrahedron  1  4  8 14 14 24 35            (published 1 4 6 11 14 23 31)\n  wedge        1  5  8 11 16 29 39            (published 1 5 8 11 16 28 35)\n\nTriangle matches through degree 8, wedge through degree 5, tetrahedron at\ndegrees 1, 2 and 5. Where they exceed the published counts the symmetric\nsearch is finding a worse configuration, not a wrong rule: every entry is\nexact to machine precision with positive weights and interior nodes, and the\nproperty and fuzz suites cover them.\n\nWitherdenVincentTest now covers all four element types.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Format: clang-format the pyramid and published-rule changes\n\nNo behaviour change.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Rebuild the symmetric rule search on one basis for every element\n\nThe search stalled around degree eight and returned rules accurate to ten\ndigits rather than sixteen. Four things had to change together; none of\nthem sufficed alone.\n\nWeights are no longer search variables. Once the points are prescribed the\nmoment equations are linear in the weights, so they are recovered by a\nleast squares solve each iteration, as Witherden and Vincent do. That is\nroughly a third of the degrees of freedom removed.\n\nOrbit parameters reach the element through a stick-breaking transform\nrather than a clamp. A clamp has zero derivative once it binds, so any\niterate starting outside the valid box had a collapsed Jacobian column and\nnever moved again.\n\nThe Jacobian is analytic, the elimination differentiated by variable\nprojection. A central difference caps the attainable residual near 1e-10\nhowever the step is tuned, and that cap was the accuracy of the rules.\n\nThe residual is stated in an orthogonal basis. CollapsedBasis writes the\nwarped Jacobi tensor product of Karniadakis and Sherwin once, driven by two\nsmall tables, and so covers the segment, triangle, quadrilateral,\ntetrahedron, wedge, pyramid and hexahedron alike -- including the pyramid,\nwhose basis is otherwise awkward enough to invite a special case. The\nprevious route orthonormalised monomials through a Cholesky of their Gram\nmatrix, which is Hilbert-like and meaningless past degree eight.\n\nTriangle rules now reach the published Xiao-Gimbutas counts exactly through\ndegree ten (1, 3, 6, 6, 7, 12, 15, 16, 19, 25) with oracle error at 1e-16,\nwhere before the ceiling was degree eight at 1e-10.\n\nTwo things this exposed. Convergence alone is not success: a configuration\nadmits several roots and the bare moment residual routinely finds one with\na negative weight, so positivity is now part of what is minimised rather\nthan a verdict passed afterwards. And an intermediate version reported a\nresidual of 5e-14 while the rules were wrong by 1e+02, because the basis\nintegrals were measured with a rule of alternating sign that put noise\nwhere exact zeros belong; it converged contentedly on the wrong equations.\nBoth failures now have tests.\n\nThe basis is tested on its own terms rather than through the generator --\northonormality, spanning, gradient, and the agreement of the tabulated fast\npath with the direct one -- because an error there does not surface as a\nfailure downstream, only as a confident wrong answer.\n\nPublishedCounts records the target tables. The two families publish\ndifferent counts for the same element, and conflating them silently moves\nthe goalposts: the Xiao-Gimbutas tetrahedron of strength four has eleven\npoints and no symmetry at all, while the Witherden-Vincent one has fourteen\nand is fully symmetric. A symmetric generator measured against the\nasymmetric column looks like a failure when it is not.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Derive each element's symmetry group instead of tabulating orbits\n\nThe orbit machinery described simplex orbits as multisets of barycentric\ncoordinates. That description is simply wrong for a pyramid, whose group\nfixes the apex and permutes the four base vertices, so the pyramid had a\nhand-written path of its own -- and the generic search, applied to it,\nfailed at strength one.\n\nSymmetryGroup derives what the previous code tabulated. The group is found\nby trying the affine maps that send vertices to vertices and keeping those\ncarrying the element onto itself. The orbit types follow: a point on the\nmirrors of some subgroup has a smaller orbit than a generic one, so the\npossible types are the fixed subspaces of the subgroups, obtained by\nintersecting the fixed subspaces of individual symmetries until the\ncollection closes, then reduced to one representative per class.\n\nThe derived orbit sizes agree with the tables of arXiv:1409.1865 on every\nelement: triangle 1/3/6, quadrilateral 1/4/4/8, tetrahedron 1/4/6/12/24,\nprism 1/2/3/6/6/12, pyramid 1/4/4/8, hexahedron 1/6/8/12/24/24/48. The\npyramid is no longer a special case, and its apex-axis orbit -- the\none-dimensional stratum the barycentric description cannot express -- comes\nout of the same code as the rest.\n\nTwo things worth recording. The reference pyramid has its apex over a\ncorner rather than the centre, so its symmetries are shears and not\northogonal maps; comparing subspaces after mapping them therefore needs the\nbasis re-orthonormalised, and without that the two diagonal mirror planes\nwere counted as different orbit types. And the modes that symmetry\nsatisfies identically are now pruned from the moment system, discovered by\nprobing rather than derived per element, since on a tetrahedron of strength\ntwenty they are the overwhelming majority of the rows. A rule is accepted\nonly after its residual is remeasured on the full system, so a row dropped\nin error cannot pass unnoticed.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Search over derived orbit strata, so every element is one code path\n\nSymmetricRuleGenerator replaces the barycentric orbit description with the\nstrata SymmetryGroup derives, which is what lets the pyramid work at all:\nits group fixes the apex and permutes the base, so multisets of barycentric\ncoordinates cannot express its orbits, and the generic search applied to it\npreviously failed at strength one. It now matches the published counts\nthrough strength five and finds twenty-three points at strength six where\nthe published table has twenty-four.\n\nA seed is a softmax-weighted combination of the vertices of the region its\norbit kind allows. That is interior for any value of the search variables,\nso the search is unconstrained and never has to be told where the element\nis, and it is smooth everywhere -- unlike a clamp, whose derivative\nvanishes once it binds.\n\nBoundary strata are admitted, the facet hyperplanes joining the lattice\nalongside the mirrors. This is not a convenience: the only fully symmetric\nsix-point rule on a cube is its face centres, since asking a seed\n(t, 1/2, 1/2) to integrate x^2 exactly forces t to zero or one. Excluding\nthe boundary loses a rule that exists, and with it the published counts at\nstrengths two and three, where the search returned eight points instead of\nsix.\n\nDecompositions are filtered by counting before any iteration is spent on\nthem. The conditions a symmetric rule must satisfy number the dimension of\nthe invariant subspace, which Burnside's lemma gives exactly as a Molien\nseries -- cheap, since it needs only the eigenvalues of each symmetry.\nCounting instead the modes whose symmetrisation is merely nonzero\novercounts badly, nearly to the dimension of the whole space, and rejects\nprecisely the decompositions that work: with that count the triangle\nreturned 4, 7, 12, 16 points where 3, 6, 6, 7 exist.\n\nWith the filter right, the triangle matches the published counts exactly\nthrough strength twelve -- 1, 3, 6, 6, 7, 12, 15, 16, 19, 25, 28, 33 -- at\noracle errors of 1e-15, where strengths eleven and twelve previously found\nnothing at all. Every element now runs through the same code: quadrilateral\nand hexahedron match published throughout, tetrahedron and prism through\nthe strengths measured so far.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Cache basis norms and search decompositions in parallel\n\nTwo costs dominated the higher degrees. The basis norms were remeasured for\nevery decomposition although they depend only on the element and the degree,\nand measuring them is a full quadrature per mode; they are now computed once\nand shared, and tabulated per quadrature point so the Jacobi recurrences run\nonce for the whole basis rather than once per mode. And decompositions,\nbeing independent, are now tried in parallel.\n\nThe rule returned is still the one from the earliest decomposition that\nsucceeds rather than whichever thread finishes first, so the result does not\ndepend on scheduling.\n\nTogether these take the triangle through strength twelve from seven minutes\nto two, at identical counts and residuals.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Budget decompositions by counting rather than excluding them\n\nThe counting condition -- unknowns at least the number of invariant modes --\nwas being used to discard decompositions outright. It is not a necessary\ncondition, and treating it as one loses real rules. The six-point rule on a\ncube is its face centres: one orbit with no freedom at all, a single unknown\nagainst two conditions, which works precisely because those points are\nspecial. Excluding it returned eight points where six exist.\n\nDecompositions failing the count are now tried briefly instead of not at\nall. Being overdetermined makes them rigid, so a few restarts settle them\nand the full budget would only re-confirm the same outcome; the ones that\ncan be expected to work keep the full budget. The hexahedron is back to the\npublished counts at strengths two and three.\n\nThe generator's tests check the rules and the reasoning separately. Rules\nare checked as objects -- exact, positive, interior, no larger than\npublished, not below the counting bound -- and, importantly, symmetric: a\nsymmetry of the element must permute the rule and carry each point to one of\nequal weight, which is what the whole construction assumes and is a property\nof the points rather than of the search. Separately the invariant dimension\nfrom Molien's series is checked against the rank of the symmetrised basis,\nsince that number decides what the search attempts and an error in it\nproduces no rule rather than a wrong one.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Order decompositions by promise, and let a search be given a deadline\n\nTrying every decomposition of every point count is what makes the higher\nstrengths slow, since almost all of them are hopeless. They are now ordered\nby how likely each is to work -- enough unknowns to meet the conditions\nfirst, and among those the ones using fewest orbits, which is what published\nrules look like -- and a success stops the rest. The order is fixed, so the\nrule found does not depend on having been reached quickly.\n\nDecompositions falling more than slightly short of the counting condition\nare no longer tried at all. A small shortfall can still be closed by a\ncoincidence of the geometry, and that is where the economical rules live, so\nthose keep a brief budget; further short than that nothing is ever found,\nand at the higher strengths there are thousands of them at every point\ncount.\n\nA search may also be given a deadline, returning the best rule found rather\nthan nothing, so an unattended sweep cannot disappear into a single\nstrength. Drivers are added to report node-elimination counts against the\npublished Xiao-Gimbutas tables, and to emit inlinable coefficients -- each\ndegree flushed as it completes, and checked against the moment oracle before\nbeing printed, since a table is worth having only if what it holds is exact.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n\n* Polish accepted rules, and prefer the tightest decomposition\n\nAccepting a rule at the tolerance leaves one that merely clears the bar. A\nfew more steps of the same iteration take it to rounding, …",
+          "timestamp": "2026-08-27T13:32:18+02:00",
+          "tree_id": "5f1cafdf36eb7a834fe7d47bf24996279856ce10",
+          "url": "https://github.com/cbritopacheco/rodin/commit/e589252606df1adfcc2b3fe0df562fba7a4736c5"
+        },
+        "date": 1787831109492,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+            "value": 32.664231760720874,
+            "unit": "ns/iter",
+            "extra": "iterations: 8750646\ncpu: 32.66135151621949 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+            "value": 17.653383831138992,
+            "unit": "ns/iter",
+            "extra": "iterations: 16014954\ncpu: 17.6535644123611 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarReferenceExpansion",
+            "value": 11.882833750706164,
+            "unit": "ns/iter",
+            "extra": "iterations: 22014343\ncpu: 11.882351337943629 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarSpaceExpansion",
+            "value": 14.65807853533148,
+            "unit": "ns/iter",
+            "extra": "iterations: 19041162\ncpu: 14.655918162977656 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarMappedBasis",
+            "value": 22.774998275855978,
+            "unit": "ns/iter",
+            "extra": "iterations: 12281497\ncpu: 22.774617296246536 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorMappedBasis",
+            "value": 75.6620946857657,
+            "unit": "ns/iter",
+            "extra": "iterations: 3707802\ncpu: 75.58365764946458 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+            "value": 79.6374527795837,
+            "unit": "ns/iter",
+            "extra": "iterations: 3521784\ncpu: 79.63242322641021 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+            "value": 70.64912611610778,
+            "unit": "ns/iter",
+            "extra": "iterations: 3965687\ncpu: 70.64502417866056 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarMappedBasis",
+            "value": 69.43683326484988,
+            "unit": "ns/iter",
+            "extra": "iterations: 4031117\ncpu: 69.39245052922062 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorMappedBasis",
+            "value": 206.19942231111887,
+            "unit": "ns/iter",
+            "extra": "iterations: 1354016\ncpu: 206.1671486895281 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3156721015913778,
+            "unit": "ns/iter",
+            "extra": "iterations: 896789433\ncpu: 0.3156287759247041 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.31144673213788737,
+            "unit": "ns/iter",
+            "extra": "iterations: 900399221\ncpu: 0.3114241765875541 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.31173521715619185,
+            "unit": "ns/iter",
+            "extra": "iterations: 899473956\ncpu: 0.3117108395743257 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.311296688239051,
+            "unit": "ns/iter",
+            "extra": "iterations: 899829878\ncpu: 0.3112586421585789 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 455.49527342065517,
+            "unit": "ns/iter",
+            "extra": "iterations: 618735\ncpu: 455.4657761400275 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 93432.87199195956,
+            "unit": "ns/iter",
+            "extra": "iterations: 2992\ncpu: 93414.85127005348 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 398608.9357142321,
+            "unit": "ns/iter",
+            "extra": "iterations: 700\ncpu: 398611.6685714285 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 808.8121266977558,
+            "unit": "ns/iter",
+            "extra": "iterations: 352429\ncpu: 808.7869982322676 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 169742.81026058344,
+            "unit": "ns/iter",
+            "extra": "iterations: 1228\ncpu: 169716.48941368004 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 724948.693548364,
+            "unit": "ns/iter",
+            "extra": "iterations: 372\ncpu: 724865.916666666 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 160758.240434075,
+            "unit": "ns/iter",
+            "extra": "iterations: 1751\ncpu: 160748.56596230698 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 163204.58758704094,
+            "unit": "ns/iter",
+            "extra": "iterations: 1724\ncpu: 163206.04698375892 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 14088.540143764645,
+            "unit": "ns/iter",
+            "extra": "iterations: 19754\ncpu: 14086.715146299444 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6286047.772727504,
+            "unit": "ns/iter",
+            "extra": "iterations: 44\ncpu: 6285150.9318182105 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 110884.5318056375,
+            "unit": "ns/iter",
+            "extra": "iterations: 2531\ncpu: 110879.28447254047 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2098425.106060569,
+            "unit": "ns/iter",
+            "extra": "iterations: 132\ncpu: 2098004.3409090806 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9205005.23333203,
+            "unit": "ns/iter",
+            "extra": "iterations: 30\ncpu: 9204327.733333351 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 66975884.50001035,
+            "unit": "ns/iter",
+            "extra": "iterations: 4\ncpu: 66970336.750000305 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 310652463.9999861,
+            "unit": "ns/iter",
+            "extra": "iterations: 1\ncpu: 310618635.99999917 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_AllPairs",
+            "value": 1129190.8508092496,
+            "unit": "ns/iter",
+            "extra": "iterations: 248\ncpu: 1129178.858871033 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_AllPairs",
+            "value": 17.742056454207365,
+            "unit": "ns/iter",
+            "extra": "iterations: 15773529\ncpu: 17.740794149489304 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+            "value": 1108764.3027958185,
+            "unit": "ns/iter",
+            "extra": "iterations: 251\ncpu: 1107899.1633465558 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_1",
+            "value": 819657.7228568458,
+            "unit": "ns/iter",
+            "extra": "iterations: 350\ncpu: 819576.0600000109 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_0",
+            "value": 296310.801308523,
+            "unit": "ns/iter",
+            "extra": "iterations: 916\ncpu: 296215.7707423508 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_1",
+            "value": 822205.910143553,
+            "unit": "ns/iter",
+            "extra": "iterations: 345\ncpu: 822131.8463767852 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_0",
+            "value": 4.3602250198871495,
+            "unit": "ns/iter",
+            "extra": "iterations: 64332447\ncpu: 4.35992227996552 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_1",
+            "value": 4.355391838573079,
+            "unit": "ns/iter",
+            "extra": "iterations: 64199001\ncpu: 4.355434487212619 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_0",
+            "value": 2.5191285753290864,
+            "unit": "ns/iter",
+            "extra": "iterations: 112387408\ncpu: 2.5189967545118632 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_1",
+            "value": 4.356007901749617,
+            "unit": "ns/iter",
+            "extra": "iterations: 64128071\ncpu: 4.355902160225587 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_AllPairs",
+            "value": 9041170.032263277,
+            "unit": "ns/iter",
+            "extra": "iterations: 31\ncpu: 9040811.7741933 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_AllPairs",
+            "value": 43.702297716153666,
+            "unit": "ns/iter",
+            "extra": "iterations: 6413760\ncpu: 43.6947570535852 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_1",
+            "value": 5361381.384620228,
+            "unit": "ns/iter",
+            "extra": "iterations: 52\ncpu: 5361110.846154 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_2",
+            "value": 5995054.025012791,
+            "unit": "ns/iter",
+            "extra": "iterations: 40\ncpu: 5994792.02499964 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_2",
+            "value": 2199598.3125000508,
+            "unit": "ns/iter",
+            "extra": "iterations: 128\ncpu: 2199436.671874833 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_1",
+            "value": 7576549.918922325,
+            "unit": "ns/iter",
+            "extra": "iterations: 37\ncpu: 7575941.459459474 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_1",
+            "value": 4.976159602063036,
+            "unit": "ns/iter",
+            "extra": "iterations: 56239875\ncpu: 4.975998470835862 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_2",
+            "value": 4.979345181750839,
+            "unit": "ns/iter",
+            "extra": "iterations: 56283526\ncpu: 4.979166443836466 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_2",
+            "value": 4.35566467236843,
+            "unit": "ns/iter",
+            "extra": "iterations: 64212734\ncpu: 4.355396703712993 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_1",
+            "value": 5.599864214790075,
+            "unit": "ns/iter",
+            "extra": "iterations: 49946530\ncpu: 5.599548577248484 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Build_1",
+            "value": 3730400.7866653893,
+            "unit": "ns/iter",
+            "extra": "iterations: 75\ncpu: 3730414.333333319 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Build_1",
+            "value": 1408033.3216044214,
+            "unit": "ns/iter",
+            "extra": "iterations: 199\ncpu: 1408026.236180752 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Transpose_1_2",
+            "value": 2240078.784006073,
+            "unit": "ns/iter",
+            "extra": "iterations: 125\ncpu: 2239617.6479999493 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Transpose_1_2",
+            "value": 577498.2417352562,
+            "unit": "ns/iter",
+            "extra": "iterations: 484\ncpu: 577483.8842975565 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_2_2_via_0",
+            "value": 2058229.6199995652,
+            "unit": "ns/iter",
+            "extra": "iterations: 100\ncpu: 2057753.8199999877 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_2_2_via_0",
+            "value": 1254714.3677109147,
+            "unit": "ns/iter",
+            "extra": "iterations: 223\ncpu: 1254641.7937219078 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_1_1_via_0",
+            "value": 3427610.878057893,
+            "unit": "ns/iter",
+            "extra": "iterations: 82\ncpu: 3427172.890243897 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_1_1_via_0",
+            "value": 1666455.0778523062,
+            "unit": "ns/iter",
+            "extra": "iterations: 167\ncpu: 1666478.844311489 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_AllPairs",
+            "value": 5535898.450984057,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 5535608.745098076 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_AllPairs",
+            "value": 43.59150309370495,
+            "unit": "ns/iter",
+            "extra": "iterations: 6432247\ncpu: 43.58842360997613 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_1",
+            "value": 3118529.3111156574,
+            "unit": "ns/iter",
+            "extra": "iterations: 90\ncpu: 3118401.7666667784 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_2",
+            "value": 3561202.6075942954,
+            "unit": "ns/iter",
+            "extra": "iterations: 79\ncpu: 3560383.0253164927 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_2",
+            "value": 1175378.0966394881,
+            "unit": "ns/iter",
+            "extra": "iterations: 238\ncpu: 1175402.7310923524 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_1",
+            "value": 4457101.98438043,
+            "unit": "ns/iter",
+            "extra": "iterations: 64\ncpu: 4457087.203124932 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_1",
+            "value": 4.992843650844186,
+            "unit": "ns/iter",
+            "extra": "iterations: 56227972\ncpu: 4.9923008427193345 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_2",
+            "value": 4.988053166083906,
+            "unit": "ns/iter",
+            "extra": "iterations: 56234648\ncpu: 4.9873862285045 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+            "value": 4.356528332051786,
+            "unit": "ns/iter",
+            "extra": "iterations: 64328537\ncpu: 4.356029548752229 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_1",
+            "value": 5.599879326937133,
+            "unit": "ns/iter",
+            "extra": "iterations: 49848739\ncpu: 5.59967226051591 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Build_1",
+            "value": 2279811.52033308,
+            "unit": "ns/iter",
+            "extra": "iterations: 123\ncpu: 2279586.211382151 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Build_1",
+            "value": 919717.8085816343,
+            "unit": "ns/iter",
+            "extra": "iterations: 303\ncpu: 919603.9339933246 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Transpose_1_2",
+            "value": 1425237.5572169598,
+            "unit": "ns/iter",
+            "extra": "iterations: 201\ncpu: 1425160.2238804803 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Transpose_1_2",
+            "value": 369988.9796468524,
+            "unit": "ns/iter",
+            "extra": "iterations: 737\ncpu: 370036.5223880746 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_2_2_via_0",
+            "value": 979116.9678582688,
+            "unit": "ns/iter",
+            "extra": "iterations: 280\ncpu: 979018.5142860913 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_2_2_via_0",
+            "value": 546030.5423088566,
+            "unit": "ns/iter",
+            "extra": "iterations: 520\ncpu: 546136.3923077491 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_1_1_via_0",
+            "value": 1991744.5744701729,
+            "unit": "ns/iter",
+            "extra": "iterations: 141\ncpu: 1991552.5744684977 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_1_1_via_0",
+            "value": 900635.5604700444,
+            "unit": "ns/iter",
+            "extra": "iterations: 339\ncpu: 900602.8938051604 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_AllPairs",
+            "value": 81767005.99998792,
+            "unit": "ns/iter",
+            "extra": "iterations: 3\ncpu: 81746175.66666599 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_AllPairs",
+            "value": 80.7240126895436,
+            "unit": "ns/iter",
+            "extra": "iterations: 3470261\ncpu: 80.71570063462205 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_1",
+            "value": 21273524.99999583,
+            "unit": "ns/iter",
+            "extra": "iterations: 13\ncpu: 21273044.076922294 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_2",
+            "value": 23842051.81818867,
+            "unit": "ns/iter",
+            "extra": "iterations: 11\ncpu: 23840472.181817062 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_2_3",
+            "value": 26975532.700009804,
+            "unit": "ns/iter",
+            "extra": "iterations: 10\ncpu: 26972124.19999957 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_3",
+            "value": 10432191.269243363,
+            "unit": "ns/iter",
+            "extra": "iterations: 26\ncpu: 10431582.038461985 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_1",
+            "value": 4.9860437831788795,
+            "unit": "ns/iter",
+            "extra": "iterations: 56246260\ncpu: 4.9856824080392395 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_2",
+            "value": 4.980623722463206,
+            "unit": "ns/iter",
+            "extra": "iterations: 56221480\ncpu: 4.979753734693589 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_2_3",
+            "value": 4.982162070200352,
+            "unit": "ns/iter",
+            "extra": "iterations: 55974769\ncpu: 4.98155036602295 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_3",
+            "value": 4.372337931884812,
+            "unit": "ns/iter",
+            "extra": "iterations: 64261175\ncpu: 4.371888827118313 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_1",
+            "value": 11064743.559995804,
+            "unit": "ns/iter",
+            "extra": "iterations: 25\ncpu: 11064516.639999622 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_1",
+            "value": 6933386.2195130335,
+            "unit": "ns/iter",
+            "extra": "iterations: 41\ncpu: 6932617.78048676 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_2",
+            "value": 13829255.999996802,
+            "unit": "ns/iter",
+            "extra": "iterations: 20\ncpu: 13828081.75000072 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_2",
+            "value": 5585525.980390069,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 5584991.274510287 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Transpose_2_3",
+            "value": 7478481.216216514,
+            "unit": "ns/iter",
+            "extra": "iterations: 37\ncpu: 7477392.837838917 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Transpose_2_3",
+            "value": 1985438.2285700466,
+            "unit": "ns/iter",
+            "extra": "iterations: 140\ncpu: 1985381.6499996972 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_0",
+            "value": 10695033.807687301,
+            "unit": "ns/iter",
+            "extra": "iterations: 26\ncpu: 10691499.346152911 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_0",
+            "value": 8400015.031259755,
+            "unit": "ns/iter",
+            "extra": "iterations: 32\ncpu: 8397437.125000406 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_2",
+            "value": 7354971.763148617,
+            "unit": "ns/iter",
+            "extra": "iterations: 38\ncpu: 7353956.947368763 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_2",
+            "value": 1887732.0738164715,
+            "unit": "ns/iter",
+            "extra": "iterations: 149\ncpu: 1887783.7651004943 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_AllPairs",
+            "value": 18188225.20000746,
+            "unit": "ns/iter",
+            "extra": "iterations: 15\ncpu: 18187901.79999989 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_AllPairs",
+            "value": 80.68156459790714,
+            "unit": "ns/iter",
+            "extra": "iterations: 3474733\ncpu: 80.67622059018514 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_1",
+            "value": 5064907.36363503,
+            "unit": "ns/iter",
+            "extra": "iterations: 55\ncpu: 5063936.200000476 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_2",
+            "value": 4426269.412687044,
+            "unit": "ns/iter",
+            "extra": "iterations: 63\ncpu: 4426357.888889014 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_2_3",
+            "value": 5003134.214289519,
+            "unit": "ns/iter",
+            "extra": "iterations: 56\ncpu: 5002736.7321432745 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_3",
+            "value": 1423837.3469388953,
+            "unit": "ns/iter",
+            "extra": "iterations: 196\ncpu: 1423709.2193878046 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_1",
+            "value": 4.988421224960834,
+            "unit": "ns/iter",
+            "extra": "iterations: 56067589\ncpu: 4.988071361513314 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_2",
+            "value": 4.981230382476789,
+            "unit": "ns/iter",
+            "extra": "iterations: 56167900\ncpu: 4.980836563232721 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_2_3",
+            "value": 4.9861930640752785,
+            "unit": "ns/iter",
+            "extra": "iterations: 55821654\ncpu: 4.986077911629004 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_3",
+            "value": 4.362660326891614,
+            "unit": "ns/iter",
+            "extra": "iterations: 64139817\ncpu: 4.362293893042977 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_1",
+            "value": 3966157.3239380256,
+            "unit": "ns/iter",
+            "extra": "iterations: 71\ncpu: 3966024.9154929286 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_1",
+            "value": 2197057.70865675,
+            "unit": "ns/iter",
+            "extra": "iterations: 127\ncpu: 2196873.3700786545 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_2",
+            "value": 3292019.7882370246,
+            "unit": "ns/iter",
+            "extra": "iterations: 85\ncpu: 3291474.094117862 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_2",
+            "value": 1409290.914578483,
+            "unit": "ns/iter",
+            "extra": "iterations: 199\ncpu: 1409273.3467337629 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Transpose_2_3",
+            "value": 1644783.0182940145,
+            "unit": "ns/iter",
+            "extra": "iterations: 164\ncpu: 1644368.6829264814 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Transpose_2_3",
+            "value": 507598.0917240077,
+            "unit": "ns/iter",
+            "extra": "iterations: 556\ncpu: 507552.01258984307 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_0",
+            "value": 1213024.582606344,
+            "unit": "ns/iter",
+            "extra": "iterations: 230\ncpu: 1212964.8260869824 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_0",
+            "value": 791366.7280417271,
+            "unit": "ns/iter",
+            "extra": "iterations: 353\ncpu: 791399.2379603971 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_2",
+            "value": 1727192.92637699,
+            "unit": "ns/iter",
+            "extra": "iterations: 163\ncpu: 1726948.7423312454 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_2",
+            "value": 458304.34621773806,
+            "unit": "ns/iter",
+            "extra": "iterations: 595\ncpu: 458451.6789917586 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_AllPairs",
+            "value": 30011075.444463134,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 30004067.000001714 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_AllPairs",
+            "value": 79.35894207889449,
+            "unit": "ns/iter",
+            "extra": "iterations: 3473605\ncpu: 79.34899333689292 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_1",
+            "value": 7939038.371416375,
+            "unit": "ns/iter",
+            "extra": "iterations: 35\ncpu: 7938285.685713911 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_2",
+            "value": 8629436.84847144,
+            "unit": "ns/iter",
+            "extra": "iterations: 33\ncpu: 8628227.454544593 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_2_3",
+            "value": 9312052.399995234,
+            "unit": "ns/iter",
+            "extra": "iterations: 30\ncpu: 9311703.666665968 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_3",
+            "value": 2793003.4950522534,
+            "unit": "ns/iter",
+            "extra": "iterations: 101\ncpu: 2792681.6633657776 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_1",
+            "value": 4.984342331668729,
+            "unit": "ns/iter",
+            "extra": "iterations: 56268659\ncpu: 4.9842372109845545 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_2",
+            "value": 4.978179080745468,
+            "unit": "ns/iter",
+            "extra": "iterations: 56231774\ncpu: 4.977567522589633 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_2_3",
+            "value": 4.982427108246148,
+            "unit": "ns/iter",
+            "extra": "iterations: 56078875\ncpu: 4.982294045663449 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_3",
+            "value": 4.372964499810855,
+            "unit": "ns/iter",
+            "extra": "iterations: 64277997\ncpu: 4.372860233961523 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_1",
+            "value": 5650544.100003571,
+            "unit": "ns/iter",
+            "extra": "iterations: 50\ncpu: 5649509.519999754 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_1",
+            "value": 3572180.2784800725,
+            "unit": "ns/iter",
+            "extra": "iterations: 79\ncpu: 3571917.784810088 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_2",
+            "value": 6046657.804349905,
+            "unit": "ns/iter",
+            "extra": "iterations: 46\ncpu: 6045922.652174401 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_2",
+            "value": 2401085.224133128,
+            "unit": "ns/iter",
+            "extra": "iterations: 116\ncpu: 2401169.172413669 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Transpose_2_3",
+            "value": 2850527.4742328012,
+            "unit": "ns/iter",
+            "extra": "iterations: 97\ncpu: 2850145.2577320063 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Transpose_2_3",
+            "value": 816709.6202913049,
+            "unit": "ns/iter",
+            "extra": "iterations: 345\ncpu: 816613.9797101073 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_0",
+            "value": 2504569.819827773,
+            "unit": "ns/iter",
+            "extra": "iterations: 111\ncpu: 2504525.5585582084 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_0",
+            "value": 1833050.3552582993,
+            "unit": "ns/iter",
+            "extra": "iterations: 152\ncpu: 1833002.9868428637 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_2",
+            "value": 3042264.2580707623,
+            "unit": "ns/iter",
+            "extra": "iterations: 93\ncpu: 3042112.473117774 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_2",
+            "value": 806986.9853374034,
+            "unit": "ns/iter",
+            "extra": "iterations: 341\ncpu: 806959.1818183647 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/BasisLoad",
+            "value": 15066.390673685444,
+            "unit": "ns/iter",
+            "extra": "iterations: 18614\ncpu: 15066.02514236599 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/SourceLoad",
+            "value": 13101.931095817403,
+            "unit": "ns/iter",
+            "extra": "iterations: 21363\ncpu: 13100.727004634024 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericFluxLoad",
+            "value": 23536.8497739097,
+            "unit": "ns/iter",
+            "extra": "iterations: 11942\ncpu: 23537.053927315097 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/Mass",
+            "value": 24308.789036684764,
+            "unit": "ns/iter",
+            "extra": "iterations: 11803\ncpu: 24308.325425738563 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedMass",
+            "value": 29369.072577233,
+            "unit": "ns/iter",
+            "extra": "iterations: 9452\ncpu: 29365.773275496682 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/OuterWeightedMass",
+            "value": 26975.43841946863,
+            "unit": "ns/iter",
+            "extra": "iterations: 10604\ncpu: 26973.77121840749 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GridFunctionWeightedMass",
+            "value": 51657.646829084835,
+            "unit": "ns/iter",
+            "extra": "iterations: 5377\ncpu: 51655.6680304984 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GradGrad",
+            "value": 22854.57346320772,
+            "unit": "ns/iter",
+            "extra": "iterations: 12217\ncpu: 22852.352868952406 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedGradGrad",
+            "value": 28230.934573778606,
+            "unit": "ns/iter",
+            "extra": "iterations: 9889\ncpu: 28231.27110931363 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorMass",
+            "value": 59523.44425533371,
+            "unit": "ns/iter",
+            "extra": "iterations: 4700\ncpu: 59518.25510638166 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorSourceLoad",
+            "value": 35033.106774114334,
+            "unit": "ns/iter",
+            "extra": "iterations: 7942\ncpu: 35030.68471417802 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/AnisotropicMass",
+            "value": 87215.74334364309,
+            "unit": "ns/iter",
+            "extra": "iterations: 3230\ncpu: 87206.87461300047 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/JacobianJacobian",
+            "value": 47049.661774633154,
+            "unit": "ns/iter",
+            "extra": "iterations: 5928\ncpu: 47046.988697705856 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedJacobianJacobian",
+            "value": 64082.44642857328,
+            "unit": "ns/iter",
+            "extra": "iterations: 4312\ncpu: 64071.902829313076 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/Advection",
+            "value": 68140.07587148594,
+            "unit": "ns/iter",
+            "extra": "iterations: 4389\ncpu: 68140.71884255944 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GridFunctionAdvection",
+            "value": 123097.78184224517,
+            "unit": "ns/iter",
+            "extra": "iterations: 2269\ncpu: 123093.7214631992 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/DivPressure",
+            "value": 21495.545892977454,
+            "unit": "ns/iter",
+            "extra": "iterations: 13063\ncpu: 21494.46061394747 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/PressureDiv",
+            "value": 25542.854484081017,
+            "unit": "ns/iter",
+            "extra": "iterations: 10961\ncpu: 25541.221056472437 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericDivDiv",
+            "value": 63359.40283492859,
+            "unit": "ns/iter",
+            "extra": "iterations: 4374\ncpu: 63351.968907179136 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericElasticity",
+            "value": 217923.98441151998,
+            "unit": "ns/iter",
+            "extra": "iterations: 1283\ncpu: 217906.98285269292 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/BasisLoad",
+            "value": 11548.37506672466,
+            "unit": "ns/iter",
+            "extra": "iterations: 24353\ncpu: 11548.000082125407 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/SourceLoad",
+            "value": 12253.912236578142,
+            "unit": "ns/iter",
+            "extra": "iterations: 23062\ncpu: 12253.300277512253 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericFluxLoad",
+            "value": 26014.47690979233,
+            "unit": "ns/iter",
+            "extra": "iterations: 11585\ncpu: 26013.359430298035 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/Mass",
+            "value": 23502.23819078577,
+            "unit": "ns/iter",
+            "extra": "iterations: 11961\ncpu: 23501.756960120016 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedMass",
+            "value": 22473.048069147535,
+            "unit": "ns/iter",
+            "extra": "iterations: 12378\ncpu: 22468.290434642295 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/OuterWeightedMass",
+            "value": 22503.319810025696,
+            "unit": "ns/iter",
+            "extra": "iterations: 12423\ncpu: 22502.911454560824 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GridFunctionWeightedMass",
+            "value": 53058.09954406443,
+            "unit": "ns/iter",
+            "extra": "iterations: 5264\ncpu: 53057.00056991128 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GradGrad",
+            "value": 21318.673515809725,
+            "unit": "ns/iter",
+            "extra": "iterations: 13189\ncpu: 21317.264007885668 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedGradGrad",
+            "value": 20173.58589999958,
+            "unit": "ns/iter",
+            "extra": "iterations: 10000\ncpu: 20172.652099999763 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/VectorMass",
+            "value": 35014.68995632714,
+            "unit": "ns/iter",
+            "extra": "iterations: 8015\ncpu: 35012.76656269419 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/VectorSourceLoad",
+            "value": 12011.474672958439,
+            "unit": "ns/iter",
+            "extra": "iterations: 23315\ncpu: 12009.085910358175 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/AnisotropicMass",
+            "value": 53449.738963524,
+            "unit": "ns/iter",
+            "extra": "iterations: 5210\ncpu: 53450.19712092086 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/JacobianJacobian",
+            "value": 38351.835734864435,
+            "unit": "ns/iter",
+            "extra": "iterations: 7287\ncpu: 38351.02538767737 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedJacobianJacobian",
+            "value": 38020.53583986241,
+            "unit": "ns/iter",
+            "extra": "iterations: 7394\ncpu: 38019.394914797405 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/Advection",
+            "value": 35895.42293859768,
+            "unit": "ns/iter",
+            "extra": "iterations: 7786\ncpu: 35893.58836373035 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GridFunctionAdvection",
+            "value": 121566.40372938052,
+            "unit": "ns/iter",
+            "extra": "iterations: 2306\ncpu: 121558.99826539405 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/DivPressure",
+            "value": 24285.432576201034,
+            "unit": "ns/iter",
+            "extra": "iterations: 11843\ncpu: 24282.301359452533 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/PressureDiv",
+            "value": 22338.86708103527,
+            "unit": "ns/iter",
+            "extra": "iterations: 12549\ncpu: 22336.32090206362 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericDivDiv",
+            "value": 58376.014549998865,
+            "unit": "ns/iter",
+            "extra": "iterations: 4811\ncpu: 58374.83329869137 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericElasticity",
+            "value": 234494.46843857272,
+            "unit": "ns/iter",
+            "extra": "iterations: 1204\ncpu: 234480.7259136223 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/BasisLoad",
+            "value": 15113.76839584852,
+            "unit": "ns/iter",
+            "extra": "iterations: 18795\ncpu: 15113.428411811947 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/SourceLoad",
+            "value": 16049.807331039208,
+            "unit": "ns/iter",
+            "extra": "iterations: 17460\ncpu: 16048.597537227432 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericFluxLoad",
+            "value": 27885.34509999181,
+            "unit": "ns/iter",
+            "extra": "iterations: 10000\ncpu: 27882.303699999513 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/Mass",
+            "value": 58195.65202701759,
+            "unit": "ns/iter",
+            "extra": "iterations: 4736\ncpu: 58196.2523226356 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedMass",
+            "value": 65326.996729736406,
+            "unit": "ns/iter",
+            "extra": "iterations: 4281\ncpu: 65325.21443588008 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/OuterWeightedMass",
+            "value": 69374.54689828187,
+            "unit": "ns/iter",
+            "extra": "iterations: 4030\ncpu: 69371.1022332507 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GridFunctionWeightedMass",
+            "value": 246120.19098144144,
+            "unit": "ns/iter",
+            "extra": "iterations: 1131\ncpu: 245220.28293545244 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GradGrad",
+            "value": 61384.56577210273,
+            "unit": "ns/iter",
+            "extra": "iterations: 4546\ncpu: 61383.025516935646 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedGradGrad",
+            "value": 69610.04407372006,
+            "unit": "ns/iter",
+            "extra": "iterations: 4016\ncpu: 69602.04930278713 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/VectorMass",
+            "value": 114131.88483607347,
+            "unit": "ns/iter",
+            "extra": "iterations: 2440\ncpu: 114132.47172130967 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/VectorSourceLoad",
+            "value": 21876.058605461203,
+            "unit": "ns/iter",
+            "extra": "iterations: 12678\ncpu: 21875.59512541455 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/AnisotropicMass",
+            "value": 220162.967084655,
+            "unit": "ns/iter",
+            "extra": "iterations: 1276\ncpu: 220153.61520376918 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/JacobianJacobian",
+            "value": 131315.2687969532,
+            "unit": "ns/iter",
+            "extra": "iterations: 2128\ncpu: 131310.62781954632 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedJacobianJacobian",
+            "value": 124338.9839714938,
+            "unit": "ns/iter",
+            "extra": "iterations: 2246\ncpu: 124314.34461264494 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/Advection",
+            "value": 175468.16729320295,
+            "unit": "ns/iter",
+            "extra": "iterations: 1596\ncpu: 175464.03383458607 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GridFunctionAdvection",
+            "value": 541120.6050095962,
+            "unit": "ns/iter",
+            "extra": "iterations: 519\ncpu: 541096.4161849719 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/DivPressure",
+            "value": 81033.57027415569,
+            "unit": "ns/iter",
+            "extra": "iterations: 3465\ncpu: 81026.97806637787 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/PressureDiv",
+            "value": 90341.23781866416,
+            "unit": "ns/iter",
+            "extra": "iterations: 3099\ncpu: 90339.5911584399 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericDivDiv",
+            "value": 177087.9379747281,
+            "unit": "ns/iter",
+            "extra": "iterations: 1580\ncpu: 177058.0000000004 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericElasticity",
+            "value": 2081585.5820895047,
+            "unit": "ns/iter",
+            "extra": "iterations: 134\ncpu: 2081605.2611940464 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/BasisLoad",
+            "value": 18554.399266422428,
+            "unit": "ns/iter",
+            "extra": "iterations: 14995\ncpu: 18552.13951317083 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/SourceLoad",
+            "value": 19771.685374269553,
+            "unit": "ns/iter",
+            "extra": "iterations: 14201\ncpu: 19770.9059221176 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericFluxLoad",
+            "value": 103413.29851851494,
+            "unit": "ns/iter",
+            "extra": "iterations: 2700\ncpu: 103404.92111111045 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/Mass",
+            "value": 151942.4807379173,
+            "unit": "ns/iter",
+            "extra": "iterations: 1843\ncpu: 151927.56755290617 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedMass",
+            "value": 211849.31092436268,
+            "unit": "ns/iter",
+            "extra": "iterations: 1309\ncpu: 211851.2734912099 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/OuterWeightedMass",
+            "value": 206901.30201344055,
+            "unit": "ns/iter",
+            "extra": "iterations: 1341\ncpu: 206892.61595823857 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GridFunctionWeightedMass",
+            "value": 1362030.22439021,
+            "unit": "ns/iter",
+            "extra": "iterations: 205\ncpu: 1361962.0195121674 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GradGrad",
+            "value": 156010.20553360836,
+            "unit": "ns/iter",
+            "extra": "iterations: 1771\ncpu: 156003.6149068361 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedGradGrad",
+            "value": 249333.79982130165,
+            "unit": "ns/iter",
+            "extra": "iterations: 1119\ncpu: 249303.26273459548 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/VectorMass",
+            "value": 325940.2133645143,
+            "unit": "ns/iter",
+            "extra": "iterations: 853\ncpu: 325933.70339977456 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/VectorSourceLoad",
+            "value": 39713.25078147097,
+            "unit": "ns/iter",
+            "extra": "iterations: 7038\ncpu: 39712.03978402978 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/AnisotropicMass",
+            "value": 807423.2391929206,
+            "unit": "ns/iter",
+            "extra": "iterations: 347\ncpu: 807375.8818443432 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/JacobianJacobian",
+            "value": 403671.1799709893,
+            "unit": "ns/iter",
+            "extra": "iterations: 689\ncpu: 403660.0827285881 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedJacobianJacobian",
+            "value": 404090.5142856641,
+            "unit": "ns/iter",
+            "extra": "iterations: 700\ncpu: 402757.9157142976 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/Advection",
+            "value": 566483.9736308589,
+            "unit": "ns/iter",
+            "extra": "iterations: 493\ncpu: 566399.3427991965 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GridFunctionAdvection",
+            "value": 3073913.800000759,
+            "unit": "ns/iter",
+            "extra": "iterations: 90\ncpu: 3073943.9666665667 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/DivPressure",
+            "value": 264315.8618732207,
+            "unit": "ns/iter",
+            "extra": "iterations: 1057\ncpu: 264295.7710501413 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/PressureDiv",
+            "value": 277053.7123015605,
+            "unit": "ns/iter",
+            "extra": "iterations: 1008\ncpu: 277026.1200396814 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericDivDiv",
+            "value": 721879.2422681005,
+            "unit": "ns/iter",
+            "extra": "iterations: 388\ncpu: 721774.4690721623 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericElasticity",
+            "value": 15955889.999999912,
+            "unit": "ns/iter",
+            "extra": "iterations: 17\ncpu: 15953834.235294469 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/BasisLoad",
+            "value": 16971.59934537753,
+            "unit": "ns/iter",
+            "extra": "iterations: 16498\ncpu: 16971.159776942215 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/SourceLoad",
+            "value": 14478.477059948042,
+            "unit": "ns/iter",
+            "extra": "iterations: 19333\ncpu: 14477.09248435349 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericFluxLoad",
+            "value": 30863.226960412143,
+            "unit": "ns/iter",
+            "extra": "iterations: 9169\ncpu: 30860.296215508584 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/Mass",
+            "value": 28558.649989748028,
+            "unit": "ns/iter",
+            "extra": "iterations: 9754\ncpu: 28558.172954686448 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedMass",
+            "value": 36964.26916457185,
+            "unit": "ns/iter",
+            "extra": "iterations: 7553\ncpu: 36961.32146166928 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/OuterWeightedMass",
+            "value": 39755.961108749536,
+            "unit": "ns/iter",
+            "extra": "iterations: 7071\ncpu: 39751.52213265449 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GridFunctionWeightedMass",
+            "value": 80328.05123069229,
+            "unit": "ns/iter",
+            "extra": "iterations: 3494\ncpu: 80320.06439610662 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GradGrad",
+            "value": 27877.681410639125,
+            "unit": "ns/iter",
+            "extra": "iterations: 10038\ncpu: 27876.372982665467 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedGradGrad",
+            "value": 39687.3511331521,
+            "unit": "ns/iter",
+            "extra": "iterations: 7060\ncpu: 39686.35835693997 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorMass",
+            "value": 173893.2055900477,
+            "unit": "ns/iter",
+            "extra": "iterations: 1610\ncpu: 173877.2211180105 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorSourceLoad",
+            "value": 47727.833647758016,
+            "unit": "ns/iter",
+            "extra": "iterations: 5831\ncpu: 47724.43405933864 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/AnisotropicMass",
+            "value": 292334.7788260223,
+            "unit": "ns/iter",
+            "extra": "iterations: 954\ncpu: 292290.105870023 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/JacobianJacobian",
+            "value": 230978.88512399196,
+            "unit": "ns/iter",
+            "extra": "iterations: 1210\ncpu: 230981.58347107895 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedJacobianJacobian",
+            "value": 308599.4445640475,
+            "unit": "ns/iter",
+            "extra": "iterations: 929\ncpu: 308581.62540366175 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/Advection",
+            "value": 143861.22176591452,
+            "unit": "ns/iter",
+            "extra": "iterations: 1948\ncpu: 143841.2422997983 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GridFunctionAdvection",
+            "value": 422234.1465256758,
+            "unit": "ns/iter",
+            "extra": "iterations: 662\ncpu: 422195.28096678376 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/DivPressure",
+            "value": 38330.3015981461,
+            "unit": "ns/iter",
+            "extra": "iterations: 7321\ncpu: 38326.46701270365 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/PressureDiv",
+            "value": 45347.10131300695,
+            "unit": "ns/iter",
+            "extra": "iterations: 6169\ncpu: 45342.77986707686 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericDivDiv",
+            "value": 110712.87919462388,
+            "unit": "ns/iter",
+            "extra": "iterations: 2533\ncpu: 110710.10343466283 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericElasticity",
+            "value": 423694.7598783279,
+            "unit": "ns/iter",
+            "extra": "iterations: 658\ncpu: 423684.732522793 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/BasisLoad",
+            "value": 18560.19124424374,
+            "unit": "ns/iter",
+            "extra": "iterations: 15190\ncpu: 18556.25365371969 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/SourceLoad",
+            "value": 19755.901171819005,
+            "unit": "ns/iter",
+            "extra": "iterations: 14166\ncpu: 19718.431667373035 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericFluxLoad",
+            "value": 40762.63532042422,
+            "unit": "ns/iter",
+            "extra": "iterations: 6710\ncpu: 40756.22786885129 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/Mass",
+            "value": 156361.00614872706,
+            "unit": "ns/iter",
+            "extra": "iterations: 1789\ncpu: 156344.2716601478 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedMass",
+            "value": 207474.3469387742,
+            "unit": "ns/iter",
+            "extra": "iterations: 1323\ncpu: 207458.22675736915 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/OuterWeightedMass",
+            "value": 208931.7317629206,
+            "unit": "ns/iter",
+            "extra": "iterations: 1316\ncpu: 208905.49240120983 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GridFunctionWeightedMass",
+            "value": 1033680.7629633533,
+            "unit": "ns/iter",
+            "extra": "iterations: 270\ncpu: 1033592.4666666987 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GradGrad",
+            "value": 138389.60555005714,
+            "unit": "ns/iter",
+            "extra": "iterations: 2018\ncpu: 138374.04955401603 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedGradGrad",
+            "value": 162762.7350377808,
+            "unit": "ns/iter",
+            "extra": "iterations: 1721\ncpu: 162757.76350959277 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/VectorMass",
+            "value": 621128.252771516,
+            "unit": "ns/iter",
+            "extra": "iterations: 451\ncpu: 621107.4390244008 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/VectorSourceLoad",
+            "value": 57768.951275134736,
+            "unit": "ns/iter",
+            "extra": "iterations: 4823\ncpu: 57758.320754719825 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/AnisotropicMass",
+            "value": 1709943.1963191975,
+            "unit": "ns/iter",
+            "extra": "iterations: 163\ncpu: 1709915.6319018095 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/JacobianJacobian",
+            "value": 596482.8201283419,
+            "unit": "ns/iter",
+            "extra": "iterations: 467\ncpu: 596433.9229121987 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedJacobianJacobian",
+            "value": 605964.5670996053,
+            "unit": "ns/iter",
+            "extra": "iterations: 462\ncpu: 605970.3138527969 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/Advection",
+            "value": 733744.7427821918,
+            "unit": "ns/iter",
+            "extra": "iterations: 381\ncpu: 733727.0656168016 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GridFunctionAdvection",
+            "value": 2917664.436169877,
+            "unit": "ns/iter",
+            "extra": "iterations: 94\ncpu: 2917454.031914913 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/DivPressure",
+            "value": 323645.37109825545,
+            "unit": "ns/iter",
+            "extra": "iterations: 865\ncpu: 323598.8335259989 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/PressureDiv",
+            "value": 365227.39580596186,
+            "unit": "ns/iter",
+            "extra": "iterations: 763\ncpu: 365195.08650065295 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericDivDiv",
+            "value": 627024.6044944164,
+            "unit": "ns/iter",
+            "extra": "iterations: 445\ncpu: 626992.5550561971 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericElasticity",
+            "value": 15380711.277777612,
+            "unit": "ns/iter",
+            "extra": "iterations: 18\ncpu: 15380281.222221805 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReassemblyMass",
+            "value": 36427.77483357745,
+            "unit": "ns/iter",
+            "extra": "iterations: 7661\ncpu: 36425.77522516763 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReassemblyGradGrad",
+            "value": 33949.36510500646,
+            "unit": "ns/iter",
+            "extra": "iterations: 8666\ncpu: 33945.41657050589 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReactionDiffusion",
+            "value": 69825.53955575645,
+            "unit": "ns/iter",
+            "extra": "iterations: 4007\ncpu: 69821.75542800123 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ColdMass",
+            "value": 36883.025546972494,
+            "unit": "ns/iter",
+            "extra": "iterations: 7633\ncpu: 36880.415039958774 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ColdGradGrad",
+            "value": 33244.217855005394,
+            "unit": "ns/iter",
+            "extra": "iterations: 8345\ncpu: 33239.87369682332 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/Elasticity",
+            "value": 355176.4770992508,
+            "unit": "ns/iter",
+            "extra": "iterations: 786\ncpu: 355180.13486003777 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReassemblyMass",
+            "value": 114280.24089980342,
+            "unit": "ns/iter",
+            "extra": "iterations: 2445\ncpu: 114274.56237218538 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReassemblyGradGrad",
+            "value": 119843.83960650179,
+            "unit": "ns/iter",
+            "extra": "iterations: 2338\ncpu: 119825.63986312838 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReactionDiffusion",
+            "value": 228701.58469057264,
+            "unit": "ns/iter",
+            "extra": "iterations: 1228\ncpu: 228676.81270357748 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ColdMass",
+            "value": 114765.77655678074,
+            "unit": "ns/iter",
+            "extra": "iterations: 2457\ncpu: 114548.91697191373 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ColdGradGrad",
+            "value": 120454.34589042785,
+            "unit": "ns/iter",
+            "extra": "iterations: 2336\ncpu: 120448.07534246874 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/Elasticity",
+            "value": 2703789.67961159,
+            "unit": "ns/iter",
+            "extra": "iterations: 103\ncpu: 2703589.0776698706 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReassemblyMass",
+            "value": 310553.316722067,
+            "unit": "ns/iter",
+            "extra": "iterations: 903\ncpu: 310500.3931339996 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReassemblyGradGrad",
+            "value": 346342.84662580886,
+            "unit": "ns/iter",
+            "extra": "iterations: 815\ncpu: 346295.94110430893 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReactionDiffusion",
+            "value": 612252.1855895267,
+            "unit": "ns/iter",
+            "extra": "iterations: 458\ncpu: 612201.6135371139 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ColdMass",
+            "value": 313410.79143188003,
+            "unit": "ns/iter",
+            "extra": "iterations: 887\ncpu: 313322.94250282284 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ColdGradGrad",
+            "value": 343896.206172786,
+            "unit": "ns/iter",
+            "extra": "iterations: 810\ncpu: 343900.59629630775 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/Elasticity",
+            "value": 18579497.399999432,
+            "unit": "ns/iter",
+            "extra": "iterations: 15\ncpu: 18578145.533334125 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReassemblyMass",
+            "value": 53472.49569543831,
+            "unit": "ns/iter",
+            "extra": "iterations: 5227\ncpu: 53464.237612398174 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReassemblyGradGrad",
+            "value": 43019.26865671514,
+            "unit": "ns/iter",
+            "extra": "iterations: 6499\ncpu: 43017.379596860366 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReactionDiffusion",
+            "value": 97703.46643110103,
+            "unit": "ns/iter",
+            "extra": "iterations: 2830\ncpu: 97697.85547703138 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ColdMass",
+            "value": 53967.4143968924,
+            "unit": "ns/iter",
+            "extra": "iterations: 5140\ncpu: 53962.09999999959 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ColdGradGrad",
+            "value": 44301.46354990402,
+            "unit": "ns/iter",
+            "extra": "iterations: 6310\ncpu: 44298.34738510376 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/Elasticity",
+            "value": 755213.4351351777,
+            "unit": "ns/iter",
+            "extra": "iterations: 370\ncpu: 755167.2567567233 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReassemblyMass",
+            "value": 314828.39390523615,
+            "unit": "ns/iter",
+            "extra": "iterations: 886\ncpu: 314811.51354401297 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReassemblyGradGrad",
+            "value": 298893.3251072598,
+            "unit": "ns/iter",
+            "extra": "iterations: 932\ncpu: 298881.5879828353 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReactionDiffusion",
+            "value": 614027.0108458942,
+            "unit": "ns/iter",
+            "extra": "iterations: 461\ncpu: 613932.8351409814 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ColdMass",
+            "value": 315930.75484613166,
+            "unit": "ns/iter",
+            "extra": "iterations: 877\ncpu: 315934.4709235994 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ColdGradGrad",
+            "value": 300706.572658809,
+            "unit": "ns/iter",
+            "extra": "iterations: 929\ncpu: 300681.4714747015 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/Elasticity",
+            "value": 19634246.571424033,
+            "unit": "ns/iter",
+            "extra": "iterations: 14\ncpu: 19630878.857142873 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/BoundaryMass",
+            "value": 7890.002006273025,
+            "unit": "ns/iter",
+            "extra": "iterations: 35389\ncpu: 7889.226369775781 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/BoundaryLoad",
+            "value": 4404.143474421372,
+            "unit": "ns/iter",
+            "extra": "iterations: 63412\ncpu: 4403.621696208735 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/BoundaryMass",
+            "value": 12693.50945534947,
+            "unit": "ns/iter",
+            "extra": "iterations: 22051\ncpu: 12692.193959456881 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/BoundaryLoad",
+            "value": 4526.1859247935145,
+            "unit": "ns/iter",
+            "extra": "iterations: 62095\ncpu: 4526.058346082873 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/BoundaryMass",
+            "value": 28003.880391963325,
+            "unit": "ns/iter",
+            "extra": "iterations: 9899\ncpu: 28003.063844833312 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+            "value": 11169.548764891546,
+            "unit": "ns/iter",
+            "extra": "iterations: 25018\ncpu: 11168.118954352847 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D2/Mass",
+            "value": 10990.54259891903,
+            "unit": "ns/iter",
+            "extra": "iterations: 24895\ncpu: 10989.299618397334 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D2/SourceLoad",
+            "value": 9639.29828333582,
+            "unit": "ns/iter",
+            "extra": "iterations: 29301\ncpu: 9584.220777448294 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D3/Mass",
+            "value": 10179.31407062283,
+            "unit": "ns/iter",
+            "extra": "iterations: 27497\ncpu: 10178.238462377652 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D3/SourceLoad",
+            "value": 9524.469927387496,
+            "unit": "ns/iter",
+            "extra": "iterations: 29196\ncpu: 9523.805487052377 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GlobalPotential",
+            "value": 9203252.299998136,
+            "unit": "ns/iter",
+            "extra": "iterations: 30\ncpu: 9202985.76666691 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GlobalPotential",
+            "value": 1367622.1951217065,
+            "unit": "ns/iter",
+            "extra": "iterations: 205\ncpu: 1367413.419512093 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorGlobalPotential",
+            "value": 33637592.99999458,
+            "unit": "ns/iter",
+            "extra": "iterations: 8\ncpu: 33632611.37499762 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorGlobalPotential",
+            "value": 7532255.729729145,
+            "unit": "ns/iter",
+            "extra": "iterations: 37\ncpu: 7532336.486486821 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D2/Mass",
+            "value": 34676.9691548516,
+            "unit": "ns/iter",
+            "extra": "iterations: 8105\ncpu: 34676.43775447299 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D2/GradGrad",
+            "value": 28213.898401717553,
+            "unit": "ns/iter",
+            "extra": "iterations: 9823\ncpu: 28209.612541994604 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3-P2/D2/Mass",
+            "value": 97282.37885772201,
+            "unit": "ns/iter",
+            "extra": "iterations: 2819\ncpu: 97280.36041149659 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3-P2/D2/GradGrad",
+            "value": 107310.55338689218,
+            "unit": "ns/iter",
+            "extra": "iterations: 2613\ncpu: 107301.31266742852 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D3/Mass",
+            "value": 66887.38045039847,
+            "unit": "ns/iter",
+            "extra": "iterations: 4174\ncpu: 66877.70747484286 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D3/GradGrad",
+            "value": 46133.623886499765,
+            "unit": "ns/iter",
+            "extra": "iterations: 6062\ncpu: 46132.87248432631 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/1",
+            "value": 1068.9125795271186,
+            "unit": "ns/iter",
+            "extra": "iterations: 262490\ncpu: 1068.885782315501 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/2",
+            "value": 23748.322145357975,
+            "unit": "ns/iter",
+            "extra": "iterations: 11709\ncpu: 23744.803142880148 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/3",
+            "value": 20149.54631162511,
+            "unit": "ns/iter",
+            "extra": "iterations: 13895\ncpu: 20148.665635121237 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/4",
+            "value": 28561.0153252793,
+            "unit": "ns/iter",
+            "extra": "iterations: 9853\ncpu: 28556.417740789067 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/6",
+            "value": 60294.65305682561,
+            "unit": "ns/iter",
+            "extra": "iterations: 4629\ncpu: 60288.91790883452 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/7",
+            "value": 28535.836939807814,
+            "unit": "ns/iter",
+            "extra": "iterations: 9751\ncpu: 28535.45533791367 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/5",
+            "value": 53860.49636668397,
+            "unit": "ns/iter",
+            "extra": "iterations: 5367\ncpu: 53855.542202343546 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/1",
+            "value": 1102.2444605572728,
+            "unit": "ns/iter",
+            "extra": "iterations: 256524\ncpu: 1102.0735642669783 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/2",
+            "value": 23737.482932240906,
+            "unit": "ns/iter",
+            "extra": "iterations: 11718\ncpu: 23735.728963985825 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/3",
+            "value": 30559.13458579611,
+            "unit": "ns/iter",
+            "extra": "iterations: 9102\ncpu: 30555.48626675457 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/4",
+            "value": 29268.238873178598,
+            "unit": "ns/iter",
+            "extra": "iterations: 9549\ncpu: 29264.25856110508 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/6",
+            "value": 117939.50925922564,
+            "unit": "ns/iter",
+            "extra": "iterations: 2376\ncpu: 117934.04755893197 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/7",
+            "value": 44305.70070196709,
+            "unit": "ns/iter",
+            "extra": "iterations: 6268\ncpu: 44302.96139119469 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/5",
+            "value": 98686.35008786885,
+            "unit": "ns/iter",
+            "extra": "iterations: 2845\ncpu: 98680.85694199895 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/CurvedMass",
+            "value": 58719.32242400928,
+            "unit": "ns/iter",
+            "extra": "iterations: 4736\ncpu: 58715.17504223193 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/CurvedGradGrad",
+            "value": 62564.94129556556,
+            "unit": "ns/iter",
+            "extra": "iterations: 4446\ncpu: 62563.78857399863 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/CurvedMass",
+            "value": 164488.09812234505,
+            "unit": "ns/iter",
+            "extra": "iterations: 1651\ncpu: 164215.86553602613 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/CurvedGradGrad",
+            "value": 141049.7397540946,
+            "unit": "ns/iter",
+            "extra": "iterations: 1952\ncpu: 141043.65829917754 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/2",
+            "value": 7.474196142611611,
+            "unit": "ns/iter",
+            "extra": "iterations: 37523789\ncpu: 7.473689184212687 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/4",
+            "value": 6.536361571355479,
+            "unit": "ns/iter",
+            "extra": "iterations: 42786531\ncpu: 6.5359000008675805 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/6",
+            "value": 4.670937762750331,
+            "unit": "ns/iter",
+            "extra": "iterations: 59808379\ncpu: 4.6706307990723 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/8",
+            "value": 5.033592653493433,
+            "unit": "ns/iter",
+            "extra": "iterations: 56278823\ncpu: 5.033670711272911 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/2",
+            "value": 4.674568437808133,
+            "unit": "ns/iter",
+            "extra": "iterations: 59981911\ncpu: 4.674208846063685 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/4",
+            "value": 3.7411100649083915,
+            "unit": "ns/iter",
+            "extra": "iterations: 75073664\ncpu: 3.740988570905538 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/6",
+            "value": 5.6046698818560845,
+            "unit": "ns/iter",
+            "extra": "iterations: 50028589\ncpu: 5.604443211460255 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/8",
+            "value": 5.919245053010155,
+            "unit": "ns/iter",
+            "extra": "iterations: 47378373\ncpu: 5.918719623402831 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/2",
+            "value": 6.224412866561889,
+            "unit": "ns/iter",
+            "extra": "iterations: 44825117\ncpu: 6.22378480350672 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/4",
+            "value": 6.544562245978849,
+            "unit": "ns/iter",
+            "extra": "iterations: 42806460\ncpu: 6.544450580590415 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/6",
+            "value": 3.8600097485023954,
+            "unit": "ns/iter",
+            "extra": "iterations: 71327881\ncpu: 3.859940084298702 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/8",
+            "value": 4.669977785055734,
+            "unit": "ns/iter",
+            "extra": "iterations: 59846647\ncpu: 4.669331834079076 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/2",
+            "value": 5.321245081675784,
+            "unit": "ns/iter",
+            "extra": "iterations: 52918681\ncpu: 5.320996511610036 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/4",
+            "value": 5.912581050560399,
+            "unit": "ns/iter",
+            "extra": "iterations: 47227312\ncpu: 5.911950038571063 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/6",
+            "value": 5.911888899497995,
+            "unit": "ns/iter",
+            "extra": "iterations: 47385925\ncpu: 5.911132029183779 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/8",
+            "value": 6.854290090871721,
+            "unit": "ns/iter",
+            "extra": "iterations: 40900101\ncpu: 6.853499921675356 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/2",
+            "value": 48.49391267124017,
+            "unit": "ns/iter",
+            "extra": "iterations: 5765501\ncpu: 48.4912728312787 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/4",
+            "value": 95.76168695286717,
+            "unit": "ns/iter",
+            "extra": "iterations: 2918896\ncpu: 95.74590804193933 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/6",
+            "value": 178.49926838665482,
+            "unit": "ns/iter",
+            "extra": "iterations: 1564351\ncpu: 178.49275258558254 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/8",
+            "value": 257.02853776546954,
+            "unit": "ns/iter",
+            "extra": "iterations: 1088943\ncpu: 257.0030699494612 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/2",
+            "value": 110.03968164249338,
+            "unit": "ns/iter",
+            "extra": "iterations: 2538781\ncpu: 110.04087985533764 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/4",
+            "value": 307.98340009935316,
+            "unit": "ns/iter",
+            "extra": "iterations: 911391\ncpu: 307.97795677157717 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/6",
+            "value": 633.9060454388372,
+            "unit": "ns/iter",
+            "extra": "iterations: 441341\ncpu: 633.8857346133826 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/8",
+            "value": 1209.9393623554708,
+            "unit": "ns/iter",
+            "extra": "iterations: 231226\ncpu: 1209.8961362476834 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/2",
+            "value": 164.9520039500144,
+            "unit": "ns/iter",
+            "extra": "iterations: 1697223\ncpu: 164.93684801585016 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/4",
+            "value": 500.32745098724877,
+            "unit": "ns/iter",
+            "extra": "iterations: 559754\ncpu: 500.26534870678444 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/6",
+            "value": 1209.247560306991,
+            "unit": "ns/iter",
+            "extra": "iterations: 231689\ncpu: 1209.0356512392868 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/8",
+            "value": 2192.7076262248897,
+            "unit": "ns/iter",
+            "extra": "iterations: 128045\ncpu: 2192.6105587878146 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/2",
+            "value": 139.1671088782335,
+            "unit": "ns/iter",
+            "extra": "iterations: 2016380\ncpu: 139.1525223420202 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/4",
+            "value": 282.28514752506555,
+            "unit": "ns/iter",
+            "extra": "iterations: 994373\ncpu: 282.2579374138153 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/6",
+            "value": 667.0879492648775,
+            "unit": "ns/iter",
+            "extra": "iterations: 421800\ncpu: 667.025357989561 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/8",
+            "value": 1293.9485380061597,
+            "unit": "ns/iter",
+            "extra": "iterations: 216451\ncpu: 1293.8553159837556 ns\nthreads: 1"
           }
         ]
       }
