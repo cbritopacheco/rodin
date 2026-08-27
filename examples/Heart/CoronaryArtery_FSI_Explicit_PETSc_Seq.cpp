@@ -2051,6 +2051,19 @@ int main(int argc, char** argv)
     // BDF1 mass split: (rho/dt)[(u,v)_{n+1} - (u^n,v)_n]; the implicit part
     // lives in 'flow', the explicit u^n part is 'massOld', assembled on the
     // PREVIOUS configuration and injected into the RHS at solve time.
+    auto flowRingBC = DirichletBC(u, zero).on(BoundaryFluid::FSIRing);
+    flowRingBC.assemble();
+    // DirichletBC DOFs and massOld use the velocity FES global numbering;
+    // vOff is added only when addressing the mixed flow RHS.
+    std::unordered_set<Index> flowRingDOFs;
+    std::visit(
+      [&](const auto& dofs)
+      {
+        for (const auto& entry : dofs)
+          flowRingDOFs.insert(entry.first);
+      },
+      flowRingBC.getDOFs());
+
     Problem flow(u, p, v, q);
     flow = (cfg.fluidDensity / dt) * Integral(u, v) +
       cfg.fluidDensity * Integral(Dot(convU, v)) +
@@ -2134,7 +2147,7 @@ int main(int argc, char** argv)
       // Strong no-slip on the cap rings: the one-element FSI band touching
       // the inlet/outlet caps is pinned to zero, consistent with the solid
       // ring clamp.
-      + DirichletBC(u, zero).on(BoundaryFluid::FSIRing);
+      + flowRingBC;
 
     PETSc::Variational::TestFunction vMass(uh);
     LinearForm<VelocityFES, ::Vec> massOld(vMass);
@@ -2685,7 +2698,9 @@ int main(int argc, char** argv)
 
           flow.assemble().setFieldSplits();
 
-          // Inject (rho/dt)(u^n, v)|_{Omega^n} into the velocity block.
+          // Inject (rho/dt)(u^n, v)|_{Omega^n} into the velocity block.  The
+          // ring BC was already applied by flow.assemble(); do not add the
+          // explicit term back into its identity rows.
           {
             ::Vec b = flow.getLinearSystem().getVector();
             const PetscInt vOff =
@@ -2696,7 +2711,8 @@ int main(int argc, char** argv)
             const PetscScalar* arr = nullptr;
             VecGetArrayRead(mOld, &arr);
             for (PetscInt i = lo; i < hi; ++i)
-              if (arr[i - lo] != PetscScalar(0))
+              if (arr[i - lo] != PetscScalar(0) &&
+                !flowRingDOFs.count(static_cast<Index>(i)))
                 VecSetValue(b, vOff + i, arr[i - lo], ADD_VALUES);
             VecRestoreArrayRead(mOld, &arr);
             VecAssemblyBegin(b);
