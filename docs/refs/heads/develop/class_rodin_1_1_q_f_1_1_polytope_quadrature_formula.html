@@ -81,8 +81,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md213">Automatic Rule Selection</a></li>
-            <li><a href="#autotoc_md214">Usage</a></li>
+            <li><a href="#autotoc_md214">Automatic Rule Selection</a></li>
+            <li><a href="#autotoc_md215">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -95,11 +95,11 @@
             </li>
           </ul>
         </nav>
-<p>PolytopeQuadratureFormula provides a convenient interface for creating quadrature formulas without needing to know which specific quadrature rule to use for each geometry type. It automatically selects an appropriate quadrature formula based on:</p><ul><li>The polytope geometry (triangle, tetrahedron, etc.)</li><li>The desired polynomial degree of exactness</li></ul><section id="autotoc_md213"><h3><a href="#autotoc_md213">Automatic Rule Selection</a></h3><p>The class internally selects the most appropriate quadrature rule:</p><ul><li>For simplices (triangles, tetrahedra): Grundmann-Möller rules</li><li>For tensor-product elements (quads, hexahedra, wedges): Gauss-Legendre rules</li><li>For segments: Gauss-Legendre rules</li><li>For points: Single point with unit weight</li></ul></section><section id="autotoc_md214"><h3><a href="#autotoc_md214">Usage</a></h3><pre class="m-code"><span class="c1">// Create a quadrature rule exact for degree 3 polynomials on a triangle</span>
+<p>PolytopeQuadratureFormula provides a convenient interface for creating quadrature formulas without needing to know which specific quadrature rule to use for each geometry type. It automatically selects an appropriate quadrature formula based on:</p><ul><li>The polytope geometry (triangle, tetrahedron, etc.)</li><li>The desired polynomial degree of exactness</li></ul><section id="autotoc_md214"><h3><a href="#autotoc_md214">Automatic Rule Selection</a></h3><p>The class internally selects the most appropriate quadrature rule:</p><ul><li>Points: the trivial one-point rule</li><li>Segments: Gauss&ndash;Legendre</li><li>Triangles and tetrahedra: Xiao&ndash;Gimbutas, with positive Gauss&ndash;Jacobi conical-product rules beyond the tabulated degrees</li><li>Quadrilaterals and hexahedra: tensor products of Gauss&ndash;Legendre rules</li><li>Wedges: a Xiao&ndash;Gimbutas triangle times a Gauss&ndash;Legendre segment, with the same conical-product triangle beyond the tabulated degrees</li><li>Pyramids: Witherden&ndash;Vincent, with a positive Gauss&ndash;Jacobi conical-product fallback</li></ul></section><section id="autotoc_md215"><h3><a href="#autotoc_md215">Usage</a></h3><pre class="m-code"><span class="c1">// Create a quadrature rule exact for degree 3 polynomials on a triangle</span>
 <span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 
 <span class="c1">// Use default order (degree 1)</span>
-<span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf_default</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>QuadratureFormulaBase</p><p>GaussLegendre</p><p>GrundmannMoller</p></aside></section>
+<span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf_default</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>QuadratureFormulaBase</p><p>GaussLegendre</p><p>XiaoGimbutas</p><p>WitherdenVincent</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

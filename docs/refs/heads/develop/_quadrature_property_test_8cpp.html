@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>/home/runner/work/rodin/rodin/tests/unit/Rodin/QF/QuadraturePropertyTest.cpp file | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_59425e443f801f1f2fd8bbe4959a3ccf.html">/home/runner/work/rodin/rodin/tests</a>/</span><span class="m-breadcrumb"><a href="dir_7711e90abc3d4bd55823d9013a185d04.html">unit</a>/</span><span class="m-breadcrumb"><a href="dir_b1e29bb6bfae77a32e071653c1d923cc.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_4aab6f3ec76f308d576aa88a9ec00ce4.html">QF</a>/</span>QuadraturePropertyTest.cpp <span class="m-thin">file</span>
+        </h1>
+        <p>Properties a correct quadrature rule must satisfy, none of which depend on the closed-form moment oracle.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The exactness sweep compares a rule against moments I derived by hand. That is a strong test but it shares one assumption with the rule: what the reference element is. A rule and an oracle built on the same wrong element agree with each other perfectly. The checks here are chosen to be blind to that: they compare the rule against itself under transformations that must leave the integral invariant, so they hold whatever the element is.</p>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa9c8aadc430ffa8ed2f395b510450ed8" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              IntegralIsAdditiveUnderSubdivision)</span>
+            </dt>
+            <dd>Subdivision consistency.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a7bb8c49aa72d15840b6b31c4670ad3eb" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              IntegralScalesWithTheAffineDeterminant)</span>
+            </dt>
+            <dd>Affine covariance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#acde358bdc303ad2f15afa5dc5c688c65" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              ExactOnRandomPolynomialsNotOnlyMonomials)</span>
+            </dt>
+            <dd>Exactness on random polynomials, not only on monomials.</dd>
+            <dt id="a6c14ba46d1efcae6785719ef76c070c7">
+              <span class="m-doc-wrap-bumper"><a href="#a6c14ba46d1efcae6785719ef76c070c7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              NonNegativeIntegrandGivesNonNegativeIntegral)</span>
+            </dt>
+            <dd>A positive rule cannot return a negative integral for a non-negative integrand. This is what makes the rule usable for assembling a form that must stay positive semidefinite.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a981f8978e82e3a42eb99d61a1cba33d2" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              TheTwoFamiliesAgree)</span>
+            </dt>
+            <dd>The two families must agree.</dd>
+            <dt id="a91e2a4e310c6ede4a8d171435f8a7d8d">
+              <span class="m-doc-wrap-bumper"><a href="#a91e2a4e310c6ede4a8d171435f8a7d8d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              ConsecutiveDegreesAgree)</span>
+            </dt>
+            <dd>A rule of degree p and one of degree p + 1 must agree on every polynomial of degree p. This cross-checks neighbouring rows of the table.</dd>
+            <dt id="a65b545847b61775afa5143b78b62eb51">
+              <span class="m-doc-wrap-bumper"><a href="#a65b545847b61775afa5143b78b62eb51" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              IntegralIsInvariantUnderVertexPermutation)</span>
+            </dt>
+            <dd>Permuting the vertices maps the reference element onto itself, so the integral of any polynomial must be unchanged. This exercises the rule under the element&#x27;s own symmetry group without requiring the rule to be symmetric.</dd>
+            <dt id="afe4f8cc6ae9d60a9a3cfe68b1d49cdb2">
+              <span class="m-doc-wrap-bumper"><a href="#afe4f8cc6ae9d60a9a3cfe68b1d49cdb2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              WeightedNodeMeanIsTheCentroid)</span>
+            </dt>
+            <dd>The weighted mean of the nodes is the centroid of the element. Follows from exactness on linear functions, and fails loudly if the nodes are systematically displaced.</dd>
+            <dt id="a5282e60699c0f43e6586832e9e4d3537">
+              <span class="m-doc-wrap-bumper"><a href="#a5282e60699c0f43e6586832e9e4d3537" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              NodesHaveValidBarycentricCoordinates)</span>
+            </dt>
+            <dd>Barycentric coordinates of every node sum to one and are non-negative. This is the interiority condition in the coordinates the rules were solved in, rather than in the half-space form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aecf26c01d9cd5ebf8f296e8688798401" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              AccuracyImprovesWithDegreeOnASmoothIntegrand)</span>
+            </dt>
+            <dd>Accuracy on a non-polynomial integrand improves with degree.</dd>
+            <dt id="ab915a37336d782357827afcd9c157690">
+              <span class="m-doc-wrap-bumper"><a href="#ab915a37336d782357827afcd9c157690" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              SubdivisionCheckRejectsAnUnderResolvedRule)</span>
+            </dt>
+            <dd>The subdivision check must be able to fail: a rule of too low a degree for the integrand is rejected by it.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa9c8aadc430ffa8ed2f395b510450ed8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa9c8aadc430ffa8ed2f395b510450ed8" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              IntegralIsAdditiveUnderSubdivision)</span></span>
+            </h3>
+            <p>Subdivision consistency.</p>
+<p>Integrating over a simplex must equal the sum over any set of pieces that tiles it. This uses no moment formula whatsoever: the rule is compared only against itself, applied to sub-elements through affine maps. A rule that integrated the wrong domain, or that was exact only by agreement with a mistaken oracle, fails here.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7bb8c49aa72d15840b6b31c4670ad3eb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bb8c49aa72d15840b6b31c4670ad3eb" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              IntegralScalesWithTheAffineDeterminant)</span></span>
+            </h3>
+            <p>Affine covariance.</p>
+<p>A rule exact on the reference element is exact on any affine image of it, with the integral scaling by the determinant. This is the property assembly actually relies on, and it is what makes a reference rule usable at all.</p>
+          </div></section>
+          <section class="m-doc-details" id="acde358bdc303ad2f15afa5dc5c688c65"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acde358bdc303ad2f15afa5dc5c688c65" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              ExactOnRandomPolynomialsNotOnlyMonomials)</span></span>
+            </h3>
+            <p>Exactness on random polynomials, not only on monomials.</p>
+<p>The sweep tests one monomial at a time, so an error that cancels between monomials of the same degree would pass it. A random combination does not cancel.</p>
+          </div></section>
+          <section class="m-doc-details" id="a981f8978e82e3a42eb99d61a1cba33d2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a981f8978e82e3a42eb99d61a1cba33d2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              TheTwoFamiliesAgree)</span></span>
+            </h3>
+            <p>The two families must agree.</p>
+<p>XiaoGimbutas and WitherdenVincent are independent published families and produce different point counts. Two rules of the same strength must nevertheless integrate every polynomial of that degree identically.</p>
+          </div></section>
+          <section class="m-doc-details" id="aecf26c01d9cd5ebf8f296e8688798401"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecf26c01d9cd5ebf8f296e8688798401" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadraturePropertyTest,
+              AccuracyImprovesWithDegreeOnASmoothIntegrand)</span></span>
+            </h3>
+            <p>Accuracy on a non-polynomial integrand improves with degree.</p>
+<p>Exactness on polynomials is a statement about a finite-dimensional space; the reason to want it is that it makes smooth integrands converge. A table whose higher-degree entries were not actually better would satisfy every other test here.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

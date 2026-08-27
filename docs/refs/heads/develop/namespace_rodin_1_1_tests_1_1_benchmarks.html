@@ -633,6 +633,22 @@
             </dt>
             <dd>Measures repeated MEDIT loading of the 64x64 triangular resource mesh.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#a8b6778404136baaeb065773579e0c182" class="m-doc">BM_QuadratureAccess</a>(</span><span class="m-doc-wrap">benchmark::State&amp; state)</span>
+            </dt>
+            <dd>Cost of obtaining a rule.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#a088b7fc056277fe2a8961e02f8166e41" class="m-doc">BM_QuadratureSweep</a>(</span><span class="m-doc-wrap">benchmark::State&amp; state)</span>
+            </dt>
+            <dd>Cost of one sweep over the rule doing per-point work of the kind an element integrator does: build a deformation gradient from the point, take its determinant and its cofactor contraction. This is the quantity a reduction in point count actually reduces.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#adc2781cc225d6d12bb3a515ea5fa0a09" class="m-doc">BENCHMARK</a>(</span><span class="m-doc-wrap">BM_QuadratureAccess)</span>
+            </dt>
+            <dd>Registers point-access benchmarks for the quadrature cases.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa017e2ecc5a38e1c3f57751c24b2c78a" class="m-doc">BENCHMARK</a>(</span><span class="m-doc-wrap">BM_QuadratureSweep)</span>
+            </dt>
+            <dd>Registers integrand-sweep benchmarks for the quadrature cases.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper"><a href="#a22c67285d73c79a3fade74d6b4405568" class="m-doc">BENCHMARK_F</a>(</span><span class="m-doc-wrap">UniformGrid,
               Triangular_16x16) (benchmark</span>
             </dt>
@@ -1524,6 +1540,35 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_mesh_i_o_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/benchmarks/MeshIO.cpp&gt;</a></div>
             </h3>
             <p>Measures repeated MEDIT loading of the 64x64 triangular resource mesh.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8b6778404136baaeb065773579e0c182"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Tests::<wbr />Benchmarks::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b6778404136baaeb065773579e0c182" class="m-doc-self">BM_QuadratureAccess</a>(</span><span class="m-doc-wrap">benchmark::State&amp; state)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_quadrature_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/benchmarks/Quadrature.cpp&gt;</a></div>
+            </h3>
+            <p>Cost of obtaining a rule.</p>
+<p>This measures the pooled lookup, not construction. Read it with care: it is not a per-element-type cost. PolytopeQuadratureFormula holds a thread-local cache of eight entries, inserted round-robin and scanned linearly from slot zero, so the cost of a hit is proportional to the slot the key landed in, hence to the order in which distinct keys were first requested in the process. Running this family in full gives 3.5 ns for the first case and 32 ns for the eighth, resetting every eight; running any single case alone gives 3.5 ns whatever the element. The ramp is the cache, not the geometry.</p><p>It is kept because the envelope is the useful quantity: 3.5 to 32 ns against a 375 ns degree-4 wedge sweep bounds the lookup at under 9% of an integrator&#x27;s time in the worst slot, so no plausible change of quadrature family is limited by it.</p>
+          </div></section>
+          <section class="m-doc-details" id="a088b7fc056277fe2a8961e02f8166e41"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Tests::<wbr />Benchmarks::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a088b7fc056277fe2a8961e02f8166e41" class="m-doc-self">BM_QuadratureSweep</a>(</span><span class="m-doc-wrap">benchmark::State&amp; state)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_quadrature_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/benchmarks/Quadrature.cpp&gt;</a></div>
+            </h3>
+            <p>Cost of one sweep over the rule doing per-point work of the kind an element integrator does: build a deformation gradient from the point, take its determinant and its cofactor contraction. This is the quantity a reduction in point count actually reduces.</p>
+          </div></section>
+          <section class="m-doc-details" id="adc2781cc225d6d12bb3a515ea5fa0a09"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Benchmarks::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc2781cc225d6d12bb3a515ea5fa0a09" class="m-doc-self">BENCHMARK</a>(</span><span class="m-doc-wrap">BM_QuadratureAccess)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_quadrature_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/benchmarks/Quadrature.cpp&gt;</a></div>
+            </h3>
+            <p>Registers point-access benchmarks for the quadrature cases.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa017e2ecc5a38e1c3f57751c24b2c78a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Benchmarks::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa017e2ecc5a38e1c3f57751c24b2c78a" class="m-doc-self">BENCHMARK</a>(</span><span class="m-doc-wrap">BM_QuadratureSweep)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_quadrature_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/benchmarks/Quadrature.cpp&gt;</a></div>
+            </h3>
+            <p>Registers integrand-sweep benchmarks for the quadrature cases.</p>
           </div></section>
           <section class="m-doc-details" id="a22c67285d73c79a3fade74d6b4405568"><div>
             <h3>

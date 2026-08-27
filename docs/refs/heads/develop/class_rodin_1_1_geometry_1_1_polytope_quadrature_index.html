@@ -81,9 +81,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md109">Cache design</a></li>
-            <li><a href="#autotoc_md110">Thread safety</a></li>
-            <li><a href="#autotoc_md111">Lifecycle</a></li>
+            <li><a href="#autotoc_md110">Cache design</a></li>
+            <li><a href="#autotoc_md111">Thread safety</a></li>
+            <li><a href="#autotoc_md112">Lifecycle</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This class maintains a mesh-owned cache of <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> objects. Within each dimension, it first resolves a quadrature formula and then indexes a dense array by polytope index.</p><section id="autotoc_md109"><h2><a href="#autotoc_md109">Cache design</a></h2><p>A formula cache owns one stable slot per polytope. Repeated assembly with a fixed formula therefore resolves one atomically published formula pointer and one atomically published quadrature pointer. Cached objects remain valid until the mesh geometry is flushed.</p></section><section id="autotoc_md110"><h2><a href="#autotoc_md110">Thread safety</a></h2><ul><li>Repeated cache hits are lock-free.</li><li>Formula creation and storage growth are serialized per dimension.</li><li>First quadrature construction is serialized through striped locks.</li></ul></section><section id="autotoc_md111"><h2><a href="#autotoc_md111">Lifecycle</a></h2><p>This cache is derived state. It should be cleared whenever the mesh geometry changes.</p><aside class="m-note m-info"><h4>Note</h4><p>This cache is intentionally transient and is not serializable.</p></aside></section>
+<p>This class maintains a mesh-owned cache of <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> objects. Within each dimension, it first resolves a quadrature formula and then indexes a dense array by polytope index.</p><section id="autotoc_md110"><h2><a href="#autotoc_md110">Cache design</a></h2><p>A formula cache owns one stable slot per polytope. Repeated assembly with a fixed formula therefore resolves one atomically published formula pointer and one atomically published quadrature pointer. Cached objects remain valid until the mesh geometry is flushed.</p></section><section id="autotoc_md111"><h2><a href="#autotoc_md111">Thread safety</a></h2><ul><li>Repeated cache hits are lock-free.</li><li>Formula creation and storage growth are serialized per dimension.</li><li>First quadrature construction is serialized through striped locks.</li></ul></section><section id="autotoc_md112"><h2><a href="#autotoc_md112">Lifecycle</a></h2><p>This cache is derived state. It should be cleared whenever the mesh geometry changes.</p><aside class="m-note m-info"><h4>Note</h4><p>This cache is intentionally transient and is not serializable.</p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

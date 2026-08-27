@@ -86,7 +86,7 @@
 <span class="cm"> *       (See accompanying file LICENSE or copy at</span>
 <span class="cm"> *          https://www.boost.org/LICENSE_1_0.txt)</span>
 <span class="cm"> */</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Math/Constants.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"Rodin/Math/Constants.h"</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
@@ -111,10 +111,10 @@
 
 <span class="w">  </span><span class="c1">// evolving field</span>
 <span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">"u"</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// ---- XDMF writer --------------------------------------------------------</span>
-<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;TimeEvolution&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">"TimeEvolution"</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span>
 <span class="w">  </span><span class="n">grid</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>

@@ -81,8 +81,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md358">Integrator Types</a></li>
-            <li><a href="#autotoc_md359">Role in Assembly</a></li>
+            <li><a href="#autotoc_md359">Integrator Types</a></li>
+            <li><a href="#autotoc_md360">Role in Assembly</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>The Integrator class provides a common interface for all types of integrators used in finite element assembly. Integrators compute local (element-level) contributions that are then assembled into global matrices and vectors.</p><section id="autotoc_md358"><h3><a href="#autotoc_md358">Integrator Types</a></h3><p>There are two main types of integrators:</p><ul><li><strong>Linear Integrators</strong>: Compute contributions to the load vector (RHS)<ul><li>Example: <svg class="m-math" style="width: 7.574em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 72.710608 13.781784">
+<p>The Integrator class provides a common interface for all types of integrators used in finite element assembly. Integrators compute local (element-level) contributions that are then assembled into global matrices and vectors.</p><section id="autotoc_md359"><h3><a href="#autotoc_md359">Integrator Types</a></h3><p>There are two main types of integrators:</p><ul><li><strong>Linear Integrators</strong>: Compute contributions to the load vector (RHS)<ul><li>Example: <svg class="m-math" style="width: 7.574em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 72.710608 13.781784">
 <title>
 $ b_i = \int_K f \psi_i \, dx $
 </title>
@@ -156,7 +156,7 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
 <use x='100.481475' y='0' xlink:href='#eq2-g3-100'/>
 <use x='106.564168' y='0' xlink:href='#eq2-g3-120'/>
 </g>
-</svg></li></ul></li></ul></section><section id="autotoc_md359"><h3><a href="#autotoc_md359">Role in Assembly</a></h3><p>During the assembly process:</p><ol><li>Integrators are iterated over mesh elements</li><li>Local contributions are computed using numerical quadrature</li><li>Local contributions are mapped to global indices</li><li>Global matrix/vector is updated with local contributions</li></ol><aside class="m-note m-default"><h4>See also</h4><p>LinearFormIntegratorBase, BilinearFormIntegratorBase</p></aside></section>
+</svg></li></ul></li></ul></section><section id="autotoc_md360"><h3><a href="#autotoc_md360">Role in Assembly</a></h3><p>During the assembly process:</p><ol><li>Integrators are iterated over mesh elements</li><li>Local contributions are computed using numerical quadrature</li><li>Local contributions are mapped to global indices</li><li>Global matrix/vector is updated with local contributions</li></ol><aside class="m-note m-default"><h4>See also</h4><p>LinearFormIntegratorBase, BilinearFormIntegratorBase</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -307,7 +307,21 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a954904358be9bf90ec5d9fb9f907784d" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t)</span></span>
             </h3>
             <p>Restores order inference from the integrand.</p>
-<p>This is the default: the order is derived per polytope from the polynomial degrees of the finite elements living on it. Correct whenever the integrand is polynomial.</p>
+<p>This is the default: the order is derived per polytope from the polynomial degrees of the finite elements living on it, and is therefore right exactly when the integrand&#x27;s degree is the sum of those degrees &mdash; when nothing else in the expression contributes any.</p><p>A coefficient does contribute. Where it can report its degree that is accounted for; where it cannot, inference undercounts and the form is under-integrated, and this happens whether or not the integrand is polynomial. A mass form weighted by a lambda returning <svg class="m-math" style="width: 2.834em; height: 0.960em; vertical-align: -0.243em;" viewBox="0 -6.890786 27.206721 9.215393">
+<title>
+$ x + y $
+</title>
+<defs>
+<path id='eq3-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq3-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq3-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-120'/>
+<use x='9.308751' y='0' xlink:href='#eq3-g1-43'/>
+<use x='21.070066' y='0' xlink:href='#eq3-g0-121'/>
+</g>
+</svg> is cubic in a first-order basis, but the lambda reports nothing, so inference sees the basis alone and asks for a quadratic rule. The integrand is a polynomial and the answer is still wrong.</p><p>State the order with <a href="#a4c4c2ddfd3edbd42d18604bd674784a2" class="m-doc">setOrder(size_<wbr />t)</a> whenever the degree the integrand actually has is not the degree inference can see.</p>
           </div></section>
           <section class="m-doc-details" id="a4c4c2ddfd3edbd42d18604bd674784a2"><div>
             <h3>
@@ -325,7 +339,7 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
                 </tr>
               </tbody>
             </table>
-<p>Note that the inferred order is a function of the polytope, so a constant is only equivalent to inference on a mesh whose elements all share one degree; prefer <a href="#a503b6171d3423d1daad5ac38b42b55bc" class="m-doc">setOrder(OrderType)</a> otherwise.</p>
+<p>The order is the degree the quadrature rule must integrate exactly, so this is how a caller says what its integrand actually needs: the degree of a polynomial integrand that inference cannot see in full, or, for an integrand that is not polynomial at all, the accuracy being asked for.</p><p>Note that the inferred order is a function of the polytope, so a constant is only equivalent to inference on a mesh whose elements all share one degree; prefer <a href="#a503b6171d3423d1daad5ac38b42b55bc" class="m-doc">setOrder(OrderType)</a> otherwise.</p>
           </div></section>
           <section class="m-doc-details" id="a503b6171d3423d1daad5ac38b42b55bc"><div>
             <h3>
@@ -343,7 +357,7 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
                 </tr>
               </tbody>
             </table>
-<p>On an integrator the order is the degree of the quadrature rule, not the polynomial degree of an expression; the two coincide only when the integrand is polynomial. Set it explicitly whenever it is not — a coefficient composing a level set with a mesh lookup, say — since the inferred order is then meaningless and typically too low.</p>
+<p>On an integrator the order is the degree of the quadrature rule, not the polynomial degree of an expression. Set it whenever the degree inference can see is not the degree the integrand has: a coefficient that reports no degree undercounts a polynomial integrand, and one that is not polynomial at all &mdash; a level set composed with a mesh lookup, say &mdash; has no degree to infer, so the inferred order is meaningless and typically too low in both cases.</p>
           </div></section>
           <section class="m-doc-details" id="a350edea67dfa070881b66ed34db4c27c"><div>
             <h3>

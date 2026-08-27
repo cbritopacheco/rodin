@@ -82,10 +82,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md74">Overview</a></li>
-            <li><a href="#autotoc_md75">Mapping Between SubMesh and Parent Mesh</a></li>
-            <li><a href="#autotoc_md76">Downcasting</a></li>
-            <li><a href="#autotoc_md77">Use Cases</a></li>
+            <li><a href="#autotoc_md75">Overview</a></li>
+            <li><a href="#autotoc_md76">Mapping Between SubMesh and Parent Mesh</a></li>
+            <li><a href="#autotoc_md77">Downcasting</a></li>
+            <li><a href="#autotoc_md78">Use Cases</a></li>
             <li>
               Reference
               <ul>
@@ -93,12 +93,12 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md74"><h2><a href="#autotoc_md74">Overview</a></h2><p>A SubMesh is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md75"><h2><a href="#autotoc_md75">Mapping Between SubMesh and Parent Mesh</a></h2><p>A SubMesh object holds a reference to its parent Mesh and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the SubMesh to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md76"><h2><a href="#autotoc_md76">Downcasting</a></h2><p>A Mesh that is also a SubMesh can be downcasted to access SubMesh functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<section id="autotoc_md75"><h2><a href="#autotoc_md75">Overview</a></h2><p>A SubMesh is a mesh that represents a subset of another mesh, typically corresponding to a specific region or boundary. It maintains references to its parent mesh and provides mappings between polytope indices in the child and parent meshes.</p></section><section id="autotoc_md76"><h2><a href="#autotoc_md76">Mapping Between SubMesh and Parent Mesh</a></h2><p>A SubMesh object holds a reference to its parent Mesh and includes information about how polytopes and vertices are mapped between the child and parent. This allows finite element operations on the SubMesh to properly reference degrees of freedom in the parent mesh.</p></section><section id="autotoc_md77"><h2><a href="#autotoc_md77">Downcasting</a></h2><p>A Mesh that is also a SubMesh can be downcasted to access SubMesh functionality. For instance:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// The cast is well defined</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
-<span class="p">}</span></pre></section><section id="autotoc_md77"><h2><a href="#autotoc_md77">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, SubMesh.h</p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md78"><h2><a href="#autotoc_md78">Use Cases</a></h2><ul><li>Boundary condition application</li><li>Interface problem formulation</li><li>Region-specific operations</li></ul><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, SubMesh.h</p></aside></section>
       </div>
     </div>
   </div>
