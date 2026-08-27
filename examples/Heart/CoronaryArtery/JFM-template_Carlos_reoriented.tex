@@ -1,0 +1,2015 @@
+\documentclass[lineno]{jfm}
+\usepackage{graphicx}
+\usepackage{multirow} % Paquete necesario para unir filas
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{cancel}
+\usepackage{ulem} 
+%\usepackage{epstopdf,epsfig}
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage{natbib}
+\usepackage{comment}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks = true,
+    urlcolor   = blue,
+    citecolor  = black,
+}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+% ---- FIX: \RomanNumeralCaps was declared with an argument count but no body,
+%      so LaTeX silently swallowed the following \linenumbers as its definition
+%      and line numbering never took effect. The macro was unused; removed.
+\linenumbers
+
+\newcommand{\orn}[1]{{\color{red} \textbf{Edit by Oscar:} #1}}
+\newcommand{\coor}[1]{{\color{blue} #1}}
+\newcommand{\ofore}[1]{{\color{yellow} #1}}
+\newcommand{\cbp}[1]{{\color{blue} \textbf{Edit by Carlos:} #1}}
+% ---- ROBUSTNESS: \cbp takes its content as a macro argument. This happens to
+%      work for multi-paragraph text and display math, but it is fragile (any
+%      \verb, footnote or catcode change inside would break it) and it makes the
+%      final text blue. Long editorial blocks use the environment form below.
+\newenvironment{cbpblock}%
+  {\par\color{blue}\noindent\textbf{Edit by Carlos:}\ \ignorespaces}%
+  {\par}
+\newenvironment{ornblock}%
+  {\par\color{red}\noindent\textbf{Edit by Oscar:}\ \ignorespaces}%
+  {\par}
+
+
+% {\MakeUppercase{\romannumeral #1}}
+\title{An analytical closure for effective hydraulic resistance in Windkessel haemodynamics with generalised-Newtonian rheology}
+%\title{An analytical closure for effective resistance in Windkessel haemodynamics with generalized-Newtonian rheology under physiological and pathological blood conditions}
+
+%\title{A rheologically adaptive Windkessel model for haemodynamics in physiological and pathological states"}
+
+%\title{A non-Newtonian Windkessel framework: Analytical formulation and application to pathological hemorheology}
+
+%\title{The R-Windkessel: An analytical non-Newtonian framework for physiological and pathological reduced haemodynamics}
+
+
+
+% ---- FIX: affiliation keys were inconsistent (\aff{1} never defined, \aff{2}
+%      declared three times) and the CUP/DAMTP entries are template boilerplate.
+%      Renumbered; please replace \aff{2} with the correct institution.
+\author{Carlos Brito-Pacheco\aff{1}, Milenko Espinosa\aff{2},
+  Ernesto Castillo\aff{2}, Scarlett Espinoza\aff{2}, Alfredo Parra\aff{2}, Luis Berr\aff{2},
+ \and Oscar Ruz\aff{2}\corresp{\email{oscar.ruz@usach.cl}}}
+
+\affiliation{
+\aff{1}LMAP, CNRS, Université de Pau et des Pays de l’Adour, Pau, France.
+\aff{2}Departamento de Ingeniería Mecánica, Universidad de Santiago de Chile,
+Santiago, Chile.}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% ---- Previous version (written for an earlier version of the work) ----
+% We derive an analytical closure for effective hydraulic resistance in Windkessel haemodynamics with generalised-Newtonian rheology. The closure is obtained from generalised Poiseuille-flow relations and is expressed as a multiplicative correction to the Windkessel resistance, thereby embedding constitutive rheology into a reduced resistive law. It recovers the Newtonian limit and accommodates both shear-thinning and shear-thickening responses in a unified resistance framework. The formulation is developed for purely viscous constitutive laws commonly used in blood rheology, namely the power-law, Carreau--Yasuda, Cross and Quemada models. Although the closure is general in structure, it is assessed here in a haemodynamic setting, where rheology-dependent resistance is especially relevant for lumped models and distal boundary representations. Physiological and pathological blood conditions, including anaemia, polycythaemia and diabetes, are incorporated through constitutive parameterisations spanning a broad range of haematocrit values. The resulting fitted rheological curves and parameter sets are reported in unified tabulations for direct use in haemorheological and reduced-modelling applications. The haemodynamic consequences of the proposed closure are investigated numerically by coupling it to an established zero-dimensional cardiac chamber model, exploring normotensive and hypertensive loading conditions and performing sensitivity analyses with respect to vessel radius, length and wall stiffness. We also provide an anchor validation of the resistance closure and examine how constitutive model choice influences effective resistance and reduced haemodynamic predictions at fixed haematocrit. The framework provides a consistent route to construct rheology-informed Windkessel models and physiologically informed distal boundary closures.
+\cbp{WE WRITE THE ABSTRACT AT THE END.}
+
+% ---- PROPOSED ABSTRACT (aligned with the reoriented argument; take or leave) ----
+% The resistive element of a Windkessel model is the point at which blood
+% viscosity enters a reduced haemodynamic description, yet it is conventionally
+% built from Poiseuille arguments at a single constant viscosity. That constant
+% is not a material property but a modelling choice, and the choice is
+% consequential: for a healthy Carreau--Yasuda fit, evaluating the resistance at
+% the high-shear plateau rather than at the operating shear rate changes it by
+% about ten per cent, and a resistance calibrated at rest is in error by
+% thirty-seven per cent at one-fortieth of the resting flow. We derive an
+% analytical closure that removes this arbitrariness by carrying the
+% generalised-Newtonian constitutive law into the quasi-steady pressure--flow
+% relation itself, yielding a flow-dependent effective resistance with an exact
+% derivative. The closure is instantiated for the power-law, Carreau--Yasuda,
+% Cross and Quemada models and calibrated against shear viscometry for healthy,
+% hypertensive, type~2 diabetic and hyperviscous blood. We then show that the
+% constitutive dependence collapses onto a single quantity, the resting wall
+% shear rate of a compartment, and that this quantity is fixed by calibre, path
+% length and pressure share alone, independent of the flow. In a normally
+% perfused coronary bed the identity places every compartment between $10^2$ and
+% $10^3\,\mathrm{s}^{-1}$, so shear thinning contributes only a few per cent and
+% a hyperviscous state is nearly indistinguishable from a healthy one. The
+% closure is exercised in a coupled zero-dimensional left-ventricle /
+% three-dimensional coronary model in which the venous drainage pressure is
+% raised to emulate elevated central venous pressure. This displaces the venular
+% bed towards the aggregation regime and separates the two constitutive states,
+% demonstrating that the value of a rheology-dependent resistance lies not in the
+% size of the correction at a nominal operating point but in its validity away
+% from that point.
+\end{abstract}
+
+% Paper hierarchy:
+% (1) Primary contribution: an analytical, rheology-informed closure for
+%     effective hydraulic resistance, with an exact derivative, that removes the
+%     arbitrary constant-viscosity choice from reduced models.
+% (2) Secondary contribution: a unified constitutive-to-resistance procedure
+%     applicable across several purely viscous rheological laws, together with a
+%     criterion -- the resting wall shear rate identity -- that tells the reader
+%     a priori whether the correction can matter in a given vascular bed.
+% (3) Application layer: a single coupled 0D-LV/3D-coronary testbed. The 0D
+%     ventricular model is a driver, not an object of study; the closure is
+%     exercised at the coronary outlets, and the pathological contrast is driven
+%     by the venous drainage pressure, which is the accessible route to the
+%     low-shear regime in a normally perfused bed.
+% Therefore, the paper should read first as a fluid-mechanics/reduced-modelling
+% contribution, and only then as a haemodynamic application paper.
+%
+% IMPORTANT framing note: the paper must NOT claim that non-Newtonian rheology
+% strongly alters coronary haemodynamics at the nominal operating point. It does
+% not, and the reason is derived here rather than asserted. The claim is that a
+% constant-viscosity resistance is valid only at its calibration point.
+
+\noindent\textbf{MSC Codes}: 76Z05; 76A05; 76M12
+
+\section{Introduction}
+\label{sec:introduction}
+
+% Cardiovascular disease is still the leading cause of
+% deaths for both men and women worldwide. 
+% Many risk factors have been identified and cur-
+% rent therapeutic efforts have been centered on
+% addressing these risk factors. However, as of
+% today, the role that blood viscosity plays in this
+% disease has not yet received its due attention.
+% Viscosity is a fundamental property of any fluid.
+% Its important role in both normal individuals and
+% patients afflicted with cardiovascular disease has
+% been underestimated. Past and current research
+% has reported the benefits in addressing this impor-
+% tant factor; however, mainstream medicine has
+% not appreciated or fully accepted this important
+% measurement.
+
+\cbp{Cardiovascular disease constitutes one of the principal causes of mortality worldwide \citep{Roth2020GBD}. In the mechanical description of the circulation, the apparent viscosity of blood governs the relation between the pressure drop and the volumetric flow rate, and thereby contributes directly to the hydraulic resistance opposed to cardiac ejection; a variation in viscosity is, at fixed geometry, a variation in that resistance \citep{Chien1987,Mozos2015}. Blood, however, is not a Newtonian fluid -- its apparent viscosity depends on the local shear rate and, strongly and nonlinearly, on the haematocrit \citep{Chien1987,Nader2019}. The viscosity effectively realised in vivo is therefore not a fixed material constant, but varies over the cardiac cycle, through the shear-rate field, and between physiological and pathological states, through the haematocrit and the aggregation state of the erythrocytes. These dependencies motivate an explicit and quantitative treatment of blood viscosity in haemodynamic modelling, and more specifically in reduced descriptions, in which the flow resistance is conventionally evaluated at a single constant viscosity.}
+
+% Blood is a concentrated suspension of deformable cells in an essentially Newtonian plasma, and its macroscopic behaviour is governed by suspension mechanics, including erythrocyte aggregation and disaggregation, deformation and alignment under shear.
+
+\cbp{This dependence of the apparent viscosity on shear rate and haematocrit originates in the microstructure of blood, which is a concentrated suspension of deformable cells in an essentially Newtonian plasma \citep{FORMAGGIA-SPRINGER,Sequeria2018}; the macroscopic response is governed by suspension mechanics, in particular the aggregation and disaggregation, deformation and alignment of erythrocytes under shear.}
+
+In haemodynamic modelling, the most widely adopted constitutive descriptions belong to the purely viscous generalised-Newtonian class, in which the deviatoric stress is proportional to the rate-of-deformation tensor and the apparent viscosity depends on shear rate and, directly or indirectly, on haematocrit \citep{FORMAGGIA-SPRINGER,Sequeria2018,Quemada1977,Popel2005}. Common choices include simple phenomenological relations, such as the power-law model, plateau-preserving models such as Cross and Carreau--Yasuda, and microstructure-motivated formulations such as Quemada \citep{Quemada1977,Popel2005,Neofytou2004,Mimouni2016}. Beyond purely viscous behaviour, experimental and modelling evidence indicates that blood may also exhibit yield-stress-like (viscoplastic) responses at low shear and viscoelastic effects associated with microstructural dynamics, particularly in regimes approaching stasis \citep{leuprecht2001computer}. The present work focuses on the purely viscous class as an analytically tractable and rheology-informed basis for resistance closures, yielding formulations that are both easy to use and systematically comparable across constitutive laws employed in haemodynamics.
+
+Physiological and pathological conditions modify blood rheology through changes in the constitutive parameters of the chosen viscosity law. Haematocrit is a primary determinant, with viscosity increasing strongly and nonlinearly from severe anaemia to polycythaemia, with direct implications for cardiac workload and thrombotic risk \citep{Chien1987,Mozos2015,Nader2019,Isbister1994}. Anaemia reduces viscosity and can increase cardiac output \citep{murray1968circulatory,fowler1975blood}, whereas hyperviscosity syndromes, including polycythaemia-related states, are associated with impaired flow and thrombotic complications \citep{somer1993disorders,kwaan2003hyperviscosity,grenier2024red}. Diabetes mellitus has likewise been linked to haemorrheological alterations, including increased viscosity and enhanced non-Newtonian character in cohort measurements \citep{cho2008hemorheological,barnes1977blood,lowe1980blood,Sun2022}. Related metabolic factors, such as elevated cholesterol and triglycerides, have also been reported to promote aggregation and increase low-shear apparent viscosity \citep{moreno2015effect}. By contrast, other conditions act primarily through haemodynamics rather than intrinsic constitutive change. Hypertension chiefly alters pressure levels and pulsatility, while variations in vessel radius, length and wall stiffness modify flow partitioning and shear-rate fields. These drivers do not necessarily change the constitutive law itself, but they do shift the shear-rate range explored over the cardiac cycle and therefore alter the apparent viscosity effectively sampled by the flow.
+
+This distinction has direct consequences for multiscale modelling. Introducing non-Newtonian physics in a three-dimensional domain is not only a matter of selecting a constitutive law in the governing equations, but also of prescribing outlet and distal boundary conditions informed by the same rheological mechanisms acting downstream. This is especially important because wall shear stress depends on both the near-wall velocity gradient and the local apparent viscosity, so rheological assumptions can influence shear-based biomarkers even when bulk flow quantities remain comparable. The issue therefore arises not only in fully lumped 0D descriptions, but also in one-dimensional wave-propagation models and in 0D--3D coupling strategies used to provide physiologically consistent distal boundary closures.
+
+% Within reduced haemodynamics, Windkessel-type models and their network generalisations provide compact representations of distal vascular effects through lumped resistive and compliant elements \citep{frank1990basic,westerhof2009arterial}. These models are widely used both as standalone 0D descriptions and as outlet boundary closures for one-dimensional and three-dimensional solvers; extensions incorporating impedance concepts and wave-propagation effects have also been proposed and analysed from a fluid-mechanical standpoint \citep{bessems2007wave,mei2018fluid,westerhof2009arterial}. In such settings, resistive elements represent effective dissipation across unresolved vessel trees, while compliance captures storage due to wall distensibility. At the whole-heart level, Windkessel networks are commonly coupled to reduced cardiac chamber models, for example time-varying elastance-type descriptions, to generate closed-loop 0D dynamics suitable for parameter sweeps and sensitivity analyses. {\color{red}[Insert the corresponding heart 0D model reference here.]} This framework provides a natural setting in which to assess how constitutive rheology propagates into pressure--flow dynamics through effective resistance closures.
+
+\cbp{Within reduced haemodynamics, Windkessel-type models and their network generalisations provide compact representations of distal vascular effects through lumped resistive and compliant elements \citep{frank1990basic,westerhof2009arterial}. Such models are employed both as standalone zero-dimensional descriptions and as outlet boundary conditions for one- and three-dimensional solvers, and extensions incorporating impedance and wave-propagation effects have been analysed from a fluid-mechanical standpoint \citep{bessems2007wave,mei2018fluid,westerhof2009arterial}. In these representations, the resistive element accounts for the effective dissipation across the unresolved vessel tree, and the compliant element for storage due to wall distensibility.
+
+The resistive element is therefore the point at which the viscosity of blood enters a Windkessel description. In current practice, however, this resistance is constructed from Poiseuille-flow arguments at a constant viscosity, so that it depends only on the vessel geometry, even when the upstream model employs a generalised-Newtonian rheology, and even though the distal bed is the region in which non-Newtonian effects and haematocrit variability are most pronounced. The present work addresses this discrepancy.
+
+We introduce a rheology-dependent resistance closure for Windkessel haemodynamics, derived from the quasi-steady, fully developed pressure–flow relation that underlies the classical constant-viscosity resistance; the additional element is the consistent incorporation of a generalised-Newtonian constitutive law within that same analytical setting. The closure is instantiated for four purely viscous laws, namely the power-law, Carreau–Yasuda, Cross and Quemada models, and is calibrated against shear-viscometry data for healthy, hypertensive, type 2 diabetic and hyperviscous blood over a range of haematocrit values \citep{Quemada1977,Popel2005,cho2008hemorheological,Sun2022}. The calibration is performed within a statistically informed procedure, motivated by the nonlinear dependence of viscosity on haematocrit and by the bias incurred when a constitutive law is fitted at a nominal mean value \citep{Chien1987,cho2008hemorheological,Westgard2024}.
+}
+
+It is worth stating at the outset what the closure does and does not change,
+because the two are easily conflated. Replacing a constant viscosity by a
+constitutive law does not, by itself, imply a large correction: whether it does
+depends entirely on where the flow samples the viscosity curve. We show in
+\S\ref{sec:RmuWindkessel} that for a compartment described by a calibre $R$, an
+effective path length $L$ and a share $\Delta p$ of the pressure budget, the
+resting wall shear rate is
+\begin{equation}
+\dot{\gamma}_{0}=\frac{R\,\Delta p}{2\,\mu_{\rm ref}\,L},
+\label{eq:intro-gamma-identity}
+\end{equation}
+in which the flow rate cancels identically. The rheological operating point of
+an unresolved bed is therefore fixed by morphometry and by the pressure
+distribution, and is not a free modelling parameter. For a coronary
+microvascular bed carrying a physiological pressure budget, \eqref{eq:intro-gamma-identity}
+places every compartment---terminal arteriole, capillary, post-capillary venule
+and collecting vein---between $10^{2}$ and $10^{3}\,\mathrm{s}^{-1}$, a regime in
+which blood is close to Newtonian. This is confirmed independently by the
+measured microvascular wall shear stress of $1$--$5\,\mathrm{Pa}$
+\citep{Chien1987}, which upon division by the apparent viscosity returns the
+same range.
+
+Two consequences follow, and they organise the rest of the paper. First, the
+correction at the nominal operating point is modest, of the order of a few per
+cent above the high-shear plateau, and a hyperviscous constitutive state is
+therefore only weakly distinguishable from a healthy one at rest. This is a
+result rather than a limitation, and \eqref{eq:intro-gamma-identity} is the
+instrument that establishes it a priori for any bed. Second, and this is where the
+closure earns its place, a constant-viscosity resistance is accurate only at the
+single flow rate at which it was calibrated, whereas the physiological range of
+interest spans a factor of ten or more between low-flow states and maximal
+vasodilation. Along that range the apparent viscosity of a healthy
+Carreau--Yasuda fit varies by tens of per cent, so a resistance frozen at the
+resting value carries an error that grows monotonically with distance from the
+calibration point. The closure removes both this error and the arbitrariness of
+the constant itself, which is not innocuous: for the same fit, evaluating the
+resistance at the high-shear plateau instead of at the operating shear rate
+already changes it by about ten per cent, an amount comparable to the shear-thinning
+effect that motivated the exercise.
+
+\cbp{The closure is exercised in a single computational setting, a coupled
+zero-dimensional left-ventricle / three-dimensional coronary model in which the
+reduced ventricular model of \citet{caruel2014dimensional} supplies the proximal
+pressure and the intramyocardial pressure, and each coronary outlet carries an
+$\mathcal{R}_{\mu}$-dependent reduced model. The pathological contrast is driven
+by the venous drainage pressure: raising it, as occurs with elevated central
+venous pressure in right-heart failure or tricuspid regurgitation, reduces the
+venular driving gradient and displaces the venular bed towards the aggregation
+regime, where the healthy and hyperviscous constitutive states separate. This
+provides a physiologically grounded test of the closure that requires no change
+of geometry and that probes precisely the shear range in which the constitutive
+laws differ.}
+
+\cbp{The remainder of the paper is organised as follows. Section~\ref{sec:models}
+introduces the constitutive framework. Section~\ref{sec:Rmu} derives the
+rheology-dependent resistance closure and specialises it to the four constitutive
+laws considered. Section~\ref{sec:hemochar} describes the haemorheological
+parameterisation and reports the calibration for the physiological and
+pathological states. Section~\ref{sec:RmuWindkessel} introduces the
+$\mathcal{R}_{\mu}$-Windkessel formulation, establishes the operating-point
+identity~\eqref{eq:intro-gamma-identity} and quantifies the error incurred by a
+constant-viscosity resistance away from its calibration point.
+Section~\ref{sec:applications} describes the coupled 0D--3D coronary setting used
+to exercise the closure and the venous-pressure protocol used to reach the
+low-shear regime. Section~\ref{sec:results} reports the numerical results, and
+Section~\ref{sec:conclusions} summarises the findings and discusses the
+implications for rheology-consistent reduced modelling and for 0D--3D coupling.}
+
+% In practice, however, Windkessel resistances are still commonly constructed from Poiseuille-flow arguments using a constant viscosity, yielding resistances that depend solely on geometry, even when the upstream model employs generalised-Newtonian rheology or when the distal bed is precisely where non-Newtonian effects and haematocrit variability are expected to be strongest. This is the central gap addressed in the present work. As in classical Windkessel resistance models, the present derivation relies on a quasi-steady fully developed relation between pressure drop and flow rate; the additional contribution here is the consistent incorporation of constitutive rheology within that same analytical setting. We therefore introduce a rheology-consistent, analytically tractable and rheology-informed resistance closure for Windkessel haemodynamics that can be parameterised systematically across physiological and pathological blood conditions. The closure takes the form of an analytical multiplicative factor that modifies the Windkessel resistance on the basis of generalised Poiseuille-flow relations, while the rheological calibration is rooted in standard shear-viscometry measurements. The framework is instantiated for several widely used purely viscous laws, namely the power-law, Carreau--Yasuda, Cross and Quemada models, and is reported through unified tabulations of fitted rheological curves and constitutive parameter sets spanning severe anaemia to polycythaemia and incorporating diabetes-related alterations \citep{Quemada1977,Popel2005,cho2008hemorheological,Sun2022}. Parameter estimation is performed in a statistically informed manner to improve robustness under cohort variability, motivated by the strong nonlinearity of viscosity with respect to haematocrit and the bias that can arise when fitting at a nominal mean \citep{Chien1987,cho2008hemorheological,Westgard2024}. The haemodynamic consequences of the proposed closure are assessed numerically by coupling it to an established zero-dimensional cardiac chamber model, exploring normotensive and hypertensive loading conditions and performing sensitivity analyses with respect to vessel radius, length and wall stiffness to represent arterial and arteriolar layers.
+
+% The remainder of the paper is organised as follows. Section~\ref{sec:models} introduces the constitutive framework. Section~\ref{sec:Rmu} derives the rheology-dependent resistance closure. Section~\ref{sec:hemochar} details the haemorheological parameterisation strategies. Section~\ref{sec:RmuWindkessel} introduces the $\mathcal{R}_{\mu}$-Windkessel formulation. Section~\ref{sec:results} presents coupled 0D numerical experiments, sensitivity analyses and an anchor validation of the resistance closure, including an assessment of how constitutive model choice affects effective resistance and reduced haemodynamic predictions. Section~\ref{sec:conclusions} summarises the main findings and discusses implications for rheology-consistent reduced modelling and future 0D--3D coupling workflows.
+
+\section{Mathematical models}
+\label{sec:models}
+
+\subsection{Navier--Stokes equations}
+
+Let $\Omega\subset\mathbb{R}^{d}$, with $d=2$ or $3$, denote a bounded fluid domain with boundary $\Gamma=\partial\Omega$. We consider an incompressible flow described by the velocity field $\boldsymbol{u}:\Omega\times\mathbb{R}^{+}\rightarrow\mathbb{R}^{d}$ and the pressure field $p:\Omega\times\mathbb{R}^{+}\rightarrow\mathbb{R}$. The governing equations are
+\begin{align}
+\rho\,\partial_t\boldsymbol{u}+\rho\,\boldsymbol{u}\cdot\nabla\boldsymbol{u}-\nabla\cdot\boldsymbol{\sigma}(\boldsymbol{u},p)&=\boldsymbol{f}
+\quad \text{in } \Omega,\label{eq:fluid-general-a}\\
+\nabla\cdot\boldsymbol{u}&=0
+\quad \text{in } \Omega,\label{eq:fluid-general-b}
+\end{align}
+where $\rho$ is the fluid density, $\boldsymbol{f}$ is the body force per unit volume, and $\boldsymbol{\sigma}$ is the Cauchy stress tensor. For a viscous incompressible fluid,
+\begin{equation}
+\boldsymbol{\sigma}=-p\boldsymbol{I}+\boldsymbol{\tau},\label{eq:cauchy-stress}
+\end{equation}
+where $\boldsymbol{I}$ is the identity tensor and $\boldsymbol{\tau}$ is the deviatoric stress tensor \citep{SPENCER-DOVER,Sequeria2018}. For a Newtonian fluid, the deviatoric stress is proportional to the rate-of-strain tensor
+\begin{equation}
+\boldsymbol{D}(\boldsymbol{u})=\frac{1}{2}\left(\nabla\boldsymbol{u}+(\nabla\boldsymbol{u})^{\mathrm{T}}\right),\label{eq:rate-strain}
+\end{equation}
+namely
+\begin{equation}
+\boldsymbol{\tau}=2\mu\,\boldsymbol{D}(\boldsymbol{u}),\label{eq:tau-newtonian}
+\end{equation}
+with $\mu$ the dynamic viscosity.
+
+\subsection{Generalised-Newtonian constitutive laws}
+
+Blood is a suspension of cellular elements in plasma. Since plasma is predominantly aqueous, it is commonly modelled as Newtonian, whereas the cellular phase induces non-Newtonian effects. Among the cellular components, erythrocytes dominate the rheological response because of their abundance and deformability. Their aggregation, disaggregation, deformation and alignment under shear give rise to the characteristic shear-thinning behaviour of blood \citep{haynes1959role,merrill1969rheology,chen2006non,ABUGATTAS2020529}. At low shear rates, rouleaux formation increases the apparent viscosity and may induce yield-stress-like behaviour; as shear increases, these aggregates break up and the apparent viscosity decreases \citep{FORMAGGIA-SPRINGER}.
+
+% ---- Previous version ----
+% To model this behaviour, we restrict attention to purely viscous generalised-Newtonian constitutive laws. In a general isotropic incompressible setting, the deviatoric stress may be expressed as in  Eq.\ref{eq:tau_general}; such materials are typically referred to as Reiner-Rivlin fluids \citep{FORMAGGIA-SPRINGER,Sequeria2018}
+To model this behaviour, we restrict attention to purely viscous generalised-Newtonian constitutive laws. \cbp{In a general isotropic incompressible setting, the deviatoric stress of such materials, referred to as Reiner--Rivlin fluids \citep{FORMAGGIA-SPRINGER,Sequeria2018}, takes the form}
+\begin{equation}
+\boldsymbol{\tau}=\phi_1(I_1,I_2,I_3)\,\boldsymbol{D}(\boldsymbol{u})+\phi_2(I_1,I_2,I_3)\,\boldsymbol{D}(\boldsymbol{u})^2,\label{eq:tau_general}
+\end{equation}
+where $I_1$, $I_2$ and $I_3$ are the principal invariants of $\boldsymbol{D}(\boldsymbol{u})$,
+\begin{equation}
+I_1=\mathrm{tr}\bigl(\boldsymbol{D}(\boldsymbol{u})\bigr),\qquad
+I_2=\frac{1}{2}\left[\mathrm{tr}\bigl(\boldsymbol{D}(\boldsymbol{u})\bigr)^2-\mathrm{tr}\bigl(\boldsymbol{D}(\boldsymbol{u})^2\bigr)\right],\qquad
+I_3=\det\bigl(\boldsymbol{D}(\boldsymbol{u})\bigr).\label{eq:invariants}
+\end{equation}
+Because incompressibility implies $I_1=0$, and because the present work is concerned with purely viscous laws identified from viscometric measurements, we neglect second-order normal-stress contributions and retain the reduced form
+\begin{equation}
+\boldsymbol{\tau}=\phi_1(I_2)\,\boldsymbol{D}(\boldsymbol{u}).\label{eq:final_deviatoric}
+\end{equation}
+Introducing the shear rate
+\begin{equation}
+\dot{\gamma}=\sqrt{2\,\boldsymbol{D}(\boldsymbol{u}):\boldsymbol{D}(\boldsymbol{u})}=\sqrt{-4I_2},\label{eq:shear-rate}
+\end{equation}
+we obtain the standard generalised-Newtonian constitutive relation
+\begin{equation}
+\boldsymbol{\tau}=2\mu(\dot{\gamma})\,\boldsymbol{D}(\boldsymbol{u}),\label{eq:gnf}
+\end{equation}
+where $\mu$ is the apparent viscosity, or equivalently the shear-dependent viscosity.
+
+% ---- Previous version ----
+% The constitutive closure is therefore specified through the scalar function $\mu(\dot{\gamma})$. Particularly, in this work we consider four classical purely viscous models: Power-Law, Quemada, Cross, and Carreau-Yasuda, widely used in several applications, such as in hemodynamics \cite{}.
+The constitutive closure is therefore specified through the scalar function $\mu(\dot{\gamma})$. \cbp{Specifically, in this work we consider four classical purely viscous models, namely the power-law, Cross, Carreau--Yasuda and Quemada models, widely used in haemodynamic applications~\citep{Quemada1977,Popel2005,Neofytou2004,Mimouni2016}.}
+
+\subsection{Power-law model}
+
+The power-law model is defined by
+\begin{equation}
+\mu=m\,\dot{\gamma}^{\,n-1},\label{eq:pl}
+\end{equation}
+where $m$ is the consistency index and $n$ is the flow index. It captures shear-thinning behaviour for $n<1$ and shear-thickening behaviour for $n>1$, but does not recover finite viscosity plateaux at very low or very high shear rates.
+
+\subsection{Cross model}
+
+The Cross model~\citep{Cross1965} is given by
+\begin{equation}
+\mu=\mu_{\infty}+\frac{\mu_{0}-\mu_{\infty}}{1+(\lambda\dot{\gamma})^{n}},\label{eq:cross}
+\end{equation}
+where $\mu_{0}$ and $\mu_{\infty}$ are the zero- and infinite-shear viscosities, $\lambda$ is a characteristic time scale, and $n$ controls the slope of the transition between the two limiting regimes. To avoid unnecessary symbol proliferation, the exponent $n$ is used in the power-law, Cross, and Carreau--Yasuda models, with its role defined locally in each constitutive expression.
+
+\subsection{Carreau--Yasuda model}
+
+The Carreau--Yasuda model~\citep{Carreau1972,Yasuda1981} reads
+\begin{equation}
+\mu=\mu_{\infty}+(\mu_{0}-\mu_{\infty})\left[1+(\lambda\dot{\gamma})^{a}\right]^{\frac{n-1}{a}},\label{eq:carreau-yasuda}
+\end{equation}
+where $a$ is the Yasuda parameter controlling the width of the transition region.
+
+\subsection{Quemada model}
+
+\begin{comment}
+% ---- Previous version (varphi for volume fraction; $$-display; equation~\ref) ----
+The Quemada model explicitly incorporates both shear rate and haematocrit, and is therefore especially attractive in haemorheological applications \citep{Quemada1977,Popel2005}. It is written as
+\begin{equation}
+\mu=\mu_{F}\left(1-\frac{1}{2}\frac{k_{0}+k_{\infty}\sqrt{\dot{\gamma}/\dot{\gamma}_{c}}}{1+\sqrt{\dot{\gamma}/\dot{\gamma}_{c}}}\,\varphi\right)^{-2},\label{eq:quemada}
+\end{equation}
+where $\mu_{F}$ is the viscosity of the suspending fluid, $\varphi$ is the dispersed-phase volume fraction, and $\dot{\gamma}_{c}$ is a critical shear rate separating aggregation- and dispersion-dominated regimes. The parameters $k_0$ and $k_{\infty}$ characterise the interaction state of the suspension at low and high shear rates, respectively.To align this formulation with the Cross and Carreau-Yasuda models, these states can be directly related to the asymptotic zero- and infinite-shear viscosities. Evaluating the limits $\mu_0 = \lim\limits_{\dot{\gamma} \to 0} \mu$ and $\mu_\infty = \lim\limits_{\dot{\gamma} \to \infty} \mu$ of equation~\ref{eq:quemada} yields
+$$\mu_0 = \mu_F \left( 1 - \frac{1}{2} k_0 \varphi \right)^{-2} \quad \text{and} \quad \mu_\infty = \mu_F \left( 1 - \frac{1}{2} k_\infty \varphi \right)^{-2}.$$
+\end{comment}
+
+The Quemada model explicitly incorporates both shear rate and haematocrit, and is therefore \cbp{particularly suited to} haemorheological applications \citep{Quemada1977,Popel2005}. It is written as
+\begin{equation}
+\mu=\mu_{F}\left(1-\frac{1}{2}\frac{k_{0}+k_{\infty}\sqrt{\dot{\gamma}/\dot{\gamma}_{c}}}{1+\sqrt{\dot{\gamma}/\dot{\gamma}_{c}}}\,\varphi\right)^{-2},\label{eq:quemada}
+\end{equation}
+where $\mu_{F}$ is the viscosity of the suspending fluid, $\varphi$ is the dispersed-phase volume fraction, and $\dot{\gamma}_{c}$ is a critical shear rate separating aggregation- and dispersion-dominated regimes. The parameters $k_0$ and $k_{\infty}$ characterise the interaction state of the suspension at low and high shear rates, respectively.\cbp{ To align this formulation with the Cross and Carreau--Yasuda models, these states can be directly related to the asymptotic zero- and infinite-shear viscosities. Evaluating the limits $\mu_0 = \lim\limits_{\dot{\gamma} \to 0} \mu$ and $\mu_\infty = \lim\limits_{\dot{\gamma} \to \infty} \mu$ of \eqref{eq:quemada} yields}
+\begin{equation}
+\cbp{\mu_0 = \mu_F \left( 1 - \tfrac{1}{2} k_0 \varphi \right)^{-2} \quad \text{and} \quad \mu_\infty = \mu_F \left( 1 - \tfrac{1}{2} k_\infty \varphi \right)^{-2}.}\label{eq:quemada_limits}
+\end{equation}
+
+These constitutive laws provide the rheological input from which the effective resistance closure is derived in the following section.
+
+\section{Generalised hydraulic resistance \texorpdfstring{$\mathcal{R}_{\mu}$}{Rmu}}
+\label{sec:Rmu}
+
+Consider steady, fully developed, laminar flow of an incompressible isothermal fluid through a rigid circular pipe of radius $R$ and length $L$. For a Newtonian fluid, the axial velocity profile is
+\begin{equation}
+v_z(r)=\frac{\Delta p}{4\mu L}(R^2-r^2),
+\label{eq:v_newton}
+\end{equation}
+where $\Delta p$ is the pressure drop and $\mu$ is the dynamic viscosity. By contrast, the shear-stress distribution follows from the axial momentum balance alone and is independent of the constitutive law,
+\begin{equation}
+\tau(r)=\frac{r}{2}\frac{\Delta p}{L},
+\label{eq:tau_dist}
+\end{equation}
+so that the wall shear stress is
+\begin{equation}
+\tau_w=\frac{R\,\Delta p}{2L}.
+\label{eq:tau_w}
+\end{equation}
+
+The volumetric flow rate is defined by
+\begin{equation}
+Q=2\pi\int_{0}^{R}v_z(r)\,r\,\mathrm{d}r.
+\label{eq:Q_def}
+\end{equation}
+For the Newtonian case, this yields the Hagen--Poiseuille relation,
+\[
+Q=\frac{\pi R^4}{8\mu L}\Delta p,
+\]
+which may be written as
+\[
+Q=\frac{\Delta p}{\mathcal{R}},
+\qquad
+\mathcal{R}=\frac{8\mu L}{\pi R^4}.
+\]
+
+For generalised-Newtonian fluids, explicit determination of $v_z(r)$ is not required. Instead, we use the Weissenberg--Rabinowitsch--Mooney--Schofield (WRMS) method \citep{Rabinowitsch1929,Bird1987}. Integrating \eqref{eq:Q_def} by parts and applying the no-slip condition gives
+\begin{equation}
+Q=\pi\int_{0}^{R}r^2\dot{\gamma}\,\mathrm{d}r,
+\end{equation}
+where $\dot{\gamma}$ is the shear rate. Using \eqref{eq:tau_dist} to change variables from $r$ to $\tau$ then yields
+\begin{equation}
+Q=\frac{\pi R^3}{\tau_w^3}\int_{0}^{\tau_w}\tau^2\dot{\gamma}(\tau)\,\mathrm{d}\tau.
+\label{eq:WRMS_general}
+\end{equation}
+We therefore define a rheology-dependent hydraulic resistance $\mathcal{R}_{\mu}$ by
+\begin{equation}
+Q=\frac{\Delta p}{\mathcal{R}_{\mu}},
+\label{eq:Q_Rmu}
+\end{equation}
+which, together with \eqref{eq:tau_w} and \eqref{eq:WRMS_general}, gives
+\begin{equation}
+\mathcal{R}_{\mu}
+=
+\frac{\Delta p\,\tau_w^3}{\pi R^3 I(\tau_w)}
+=
+\frac{\Delta p^4}{8\pi L^3 I(\tau_w)},
+\label{eq:generalized-hydraulic-resistance}
+\end{equation}
+where
+\begin{equation}
+I(\tau_w)=\int_{0}^{\tau_w}\tau^2\dot{\gamma}(\tau)\,\mathrm{d}\tau
+\label{eq:rheological_integral}
+\end{equation}
+is the rheological integral. The constitutive dependence of the effective resistance is therefore entirely contained in the mapping $\dot{\gamma}=\dot{\gamma}(\tau)$. We now propose the rheological integral for the viscous models presented before.
+
+\subsection{Power-law hydraulic resistance}
+
+The Power-Law fluid viscosity is given by,
+\begin{equation}
+\tau=m\dot{\gamma}^{n},
+\qquad
+\dot{\gamma}=\left(\frac{\tau}{m}\right)^{1/n},
+\label{eq:pl_tau_gamma}
+\end{equation}
+whose substitution into \eqref{eq:rheological_integral} yields
+\begin{equation}
+I_{\mathrm{PL}}
+=
+\left(\frac{1}{m}\right)^{1/n}\frac{n}{3n+1}\tau_w^{(3n+1)/n},
+\label{eq:I_PL}
+\end{equation}
+and hence
+\begin{equation}
+\mathcal{R}_{\mu}^{\mathrm{PL}}
+=
+\frac{\Delta p^4}{8\pi L^3 I_{\mathrm{PL}}(\tau_w)}.
+\label{eq:R_PL}
+\end{equation}
+
+\subsection{Carreau--Yasuda hydraulic resistance}
+
+The fluid viscosity given by the Carreau--Yasuda model is defined as,
+\[
+\mu(\dot{\gamma})
+=
+\mu_{\infty}
++
+(\mu_0-\mu_{\infty})
+\left[1+(\lambda\dot{\gamma})^a\right]^{(n-1)/a},
+\]
+where the relation $\tau=\mu(\dot{\gamma})\dot{\gamma}$ is implicit, so the rheological integral is expressed in terms of $\dot{\gamma}$. Letting $\delta=\mu_0-\mu_{\infty}$, one has
+\begin{equation}
+I_{\mathrm{CY}}
+=
+\int_{0}^{\dot{\gamma}_w}
+\dot{\gamma}^3
+\left[\mu_{\infty}+\delta\left(1+(\lambda\dot{\gamma})^a\right)^{\frac{n-1}{a}}\right]^2
+\frac{\mathrm{d}\tau}{\mathrm{d}\dot{\gamma}}\,\mathrm{d}\dot{\gamma},
+\label{eq:I_CY_start}
+\end{equation}
+with
+% ---- Previous version (coefficient error: middle term should be \delta n, not \delta) ----
+% \begin{equation}
+% \frac{\mathrm{d}\tau}{\mathrm{d}\dot{\gamma}} = \mu_{\infty}
+% +\delta \left(1+\lambda^a\dot{\gamma}^a\right)^{\frac{n-1}{a}}
+% -\delta(n-1)\left(1+\lambda^a\dot{\gamma}^a\right)^{\frac{n-1-a}{a}}.
+% \label{eq:dtau_dgamma_CY}
+% \end{equation}
+\begin{equation}
+\frac{\mathrm{d}\tau}{\mathrm{d}\dot{\gamma}}
+=
+\mu_{\infty}
++\delta \cbp{n} \left(1+\lambda^a\dot{\gamma}^a\right)^{\frac{n-1}{a}}
+-\delta(n-1)\left(1+\lambda^a\dot{\gamma}^a\right)^{\frac{n-1-a}{a}}.
+\label{eq:dtau_dgamma_CY}
+\end{equation}
+\begin{comment}
+% ---- Previous version (CY J-family without Cr/CY superscript) ----
+Following \citet{Sochi2015}, this admits an exact representation in terms of Gauss hypergeometric functions. Defining
+\begin{equation}
+J_k
+=
+\int_{0}^{\dot{\gamma}_w}\dot{\gamma}^3(1+\lambda^a\dot{\gamma}^a)^k\,\mathrm{d}\dot{\gamma}
+=
+\frac{\dot{\gamma}_w^4}{4}\,
+{}_2F_1\!\left(-k,\frac{4}{a};1+\frac{4}{a};-\lambda^a\dot{\gamma}_w^a\right),
+\label{eq:Jk_CY}
+\end{equation}
+the integral becomes
+\begin{align}
+I_{\mathrm{CY}}
+&=\mu_{\infty}^3J_0
++\mu_{\infty}^2\delta(n+2)J_{(n-1)/a}
+-\mu_{\infty}^2\delta(n-1)J_{(n-1-a)/a}\nonumber\\
+&\quad
++\mu_{\infty}\delta^2(2n+1)J_{(2n-2)/a}
+-2\mu_{\infty}\delta^2(n-1)J_{(2n-2-a)/a}\nonumber\\
+&\quad
++\delta^3nJ_{(3n-3)/a}
+-\delta^3(n-1)J_{(3n-3-a)/a}.
+\label{eq:I_CY_final}
+\end{align}
+\end{comment}
+
+\cbp{Following \citet{Sochi2015}, this admits an exact representation in terms of Gauss hypergeometric functions. Defining
+\begin{equation}
+J_k^{\mathrm{CY}}
+=
+\int_{0}^{\dot{\gamma}_w}\dot{\gamma}^3(1+\lambda^a\dot{\gamma}^a)^k\,\mathrm{d}\dot{\gamma}
+=
+\frac{\dot{\gamma}_w^4}{4}\,
+{}_2F_1\!\left(-k,\frac{4}{a};1+\frac{4}{a};-\lambda^a\dot{\gamma}_w^a\right),
+\label{eq:Jk_CY}
+\end{equation}
+the integral becomes
+\begin{align}
+I_{\mathrm{CY}}
+&=\mu_{\infty}^3J_0^{\mathrm{CY}}
++\mu_{\infty}^2\delta(n+2)J_{(n-1)/a}^{\mathrm{CY}}
+-\mu_{\infty}^2\delta(n-1)J_{(n-1-a)/a}^{\mathrm{CY}}\nonumber\\
+&\quad
++\mu_{\infty}\delta^2(2n+1)J_{(2n-2)/a}^{\mathrm{CY}}
+-2\mu_{\infty}\delta^2(n-1)J_{(2n-2-a)/a}^{\mathrm{CY}}\nonumber\\
+&\quad
++\delta^3nJ_{(3n-3)/a}^{\mathrm{CY}}
+-\delta^3(n-1)J_{(3n-3-a)/a}^{\mathrm{CY}}.
+\label{eq:I_CY_final}
+\end{align}}
+The associated hydraulic resistance is
+\begin{equation}
+\mathcal{R}_{\mu}^{\mathrm{CY}}
+=
+\frac{\Delta p^4}{8\pi L^3 I_{\mathrm{CY}}(\tau_w)}.
+\label{eq:R_CY}
+\end{equation}
+
+\subsection{Cross hydraulic resistance}
+
+\begin{comment}
+% ---- Previous version (Cross exponent m; J-family index n) ----
+For the Cross model, the fluid viscosity is represented by
+\[
+\mu(\dot{\gamma})
+=
+\mu_{\infty}
++
+\frac{\delta}{1+(\lambda\dot{\gamma})^m},
+\qquad
+\delta=\mu_0-\mu_{\infty},
+\]
+where the differentiation of $\tau=\mu(\dot{\gamma})\dot{\gamma}$ gives
+\begin{equation}
+    d\tau = \left[ \mu_\infty + \frac{\delta}{1 + (\lambda \dot{\gamma})^m} - \frac{\delta m (\lambda \dot{\gamma})^m}{\left(1 + (\lambda \dot{\gamma})^m\right)^2} \right] d\dot{\gamma}\label{eq:dtau_dgamma_Cross}
+\end{equation}
+Substituting the preivous expression into the WRMS integral, yields
+\begin{align}
+    I = \int_0^{\dot{\gamma}_w} \dot{\gamma} & \left[ \mu_\infty^2 \dot{\gamma}^2 + \frac{2\mu_\infty \delta \dot{\gamma}^2}{1 + (\lambda \dot{\gamma})^m} + \frac{\delta^2 \dot{\gamma}^2}{\left(1 + (\lambda \dot{\gamma})^m\right)^2} \right] \cdot \nonumber \\
+    & \left[ \mu_\infty + \frac{\delta}{1 + (\lambda \dot{\gamma})^m} - \frac{\delta m (\lambda \dot{\gamma})^m}{\left(1 + (\lambda \dot{\gamma})^m\right)^2} \right] d\dot{\gamma}
+    \label{Int:Cross}
+\end{align}
+
+This integral can be expanded (see Section \ref{appA}) into several terms which together gives the following expression
+
+\begin{align}
+I &= \mu_{\infty}^3 J_0 + \left[ \mu_{\infty}^2 \delta (3 - m) \right] J_1 + \left[ \mu_{\infty} \delta^2 (3 - 2m) + \mu_{\infty}^2 m \delta \right] J_2 \nonumber \\
+&+ \left[ \delta^3 (1 - m) + 2\mu_{\infty} \delta^2 m \right] J_3 + \left[ m \delta^3 \right] J_4
+\end{align}
+where $J_n$ corresponds to $J_n=\frac{\dot{\gamma}_w^4}{4} \, _2F_1\left(n, \frac{4}{m}; \frac{4}{m}+1; -(\lambda \dot{\gamma}_w)^m\right)$.
+
+To ultimately derive $I_{Cr}$, \citet{Sochi2015} define the auxiliary variables $f=\lambda^m\dot{\gamma}_w^m$ and $g=1+f$.
+\begin{equation}
+f=\lambda^m\dot{\gamma}_w^m,
+\qquad
+g=1+f,
+\label{eq:fg_cross}
+\end{equation}
+one may write
+\begin{align}
+I_{\mathrm{Cr}}
+&=
+\frac{\left( 2\delta^3 \zeta + \psi \right) \dot{\gamma}_w^4}{12m^2 g^3}
+-\frac{\xi
+{}_2F_1 \left(1, \frac{4}{m}; \frac{m+4}{m}; -f\right)\dot{\gamma}_w^4}{12m^2},
+\label{eq:cross_integral_solution}
+\end{align} where $\zeta=-m (2f^2 + 5f + 3) + 4g^2 + 2m^2$, $\psi=12m\delta^2 \mu_\infty g (m - g) + 3m^2\mu_\infty^2 g^2(4\delta + g)$, y $\xi=\delta^3 (m^2 - 6m + 8) + 3m\delta^2\mu_\infty (m - 4) + 3m^2\delta\mu_\infty^2$.
+\end{comment}
+
+\cbp{For the Cross model, the fluid viscosity is represented by
+\[
+\mu(\dot{\gamma})
+=
+\mu_{\infty}
++
+\frac{\delta}{1+(\lambda\dot{\gamma})^n},
+\qquad
+\delta=\mu_0-\mu_{\infty},
+\]
+where the differentiation of $\tau=\mu(\dot{\gamma})\dot{\gamma}$ gives
+\begin{equation}
+    d\tau = \left[ \mu_\infty + \frac{\delta}{1 + (\lambda \dot{\gamma})^n} - \frac{\delta n (\lambda \dot{\gamma})^n}{\left(1 + (\lambda \dot{\gamma})^n\right)^2} \right] d\dot{\gamma}\label{eq:dtau_dgamma_Cross}
+\end{equation}
+Substituting the preivous expression into the WRMS integral, yields
+\begin{align}
+    I = \int_0^{\dot{\gamma}_w} \dot{\gamma} & \left[ \mu_\infty^2 \dot{\gamma}^2 + \frac{2\mu_\infty \delta \dot{\gamma}^2}{1 + (\lambda \dot{\gamma})^n} + \frac{\delta^2 \dot{\gamma}^2}{\left(1 + (\lambda \dot{\gamma})^n\right)^2} \right] \cdot \nonumber \\
+    & \left[ \mu_\infty + \frac{\delta}{1 + (\lambda \dot{\gamma})^n} - \frac{\delta n (\lambda \dot{\gamma})^n}{\left(1 + (\lambda \dot{\gamma})^n\right)^2} \right] d\dot{\gamma}
+    \label{Int:Cross}
+\end{align}
+
+This integral can be expanded (see Section \ref{appA}) into several terms which together gives the following expression
+
+\begin{align}
+I &= \mu_{\infty}^3 J_0^{\mathrm{Cr}} + \left[ \mu_{\infty}^2 \delta (3 - n) \right] J_1^{\mathrm{Cr}} + \left[ \mu_{\infty} \delta^2 (3 - 2n) + \mu_{\infty}^2 n \delta \right] J_2^{\mathrm{Cr}} \nonumber \\
+&+ \left[ \delta^3 (1 - n) + 2\mu_{\infty} \delta^2 n \right] J_3^{\mathrm{Cr}} + \left[ n \delta^3 \right] J_4^{\mathrm{Cr}}
+\end{align}
+where $J_k^{\mathrm{Cr}}$ corresponds to $J_k^{\mathrm{Cr}}=\frac{\dot{\gamma}_w^4}{4} \, _2F_1\left(k, \frac{4}{n}; \frac{4}{n}+1; -(\lambda \dot{\gamma}_w)^n\right)$.
+
+To ultimately derive $I_{Cr}$, \citet{Sochi2015} define the auxiliary variables $f=\lambda^n\dot{\gamma}_w^n$ and $g=1+f$.
+\begin{equation}
+f=\lambda^n\dot{\gamma}_w^n,
+\qquad
+g=1+f,
+\label{eq:fg_cross}
+\end{equation}
+one may write
+\begin{align}
+I_{\mathrm{Cr}}
+&=
+\frac{\left( 2\delta^3 \zeta + \psi \right) \dot{\gamma}_w^4}{12n^2 g^3}
+-\frac{\xi
+{}_2F_1 \left(1, \frac{4}{n}; \frac{n+4}{n}; -f\right)\dot{\gamma}_w^4}{12n^2},
+\label{eq:cross_integral_solution}
+\end{align} where $\zeta=-n (2f^2 + 5f + 3) + 4g^2 + 2n^2$, $\psi=12n\delta^2 \mu_\infty g (n - g) + 3n^2\mu_\infty^2 g^2(4\delta + g)$, y $\xi=\delta^3 (n^2 - 6n + 8) + 3n\delta^2\mu_\infty (n - 4) + 3n^2\delta\mu_\infty^2$.} 
+
+Finally, the hydraulic resistance for the cross model is defined as
+\begin{equation}
+\mathcal{R}_{\mu}^{\mathrm{Cr}}
+=
+\frac{\Delta p^4}{8\pi L^3 I_{\mathrm{Cr}}(\tau_w)}.
+\label{eq:R_Cr}
+\end{equation}
+
+\subsection{Quemada hydraulic resistance}
+
+For the Quemada model, the rheological integral was derived by \citet{Popel1993} using the WRMS method. In that formulation,
+\begin{equation}
+I_{\mathrm{Q}}
+=
+\left(\frac{\Delta p\,R}{2L}\right)^4
+\frac{\left(1-\frac{1}{2}k\varphi\right)^2}{4\mu_F}
+F(\alpha,q),
+\label{eq:I_Q}
+\end{equation}
+where $k$ is a new parameter that encompasses the parameters originally defined in the Quemada model, $\frac{k_0+k_\infty \sqrt{\dot{\gamma}/\dot{\gamma_c}}}{1+\sqrt{\dot{\gamma}/\dot{\gamma_c}}}$, and $F(\alpha,q)$ is a dimensionless function involving polynomial coefficients from Quemada theory,
+\begin{align}
+F(\alpha,q)
+&=
+\frac{1}{2}\Bigg[
+1-\frac{8}{7}\alpha(1+q)+\frac{4}{3}\alpha^2-\alpha^8P_7
++\left(1+\sum_{n=1}^{7}\alpha^nP_n\right)\sqrt{1-2\alpha q+\alpha^2}\nonumber\\
+&\qquad\qquad
++\alpha^8P_8
+\ln\left(
+\frac{1-\alpha q+\sqrt{1-2\alpha q+\alpha^2}}{\alpha(1-q)}
+\right)
+\Bigg].
+\label{eq:F_alpha_q}
+\end{align}
+Here, $\alpha$ and $q$ are dimensionless parameters defined in \citet{Popel1993}, and Polynomials $P_n$ are defined in Appendix \ref{appB}.
+\begin{align*}
+    \alpha = \frac{\sqrt{\tau_0} + \sqrt{\mu_\infty \lambda}}{\sqrt{\tau_w}}, \quad
+    q = \frac{\sqrt{\tau_0} - \sqrt{\mu_\infty \lambda}}{\sqrt{\tau_0} + \sqrt{\mu_\infty \lambda}}
+\end{align*}
+
+The corresponding hydraulic resistance is
+\begin{equation}
+\mathcal{R}_{\mu}^{\mathrm{Q}}
+=
+\frac{\Delta p^4}{8\pi L^3 I_{\mathrm{Q}}(\tau_w)}.
+\label{eq:R_Q}
+\end{equation}
+
+\section{Haemorheological characterisation}
+\label{sec:hemochar}
+
+\orn{The generalised hydraulic resistance $\mathcal{R}_{\mu}$ introduced in Section~\ref{sec:Rmu} provides a natural entry point for reduced-order descriptions of flows with non-constant viscosity. This is especially useful in haemodynamics, where complex vascular networks are routinely idealised as interconnected pipe segments represented through effective pressure--flow relations.}
+
+\orn{Within this framework, blood is treated as a concentrated suspension of deformable red blood cells (RBCs) in a Newtonian plasma. Its macroscopic rheology is governed by the dynamics of the suspended phase. At low shear rates, plasma proteins, primarily fibrinogen, promote the formation of reversible stack-like aggregates known as rouleaux, which increase internal friction and apparent viscosity. As the shear stress increases, these aggregates disperse and the RBCs deform and align with the flow, producing the characteristic shear-thinning behaviour of blood.}
+
+
+\subsection{Haematocrit influence and constitutive coupling}
+\label{sec:haematocrit}
+
+\orn{From a physiological standpoint, haematocrit is one of the principal parameters
+governing red-cell interactions. A low haematocrit compromises oxygen transport
+and drives the circulation towards a chronic hyperdynamic state which, if
+sustained, may contribute to heart failure and increased cardiovascular
+morbidity. A high haematocrit, by contrast, raises the blood viscosity strongly
+and thereby the risk of ischaemic thrombotic events and, in extreme cases,
+hyperviscosity syndrome with neurological and haemorrhagic manifestations
+\citep{Mozos2015,Nader2019,Isbister1994}. The effective resistance is therefore
+naturally regarded as a function not only of the pressure drop, vessel geometry
+and shear-dependent viscosity, but also of the haematological state of the fluid,}
+\begin{equation}
+\mathcal{R}_{\mu}=\mathcal{R}_{\mu}(\Delta p,R,L,\mu,\varphi).
+\label{eq:Rmu_phi}
+\end{equation}
+
+\begin{remark}
+\orn{While the Quemada model \eqref{eq:quemada} is intrinsically formulated in terms
+of the volume fraction~$\varphi$, the phenomenological models---power-law, Cross
+and Carreau--Yasuda---require closure relations to couple their constitutive
+parameters to the haematocrit. To ensure physical consistency across the shear
+spectrum, the viscosity scales $(\mu_0,\mu_\infty,m)$ are made explicit functions
+of~$\varphi$ using either the Krieger--Dougherty relation \citep{Krieger1959} or
+an exponential empirical law \citep{CokeletA1963,CokeletB1963}.}
+\end{remark}
+
+\subsubsection{Coupling to haematocrit and population-consistent fitting}
+\label{subsec:phi_coupling}
+
+\orn{For the phenomenological models the constitutive scales must be made explicit
+functions of~$\varphi$. We use the Krieger--Dougherty relation
+\citep{Krieger1959} where a physically motivated packing correction suffices,
+and, where a parameter shows stronger nonlinear dependence on haematocrit than a
+single algebraic form can capture, an exponential representation}
+\begin{equation}
+\mu_i(\varphi)=c_1\exp\!\bigl(w(\varphi)\bigr),
+\qquad
+\mu_i(\varphi)=c_2+c_3\varphi,
+\label{eq:phi_scaling}
+\end{equation}
+\orn{with $w(\varphi)$ a low-order polynomial and the linear form retained for weakly
+$\varphi$-dependent parameters. The order of $w$ is fixed by calibration, so as
+to preserve physical fidelity without introducing spurious degrees of freedom;
+this follows the hybrid strategy of \citet{CokeletA1963,CokeletB1963}, who used
+an exponential dependence for $\dot\gamma_c$ while keeping $k_0,k_\infty$ linear.
+Here the exponential law is employed as an \emph{alternative} to
+Krieger--Dougherty scaling, selected per parameter, rather than as an additional
+fitted layer.}
+
+
+
+\begin{remark}
+\orn{In the microcirculation the haematocrit is not, in general, a conserved spatial
+constant but exhibits a shear-dependent distribution associated with
+shear-induced migration and the F\aa hr\ae us effect, so that $\varphi$ may vary
+with the local strain rate, $\varphi=\varphi(\dot\gamma)$. In that regime the
+coupling between the concentration field and the velocity gradient must be
+resolved by evaluating the rheological integral of \S\ref{sec:Rmu} with a
+shear-dependent volume fraction,
+$I(\tau_w)=\int \tau^2\,\dot\gamma\bigl(\tau,\varphi(\dot\gamma)\bigr)\,
+\mathrm{d}\tau$. The present closure retains a cross-sectionally
+uniform~$\varphi$, which is adequate for the conduit- and distal-vessel scales
+targeted here.}
+\end{remark}
+\begin{comment}
+   Because haematocrit disperses appreciably across a clinical population, fitting a
+constitutive law $\mathcal{M}(\dot\gamma,\varphi;\boldsymbol\theta)$ at the mean
+haematocrit is biased whenever the viscosity is convex in~$\varphi$: by Jensen's
+inequality $\mathbb{E}[\mu(\varphi)]\ge\mu(\mathbb{E}[\varphi])$, so the
+mean-$\varphi$ evaluation systematically underestimates the population viscosity.
+We therefore calibrate against the expectation of the constitutive law over the
+haematocrit distribution,
+\begin{equation}
+\hat\mu(\dot\gamma;\boldsymbol\theta)
+=\int_0^1 \mathcal{M}(\dot\gamma,\varphi;\boldsymbol\theta)\,P(\varphi)\,
+\mathrm{d}\varphi,
+\qquad
+\boldsymbol\theta^{*}
+=\arg\min_{\boldsymbol\theta}\sum_i
+\bigl[\mu_{\mathrm{obs},i}-\hat\mu(\dot\gamma_i;\boldsymbol\theta)\bigr]^2,
+\label{eq:expectation_fit}
+\end{equation}
+with $P(\varphi)\sim\mathcal{N}(\mu_\varphi,\sigma_\varphi)$ taken from the
+reported ranges \citep{cho2008hemorheological}. This separates extrinsic haematocrit dispersion
+from intrinsic constitutive behaviour, and the shaded bands of
+figures~\ref{fig:fit_normal}--\ref{fig:fit_hiperv} are the image of
+$P(\varphi)$ under each calibrated law. 
+\end{comment}
+
+
+\begin{comment}
+    
+
+
+\subsubsection{Krieger--Dougherty-based \texorpdfstring{$\mathcal{R}_{\mu}$}{Rmu} resistances}
+\label{subsec:KD_Rmu}
+
+
+
+\subsubsection{Exponential \texorpdfstring{$\mathcal{R}_{\mu}$}{Rmu} resistances}
+\label{subsec:exp_Rmu}
+
+Although Krieger--Dougherty scaling provides a physically motivated concentration correction, some constitutive parameters may exhibit stronger nonlinear dependence on haematocrit than can be captured by a single algebraic form. To account for this, we also consider a more flexible exponential representation,
+\begin{equation}
+\mu_i(\varphi)=c_1\exp\!\bigl(w(\varphi)\bigr),
+\label{eq:exponential_gen}
+\end{equation}
+where $w(\varphi)$ is a polynomial function. This form provides a general framework for describing strong parameter sensitivity to haematocrit, especially near highly concentrated regimes. For parameters displaying weaker dependence on $\varphi$, a linear form may be sufficient,
+\begin{equation}
+\mu_i(\varphi)=c_2+c_3\varphi.
+\label{eq:linear_gen}
+\end{equation}
+The order of $w(\varphi)$ is selected by calibration against experimental data, with the aim of preserving physical fidelity while avoiding unnecessary degrees of freedom.
+
+A precedent for this hybrid strategy is given by \citet{CokeletA1963,CokeletB1963}, who used an exponential polynomial dependence for $\dot{\gamma}_c$ within a Quemada-type framework, while retaining linear relations for $k_0$ and $k_{\infty}$. In the present work, the same idea is embedded in the effective-resistance formulation. {\color{red}CHECK: state explicitly later whether this exponential strategy is used as an alternative to Krieger--Dougherty scaling or as an additional fitted parameterisation layer.}
+
+\subsection{Probabilistic Distribution of \texorpdfstring{$\mathcal{R}_{\mu}$}{Rmu} resistances}
+\label{subsec:fitted_Rmu}
+
+In clinical populations, haematocrit exhibits significant inter-individual dispersion. Direct evaluation of constitutive models at the mean haematocrit may therefore introduce a systematic error associated with Jensen's inequality. In particular, if the viscosity function is convex with respect to $\varphi$, then
+\begin{equation}
+\mathbb{E}[\mu(\varphi)]\geq \mu(\mathbb{E}[\varphi]),
+\label{eq:jensen}
+\end{equation}
+so that evaluating the viscosity at the mean haematocrit underestimates the expected viscosity of the population.
+
+To address this issue, we define a general fitting framework for any constitutive model
+\[
+\mathcal{M}(\dot{\gamma},\varphi;\boldsymbol{\theta}),
+\]
+where $\boldsymbol{\theta}$ denotes the parameter vector to be estimated. The effective viscosity is defined as the expectation of the constitutive law with respect to the haematocrit distribution,
+\begin{equation}
+\hat{\mu}(\dot{\gamma};\boldsymbol{\theta})
+=
+\int_{0}^{1}\mathcal{M}(\dot{\gamma},\varphi;\boldsymbol{\theta})\,P(\varphi)\,\mathrm{d}\varphi,
+\label{eq:mu_hat}
+\end{equation}
+where $P(\varphi)$ is the haematocrit probability density. In the present work, $P(\varphi)$ is modelled as a normal distribution consistent with clinical observations \citep{cho2008hemorheological},
+\[
+P(\varphi)\sim\mathcal{N}(\mu_{\varphi},\sigma_{\varphi}).
+\]
+The optimal parameter set is then obtained from the least-squares problem
+\begin{equation}
+\boldsymbol{\theta}^{*}
+=
+\arg\min_{\boldsymbol{\theta}}
+\sum_i
+\left[
+\mu_{\mathrm{obs},i}
+-
+\hat{\mu}(\dot{\gamma}_i;\boldsymbol{\theta})
+\right]^2.
+\label{eq:theta_opt}
+\end{equation}
+This construction separates extrinsic haematocrit dispersion from intrinsic constitutive behaviour, leading to a more robust physiological characterisation and, consequently, a more reliable rheology-informed resistance.
+\end{comment}
+
+\orn{
+
+\subsection{Blood pathologies and constitutive parameterisation}
+\label{sec:pathologies}
+
+The generalised resistance $\mathcal{R}_\mu$ of Section \ref{sec:Rmu} depends on
+the constitutive law only through the shear-rate--shear-stress mapping
+$\dot\gamma=\dot\gamma(\tau)$. A pathology therefore enters the reduced model not
+as an additional term, but as a shift in the parameters of the chosen viscosity
+law, and thus as a deformation of that mapping. In this section we calibrate the
+four constitutive models against steady shear-viscometry data for four
+haematological states---a healthy reference, arterial hypertension, type~2
+diabetes mellitus and a hyperviscous state---each associated with a distinct
+haematocrit range. The fitted parameters are collected in
+table~\ref{tab:rheology}, and the corresponding fits are shown in
+figures~\ref{fig:healthy}--\ref{fig:hyperviscosity}. Throughout, the
+haematocrit~$\varphi$ is treated as the primary control parameter: it enters the
+Quemada model intrinsically through the packing state of the suspension, whereas
+for the power-law, Cross and Carreau--Yasuda models the viscosity scales
+$(\mu_0,\mu_\infty,m)$ are coupled to $\varphi$ through either the
+Krieger--Dougherty relation \cite{Krieger1959} or an exponential
+empirical law \citep{CokeletA1963,CokeletB1963}.
+
+Each dataset is fitted at its reported mean haematocrit, and the associated
+physiological variability in~$\varphi$ is propagated to a shaded viscosity band in
+figures~\ref{fig:healthy}--\ref{fig:hyperviscosity}. Because the
+viscosity--haematocrit relation is strongly nonlinear, this band is asymmetric
+and is not centred on the mean fit; reporting it explicitly guards against the
+bias incurred when a single nominal $\varphi$ is used to represent a population
+\cite{Chien1987,cho2008hemorheological,Westgard2024}.
+
+\begin{remark}
+In the microcirculation the haematocrit is not, in general, a conserved spatial
+constant but exhibits a shear-dependent distribution associated with
+shear-induced migration and the F\aa hr\ae us effect, so that $\varphi$ may vary
+with the local strain rate, $\varphi=\varphi(\dot\gamma)$. In that regime the coupling
+between the concentration field and the velocity gradient must be resolved by
+evaluating the rheological integral of Section \ref{sec:Rmu} with a
+shear-dependent volume fraction, $I(\dot\gamma_w)=\int \tau^2\,
+\dot\gamma\bigl(\tau,\varphi(\dot\gamma)\bigr)\,\mathrm{d}\tau$. The present
+closure retains a cross-sectionally uniform~$\varphi$, which is adequate for the
+conduit- and distal-vessel scales targeted here.
+\end{remark}
+
+\subsubsection{Healthy reference}
+Under physiological conditions blood rheology is governed by the high
+deformability of the erythrocytes at a moderate haematocrit,
+$0.40<\varphi<0.45$. This produces pronounced shear thinning, most marked in the
+low-shear regime where reversible aggregation into rouleaux structures raises
+the apparent viscosity. We take the healthy dataset of \cite{cho2008hemorheological}, at a
+mean haematocrit $\varphi\approx0.42$, as the reference state. The apparent
+viscosity decreases monotonically over $1$--$10^2\,\mathrm{s}^{-1}$
+(figure~\ref{fig:healthy}), and all four models reproduce the mean trajectory
+within the variability band ($\varphi=0.389$--$0.461$). The power-law fit, however,
+remains a straight line in log--log coordinates and by construction cannot
+recover the Newtonian plateaus at either shear-rate limit; the Cross,
+Carreau--Yasuda and Quemada models capture the transition between the low- and
+high-shear plateaus and provide the physically admissible baseline against which
+the pathological states are compared.
+
+\subsubsection{Arterial hypertension}
+Hypertension-associated rheological changes are driven primarily by elevated
+plasma fibrinogen, which promotes macromolecular bridging between erythrocytes;
+combined with reduced cell deformability, this raises the bulk viscosity and
+enhances aggregation. Using the data of \cite{Letcher1981} at $\varphi=0.444$
+(figure~\ref{fig:hypertension}), the fits confirm strong shear thinning, with
+the largest departure from Newtonian behaviour at low shear. Here the structural
+deficiency of the power-law model is most visible: lacking both plateaus, it
+deviates from the data at both shear-rate extremes. The Cross, Carreau--Yasuda
+and Quemada models capture the nonlinear transition, although the Quemada fit
+represents the low-shear dispersion less faithfully, a consequence of its
+tendency to develop unphysical viscosity growth as the effective packing
+fraction approaches unity (remark~\ref{rmk:quemada}).
+
+\begin{remark}
+\label{rmk:quemada}
+The divergence of the Quemada viscosity as
+\[
+\tfrac{1}{2}\,
+\frac{k_0+k_\infty\sqrt{\dot\gamma/\dot\gamma_c}}
+{1+\sqrt{\dot\gamma/\dot\gamma_c}}\,\varphi \to 1
+\]
+is an artefact of the underlying minimum-energy-dissipation assumption and does
+not reflect the physical response of erythrocyte suspensions at extreme
+haematocrit. In practice this bounds the admissible parameter range of the
+Quemada closure at the high-$\varphi$ end.
+\end{remark}
+
+\subsubsection{Type~2 diabetes mellitus}
+The haemorheological signature of type~2 diabetes ($\varphi=0.410$--$0.490$) is a
+marked elevation of bulk viscosity, most pronounced in the low-shear limit,
+where reported values exceed those of healthy controls by more than $20\%$
+\citep{cho2008hemorheological}. This is attributed to erythrocyte hyperaggregation and to a
+reduction in cell deformability caused by chronic hyperglycaemia and the
+glycation of membrane proteins, both of which raise the flow resistance of the
+microvasculature \citep{Sun2022}. Fitting the data of \citet{cho2008hemorheological}
+(figure~\ref{fig:diabetes}) yields a picture qualitatively similar to the
+hypertensive case: the power-law model recovers the viscosity limits marginally
+better than for hypertension but still fails to describe the intermediate-shear
+transition, whereas the Cross, Carreau--Yasuda and Quemada models capture the
+full nonlinear response.
+
+\subsubsection{Hyperviscous state}
+The hyperviscous state is parameterised from the data of \citet{Chien1966} at a
+control haematocrit of $51.7\%$, where the non-Newtonian character of blood is
+most strongly accentuated (figure~\ref{fig:hyperviscosity}). The apparent
+viscosity rises steeply in the low-shear regime (down to
+$\sim\!10^{-2}\,\mathrm{s}^{-1}$), producing the steepest shear-thinning
+gradient of all four states. Under this severe nonlinearity the plateau-preserving
+Cross, Carreau--Yasuda and Quemada models are clearly preferable to the power law.
+Their behaviour nonetheless differs in an instructive way. The Quemada
+uncertainty band is the most sensitive to the high volume fraction, broadening
+into a dispersion that degrades its point-wise accuracy. The Carreau--Yasuda
+model follows the experimental trajectory most closely, as expected from its
+additional degree of freedom (the Yasuda exponent~$a$). The slightly larger
+residual of the Cross model is not a failure but a consequence of its more
+constrained functional form: with one parameter fewer, it imposes a stiffer
+geometry on the transition region. This rigidity is desirable when the fitted
+constants are to be interpreted structurally, since it reduces the risk of
+overfitting to which the higher-dimensional Carreau--Yasuda form is more exposed.}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F1PL_Model_normal.pdf} 
+        \caption{Power Law}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F1Quemada_Model_normal.pdf} 
+        \caption{Quemada Model}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F1Cross_Model_normal.pdf} 
+        \caption{Cross Model}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F1CY_Model_normal.pdf} 
+        \caption{Carreau-Yasuda Model}
+    \end{subfigure}
+    \caption{\textbf{Normal Subjects.} Reference rheological profiles for healthy controls. Data from \cite{cho2008hemorheological}.}
+    \label{fig:healthy}
+\end{figure} 
+
+
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F2PL_Model_htn.pdf}
+        \caption{Power Law}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F2Quemada_Model_htn.pdf}
+        \caption{Quemada Model}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F2Cross_Model_htn.pdf}
+        \caption{Cross Model}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F2CY_Model_htn.pdf}
+        \caption{Carreau-Yasuda Model}
+    \end{subfigure}
+    \caption{\textbf{Arterial Hypertension.} The complete multi-model profile confirms that cellular microrheology remains stable. Data from \cite{Letcher1981}.}
+    \label{fig:hypertension}
+\end{figure}
+
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F3PL_Model_dm.pdf} 
+        \caption{Power Law}
+    \end{subfigure}
+\hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F3Quemada_Model_dm.pdf}
+        \caption{Quemada Model}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F3Cross_Model_dm.pdf}
+        \caption{Cross Model}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F3CY_Model_dm.pdf}
+        \caption{Carreau-Yasuda Model}
+    \end{subfigure}
+    \caption{\textbf{Uncontrolled Diabetes.} Data from \cite{cho2008hemorheological}.}
+    \label{fig:diabetes}
+\end{figure}
+
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F5PL_Model_Hyper.pdf}
+        \caption{Power Law}
+    \end{subfigure}
+    \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F5Quemada_Model_Hyper.pdf}
+        \caption{Quemada Model}
+    \end{subfigure}    
+    \medskip
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F5Cross_Model_Hyper.pdf}
+        \caption{Cross Model}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Images4/F5CY_Model_Hyper.pdf}
+        \caption{Carreau-Yasuda Model}
+    \end{subfigure}
+    \caption{\textbf{hyperviscosity.} Data from \cite{Chien1966}}
+    \label{fig:hyperviscosity}
+\end{figure}
+
+
+
+
+
+
+\section{The $\mathcal{R}_{\mu}$-Windkessel model}
+\label{sec:RmuWindkessel}
+
+Reduced-order lumped-parameter representations, commonly referred to as Windkessel models \citep{frank1990basic,olufsen2003deriving,westerhof2009arterial}, characterise the systemic arterial tree through a formal analogy with electro-mechanical circuits. In this framework, the complex spatio-temporal dynamics of the vasculature are mapped onto discrete elements representing hydraulic resistance, compliance, and inertance. The foundational two-element model comprises a linear resistance $\mathcal{R}$, accounting for viscous dissipation within the peripheral microvasculature, and a compliance $C$, representing the elastic energy storage and distensibility of the large conduit arteries. Higher-order extensions, such as the three-element model, incorporate an impedance term to account for proximal wave reflections, while four-element models introduce an inertance term to capture high-frequency pulsatile effects.
+
+Irrespective of the specific Windkessel topology, the model may be generalised to incorporate the non-Newtonian behaviour of blood by replacing the constant (Poiseuille-type) resistance with a variable hydraulic resistance $\mathcal{R}_{\mu}$, as derived in \S\ref{sec:Rmu}. The $\mathcal{R}_{\mu}$-Windkessel model is thus governed by the non-linear constitutive flow relation
+\begin{equation}
+Q_{\mathrm{out}}=\frac{\Delta p}{\mathcal{R}_{\mu}(\dot{\gamma}, \varphi, \dots)},
+\label{eq:WK_Rmu_outflow}
+\end{equation}
+where the resistance $\mathcal{R}_{\mu}$ is a function of the local shear rate $\dot{\gamma}$ and may depend on a vector of state-dependent parameters, including the haematocrit $\varphi$ and other pathology-specific rheological constants. This formulation provides a rigorous yet computationally efficient structure for investigating how microscopic rheological alterations propagate into macroscopic cardiovascular dynamics.
+
+\subsection{The operating point of an unresolved bed}
+\label{sec:operating-point}
+
+Equation~\eqref{eq:WK_Rmu_outflow} is only as informative as the shear rate at
+which it is evaluated, so it is worth establishing where an unresolved bed
+actually sits on the viscosity curve. Represent a compartment as $N$ identical
+vessels in parallel, of calibre $R$ and effective path length $L$, carrying a
+branch flow $Q$ and dissipating a share $\Delta p$ of the pressure budget. At the
+reference viscosity $\mu_{\rm ref}$ used for calibration, Poiseuille's relation
+closes the multiplicity,
+\begin{equation}
+N=\frac{8\mu_{\rm ref}LQ}{\pi R^{4}\Delta p},
+\label{eq:bed-multiplicity}
+\end{equation}
+and substituting into the definition of the wall shear rate,
+$\dot{\gamma}_{0}=4Q/(N\pi R^{3})$, gives
+\begin{equation}
+\boxed{\;\dot{\gamma}_{0}=\frac{R\,\Delta p}{2\,\mu_{\rm ref}\,L}
+=\frac{\tau_{w}}{\mu_{\rm ref}}\;}
+\label{eq:gamma-identity}
+\end{equation}
+in which the flow rate has cancelled identically. The rheological operating point
+of a compartment is therefore not a free parameter: it is fixed by the calibre,
+the effective path length and the share of the pressure budget, and it is simply
+the wall shear stress divided by the reference viscosity.
+
+\begin{remark}
+Equation~\eqref{eq:gamma-identity} is a useful screening tool. Since the
+microvascular wall shear stress is an independently measured quantity of order
+$1$--$5\,\mathrm{Pa}$, the operating shear rate of any bed carrying a
+physiological pressure budget is of order $10^{2}$--$10^{3}\,\mathrm{s}^{-1}$. A
+reduced model of such a bed will therefore sample the high-shear branch of any
+purely viscous law, and the magnitude of the non-Newtonian correction can be
+estimated before any simulation is performed.
+\end{remark}
+
+Because $\dot{\gamma}_{0}$ is fixed by morphometry, the pair
+$(R,\bar{v})$---a calibre and a mean velocity, both directly accessible to
+intravital microscopy---is the natural set of prescribed quantities, with
+$\dot{\gamma}_{0}=4\bar{v}/R$, and with $N$, $L$ and the mean transit time
+$T=L/\bar{v}$ following as predictions. Three measurable quantities
+$(R,\bar{v},T)$ for two degrees of freedom leaves one consistency check: the
+derived transit time must agree with the indicator-dilution value. Prescribing
+$L$ instead and deriving $\dot{\gamma}_{0}$ would invert this hierarchy, since
+$L$ is a lumped path through several generations in series and is not itself a
+measurable quantity.
+
+\subsection{Validity of a constant-viscosity resistance}
+\label{sec:calibration-point}
+
+The practical case for \eqref{eq:WK_Rmu_outflow} does not rest on the size of the
+correction at a nominal operating point, but on the fact that a constant
+resistance is exact only there. Writing the effective apparent viscosity as
+$\mu_{\rm eff}(Q)=\mu_{\rm ap}(\dot{\gamma}_{0}Q/Q_{0})$, a resistance calibrated
+at $Q_{0}$ incurs the relative error
+\begin{equation}
+e(Q)=\frac{\mu_{\rm ap}(\dot{\gamma}_{0})}{\mu_{\rm ap}(\dot{\gamma}_{0}Q/Q_{0})}-1,
+\label{eq:calibration-error}
+\end{equation}
+which vanishes at $Q=Q_{0}$ by construction and grows monotonically away from it,
+with opposite signs on either side. Two further remarks are in order. First, the
+choice of the constant is itself consequential and rarely justified: for the
+healthy fit of \S\ref{sec:hemochar}, evaluating the resistance at the high-shear
+plateau $\mu_{\infty}$ rather than at $\mu_{\rm ap}(\dot{\gamma}_{0})$ already
+changes it appreciably, by an amount comparable to the shear-thinning correction
+itself. The closure removes this degree of freedom. Second, the closure supplies
+the exact derivative
+\begin{equation}
+\frac{\partial Q}{\partial\Delta p}
+=\frac{\pi R^{3}\dot{\gamma}_{w}-3Q}{\Delta p},
+\label{eq:exact-derivative}
+\end{equation}
+obtained by differentiating \eqref{eq:WRMS_general} under the integral sign, so
+that a Newton or monolithic coupling of the reduced model to a higher-dimensional
+domain retains a consistent tangent. This is a practical advantage independent of
+the magnitude of the rheological correction.
+
+\begin{remark}
+The closure is a statement about equilibrium rheology: $\mu_{\rm ap}$ is
+evaluated as though the microstructure had fully adapted to the instantaneous
+shear rate. Erythrocyte aggregation has a characteristic time of seconds, so the
+low-shear branch should not be applied to transients shorter than that, such as a
+flow reversal lasting tens of milliseconds. Where the results below approach
+$\dot{\gamma}\to 0$ this restriction is stated explicitly.
+\end{remark}
+
+\section{Applications}
+\label{sec:applications}
+
+\begin{cbpblock}
+The closure is exercised in a single computational setting: a coupled
+LV-0D/coronary-3D model in which a three-dimensional coronary domain carries
+rheology-dependent reduced models at its six terminal outlets. The reduced
+left-ventricular model of \citet{caruel2014dimensional} appears in this setting
+purely as a \emph{driver}: it supplies the proximal arterial pressure at the
+coronary inlet and the intramyocardial pressure acting on the distal coronary
+compartments. Its own systemic Windkessel stage is retained with
+constant-viscosity resistances and is not an object of study here, so that the
+$\mathcal{R}_{\mu}$ closure is exercised at one location only and the observed
+sensitivity can be attributed unambiguously to the coronary outlet models. For
+the same reason we do not report a normotensive/hypertensive sweep of the
+systemic circuit, nor a sensitivity analysis of systemic vessel radius, length
+and wall stiffness: those would probe the driver rather than the closure.
+
+The coronary bed is chosen deliberately, and not because the correction is large
+there. By the operating-point identity~\eqref{eq:gamma-identity} it is a bed in
+which the correction is provably \emph{small} at rest, which makes it the
+stringent case: any sensitivity recovered must come from displacing the operating
+point rather than from a favourable choice of setting. The mechanism used to
+displace it is the venous drainage pressure, described in
+\S\ref{sec:pathology-protocol}.
+
+All simulations were performed with the Rodin finite-element framework
+\citep{Brito-Pacheco_Rodin_2023}. The implementations used here are those of the
+\texttt{Heart/CCMLC2014} module and the
+\texttt{examples/Heart/CoronaryArtery} coupled example.
+\end{cbpblock}
+
+
+\subsection{Reduced left-ventricular driver}
+\label{sec:ApplicationI}
+
+The proximal haemodynamic state of the coronary problem is supplied by a coupled
+0D lumped-parameter model of the left heart and systemic circulation. Its role
+here is to generate physiologically consistent waveforms for the arterial
+pressure $p_{\rm ar}(t)$ and the ventricular pressure $p_{\rm LV}(t)$, which
+enter the coronary model at the inlet and at the distal side of each outlet
+respectively. It is described for completeness and reproducibility; its own
+pressure--volume dynamics are not among the results reported in
+\S\ref{sec:results}.
+
+\subsubsection*{Ventricular and valvular dynamics}
+
+The left ventricle is represented using the electromechanical framework of \cite{chapelle2012energy}, reduced under the assumptions of spherical symmetry and purely radial displacement \citep{caruel2014dimensional}. In contrast to traditional time-varying elastance models, this formulation explicitly accounts for the non-linear coupling between passive myocardial elasticity, active tension generation, and internal viscous damping. 
+
+From a fluid-mechanical perspective, the flows through the mitral and aortic valves are treated as quasi-unidirectional and governed by pressure-driven gradients. The transitions between the filling, isovolumetric, and ejection phases are treated as state-dependent events. The conservation of mass within the ventricular cavity is governed by the kinematic relation
+\begin{equation}
+\frac{\mathrm{d}V}{\mathrm{d}t} = Q_{\rm in}(p_{\rm LA},p_{\rm LV}) - Q_{\rm out}(p_{\rm LV},p_{\rm ar}),
+\end{equation}
+where $p_{\rm LA}$ and $p_{\rm ar}$ denote the left-atrial and arterial pressures, respectively.
+
+\subsubsection*{Systemic afterload}
+
+The systemic afterload is modelled as a two-stage Windkessel circuit, partitioning the vasculature into proximal (conduit) and distal (microcirculatory) compartments. This arrangement is governed by the following system of coupled ordinary differential equations:
+\begin{equation}
+\begin{cases}
+C_p \dfrac{\mathrm{d}p_{\rm ar}}{\mathrm{d}t} + \dfrac{p_{\rm ar} - p_d}{\mathcal{R}_{p}} = Q_{\rm out}, \\
+C_d \dfrac{\mathrm{d}p_d}{\mathrm{d}t} + \dfrac{p_d - p_{\rm sv}}{\mathcal{R}_{d}} = \dfrac{p_{\rm ar} - p_d}{\mathcal{R}_{p}},
+\end{cases}
+\end{equation}
+where $\{C_p, C_d\}$ and $\{\mathcal{R}_{p}, \mathcal{R}_{d}\}$ are the
+stage-specific compliances and resistances. These resistances are kept at
+constant viscosity on purpose. The closure of \S\ref{sec:Rmu} could equally be
+applied here, and doing so would introduce a nonlinear feedback between cardiac
+output and afterload; but it would also make the coronary response depend on two
+simultaneously varying rheological elements, and the sensitivity reported in
+\S\ref{sec:results} could no longer be attributed to the outlet closure alone.
+The systemic stage is therefore held fixed, and the coronary inlet sees an
+identical $p_{\rm ar}(t)$ in every case considered. This is verified in the
+results as a control.
+
+\subsection{Three-dimensional non-Newtonian coronary artery with
+\texorpdfstring{$\mathcal{R}_{\mu}$}{Rmu}-Windkessel boundary conditions}
+\label{sec:ApplicationII}
+
+\cbp{
+The second application considers the coupled LV-0D/coronary-3D model of
+figure~\ref{fig:coronary-setup}. The computational domain $\Omega$ is a
+three-dimensional coronary artery with one inlet, one rigid arterial wall on
+which no-slip is imposed, and six terminal outlets $\Gamma_\mu^{(i)}$,
+$i=1,\ldots,6$. The flow in $\Omega$ is governed by the incompressible
+Navier--Stokes equations \eqref{eq:fluid-general-a}--\eqref{eq:fluid-general-b}
+with the Carreau--Yasuda apparent viscosity \eqref{eq:carreau-yasuda}. Each
+terminal outlet carries the single-state $\mathcal{R}_{\mu}$ model of
+\S\ref{sec:coronary-outlet-model}, which is where the closure of
+\S\ref{sec:Rmu} is exercised.
+
+The coupling to the driver of \S\ref{sec:ApplicationI} is one-way and uses its
+state at two locations: the arterial pressure $p_{\rm ar}(t)$ is imposed as
+the inlet traction of $\Omega$, and the ventricular pressure $p_{\rm LV}(t)$
+sets the intramyocardial pressure acting on the distal coronary compartments.
+The reduced circulation follows the pathway
+\begin{equation}
+p_{\rm LA}(t)
+\xrightarrow{\,Q_{\rm LA}\,}
+p_{\rm LV}
+\xrightarrow{\,Q_{\rm ar}\,}
+p_{\rm ar}
+\xrightarrow{\,Q_p\,}
+p_d
+\xrightarrow{\,Q_d\,}
+p_{\rm sv},
+\label{eq:lv0d-flow-topology}
+\end{equation}
+where $p_{\rm LA}$ denotes the prescribed left-atrial pressure, $p_{\rm LV}$
+the left-ventricular pressure, $p_{\rm ar}$ the proximal arterial pressure,
+$p_d$ the systemic distal pressure and $p_{\rm sv}$ the systemic venous
+pressure, while each terminal outlet appends the coronary branch
+\begin{equation}
+p_{\rm ar}
+\longrightarrow
+\Omega
+\xrightarrow{\,Q_i\,}
+p_{\rm out}^{(i)}
+\xrightarrow{\,Q_{\mu,p}^{(i)}\,}
+p_c^{(i)}
+\xrightarrow{\,Q_{\mu,d}^{(i)}\,}
+p_{\rm LV}.
+\label{eq:coronary-flow-topology}
+\end{equation}
+The systemic distal pressure $p_d$ and the coronary microvascular pressures
+$p_c^{(i)}$ are therefore distinct variables. The discretisation and the
+solution algorithm are standard and deferred to \S\ref{sec:coronary-numerics};
+we describe the outlet model first, since it is where the closure of
+\S\ref{sec:Rmu} enters the problem.
+}
+% ---- NOTE: the outlet formulation below is deliberately NOT wrapped in \cbp{}.
+%      It is final text rather than an editorial annotation, and it should not be
+%      typeset in blue.
+
+\subsubsection{Single-state terminal outlet model}
+\label{sec:coronary-outlet-model}
+
+Each terminal coronary outlet carries an independent nonlinear
+$\mathcal{R}_{\mu}$ reduced model with a single state, the microvascular
+transmural pressure
+\begin{equation}
+p_{tm}^{(i)}=p_c^{(i)}-p_{\rm im},
+\qquad
+p_{\rm im}=\alpha\,p_{\rm LV},
+\label{eq:coronary-transmural}
+\end{equation}
+where $p_c^{(i)}$ is the microvascular pressure and $\alpha$ the
+volume-averaged transmission of cavity pressure to the myocardial tissue. The
+sign convention is such that $Q_i>0$ denotes flow leaving the
+three-dimensional domain, and $Q_{d}^{(i)}>0$ drainage towards the venous
+reservoir at pressure $P_{\rm RA}$.
+
+The compartment is intramyocardial, so the tissue pressure is not a source added
+to the balance but the reference of the whole compartment. Its venous limb is
+accordingly a Starling resistor whose throat closes at $p_{\rm im}$
+\citep{Downey1975,Permutt1963}, giving
+\begin{align}
+C^{(i)}\frac{\mathrm{d}p_{tm}^{(i)}}{\mathrm{d}t}
+&=Q_i-Q_{d}^{(i)},
+\label{eq:coronary-node-balance}\\
+Q_{d}^{(i)}
+&=Q_{\mu,d}^{(i)}\!\left(p_{tm}^{(i)}+p_{\rm im}-p_{w}\right),
+\qquad
+p_{w}=P_{\rm RA}+\beta\left(p_{\rm im}-P_{\rm RA}\right)^{+},
+\label{eq:coronary-starling}\\
+p_{\rm out}^{(i)}
+&=p_{\rm im}+p_{tm}^{(i)}+\mathcal{R}_{\mu,p}^{(i)}\!\left(Q_i\right)Q_i,
+\label{eq:coronary-outlet-pressure}
+\end{align}
+in which $\beta\in[0,1]$ is the fraction of tissue pressure reaching the venous
+throat. The limits are informative: $\beta=1$ is the strong waterfall, in which
+$p_{\rm im}$ cancels from the venous driving pressure entirely, whereas $\beta=0$
+recovers drainage against a fixed reference. The intermediate value reflects the
+fact that the venular exit lies closer to the epicardium than the volume-averaged
+tissue pressure of the bed, so it is exposed to a fraction of it. The strong
+waterfall is not the modern consensus---capacitive mechanisms account for much of
+the observed zero-flow behaviour \citep{Spaan1981,Klocke1985,Westerhof2006}---and
+$\beta$ interpolates continuously between the two descriptions.
+
+Two properties of \eqref{eq:coronary-node-balance}--\eqref{eq:coronary-outlet-pressure}
+are worth noting, because they are what reduces the outlet to one state. First,
+$p_{\rm im}$ appears explicitly in the outlet pressure
+\eqref{eq:coronary-outlet-pressure}, so the systolic impediment to coronary
+inflow requires no separate calibre modulation and no explicit pump source.
+Second, in the waterfall regime $p_{\rm im}$ cancels from
+\eqref{eq:coronary-starling}, so $p_{tm}$ becomes a relaxation variable with
+time constant $C^{(i)}\mathcal{R}_{\mu,d}^{(i)}$, bounded below by zero and above
+by $\mathcal{R}_{\mu,d}^{(i)}\max Q_i$. The stored volume $C^{(i)}p_{tm}^{(i)}$ is
+therefore non-negative by construction, without a collapsible-tube law or a
+non-negativity penalty.
+
+Both branch flows are evaluated with the $\mathcal{R}_{\mu}$ closure of
+\S\ref{sec:Rmu}, and the operating shear rates follow from
+\eqref{eq:gamma-identity} rather than being prescribed. The proximal resistance is
+assembled implicitly on the outlet boundary. Writing the resistive contribution to
+the Neumann traction for a flat profile,
+\begin{equation}
+\int_{\Gamma_\mu^{(i)}}\!\mathcal{R}_{\mu,p}^{(i)}Q_i\,(\boldsymbol{v}\cdot\boldsymbol{n})
+\,\mathrm{d}\Gamma
+\;\simeq\;
+\mathcal{R}_{\mu,p}^{(i)}A_i
+\int_{\Gamma_\mu^{(i)}}\!(\boldsymbol{u}\cdot\boldsymbol{n})
+(\boldsymbol{v}\cdot\boldsymbol{n})\,\mathrm{d}\Gamma ,
+\label{eq:coronary-implicit-resistance}
+\end{equation}
+with $A_i$ the outlet area, gives a symmetric positive-semidefinite operator that
+is exact for a flat profile. Assembling it rather than lagging it by one step
+changes the amplification factor of the lagged coupling from
+$|1-\mathcal{R}\Delta t/L_{3D}|$, which exceeds unity for the dominant distal
+resistance, to $1/(1+\mathcal{R}\Delta t/L_{3D})<1$ for every $\Delta t$ and every
+$\mathcal{R}$, where $L_{3D}$ is the inertance of the three-dimensional domain.
+The coupling is then unconditionally stable and requires no outlet capacitor; this
+matters because such a capacitor forms an undamped resonator with $L_{3D}$ and
+contaminates the outlet flux with a spurious systolic component.
+
+% ---- Previous version (re-derived the Section 3 WRMS law; superseded by a reference to \S\ref{sec:Rmu}) ----
+% Both the proximal and distal outlet flows are evaluated with the same
+% Carreau--Yasuda WRMS-type pressure--flow law. For a pressure drop
+% $\Delta p$, an effective vessel radius $R$ and length $L$, the wall shear
+% stress is
+% \begin{equation}
+% \tau_w = \frac{R|\Delta p|}{2L}, \label{eq:coronary-wall-shear-stress}
+% \end{equation}
+% and the wall shear rate is obtained from
+% \begin{equation}
+% \tau_w = \mu(\dot{\gamma}_w)\dot{\gamma}_w. \label{eq:coronary-wall-shear-rate}
+% \end{equation}
+% Assuming that the map $\dot{\gamma}\mapsto \mu(\dot{\gamma})\dot{\gamma}$ is monotone over the
+% considered shear-rate interval, the corresponding flow is computed as
+% \begin{equation}
+% Q_{\mu}(\Delta p;R,L) = \operatorname{sign}(\Delta p) \frac{\pi R^3}{\tau_w^3}
+% \int_0^{\dot{\gamma}_w} \dot{\gamma}^{3} \mu(\dot{\gamma})^2
+% \frac{\mathrm{d}}{\mathrm{d}\dot{\gamma}}\left[ \mu(\dot{\gamma})\dot{\gamma} \right]\,\mathrm{d}\dot{\gamma}.
+% \label{eq:coronary-wrms-flow-law}
+% \end{equation}
+For a pressure drop $\Delta p$ across an outlet segment of effective radius $R$
+and length~$L$, the wall shear stress follows from \eqref{eq:tau_w} and the flow
+from the rheological integral \eqref{eq:WRMS_general}, generalised here to signed
+pressure drops,
+\begin{equation}
+Q_{\mu}(\Delta p;R,L)
+=
+\operatorname{sign}(\Delta p)\,
+\frac{\pi R^3}{\tau_w^3}\,I_{\mathrm{CY}}(\dot{\gamma}_w),
+\qquad
+\tau_w=\frac{R|\Delta p|}{2L},
+\label{eq:coronary-wrms-flow-law}
+\end{equation}
+where $I_{\mathrm{CY}}$ is the Carreau--Yasuda rheological integral
+\eqref{eq:I_CY_final} and the wall shear rate $\dot{\gamma}_w$ solves
+$\tau_w=\mu(\dot{\gamma}_w)\dot{\gamma}_w$.
+
+Rather than evaluating \eqref{eq:coronary-wrms-flow-law} at every call, we exploit
+a structural property of the closure. Writing the flow of a
+generalised-Newtonian fluid as Hagen--Poiseuille with an apparent viscosity and
+comparing with \eqref{eq:coronary-wrms-flow-law} gives
+\begin{equation}
+\mu_{\rm ap}(\tau_w)=\frac{\tau_w^{4}}{4\,I(\tau_w)},
+\qquad
+\dot{\gamma}_{\rm nom}=\frac{4Q}{\pi R^{3}}=\frac{\tau_w}{\mu_{\rm ap}},
+\label{eq:mu-apparent}
+\end{equation}
+so that $\mu_{\rm ap}$ is a \emph{universal} function of the wall shear stress for
+a given rheology: it carries no dependence on $R$, on $L$ or on the branch. It is
+therefore tabulated once in $\dot{\gamma}_{\rm nom}$ and the reduced element only
+interpolates. With $241$ logarithmically spaced nodes over
+$\tau_w\in[10^{-6},10^{4}]\,\mathrm{Pa}$ the maximum log--log interpolation error
+is $0.09\%$, against a per-call root solve for $\dot{\gamma}_w$ and a quadrature
+of the rheological integral. This eliminates the nonlinear inner solves entirely,
+and with them the need for any fallback approximation: the outlet update reduces to
+a scalar Newton iteration on $p_{tm}^{(i)}$ whose residual derivative,
+$C^{(i)}/\Delta t+\partial Q_{d}^{(i)}/\partial p_{tm}^{(i)}$, is strictly
+positive, so the iteration converges globally from any iterate.
+
+\subsubsection{Discretisation and solution algorithm}
+\label{sec:coronary-numerics}
+
+\cbp{
+The mesh of $\Omega$ contains 35k tetrahedral elements, 11k vertices and 19k
+boundary faces, and is partitioned over 30 MPI ranks. The spatial
+discretisation uses Taylor--Hood finite elements~\citep{TaylorHood1973},
+$\boldsymbol{u}_h\in[\mathbb{P}_2]^3$ and $p_h\in\mathbb{P}_1$, giving
+$264\,768$ velocity and $14\,135$ pressure unknowns, $278\,903$ flow degrees
+of freedom in total. The apparent viscosity is evaluated at the regularised
+shear rate
+$\dot{\gamma}_{\varepsilon}=(\varepsilon_{\gamma}^{2}+\dot{\gamma}^{2})^{1/2}$,
+with $\dot{\gamma}$ as in \eqref{eq:shear-rate}, and the variational
+formulation is augmented by a small pressure regularisation term, by backflow
+stabilisation at the inlet and outlets~\citep{EsmailyMoghadam2011}, and by a
+weak normal impedance and tangential penalisation at the inlet.
+
+Time integration is first order and semi-implicit. The convective term is
+treated by an Oseen--Picard linearisation~\citep{ElmanSilvesterWathen2014}:
+the advecting velocity, the Temam divergence correction~\citep{Temam2001},
+the Carreau--Yasuda viscosity and the rheological factors of the outlet
+resistances are evaluated at the previous time step, so each accepted step
+requires a single linearised saddle-point solve. Within a step the coupling
+is staggered. The LV-0D driver is advanced first, providing
+$p_{\rm ar}^{n+1}$ and $p_{\rm LV}^{n+1}$; the three-dimensional problem is
+then solved with $p_{\rm ar}^{n+1}$ imposed at the inlet, the resistive part
+of each outlet traction assembled implicitly through
+\eqref{eq:coronary-implicit-resistance} and its compartmental part
+$p_{\rm im}+p_{tm}^{(i)}$ taken from the previous outlet state; the resulting
+outlet fluxes $Q_i^{n+1}$ finally feed the scalar Newton update of each
+$p_{tm}^{(i)}$. Only the compartmental pressure is therefore exposed to the
+one-step lag, and the stability argument of
+\S\ref{sec:coronary-outlet-model} covers the dominant resistive part.
+
+% NOTE: the implementation drains against max(p_im, P_RA), i.e. beta = 1;
+% confirm this is the value used for the reported runs before submission.
+The simulations of \S\ref{sec:results} use the strong-waterfall limit
+$\beta=1$ of \eqref{eq:coronary-starling}. The base time step is
+$\Delta t=10^{-3}$~s, halved and retried whenever the three-dimensional solve
+fails, for a total simulated time of $2.55$~s (three cardiac cycles of
+$0.85$~s). The average computational cost was 12 seconds per accepted time
+step on 30 MPI ranks of \textbf{[HARDWARE / CPU DESCRIPTION]}.
+}
+
+\subsubsection{Pathological protocol: venous drainage pressure}
+\label{sec:pathology-protocol}
+
+\cbp{
+The constitutive states of \S\ref{sec:hemochar} differ chiefly at low shear, while
+by \eqref{eq:gamma-identity} a normally perfused coronary bed operates two to
+three decades above that range. Distinguishing them therefore requires displacing
+the operating point, and the cheapest physiologically grounded way to do so is
+through the venous drainage pressure $P_{\rm RA}$.
+
+Elevated central venous pressure---in right-heart failure, tricuspid
+regurgitation or constrictive pericarditis---raises the downstream reference of
+the coronary venous drainage without altering any vessel geometry. Through
+\eqref{eq:coronary-starling} it reduces the venular driving gradient, hence the
+venular flow, hence by \eqref{eq:gamma-identity} the venular shear rate. It is
+also the only accessible mechanism with this property: an increase in
+microvascular resistance by capillary rarefaction leaves the per-vessel flow, and
+therefore the shear rate, unchanged, since the flow and the number of parallel
+vessels fall together; vasoconstriction reduces the shear rate only as the square
+root of the resistance increase, because the calibre falls with the flow.
+
+We therefore sweep $P_{\rm RA}$ across its clinical range at fixed geometry and
+fixed systemic driver, for each of the four constitutive states of
+\S\ref{sec:hemochar}, and report the resulting flow, waveform and shear-rate
+statistics. This is a test of the closure rather than a search for a favourable
+configuration: the sweep is monotone in a single physiological parameter, and the
+prediction to be verified is that the constitutive states separate progressively
+as the venular operating point descends through the aggregation transition.
+Where the sweep drives $\dot{\gamma}$ below a few tens of $\mathrm{s}^{-1}$ the
+equilibrium restriction noted in \S\ref{sec:calibration-point} applies and is
+reported alongside the results.
+}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{CoronarySetup.pdf}
+    \caption{
+    Schematic of the coupled LV-0D/coronary-3D model. The reduced LV model
+    follows the pathway
+    $p_{\rm LA}(t)\rightarrow p_{\rm LV}\rightarrow p_{\rm ar}
+    \rightarrow p_d\rightarrow p_{\rm sv}$ and acts as a driver only: the
+    arterial pressure $p_{\rm ar}$ is imposed at the inlet of the
+    three-dimensional coronary domain, and the ventricular pressure
+    $p_{\rm LV}$ sets the intramyocardial pressure
+    $p_{\rm im}=\alpha p_{\rm LV}$ of the coronary outlet models. Each terminal
+    outlet $\Gamma_\mu^{(i)}$ carries a single-state $\mathcal{R}_{\mu}$ model:
+    a proximal rheology-dependent resistance $\mathcal{R}_{\mu,p}^{(i)}$
+    assembled implicitly on the boundary, a microvascular compartment of
+    compliance $C^{(i)}$ referenced to $p_{\rm im}$ with state
+    $p_{tm}^{(i)}=p_c^{(i)}-p_{\rm im}$, and a distal rheology-dependent
+    resistance $\mathcal{R}_{\mu,d}^{(i)}$ terminated by a Starling throat that
+    closes at $p_{w}=P_{\rm RA}+\beta(p_{\rm im}-P_{\rm RA})^{+}$. The
+    pathological protocol of \S\ref{sec:pathology-protocol} varies $P_{\rm RA}$
+    at fixed geometry.
+    \textbf{[FIGURE TO BE REDRAWN: the current \texttt{CoronarySetup.pdf} shows
+    the superseded capacitor-plus-source outlet; it must be replaced by the
+    single-state topology above.]}
+    }
+    \label{fig:coronary-setup}
+\end{figure}
+\section{Results}\label{sec:results}
+
+\cbp{OUTLINE ONLY --- the numbered items below are the results to be produced,
+in the order in which they build the argument. Indicative magnitudes in square
+brackets come from the Carreau--Yasuda fits of table~\ref{tab:parametros_reologicos}
+evaluated through the closure, and are placeholders to be replaced by the
+simulation output.}
+
+\begin{enumerate}
+
+\item \textbf{Verification of the closure.} Newtonian limit
+($\mu_0\!\to\!\mu_\infty$) recovered to machine precision; low- and high-shear
+plateaux of $\mu_{\rm ap}$ recovered as $\mu_0$ and $\mu_\infty$; agreement
+between the tabulated and directly integrated closure
+[max.\ error $0.09\%$, mean $0.011\%$ over $241$ nodes]. One table, no figure.
+
+\item \textbf{The operating point is not free.} Evaluation of
+\eqref{eq:gamma-identity} for the four compartments of a coronary bed
+(terminal arteriole, capillary, post-capillary venule, collecting vein) with
+morphometric $R$ and the measured pressure budget, tabulated against the
+independent estimate $\dot{\gamma}=\tau_w/\mu$ from
+$\tau_w=1$--$5\,\mathrm{Pa}$. Expected outcome: all compartments in
+$10^{2}$--$10^{3}\,\mathrm{s}^{-1}$. This is the screening result and it should
+appear before any simulation. \emph{Include the transit-time consistency check
+$T=L/\bar{v}$ against indicator dilution, and report it even where it fails}
+[$T_a\!\approx\!8\,$s for $R=25\,\mu$m, $\bar v=5\,$mm/s, against $1$--$2\,$s
+measured]: it bounds the validity of representing a branching tree by a single
+effective segment, and is more informative stated than omitted.
+
+\item \textbf{Constitutive contrast at the operating point.} $\mu_{\rm ap}$ for
+the four states of table~\ref{tab:parametros_reologicos} across
+$\dot{\gamma}\in[1,10^{3}]\,\mathrm{s}^{-1}$, with the ratio to the healthy state.
+Expected outcome: hyperviscous/healthy
+[$\approx\!1.17$ at $400\,\mathrm{s}^{-1}$, $\approx\!1.52$ at
+$10\,\mathrm{s}^{-1}$]; diabetes and hypertension cross the healthy curve.
+One figure, log--log, four curves plus a shaded band marking the coronary
+operating range. This figure states the difficulty and motivates item~5.
+
+\item \textbf{Error of a constant-viscosity resistance.} $e(Q)$ from
+\eqref{eq:calibration-error} over $Q/Q_0\in[1/40,4]$ for each constitutive state,
+calibrated at rest. Expected outcome for the healthy fit
+[$-37\%$ at $Q/Q_0=1/40$, $-12.5\%$ at $1/8$, $+2.3\%$ at $4$]. Add the
+plateau-versus-operating-point comparison ($\mu_\infty$ against
+$\mu_{\rm ap}(\dot{\gamma}_0)$) as a horizontal reference line. \emph{This is the
+principal methodological result of the paper} and should be the figure a reader
+remembers: monotone, sign-changing at the calibration point, and larger than the
+correction in item~3.
+
+\item \textbf{Venous-pressure protocol: separation of the constitutive states.}
+Sweep $P_{\rm RA}$ over the clinical range at fixed geometry and fixed driver,
+for the four states. Report, per outlet and in total: mean coronary flow,
+venular shear rate, $\mu_{\rm ap}$ ratio to healthy, and transmural pressure.
+Expected outcome [venular $\dot{\gamma}$ from $400$ to
+$\approx\!25\,\mathrm{s}^{-1}$ as $P_{\rm RA}$ goes from $4.5$ to
+$14\,\mathrm{mmHg}$, with the hyperviscous/healthy viscosity ratio rising from
+$1.17$ to $1.38$]. Two panels: shear rate and flow against $P_{\rm RA}$.
+\emph{State explicitly the $\dot{\gamma}$ below which the equilibrium assumption
+of \S\ref{sec:calibration-point} no longer holds, and mark it on the axis.}
+
+\item \textbf{Waveform response.} For the healthy and hyperviscous states at
+low and elevated $P_{\rm RA}$: coronary inflow $Q_i(t)$, venous outflow
+$Q_d^{(i)}(t)$ and $p_{tm}^{(i)}(t)$ over one cycle. Metrics: systolic fraction
+of the inflow volume, diastolic-to-systolic peak ratio, peak-to-mean venous
+outflow, and the per-beat volume displaced by the intramyocardial compartment.
+Verify $p_{tm}>0$ throughout, which certifies the non-negativity of the stored
+volume without a penalty.
+
+\item \textbf{Constitutive-model comparison at fixed state.} The same protocol
+with power-law, Cross, Carreau--Yasuda and Quemada for the healthy fit. Expected
+outcome: Cross and Carreau--Yasuda nearly indistinguishable at the operating
+point; the power-law progressively wrong at low shear, where it lacks a plateau
+and diverges; Quemada distinguished by admitting haematocrit and plasma viscosity
+as explicit parameters. \emph{This is where the case for Quemada belongs: not a
+better fit, but the only one of the four that separates the aggregation axis from
+the haematocrit axis, and the haematocrit axis is the one that moves the
+high-shear plateau where the bed operates.}
+
+\item \textbf{Numerical properties of the coupling.} Amplification factor of the
+lagged versus implicitly assembled outlet resistance, as a function of $\Delta t$
+and $\mathcal{R}$; residual high-frequency content of the outlet flux in each
+case; cost per accepted time step of the tabulated versus directly integrated
+closure. Short, one table, but it is what makes the closure usable inside a 3D
+solver and it answers the obvious referee question about stability.
+
+\item \textbf{Control.} Verification that $p_{\rm ar}(t)$, $p_{\rm LV}(t)$ and
+the ventricular volume are identical across all cases to machine precision, so
+that every reported difference is attributable to the outlet closure. Two lines
+of text, no figure. Cheap, and it forecloses an entire class of objection.
+
+\end{enumerate}
+
+\cbp{NOT to be reported, and why: a normotensive/hypertensive sweep of the
+systemic circuit, and sensitivity to systemic vessel radius, length and wall
+stiffness. Both probe the driver rather than the closure, and the previous draft
+promised them; see \S\ref{sec:ApplicationI}.}
+
+% ----------------------------------------------------------------------
+% SECTION: SICKLE CELL ANEMIA (HbSS)
+%
+
+
+\begin{table}
+    \begin{center}
+    \begin{tabular}{l l c c c c c c c c}
+        \hline
+        Pathology & Model & \multicolumn{8}{c}{Parameters} \\
+        \cline{3-10}
+        & & $m$ & $n$ & $\mu_0$ & $\mu_\infty$ & $a$ & $\lambda$ & $\dot{\gamma}_c$ & $\mu_F$\\
+        \hline
+        Normal
+         & PL & $5.0692$ & $0.6655$ & -- & -- & -- & -- & -- & -- \\
+         & Q  & -- & -- & $80.3102$ & $5.0041$ & -- & -- & $2.2922$ & $1.7963$ \\
+         & Cr & -- & $0.9503$ & $78.9514$ & $5.0629$ & -- & $4.1199$ & -- & -- \\
+         & CY & -- & $0.2081$ & $71.9637$ & $4.8612$ & $1.4173$ & $6.1529$ & -- & -- \\
+        [5pt] % Espacio vertical para separar categorías
+        Hypertension
+         & PL & $5.5256$ & $0.7048$ & -- & -- & -- & -- & -- & -- \\
+         & Q  & -- & -- & $96.6447$ & $3.2835$ & -- & -- & $0.9992$ & $1.4502$ \\
+         & Cr & -- & $0.8260$ & $92.5012$ & $4.1099$ & -- & $5.3469$ & -- & -- \\
+         & CY & -- & $0.1703$ & $81.5805$ & $4.1796$ & $1.0324$ & $4.9438$ & -- & -- \\
+        [5pt]
+        Diabetes
+         & PL & $3.9686$ & $0.6725$ & -- & -- & -- & -- & -- & -- \\
+         & Q  & -- & -- & $122.2013$ & $4.7551$ & -- & -- & $1.7278$ & $1.9115$ \\
+         & Cr & -- & $0.8633$ & $103.5405$ & $5.3610$ & -- & $10.4591$ & -- & -- \\
+         & CY & -- & $0.1502$ & $104.6692$ & $5.3610$ & $0.8625$ & $11.1048$ & -- & -- \\
+        [5pt]
+        Hyperviscosity
+         & PL & $8.2781$ & $0.5288$ & -- & -- & -- & -- & -- & -- \\
+         & Q  & -- & -- & $313.0808$ & $2.6863$ & -- & -- & $14.9623$ & $1.3228$ \\
+         & Cr & -- & $0.7982$ & $295.7832$ & $5.0291$ & -- & $13.7952$ & -- & -- \\
+         & CY & -- & $0.2152$ & $319.4782$ & $5.5066$ & $0.7709$ & $16.9213$ & -- & -- \\
+        \hline
+    \end{tabular}
+    \caption{Rheological parameters according to pathology and model.}
+    \label{tab:parametros_reologicos}
+    \end{center}
+\end{table} 
+
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+\cbp{
+WE NEED TO WRITE AT THE END. Outline of the claims the results should support,
+in descending order of strength:
+
+\begin{enumerate}
+\item A constant-viscosity Windkessel resistance is exact only at the flow rate at
+which it was calibrated, and its error grows monotonically away from that point,
+reaching tens of per cent across the physiological range. The closure removes this
+error and, with it, the unjustified choice of the constant.
+\item The rheological operating point of an unresolved bed is not a modelling
+parameter: \eqref{eq:gamma-identity} fixes it from calibre, effective path length
+and pressure share, with the flow rate cancelling. This provides an a priori
+criterion for deciding whether a non-Newtonian closure can matter in a given bed.
+\item Applied to a coronary bed, that criterion predicts, and the simulations
+confirm, that shear thinning contributes only a few per cent at rest and that a
+hyperviscous constitutive state is weakly distinguishable from a healthy one. This
+is reported as a result, not as a shortcoming.
+\item The states do separate once the operating point is displaced, and elevated
+venous drainage pressure is a physiologically grounded, geometry-preserving way to
+do so.
+\item The closure admits an exact derivative and a universal tabulation, which is
+what makes it usable as a boundary condition inside a three-dimensional solver
+without inner nonlinear solves.
+\end{enumerate}
+
+Limitations to state plainly rather than defend: the equilibrium assumption of the
+purely viscous class fails for transients shorter than the aggregation time;
+Fåhræus--Lindqvist effects are not contained in a bulk constitutive law applied to
+vessels of tens of micrometres; a single effective segment per limb is a coarse
+representation of a branching tree, as the transit-time check quantifies; and the
+absence of vasomotor tone means the results describe a fixed-tone preparation, so
+they should be compared against maximally dilated rather than autoregulated
+measurements.
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\appendix 
+\section{Analytical evaluation of the flow-rate integral for the Cross and
+Carreau--Yasuda models}\label{appA}
+
+\subsection{Cross model}
+
+Consider the flow-rate integral associated with the Cross model defined in
+\eqref{Int:Cross}. Writing the integrand of the wall integral as
+$\dot\gamma^{3}\,\mu(\dot\gamma)^{2}\,\mathrm d\tau/\mathrm d\dot\gamma$ and
+expanding it algebraically, it decomposes into the sum of seven independent
+contributions,
+\begin{align}
+I_1 &= \int_0^{\dot{\gamma}_w} \mu_{\infty}^3 \dot{\gamma}^3 \, d\dot{\gamma}
+      = \frac{\mu_{\infty}^3 \dot{\gamma}_w^4}{4} \\[6pt]
+I_2 &= 3\mu_{\infty}^2 \delta \int_0^{\dot{\gamma}_w}
+      \frac{\dot{\gamma}^3}{1+(\lambda \dot{\gamma})^n} \, d\dot{\gamma} \\[6pt]
+I_3 &= 3\mu_{\infty} \delta^2 \int_0^{\dot{\gamma}_w}
+      \frac{\dot{\gamma}^3}{(1+(\lambda \dot{\gamma})^n)^2} \, d\dot{\gamma} \\[6pt]
+I_4 &= -\mu_{\infty}^2 n \delta \int_0^{\dot{\gamma}_w}
+      \frac{(\lambda \dot{\gamma})^{n}\dot{\gamma}^{3}}{(1+(\lambda \dot{\gamma})^n)^2}
+      \, d\dot{\gamma} \\[6pt]
+I_5 &= \delta^3 \int_0^{\dot{\gamma}_w}
+      \frac{\dot{\gamma}^3}{(1+(\lambda \dot{\gamma})^n)^3} \, d\dot{\gamma} \\[6pt]
+I_6 &= -2\mu_{\infty} \delta^2 n \int_0^{\dot{\gamma}_w}
+      \frac{(\lambda \dot{\gamma})^{n}\dot{\gamma}^{3}}{(1+(\lambda \dot{\gamma})^n)^3}
+      \, d\dot{\gamma} \\[6pt]
+I_7 &= -n \delta^3 \int_0^{\dot{\gamma}_w}
+      \frac{(\lambda \dot{\gamma})^{n}\dot{\gamma}^{3}}{(1+(\lambda \dot{\gamma})^n)^4}
+      \, d\dot{\gamma}
+\end{align}
+where $\delta=\mu_0-\mu_\infty$. The integrals $I_1$, $I_2$, $I_3$ and $I_5$
+share a common structure and admit a closed form in terms of the Gauss
+hypergeometric function,
+\begin{equation}
+J_k^{\mathrm{Cr}} = \int_0^{\dot{\gamma}_w}
+\frac{\dot{\gamma}^3}{\bigl(1+(\lambda \dot{\gamma})^n\bigr)^k} \, d\dot{\gamma}
+= \frac{\dot{\gamma}_w^4}{4}\,
+{}_2F_1\!\left(k, \tfrac{4}{n}; \tfrac{4}{n}+1; -(\lambda \dot{\gamma}_w)^n\right).
+\end{equation}
+The integrals $I_4$, $I_6$ and $I_7$ carry an additional factor
+$(\lambda\dot\gamma)^n$ in the numerator and can be grouped into a second family,
+\begin{align}
+K_k^{\mathrm{Cr}}
+&= \int_0^{\dot{\gamma}_w}
+   \frac{\dot{\gamma}^3 (\lambda \dot{\gamma})^n}{(1+(\lambda \dot{\gamma})^n)^k}
+   \, d\dot{\gamma} \nonumber\\
+&= \int_0^{\dot{\gamma}_w}
+   \frac{\dot{\gamma}^3}{(1+(\lambda \dot{\gamma})^n)^{k-1}} \, d\dot{\gamma}
+ - \int_0^{\dot{\gamma}_w}
+   \frac{\dot{\gamma}^3}{(1+(\lambda \dot{\gamma})^n)^k} \, d\dot{\gamma}.
+\end{align}
+Using the algebraic identity
+\[
+\frac{(\lambda \dot{\gamma})^n}{\bigl(1+(\lambda \dot{\gamma})^n\bigr)^k}
+= \frac{1}{\bigl(1+(\lambda \dot{\gamma})^n\bigr)^{k-1}}
+- \frac{1}{\bigl(1+(\lambda \dot{\gamma})^n\bigr)^k},
+\]
+one obtains the recurrence relation
+\begin{equation}
+K_k^{\mathrm{Cr}} = J_{k-1}^{\mathrm{Cr}} - J_k^{\mathrm{Cr}}.
+\end{equation}
+Finally, rewriting every contribution in terms of the family $J_k^{\mathrm{Cr}}$,
+the total flow-rate integral of the Cross model can be expressed as
+\begin{align}
+I_{Cr} &= \mu_{\infty}^3 J_0^{\mathrm{Cr}}
+        + \bigl[\mu_{\infty}^2 \delta (3 - n)\bigr] J_1^{\mathrm{Cr}}
+        + \bigl[\mu_{\infty} \delta^2 (3 - 2n) + \mu_{\infty}^2 n \delta\bigr]
+          J_2^{\mathrm{Cr}} \nonumber\\
+       &\quad + \bigl[\delta^3 (1 - n) + 2\mu_{\infty} \delta^2 n\bigr]
+          J_3^{\mathrm{Cr}} + n \delta^3 \, J_4^{\mathrm{Cr}}.
+\end{align}
+
+\subsection{Carreau--Yasuda model}
+
+For the Carreau--Yasuda model the evaluation follows the same strategy. The wall
+integral is $I_{\mathrm{CY}}=\int_0^{\dot\gamma_w}\dot\gamma^{3}\,
+\mu(\dot\gamma)^{2}\,(\mathrm d\tau/\mathrm d\dot\gamma)\,\mathrm d\dot\gamma$, and
+with $\alpha = 1+(\lambda\dot{\gamma})^a$ and $\delta=\mu_0-\mu_\infty$ the
+derivative of the shear stress $\tau=\mu(\dot\gamma)\dot\gamma$ is
+\begin{equation}
+\frac{\mathrm d\tau}{\mathrm d\dot\gamma}
+= \mu_\infty + \delta\,\alpha^{\frac{n-1}{a}}
++ \delta(n-1)(\lambda\dot\gamma)^a\,\alpha^{\frac{n-1-a}{a}}.
+\label{eq:dtau_CY}
+\end{equation}
+Starting from the expression defined in \eqref{eq:I_CY_start}, this gives
+\begin{align}
+I_{\mathrm{CY}}
+=&
+\int_{0}^{\dot{\gamma}_w}
+\dot{\gamma}^3
+\left[\mu_{\infty}+\delta\,\alpha^{\frac{n-1}{a}}\right]^2 \cdot \nonumber\\
+& \left[\mu_{\infty}
++\delta\,\alpha^{\frac{n-1}{a}}
++\delta(n-1)(\lambda \dot{\gamma})^a\,\alpha^{\frac{n-1-a}{a}} \right]\,\mathrm{d}
+\dot{\gamma}.
+\end{align}
+Expanding the integrand algebraically yields
+\begin{align}
+I_{\mathrm{CY}}
+= &\int \dot{\gamma}^3 \Bigg[ \mu_\infty^3
+  + 3\mu_\infty^2 \delta\, \alpha^{\frac{n-1}{a}}
+  + \mu_\infty^2 \delta (n-1)(\lambda \dot{\gamma})^a\, \alpha^{\frac{n-1}{a}-1}
+  + 3\mu_\infty \delta^2\, \alpha^{\frac{2(n-1)}{a}} \nonumber\\
+& + 2\mu_\infty \delta^2 (n-1)\, \alpha^{\frac{2(n-1)}{a}-1} (\lambda \dot{\gamma})^a
+  + \delta^3\, \alpha^{\frac{3(n-1)}{a}}
+  + \delta^3(n-1)\, \alpha^{\frac{3(n-1)}{a}-1} (\lambda \dot{\gamma})^a \Bigg]
+  \,d\dot{\gamma},
+\end{align}
+which decomposes into seven independent integrals,
+\begin{align}
+I_1 &= \mu_\infty^3 \int_0^{\dot{\gamma}_w} \dot{\gamma}^3\, d\dot{\gamma} \\
+I_2 &= 3\mu_\infty^2 \delta \int_0^{\dot{\gamma}_w}
+       \dot{\gamma}^3 \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^{\frac{n-1}{a}}
+       d\dot{\gamma}\\
+I_3 &= \mu_\infty^2 \delta (n-1) \int_0^{\dot{\gamma}_w}
+       \dot{\gamma}^3 (\lambda\dot{\gamma})^a
+       \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^{\frac{n-1-a}{a}}
+       d\dot{\gamma}\\
+I_4 &= 3\mu_\infty \delta^2 \int_0^{\dot{\gamma}_w}
+       \dot{\gamma}^3 \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^{\frac{2n-2}{a}}
+       d\dot{\gamma}\\
+I_5 &= 2\mu_\infty \delta^2 (n-1) \int_0^{\dot{\gamma}_w}
+       \dot{\gamma}^3 (\lambda\dot{\gamma})^a
+       \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^{\frac{2n-2-a}{a}}
+       d\dot{\gamma}\\
+I_6 &= \delta^3 \int_0^{\dot{\gamma}_w}
+       \dot{\gamma}^3 \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^{\frac{3n-3}{a}}
+       d\dot{\gamma}\\
+I_7 &= \delta^3 (n-1) \int_0^{\dot{\gamma}_w}
+       \dot{\gamma}^3 (\lambda\dot{\gamma})^a
+       \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^{\frac{3n-3-a}{a}}
+       d\dot{\gamma}
+\end{align}
+As in the Cross case, the identity
+$(\lambda\dot{\gamma})^a = \bigl(1+(\lambda\dot{\gamma})^a\bigr) - 1$ allows every
+integral to be written in terms of a single fundamental family,
+\begin{equation}
+J_k^{\mathrm{CY}} = \int_0^{\dot{\gamma}_w}
+\dot{\gamma}^3 \bigl(1 + (\lambda \dot{\gamma})^a\bigr)^k\, d\dot{\gamma},
+\end{equation}
+which admits the closed form
+\begin{equation}
+J_k^{\mathrm{CY}} = \frac{\dot{\gamma}_w^4}{4}\,
+{}_2F_1\!\left(-k, \tfrac{4}{a}; 1 + \tfrac{4}{a}; -(\lambda \dot{\gamma}_w)^a\right).
+\end{equation}
+Finally, expressing all contributions in terms of $J_k^{\mathrm{CY}}$ (with the
+shorthand $k=(n-1)/a$), the flow-rate integral of the Carreau--Yasuda model reads
+\begin{align}
+I_{\mathrm{CY}}= &\mu_\infty^3 J_0^{\mathrm{CY}}
+   + \mu_\infty^2 \delta (n+2) J_k^{\mathrm{CY}}
+   - \mu_\infty^2 \delta (n-1) J_{k-1}^{\mathrm{CY}}
+   + \mu_\infty \delta^2 (2n+1) J_{2k}^{\mathrm{CY}} \nonumber\\
+   & - 2\mu_\infty \delta^2 (n-1) J_{2k-1}^{\mathrm{CY}}
+   + \delta^3 n J_{3k}^{\mathrm{CY}}
+   - \delta^3 (n-1) J_{3k-1}^{\mathrm{CY}}.
+\end{align}
+
+\section{Parameters and changes of variable used in the flow-rate integral of the
+Quemada model}\label{appB}
+
+For a flow governed by the Quemada rheology, the flow rate is expressed through a
+function $F(\alpha,q)$. The dimensionless parameters follow from the changes of
+variable
+\begin{equation}
+\xi = \frac{r}{R};\qquad
+\alpha = \frac{\sqrt{\tau_0} + \sqrt{\mu_\infty \lambda}}{\sqrt{\tau_w}}, \qquad
+q = \frac{\sqrt{\tau_0} - \sqrt{\mu_\infty \lambda}}{\sqrt{\tau_0} + \sqrt{\mu_\infty \lambda}},
+\end{equation}
+where the parameters $\tau_0$, $\mu_\infty$ and $\lambda$ are defined so as to
+express the Quemada model in terms of stresses. Denoting the haematocrit
+by~$\varphi$,
+\begin{align}
+\tau_0 &= \mu_p \gamma_c\,
+  \frac{\bigl[\tfrac{1}{2}\varphi(k_0 - k_\infty)\bigr]^2}
+       {\bigl(1 - \tfrac{1}{2} k_\infty \varphi\bigr)^4},\\[4pt]
+\mu_\infty &= \frac{\mu_p}{\bigl(1 - \tfrac{1}{2} k_\infty \varphi\bigr)^2},\\[4pt]
+\lambda &= \gamma_c
+  \left[\frac{1 - \tfrac{1}{2} k_0 \varphi}{1 - \tfrac{1}{2} k_\infty \varphi}\right]^2 .
+\end{align}
+The function $F(\alpha,q)$ is a polynomial description in the variable $q$, whose
+coefficients are
+\begin{align}
+P_1 &= -\tfrac{1}{7}(q+8), \\
+P_2 &= -\tfrac{1}{42}(13q^2 - 8q - 7), \\
+P_3 &= -\tfrac{1}{210}(143q^3 - 88q^2 - 113q + 48), \\
+P_4 &= -\tfrac{1}{840}(1287q^4 - 792q^3 - 1342q^2 + 632q + 175), \\
+P_5 &= -\tfrac{1}{840}(3003q^5 - 1848q^4 - 3894q^3 + 1944q^2 + 1011q - 256), \\
+P_6 &= -\tfrac{1}{1680}(15015q^6 - 9240q^5 - 23331q^4 + 12096q^3 + 9081q^2
+       - 3179q - 525), \\
+P_7 &= -\tfrac{1}{1680}(45045q^7 - 27720q^6 - 82005q^5 + 43680q^4 + 42819q^3
+       - 17304q^2 \nonumber\\
+    &\qquad\quad - 5619q + 1024), \\
+P_8 &= -\tfrac{1}{16}(1-q)^2(1+q)(429q^5 + 165q^4 - 330q^3 - 90q^2 + 45q + 5).
+\end{align}
+\section{}\label{appC}
+
+
+\bibliographystyle{jfm}
+\bibliography{jfm}
+%Use of the above commands will create a bibliography using the .bib file. Shown below is a bibliography built from individual items.
+
+%\bibliographystyle{jfm}
+%\bibliography{jfm2esam}
+
+%\begin{thebibliography}{99}
+
+% \expandafter\ifx\csname natexlab\endcsname\relax
+% \def\natexlab#1{#1}\fi
+% \expandafter\ifx\csname selectlanguage\endcsname\relax
+% \def\selectlanguage#1{\relax}\fi
+
+% \bibitem[Batchelor (1971)]{Batchelor59}
+% {\sc Batchelor, G.K.} 1971 {Small-scale variation of convected quantities like temperature in turbulent fluid part1, general discussion and the case of small conductivity}, {\it J. Fluid Mech.}, {\bf 5}, pp. 3-113-133.
+
+% \bibitem [Bouguet (2008)]{Bouguet01}
+% {\sc Bouguet, J.-Y} 2008 Camera Calibration Toolbox for Matlab {\url{http://www.vision.caltech.edu/bouguetj/calib_doc/}}.
+
+%  \bibitem[Briukhanovetal et al (1967)] {Briukhanovetal1967}
+% {\sc Briukhanov, A. V.,   Grigorian, S. S., Miagkov,  S. M., Plam, M. Y.,   I. E. Shurova, I. E.,   Eglit, M. E. and Yakimov, Y. L.} 1967
+% {On some new approaches to the dynamics of snow avalanches},
+% {\it Physics of Snow and Ice,  Proceedings of the International Conference on Low Temperature Science}
+% {Vol 1} pp. 1221--1241 {Institute of Low Temperature Science, Hokkaido University, Sapporo, Hokkaido, Japan}.
+
+% \bibitem[Brownell (2004)]{Brownell04}
+%  {\sc Brownell,  C.J.  and Su,  L.K.} 2004  {Planar measurements of differential diffusion in turbulent jets}, {\it AIAA Paper},  pp. 2004-2335.
+
+% \bibitem[Brownell and Su (2007)] {Brownell07}
+%   {\sc Brownell, C.J. and  Su, L.K.} 2007 {Scale relations and spatial spectra in a differentially diffusing jet}, {\it AIAA Paper}, pp 2007-1314.
+
+% \bibitem [Dennis (1985)] {Dennis85}
+%  {\sc  Dennis, S.C.R.} 1985 {Compact explicit finite difference approximations to the Navier--Stokes equation},  { In \it Ninth Intl Conf. on Numerical Methods in Fluid Dynamics},  {ed Soubbaramayer and J.P. Boujot},  {Vol 218}, {\it Lecture Notes in Physics}, pp. 23-51. Springer.
+
+% \bibitem [Edwards et al. (2017)]{EdwardsVirouletKokelaarGray2017}
+% {\sc Edwards, A. N., Viroulet, S., Kokelaar, B. P. and Gray, J. M. N. T.} 2017 Formation of levees, troughs and elevated channels by avalanches on erodible slopes {\it J. Fluid Mech.}, {\bf 823}, pp. 278-315.
+
+% \bibitem[Hwang et al (1970)] {Hwang70}
+%  {\sc Hwang,  L.-S.  and  Tuck, E.O.} 1970 On the oscillations of harbours of arbitrary shape {\it J.~Fluid Mech.}, {\bf42}, pp 447-464.
+
+% \bibitem[Josep and Saut (1990)] {JosephSaut1990}
+%  {\sc Joseph, Daniel D. and Saut, Jean Claude} 1990 Short-wave instabilities and ill-posed initial-value problems {\it Theoretical and Computational Fluid Dynamics}, {\bf 1},  pp.191--227,  {\url{http://dx.doi.org/10.1007/BF00418002}}.
+
+% \bibitem[Worster (1992)] {Worster92}
+% { \sc  Worster, M.G.} 1992 The dynamics of mushy layers {\it Interactive dynamics of convection and solidification},
+% {(ed. S.H. Davis and H.E. Huppert and W. Muller and M.G. Worster)}, pp. 113--138 {Kluwer}.
+
+% \bibitem[Koch(1983)] {Koch83}
+% {\sc Koch, W.} 1983 Resonant acoustic frequencies of flat plate cascades {\it J.~Sound Vib.}, {\bf 88}, pp. 233-242.
+
+% \bibitem[Lee(1971)] {Lee71}
+% {\sc Lee,  J.-J.}  1971 Wave-induced oscillations in harbours of arbitrary geometry {\it J.~Fluid Mech.}, {\bf 45}, pp. 375-394.
+
+% \bibitem[Linton and  Evans (1992)] {Linton92}
+%  {\sc  Linton, C.M. and  Evans, D.V.} 1992 The radiation and scattering of surface waves by a vertical circular cylinder in a channel {\it Phil.\ Trans.\ R. Soc.\ Lond.}, {\bf 338}, pp. 325-357.
+
+% \bibitem [Martin(1980] {Martin80}
+%  {\sc  Martin, P.A.} 1980 On the null-field equations for the exterior problems of acoustics {\it Q.~J. Mech.\ Appl.\ Maths},{\bf 33}, pp. 385--396.
+
+% \bibitem [Rogallo(1981)] {Rogallo81}
+%  {\sc Rogallo,  R.S.} 1981 Numerical experiments in homogeneous turbulence  { {\it Tech. Rep.} 81835}  {NASA Tech.\ Mem}.
+
+% \bibitem[Ursell(1950)] {Ursell50}
+% {\sc  Ursell, F.} 1950 Surface waves on deep water in the presence of a submerged cylinder i {\it Proc.\ Camb.\ Phil.\ Soc.}, {\bf 46}, pp.141--152.
+
+% \bibitem[Wijngaarden (1968)]{Wijngaarden68}
+% {\sc van Wijngaarden, L.} 1968 On the oscillations Near and at resonance in open pipes {\it J.~Engng Maths},{\bf 2}, pp. 225--240.
+
+% \bibitem[Miller (1991)]{Miller91}
+% { \sc  Miller, P.L.} 1991 Mixing in high Schmidt number turbulent jets {school {PhD thesis}} {California Institute of Technology}.
+
+% \end{thebibliography}
+
+%% End of file `jfm2esam.bib'.
+
+
+\end{document}
