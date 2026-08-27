@@ -68,7 +68,7 @@
   | @ref Rodin::Variational "Variational" | Finite element spaces (P0, P1, H1), trial/test functions, forms, and problem composition |
   | @ref Rodin::Assembly "Assembly" | Low-level assembly of stiffness matrices and load vectors |
   | @ref Rodin::Solver "Solver" | Direct solvers (SparseLU, UMFPack) and iterative solvers (CG, GMRES) |
-  | @ref Rodin::QF "QF" | Quadrature formulas (Gauss–Legendre, Grundmann–Möller) |
+  | @ref Rodin::QF "QF" | Published and arbitrary-order quadrature formulas on reference polytopes |
   | @ref Rodin::IO "IO" | I/O in MFEM, MEDIT, HDF5, and XDMF (ParaView) formats |
   | @ref Rodin::FormLanguage "FormLanguage" | Expression template infrastructure for the variational form language |
   | @ref Rodin::Math "Math" | Mathematical constants, dense vector/matrix types, common functions |

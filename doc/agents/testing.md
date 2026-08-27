@@ -10,9 +10,17 @@ tests/installation/                Install-tree consumption checks
 src/Rodin/Test/                    Library-side helpers (Random functions, Utility)
 ```
 
-- ctest is **not** wired up (`ctest -N` → 0 tests). Run the gtest
-  executables directly: `build/tests/unit/Rodin/<Module>/
-  Rodin<Module><Component>Test` (`--gtest_filter`, `--gtest_list_tests`).
+- ctest **is** wired up: suites register through `gtest_discover_tests` with
+  the labels `unit`, `manufactured`, `slow`, `distributed` and `petsc` — the
+  same selectors CI uses. Scope a run to what changed:
+  `ctest --test-dir build/tests -L unit -LE "slow|distributed"
+  --output-on-failure`, or `-R <pattern>` for one suite. Running a gtest
+  executable directly still works when you want its raw output
+  (`--gtest_filter`, `--gtest_list_tests`).
+- Build type is part of correctness here: unit tests may run `Debug`
+  (assertions, sanitizers), but manufactured tests solve PDEs and verify
+  convergence rates, so they run `Release`/`RelWithDebInfo` — `Debug` is
+  impractically slow.
 - Manufactured tests are organized by space and cross-space combination
   (`H1/`, `P0/`, `P1/`, `P0_P1/`, `P1_H1/`, `PreassembledMixed/`,
   `Assembly/`, `Solver/`, `Models/`, `MPI/`, `PETSc/`) — the place for

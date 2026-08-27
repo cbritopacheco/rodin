@@ -50,18 +50,22 @@ prefer incremental builds of the target you need
 
 ## Test
 
-Tests are GoogleTest executables (ctest is NOT wired up — `ctest -N` shows 0
-tests). Run the binary for the module you touched:
+Tests are GoogleTest executables registered with ctest via
+`gtest_discover_tests`. Scope the run to what you changed, using the same
+labels CI uses (`unit`, `manufactured`, `slow`, `distributed`, `petsc`):
 
 ```sh
-build/tests/unit/Rodin/Adaptation/RodinAdaptationTargetMatrixOptimizationTest
-build/tests/unit/Rodin/Variational/RodinVariationalH1Test
+ctest --test-dir build/tests -L unit -LE "slow|distributed" --output-on-failure
+ctest --test-dir build/tests -R <pattern> --output-on-failure
 ```
 
-Naming: `build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`.
-Suites: `tests/unit` (fast), `tests/manufactured` (convergence/regression,
-includes PETSc assembly regressions), `tests/benchmarks` (Google Benchmark,
-target `RodinBenchmarks`).
+Individual binaries still work when you want one suite's output directly:
+`build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`.
+
+Suites: `tests/unit` (fast; may be built `Debug`), `tests/manufactured`
+(convergence/regression, includes PETSc assembly regressions — build
+`Release`/`RelWithDebInfo`, `Debug` is impractically slow),
+`tests/benchmarks` (Google Benchmark, target `RodinBenchmarks`).
 
 A change is not done until the affected unit test executable passes and, for
 assembly/solver changes, the relevant manufactured tests pass too.
@@ -91,6 +95,11 @@ assembly/solver changes, the relevant manufactured tests pass too.
    fitting is always a smooth penalty term (see `doc/agents/conventions.md`).
 5. **Internal variables are first-class DOFs** in Solid — no per-quadrature
    Schur condensation (see `doc/agents/conventions.md`).
+6. **Explain every anomaly.** An unexplained measurement is a finding, not a
+   footnote; explore it to a root cause and write the cause down before
+   calling the work done. Anomalies are usually about the instrument rather
+   than the subject, so believing one costs more than chasing it (see
+   `doc/agents/conventions.md`).
 
 ## Housekeeping
 

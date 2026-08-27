@@ -46,7 +46,7 @@ Modules stack strictly; lower layers never include higher ones:
 
 Sized by header count so you know where the mass is: Variational 127,
 Geometry 34, PETSc 32, MPI 24, Solid 23, Utility 22, Solver 22, Alert 20,
-Math 17, Heart 14, Adaptation 13, Serialization/IO 11 each, MMG 10, QF 7,
+Math 17, Heart 14, Adaptation 13, QF 12, Serialization/IO 11 each, MMG 10,
 Assembly 7, FormLanguage 6, Distance 6, Test 6.
 
 - **Root headers** — `Types.h` (house aliases), `Copyable.h`/`Moveable.h`
@@ -71,9 +71,11 @@ Assembly 7, FormLanguage 6, Distance 6, Test 6.
   (`skin`/`trim`/`keep`/`trace`, `UniformGrid`), Builder, partitioners
   (Greedy/BalancedCompact + Sharder/Shard), `MinSTCut` (s-t cut
   classifier). → geometry.md
-- **QF/** — quadrature on reference polytopes: GaussLegendre, GaussLobatto,
-  GrundmannMoller (simplex), Centroid; `PolytopeQuadratureFormula`
-  dispatcher. → geometry.md
+- **QF/** — positive quadrature on reference polytopes: published
+  Xiao--Gimbutas and Witherden--Vincent tables, Gauss--Legendre/Jacobi
+  conical products, tensor products, and `PolytopeQuadratureFormula`
+  dispatch/caching. Grundmann--Möller remains explicitly selectable but is
+  not a default. → quadrature.md
 - **FormLanguage/** — `Base` (clone + identity root), `Traits` (open
   type-computation), `List` (polymorphic node container). → variational.md
 - **Variational/** — the language: ~60 operator headers (arithmetic,

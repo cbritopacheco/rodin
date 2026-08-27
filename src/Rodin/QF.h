@@ -25,6 +25,9 @@
  * @see Rodin::QF::GrundmannMoller
  * @see Rodin::QF::Centroid
  * @see Rodin::QF::PolytopeQuadratureFormula
+ * @see Rodin::QF::XiaoGimbutas
+ * @see Rodin::QF::WitherdenVincent
+ * @see Rodin::QF::TensorProduct
  * @see Rodin::QF::GaussLobatto (header-only, include QF/GaussLobato.h separately)
  */
 
@@ -34,5 +37,8 @@
 #include "QF/GaussLobatto.h"
 #include "QF/GrundmannMoller.h"
 #include "QF/PolytopeQuadratureFormula.h"
+#include "QF/TensorProduct.h"
+#include "QF/WitherdenVincent.h"
+#include "QF/XiaoGimbutas.h"
 
 #endif

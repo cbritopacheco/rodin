@@ -94,10 +94,17 @@ projection, write the mass-matrix problem
 Element integrals are approximated by rules on $K$:
 $\int_K f \approx \sum_q w_q f(\hat x_q)$, chosen by (geometry, order):
 
-- `QF::GaussLegendre` — exact to order $2n-1$ on tensor domains;
+- `QF::XiaoGimbutas` — positive interior simplex tables;
+- `QF::WitherdenVincent` — fully symmetric positive interior tables;
+- `QF::GaussLegendre` — one-dimensional Gaussian factors and positive
+  Gauss--Jacobi conical products;
+- `QF::TensorProduct` — product cells, including triangle times segment;
 - `QF::GaussLobatto` — includes endpoints (useful for lumping/collocation);
-- `QF::GrundmannMoller` — arbitrary-order simplex rules;
+- `QF::GrundmannMoller` — explicitly selectable signed simplex rules;
 - `QF::Centroid` — the 1-point rule (exact for affine × constant).
+
+The exact family ranges and dispatcher fallbacks are recorded in
+[quadrature.md](../quadrature.md).
 
 Correctness rule: the rule must integrate the *integrand as mapped* —
 polynomial degree of trial × test × coefficient **plus** the degree of

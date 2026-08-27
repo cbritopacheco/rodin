@@ -70,12 +70,12 @@ compare coordinate/key sets in tests.
 
 ## Quadrature (QF/)
 
-Formulas are defined on reference polytopes and selected by
-(polytope type, order): `QF::GaussLegendre`, `QF::GaussLobatto`,
-`QF::GrundmannMoller` (arbitrary-order simplex), `QF::Centroid` (1-point).
-`QF::PolytopeQuadratureFormula` is the runtime dispatcher. Variational
-integrators pick an order automatically but accept an override; order-4 is
-the house choice for validity/diagnostic sampling of curved cells.
+Formulas are defined on reference polytopes and selected by polytope type and
+polynomial degree. `QF::PolytopeQuadratureFormula` dispatches to published
+positive-interior tables where available and positive Gaussian product rules
+otherwise. Variational integrators pick an order automatically but accept an
+override; order 4 is the house choice for validity and diagnostic sampling of
+curved cells. See quadrature.md for the exact ranges and fallback formulas.
 
 ## Partitioning and distribution
 

@@ -43,6 +43,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
+#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "P1.h"
@@ -87,6 +88,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
 
@@ -264,6 +268,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType =
         P1<Range, Mesh>;
@@ -496,6 +503,9 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -582,9 +592,15 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(
           polytope.getDimension(), polytope.getIndex());
 
-        // P1 × P1 product is degree 2 — need at least order-2 quadrature.
+        // The integrand knows its own degree, coefficient included; the sum of
+        // the two shape function orders is only the degree of the product of
+        // the bases, and using it alone under-integrates any form carrying a
+        // non-constant coefficient. The generic handler asks the integrand
+        // first and this must agree with it, an optimized path being obliged
+        // to compute the same thing faster, not something else.
         const size_t order =
-          this->getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            trialfe.getOrder() + testfe.getOrder()));
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
 
         if (recompute)
@@ -829,6 +845,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -933,7 +952,8 @@ namespace Rodin::Variational
         const auto& testfe  = testfes.getFiniteElement(d, idx);
 
         const size_t order =
-          this->getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            trialfe.getOrder() + testfe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1151,6 +1171,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -1247,8 +1270,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1263,16 +1287,23 @@ namespace Rodin::Variational
 
           const size_t n = trialfe.getCount();
 
-          m_refGrad.resize(n);
-
-          const auto& rc = m_qf->getPoint(0);
-          for (size_t local = 0; local < n; ++local)
+          // Cached per quadrature point, not at the first one: reference
+          // gradients are constant only on a simplex, so freezing them at one
+          // point is exact only there, or when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
+          m_refGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            auto& g = m_refGrad[local];
-            g.resize(d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t j = 0; j < d; ++j)
-              g(j) = basis.template getDerivative<1>(j)(rc);
+            const auto& rc = m_qf->getPoint(qp);
+            m_refGrad[qp].resize(n);
+            for (size_t local = 0; local < n; ++local)
+            {
+              auto& g = m_refGrad[qp][local];
+              g.resize(d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t j = 0; j < d; ++j)
+                g(j) = basis.template getDerivative<1>(j)(rc);
+            }
           }
 
           m_matrix.resize(n, n);
@@ -1281,7 +1312,7 @@ namespace Rodin::Variational
         assert(m_qf);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
-        const size_t n = m_refGrad.size();
+        const size_t n = m_refGrad.empty() ? 0 : m_refGrad.front().size();
 
         m_matrix.setZero();
 
@@ -1296,12 +1327,13 @@ namespace Rodin::Variational
           const auto& Jinv = p.getJacobianInverse();
           const auto G = Jinv * Jinv.transpose();
 
+          const auto& refGrad = m_refGrad[qp];
           for (size_t i = 0; i < n; ++i)
           {
-            const auto Ggi = G * m_refGrad[i];
-            m_matrix(i, i) += wdet * Math::dot(m_refGrad[i], Ggi);
+            const auto Ggi = G * refGrad[i];
+            m_matrix(i, i) += wdet * Math::dot(refGrad[i], Ggi);
             for (size_t j = 0; j < i; ++j)
-              m_matrix(i, j) += wdet * Math::dot(m_refGrad[j], Ggi);
+              m_matrix(i, j) += wdet * Math::dot(refGrad[j], Ggi);
           }
         }
 
@@ -1331,7 +1363,8 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_refGrad;
+      /// @brief Reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
       Math::Matrix<ScalarType> m_matrix;
   };
 
@@ -1402,6 +1435,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -1512,8 +1548,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1526,36 +1563,45 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: reference
+          // gradients are constant only on a simplex, so freezing them at one
+          // point is exact only there, or when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
+          m_trialRefGrad.assign(nqp, {});
+          m_testRefGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
 
-          m_trialRefGrad.resize(trialfe.getCount());
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
-          {
-            auto& g = m_trialRefGrad[local];
-            g.resize(d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t j = 0; j < d; ++j)
-              g(j) = basis.template getDerivative<1>(j)(rc);
-          }
-
-          if (trialfes == testfes)
-          {
-            m_testRefGrad = m_trialRefGrad;
-          }
-          else
-          {
-            m_testRefGrad.resize(testfe.getCount());
-            for (size_t local = 0; local < testfe.getCount(); ++local)
+            m_trialRefGrad[qp].resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
             {
-              auto& g = m_testRefGrad[local];
+              auto& g = m_trialRefGrad[qp][local];
               g.resize(d);
-              const auto& basis = testfe.getBasis(local);
+              const auto& basis = trialfe.getBasis(local);
               for (size_t j = 0; j < d; ++j)
                 g(j) = basis.template getDerivative<1>(j)(rc);
             }
+
+            if (trialfes == testfes)
+            {
+              m_testRefGrad[qp] = m_trialRefGrad[qp];
+            }
+            else
+            {
+              m_testRefGrad[qp].resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& g = m_testRefGrad[qp][local];
+                g.resize(d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t j = 0; j < d; ++j)
+                  g(j) = basis.template getDerivative<1>(j)(rc);
+              }
+            }
           }
 
-          m_matrix.resize(m_testRefGrad.size(), m_trialRefGrad.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -1574,6 +1620,8 @@ namespace Rodin::Variational
 
           const auto& Jinv = p.getJacobianInverse();
           const auto G = Jinv * Jinv.transpose();
+          const auto& trialRefGrad = m_trialRefGrad[qp];
+          const auto& testRefGrad = m_testRefGrad[qp];
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -1581,25 +1629,25 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefGrad.size();
+              const size_t n = trialRefGrad.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto Ggi = G * m_trialRefGrad[i];
-                m_matrix(i, i) += wdet * csv * Math::dot(m_trialRefGrad[i], Ggi);
+                const auto Ggi = G * trialRefGrad[i];
+                m_matrix(i, i) += wdet * csv * Math::dot(trialRefGrad[i], Ggi);
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * csv * Math::dot(m_trialRefGrad[j], Ggi);
+                  m_matrix(i, j) += wdet * csv * Math::dot(trialRefGrad[j], Ggi);
               }
             }
             else
             {
-              const size_t ntr = m_trialRefGrad.size();
-              const size_t nte = m_testRefGrad.size();
+              const size_t ntr = trialRefGrad.size();
+              const size_t nte = testRefGrad.size();
 
               for (size_t te = 0; te < nte; ++te)
               {
-                const auto Ggte = G * m_testRefGrad[te];
+                const auto Ggte = G * testRefGrad[te];
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * csv * Math::dot(m_trialRefGrad[tr], Ggte);
+                  m_matrix(te, tr) += wdet * csv * Math::dot(trialRefGrad[tr], Ggte);
               }
             }
           }
@@ -1610,29 +1658,29 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefGrad.size();
+              const size_t n = trialRefGrad.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto AGgi = cmv * (G * m_trialRefGrad[i]);
-                m_matrix(i, i) += wdet * Math::dot(AGgi, m_trialRefGrad[i]);
+                const auto AGgi = cmv * (G * trialRefGrad[i]);
+                m_matrix(i, i) += wdet * Math::dot(AGgi, trialRefGrad[i]);
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(AGgi, m_trialRefGrad[j]);
+                  m_matrix(i, j) += wdet * Math::dot(AGgi, trialRefGrad[j]);
               }
 
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(
-                    cmv * (G * m_trialRefGrad[j]), m_trialRefGrad[i]);
+                  m_matrix(i, j) +=
+                    wdet * Math::dot(cmv * (G * trialRefGrad[j]), trialRefGrad[i]);
             }
             else
             {
-              const size_t ntr = m_trialRefGrad.size();
-              const size_t nte = m_testRefGrad.size();
+              const size_t ntr = trialRefGrad.size();
+              const size_t nte = testRefGrad.size();
 
               for (size_t te = 0; te < nte; ++te)
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * Math::dot(
-                    cmv * (G * m_trialRefGrad[tr]), m_testRefGrad[te]);
+                  m_matrix(te, tr) +=
+                    wdet * Math::dot(cmv * (G * trialRefGrad[tr]), testRefGrad[te]);
             }
           }
           else
@@ -1673,8 +1721,10 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_trialRefGrad;
-      std::vector<Math::SpatialVector<ScalarType>> m_testRefGrad;
+      /// @brief Trial reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_trialRefGrad;
+      /// @brief Test reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_testRefGrad;
 
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -1740,6 +1790,9 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
@@ -1828,7 +1881,8 @@ namespace Rodin::Variational
         const auto& testfe  = testfes.getFiniteElement(d, idx);
 
         const size_t order =
-          this->getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            trialfe.getOrder() + testfe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1969,6 +2023,9 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
@@ -2050,8 +2107,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2064,27 +2122,38 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: the basis
+          // values vary within every element, and the reference gradients
+          // vary within every element that is not a simplex. Freezing either
+          // at one point is exact only when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
 
-          m_testBasis.resize(testfe.getCount());
-          for (size_t i = 0; i < testfe.getCount(); ++i)
-            m_testBasis[i] = testfe.getBasis(i)(rc);
-
-          m_refGrad.resize(trialfe.getCount());
-          for (size_t i = 0; i < trialfe.getCount(); ++i)
+          m_testBasis.assign(nqp, {});
+          m_refGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            auto& refg = m_refGrad[i];
-            refg.resize(trialfes.getVectorDimension());
-            for (size_t comp = 0; comp < trialfes.getVectorDimension(); ++comp)
+            const auto& rc = m_qf->getPoint(qp);
+
+            m_testBasis[qp].resize(testfe.getCount());
+            for (size_t i = 0; i < testfe.getCount(); ++i)
+              m_testBasis[qp][i] = testfe.getBasis(i)(rc);
+
+            m_refGrad[qp].resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
             {
-              refg[comp].resize(d);
-              const auto& basis = trialfe.getBasis(i);
-              for (size_t j = 0; j < d; ++j)
-                refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              auto& refg = m_refGrad[qp][i];
+              refg.resize(trialfes.getVectorDimension());
+              for (size_t comp = 0; comp < trialfes.getVectorDimension(); ++comp)
+              {
+                refg[comp].resize(d);
+                const auto& basis = trialfe.getBasis(i);
+                for (size_t j = 0; j < d; ++j)
+                  refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              }
             }
           }
 
-          m_matrix.resize(m_testBasis.size(), m_refGrad.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -2101,22 +2170,24 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
-          const size_t vdim = m_refGrad.empty() ? 0 : m_refGrad.front().size();
+          const auto& refGrad = m_refGrad[qp];
+          const auto& testBasis = m_testBasis[qp];
+          const size_t vdim = refGrad.empty() ? 0 : refGrad.front().size();
 
-          for (size_t i = 0; i < m_refGrad.size(); ++i)
+          for (size_t i = 0; i < refGrad.size(); ++i)
           {
             ScalarType div = 0;
             for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
-                physComp += Jinv(comp, j) * m_refGrad[i][comp](j);
+                physComp += Jinv(comp, j) * refGrad[i][comp](j);
               div += physComp;
             }
 
-            const size_t nte = m_testBasis.size();
+            const size_t nte = testBasis.size();
             for (size_t te = 0; te < nte; ++te)
-              m_matrix(te, i) += wdet * m_testBasis[te] * div;
+              m_matrix(te, i) += wdet * testBasis[te] * div;
           }
         }
 
@@ -2142,8 +2213,10 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
-      std::vector<ScalarType> m_testBasis;
+      /// @brief Reference gradients per quadrature point, dof and component.
+      std::vector<std::vector<std::vector<Math::SpatialVector<ScalarType>>>> m_refGrad;
+      /// @brief Test basis values per quadrature point and dof.
+      std::vector<std::vector<ScalarType>> m_testBasis;
       Math::Matrix<ScalarType> m_matrix;
   };
 
@@ -2196,6 +2269,9 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Real, LHSMesh>;
@@ -2277,8 +2353,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2291,27 +2368,38 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: the basis
+          // values vary within every element, and the reference gradients
+          // vary within every element that is not a simplex. Freezing either
+          // at one point is exact only when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
 
-          m_trialBasis.resize(trialfe.getCount());
-          for (size_t i = 0; i < trialfe.getCount(); ++i)
-            m_trialBasis[i] = trialfe.getBasis(i)(rc);
-
-          m_refGrad.resize(testfe.getCount());
-          for (size_t i = 0; i < testfe.getCount(); ++i)
+          m_trialBasis.assign(nqp, {});
+          m_refGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            auto& refg = m_refGrad[i];
-            refg.resize(testfes.getVectorDimension());
-            for (size_t comp = 0; comp < testfes.getVectorDimension(); ++comp)
+            const auto& rc = m_qf->getPoint(qp);
+
+            m_trialBasis[qp].resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
+              m_trialBasis[qp][i] = trialfe.getBasis(i)(rc);
+
+            m_refGrad[qp].resize(testfe.getCount());
+            for (size_t i = 0; i < testfe.getCount(); ++i)
             {
-              refg[comp].resize(d);
-              const auto& basis = testfe.getBasis(i);
-              for (size_t j = 0; j < d; ++j)
-                refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              auto& refg = m_refGrad[qp][i];
+              refg.resize(testfes.getVectorDimension());
+              for (size_t comp = 0; comp < testfes.getVectorDimension(); ++comp)
+              {
+                refg[comp].resize(d);
+                const auto& basis = testfe.getBasis(i);
+                for (size_t j = 0; j < d; ++j)
+                  refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              }
             }
           }
 
-          m_matrix.resize(m_refGrad.size(), m_trialBasis.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -2328,22 +2416,24 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
-          const size_t vdim = m_refGrad.empty() ? 0 : m_refGrad.front().size();
+          const auto& refGrad = m_refGrad[qp];
+          const auto& trialBasis = m_trialBasis[qp];
+          const size_t vdim = refGrad.empty() ? 0 : refGrad.front().size();
 
-          for (size_t i = 0; i < m_refGrad.size(); ++i)
+          for (size_t i = 0; i < refGrad.size(); ++i)
           {
             ScalarType div = 0;
             for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
-                physComp += Jinv(comp, j) * m_refGrad[i][comp](j);
+                physComp += Jinv(comp, j) * refGrad[i][comp](j);
               div += physComp;
             }
 
-            const size_t ntr = m_trialBasis.size();
+            const size_t ntr = trialBasis.size();
             for (size_t tr = 0; tr < ntr; ++tr)
-              m_matrix(i, tr) += wdet * m_trialBasis[tr] * div;
+              m_matrix(i, tr) += wdet * trialBasis[tr] * div;
           }
         }
 
@@ -2369,8 +2459,10 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
-      std::vector<ScalarType> m_trialBasis;
+      /// @brief Reference gradients per quadrature point, dof and component.
+      std::vector<std::vector<std::vector<Math::SpatialVector<ScalarType>>>> m_refGrad;
+      /// @brief Trial basis values per quadrature point and dof.
+      std::vector<std::vector<ScalarType>> m_trialBasis;
       Math::Matrix<ScalarType> m_matrix;
   };
 
@@ -2433,6 +2525,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -2537,8 +2632,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2551,38 +2647,47 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: reference
+          // derivatives are constant only on a simplex, so freezing them at
+          // one point is exact only there, or for a single-point rule.
+          const size_t nqp = m_qf->getSize();
+          m_trialRefJac.assign(nqp, {});
+          m_testRefJac.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
 
-          m_trialRefJac.resize(trialfe.getCount());
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
-          {
-            auto& J = m_trialRefJac[local];
-            J.resize(trialfes.getVectorDimension(), d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
-              for (size_t j = 0; j < d; ++j)
-                J(i, j) = basis.template getDerivative<1>(i, j)(rc);
-          }
-
-          if (trialfes == testfes)
-          {
-            m_testRefJac = m_trialRefJac;
-          }
-          else
-          {
-            m_testRefJac.resize(testfe.getCount());
-            for (size_t local = 0; local < testfe.getCount(); ++local)
+            m_trialRefJac[qp].resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
             {
-              auto& J = m_testRefJac[local];
-              J.resize(testfes.getVectorDimension(), d);
-              const auto& basis = testfe.getBasis(local);
-              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              auto& J = m_trialRefJac[qp][local];
+              J.resize(trialfes.getVectorDimension(), d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
             }
+
+            if (trialfes == testfes)
+            {
+              m_testRefJac[qp] = m_trialRefJac[qp];
+            }
+            else
+            {
+              m_testRefJac[qp].resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& J = m_testRefJac[qp][local];
+                J.resize(testfes.getVectorDimension(), d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                  for (size_t j = 0; j < d; ++j)
+                    J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
+            }
           }
 
-          m_matrix.resize(m_testRefJac.size(), m_trialRefJac.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -2599,29 +2704,31 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
+          const auto& trialRefJac = m_trialRefJac[qp];
+          const auto& testRefJac = m_testRefJac[qp];
 
           if (trialfes == testfes)
           {
-            const size_t n = m_trialRefJac.size();
+            const size_t n = trialRefJac.size();
             for (size_t i = 0; i < n; ++i)
             {
-              const auto Ji = m_trialRefJac[i] * Jinv;
+              const auto Ji = trialRefJac[i] * Jinv;
               m_matrix(i, i) += wdet * Ji.squaredNorm();
 
               for (size_t j = 0; j < i; ++j)
-                m_matrix(i, j) += wdet * Math::dot(m_trialRefJac[j] * Jinv, Ji);
+                m_matrix(i, j) += wdet * Math::dot(trialRefJac[j] * Jinv, Ji);
             }
           }
           else
           {
-            const size_t ntr = m_trialRefJac.size();
-            const size_t nte = m_testRefJac.size();
+            const size_t ntr = trialRefJac.size();
+            const size_t nte = testRefJac.size();
 
             for (size_t te = 0; te < nte; ++te)
             {
-              const auto Jte = m_testRefJac[te] * Jinv;
+              const auto Jte = testRefJac[te] * Jinv;
               for (size_t tr = 0; tr < ntr; ++tr)
-                m_matrix(te, tr) += wdet * Math::dot(m_trialRefJac[tr] * Jinv, Jte);
+                m_matrix(te, tr) += wdet * Math::dot(trialRefJac[tr] * Jinv, Jte);
             }
           }
         }
@@ -2655,7 +2762,9 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialMatrix<ScalarType>> m_trialRefJac, m_testRefJac;
+      /// @brief Reference Jacobians per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialRefJac,
+        m_testRefJac;
 
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -3021,6 +3130,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -3134,8 +3246,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -3148,38 +3261,47 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: reference
+          // derivatives are constant only on a simplex, so freezing them at
+          // one point is exact only there, or for a single-point rule.
+          const size_t nqp = m_qf->getSize();
+          m_trialRefJac.assign(nqp, {});
+          m_testRefJac.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
 
-          m_trialRefJac.resize(trialfe.getCount());
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
-          {
-            auto& J = m_trialRefJac[local];
-            J.resize(trialfes.getVectorDimension(), d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
-              for (size_t j = 0; j < d; ++j)
-                J(i, j) = basis.template getDerivative<1>(i, j)(rc);
-          }
-
-          if (trialfes == testfes)
-          {
-            m_testRefJac = m_trialRefJac;
-          }
-          else
-          {
-            m_testRefJac.resize(testfe.getCount());
-            for (size_t local = 0; local < testfe.getCount(); ++local)
+            m_trialRefJac[qp].resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
             {
-              auto& J = m_testRefJac[local];
-              J.resize(testfes.getVectorDimension(), d);
-              const auto& basis = testfe.getBasis(local);
-              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              auto& J = m_trialRefJac[qp][local];
+              J.resize(trialfes.getVectorDimension(), d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
             }
+
+            if (trialfes == testfes)
+            {
+              m_testRefJac[qp] = m_trialRefJac[qp];
+            }
+            else
+            {
+              m_testRefJac[qp].resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& J = m_testRefJac[qp][local];
+                J.resize(testfes.getVectorDimension(), d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                  for (size_t j = 0; j < d; ++j)
+                    J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
+            }
           }
 
-          m_matrix.resize(m_testRefJac.size(), m_trialRefJac.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -3197,6 +3319,8 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
+          const auto& trialRefJac = m_trialRefJac[qp];
+          const auto& testRefJac = m_testRefJac[qp];
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -3204,26 +3328,26 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefJac.size();
+              const size_t n = trialRefJac.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto Ji = m_trialRefJac[i] * Jinv;
+                const auto Ji = trialRefJac[i] * Jinv;
                 m_matrix(i, i) += wdet * csv * Ji.squaredNorm();
 
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * csv * Math::dot(m_trialRefJac[j] * Jinv, Ji);
+                  m_matrix(i, j) += wdet * csv * Math::dot(trialRefJac[j] * Jinv, Ji);
               }
             }
             else
             {
-              const size_t ntr = m_trialRefJac.size();
-              const size_t nte = m_testRefJac.size();
+              const size_t ntr = trialRefJac.size();
+              const size_t nte = testRefJac.size();
 
               for (size_t te = 0; te < nte; ++te)
               {
-                const auto Jte = m_testRefJac[te] * Jinv;
+                const auto Jte = testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * csv * Math::dot(m_trialRefJac[tr] * Jinv, Jte);
+                  m_matrix(te, tr) += wdet * csv * Math::dot(trialRefJac[tr] * Jinv, Jte);
               }
             }
           }
@@ -3234,32 +3358,32 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefJac.size();
+              const size_t n = trialRefJac.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto Ji = m_trialRefJac[i] * Jinv;
+                const auto Ji = trialRefJac[i] * Jinv;
                 m_matrix(i, i) += wdet * Math::dot(cmv * Ji, Ji);
 
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(cmv * (m_trialRefJac[j] * Jinv), Ji);
+                  m_matrix(i, j) += wdet * Math::dot(cmv * (trialRefJac[j] * Jinv), Ji);
               }
 
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(
-                    cmv * (m_trialRefJac[j] * Jinv), m_trialRefJac[i] * Jinv);
+                  m_matrix(i, j) += wdet *
+                    Math::dot(cmv * (trialRefJac[j] * Jinv), trialRefJac[i] * Jinv);
             }
             else
             {
-              const size_t ntr = m_trialRefJac.size();
-              const size_t nte = m_testRefJac.size();
+              const size_t ntr = trialRefJac.size();
+              const size_t nte = testRefJac.size();
 
               for (size_t te = 0; te < nte; ++te)
               {
-                const auto Jte = m_testRefJac[te] * Jinv;
+                const auto Jte = testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * Math::dot(
-                    cmv * (m_trialRefJac[tr] * Jinv), Jte);
+                  m_matrix(te, tr) +=
+                    wdet * Math::dot(cmv * (trialRefJac[tr] * Jinv), Jte);
               }
             }
           }
@@ -3301,7 +3425,9 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialMatrix<ScalarType>> m_trialRefJac, m_testRefJac;
+      /// @brief Reference Jacobians per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialRefJac,
+        m_testRefJac;
 
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -3385,6 +3511,9 @@ namespace Rodin::Variational
               P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = P1<LHSRange, LHSMesh>;
       using TestFESType  = P1<RHSRange, RHSMesh>;
 
@@ -3475,8 +3604,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -3492,43 +3622,53 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
-
-          if constexpr (std::is_same_v<LHSRange, ScalarType>)
+          // Cached per quadrature point, not at the first one: basis values
+          // vary within every element and reference gradients vary within
+          // every element that is not a simplex, so freezing either at one
+          // point is exact only for a single-point rule.
+          const size_t nqp = m_qf->getSize();
+          m_refGrad.assign(nqp, {});
+          m_basis.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            const size_t n = trialfe.getCount();
-            m_refGrad.resize(n);
-            for (size_t a = 0; a < n; ++a)
+            const auto& rc = m_qf->getPoint(qp);
+
+            if constexpr (std::is_same_v<LHSRange, ScalarType>)
             {
-              m_refGrad[a].resize(d);
-              const auto& basisFn = trialfe.getBasis(a);
-              for (size_t j = 0; j < d; ++j)
-                m_refGrad[a](j) = basisFn.template getDerivative<1>(j)(rc);
+              const size_t n = trialfe.getCount();
+              m_refGrad[qp].resize(n);
+              for (size_t a = 0; a < n; ++a)
+              {
+                m_refGrad[qp][a].resize(d);
+                const auto& basisFn = trialfe.getBasis(a);
+                for (size_t j = 0; j < d; ++j)
+                  m_refGrad[qp][a](j) = basisFn.template getDerivative<1>(j)(rc);
+              }
+
+              m_basis[qp].resize(n);
+              for (size_t b = 0; b < n; ++b)
+                m_basis[qp][b] = testfe.getBasis(b)(rc);
             }
-
-            m_basis.resize(n);
-            for (size_t b = 0; b < n; ++b)
-              m_basis[b] = testfe.getBasis(b)(rc);
-          }
-          else
-          {
-            const size_t vdim = trialfes.getVectorDimension();
-            const size_t nVertices = trialfe.getCount() / vdim;
-
-            m_refGrad.resize(nVertices);
-            for (size_t v = 0; v < nVertices; ++v)
+            else
             {
-              m_refGrad[v].resize(d);
-              const auto& basisFn = trialfe.getBasis(v * vdim);
-              for (size_t j = 0; j < d; ++j)
-                m_refGrad[v](j) = basisFn.template getDerivative<1>(0, j)(rc);
-            }
+              const size_t vdim = trialfes.getVectorDimension();
+              const size_t nVertices = trialfe.getCount() / vdim;
 
-            m_basis.resize(nVertices);
-            for (size_t v = 0; v < nVertices; ++v)
-            {
-              const auto bv = testfe.getBasis(v * vdim)(rc);
-              m_basis[v] = bv(0);
+              m_refGrad[qp].resize(nVertices);
+              for (size_t v = 0; v < nVertices; ++v)
+              {
+                m_refGrad[qp][v].resize(d);
+                const auto& basisFn = trialfe.getBasis(v * vdim);
+                for (size_t j = 0; j < d; ++j)
+                  m_refGrad[qp][v](j) = basisFn.template getDerivative<1>(0, j)(rc);
+              }
+
+              m_basis[qp].resize(nVertices);
+              for (size_t v = 0; v < nVertices; ++v)
+              {
+                const auto bv = testfe.getBasis(v * vdim)(rc);
+                m_basis[qp][v] = bv(0);
+              }
             }
           }
         }
@@ -3536,7 +3676,7 @@ namespace Rodin::Variational
         assert(m_qf);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
-        const size_t n = m_refGrad.size();
+        const size_t n = m_refGrad.empty() ? 0 : m_refGrad.front().size();
         const size_t vdim = trialfes.getVectorDimension();
 
         const size_t ntr = lhs.getDOFs(polytope);
@@ -3555,15 +3695,17 @@ namespace Rodin::Variational
 
           const auto& Jinv = p.getJacobianInverse();
           const auto fval = coeff.getValue(ip);
+          const auto& refGrad = m_refGrad[qp];
+          const auto& basis = m_basis[qp];
 
           for (size_t a = 0; a < n; ++a)
           {
-            const auto physGrad = Jinv.transpose() * m_refGrad[a];
+            const auto physGrad = Jinv.transpose() * refGrad[a];
             const ScalarType gradDotF = Math::dot(physGrad, fval);
 
             for (size_t b = 0; b < n; ++b)
             {
-              const ScalarType val = wdet * gradDotF * m_basis[b];
+              const ScalarType val = wdet * gradDotF * basis[b];
 
               for (size_t c = 0; c < vdim; ++c)
               {
@@ -3599,8 +3741,10 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_refGrad;
-      std::vector<ScalarType> m_basis;
+      /// @brief Reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
+      /// @brief Test basis values per quadrature point and dof.
+      std::vector<std::vector<ScalarType>> m_basis;
 
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -3669,6 +3813,9 @@ namespace Rodin::Variational
     : public GlobalBilinearFormIntegratorBase<typename FormLanguage::Traits<Range>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
@@ -3771,6 +3918,25 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(
           tep.getDimension(), tep.getIndex());
 
+        // The regularised integrand is smooth but not polynomial for the
+        // singular kernels this exists for, so the order is an accuracy
+        // choice rather than a degree that can be inferred. Seven is exact
+        // for the Jacobian and the first-order bases over it, and is the
+        // default when the caller states nothing.
+        {
+          const size_t order = this->getOrder(trp).value_or(7);
+          const size_t n = std::max<size_t>(1, (order + 2) / 2);
+          if (m_collapsed.size() != n)
+          {
+            std::vector<Real> nodes, weights;
+            QF::GaussLegendre::gl1dUnit(n, nodes, weights);
+            m_collapsed.clear();
+            m_collapsed.reserve(n);
+            for (size_t i = 0; i < n; ++i)
+              m_collapsed.emplace_back(nodes[i], weights[i]);
+          }
+        }
+
         if constexpr (std::is_same_v<Range, ScalarType>)
         {
 
@@ -3788,97 +3954,139 @@ namespace Rodin::Variational
                                                 rx4(2), rz4(2),
                                                 rx5(2), rz5(2);
 
-                assert(m_qfs.getSize() == 1);
-                const auto r = m_qfs.getPoint(0).value();
-                const auto w = m_qfs.getWeight(0);
-
-                const ScalarType xi = 1 - r;
-                const ScalarType eta1 = r;
-                const ScalarType eta2 = r;
-                const ScalarType eta3 = r;
-
-                rx0[0] = xi;
-                rx0[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz1[0] = xi;
-                rz1[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz2[0] = xi * (1 - eta1 * eta2);
-                rz2[1] = xi * eta1 * (1 - eta2);
-
-                rx3[0] = xi * (1 - eta1 * eta2);
-                rx3[1] = xi * eta1 * (1 - eta2);
-
-                rz4[0] = xi;
-                rz4[1] = xi * eta1 * (1 - eta2);
-
-                rx5[0] = xi;
-                rx5[1] = xi * eta1 * (1 - eta2);
-
-                rz0[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz0[1] = xi * (1 - eta1);
-
-                rx1[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx1[1] = xi * (1 - eta1);
-
-                rx2[0] = xi;
-                rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rz3[0] = xi;
-                rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rx4[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx4[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                rz5[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz5[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                const Geometry::Point x0(polytope, rx0);
-                const Geometry::Point x1(polytope, rx1);
-                const Geometry::Point x2(polytope, rx2);
-                const Geometry::Point x3(polytope, rx3);
-                const Geometry::Point x4(polytope, rx4);
-                const Geometry::Point x5(polytope, rx5);
-
-                const Geometry::Point z0(polytope, rz0);
-                const Geometry::Point z1(polytope, rz1);
-                const Geometry::Point z2(polytope, rz2);
-                const Geometry::Point z3(polytope, rz3);
-                const Geometry::Point z4(polytope, rz4);
-                const Geometry::Point z5(polytope, rz5);
-
-                m_distortion = xi * xi * xi * eta1 * eta1 * eta2;
-                m_weight = w * w * w * w;
-                m_matrix.resize(testfe.getCount(), trialfe.getCount());
-
-                const Real s0 = x0.getDistortion() * z0.getDistortion();
-                const Real s1 = x1.getDistortion() * z1.getDistortion();
-                const Real s2 = x2.getDistortion() * z2.getDistortion();
-                const Real s3 = x3.getDistortion() * z3.getDistortion();
-                const Real s4 = x4.getDistortion() * z4.getDistortion();
-                const Real s5 = x5.getDistortion() * z5.getDistortion();
-
-                assert(std::isfinite(s0));
-                assert(std::isfinite(s1));
-                assert(std::isfinite(s2));
-                assert(std::isfinite(s3));
-                assert(std::isfinite(s4));
-                assert(std::isfinite(s5));
-
-                for (size_t l = 0; l < testfe.getCount(); ++l)
+                // Sauter-Schwab for coincident panels: the four-dimensional
+                // integral is regularised onto the unit cube in the collapsed
+                // variables, and what remains is smooth and integrated by a
+                // tensor Gauss rule --- the same rule in each direction, as
+                // the construction intends.
+                //
+                // Evaluating it at one point instead, as this did, does not
+                // integrate even the Jacobian: xi^3 eta1^2 eta2 has midpoint
+                // value 1/64 against an exact 1/24 over the cube, so a
+                // constant kernel came out at three eighths of its value on
+                // every coincident pair. The transformation was never the
+                // problem.
+                m_matrix.setZero(testfe.getCount(), trialfe.getCount());
+                for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const auto& teb = testfe.getBasis(l);
-                  for (size_t m = 0; m < trialfe.getCount(); ++m)
+                  const ScalarType eta3 = m_collapsed[i3].first;
+                  const Real w3 = m_collapsed[i3].second;
+                  for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const auto& trb = trialfe.getBasis(m);
-                    m_matrix(l, m) = s0 * kernel(x0, z0) * trb(rx0) * teb(rz0);
-                    m_matrix(l, m) += s1 * kernel(x1, z1) * trb(rx1) * teb(rz1);
-                    m_matrix(l, m) += s2 * kernel(x2, z2) * trb(rx2) * teb(rz2);
-                    m_matrix(l, m) += s3 * kernel(x3, z3) * trb(rx3) * teb(rz3);
-                    m_matrix(l, m) += s4 * kernel(x4, z4) * trb(rx4) * teb(rz4);
-                    m_matrix(l, m) += s5 * kernel(x5, z5) * trb(rx5) * teb(rz5);
+                    const ScalarType eta2 = m_collapsed[i2].first;
+                    const Real w2 = m_collapsed[i2].second;
+                    for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
+                    {
+                      const ScalarType eta1 = m_collapsed[i1].first;
+                      const Real w1 = m_collapsed[i1].second;
+                      for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
+                      {
+                        const ScalarType xi = m_collapsed[i0].first;
+                        const Real w0 = m_collapsed[i0].second;
+                        const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                        const Real factor = w0 * w1 * w2 * w3 * jacobian;
+
+                        // The six sub-domains of the identical-panel case,
+                        // in the variables of Sauter and Schwab. Written as
+                        // they appear there: the first coordinate carries
+                        // 1 - xi and the second carries xi, which a symmetric
+                        // one-point rule cannot tell apart and a real rule
+                        // can. Getting these the wrong way round leaves the
+                        // Jacobian integrating correctly, so the entries sum
+                        // to the right total while being distributed wrongly
+                        // among the basis functions.
+                        const ScalarType a = xi - xi * eta1;
+                        const ScalarType b = xi - xi * eta1 * eta2 * eta3;
+                        const ScalarType c = xi - xi * eta1 * eta2;
+                        const ScalarType d = xi * eta1 * (1 - eta2);
+                        const ScalarType e = xi * eta1 * (1 - eta2 * eta3);
+                        const ScalarType f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const ScalarType g = xi - xi * eta1 + xi * eta1 * eta2;
+
+                        rx0[0] = 1 - xi;
+                        rx0[1] = g;
+                        rz0[0] = 1 - b;
+                        rz0[1] = a;
+
+                        rx1[0] = 1 - b;
+                        rx1[1] = a;
+                        rz1[0] = 1 - xi;
+                        rz1[1] = g;
+
+                        rx2[0] = 1 - xi;
+                        rx2[1] = f;
+                        rz2[0] = 1 - c;
+                        rz2[1] = d;
+
+                        rx3[0] = 1 - c;
+                        rx3[1] = d;
+                        rz3[0] = 1 - xi;
+                        rz3[1] = f;
+
+                        rx4[0] = 1 - b;
+                        rx4[1] = e;
+                        rz4[0] = 1 - xi;
+                        rz4[1] = d;
+
+                        rx5[0] = 1 - xi;
+                        rx5[1] = d;
+                        rz5[0] = 1 - b;
+                        rz5[1] = e;
+
+                        const Geometry::Point x0(polytope, rx0);
+                        const Geometry::Point x1(polytope, rx1);
+                        const Geometry::Point x2(polytope, rx2);
+                        const Geometry::Point x3(polytope, rx3);
+                        const Geometry::Point x4(polytope, rx4);
+                        const Geometry::Point x5(polytope, rx5);
+
+                        const Geometry::Point z0(polytope, rz0);
+                        const Geometry::Point z1(polytope, rz1);
+                        const Geometry::Point z2(polytope, rz2);
+                        const Geometry::Point z3(polytope, rz3);
+                        const Geometry::Point z4(polytope, rz4);
+                        const Geometry::Point z5(polytope, rz5);
+
+                        const Real s0 = x0.getDistortion() * z0.getDistortion();
+                        const Real s1 = x1.getDistortion() * z1.getDistortion();
+                        const Real s2 = x2.getDistortion() * z2.getDistortion();
+                        const Real s3 = x3.getDistortion() * z3.getDistortion();
+                        const Real s4 = x4.getDistortion() * z4.getDistortion();
+                        const Real s5 = x5.getDistortion() * z5.getDistortion();
+
+                        assert(std::isfinite(s0));
+                        assert(std::isfinite(s1));
+                        assert(std::isfinite(s2));
+                        assert(std::isfinite(s3));
+                        assert(std::isfinite(s4));
+                        assert(std::isfinite(s5));
+
+                        for (size_t l = 0; l < testfe.getCount(); ++l)
+                        {
+                          const auto& teb = testfe.getBasis(l);
+                          for (size_t m = 0; m < trialfe.getCount(); ++m)
+                          {
+                            const auto& trb = trialfe.getBasis(m);
+                            m_matrix(l, m) +=
+                              factor * s0 * kernel(x0, z0) * trb(rx0) * teb(rz0);
+                            m_matrix(l, m) +=
+                              factor * s1 * kernel(x1, z1) * trb(rx1) * teb(rz1);
+                            m_matrix(l, m) +=
+                              factor * s2 * kernel(x2, z2) * trb(rx2) * teb(rz2);
+                            m_matrix(l, m) +=
+                              factor * s3 * kernel(x3, z3) * trb(rx3) * teb(rz3);
+                            m_matrix(l, m) +=
+                              factor * s4 * kernel(x4, z4) * trb(rx4) * teb(rz4);
+                            m_matrix(l, m) +=
+                              factor * s5 * kernel(x5, z5) * trb(rx5) * teb(rz5);
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                m_distortion = 1;
+                m_weight = 1;
                 break;
               }
               default:
@@ -3958,117 +4166,136 @@ namespace Rodin::Variational
                                                 rx4(2), rz4(2),
                                                 rx5(2), rz5(2);
 
-                assert(m_qfs.getSize() == 1);
-                const auto r = m_qfs.getPoint(0).value();
-                const auto w = m_qfs.getWeight(0);
-
-                const ScalarType xi = 1 - r;
-                const ScalarType eta1 = r;
-                const ScalarType eta2 = r;
-                const ScalarType eta3 = r;
-
-                rx0[0] = xi;
-                rx0[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz1[0] = xi;
-                rz1[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz2[0] = xi * (1 - eta1 * eta2);
-                rz2[1] = xi * eta1 * (1 - eta2);
-
-                rx3[0] = xi * (1 - eta1 * eta2);
-                rx3[1] = xi * eta1 * (1 - eta2);
-
-                rz4[0] = xi;
-                rz4[1] = xi * eta1 * (1 - eta2);
-
-                rx5[0] = xi;
-                rx5[1] = xi * eta1 * (1 - eta2);
-
-                rz0[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz0[1] = xi * (1 - eta1);
-
-                rx1[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx1[1] = xi * (1 - eta1);
-
-                rx2[0] = xi;
-                rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rz3[0] = xi;
-                rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rx4[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx4[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                rz5[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz5[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                const Geometry::Point x0(polytope, rx0);
-                const Geometry::Point x1(polytope, rx1);
-                const Geometry::Point x2(polytope, rx2);
-                const Geometry::Point x3(polytope, rx3);
-                const Geometry::Point x4(polytope, rx4);
-                const Geometry::Point x5(polytope, rx5);
-
-                const Geometry::Point z0(polytope, rz0);
-                const Geometry::Point z1(polytope, rz1);
-                const Geometry::Point z2(polytope, rz2);
-                const Geometry::Point z3(polytope, rz3);
-                const Geometry::Point z4(polytope, rz4);
-                const Geometry::Point z5(polytope, rz5);
-
-                m_distortion = xi * xi * xi * eta1 * eta1 * eta2;
-                m_weight = w * w * w * w;
-                m_matrix.resize(testfe.getCount(), trialfe.getCount());
-
-                const Real s0 = x0.getDistortion() * z0.getDistortion();
-                const Real s1 = x1.getDistortion() * z1.getDistortion();
-                const Real s2 = x2.getDistortion() * z2.getDistortion();
-                const Real s3 = x3.getDistortion() * z3.getDistortion();
-                const Real s4 = x4.getDistortion() * z4.getDistortion();
-                const Real s5 = x5.getDistortion() * z5.getDistortion();
-
-                assert(std::isfinite(s0));
-                assert(std::isfinite(s1));
-                assert(std::isfinite(s2));
-                assert(std::isfinite(s3));
-                assert(std::isfinite(s4));
-                assert(std::isfinite(s5));
-
-                kernel(m_k0, x0, z0);
-                kernel(m_k1, x1, z1);
-                kernel(m_k2, x2, z2);
-                kernel(m_k3, x3, z3);
-                kernel(m_k4, x4, z4);
-                kernel(m_k5, x5, z5);
-
-                for (size_t l = 0; l < testfe.getCount(); ++l)
+                // The vector-valued counterpart of the scalar case above, and
+                // the same two corrections: a tensor Gauss rule over the
+                // collapsed variables rather than a single point, and the
+                // sub-domain maps written as Sauter and Schwab give them.
+                m_matrix.setZero(testfe.getCount(), trialfe.getCount());
+                for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const auto& teb = testfe.getBasis(l);
-                  for (size_t m = 0; m < trialfe.getCount(); ++m)
+                  const ScalarType eta3 = m_collapsed[i3].first;
+                  const Real w3 = m_collapsed[i3].second;
+                  for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const auto& trb = trialfe.getBasis(m);
-                    const auto trv0 = trb(rx0);
-                    const auto tev0 = teb(rz0);
-                    const auto trv1 = trb(rx1);
-                    const auto tev1 = teb(rz1);
-                    const auto trv2 = trb(rx2);
-                    const auto tev2 = teb(rz2);
-                    const auto trv3 = trb(rx3);
-                    const auto tev3 = teb(rz3);
-                    const auto trv4 = trb(rx4);
-                    const auto tev4 = teb(rz4);
-                    const auto trv5 = trb(rx5);
-                    const auto tev5 = teb(rz5);
+                    const ScalarType eta2 = m_collapsed[i2].first;
+                    const Real w2 = m_collapsed[i2].second;
+                    for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
+                    {
+                      const ScalarType eta1 = m_collapsed[i1].first;
+                      const Real w1 = m_collapsed[i1].second;
+                      for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
+                      {
+                        const ScalarType xi = m_collapsed[i0].first;
+                        const Real w0 = m_collapsed[i0].second;
+                        const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                        const Real factor = w0 * w1 * w2 * w3 * jacobian;
 
-                    m_matrix(l, m) = s0 * (m_k0 * trv0).dot(tev0);
-                    m_matrix(l, m) += s1 * (m_k1 * trv1).dot(tev1);
-                    m_matrix(l, m) += s2 * (m_k2 * trv2).dot(tev2);
-                    m_matrix(l, m) += s3 * (m_k3 * trv3).dot(tev3);
-                    m_matrix(l, m) += s4 * (m_k4 * trv4).dot(tev4);
-                    m_matrix(l, m) += s5 * (m_k5 * trv5).dot(tev5);
+                        const ScalarType a = xi - xi * eta1;
+                        const ScalarType b = xi - xi * eta1 * eta2 * eta3;
+                        const ScalarType c = xi - xi * eta1 * eta2;
+                        const ScalarType d = xi * eta1 * (1 - eta2);
+                        const ScalarType e = xi * eta1 * (1 - eta2 * eta3);
+                        const ScalarType f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const ScalarType g = xi - xi * eta1 + xi * eta1 * eta2;
+
+                        rx0[0] = 1 - xi;
+                        rx0[1] = g;
+                        rz0[0] = 1 - b;
+                        rz0[1] = a;
+
+                        rx1[0] = 1 - b;
+                        rx1[1] = a;
+                        rz1[0] = 1 - xi;
+                        rz1[1] = g;
+
+                        rx2[0] = 1 - xi;
+                        rx2[1] = f;
+                        rz2[0] = 1 - c;
+                        rz2[1] = d;
+
+                        rx3[0] = 1 - c;
+                        rx3[1] = d;
+                        rz3[0] = 1 - xi;
+                        rz3[1] = f;
+
+                        rx4[0] = 1 - b;
+                        rx4[1] = e;
+                        rz4[0] = 1 - xi;
+                        rz4[1] = d;
+
+                        rx5[0] = 1 - xi;
+                        rx5[1] = d;
+                        rz5[0] = 1 - b;
+                        rz5[1] = e;
+
+                        const Geometry::Point x0(polytope, rx0);
+                        const Geometry::Point x1(polytope, rx1);
+                        const Geometry::Point x2(polytope, rx2);
+                        const Geometry::Point x3(polytope, rx3);
+                        const Geometry::Point x4(polytope, rx4);
+                        const Geometry::Point x5(polytope, rx5);
+
+                        const Geometry::Point z0(polytope, rz0);
+                        const Geometry::Point z1(polytope, rz1);
+                        const Geometry::Point z2(polytope, rz2);
+                        const Geometry::Point z3(polytope, rz3);
+                        const Geometry::Point z4(polytope, rz4);
+                        const Geometry::Point z5(polytope, rz5);
+
+                        const Real s0 = x0.getDistortion() * z0.getDistortion();
+                        const Real s1 = x1.getDistortion() * z1.getDistortion();
+                        const Real s2 = x2.getDistortion() * z2.getDistortion();
+                        const Real s3 = x3.getDistortion() * z3.getDistortion();
+                        const Real s4 = x4.getDistortion() * z4.getDistortion();
+                        const Real s5 = x5.getDistortion() * z5.getDistortion();
+
+                        assert(std::isfinite(s0));
+                        assert(std::isfinite(s1));
+                        assert(std::isfinite(s2));
+                        assert(std::isfinite(s3));
+                        assert(std::isfinite(s4));
+                        assert(std::isfinite(s5));
+
+                        kernel(m_k0, x0, z0);
+                        kernel(m_k1, x1, z1);
+                        kernel(m_k2, x2, z2);
+                        kernel(m_k3, x3, z3);
+                        kernel(m_k4, x4, z4);
+                        kernel(m_k5, x5, z5);
+
+                        for (size_t l = 0; l < testfe.getCount(); ++l)
+                        {
+                          const auto& teb = testfe.getBasis(l);
+                          for (size_t m = 0; m < trialfe.getCount(); ++m)
+                          {
+                            const auto& trb = trialfe.getBasis(m);
+                            const auto trv0 = trb(rx0);
+                            const auto tev0 = teb(rz0);
+                            const auto trv1 = trb(rx1);
+                            const auto tev1 = teb(rz1);
+                            const auto trv2 = trb(rx2);
+                            const auto tev2 = teb(rz2);
+                            const auto trv3 = trb(rx3);
+                            const auto tev3 = teb(rz3);
+                            const auto trv4 = trb(rx4);
+                            const auto tev4 = teb(rz4);
+                            const auto trv5 = trb(rx5);
+                            const auto tev5 = teb(rz5);
+
+                            m_matrix(l, m) += factor * s0 * (m_k0 * trv0).dot(tev0);
+                            m_matrix(l, m) += factor * s1 * (m_k1 * trv1).dot(tev1);
+                            m_matrix(l, m) += factor * s2 * (m_k2 * trv2).dot(tev2);
+                            m_matrix(l, m) += factor * s3 * (m_k3 * trv3).dot(tev3);
+                            m_matrix(l, m) += factor * s4 * (m_k4 * trv4).dot(tev4);
+                            m_matrix(l, m) += factor * s5 * (m_k5 * trv5).dot(tev5);
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                m_distortion = 1;
+                m_weight = 1;
                 break;
               }
               default:
@@ -4158,6 +4385,17 @@ namespace Rodin::Variational
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_trp;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_tep;
+
+      /**
+       * @brief Points and weights on @f$ [0, 1] @f$ for the collapsed
+       * variables of a Sauter--Schwab transformation.
+       *
+       * One rule, applied in each of the four directions as a tensor product.
+       * Its size follows from the integrator's order, so setOrder() controls
+       * how finely the regularised integrand is resolved --- which is the only
+       * knob that matters once the transformation has removed the singularity.
+       */
+      std::vector<std::pair<Real, Real>> m_collapsed;
 
       const QF::Centroid m_qfs;
       Optional<QF::Centroid> m_qftr;

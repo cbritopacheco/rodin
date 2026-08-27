@@ -23,6 +23,8 @@ Hierarchical: read top-down, stop at the depth your task needs.
 - [geometry.md](geometry.md) — the mesh model: polytopes, connectivity,
   transformations, Point evaluation, mesh algebra (skin/trim/keep/trace),
   SubMesh, builders, partitioning, classification utilities.
+- [quadrature.md](quadrature.md) — quadrature families, exactness ranges,
+  positive conical-product fallbacks, dispatch, caching, and verification.
 - [variational.md](variational.md) — the form language in depth: operator
   taxonomy, shape-function grading, finite element spaces (P0, P0g, P1,
   high-order H1), GridFunction, integrals, boundary conditions, Problem.
