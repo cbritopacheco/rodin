@@ -162,7 +162,9 @@ namespace
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, cell.getGeometry());
+      const std::size_t order =
+        qOrder > 0 ? qOrder : std::max<std::size_t>(2, 2 * fe.getOrder());
+      const auto& qf = QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
       {
@@ -368,12 +370,9 @@ int main(int argc, char** argv)
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 10;
-#endif
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
@@ -419,7 +418,8 @@ int main(int argc, char** argv)
   GridFunction du(vectorFes);
   du.setName("wngir_step");
   auto wngirSolveParams = wngirParams;
-  wngirSolveParams.activeRMSTol = fitTol;
+  if (fitTol > Real(0))
+    wngirSolveParams.activeRMSTol = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -454,7 +454,8 @@ int main(int argc, char** argv)
   std::cout << "Wavy-circle WNGIR sweep on " << n << "x" << n << " unit-square mesh, "
             << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
-            << "  orbit R=" << orbitR << "  wngirEll=" << wngirParams.ellM << '\n';
+            << "  orbit R=" << orbitR
+            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -607,6 +608,7 @@ int main(int argc, char** argv)
                 << "  fit0=" << interfaceFit << "\n";
     }
     Real bestFit = interfaceFit;
+    Real effectiveFitTol = fitTol;
     Math::Vector<Real> bestU = u.getData();
     Real minJ = Real(1);
     Real maxQRel = Real(1);
@@ -618,6 +620,7 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      effectiveFitTol = wngirRep.effectiveRMSTol;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -637,8 +640,8 @@ int main(int argc, char** argv)
         bestU = u.getData();
       }
       if (trace)
-        std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
-                  << ")\n";
+        std::cout << "      wngir sigma=" << wngirRep.sigma
+                  << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
     u.getData() = bestU;
@@ -648,7 +651,7 @@ int main(int argc, char** argv)
     minJ = bestAdm.minJ;
     maxQRel = bestAdm.maxQRel;
 
-    const bool converged = interfaceFit <= fitTol;
+    const bool converged = interfaceFit <= effectiveFitTol;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);

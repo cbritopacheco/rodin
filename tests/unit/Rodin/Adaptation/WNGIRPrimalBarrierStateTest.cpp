@@ -21,9 +21,9 @@ namespace Rodin::Tests::Unit
     WNGIRParameters parameters;
     parameters.jSafe = Real(0.1);
     parameters.qMax = Real(3);
-    parameters.gammaJ = Real(2);
-    parameters.gammaQ = 0;
-    parameters.primalBarrierMu = Real(0.01);
+    parameters.kappaJ = Real(2);
+    parameters.kappaQ = 0;
+    parameters.muHat = Real(0.01);
 
     Detail::WNGIRPrimalBarrierState state(deformation, inner, parameters, Real(0.01));
     ASSERT_TRUE(state.isFeasible());

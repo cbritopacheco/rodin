@@ -9,18 +9,6 @@ gtest_discover_tests(RodinAdaptationCellDeformationTest
     LABELS unit
 )
 
-add_executable(RodinAdaptationWNGIRConstraintStateTest
-  WNGIRConstraintStateTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRConstraintStateTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRConstraintStateTest
-  PROPERTIES
-    LABELS unit
-)
-
 add_executable(RodinAdaptationWNGIRPrimalBarrierStateTest
   WNGIRPrimalBarrierStateTest.cpp)
 target_link_libraries(RodinAdaptationWNGIRPrimalBarrierStateTest
@@ -33,18 +21,6 @@ gtest_discover_tests(RodinAdaptationWNGIRPrimalBarrierStateTest
     LABELS unit
 )
 
-add_executable(RodinAdaptationWNGIRValidationWeightsTest
-  WNGIRValidationWeightsTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRValidationWeightsTest
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRValidationWeightsTest
-  PROPERTIES
-    LABELS unit
-)
-
 add_executable(RodinAdaptationWNGIRLossTest WNGIRLossTest.cpp)
 target_link_libraries(RodinAdaptationWNGIRLossTest
   PUBLIC
@@ -52,6 +28,17 @@ target_link_libraries(RodinAdaptationWNGIRLossTest
   GTest::gtest_main
   Rodin::Adaptation)
 gtest_discover_tests(RodinAdaptationWNGIRLossTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinAdaptationWNGIRSolverTest WNGIRSolverTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRSolverTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRSolverTest
   PROPERTIES
     LABELS unit
 )

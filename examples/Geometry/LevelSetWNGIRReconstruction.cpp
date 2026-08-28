@@ -35,6 +35,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -159,7 +160,9 @@ namespace
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, cell.getGeometry());
+      const std::size_t order =
+        qOrder > 0 ? qOrder : std::max<std::size_t>(2, 2 * fe.getOrder());
+      const auto& qf = QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
       {
@@ -359,11 +362,6 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.008));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 10;
-#else
-  wngirDefaults.betaMax = 50;
-#endif
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
@@ -382,7 +380,7 @@ int main(int argc, char** argv)
     wngirParams.dirichletAttributes = {boundaryAttribute, supportAttribute};
   else if (wngirDirichlet != "none")
     throw std::invalid_argument("Unknown --wngir-dirichlet value: " + wngirDirichlet);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
@@ -442,8 +440,6 @@ int main(int argc, char** argv)
   cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);
   phaseMoment.setName("phase_moment");
-  GridFunction conflict(p0Fes);
-  conflict.setName("fit_admissibility_conflict");
   TrialFunction wngirTrial(vectorFes);
   TestFunction wngirTest(vectorFes);
   auto& u = wngirTrial.getSolution();
@@ -451,7 +447,8 @@ int main(int argc, char** argv)
   GridFunction du(vectorFes);
   du.setName("wngir_step");
   auto wngirSolveParams = wngirParams;
-  wngirSolveParams.activeRMSTol = fitTol;
+  if (fitTol > Real(0))
+    wngirSolveParams.activeRMSTol = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -476,7 +473,6 @@ int main(int argc, char** argv)
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
   backgroundGrid.add(phaseMoment, IO::XDMF::Center::Cell);
-  backgroundGrid.add(conflict, IO::XDMF::Center::Cell);
   backgroundGrid.add(phiGf, IO::XDMF::Center::Node);
   backgroundGrid.add(u, IO::XDMF::Center::Node);
   backgroundGrid.add(du, IO::XDMF::Center::Node);
@@ -492,8 +488,8 @@ int main(int argc, char** argv)
             << " unit-square mesh\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase << "  wngirEll=" << wngirParams.ellM
-            << '\n';
+            << "  phase=" << phase
+            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -657,10 +653,17 @@ int main(int argc, char** argv)
                 << "  outside=" << (classified.labels.size() - insideCount)
                 << "  fit0=" << interfaceFit << "\n";
     }
-    Real bestFit = interfaceFit;
-    Math::Vector<Real> bestU = u.getData();
+    Real effectiveFitTol = fitTol;
     Real minJ = Real(1);
+    Real maxJ = Real(1);
     Real maxQRel = Real(1);
+    Real activeRMS = Real(0);
+    Real levelSetGradientScale = Real(0);
+    Real activeFraction = Real(0);
+    Real rigidModeCoercivity = Real(0);
+    std::size_t jacobianRejections = 0;
+    std::size_t distortionRejections = 0;
+    std::size_t energyRejections = 0;
     Real lastAlpha = Real(0);
     Real maxStep = Real(0);
     Real acceptedStep = Real(0);
@@ -669,6 +672,7 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      effectiveFitTol = wngirRep.effectiveRMSTol;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -676,40 +680,29 @@ int main(int argc, char** argv)
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       iterations = wngirRep.iterations;
-        // Per-cell fit-admissibility alignment indicator; this is not a KKT
-        // multiplier (see WNGIRReport::conflictIndicator).
-      conflict.getData().setZero();
-      if (!wngirRep.conflictIndicator.empty())
-        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-        {
-          const Index cellIdx = cellIt->getIndex();
-          const Index dof = p0Fes.getGlobalIndex({mesh.getDimension(), cellIdx}, 0);
-          conflict.getData()(dof) = wngirRep.conflictIndicator[cellIdx];
-        }
       lastAlpha = wngirRep.lastAlpha;
       acceptedStep = wngirRep.acceptedStep;
       minJ = wngirRep.minJ;
+      maxJ = wngirRep.maxJ;
       maxQRel = wngirRep.maxQRel;
+      activeRMS = wngirRep.activeRMS;
+      levelSetGradientScale = wngirRep.levelSetGradientScale;
+      activeFraction = wngirRep.activeFraction;
+      rigidModeCoercivity = wngirRep.rigidModeCoercivity;
+      jacobianRejections = wngirRep.jacobianRejections;
+      distortionRejections = wngirRep.distortionRejections;
+      energyRejections = wngirRep.energyRejections;
       exitReason = wngirRep.exitReason;
       interfaceFit = computeInterfaceFit();
-      if (interfaceFit < bestFit)
-      {
-        bestFit = interfaceFit;
-        bestU = u.getData();
-      }
       if (trace)
-        std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
-                  << ")\n";
+        std::cout << "      wngir sigma=" << wngirRep.sigma
+                  << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    u.getData() = bestU;
-    interfaceFit = bestFit;
-    const auto bestAdm =
-      evaluateWNGIRAdmissibilitySampled(u, u.getData(), wngirParams.jMinRatio, qOrder);
-    minJ = bestAdm.minJ;
-    maxQRel = bestAdm.maxQRel;
-
-    const bool converged = interfaceFit <= fitTol;
+    const std::string_view exit(exitReason);
+    const bool residualConverged = exit.starts_with("numerical-") ||
+      exit.starts_with("geometric-");
+    const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);
@@ -768,7 +761,15 @@ int main(int argc, char** argv)
     std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
               << "  step=" << acceptedStep << "  min_j=" << minJ
-              << "  max_qrel=" << maxQRel
+              << "  max_j=" << maxJ << "  max_qrel=" << maxQRel
+              << "  active_rms=" << activeRMS
+              << "  active_rms_hg="
+              << (h * levelSetGradientScale > Real(0)
+                    ? activeRMS / (h * levelSetGradientScale)
+                    : Real(0))
+              << "  act_frac=" << activeFraction << "  cR=" << rigidModeCoercivity
+              << "  rej_j=" << jacobianRejections << "  rej_q=" << distortionRejections
+              << "  rej_e=" << energyRejections
               << "  converged=" << (converged ? "yes" : "best-effort")
               << "  exit=" << exitReason << '\n';
 

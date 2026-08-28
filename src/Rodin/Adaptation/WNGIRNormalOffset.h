@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_WNGIRNORMALOFFSET_H
 #define RODIN_ADAPTATION_WNGIRNORMALOFFSET_H
 
+#include "WNGIRLoss.h"
 #include "WNGIRParameters.h"
 
 namespace Rodin::Adaptation::Detail
@@ -38,7 +39,7 @@ namespace Rodin::Adaptation::Detail
           const Real cap = params.initialGuessCapH * params.h;
           m_offset = std::clamp(m_offset, -cap, cap);
         }
-        m_attenuation = WNGIRLoss(params.loss, std::sqrt(sigma2)).getWeight(r);
+        m_attenuation = WNGIRLoss(std::sqrt(sigma2)).getWeight(r);
       }
 
       /// @brief Whether degenerate.

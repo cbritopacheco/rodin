@@ -101,13 +101,15 @@ int main(int argc, char** argv)
       writeSample(out, "default_geometry", geometry, dp, input);
 
     for (const Real radius : radii)
-      writeSample(out, "fixed_length_radius_sweep", {"radius_sweep", radius, 2.5e-3}, dp, input);
+      writeSample(
+        out, "fixed_length_radius_sweep", {"radius_sweep", radius, 2.5e-3}, dp, input);
 
-    writeSample(out, "constant_newtonian_resistance", {"base", 2.0e-4, 2.5e-3}, dp, input);
+    writeSample(
+      out, "constant_newtonian_resistance", {"base", 2.0e-4, 2.5e-3}, dp, input);
     writeSample(
       out, "constant_newtonian_resistance", {"double_radius", 4.0e-4, 4.0e-2}, dp, input);
-    writeSample(
-      out, "constant_newtonian_resistance", {"half_radius", 1.0e-4, 1.5625e-4}, dp, input);
+    writeSample(out, "constant_newtonian_resistance", {"half_radius", 1.0e-4, 1.5625e-4},
+      dp, input);
   }
 
   std::cout << "Wrote " << path << '\n';

@@ -8,20 +8,15 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinAdaptation_HEADERS
   AnalyticFunctionAdapters.h
   WNGIR.h
-  WNGIRActiveSetKKT.h
   WNGIRAdmissibility.h
-  WNGIRAdmissibilityMetric.h
   CellDeformation.h
   DeformationMap.h
   CellGeomCache.h
-  WNGIRConstraintState.h
-  WNGIRMarginForce.h
   WNGIRLoss.h
   WNGIRParameters.h
   WNGIRPrimalBarrierForce.h
   WNGIRPrimalBarrierMetric.h
   WNGIRPrimalBarrierState.h
-  WNGIRValidationWeights.h
   WNGIRReport.h
   WNGIRSolver.h
   WNGIRNormalOffset.h

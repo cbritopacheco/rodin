@@ -12,113 +12,37 @@
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Types.h"
 
-#include "WNGIRLoss.h"
-
 namespace Rodin::Adaptation
 {
-  /// @brief Surface observation metric used by the WNGIR natural gradient.
-  enum class WNGIRObservationMetric
-  {
-    /// @brief Isotropic demons metric acting on every displacement component.
-    Isotropic,
-    /// @brief Rank-one IRLS metric acting only in the observed level-set direction.
-    RankOneIRLS,
-    /// @brief Rank-one IRLS metric with a tangential coercivity floor.
-    HybridRankOneIRLS,
-    /// @brief Rank-one Gauss--Newton majorizer retaining robust force attenuation.
-    RankOneGaussNewton
-  };
-
-  /// @brief Activation rule for quality and admissibility metric terms.
-  enum class WNGIRMetricActivation
-  {
-    /// @brief Activate the metric contribution with a sharp threshold.
-    Hard,
-    /// @brief Activate the metric contribution with a smooth transition.
-    Smooth
-  };
-
-  /// @brief Local treatment of linearized quality and admissibility margins.
-  enum class WNGIRConstraintFormulation
-  {
-    /// @brief Penalize both signs of every state-activated constraint action.
-    SignBlindMetric,
-    /// @brief Penalize only actions that consume the current margin.
-    DirectionalMetric,
-    /// @brief Limit the predicted action to a fraction of the current margin.
-    FractionalMarginMetric,
-    /// @brief Fractional-margin metric followed by an affine global safeguard.
-    SafeguardedMarginMetric,
-    /// @brief Primal logarithmic-barrier solution of the linearized QP.
-    PrimalBarrierQP,
-    /// @brief Exact active-set solution of the linearized constrained problem.
-    ActiveSetKKT
-  };
-
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
-      WNGIRLossType loss = WNGIRLossType::Welsch; ///< Robust interface loss.
       Real robustScale =
-        0; ///< >0 fixes the physical robust scale; zero selects it automatically.
+        0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
       Real h = 0; ///< reference mesh size (required).
-      Real gammaM = 0; ///< L² weight; zero disables the mass term.
-      Real gammaH = -1; ///< deviatoric-strain weight; <0 ⇒ 0.0125/h.
-      Real gammaDiv = -1; ///< divergence weight; <0 ⇒ gammaH.
-      Real ellM = -1; ///< Sobolev length; <0 ⇒ 0.75h.
-      Real gammaObs = 1; ///< surface observation metric weight.
-      WNGIRObservationMetric observationMetric =
-        WNGIRObservationMetric::HybridRankOneIRLS; ///< Surface observation metric.
-      Real observationTangentialFloor =
+      Real kappaBulk = Real(0.00703125); ///< Dimensionless bulk-strain coefficient.
+      Real rDiv = 1; ///< Divergence/deviatoric bulk-coefficient ratio.
+      Real kappaObs = 1; ///< surface observation metric weight.
+      Real tauTan =
         Real(0.05); ///< Tangential weight of the hybrid rank-one metric.
-      bool residualStabilizedObservationMetric =
-        true; ///< Add residual damping to the isotropic observation metric.
-      Real initialGuessGamma = 0; ///< Normal-offset initializer; zero gives a cold start.
+      Real kappaInit = 0; ///< Normal-offset initializer; zero gives a cold start.
       Real initialGuessCapH =
         2; ///< Cap normal-offset initialization by this multiple of h.
-      Real gammaJ = 1; ///< j-barrier weight.
-      Real gammaQ = 1; ///< Q-barrier weight.
+      Real kappaJ = 1; ///< Jacobian barrier row weight.
+      Real kappaQ = 1; ///< Relative-distortion barrier row weight.
       Real jSafe = 1e-2; ///< barrier floor on j.
       Real qMax = 10; ///< barrier + line-search ceiling on Q.
-      Real s0J = 0.25; ///< j-barrier activation width.
-      Real s0Q = 2; ///< Q-barrier activation width.
-      /// One-sided relative-distortion quality metric:
-      ///   K_Q(v,z) = gammaQual ∫_{Q_rel>qStar} a_Q(v) a_Q(z) dX.
-      /// This changes the Riesz metric only; no quality force is added to the
-      /// right-hand side.
-      /// gammaQual ≤ 0 disables the Q hinge.
-      Real gammaQual = 0; ///< Relative-distortion quality metric weight.
-      Real qStar = Real(1.75); ///< Relative-distortion hinge threshold.
-      /// Optional one-sided size hinge:
-      ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
-      /// Disabled by default. Inversion is handled by the near-zero j barrier
-      /// and the true-geometry line search, allowing small well-shaped cells.
-      Real gammaSize = 0; ///< Size-hinge weight in the symmetric metric model.
-      Real jStar = Real(0.3); ///< Jacobian size-hinge threshold.
-      WNGIRMetricActivation metricActivation =
-        WNGIRMetricActivation::Hard; ///< Activation rule for metric hinges.
-      Real qualitySmoothDelta = Real(0.1); ///< Smooth quality-hinge transition width.
-      Real jBarrierSmoothDelta = Real(0.05); ///< Smooth j-barrier transition width.
-      Real qBarrierSmoothDelta = Real(0.1); ///< Smooth Q-barrier transition width.
-      Real metricActivationEpsilon =
-        Real(1e-8); ///< Positive guard for smooth activation.
-      WNGIRConstraintFormulation constraintFormulation =
-        WNGIRConstraintFormulation::PrimalBarrierQP; ///< Linearized constraint model.
-      Real marginFraction = Real(0.5); ///< Fraction of a margin available to one step.
-      std::size_t marginCorrectionIterations = 3; ///< Safeguarded penalty corrections.
-      Real marginPenaltyGrowth = 10; ///< Penalty growth between safeguard corrections.
       std::size_t primalBarrierIterations =
         8; ///< Maximum Newton corrections of the QP barrier.
       Real primalBarrierRelativeTolerance =
         Real(1e-2); ///< Relative Newton-correction tolerance for the QP barrier.
       bool requirePrimalBarrierConvergence =
         true; ///< Reject a primal-barrier direction without an inner certificate.
-      Real primalBarrierMu = Real(0.3); ///< Dimensionless barrier/model-decrease ratio.
-      Real fractionToBoundary = Real(0.95); ///< Strict-feasibility fraction.
+      Real muHat = Real(0.3); ///< Dimensionless barrier/model-decrease ratio.
+      Real thetaBoundary = Real(0.95); ///< Strict-feasibility fraction.
       Real omegaMin = 0.1; ///< active-set threshold on ω.
       Real alphaMin = 1e-4; ///< line-search floor.
-      bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds;
-        ///< mandatory when the primal barrier is active.
+      bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds.
       bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
       Real armijoCoefficient = Real(1e-4); ///< Armijo sufficient-decrease coefficient.
       Real descentFraction =
@@ -127,10 +51,12 @@ namespace Rodin::Adaptation
         Real(10); ///< Maximum coefficient norm relative to the predictor.
       Real jMinRatio = 1e-8; ///< hard inadmissibility floor.
       Real jLineSearchRatio = 1e-2; ///< Jacobian floor ratio enforced by line search.
-      Real activeRMSTol = 0; ///< ≤0 ⇒ 4h².
-      Real activeSupTol = 0; ///< ≤0 ⇒ 10h².
-      Real activeRMSOverHTol = 0; ///< >0 enables scale-aware RMS stopping.
-      Real activeSupOverHTol = 0; ///< >0 enables scale-aware sup stopping.
+      Real activeRMSTol = 0; ///< ≤0 ⇒ 4h² times the level-set gradient scale.
+      Real activeSupTol = 0; ///< ≤0 ⇒ 10h² times the level-set gradient scale.
+      Real activeRMSOverHTol =
+        0; ///< >0 bounds RMS divided by h times the level-set gradient scale.
+      Real activeSupOverHTol =
+        0; ///< >0 bounds sup divided by h times the level-set gradient scale.
       bool geometryAwareTolerances = true; ///< Enable dimension-aware residual floors.
       Real rmsFloor2D = Real(0.05); ///< Minimum RMS residual floor in 2D, divided by h.
       Real supFloor2D = Real(0.25); ///< Minimum sup residual floor in 2D, divided by h.
@@ -154,23 +80,6 @@ namespace Rodin::Adaptation
         0; ///< Mesh attribute identifying interface facets.
       FlatSet<Geometry::Attribute> dirichletAttributes; ///< Zero-displacement boundaries.
       bool trace = false; ///< Print per-iteration diagnostics when true.
-      /// If true, add near-boundary admissibility barriers to the metric.
-      /// The true-geometry line search remains the final admissibility check.
-      bool includeAdmissibilityMetric = true;
-      /// If true, add the Q_rel and optional j-size hinge Gauss--Newton terms
-      /// to the metric.
-      bool includeQualityMetric = true;
-      /// Optional sign-blind-formulation rescale of the lifted step along itself:
-      ///   β = ⟨d, v⟩_Γ / ⟨v, v⟩_Γ  (surface inner products),
-      /// clamped to [1, betaMax]; line search starts at β·v instead of
-      /// v. The H¹ lift systematically under-scales the skeleton trace
-      /// (gain ≈ surface-weight / M-diagonal ≈ 1/20 at default γ), so
-      /// without β the iteration is linearly convergent with ρ ≈ 0.95.
-      /// β recovers Newton-matched magnitude while preserving the lift's
-      /// smooth admissibility-aware shape. Since β only scales the same
-      /// descent direction, the nonlinear line search remains the final
-      /// admissibility and energy-decrease guard.
-      Real betaMax = 50; ///< Used only by SignBlindMetric.
   };
 }
 

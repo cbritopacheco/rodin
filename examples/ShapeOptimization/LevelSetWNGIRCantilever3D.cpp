@@ -581,10 +581,6 @@ int run(int argc, char** argv)
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
-  wngirDefaults.gammaMFactor = 0;
-  wngirDefaults.gammaHFactor = Real(0.0125);
-  wngirDefaults.gammaDivFactor = Real(0.0125);
-  wngirDefaults.ellOverH = Real(0.75);
   wngirDefaults.activeRMSOverHTol = Real(0.12);
   wngirDefaults.activeSupOverHTol = Real(0.65);
   WNGIRParameters wp =
@@ -699,9 +695,8 @@ int run(int argc, char** argv)
             << " classify=" << classifyEvery << " redistance=" << redistanceMode << "/"
             << redistanceEvery << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
-            << " repair=" << repairEvery << "\n  WNGIR metric: gammaM=" << wp.gammaM
-            << " gammaDev=" << wp.gammaH << " gammaDiv=" << wp.gammaDiv
-            << " ellM=" << wp.ellM << '\n';
+            << " repair=" << repairEvery << "\n  WNGIR metric: kappaBulk="
+            << wp.kappaBulk << " rDiv=" << wp.rDiv << '\n';
 
   auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {
     const auto& vv = cell.getVertices();
@@ -907,12 +902,17 @@ int run(int argc, char** argv)
       [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
     u.getData().setZero();
     const auto report = wngir.solve(mesh, interfaceFacets, phiFn, gradFn);
+    const Real levelSetMeshScale = h * report.levelSetGradientScale;
     std::cout << "  WNGIR: it=" << report.iterations << " exit=" << report.exitReason
               << " activeRMS=" << std::scientific << report.activeRMS
-              << " activeRMS/h=" << (h > Real(0) ? report.activeRMS / h : Real(0))
-              << " activeSup/h=" << (h > Real(0) ? report.activeSup / h : Real(0))
-              << " tolRMS/h=" << report.effectiveRMSOverHTol
-              << " tolSup/h=" << report.effectiveSupOverHTol
+              << " activeRMS/(hG)="
+              << (levelSetMeshScale > Real(0) ? report.activeRMS / levelSetMeshScale
+                                              : Real(0))
+              << " activeSup/(hG)="
+              << (levelSetMeshScale > Real(0) ? report.activeSup / levelSetMeshScale
+                                              : Real(0))
+              << " tolRMS/(hG)=" << report.effectiveRMSOverHTol
+              << " tolSup/(hG)=" << report.effectiveSupOverHTol
               << " nJumpRMS=" << report.normalJumpRMS << '\n';
     tWNGIR = iterTimer.reset();
 
@@ -1094,7 +1094,9 @@ int run(int argc, char** argv)
     }
     tWrite = iterTimer.reset();
 
-    const Real redistanceEta = std::max(report.sigma, Real(3) * h);
+    const Real redistanceEta = report.levelSetGradientScale > Real(0)
+      ? std::max(report.sigma / report.levelSetGradientScale, Real(3) * h)
+      : Real(3) * h;
     const Real eikonalDefect = weightedEikonalDefect(phiH, redistanceEta);
     const bool periodicRedistance =
       redistanceEvery > 0 && ((itn + 1) % redistanceEvery == 0 || itn + 1 == maxIt);

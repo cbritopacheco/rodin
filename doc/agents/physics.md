@@ -70,7 +70,7 @@ fitting owns node positions and never decides topology.
 On this branch the module is **WNGIR** — Welsch natural-gradient interface
 registration: `WNGIR.h` public include; `WNGIRParameters`/`WNGIRReport`,
 backend-independent `WNGIRSolver`, form-language surface coefficients,
-`WNGIRAdmissibilityMetric`, and optional normal-offset coefficients. The solver
+primal-barrier admissibility coefficients, and optional normal-offset coefficients. The solver
 retains one `Problem`, one linear solver, and a preassembled bulk form; only
 coefficients depending on the current deformation are reassembled. It is the default
 displacement model for fitting a mesh interface to a level set;

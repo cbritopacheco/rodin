@@ -30,7 +30,7 @@ namespace Rodin::Solver
     PetscErrorCode ierr;
     ierr = KSPCreate(pb.getLinearSystem().getCommunicator(), &m_ksp);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
   }
 
   KSP::~KSP()
@@ -40,7 +40,7 @@ namespace Rodin::Solver
       PetscErrorCode ierr = KSPDestroy(&m_ksp);
       assert(ierr == PETSC_SUCCESS);
       m_ksp = PETSC_NULLPTR;
-      (void) ierr;
+      (void)ierr;
     }
   }
 
@@ -106,8 +106,7 @@ namespace Rodin::Solver
         const auto& s = splits[k];
         assert(s.is);
 
-        const std::string name =
-          !s.name.empty() ? s.name : std::to_string(k);
+        const std::string name = !s.name.empty() ? s.name : std::to_string(k);
 
         ierr = PCFieldSplitSetIS(pc, name.c_str(), s.is);
         assert(ierr == PETSC_SUCCESS);
@@ -128,7 +127,7 @@ namespace Rodin::Solver
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);
 
-    (void) ierr;
+    (void)ierr;
   }
 
   KSP& KSP::setType(::KSPType type) noexcept
@@ -138,7 +137,7 @@ namespace Rodin::Solver
   }
 
   KSP& KSP::setTolerances(
-      PetscReal rtol, PetscReal abstol, PetscReal dtol, PetscInt  maxIt) noexcept
+    PetscReal rtol, PetscReal abstol, PetscReal dtol, PetscInt maxIt) noexcept
   {
     m_rtol = rtol;
     m_abstol = abstol;
@@ -152,7 +151,7 @@ namespace Rodin::Solver
     PetscInt iterations = 0;
     const PetscErrorCode ierr = KSPGetIterationNumber(m_ksp, &iterations);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
     return static_cast<std::size_t>(iterations);
   }
 
@@ -161,7 +160,7 @@ namespace Rodin::Solver
     PetscReal residual = 0;
     const PetscErrorCode ierr = KSPGetResidualNorm(m_ksp, &residual);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
     return static_cast<Real>(residual);
   }
 

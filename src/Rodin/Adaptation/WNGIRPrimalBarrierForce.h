@@ -7,7 +7,6 @@
 
 #include "CellDeformation.h"
 #include "WNGIRPrimalBarrierState.h"
-#include "WNGIRValidationWeights.h"
 
 namespace Rodin::Adaptation::Detail
 {
@@ -60,7 +59,6 @@ namespace Rodin::Adaptation::Detail
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
-        const WNGIRValidationWeights validationWeights(qf);
 
         m_vector.resize(static_cast<Eigen::Index>(fe.getCount()));
         m_vector.setZero();
@@ -84,7 +82,7 @@ namespace Rodin::Adaptation::Detail
 
           const Real coefficientJ = state.getJacobianForce();
           const Real coefficientQ = state.getDistortionForce();
-          const Real weight = validationWeights.getWeight(q) * point.getDistortion();
+          const Real weight = qf.getWeight(q) * point.getDistortion();
           testJacobian.setIntegrationPoint(ip);
           for (std::size_t local = 0; local < fe.getCount(); ++local)
           {

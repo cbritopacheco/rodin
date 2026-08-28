@@ -108,9 +108,8 @@ namespace Rodin::Adaptation
        * @brief Whether @f$F@f$ is numerically invertible, @f$|j|>\varepsilon@f$.
        *
        * Weaker than @ref isAdmissible — an inverted cell (@f$j<0@f$) is
-       * invertible. Mesh adaptation relies on this distinction, since the
-       * size-control terms act on inverted cells precisely to pull them back to
-       * validity, and need @f$F^{-\top}@f$ there.
+       * invertible. Mesh adaptation relies on this distinction when evaluating
+       * the cofactor in linearized sampled constraints.
        */
       bool isInvertible() const
       {

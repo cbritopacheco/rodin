@@ -32,6 +32,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -339,17 +340,8 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-  wngirDefaults.gammaMFactor = 0;
-  wngirDefaults.gammaHFactor = Real(0.0125);
-  wngirDefaults.gammaDivFactor = Real(0.0125);
-  wngirDefaults.ellOverH = Real(0.75);
   wngirDefaults.activeRMSOverHTol = Real(0.03);
   wngirDefaults.activeSupOverHTol = Real(0.20);
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 50;
-#else
-  wngirDefaults.betaMax = 100;
-#endif
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
@@ -359,7 +351,7 @@ int main(int argc, char** argv)
 
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
@@ -406,14 +398,13 @@ int main(int argc, char** argv)
   cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);
   phaseMoment.setName("phase_moment");
-  GridFunction conflict(p0Fes);
-  conflict.setName("fit_admissibility_conflict");
   TrialFunction wngirTrial(vectorFes);
   TestFunction wngirTest(vectorFes);
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
-  wngirSolveParams.activeRMSTol = fitTol;
+  if (fitTol > Real(0))
+    wngirSolveParams.activeRMSTol = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -438,7 +429,6 @@ int main(int argc, char** argv)
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
   backgroundGrid.add(phaseMoment, IO::XDMF::Center::Cell);
-  backgroundGrid.add(conflict, IO::XDMF::Center::Cell);
   backgroundGrid.add(phiGf, IO::XDMF::Center::Node);
   backgroundGrid.add(u, IO::XDMF::Center::Node);
 
@@ -460,8 +450,8 @@ int main(int argc, char** argv)
             << " tetrahedral unit-cube mesh\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes << "  center=("
             << cx << ", " << cy << ", " << cz << ")"
-            << "  phase=" << phase << "  wngirEll=" << wngirParams.ellM
-            << '\n';
+            << "  phase=" << phase
+            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   clearXDMFRegionAttributes(mesh);
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
@@ -591,16 +581,24 @@ int main(int argc, char** argv)
               << "  fit0=" << interfaceFit << "\n";
   }
 
-  Math::Vector<Real> bestU = u.getData();
-  Real bestFit = interfaceFit;
+  Real effectiveFitTol = fitTol;
   Real minJ = Real(1);
+  Real maxJ = Real(1);
   Real maxQRel = Real(1);
+  Real activeRMS = Real(0);
+  Real levelSetGradientScale = Real(0);
+  Real activeFraction = Real(0);
+  Real rigidModeCoercivity = Real(0);
+  std::size_t jacobianRejections = 0;
+  std::size_t distortionRejections = 0;
+  std::size_t energyRejections = 0;
   Real lastAlpha = Real(0);
   Real acceptedStep = Real(0);
   std::size_t iterations = 0;
   const char* exitReason = "iter-budget";
   {
     const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+    effectiveFitTol = wngirRep.effectiveRMSTol;
     std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
               << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
               << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -608,34 +606,29 @@ int main(int argc, char** argv)
               << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
               << "  exit=" << wngirRep.exitReason << '\n';
     iterations = wngirRep.iterations;
-      // Per-cell fit-admissibility alignment indicator, not a KKT multiplier.
-    conflict.getData().setZero();
-    if (!wngirRep.conflictIndicator.empty())
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-      {
-        const Index cellIdx = cellIt->getIndex();
-        const Index dof = p0Fes.getGlobalIndex({mesh.getDimension(), cellIdx}, 0);
-        conflict.getData()(dof) = wngirRep.conflictIndicator[cellIdx];
-      }
     lastAlpha = wngirRep.lastAlpha;
     acceptedStep = wngirRep.acceptedStep;
     minJ = wngirRep.minJ;
+    maxJ = wngirRep.maxJ;
     maxQRel = wngirRep.maxQRel;
+    activeRMS = wngirRep.activeRMS;
+    levelSetGradientScale = wngirRep.levelSetGradientScale;
+    activeFraction = wngirRep.activeFraction;
+    rigidModeCoercivity = wngirRep.rigidModeCoercivity;
+    jacobianRejections = wngirRep.jacobianRejections;
+    distortionRejections = wngirRep.distortionRejections;
+    energyRejections = wngirRep.energyRejections;
     exitReason = wngirRep.exitReason;
     interfaceFit = computeInterfaceFit();
-    if (interfaceFit < bestFit)
-    {
-      bestFit = interfaceFit;
-      bestU = u.getData();
-    }
     if (trace)
-      std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
-                << ")\n";
+      std::cout << "      wngir sigma=" << wngirRep.sigma
+                << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
   }
 
-  u.getData() = bestU;
-  interfaceFit = bestFit;
-  const bool converged = interfaceFit <= fitTol;
+  const std::string_view exit(exitReason);
+  const bool residualConverged = exit.starts_with("numerical-") ||
+    exit.starts_with("geometric-");
+  const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
 
   const std::size_t D = mesh.getDimension();
   for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -708,7 +701,14 @@ int main(int argc, char** argv)
 
   std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
             << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
-            << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_qrel=" << maxQRel
+            << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
+            << "  max_qrel=" << maxQRel << "  act_frac=" << activeFraction
+            << "  active_rms=" << activeRMS << "  active_rms_hg="
+            << (h * levelSetGradientScale > Real(0)
+                  ? activeRMS / (h * levelSetGradientScale)
+                  : Real(0))
+            << "  cR=" << rigidModeCoercivity << "  rej_j=" << jacobianRejections
+            << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections
             << "  converged=" << (converged ? "yes" : "best-effort")
             << "  exit=" << exitReason << '\n';
   std::cout << "\nSummary\n";

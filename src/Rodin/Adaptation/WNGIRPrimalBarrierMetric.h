@@ -7,7 +7,6 @@
 
 #include "CellDeformation.h"
 #include "WNGIRPrimalBarrierState.h"
-#include "WNGIRValidationWeights.h"
 
 namespace Rodin::Adaptation::Detail
 {
@@ -64,7 +63,6 @@ namespace Rodin::Adaptation::Detail
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
-        const WNGIRValidationWeights validationWeights(qf);
         const std::size_t nTrial = trialFE.getCount();
         const std::size_t nTest = testFE.getCount();
 
@@ -119,7 +117,7 @@ namespace Rodin::Adaptation::Detail
             }
           }
 
-          const Real weight = validationWeights.getWeight(q) * point.getDistortion();
+          const Real weight = qf.getWeight(q) * point.getDistortion();
           const Real weightJ = state.getJacobianHessian();
           const Real weightQ = state.getDistortionHessian();
           for (std::size_t test = 0; test < nTest; ++test)

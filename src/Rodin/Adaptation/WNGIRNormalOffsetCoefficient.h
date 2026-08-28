@@ -59,7 +59,7 @@ namespace Rodin::Adaptation::Detail
         const WNGIRNormalOffset offset(*m_phi, *m_grad, p, m_parameters.get(), m_sigma2);
         if (offset.isDegenerate())
           return m;
-        const Real scale = m_parameters.get().initialGuessGamma * offset.getAttenuation();
+        const Real scale = m_parameters.get().kappaInit * offset.getAttenuation();
         for (std::uint8_t r = 0; r < d; ++r)
           for (std::uint8_t c = 0; c < d; ++c)
             m(r, c) = scale * offset.getNormal()(r) * offset.getNormal()(c);

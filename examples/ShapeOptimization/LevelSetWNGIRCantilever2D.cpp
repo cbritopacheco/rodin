@@ -654,8 +654,8 @@ int main(int argc, char** argv)
             << "\n  domain [0," << L << "]x[0," << H << "]"
             << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
-            << "\n  WNGIR: gammaM=" << wp.gammaM << " gammaDev=" << wp.gammaH
-            << " gammaDiv=" << wp.gammaDiv << " ellM=" << wp.ellM
+            << "\n  WNGIR: kappaBulk=" << wp.kappaBulk
+            << " rDiv=" << wp.rDiv
             << " rmsTol=" << wp.activeRMSTol << " supTol=" << wp.activeSupTol
             << " steps=" << wp.maxIterations << "  classify=" << classifyEvery
             << "  redistance=" << redistanceMode << "/" << redistanceEvery
@@ -1055,14 +1055,17 @@ int main(int argc, char** argv)
         const Real ux = u.getData()(d[0]), uy = u.getData()(d[1]);
         maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
       }
-      const Real activeRMSOverH = h > Real(0) ? rep.activeRMS / h : Real(0);
-      const Real activeSupOverH = h > Real(0) ? rep.activeSup / h : Real(0);
+      const Real levelSetMeshScale = h * rep.levelSetGradientScale;
+      const Real activeRMSOverH =
+        levelSetMeshScale > Real(0) ? rep.activeRMS / levelSetMeshScale : Real(0);
+      const Real activeSupOverH =
+        levelSetMeshScale > Real(0) ? rep.activeSup / levelSetMeshScale : Real(0);
       std::cout << "  WNGIR: it=" << rep.iterations << "  exit=" << rep.exitReason
                 << "  activeRMS=" << std::scientific << std::setprecision(2)
-                << rep.activeRMS << "  activeRMS/h=" << activeRMSOverH
-                << "  activeSup/h=" << activeSupOverH
-                << "  tolRMS/h=" << rep.effectiveRMSOverHTol
-                << "  tolSup/h=" << rep.effectiveSupOverHTol
+                << rep.activeRMS << "  activeRMS/(hG)=" << activeRMSOverH
+                << "  activeSup/(hG)=" << activeSupOverH
+                << "  tolRMS/(hG)=" << rep.effectiveRMSOverHTol
+                << "  tolSup/(hG)=" << rep.effectiveSupOverHTol
                 << "  nJumpRMS=" << rep.normalJumpRMS << "  max|u|/h=" << maxUoverH
                 << '\n';
     }
@@ -1343,7 +1346,9 @@ int main(int argc, char** argv)
     tWrite = iterTimer.reset();
 
     // ---- Stage 5: optional redistance --------------------------------------
-    const Real redistanceEta = std::max(rep.sigma, Real(3) * h);
+    const Real redistanceEta = rep.levelSetGradientScale > Real(0)
+      ? std::max(rep.sigma / rep.levelSetGradientScale, Real(3) * h)
+      : Real(3) * h;
     const Real eikonalDefect = weightedEikonalDefect(phiH, redistanceEta);
     const bool periodicRedistance =
       redistanceEvery > 0 && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt);

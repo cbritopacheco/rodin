@@ -337,17 +337,8 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-  wngirDefaults.gammaMFactor = 0;
-  wngirDefaults.gammaHFactor = Real(0.0125);
-  wngirDefaults.gammaDivFactor = Real(0.0125);
-  wngirDefaults.ellOverH = Real(0.75);
   wngirDefaults.activeRMSOverHTol = Real(0.03);
   wngirDefaults.activeSupOverHTol = Real(0.20);
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 50;
-#else
-  wngirDefaults.betaMax = 100;
-#endif
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
@@ -357,7 +348,7 @@ int main(int argc, char** argv)
 
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
@@ -409,7 +400,8 @@ int main(int argc, char** argv)
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
-  wngirSolveParams.activeRMSTol = fitTol;
+  if (fitTol > Real(0))
+    wngirSolveParams.activeRMSTol = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -447,8 +439,8 @@ int main(int argc, char** argv)
   std::cout << "Lobed-sphere WNGIR sweep on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
-            << "  orbit R=" << orbitR << "  wngirEll=" << wngirParams.ellM
-            << '\n';
+            << "  orbit R=" << orbitR
+            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -604,6 +596,7 @@ int main(int argc, char** argv)
 
     Math::Vector<Real> bestU = u.getData();
     Real bestFit = interfaceFit;
+    Real effectiveFitTol = fitTol;
     Real minJ = Real(1);
     Real maxQRel = Real(1);
     Real lastAlpha = Real(0);
@@ -612,6 +605,7 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      effectiveFitTol = wngirRep.effectiveRMSTol;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -631,14 +625,14 @@ int main(int argc, char** argv)
         bestU = u.getData();
       }
       if (trace)
-        std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
-                  << ")\n";
+        std::cout << "      wngir sigma=" << wngirRep.sigma
+                  << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
     u.getData() = bestU;
     interfaceFit = bestFit;
 
-    const bool converged = interfaceFit <= fitTol;
+    const bool converged = interfaceFit <= effectiveFitTol;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);

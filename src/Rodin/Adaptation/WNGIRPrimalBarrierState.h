@@ -28,15 +28,15 @@ namespace Rodin::Adaptation::Detail
         if (m_jSlack <= Real(0) || m_qSlack <= Real(0))
           return;
 
-        if (parameters.includeAdmissibilityMetric && parameters.gammaJ > Real(0))
+        if (parameters.kappaJ > Real(0))
         {
-          const Real coefficient = barrierCoefficient * parameters.gammaJ;
+          const Real coefficient = barrierCoefficient * parameters.kappaJ;
           m_jHessian = coefficient / (m_jSlack * m_jSlack);
           m_jForce = m_jHessian * m_jAction - coefficient / m_jSlack;
         }
-        if (parameters.includeAdmissibilityMetric && parameters.gammaQ > Real(0))
+        if (parameters.kappaQ > Real(0))
         {
-          const Real coefficient = barrierCoefficient * parameters.gammaQ;
+          const Real coefficient = barrierCoefficient * parameters.kappaQ;
           m_qHessian = coefficient / (m_qSlack * m_qSlack);
           m_qForce = m_qHessian * m_qAction - coefficient / m_qSlack;
         }

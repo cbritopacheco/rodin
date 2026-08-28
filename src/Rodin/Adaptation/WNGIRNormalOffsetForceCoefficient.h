@@ -56,7 +56,7 @@ namespace Rodin::Adaptation::Detail
         const WNGIRNormalOffset offset(*m_phi, *m_grad, p, m_parameters.get(), m_sigma2);
         if (offset.isDegenerate())
           return RangeType::Zero(m_dimension);
-        return (m_parameters.get().initialGuessGamma * offset.getAttenuation() *
+        return (m_parameters.get().kappaInit * offset.getAttenuation() *
                  offset.getOffset()) *
           offset.getNormal();
       }
