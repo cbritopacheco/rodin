@@ -577,16 +577,6 @@ int main(int argc, char** argv)
   wngirDefaults.activeSupOverHTol = Real(0.25);
   WNGIRParameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
-  const auto wngirDirichlet =
-    Rodin::Examples::stringOption(argc, argv, "wngir-dirichlet", "none");
-  if (wngirDirichlet == "anchor")
-    wp.dirichletAttributes = {WNGIRAnchor};
-  else if (wngirDirichlet == "support")
-    wp.dirichletAttributes = {GammaD};
-  else if (wngirDirichlet == "boundary")
-    wp.dirichletAttributes = {Gamma0, GammaD, GammaN};
-  else if (wngirDirichlet != "none")
-    throw std::invalid_argument("Unknown --wngir-dirichlet value: " + wngirDirichlet);
   wp.trace = trace;
   WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
@@ -1037,15 +1027,7 @@ int main(int argc, char** argv)
     u.getData().setZero();
     WNGIRReport rep;
     {
-      if (wngirDirichlet == "anchor")
-      {
-        if (wngirAnchorFacet == Index(-1))
-          throw std::runtime_error("WNGIR anchor facet was not found.");
-        mesh.setAttribute({D - 1, wngirAnchorFacet}, WNGIRAnchor);
-      }
       rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
-      if (wngirDirichlet == "anchor")
-        mesh.setAttribute({D - 1, wngirAnchorFacet}, GammaD);
       // Diagnostic: did WNGIR actually move the mesh, and did it converge?
       Real maxUoverH = 0;
       const auto& uFes = u.getFiniteElementSpace();

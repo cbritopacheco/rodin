@@ -36,14 +36,10 @@ namespace Rodin::Adaptation
         8; ///< Maximum Newton corrections of the QP barrier.
       Real primalBarrierRelativeTolerance =
         Real(1e-2); ///< Relative Newton-correction tolerance for the QP barrier.
-      bool requirePrimalBarrierConvergence =
-        true; ///< Reject a primal-barrier direction without an inner certificate.
       Real muHat = Real(0.3); ///< Dimensionless barrier/model-decrease ratio.
       Real thetaBoundary = Real(0.95); ///< Strict-feasibility fraction.
       Real omegaMin = 0.1; ///< active-set threshold on ω.
       Real alphaMin = 1e-4; ///< line-search floor.
-      bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds.
-      bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
       Real armijoCoefficient = Real(1e-4); ///< Armijo sufficient-decrease coefficient.
       Real descentFraction =
         Real(1e-4); ///< Minimum force action relative to the predictor.
@@ -78,7 +74,6 @@ namespace Rodin::Adaptation
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
-      FlatSet<Geometry::Attribute> dirichletAttributes; ///< Zero-displacement boundaries.
       bool trace = false; ///< Print per-iteration diagnostics when true.
   };
 }

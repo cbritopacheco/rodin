@@ -372,14 +372,6 @@ int main(int argc, char** argv)
 
   auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const auto wngirDirichlet =
-    Rodin::Examples::stringOption(argc, argv, "wngir-dirichlet", "none");
-  if (wngirDirichlet == "anchor" || wngirDirichlet == "support")
-    wngirParams.dirichletAttributes = {supportAttribute};
-  else if (wngirDirichlet == "boundary")
-    wngirParams.dirichletAttributes = {boundaryAttribute, supportAttribute};
-  else if (wngirDirichlet != "none")
-    throw std::invalid_argument("Unknown --wngir-dirichlet value: " + wngirDirichlet);
   const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;

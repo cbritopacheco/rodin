@@ -133,16 +133,12 @@ namespace Rodin::Examples
         argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
     p.primalBarrierRelativeTolerance = realOption(
       argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
-    p.requirePrimalBarrierConvergence = boolOption(argc, argv,
-      "wngir-primal-barrier-require-convergence", p.requirePrimalBarrierConvergence);
     p.muHat =
       realOption(argc, argv, "wngir-mu-hat", "wngir-primal-barrier-mu", p.muHat);
     p.thetaBoundary = realOption(argc, argv, "wngir-theta-boundary",
       "wngir-fraction-to-boundary", p.thetaBoundary);
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
-    p.admissibilityChecks = boolOption(argc, argv, "wngir-admissibility-checks", true);
-    p.energyLineSearch = !boolOption(argc, argv, "wngir-no-energy-ls", false);
     p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
     p.descentFraction =
       realOption(argc, argv, "wngir-descent-fraction", p.descentFraction);

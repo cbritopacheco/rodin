@@ -213,7 +213,6 @@ namespace Rodin::Adaptation
         WNGIRReport rep;
         const Real h = p.h;
         const bool usePrimalBarrier = p.kappaJ > Real(0) || p.kappaQ > Real(0);
-        const bool checkGeometry = p.admissibilityChecks || usePrimalBarrier;
         const Real acceptedJacobianFloor =
           usePrimalBarrier ? std::max(p.jLineSearchRatio, p.jSafe) : p.jLineSearchRatio;
         const Real bulkDeviatoricCoefficient = h * p.kappaBulk;
@@ -378,12 +377,6 @@ namespace Rodin::Adaptation
           initForce.over(p.interfaceAttribute);
           typename ProblemType::ProblemBodyType body(m_bulkForm);
           body = body + initMetric - initForce;
-          Math::Vector<Real> zero(meshDim);
-          zero.setZero();
-          if (!p.dirichletAttributes.empty())
-            body = body +
-              Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
-                .on(p.dirichletAttributes);
           m_stepProblem = body;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
@@ -403,7 +396,6 @@ namespace Rodin::Adaptation
           }
 
           tic = Clock::now();
-          const bool useLineSearch = checkGeometry || p.energyLineSearch;
           Real eBase = 0;
           Real alpha = Real(1);
           bool accepted = false;
@@ -411,16 +403,9 @@ namespace Rodin::Adaptation
           Real eTrial = std::numeric_limits<Real>::infinity();
           SurfaceState trialSurface{};
           bool trialSurfaceEvaluated = false;
-          if (!useLineSearch)
-          {
-            u += vK;
-            accepted = true;
-          }
-          else
           {
             previousU = u;
-            if (p.energyLineSearch)
-              eBase = surfaceState(previousU).energy;
+            eBase = surfaceState(previousU).energy;
             while (alpha >= p.alphaMin)
             {
               uTrial = vK;
@@ -428,14 +413,13 @@ namespace Rodin::Adaptation
               uTrial += previousU;
               bool jOK = true;
               bool qOK = true;
-              if (checkGeometry)
               {
                 adm = fastAdmissibility(uTrial);
                 jOK = adm.inadmissibleCount == 0 && adm.minJ > acceptedJacobianFloor;
                 qOK = adm.maxQ < p.qMax;
               }
               bool eOK = true;
-              if (jOK && qOK && p.energyLineSearch)
+              if (jOK && qOK)
               {
                 trialSurface = surfaceState(uTrial);
                 trialSurfaceEvaluated = true;
@@ -470,19 +454,16 @@ namespace Rodin::Adaptation
                       << (levelSetMeshScale > Real(0) ? surf.activeRMS / levelSetMeshScale
                                                       : Real(0))
                       << "  min_j="
-                      << (checkGeometry && accepted
-                             ? adm.minJ
-                             : std::numeric_limits<Real>::quiet_NaN())
+                      << (accepted ? adm.minJ
+                                   : std::numeric_limits<Real>::quiet_NaN())
                       << "  max_Q="
-                      << (checkGeometry && accepted
-                             ? adm.maxQ
-                             : std::numeric_limits<Real>::quiet_NaN())
+                      << (accepted ? adm.maxQ
+                                   : std::numeric_limits<Real>::quiet_NaN())
                       << '\n';
           }
         }
 
         FastAdm initialAdm{};
-        if (checkGeometry)
         {
           initialAdm = fastAdmissibility(u);
           rep.minJ = initialAdm.minJ;
@@ -542,16 +523,10 @@ namespace Rodin::Adaptation
           surfaceForce.over(p.interfaceAttribute);
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
-          Math::Vector<Real> zero(meshDim);
-          zero.setZero();
           bool solveOk = true;
           Real predictorAction = Real(0);
           typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
           predictorBody = predictorBody + obsMetric - surfaceForce;
-          if (!p.dirichletAttributes.empty())
-            predictorBody = predictorBody +
-              Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
-                .on(p.dirichletAttributes);
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
@@ -617,10 +592,6 @@ namespace Rodin::Adaptation
                   m_vStep, u, vK, p, barrierCoefficient);
                 typename ProblemType::ProblemBodyType body(m_bulkForm);
                 body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
-                if (!p.dirichletAttributes.empty())
-                  body = body +
-                    Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
-                      .on(p.dirichletAttributes);
                 m_stepProblem = body;
                 m_stepProblem.assemble();
                 rep.tAssembly += secondsSince(tic);
@@ -663,7 +634,7 @@ namespace Rodin::Adaptation
                   break;
               }
               rep.primalBarrierConverged = innerConverged;
-              if (solveOk && p.requirePrimalBarrierConvergence &&
+              if (solveOk &&
                 p.primalBarrierRelativeTolerance > Real(0) && !innerConverged)
               {
                 rep.exitReason = "primal-barrier-inner-not-converged";
@@ -739,7 +710,6 @@ namespace Rodin::Adaptation
 
           // ---- Nonlinear line search on TRUE geometry ----
           tic = Clock::now();
-          const bool useLineSearch = checkGeometry || p.energyLineSearch;
           Real alpha = Real(1);
           bool accepted = false;
           std::size_t backtracks = 0;
@@ -747,12 +717,6 @@ namespace Rodin::Adaptation
           Real eTrial = std::numeric_limits<Real>::infinity();
           SurfaceState trialSurface{};
           bool trialSurfaceEvaluated = false;
-          if (!useLineSearch)
-          {
-            u += vK;
-            accepted = true;
-          }
-          else
           {
             previousU = u;
             while (alpha >= p.alphaMin)
@@ -763,14 +727,13 @@ namespace Rodin::Adaptation
               uTrial += previousU;
               bool jOK = true;
               bool qOK = true;
-              if (checkGeometry)
               {
                 adm = fastAdmissibility(uTrial);
                 jOK = adm.inadmissibleCount == 0 && adm.minJ > acceptedJacobianFloor;
                 qOK = adm.maxQ < p.qMax;
               }
               bool eOK = true;
-              if (jOK && qOK && p.energyLineSearch)
+              if (jOK && qOK)
               {
                 trialSurface = surfaceState(uTrial);
                 trialSurfaceEvaluated = true;
@@ -808,24 +771,18 @@ namespace Rodin::Adaptation
           SurfaceState acceptedSurf =
             trialSurfaceEvaluated ? trialSurface : surfaceState(u);
           Real acceptedEnergy =
-            p.energyLineSearch && std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
+            std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
 
           rep.lastAlpha = alpha;
-          if (useLineSearch)
           {
             // acceptedStep = max_i |u_i - previousU_i|
             scratch = u;
             scratch -= previousU;
             rep.acceptedStep = std::max(std::abs(scratch.max()), std::abs(scratch.min()));
           }
-          else
-            rep.acceptedStep = maxStep;
-          rep.minJ =
-            checkGeometry ? acceptedAdm.minJ : std::numeric_limits<Real>::quiet_NaN();
-          rep.maxJ =
-            checkGeometry ? acceptedAdm.maxJ : std::numeric_limits<Real>::quiet_NaN();
-          rep.maxQRel =
-            checkGeometry ? acceptedAdm.maxQ : std::numeric_limits<Real>::quiet_NaN();
+          rep.minJ = acceptedAdm.minJ;
+          rep.maxJ = acceptedAdm.maxJ;
+          rep.maxQRel = acceptedAdm.maxQ;
 
           const auto surf = acceptedSurf;
           currentSurface = surf;
@@ -1012,9 +969,9 @@ namespace Rodin::Adaptation
        * @brief Observation coercivity on the rigid-motion kernel of the bulk form.
        *
        * The matrices are the sampled realizations of @f$G_R@f$ and @f$H_R@f$
-       * from the analytical model. A full-vector Dirichlet condition on a
-       * boundary attribute removes the rigid kernel, in which case the
-       * diagnostic is vacuous.
+       * from the analytical model. No essential boundary condition is imposed,
+       * so the rigid kernel is always present and the diagnostic is never
+       * vacuous.
        */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       RigidModeState getRigidModeState(const Mesh& mesh, const FES& fes,
@@ -1022,9 +979,6 @@ namespace Rodin::Adaptation
         const std::vector<Index>& interfaceFacets, Real sigma2, Real normalization,
         std::size_t dimension, const LocatorType& locator) const
       {
-        if (!m_parameters.dirichletAttributes.empty())
-          return {std::numeric_limits<Real>::infinity(), Real(1), 0};
-
         const std::size_t count = dimension * (dimension + 1) / 2;
         if (count == 0)
           return {std::numeric_limits<Real>::infinity(), Real(1), 0};
