@@ -282,6 +282,22 @@ namespace Rodin::Examples::Heart
     /// @brief Flow magnitude below which the rheological modulation is frozen
     ///        at its low-shear plateau.
           Real zeroFlowTolerance = 1.0e-16;
+    /// @brief Residual venous conductance kept when the waterfall is shut, as a
+    ///        fraction of the open value.
+    /// @details With a hard on/off switch the Newton Jacobian loses its only
+    ///          restoring term the instant p_tm crosses zero, leaving a pure
+    ///          integrator of the 3D flux: a transient backflow then drives
+    ///          p_tm to large negative values with nothing to stop it. A small
+    ///          leak keeps J bounded away from C/dt and makes the switch
+    ///          differentiable enough for Newton. It is a regularisation, not a
+    ///          physical shunt: at 1e-3 it moves the open-lumen solution by less
+    ///          than 0.1 per cent.
+          Real closedLumenLeak = 1.0e-3;
+    /// @brief Enforce the lower bound p_tm >= 0 that the formulation assumes.
+    /// @details The RCR closure is derived assuming p_tm is bounded below by
+    ///          zero. That bound holds only while the venous lumen is open; it
+    ///          is imposed here so it holds unconditionally.
+          bool clampTransmuralPressure = true;
       };
 
   /**
@@ -589,6 +605,36 @@ namespace Rodin::Examples::Heart
           /// @details ~1.0e-6 m^3/s is about 60 mL/min; LCA rest flow ~150-250.
           Real lcaTargetFlow = 1.5e-6;
 
+          /// @brief Derive the bed resistance from morphometry instead of
+          ///        calibrating it to lcaTargetFlow.
+          /// @details When false (the default) R_a = dP_a / Q_i with
+          ///          Q_i = lcaTargetFlow * w: the resting flow is an input and
+          ///          the resistance follows, so nothing upstream -- a stenosis
+          ///          included -- can move the calibration. When true the
+          ///          arteriolar multiplicity N_a is prescribed instead
+          ///          (arteriolarCount, split by the same Murray weight) and the
+          ///          flow becomes a prediction, Q_i = pi r_a^2 v_a N_a. The two
+          ///          closures are algebraically identical when
+          ///          arteriolarCount = lcaTargetFlow / (pi r_a^2 v_a), which is
+          ///          the default below: switching this on changes nothing until
+          ///          arteriolarCount is edited away from that value.
+          bool morphometricResistance = false;
+
+          /// @brief Terminal arteriolar count of the whole bed, split by Murray.
+          /// @details Used only when morphometricResistance is true. The default
+          ///          reproduces lcaTargetFlow at the default (r_a, v_a).
+          ///          Coronary morphometry puts it at 1e5-1e6.
+          Real arteriolarCount = 1.5279e5;
+
+          /// @brief Microvascular vasodilation factor. 1 = rest.
+          /// @details R_a and R_v are divided by it, so 4-5 reproduces the
+          ///          adenosine hyperaemia under which FFR is measured. At rest
+          ///          an epicardial stenosis below ~90 per cent area is not flow
+          ///          limiting, because the microvascular bed carries almost all
+          ///          the resistance; it only becomes limiting once the bed is
+          ///          dilated. A stenosis study therefore needs this above one.
+          Real vasodilationFactor = 1.0;
+
           /// @brief Total microvascular compliance (m^3/Pa), split across
           ///        outlets by the Murray weight.
           /// @details The identified intramyocardial compliance. Together with
@@ -668,6 +714,44 @@ namespace Rodin::Examples::Heart
           Real intramyocardialFraction = 0.7;
           /// @brief Right atrial (coronary sinus) drainage pressure.
           Real rightAtrialPressure = 1800.0;
+
+          /// @brief Operating right atrial pressure of the running 0D outlets
+          ///        (Pa). <= 0 means "same as rightAtrialPressure".
+          /// @details Separates the runtime drainage pressure from the value
+          ///          used by the resting calibration. A venous-hypertension
+          ///          scenario (right-heart failure, tricuspid regurgitation,
+          ///          constrictive pericarditis; ~1800-2500 Pa, 13-19 mmHg)
+          ///          should displace the operating point of a bed whose
+          ///          (R_a, R_v, C) were calibrated at the healthy baseline:
+          ///          set THIS value and leave rightAtrialPressure alone.
+          ///          Setting rightAtrialPressure itself instead models a
+          ///          chronically adapted bed, because the calibration budget
+          ///          dP = p_ar(0) - P_RA then absorbs part of the change.
+          ///          The first cycles carry a small transient because the
+          ///          calibrated initial p_tm uses the baseline value; discard
+          ///          them as usual.
+          Real operatingRightAtrialPressure = 0.0;
+
+          /// @brief Freeze the reduced outlet closure at its high-shear
+          ///        plateau, giving a CONSTANT outlet resistance.
+          /// @details The comparison the paper reports at fixed haematological
+          ///          state: R_mu is replaced by
+          ///          R_inf = 8 mu_inf L / (N pi R^4), i.e. the WRMS table is
+          ///          built with mu(gammadot) == mu_inf so Phi = mu_inf/mu_N is
+          ///          constant and the pressure-flow relation of every outlet
+          ///          becomes linear. The plateau is taken from the ACTIVE law
+          ///          (mu_inf for Carreau-Yasuda; mu_F (1 - k_inf phi/2)^-2 for
+          ///          Quemada), so setting this is exactly "same mu_inf, zero
+          ///          shear-thinning".
+          ///
+          ///          Only the 0D closure changes: Config::viscosity still
+          ///          drives the 3D Carreau-Yasuda field, so a run with this
+          ///          flag differs from its R_mu twin ONLY in the reduced
+          ///          outlet model. That is what isolates the closure, and it
+          ///          is why the flag exists instead of setting
+          ///          viscosity.mu0 = viscosity.muInf, which would make the
+          ///          resolved domain Newtonian as well.
+          bool constantOutletResistance = false;
 
           Real inletTangentialDamping = 1e3;
           Real inletVelocityDamping = 0.0;

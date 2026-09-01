@@ -230,6 +230,75 @@ int main(int argc, char** argv)
         cfg.timeAdaptivityMaxLevels = maxAdaptivityLevels;
       }
 
+      // ---- Pathological-scenario knobs -----------------------------------
+      // Venous hypertension: runtime drainage pressure of the outlets, with
+      // the calibration left at the healthy baseline (frozen bed geometry).
+      PetscReal operatingPra = cfg.operatingRightAtrialPressure;
+      PetscBool operatingPraSet = PETSC_FALSE;
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_operating_pra", &operatingPra, &operatingPraSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (operatingPraSet)
+      {
+        if (operatingPra <= 0)
+          throw std::runtime_error("-coronary_operating_pra must be positive (Pa).");
+        cfg.operatingRightAtrialPressure = operatingPra;
+      }
+
+      // Pressure-overload / subendocardial territory: transmission fraction
+      // p_im = alpha p_LV. Baseline 0.7; subendocardium up to ~0.9.
+      PetscReal alphaIm = cfg.intramyocardialFraction;
+      PetscBool alphaImSet = PETSC_FALSE;
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_alpha_im", &alphaIm, &alphaImSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (alphaImSet)
+      {
+        if (alphaIm < 0 || alphaIm > 1)
+          throw std::runtime_error("-coronary_alpha_im must be in [0, 1].");
+        cfg.intramyocardialFraction = alphaIm;
+      }
+
+      // Sensitivity knob: total microvascular compliance (m^3/Pa). Changes the
+      // retrograde spike, hardly the mean flow; identified range 1e-10..3e-9.
+      PetscReal complianceTotal = cfg.coronaryComplianceTotal;
+      PetscBool complianceTotalSet = PETSC_FALSE;
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_compliance_total", &complianceTotal, &complianceTotalSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (complianceTotalSet)
+      {
+        if (complianceTotal <= 0)
+        {
+          throw std::runtime_error(
+            "-coronary_compliance_total must be positive (m^3/Pa).");
+        }
+        cfg.coronaryComplianceTotal = complianceTotal;
+      }
+
+      // Constant-resistance outlet closure (the mu_inf comparison run): the
+      // reduced outlets lose their shear dependence while the 3D Carreau-Yasuda
+      // field is left untouched, so the pair of runs isolates the closure.
+      PetscBool constantOutlet = PETSC_FALSE;
+      PetscBool constantOutletSet = PETSC_FALSE;
+      ierr = PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_constant_outlet", &constantOutlet, &constantOutletSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (constantOutletSet)
+        cfg.constantOutletResistance = (constantOutlet == PETSC_TRUE);
+
+      // Per-scenario output directory: <prefix>/CoronaryArtery.{xdmf,csv}.
+      char outPrefix[256] = {};
+      PetscBool outPrefixSet = PETSC_FALSE;
+      ierr = PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_output_prefix", outPrefix, sizeof(outPrefix), &outPrefixSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (outPrefixSet)
+      {
+        cfg.xdmfBasename = std::string(outPrefix) + "/CoronaryArtery";
+        cfg.csvPath = std::string(outPrefix) + "/CoronaryArtery.csv";
+      }
+
       Rodin::Examples::Heart::CoupledLV0DCoronary3D simulation(context, cfg);
       status = simulation.initialize().run();
     }

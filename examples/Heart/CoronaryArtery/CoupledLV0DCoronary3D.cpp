@@ -382,7 +382,19 @@ namespace Rodin::Examples::Heart
       return qp.plasmaViscosity / (b * b);
     };
 
+    // Constant-resistance closure: freeze the law at the high-shear plateau of
+    // whichever rheology is active. With mu constant the WRMS integral is
+    // I = tau_w^4 / (4 mu) exactly, so mu_ap == mu at every table node and the
+    // outlet becomes the linear resistance R_inf = 8 mu_inf L / (N pi R^4).
+    // The 3D field keeps Config::viscosity: only the reduced closure changes.
+    const Real muPlateau = quemada
+      ? qp.plasmaViscosity /
+          ((1.0 - 0.5 * qkInf * phi) * (1.0 - 0.5 * qkInf * phi))
+      : muInf;
+
     auto mu = [&](Real g) -> Real {
+      if (cfg.constantOutletResistance)
+        return muPlateau;
       if (quemada)
         return muQ(g);
       return muInf +
@@ -390,6 +402,8 @@ namespace Rodin::Examples::Heart
     };
 
     auto dmu = [&](Real g) -> Real {
+      if (cfg.constantOutletResistance)
+        return 0.0;
       if (quemada)
       {
         // Central difference in log g: the law is smooth and the table is
@@ -553,12 +567,18 @@ namespace Rodin::Examples::Heart
     const auto& s = model.getState();
     const auto& law = cfg.outletFlowLaw;
 
+    // Operating (runtime) right atrial pressure. May differ from the value the
+    // calibration used; see Config::operatingRightAtrialPressure.
+    const Real praOp = (cfg.operatingRightAtrialPressure > 0.0)
+      ? cfg.operatingRightAtrialPressure
+      : cfg.rightAtrialPressure;
+
     const Real pim = cfg.intramyocardialFraction * s.pv;
     const Real ptmOld = bc.ptm;
 
     // Drainage pressure of the Starling throat. Outside the myocardium the
     // reservoir is the right atrium; inside, the collapse pressure is p_im.
-    const Real pDrain = std::max<Real>(pim, cfg.rightAtrialPressure);
+    const Real pDrain = std::max<Real>(pim, praOp);
 
     // Is the venular lumen open?
     //
@@ -578,7 +598,7 @@ namespace Rodin::Examples::Heart
     // Backflow through the *open* branch is self-limiting and needs no floor:
     // q_v < 0 gives C dp_tm/dt > 0, which raises p_tm and closes the gradient.
     // The Jacobian stays C/dt + G_v > 0 in both branches.
-    const bool waterfall = pim > cfg.rightAtrialPressure;
+    const bool waterfall = pim > praOp;
 
     auto venousLumenOpen = [&](Real p) { return !waterfall || p > 0.0; };
 
@@ -622,21 +642,33 @@ namespace Rodin::Examples::Heart
     Real phiV = viscosityFactorV(qv);
     bool converged = false;
 
+    // The venous lumen is regularised rather than switched. A hard shut leaves
+    // J = C/dt, i.e. a pure integrator of the 3D flux Q with no restoring term,
+    // so a single transient backflow drives p_tm arbitrarily negative and the
+    // outlet never recovers. Keeping a small leak conductance bounds J away
+    // from that degenerate case and makes the switch differentiable enough for
+    // Newton to stop chattering across p_tm = 0.
+    const Real leak = std::max<Real>(law.closedLumenLeak, 0.0);
+
     for (int it = 0; it < law.outletMaxIterations; ++it)
     {
       phiV = viscosityFactorV(qv);
 
       const Real drive = (ptm + pim) - pDrain;
       const Real Gv = 1.0 / (Rv * phiV);
-      const bool open = venousLumenOpen(ptm);
+      const Real Ge = venousLumenOpen(ptm) ? Gv : leak * Gv;
 
-      qv = open ? drive * Gv : 0.0;
+      qv = drive * Ge;
 
       const Real R = C * (ptm - ptmOld) / dt - Q + qv;
-      const Real J = C / dt + (open ? Gv : 0.0);
+      const Real J = C / dt + Ge;
 
       const Real d = -R / J;
       ptm += d;
+
+      // The bound the formulation assumes, imposed rather than hoped for.
+      if (law.clampTransmuralPressure)
+        ptm = std::max<Real>(ptm, 0.0);
 
       if (std::abs(d) < law.outletStepTolerance * (1.0 + std::abs(ptm)))
       {
@@ -647,17 +679,28 @@ namespace Rodin::Examples::Heart
 
     if (!converged || !std::isfinite(ptm))
     {
-      std::cerr << "Warning: coronary outlet solve did not converge. "
-                << "Keeping previous state.\n";
+      // Silently reusing the previous state lets a local failure propagate: the
+      // next step inherits an iterate inconsistent with its own flux. Count it
+      // and surface it, so a run that limps is visible instead of merely odd.
+      static int failures = 0;
+      ++failures;
+      if (failures <= 20)
+        std::cerr << "Warning: coronary outlet solve did not converge "
+                  << "(failure " << failures
+                  << (failures == 20 ? ", further ones suppressed" : "")
+                  << "). Keeping previous state.\n";
       ptm = ptmOld;
     }
+
+    if (law.clampTransmuralPressure)
+      ptm = std::max<Real>(ptm, 0.0);
 
     // Final consistent evaluation at the converged state.
     const Real pc = ptm + pim;
     const Real drive = pc - pDrain;
 
     phiV = viscosityFactorV(qv);
-    qv = venousLumenOpen(ptm) ? drive / (Rv * phiV) : 0.0;
+    qv = (venousLumenOpen(ptm) ? 1.0 : leak) * drive / (Rv * phiV);
 
     bc.ptm = ptm;
     bc.pim = pim;
@@ -960,35 +1003,97 @@ namespace Rodin::Examples::Heart
       const Real Ta = La / va;
       const Real Tv = Lv / vv;
 
+      // Tone of the distal bed.  fVaso = 1 is the resting calibration; a
+      // hyperaemic study (adenosine, exercise) is fVaso > 1, which divides the
+      // *bed* resistance while leaving the epicardial 3D domain untouched.
+      // This is the only knob that makes an epicardial stenosis flow-limiting:
+      // at rest the bed carries ~99.7 per cent of the total resistance, so a
+      // geometric lesion upstream is invisible; once R_a, R_v are divided by
+      // 4-5 the lesion becomes the dominant term and the model traverses the
+      // Gould curve.
+      const Real fVaso = std::max<Real>(m_cfg.vasodilationFactor, 1e-6);
+
+      // What dilation does to the operating shear rate.
+      //
+      // Dividing R by f at fixed N is, through R = 8 mu L/(pi r^4 N), a radius
+      // change r -> r f^{1/4}.  The flow rises by f, so the velocity rises by
+      // f/f^{1/2} = f^{1/2}, and the wall shear rate
+      //
+      //     g = 4 v / r  ->  g_0 f^{1/2} / f^{1/4} = g_0 f^{1/4}
+      //
+      // rises by only f^{1/4}.  This is the quantitative content of the
+      // shear-regulation picture: a fourfold hyperaemia moves the shear rate by
+      // 41 per cent, i.e. a quarter of a decade on a curve whose knee is three
+      // decades away, so the *rheology* is essentially frozen through the
+      // vasodilator response and the flow reserve is a resistance effect, not a
+      // viscosity effect.  At f = 1 every expression below reduces exactly to
+      // the resting calibration, bit for bit.
+      const Real fShear = std::pow(fVaso, 0.25);
+      const Real gammaA = gammaA0 * fShear;
+      const Real gammaV = gammaV0 * fShear;
+
       // R_a and R_v remain the Newtonian resistances of the budget, so a change
       // of blood properties moves Phi and therefore the flow. The
       // normalization is mu_N and never the running rheology.
-      const Real phiA0 = m_wrms(gammaA0) / muN;
-      const Real phiV0 = m_wrms(gammaV0) / muN;
+      const Real phiA0 = m_wrms(gammaA) / muN;
+      const Real phiV0 = m_wrms(gammaV) / muN;
 
       // Initial condition: steady state of the *actual* (non-Newtonian)
-      // network, so the run does not open with a spurious transient.
+      // network, so the run does not open with a spurious transient.  The
+      // venular drop is R_v Phi_v Q = (dPv/(Q_i f)) Phi_v (Q_i f) = dPv Phi_v,
+      // independent of f, so this line is unchanged by dilation.
       const Real ptmRest =
         m_cfg.rightAtrialPressure + dPv * phiV0 - pimRest;
 
       Real volumeTotal = 0.0;
+      Real flowTotal = 0.0;
+      Real countTotal = 0.0;
 
       for (const Attribute tag : m_cfg.outlets)
       {
         const Real w = (rEq[tag] * rEq[tag] * rEq[tag]) / std::max(sumR3, 1e-30);
-        const Real Qi = std::max<Real>(m_cfg.lcaTargetFlow * w, 1e-12);
+
+        // Structural design flow of this territory.
+        //
+        // Two ways of fixing it, algebraically identical at the default
+        // settings but epistemically different:
+        //
+        //   (a) prescribed  Qi = lcaTargetFlow * w.  The total bed flow is an
+        //       input; the arteriolar count N_a = Qi/(pi r_a^2 v_a) is then a
+        //       derived number that the model reports but nothing checks.
+        //
+        //   (b) morphometric  Qi = pi r_a^2 v_a * (arteriolarCount * w).  The
+        //       bed is described by how many terminal arterioles it has, and
+        //       the flow becomes a *prediction* that can be compared against
+        //       the 1.5 mL/s of the literature.  Substituting the pressure
+        //       budget dPa = the arteriolar share of the drop, the resulting
+        //       Ra = dPa/Qi is exactly the Poiseuille resistance of N_a
+        //       parallel tubes,  Ra = 8 mu_N L_a / (pi r_a^4 N_a),  with L_a
+        //       the length computed above.  So (b) is not a different closure,
+        //       it is the same closure read in the opposite direction.
+        //
+        // arteriolarCount is set so that (b) reproduces (a) bit for bit at the
+        // default radius and velocity; the flag exists so that a morphometric
+        // hypothesis (rarefaction in diabetes, capillary drop-out) can be
+        // stated directly as a change of N_a instead of a change of the total
+        // flow.
+        const Real QiStruct =
+          m_cfg.morphometricResistance
+            ? PI * ra * ra * va * std::max<Real>(m_cfg.arteriolarCount * w, 0.0)
+            : m_cfg.lcaTargetFlow * w;
+        const Real Qi = std::max<Real>(QiStruct, 1e-12);
 
         auto& bc = m_wk.at(tag);
 
         bc.area = areaOf[tag];
-        bc.q0 = Qi;
-        bc.Ra = dPa / Qi;
-        bc.Rv = dPv / Qi;
+        bc.q0 = Qi * fVaso;
+        bc.Ra = dPa / (Qi * fVaso);
+        bc.Rv = dPv / (Qi * fVaso);
         bc.C = std::max<Real>(m_cfg.coronaryComplianceTotal * w, 1e-300);
 
         // Derived operating point and bed multiplicities (predictions).
-        bc.gammaA = gammaA0;
-        bc.gammaV = gammaV0;
+        bc.gammaA = gammaA;
+        bc.gammaV = gammaV;
         bc.Na = Qi / (PI * ra * ra * va);
         bc.Nv = Qi / (PI * rv * rv * vv);
 
@@ -997,13 +1102,15 @@ namespace Rodin::Examples::Heart
         bc.pim = pimRest;
         bc.pc = ptmRest + pimRest;
         bc.pout = bc.pc;
-        bc.qd = Qi;
+        bc.qd = Qi * fVaso;
         bc.vol0 = bc.C * std::max<Real>(ptmRest, 0.0);
         bc.vol = bc.vol0;
         bc.muA = phiA0;
         bc.muV = phiV0;
 
         volumeTotal += bc.vol0;
+        flowTotal += bc.q0;
+        countTotal += bc.Na;
 
         const Real tau = bc.C * bc.Rv;
 
@@ -1029,6 +1136,26 @@ namespace Rodin::Examples::Heart
 
       if (isRoot())
       {
+        // Flow budget.  With morphometricResistance the total is a prediction
+        // and the ratio below is the falsifiable statement of the closure;
+        // with the prescribed closure it is an identity and the ratio is 1 by
+        // construction.
+        Alert::Info() << "  [calib] caudal:"
+                      << "  cierre="
+                      << (m_cfg.morphometricResistance ? "morfometrico (N_a)"
+                                                       : "prescrito (lcaTargetFlow)")
+                      << "  N_a(total)=" << countTotal
+                      << "  Q(reposo)=" << (flowTotal / fVaso * 6.0e7)
+                      << " mL/min"
+                      << "  f_vaso=" << fVaso
+                      << "  Q(operativo)=" << (flowTotal * 6.0e7) << " mL/min"
+                      << "  |  referencia lcaTargetFlow="
+                      << (m_cfg.lcaTargetFlow * 6.0e7) << " mL/min"
+                      << "  cociente prediccion/referencia="
+                      << (flowTotal / fVaso
+                          / std::max<Real>(m_cfg.lcaTargetFlow, 1e-30))
+                      << Alert::Raise;
+
         Alert::Info() << "  [calib] totals:"
                       << "  V0=" << (volumeTotal * 1e6) << " mL"
                       << "  C=" << m_cfg.coronaryComplianceTotal << " m^3/Pa"
@@ -1036,10 +1163,16 @@ namespace Rodin::Examples::Heart
                       << "  reologia="
                       << (m_cfg.rheologyModel == RheologyModel::Quemada
                             ? "Quemada" : "Carreau-Yasuda")
-                      << "  mu_ap(" << gammaA0 << ")=" << m_wrms(gammaA0)
-                      << "  mu_ap(" << gammaV0 << ")=" << m_wrms(gammaV0)
+                      << "  mu_ap(" << gammaA << ")=" << m_wrms(gammaA)
+                      << "  mu_ap(" << gammaV << ")=" << m_wrms(gammaV)
+                      << "  (g_0 en reposo=" << gammaA0 << "/" << gammaV0
+                      << ", f_shear=" << fShear << ")"
                       << "  (mu_N=" << muN << ", mu_inf=" << m_cfg.viscosity.muInf
                       << ", mu_0=" << m_cfg.viscosity.mu0 << ")"
+                      << (m_cfg.constantOutletResistance
+                            ? "  [CONSTANT outlet closure: mu_ap frozen at the "
+                              "high-shear plateau; 3D rheology unchanged]"
+                            : "")
                       << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0
                       << "  |  outlet resistance is assembled implicitly: the "
                       << "coupling is unconditionally stable in dt"
