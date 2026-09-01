@@ -8,7 +8,7 @@
 // Wavy-circle reconstruction benchmark for WNGIR.
 //
 // The background grid is classified from a fixed analytic level set. WNGIR
-// then registers the classified skeleton directly to the analytic target
+// then fits the classified skeleton directly to the analytic target
 // interface using phi(X + u(X)) on the skeleton. The example is deliberately
 // single-frame: it is the controlled reconstruction benchmark, while
 // LevelSetWNGIRSweep and LevelSetWNGIRAdvection provide time-dependent stress
@@ -440,7 +440,7 @@ int main(int argc, char** argv)
   du.setName("wngir_step");
   auto wngirSolveParams = wngirParams;
   if (fitTol > Real(0))
-    wngirSolveParams.activeRMSTol = fitTol;
+    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -664,7 +664,7 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveRMSTol;
+      effectiveFitTol = wngirRep.effectiveTauRms;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve

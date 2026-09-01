@@ -19,9 +19,6 @@ set(RodinAdaptation_HEADERS
   WNGIRPrimalBarrierState.h
   WNGIRReport.h
   WNGIRSolver.h
-  WNGIRNormalOffset.h
-  WNGIRNormalOffsetCoefficient.h
-  WNGIRNormalOffsetForceCoefficient.h
   WNGIRObservationCoefficient.h
   WNGIRResidualState.h
   WNGIRSurfaceForceCoefficient.h

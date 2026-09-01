@@ -62,27 +62,18 @@ namespace Rodin::Adaptation::Detail
       /// @brief Evaluates the coefficient at a point.
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
-        constexpr Real epsG = Real(1e-12);
         const auto& params = m_parameters.get();
         const auto d = static_cast<std::uint8_t>(m_dimension);
         RangeType m = RangeType::Identity(d, d);
+        m.setZero();
 
         const WNGIRResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss, true);
         const auto& g = state.getGradient();
-        const Real g2 = g.dot(g);
-        const Real tau = params.tauTan * g2;
-        const Real normalizedG2 = m_normalization * g2;
-        const Real tangential =
-          params.tauTan * normalizedG2 / (normalizedG2 + epsG);
         const Real scale = params.kappaObs * m_normalization * state.getWeight();
         for (std::uint8_t r = 0; r < d; ++r)
         {
           for (std::uint8_t c = 0; c < d; ++c)
-          {
-            m(r, c) = scale * g(r) * g(c) * (Real(1) - tangential);
-            if (r == c)
-              m(r, c) += scale * tau;
-          }
+            m(r, c) = scale * g(r) * g(c);
         }
         return m;
       }

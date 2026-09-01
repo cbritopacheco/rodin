@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Public include for robust natural-gradient interface registration.
+ * @brief Public include for robust natural-gradient interface fitting.
  */
 
 #include "WNGIRParameters.h"

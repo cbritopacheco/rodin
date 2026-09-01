@@ -72,16 +72,22 @@ namespace Rodin::Adaptation
       Real rigidModeCoercivity = 0;
       /// @brief Smallest-to-largest rigid-mode observation eigenvalue ratio.
       Real rigidModeCoercivityRatio = 0;
+
+      /// @brief Fraction of the accepted displacement carried by translation.
+      Real rigidTranslationFraction = 0;
+
+      /// @brief Fraction of the accepted displacement carried by rotation.
+      Real rigidRotationFraction = 0;
       /// @brief Dimension of the uncontrolled rigid-motion space.
       std::size_t rigidModeDimension = 0;
       /// @brief Effective RMS-over-(h times level-set gradient) tolerance.
-      Real effectiveRMSOverHTol = 0;
+      Real effectiveTauRmsH = 0;
       /// @brief Effective sup-over-(h times level-set gradient) tolerance.
-      Real effectiveSupOverHTol = 0;
+      Real effectiveTauInfH = 0;
       /// @brief Effective RMS tolerance in level-set units.
-      Real effectiveRMSTol = 0;
+      Real effectiveTauRms = 0;
       /// @brief Effective supremum tolerance in level-set units.
-      Real effectiveSupTol = 0;
+      Real effectiveTauInf = 0;
       /// @brief RMS jump of the normal field across the interface.
       Real normalJumpRMS = 0;
       /// @brief Maximum jump of the normal field across the interface.

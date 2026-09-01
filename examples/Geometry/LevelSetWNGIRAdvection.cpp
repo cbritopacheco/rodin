@@ -125,7 +125,7 @@ namespace
   //
   // phi is smooth away from the centre. Like the plain circle SDF, it is
   // NOT a strict signed distance (the radial perturbation makes the
-  // gradient norm differ from 1) but the registration pipeline only requires a
+  // gradient norm differ from 1) but the fitting pipeline only requires a
   // sufficiently smooth implicit function — phi, grad phi at quadrature
   // points — to operate.
   // -------------------------------------------------------------------------

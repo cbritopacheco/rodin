@@ -8,7 +8,7 @@
 // Wavy-circle sweep test for a WNGIR-style level-set mesh motion.
 //
 // At every frame the background grid is classified from the analytic level
-// set. WNGIR then registers the classified skeleton directly to phi = 0 using
+// set. WNGIR then fits the classified skeleton directly to phi = 0 using
 // the residual phi(X + u(X)) on the classified interior faces.
 //
 #include <Rodin/Adaptation.h>
@@ -419,7 +419,7 @@ int main(int argc, char** argv)
   du.setName("wngir_step");
   auto wngirSolveParams = wngirParams;
   if (fitTol > Real(0))
-    wngirSolveParams.activeRMSTol = fitTol;
+    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -620,7 +620,7 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveRMSTol;
+      effectiveFitTol = wngirRep.effectiveTauRms;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve

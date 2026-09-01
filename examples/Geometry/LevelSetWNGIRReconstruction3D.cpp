@@ -8,7 +8,7 @@
 // Lobed-sphere reconstruction benchmark for WNGIR.
 //
 // The background tetrahedral grid is classified from an analytic level set.
-// WNGIR then registers the classified cut-surface skeleton directly to the
+// WNGIR then fits the classified cut-surface skeleton directly to the
 // analytic target interface using phi(X + u(X)) on the skeleton.
 //
 #include <Rodin/Adaptation.h>
@@ -340,8 +340,6 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-  wngirDefaults.activeRMSOverHTol = Real(0.03);
-  wngirDefaults.activeSupOverHTol = Real(0.20);
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
@@ -404,7 +402,7 @@ int main(int argc, char** argv)
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
   if (fitTol > Real(0))
-    wngirSolveParams.activeRMSTol = fitTol;
+    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -598,7 +596,7 @@ int main(int argc, char** argv)
   const char* exitReason = "iter-budget";
   {
     const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-    effectiveFitTol = wngirRep.effectiveRMSTol;
+    effectiveFitTol = wngirRep.effectiveTauRms;
     std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
               << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
               << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve

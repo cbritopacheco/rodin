@@ -412,8 +412,6 @@ int run(int argc, char** argv)
     realOption(argc, argv, "redistance-eikonal-tol", Real(0.35));
   const Real poissonTransferInterfaceWeight =
     realOption(argc, argv, "poisson-transfer-interface-weight", Real(10) * h);
-  const std::size_t repairEvery = sizeOption(argc, argv, "repair-every", 0);
-  const Real repairEta = realOption(argc, argv, "repair-eta", Real(0.5) * h);
   const std::size_t outputEvery = sizeOption(argc, argv, "output-every", 1);
   const bool printTiming = sizeOption(argc, argv, "timing", 0) != 0;
   const bool trace = hasFlag(argc, argv, "trace");
@@ -556,33 +554,13 @@ int run(int argc, char** argv)
   gradProjection = gradMass - Integral(Grad(phiH), gq);
   Solver::CG gradSolver(gradProjection);
 
-  TrialFunction sr(sh);
-  TestFunction st(sh);
-  BilinearForm mass(sr, st);
-  BilinearForm stiffness(sr, st);
-  Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
-    repairCG;
-  repairCG.setTolerance(Real(1e-10));
-  repairCG.setMaxIterations(static_cast<int>(phiH.getData().size()));
-  if (repairEvery > 0)
-  {
-    mass = Integral(sr, st);
-    mass.assemble();
-    stiffness = Integral(Grad(sr), Grad(st));
-    stiffness.assemble();
-    Math::SparseMatrix<Real> repairOperator = mass.getOperator();
-    repairOperator += repairEta * repairEta * stiffness.getOperator();
-    repairCG.compute(repairOperator);
-  }
-
   GridFunction dist(sh), speed(sh);
   TrialFunction adv(sh);
   TestFunction advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
-  wngirDefaults.activeRMSOverHTol = Real(0.12);
-  wngirDefaults.activeSupOverHTol = Real(0.65);
+  wngirDefaults.tauRmsHFloor = Real(0.12);  wngirDefaults.tauInfHFloor = Real(0.65);
   WNGIRParameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
@@ -695,8 +673,8 @@ int run(int argc, char** argv)
             << " classify=" << classifyEvery << " redistance=" << redistanceMode << "/"
             << redistanceEvery << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
-            << " repair=" << repairEvery << "\n  WNGIR metric: kappaBulk="
-            << wp.kappaBulk << " rDiv=" << wp.rDiv << '\n';
+            << "\n  WNGIR metric: kappaBulk=" << wp.kappaBulk << " rDiv=" << wp.rDiv
+            << '\n';
 
   auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {
     const auto& vv = cell.getVertices();
@@ -764,7 +742,6 @@ int run(int argc, char** argv)
     Real tWrite = 0;
     Real tRedistance = 0;
     Real tAdvect = 0;
-    Real tRepair = 0;
 
     const std::size_t itn = acceptedShapeIterations;
     ++shapeAttempts;
@@ -911,8 +888,8 @@ int run(int argc, char** argv)
               << " activeSup/(hG)="
               << (levelSetMeshScale > Real(0) ? report.activeSup / levelSetMeshScale
                                               : Real(0))
-              << " tolRMS/(hG)=" << report.effectiveRMSOverHTol
-              << " tolSup/(hG)=" << report.effectiveSupOverHTol
+              << " tolRMS/(hG)=" << report.effectiveTauRmsH
+              << " tolSup/(hG)=" << report.effectiveTauInfH
               << " nJumpRMS=" << report.normalJumpRMS << '\n';
     tWNGIR = iterTimer.reset();
 
@@ -1282,17 +1259,10 @@ int run(int argc, char** argv)
               << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0)) << '\n';
     tAdvect = iterTimer.reset();
 
-    if (repairEvery > 0 && ((itn + 1) % repairEvery == 0 || itn + 1 == maxIt))
-    {
-      const Math::Vector<Real> rhs = mass.getOperator() * phiH.getData();
-      phiH.getData() = repairCG.solve(rhs);
-    }
-    tRepair = iterTimer.reset();
-
     if (printTiming)
     {
       const Real total = tClassify + tGrad + tWNGIR + tMoveTrim + tElasticity + tHilbert +
-        tWrite + tRedistance + tAdvect + tRepair;
+        tWrite + tRedistance + tAdvect;
       std::cout << "  timing:"
                 << " classify=" << std::scientific << std::setprecision(2) << tClassify
                 << " grad=" << tGrad << " wngir=" << tWNGIR
@@ -1301,8 +1271,7 @@ int run(int argc, char** argv)
                 << " wngirLS=" << report.tLineSearch << " moveTrim=" << tMoveTrim
                 << " elas=" << tElasticity << " hilbert=" << tHilbert
                 << " write=" << tWrite << " redist=" << tRedistance
-                << " advect=" << tAdvect << " repair=" << tRepair << " total=" << total
-                << '\n';
+                << " advect=" << tAdvect << " total=" << total << '\n';
     }
 
     ++acceptedShapeIterations;

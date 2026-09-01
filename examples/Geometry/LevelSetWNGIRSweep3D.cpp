@@ -8,7 +8,7 @@
 // Lobed-sphere sweep test for a WNGIR-style level-set mesh motion in 3D.
 //
 // At every frame the background tetrahedral grid is classified from the
-// analytic level set. WNGIR then registers the classified cut-surface
+// analytic level set. WNGIR then fits the classified cut-surface
 // skeleton directly to phi = 0 using the residual phi(X + u(X)) on the
 // classified interior faces. Between frames the target orbits the cube
 // center and its lobes rotate in phase, so each frame is a cold-start
@@ -337,8 +337,6 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-  wngirDefaults.activeRMSOverHTol = Real(0.03);
-  wngirDefaults.activeSupOverHTol = Real(0.20);
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
@@ -401,7 +399,7 @@ int main(int argc, char** argv)
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
   if (fitTol > Real(0))
-    wngirSolveParams.activeRMSTol = fitTol;
+    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -605,7 +603,7 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveRMSTol;
+      effectiveFitTol = wngirRep.effectiveTauRms;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve

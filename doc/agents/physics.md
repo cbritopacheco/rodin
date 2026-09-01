@@ -68,7 +68,7 @@ attributes (`Geometry::MinSTCut` is the classifier primitive), geometry
 fitting owns node positions and never decides topology.
 
 On this branch the module is **WNGIR** — Welsch natural-gradient interface
-registration: `WNGIR.h` public include; `WNGIRParameters`/`WNGIRReport`,
+fitting: `WNGIR.h` public include; `WNGIRParameters`/`WNGIRReport`,
 backend-independent `WNGIRSolver`, form-language surface coefficients,
 primal-barrier admissibility coefficients, and optional normal-offset coefficients. The solver
 retains one `Problem`, one linear solver, and a preassembled bulk form; only

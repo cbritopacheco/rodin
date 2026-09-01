@@ -24,8 +24,8 @@ namespace Rodin::Examples
       Real rDiv = 1;
       Real kappaJ = 1;
       Real kappaQ = 1;
-      Real activeRMSOverHTol = 0;
-      Real activeSupOverHTol = 0;
+      Real tauRmsHFloor = Real(0.03);
+      Real tauInfHFloor = Real(0.20);
       bool parseLegacyMaxIterations = false;
   };
 
@@ -112,20 +112,11 @@ namespace Rodin::Examples
     p.rDiv = realOption(
       argc, argv, "wngir-r-div", "wngir-divergence-ratio", defaults.rDiv);
 
-    p.kappaObs =
-      realOption(argc, argv, "wngir-kappa-obs", "wngir-gamma-obs", Real(1));
-    p.tauTan = realOption(argc, argv, "wngir-tau-tan",
-      "wngir-observation-tangential-floor", p.tauTan);
-    p.kappaInit = Real(0);
-    p.kappaInit =
-      realOption(argc, argv, "wngir-kappa-init", "wngir-init-gamma", p.kappaInit);
-    p.initialGuessCapH = realOption(argc, argv, "wngir-init-cap-h", p.initialGuessCapH);
+    p.kappaObs = realOption(argc, argv, "wngir-kappa-obs", Real(1));
     p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
 
-    p.kappaJ =
-      realOption(argc, argv, "wngir-kappa-j", "wngir-gamma-j", defaults.kappaJ);
-    p.kappaQ =
-      realOption(argc, argv, "wngir-kappa-q", "wngir-gamma-q", defaults.kappaQ);
+    p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
+    p.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
     p.jSafe = realOption(argc, argv, "wngir-jsafe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
     p.primalBarrierIterations = std::max<std::size_t>(1,
@@ -149,28 +140,17 @@ namespace Rodin::Examples
     const Real jSafeRatio = realOption(argc, argv, "j-safe", Real(1e-3));
     p.jLineSearchRatio =
       realOption(argc, argv, "j-ls", std::max(p.jMinRatio, Real(10) * jSafeRatio));
-
-    p.activeRMSOverHTol =
-      realOption(argc, argv, "wngir-rms-h-tol", defaults.activeRMSOverHTol);
-    p.activeSupOverHTol =
-      realOption(argc, argv, "wngir-sup-h-tol", defaults.activeSupOverHTol);
-    p.geometryAwareTolerances =
-      boolOption(argc, argv, "wngir-geometry-aware-tolerances", true);
-    p.rmsFloor2D = realOption(argc, argv, "wngir-rms-floor-2d", p.rmsFloor2D);
-    p.supFloor2D = realOption(argc, argv, "wngir-sup-floor-2d", p.supFloor2D);
-    p.rmsFloor3D = realOption(argc, argv, "wngir-rms-floor-3d", p.rmsFloor3D);
-    p.supFloor3D = realOption(argc, argv, "wngir-sup-floor-3d", p.supFloor3D);
-    p.rmsNormalJumpFactor =
-      realOption(argc, argv, "wngir-rms-normal-jump-factor", p.rmsNormalJumpFactor);
-    p.supNormalJumpFactor =
-      realOption(argc, argv, "wngir-sup-normal-jump-factor", p.supNormalJumpFactor);
+    p.tauRmsHFloor = realOption(argc, argv, "wngir-rms-floor", defaults.tauRmsHFloor);
+    p.tauInfHFloor = realOption(argc, argv, "wngir-sup-floor", defaults.tauInfHFloor);
+    p.tauJumpRms =
+      realOption(argc, argv, "wngir-rms-normal-jump-factor", p.tauJumpRms);
+    p.tauJumpInf =
+      realOption(argc, argv, "wngir-sup-normal-jump-factor", p.tauJumpInf);
     // Zero delegates the physical tolerance to WNGIR, where the sampled
     // level-set gradient converts mesh length to field units.
-    p.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", Real(0));
-    p.activeSupTol = realOption(argc, argv, "wngir-sup-tol", Real(0));
+    p.tauRms = realOption(argc, argv, "wngir-rms-tol", Real(0));
+    p.tauInf = realOption(argc, argv, "wngir-sup-tol", Real(0));
     p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
-    p.stationarityTolerance =
-      realOption(argc, argv, "wngir-stationarity-tol", p.stationarityTolerance);
     p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
     p.acceptedStepOverHTol =
       realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
@@ -180,6 +160,8 @@ namespace Rodin::Examples
     if (defaults.parseLegacyMaxIterations)
       p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
 
+    p.rigidStabilisationLevel = realOption(
+      argc, argv, "wngir-rigid-stabilisation", p.rigidStabilisationLevel);
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
