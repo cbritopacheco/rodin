@@ -63,14 +63,20 @@ namespace Rodin::Tests::Unit
       parameters.hasInterfaceAttribute = true;
       parameters.interfaceAttribute = Interface;
       parameters.maxIterations = 12;
-      parameters.activeRMSTol = 0;
-      parameters.activeSupTol = 0;
-      parameters.activeRMSOverHTol = Real(1e-3);
-      parameters.activeSupOverHTol = Real(1e-3);
-      parameters.geometryAwareTolerances = false;
+      parameters.tauRms = 0;
+      parameters.tauInf = 0;
+      // Tight scale-aware tolerances, with the normal-jump raise switched off
+      // by zero factors, so the solve is not stopped by the geometric criterion.
+      parameters.tauRmsHFloor = Real(1e-3);
+      parameters.tauInfHFloor = Real(1e-3);
+      parameters.tauJumpRms = 0;
+      parameters.tauJumpInf = 0;
       parameters.acceptedStepOverHTol = 0;
       parameters.energyStagTol = 0;
       parameters.quadratureOrder = 2;
+      // A tight linear solve, so that the geometric-invariance assertion below
+      // measures the invariance and not the conjugate-gradient round-off.
+      parameters.cgRelativeTolerance = Real(1e-12);
       solver.setParameters(parameters);
 
       RealFunction phi([levelSetScale](const Point& point) {
@@ -100,8 +106,12 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(state.report.maxJ, state.report.minJ);
     EXPECT_GT(state.report.activeFraction, Real(0));
     EXPECT_EQ(state.report.rigidModeDimension, 3);
-    EXPECT_GT(state.report.rigidModeCoercivity, Real(0));
-    EXPECT_GT(state.report.rigidModeCoercivityRatio, Real(0));
+    // The interface is a straight line, so the translation along it is invisible
+    // to the rank-one observation and the rigid-mode coercivity constant
+    // vanishes. The solve still reaches the fit above because the rigid-mode
+    // stabilisation bounds that mode from below.
+    EXPECT_LT(state.report.rigidModeCoercivity, Real(1e-12));
+    EXPECT_GE(state.report.rigidModeCoercivity, Real(0));
     EXPECT_GT(state.report.iterations, 0);
     EXPECT_TRUE(std::isfinite(state.report.energy));
   }
