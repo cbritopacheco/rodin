@@ -5,7 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * Distributed (MPI) PETSc port of the Newmark-beta quasi-compressible
+ * @file CoronaryArterySolid_PETSc_MPI.cpp
+ * @brief Distributed (MPI) PETSc port of the Newmark-beta quasi-compressible
  * NeoHookean coronary solid.
  *
  *   rho * u_tt - div(P(F(u))) = 0
@@ -287,7 +288,7 @@ int main(int argc, char** argv)
     out << "t,y,v,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat\n";
   }
 
-  const char* meshFile = "../resources/examples/Heart/malla_solido.mesh";
+  const char* meshFile = "../resources/examples/Heart/CoronaryArtery/Solid.mesh";
 
   Rodin::MPI::Sharder sharder(context);
   if (comm.rank() == RootRank)

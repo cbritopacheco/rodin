@@ -1,45 +1,54 @@
-// ThrombosisModel.h
-//
-// Coagulation kinetics (Qureshi et al. 2022) with per-cycle haemodynamic
-// indices, written once so that both CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq
-// and CoupledLV0DCoronary3D use the same implementation.
-//
-// ---------------------------------------------------------------------------
-// MODEL
-//
-//   dTh/dt = D_th DTh - u.grad(Th) + R_Th                     (thrombin)
-//   dFg/dt = D_fg DFg - u.grad(Fg) - k_eff Fg Th              (fibrinogen)
-//   dFn/dt = D_fn DFn - u.grad(Fn) + k_eff Fg Th              (fibrin)
-//
-// The three fields are transported by a *known* velocity: the coupling is
-// one-way, the kinetics do not feed back on the flow. R_Th is an endothelial
-// source, active where the endothelium has been activated by the flow, and
-// measured per unit *area*: it is a Neumann flux on the wall, not a volumetric
-// source.
-//
-// ---------------------------------------------------------------------------
-// SCOPE -- read this before using it anywhere new.
-//
-// This is a model of thrombus *initiation and growth*. It predicts where and how fast fibrin would begin to accumulate in
-// a geometry whose flow is not yet perturbed by the clot. It contains no
-// mechanical representation of the clot: no permeability, no added resistance,
-// no moving boundary, no platelet aggregation and no lysis. It ceases to be
-// valid once the fibrin field is dense enough to alter the flow, which is
-// exactly the two-way extension the model does not have.
-//
-// It is also a *stasis* model. The activation indicator is built from wall
-// shear statistics, so the mechanism it encodes is recirculation and low,
-// oscillatory wall shear. Transferring it unchanged to a coronary artery is questionable on
-// two counts: the residence time of a coronary conduit is of order 0.1 s
-// against the seconds-to-minutes of the cascade, so the species are advected
-// away before they react; and coronary thrombosis is driven by plaque rupture
-// and tissue-factor exposure rather than by stasis. The model is appropriate
-// for a coronary geometry only where a genuine low-flow feature exists -- an
-// aneurysmal or ectatic segment, a post-stent recirculation zone, a side branch
-// with reversed flow -- and the residence-time diagnostic below is what decides
-// whether such a feature is present.
-//
-// ---------------------------------------------------------------------------
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file ThrombosisModel.h
+ * @brief Coagulation kinetics transported by a known flow (Qureshi et al. 2022).
+ *
+ * Coagulation kinetics (Qureshi et al. 2022) with per-cycle haemodynamic
+ * indices, written once so that both CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq
+ * and CoupledLV0DCoronary3D use the same implementation.
+ *
+ * ---------------------------------------------------------------------------
+ * MODEL
+ *
+ *   dTh/dt = D_th DTh - u.grad(Th) + R_Th                     (thrombin)
+ *   dFg/dt = D_fg DFg - u.grad(Fg) - k_eff Fg Th              (fibrinogen)
+ *   dFn/dt = D_fn DFn - u.grad(Fn) + k_eff Fg Th              (fibrin)
+ *
+ * The three fields are transported by a *known* velocity: the coupling is
+ * one-way, the kinetics do not feed back on the flow. R_Th is an endothelial
+ * source, active where the endothelium has been activated by the flow, and
+ * measured per unit *area*: it is a Neumann flux on the wall, not a volumetric
+ * source.
+ *
+ * ---------------------------------------------------------------------------
+ * SCOPE -- read this before using it anywhere new.
+ *
+ * This is a model of thrombus *initiation and growth*. It predicts where and how fast fibrin would begin to accumulate in
+ * a geometry whose flow is not yet perturbed by the clot. It contains no
+ * mechanical representation of the clot: no permeability, no added resistance,
+ * no moving boundary, no platelet aggregation and no lysis. It ceases to be
+ * valid once the fibrin field is dense enough to alter the flow, which is
+ * exactly the two-way extension the model does not have.
+ *
+ * It is also a *stasis* model. The activation indicator is built from wall
+ * shear statistics, so the mechanism it encodes is recirculation and low,
+ * oscillatory wall shear. Transferring it unchanged to a coronary artery is questionable on
+ * two counts: the residence time of a coronary conduit is of order 0.1 s
+ * against the seconds-to-minutes of the cascade, so the species are advected
+ * away before they react; and coronary thrombosis is driven by plaque rupture
+ * and tissue-factor exposure rather than by stasis. The model is appropriate
+ * for a coronary geometry only where a genuine low-flow feature exists -- an
+ * aneurysmal or ectatic segment, a post-stent recirculation zone, a side branch
+ * with reversed flow -- and the residence-time diagnostic below is what decides
+ * whether such a feature is present.
+ *
+ * ---------------------------------------------------------------------------
+ */
 #ifndef EXAMPLES_HEART_CORONARYARTERY_THROMBOSISMODEL_H
 #define EXAMPLES_HEART_CORONARYARTERY_THROMBOSISMODEL_H
 

@@ -5,7 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * Monolithic PETSc/MPI coronary ALE FSI prototype.
+ * @file CoronaryArtery_FSI_PETSc_MPI.cpp
+ * @brief Monolithic PETSc/MPI coronary ALE FSI prototype.
  *
  * This file follows the monolithic pattern from
  * examples/PETSc/PDEs/Seq_BDF1_ALE_FSI_Monolithic.cpp, but uses the coronary
@@ -242,7 +243,7 @@ namespace
 
   struct Config
   {
-      std::string meshPath = "malla_merge.mesh";
+      std::string meshPath = "../resources/examples/Heart/CoronaryArtery/MergedFSI.mesh";
       std::string xdmfBasename = "CoronaryArtery_FSI";
       std::string csvPath = "CoronaryArtery_FSI.csv";
       Real meshScale = 1.0e-3;

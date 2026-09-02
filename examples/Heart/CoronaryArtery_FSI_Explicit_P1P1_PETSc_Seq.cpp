@@ -5,7 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * Explicit (staggered) sequential PETSc coronary ALE FSI -- P1/P1 VARIANT.
+ * @file CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq.cpp
+ * @brief Explicit (staggered) sequential PETSc coronary ALE FSI, P1/P1
+ * variant.
  *
  * Equal-order P1 velocity / P1 pressure fluid (NOT inf-sup stable) and P1
  * solid.  Because Taylor-Hood is lost, the pressure mode is stabilized with an
@@ -126,7 +128,7 @@ namespace
   // on the 3D outlet boundary as R_a Phi_a A (u.n)(v.n), so p_out carries only
   // p_c and the coupling is unconditionally stable in dt.  Phi = mu_ap/mu_N is
   // the rheological modulation read off the universal WRMS table.
-  // See RCR_formulacion_minima.tex and CoupledLV0DCoronary3D.{h,cpp}.
+  // See the RCR documentation in CoronaryArtery/CoupledLV0DCoronary3D.h.
   // --------------------------------------------------------------------------
   struct RCR
   {
@@ -1456,12 +1458,12 @@ int main(int argc, char** argv)
     initializeModel(model, modelInput);
 
     const std::string fluidMesh =
-      "../resources/examples/Heart/coronaria_estenosis_80.mesh";
+      "../resources/examples/Heart/CoronaryArtery/Stenosis80.mesh";
     MeshType meshFluid = makeMesh(cfg, fluidMesh);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
     const std::string solidMesh =
-      "../resources/examples/Heart/coronaria_80_prismatica.mesh";
+      "../resources/examples/Heart/CoronaryArtery/Prismatic80.mesh";
     MeshType meshSolid = makeMesh(cfg, solidMesh);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 

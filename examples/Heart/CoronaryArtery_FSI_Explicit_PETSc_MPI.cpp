@@ -5,7 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * Explicit (staggered) PETSc/MPI coronary ALE FSI.
+ * @file CoronaryArtery_FSI_Explicit_PETSc_MPI.cpp
+ * @brief Explicit (staggered) PETSc/MPI coronary ALE FSI.
  *
  * NOTE: the fluid<->solid interface coupling is not distributed;
  * run on a SINGLE MPI rank (see buildInterfaceMap).
@@ -1141,12 +1142,12 @@ int main(int argc, char** argv)
     initializeModel(model, modelInput);
 
     const std::string fluidMesh =
-      "../resources/examples/Heart/CoronaryArtery_FSI_fluid.mesh";
+      "../resources/examples/Heart/CoronaryArtery/FSIFluid.mesh";
     MeshType meshFluid = makeMesh(context, cfg, fluidMesh);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
     const std::string solidMesh =
-      "../resources/examples/Heart/CoronaryArtery_FSI_solid.mesh";
+      "../resources/examples/Heart/CoronaryArtery/FSISolid.mesh";
     MeshType meshSolid = makeMesh(context, cfg, solidMesh);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 

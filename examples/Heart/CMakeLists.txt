@@ -93,11 +93,12 @@ if (RODIN_USE_PETSC)
   # recirculation the kinetics need. Sequential and PETSc-only, like the P1/P1
   # case above; it does not link Rodin::MPI.
   #
-  # The mesh is not in the repository because it is generated:
+  # The mesh ships in resources/examples/Heart/ProteinTest.mesh and is
+  # regenerated with:
   #   python3 examples/Heart/ProteinTest/make_test_mesh.py \
-  #           examples/Heart/ProteinTest/ProteinTest.mesh
-  # and the executable looks for it at ProteinTest/ProteinTest.mesh relative to
-  # the working directory, so run it from the examples/Heart tree or pass a
+  #           resources/examples/Heart/ProteinTest.mesh
+  # The executable looks for it at ../resources/examples/Heart/ProteinTest.mesh
+  # relative to the working directory, so run it from the build tree or pass a
   # different path in Config::meshPath.
   add_executable(ProteinTest ProteinTest.cpp)
   target_link_libraries(ProteinTest

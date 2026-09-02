@@ -1,18 +1,27 @@
-// Atrium.h
-//
-// 3D atrium: stabilised non-Newtonian flow with four pressure inlets and one
-// outlet closed by the 0D left ventricle through a mitral diode, plus the
-// thrombin/fibrinogen/fibrin kinetics transported by that flow.
-//
-//   inlets  : p = p_pv(t)             (natural traction + impedance + damping)
-//   outlet  : p = p_v(t) from the 0D LV, with R_mv A (u.n)(v.n) assembled
-//             implicitly; R_mv switches between open and closed values.
-//   wall    : no slip, endothelial thrombin flux weighted by the cycle
-//             wall-shear indices.
-//
-// Equal order P1/P1, stabilised with VMS (convection, grad-div) and PSPG.
-// Runs under MPI; the mesh is partitioned on the root rank and scaled by
-// Config::meshScale.
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file Atrium.h
+ * @brief Stabilised non-Newtonian atrium flow coupled to the 0D left ventricle.
+ *
+ * 3D atrium: stabilised non-Newtonian flow with four pressure inlets and one
+ * outlet closed by the 0D left ventricle through a mitral diode, plus the
+ * thrombin/fibrinogen/fibrin kinetics transported by that flow.
+ *
+ *   inlets  : p = p_pv(t)             (natural traction + impedance + damping)
+ *   outlet  : p = p_v(t) from the 0D LV, with R_mv A (u.n)(v.n) assembled
+ *             implicitly; R_mv switches between open and closed values.
+ *   wall    : no slip, endothelial thrombin flux weighted by the cycle
+ *             wall-shear indices.
+ *
+ * Equal order P1/P1, stabilised with VMS (convection, grad-div) and PSPG.
+ * Runs under MPI; the mesh is partitioned on the root rank and scaled by
+ * Config::meshScale.
+ */
 #ifndef EXAMPLES_HEART_ATRIUM_H
 #define EXAMPLES_HEART_ATRIUM_H
 
@@ -186,7 +195,7 @@ namespace Rodin::Examples::Heart
 
       struct Config
       {
-          std::string meshPath = "../resources/examples/Heart/atrium_coarse.mesh";
+          std::string meshPath = "../resources/examples/Heart/Atrium/Coarse.mesh";
           std::string xdmfBasename = "Atrium";
           std::string csvPath = "Atrium.csv";
 

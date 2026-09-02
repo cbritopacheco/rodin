@@ -5,6 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
+ * @file CoronarySolid.cpp
+ * @brief Newmark-beta quasi-compressible NeoHookean coronary solid.
+ *
  * The Coronary Artery is modeled as a quasi compressible NeoHookean solid with
  * inertia and simple mass-proportional viscous damping:
  *
@@ -278,7 +281,7 @@ int main(int, char**)
 
   // Initialization 3D Model
 
-  const char* meshFile = "../resources/examples/Heart/CoronaryArterySolid.mesh";
+  const char* meshFile = "../resources/examples/Heart/CoronaryArtery/Solid.mesh";
 
   // Define boundary attributes
   Attribute GammaRing = 100, Gamma1 = 101, Gamma2 = 105;

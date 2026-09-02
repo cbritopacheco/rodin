@@ -6,6 +6,9 @@
  */
 
 /**
+ * @file MPI_BDF1_ALE_FSI_Monolithic.cpp
+ * @brief Distributed monolithic BDF1 ALE FSI on one conforming mesh.
+ *
  * @example MPI monolithic BDF1 ALE FSI on a single conforming mesh
  *
  * This example is the distributed-memory counterpart of

@@ -1,4 +1,13 @@
-// CoupledLV0DCoronary3D.h
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file CoupledLV0DCoronary3D.h
+ * @brief Coupled 0D left-ventricle / 3D coronary flow solver.
+ */
 #ifndef EXAMPLES_HEART_CORONARYARTERY_COUPLEDLV0DCORONARY3D_H
 #define EXAMPLES_HEART_CORONARYARTERY_COUPLEDLV0DCORONARY3D_H
 
@@ -112,8 +121,6 @@ namespace Rodin::Examples::Heart
        *          no unstressed areas, no parallel multiplicities and no
        *          non-negativity penalty are needed: they all existed to bound
        *          a variable that is now bounded by construction.
-       *
-       *          See RCR_formulacion_minima.tex.
        */
       struct RCR
       {

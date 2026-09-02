@@ -5,7 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * Explicit (staggered) sequential PETSc coronary ALE FSI.
+ * @file CoronaryArtery_FSI_Explicit_PETSc_Seq.cpp
+ * @brief Explicit (staggered) sequential PETSc coronary ALE FSI.
  *
  * Physics: Carreau-Yasuda blood flow (ALE, conservative BDF1) in a coronary
  * tree, coupled to a hyperelastic arterial wall (total Lagrangian, Newmark)
@@ -1429,12 +1430,12 @@ int main(int argc, char** argv)
     initializeModel(model, modelInput);
 
     const std::string fluidMesh =
-      "../resources/examples/Heart/CoronaryArtery_FSI_fluid.mesh";
+      "../resources/examples/Heart/CoronaryArtery/FSIFluid.mesh";
     MeshType meshFluid = makeMesh(cfg, fluidMesh);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
     const std::string solidMesh =
-      "../resources/examples/Heart/CoronaryArtery_FSI_solid.mesh";
+      "../resources/examples/Heart/CoronaryArtery/FSISolid.mesh";
     MeshType meshSolid = makeMesh(cfg, solidMesh);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 

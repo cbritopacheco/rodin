@@ -1,10 +1,19 @@
-// Atrium.cpp
-//
-// Run:
-//   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
-//
-// Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
-//          -atrium_species_cycles, -atrium_pin.
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file Atrium.cpp
+ * @brief Driver for the 3D atrium flow and coagulation-kinetics example.
+ *
+ * Run:
+ *   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
+ *
+ * Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
+ *          -atrium_species_cycles, -atrium_pin.
+ */
 #include <algorithm>
 #include <cassert>
 #include <cmath>

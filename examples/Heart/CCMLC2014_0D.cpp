@@ -1,3 +1,19 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file CCMLC2014_0D.cpp
+ * @brief Standalone driver for the 0D CCMLC2014 heart model.
+ *
+ * Integrates the lumped left-ventricle model of Caruel, Chabiniok, Moireau,
+ * Lecarpentier and Chapelle (2014) closed by a four-element Windkessel, driven
+ * by a periodic activation, and writes the resulting pressure/volume/flow
+ * history. No mesh and no finite element space are involved: this is the 0D
+ * reference the 3D coronary and atrium examples couple to.
+ */
 #include <cmath>
 #include <fstream>
 #include <iostream>

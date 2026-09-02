@@ -1,3 +1,19 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file CoupledLV0DCoronary3D.cpp
+ * @brief Out-of-line implementation of @ref CoupledLV0DCoronary3D.
+ *
+ * Holds the parts of the coupled 0D left-ventricle / 3D coronary solver that
+ * are not needed at the point of instantiation: mesh loading and partitioning,
+ * the assembly of the stabilised Navier-Stokes system, the outlet closure
+ * (Starling resistor plus tabulated WRMS apparent viscosity) and the time
+ * loop with its XDMF/CSV output.
+ */
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -563,7 +579,7 @@ namespace Rodin::Examples::Heart
     //    unstressed areas, the parallel multiplicities and the non-negativity
     //    penalty all existed to bound a variable that is now bounded.
     //
-    // See RCR_formulacion_minima.tex.
+    // See the RCR documentation in CoupledLV0DCoronary3D.h.
     const auto& s = model.getState();
     const auto& law = cfg.outletFlowLaw;
 

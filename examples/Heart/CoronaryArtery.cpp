@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file CoronaryArtery.cpp
  * @brief Driver for the coupled LV-0D / coronary 3D flow example.
@@ -51,8 +57,8 @@
  * lumped constants `(R_a, R_v, C)` are produced by the calibration from
  * `lcaTargetFlow`, `venularPressureFraction` and `coronaryComplianceTotal`.
  * The arteriolar resistance is assembled implicitly on the outlet boundary,
- * so the 3D-0D coupling is unconditionally stable in `dt`. See
- * `CoronaryArtery/RCR_formulacion_minima.tex`.
+ * so the 3D-0D coupling is unconditionally stable in `dt`. See the `RCR`
+ * documentation in `CoronaryArtery/CoupledLV0DCoronary3D.h`.
  * The 3D solve has local time-step adaptivity enabled by default: if the
  * PETSc KSP/SNES solve fails, the 3D flow state is restored and retried with
  * solver `dt *= 0.5`, down to 8 reductions. After accepted reduced solves,
@@ -124,7 +130,7 @@ int main(int argc, char** argv)
 
     {
       Rodin::Examples::Heart::CoupledLV0DCoronary3D::Config cfg;
-      cfg.meshPath = "../resources/examples/Heart/salida_3d.mesh";
+      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery/Output3D.mesh";
       cfg.xdmfBasename = "hyp2/CoronaryArtery";
       cfg.csvPath = "hyp2/CoronaryArtery.csv";
 

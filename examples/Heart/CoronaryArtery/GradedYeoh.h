@@ -7,6 +7,11 @@
 #ifndef EXAMPLES_HEART_CORONARYARTERY_GRADEDYEOH_H
 #define EXAMPLES_HEART_CORONARYARTERY_GRADEDYEOH_H
 
+/**
+ * @file GradedYeoh.h
+ * @brief Position-graded compressible Yeoh hyperelastic law.
+ */
+
 #include <functional>
 #include <utility>
 

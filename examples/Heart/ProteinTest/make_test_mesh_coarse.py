@@ -72,5 +72,5 @@ with open(out,'w') as f:
 Vt = sum(abs(vol(*t)) for t in tets)
 Vex = np.trapezoid(np.pi*radius(zs)**2, zs)
 print("vertices %d  tetraedros %d  caras %d"%(len(V),len(tets),len(faces)))
-print("volumen malla %.4e m3   exacto %.4e m3   error %.2f%%"%(Vt,Vex,100*abs(Vt/Vex-1)))
+print("mesh volume %.4e m3   exact %.4e m3   error %.2f%%"%(Vt,Vex,100*abs(Vt/Vex-1)))
 print("R0=%.2f mm  Rmax=%.2f mm  razon de expansion %.1f"%(R0*1e3,radius(ZC)*1e3,radius(ZC)/R0))

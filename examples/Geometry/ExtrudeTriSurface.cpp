@@ -4,6 +4,17 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ExtrudeTriSurface.cpp
+ * @brief Command line tool extruding a triangular surface mesh into wedges.
+ *
+ * Reads a surface mesh, offsets it along the vertex normals or along @f$ +z @f$
+ * by a given thickness, and writes the resulting wedge (prism) volume mesh.
+ * The bottom, top and lateral boundaries receive distinct attributes so the
+ * extruded solid can be used directly in a boundary value problem.
+ *
+ * Run with no arguments for the full list of options.
+ */
 #include <algorithm>
 #include <array>
 #include <cstdlib>
