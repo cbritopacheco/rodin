@@ -336,7 +336,6 @@ int main(int argc, char** argv)
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  wngirDefaults.maxIterations = 120;
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;

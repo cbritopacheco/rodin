@@ -369,7 +369,6 @@ int main(int argc, char** argv)
   constexpr Attribute boundaryAttribute = 20;
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  wngirDefaults.maxIterations = 120;
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
   const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));

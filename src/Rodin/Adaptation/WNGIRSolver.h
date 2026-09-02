@@ -284,9 +284,9 @@ namespace Rodin::Adaptation
         const Real dataNormalization =
           Real(1) / (robustScale.gradientScale * robustScale.gradientScale);
         const Real tauRms =
-          p.tauRms > Real(0) ? p.tauRms : Real(4) * h * levelSetMeshScale;
+          p.tauRms > Real(0) ? p.tauRms : Real(4) * levelSetMeshScale;
         const Real tauInf =
-          p.tauInf > Real(0) ? p.tauInf : Real(10) * h * levelSetMeshScale;
+          p.tauInf > Real(0) ? p.tauInf : Real(10) * levelSetMeshScale;
         rep.effectiveTauRms = tauRms;
         rep.effectiveTauInf = tauInf;
         const WNGIRLoss loss(sigma);
@@ -1406,50 +1406,90 @@ namespace Rodin::Adaptation
       }
 
 
+      struct RigidStabilisation
+      {
+          std::vector<Math::Vector<Real>> modes;
+          std::vector<Real> weights;
+      };
+
       /**
-       * @brief Rank-@f$d(d+1)/2@f$ stabilisation of weakly observed rigid modes.
+       * @brief Rank-@f$d(d+1)/2@f$ spectral stabilisation of rigid modes.
        *
-       * A rigid mode carries fitting information in proportion to its Rayleigh
-       * quotient @f$a_k=q_k^TAq_k@f$ in the assembled metric. Deflation removes
-       * such a mode outright; stabilisation instead raises its stiffness to a
-       * fixed fraction @f$\rho@f$ of the stiffest rigid mode, so that a weakly
-       * observed mode remains available to the fit but cannot dominate it. The
-       * correction @f$\sum_k\beta_kq_kq_k^T@f$ with @f$\beta_k\ge0@f$ keeps the
-       * operator symmetric positive definite and is applied matrix-free.
+       * The assembled metric is restricted to the Euclidean-orthonormal rigid
+       * subspace, diagonalised there, and every weak rigid eigenmode is lifted
+       * to a fixed fraction @f$\rho@f$ of the stiffest one. This avoids a
+       * basis-dependent diagonal correction while retaining all rigid modes.
        */
-      std::vector<Real> rigidStabilisationWeights(
+      RigidStabilisation getRigidStabilisation(
         const Math::SparseMatrix<Real>& A) const
       {
-        std::vector<Real> beta(m_rigidModeBasis.size(), Real(0));
+        RigidStabilisation result;
         const Real rho = m_parameters.rigidStabilisationLevel;
         if (!(rho > Real(0)) || m_rigidModeBasis.empty())
-          return beta; // no rigid modes to stabilise
-        std::vector<Real> rayleigh(m_rigidModeBasis.size(), Real(0));
-        Real stiffest = Real(0);
-        for (std::size_t k = 0; k < m_rigidModeBasis.size(); ++k)
+          return result;
+
+        const auto n = static_cast<Eigen::Index>(m_rigidModeBasis.size());
+        Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> restriction(n, n);
+        std::vector<Math::Vector<Real>> images(m_rigidModeBasis.size());
+        for (std::size_t j = 0; j < m_rigidModeBasis.size(); ++j)
+          images[j] = A * m_rigidModeBasis[j];
+        for (Eigen::Index i = 0; i < n; ++i)
         {
-          rayleigh[k] = m_rigidModeBasis[k].dot(A * m_rigidModeBasis[k]);
-          stiffest = std::max(stiffest, rayleigh[k]);
+          for (Eigen::Index j = i; j < n; ++j)
+          {
+            const Real value =
+              m_rigidModeBasis[static_cast<std::size_t>(i)].dot(
+                images[static_cast<std::size_t>(j)]);
+            restriction(i, j) = value;
+            restriction(j, i) = value;
+          }
         }
+
+        Eigen::SelfAdjointEigenSolver<
+          Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>>
+          eig(restriction);
+        if (eig.info() != Eigen::Success)
+          return result;
+
+        const Real stiffest = std::max(Real(0), eig.eigenvalues().maxCoeff());
         if (!(stiffest > Real(0)))
-          return beta;
-        for (std::size_t k = 0; k < beta.size(); ++k)
-          beta[k] = std::max(Real(0), rho * stiffest - rayleigh[k]);
-        return beta;
+          return result;
+
+        const Real target = rho * stiffest;
+        for (Eigen::Index i = 0; i < n; ++i)
+        {
+          const Real lambda = std::max(Real(0), eig.eigenvalues()(i));
+          const Real beta = std::max(Real(0), target - lambda);
+          if (!(beta > Real(0)))
+            continue;
+
+          Math::Vector<Real> mode =
+            Math::Vector<Real>::Zero(m_rigidModeBasis.front().size());
+          for (Eigen::Index j = 0; j < n; ++j)
+            mode += eig.eigenvectors()(j, i) *
+              m_rigidModeBasis[static_cast<std::size_t>(j)];
+          const Real norm = mode.norm();
+          if (norm > Real(0))
+          {
+            result.modes.push_back(mode / norm);
+            result.weights.push_back(beta);
+          }
+        }
+        return result;
       }
 
       void applyStabilised(const Math::SparseMatrix<Real>& A,
-        const std::vector<Real>& beta, const Math::Vector<Real>& x,
+        const RigidStabilisation& stabilisation, const Math::Vector<Real>& x,
         Math::Vector<Real>& y) const
       {
         y = A * x;
-        for (std::size_t k = 0; k < beta.size(); ++k)
-          if (beta[k] > Real(0))
-            y += beta[k] * m_rigidModeBasis[k].dot(x) * m_rigidModeBasis[k];
+        for (std::size_t k = 0; k < stabilisation.weights.size(); ++k)
+          y += stabilisation.weights[k] * stabilisation.modes[k].dot(x) *
+            stabilisation.modes[k];
       }
 
       bool stabilisedConjugateGradient(const Math::SparseMatrix<Real>& A,
-        const std::vector<Real>& beta, const Math::Vector<Real>& b,
+        const RigidStabilisation& stabilisation, const Math::Vector<Real>& b,
         Math::Vector<Real>& x, std::size_t maxIterations, Real relativeTolerance,
         std::size_t& iterations, Real& error) const
       {
@@ -1467,7 +1507,7 @@ namespace Rodin::Adaptation
           return true;
         }
         Math::Vector<Real> Ax;
-        applyStabilised(A, beta, x, Ax);
+        applyStabilised(A, stabilisation, x, Ax);
         Math::Vector<Real> r = b - Ax;
         Math::Vector<Real> z = jacobi.cwiseProduct(r);
         Math::Vector<Real> p = z;
@@ -1478,7 +1518,7 @@ namespace Rodin::Adaptation
         {
           if (r.norm() <= threshold)
             break;
-          applyStabilised(A, beta, p, Ap);
+          applyStabilised(A, stabilisation, p, Ap);
           const Real pAp = p.dot(Ap);
           if (!(pAp > Real(0)))
             break;
@@ -1513,11 +1553,12 @@ namespace Rodin::Adaptation
             : std::min<std::size_t>(2000,
                 std::max<std::size_t>(
                   100, 2 * m_duStep.getFiniteElementSpace().getSize()));
-          const auto beta = rigidStabilisationWeights(axb.getOperator());
+          const auto stabilisation = getRigidStabilisation(axb.getOperator());
           Math::Vector<Real> solution =
             (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());
-          const bool ok = stabilisedConjugateGradient(axb.getOperator(), beta, rhs,
-            solution, maxIterations, m_parameters.cgRelativeTolerance, iterations, error);
+          const bool ok = stabilisedConjugateGradient(axb.getOperator(), stabilisation,
+            rhs, solution, maxIterations, m_parameters.cgRelativeTolerance, iterations,
+            error);
           axb.getSolution() = solution;
           m_duStep.getSolution().setData(solution);
           out = m_duStep.getSolution();

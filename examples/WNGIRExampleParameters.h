@@ -18,7 +18,7 @@ namespace Rodin::Examples
 {
   struct WNGIRExampleDefaults
   {
-      std::size_t maxIterations = 60;
+      std::size_t maxIterations = 200;
       std::size_t quadratureOrder = 0;
       Real kappaBulk = Real(0.00703125);
       Real rDiv = 1;
@@ -117,7 +117,7 @@ namespace Rodin::Examples
 
     p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
     p.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
-    p.jSafe = realOption(argc, argv, "wngir-jsafe", Real(1e-2));
+    p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
     p.primalBarrierIterations = std::max<std::size_t>(1,
       sizeOption(
@@ -137,9 +137,8 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-direction-norm-factor", p.directionNormFactor);
 
     p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
-    const Real jSafeRatio = realOption(argc, argv, "j-safe", Real(1e-3));
-    p.jLineSearchRatio =
-      realOption(argc, argv, "j-ls", std::max(p.jMinRatio, Real(10) * jSafeRatio));
+    p.jLineSearchRatio = realOption(
+      argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
     p.tauRmsHFloor = realOption(argc, argv, "wngir-rms-floor", defaults.tauRmsHFloor);
     p.tauInfHFloor = realOption(argc, argv, "wngir-sup-floor", defaults.tauInfHFloor);
     p.tauJumpRms =

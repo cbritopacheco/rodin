@@ -559,8 +559,6 @@ int run(int argc, char** argv)
   TestFunction advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  wngirDefaults.maxIterations = 60;
-  wngirDefaults.tauRmsHFloor = Real(0.12);  wngirDefaults.tauInfHFloor = Real(0.65);
   WNGIRParameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
