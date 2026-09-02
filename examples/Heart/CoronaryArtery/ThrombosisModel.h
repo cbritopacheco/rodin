@@ -62,56 +62,56 @@ namespace Rodin::Examples::Heart
   {
       using Real = Rodin::Real;
 
-  /// @brief Thrombin diffusivity (m^2/s).
+      /// @brief Thrombin diffusivity (m^2/s).
       Real diffusivityThrombin = 4.6e-11;
-  /// @brief Fibrinogen diffusivity (m^2/s).
+      /// @brief Fibrinogen diffusivity (m^2/s).
       Real diffusivityFibrinogen = 2.0e-11;
-  /// @brief Fibrin diffusivity (m^2/s).
+      /// @brief Fibrin diffusivity (m^2/s).
       Real diffusivityFibrin = 2.0e-11;
 
-  /// @brief Effective reaction rate (m^3 mol^-1 s^-1).
+      /// @brief Effective reaction rate (m^3 mol^-1 s^-1).
       Real reactionRate = 7180.0;
 
-  /// @brief Molar mass of fibrinogen (kg/mol), used to convert g/L to mol/m^3.
+      /// @brief Molar mass of fibrinogen (kg/mol), used to convert g/L to mol/m^3.
       Real fibrinogenMolarMass = 340.0;
-  /// @brief Initial fibrinogen in sinus rhythm (g/L).
+      /// @brief Initial fibrinogen in sinus rhythm (g/L).
       Real fibrinogenSinusRhythm = 2.5;
-  /// @brief Initial fibrinogen in atrial fibrillation (g/L).
+      /// @brief Initial fibrinogen in atrial fibrillation (g/L).
       Real fibrinogenFibrillation = 4.0;
 
-  /// @brief Endothelial thrombin flux at an activated site (mol m^-2 s^-1).
-  /// @details 0.1 nmol/(m^2 s). It is a *surface* flux: it enters the weak form
-  ///          as a boundary integral over the activated wall, never as a
-  ///          volume integral.
+      /// @brief Endothelial thrombin flux at an activated site (mol m^-2 s^-1).
+      /// @details 0.1 nmol/(m^2 s). It is a *surface* flux: it enters the weak form
+      ///          as a boundary integral over the activated wall, never as a
+      ///          volume integral.
       Real thrombinWallFlux = 1.0e-10;
 
-  /// @brief Wall shear stress below which the endothelium is taken to be
-  ///        prothrombotic (Pa).
-  /// @details Used by the smooth activation kernel. The endothelial phenotype
-  ///          switches below roughly 0.4 Pa, which is a measured quantity,
-  ///          unlike a percentile of the computed ECAP field.
+      /// @brief Wall shear stress below which the endothelium is taken to be
+      ///        prothrombotic (Pa).
+      /// @details Used by the smooth activation kernel. The endothelial phenotype
+      ///          switches below roughly 0.4 Pa, which is a measured quantity,
+      ///          unlike a percentile of the computed ECAP field.
       Real activationShearStress = 0.4;
-  /// @brief Width of the activation transition (Pa).
+      /// @brief Width of the activation transition (Pa).
       Real activationShearWidth = 0.15;
 
-  /// @brief Number of complete cycles to discard before the source is armed.
-  /// @details The wall-shear statistics are only meaningful once the flow is
-  ///          periodic, and the indices are accumulated over a whole cycle, so
-  ///          the source cannot be active during the first one.
+      /// @brief Number of complete cycles to discard before the source is armed.
+      /// @details The wall-shear statistics are only meaningful once the flow is
+      ///          periodic, and the indices are accumulated over a whole cycle, so
+      ///          the source cannot be active during the first one.
       int warmupCycles = 1;
 
-  /// @brief Cycle period (s).
+      /// @brief Cycle period (s).
       Real cyclePeriod = 0.85;
 
-  /// @brief SUPG/VMS stabilization multiplier. 1 is the standard value; set to
-  ///        0 to disable stabilization and expose the underlying oscillations.
+      /// @brief SUPG/VMS stabilization multiplier. 1 is the standard value; set to
+      ///        0 to disable stabilization and expose the underlying oscillations.
       Real stabilizationScale = 1.0;
 
-  /// @brief Floor on TAWSS used when forming ECAP (Pa).
-  /// @details ECAP = OSI/TAWSS diverges wherever TAWSS -> 0, which happens at
-  ///          every stagnation point irrespective of how oscillatory the flow
-  ///          is. Without a floor the maximum of ECAP is a property of the mesh
-  ///          rather than of the flow. See the note on indicator choice below.
+      /// @brief Floor on TAWSS used when forming ECAP (Pa).
+      /// @details ECAP = OSI/TAWSS diverges wherever TAWSS -> 0, which happens at
+      ///          every stagnation point irrespective of how oscillatory the flow
+      ///          is. Without a floor the maximum of ECAP is a property of the mesh
+      ///          rather than of the flow. See the note on indicator choice below.
       Real tawssFloor = 1.0e-3;
   };
 
@@ -147,10 +147,16 @@ namespace Rodin::Examples::Heart
 
       template <class VectorFES, class ScalarFES>
       WallShearAccumulator(const VectorFES& vfes, const ScalarFES& sfes)
-        : m_netIntegral(vfes), m_absIntegral(sfes),
-          m_tawss(sfes), m_osi(sfes), m_ecap(sfes),
-          m_scalarSize(sfes.getSize()), m_vectorSize(vfes.getSize()),
-          m_elapsed(0.0), m_cyclesCompleted(0), m_ready(false)
+        : m_netIntegral(vfes),
+          m_absIntegral(sfes),
+          m_tawss(sfes),
+          m_osi(sfes),
+          m_ecap(sfes),
+          m_scalarSize(sfes.getSize()),
+          m_vectorSize(vfes.getSize()),
+          m_elapsed(0.0),
+          m_cyclesCompleted(0),
+          m_ready(false)
       {
         reset();
       }
@@ -262,15 +268,25 @@ namespace Rodin::Examples::Heart
         std::size_t best = 0;
         Real bestVal = -std::numeric_limits<Real>::infinity();
         for (std::size_t i = 0; i < m_scalarSize; ++i)
-          if (m_ecap[i] > bestVal) { bestVal = m_ecap[i]; best = i; }
+          if (m_ecap[i] > bestVal)
+          {
+            bestVal = m_ecap[i];
+            best = i;
+          }
         m_ecap.flush();
         return best;
       }
 
-      Real maxECAP() const { return m_ecap.max(); }
+      Real maxECAP() const
+      {
+        return m_ecap.max();
+      }
 
       /// @brief Number of scalar degrees of freedom carried by the indices.
-      std::size_t size() const { return m_scalarSize; }
+      std::size_t size() const
+      {
+        return m_scalarSize;
+      }
 
       /// @brief Have enough cycles elapsed for the source to be armed?
       bool sourceArmed(const ThrombosisParameters& p) const
@@ -278,19 +294,46 @@ namespace Rodin::Examples::Heart
         return m_ready && m_cyclesCompleted >= p.warmupCycles;
       }
 
-      int cyclesCompleted() const { return m_cyclesCompleted; }
+      int cyclesCompleted() const
+      {
+        return m_cyclesCompleted;
+      }
 
-      const ScalarGridFunction& tawss() const { return m_tawss; }
-      const ScalarGridFunction& osi() const { return m_osi; }
-      const ScalarGridFunction& ecap() const { return m_ecap; }
-      ScalarGridFunction& tawss() { return m_tawss; }
-      ScalarGridFunction& osi() { return m_osi; }
-      ScalarGridFunction& ecap() { return m_ecap; }
+      const ScalarGridFunction& tawss() const
+      {
+        return m_tawss;
+      }
+      const ScalarGridFunction& osi() const
+      {
+        return m_osi;
+      }
+      const ScalarGridFunction& ecap() const
+      {
+        return m_ecap;
+      }
+      ScalarGridFunction& tawss()
+      {
+        return m_tawss;
+      }
+      ScalarGridFunction& osi()
+      {
+        return m_osi;
+      }
+      ScalarGridFunction& ecap()
+      {
+        return m_ecap;
+      }
 
       /// @brief Raw accumulators, exposed so that alternative activation
       ///        functionals can be built without recomputing them.
-      const VectorGridFunction& netShearIntegral() const { return m_netIntegral; }
-      const ScalarGridFunction& absShearIntegral() const { return m_absIntegral; }
+      const VectorGridFunction& netShearIntegral() const
+      {
+        return m_netIntegral;
+      }
+      const ScalarGridFunction& absShearIntegral() const
+      {
+        return m_absIntegral;
+      }
 
     private:
       VectorGridFunction m_netIntegral;
@@ -325,8 +368,8 @@ namespace Rodin::Examples::Heart
    *          keeps the total injected thrombin independent of mesh refinement.
    */
   template <class Accumulator, class ScalarGridFunction>
-  void activationWeight(const Accumulator& acc, const ThrombosisParameters& p,
-    ScalarGridFunction& weight)
+  void activationWeight(
+    const Accumulator& acc, const ThrombosisParameters& p, ScalarGridFunction& weight)
   {
     using Real = Rodin::Real;
 
@@ -335,9 +378,10 @@ namespace Rodin::Examples::Heart
 
     for (std::size_t i = 0; i < acc.size(); ++i)
     {
-      const Real low =
-        1.0 / (1.0 + std::exp((tawss[i] - p.activationShearStress) /
-                              std::max<Real>(p.activationShearWidth, 1e-12)));
+      const Real low = 1.0 /
+        (1.0 +
+          std::exp((tawss[i] - p.activationShearStress) /
+            std::max<Real>(p.activationShearWidth, 1e-12)));
       weight[i] = low * std::min<Real>(2.0 * osi[i], 1.0);
     }
 

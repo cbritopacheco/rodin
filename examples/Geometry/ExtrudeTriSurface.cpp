@@ -21,31 +21,31 @@ namespace
 {
   struct Options
   {
-    std::string input;
-    std::string output;
-    Real thickness = 0;
-    size_t layers = 1;
-    bool centered = false;
-    bool zDirection = false;
-    Optional<Attribute> wedgeAttribute;
-    Attribute bottomAttribute = 1;
-    Attribute topAttribute = 2;
-    Attribute sideAttribute = 3;
-    IO::FileFormat inputFormat = IO::FileFormat::MEDIT;
-    IO::FileFormat outputFormat = IO::FileFormat::MEDIT;
+      std::string input;
+      std::string output;
+      Real thickness = 0;
+      size_t layers = 1;
+      bool centered = false;
+      bool zDirection = false;
+      Optional<Attribute> wedgeAttribute;
+      Attribute bottomAttribute = 1;
+      Attribute topAttribute = 2;
+      Attribute sideAttribute = 3;
+      IO::FileFormat inputFormat = IO::FileFormat::MEDIT;
+      IO::FileFormat outputFormat = IO::FileFormat::MEDIT;
   };
 
   struct TriangleData
   {
-    std::array<Index, 3> vertices;
-    Attribute attribute;
+      std::array<Index, 3> vertices;
+      Attribute attribute;
   };
 
   struct EdgeData
   {
-    Index first;
-    Index second;
-    size_t count;
+      Index first;
+      Index second;
+      size_t count;
   };
 
   void usage(const char* exe)
@@ -56,7 +56,8 @@ namespace
       << "Options:\n"
       << "  --layers <n>             Wedge layers through thickness (default: 1)\n"
       << "  --centered               Extrude +/- thickness/2 around the input surface\n"
-      << "  --direction <normal|z>   Extrude along vertex normals or +z (default: normal)\n"
+      << "  --direction <normal|z>   Extrude along vertex normals or +z (default: "
+         "normal)\n"
       << "  --input-format <medit|mfem>\n"
       << "  --output-format <medit|mfem>\n"
       << "  --wedge-attribute <n>    Override wedge attributes\n"
@@ -94,9 +95,8 @@ namespace
       return IO::FileFormat::MEDIT;
     if (value == "mfem")
       return IO::FileFormat::MFEM;
-    Alert::Exception()
-      << "Unsupported mesh format: " << value << ". Expected medit or mfem."
-      << Alert::Raise;
+    Alert::Exception() << "Unsupported mesh format: " << value
+                       << ". Expected medit or mfem." << Alert::Raise;
     return IO::FileFormat::MEDIT;
   }
 
@@ -140,9 +140,8 @@ namespace
         else if (value == "z")
           options.zDirection = true;
         else
-          Alert::Exception()
-            << "Invalid --direction: " << value << ". Expected normal or z."
-            << Alert::Raise;
+          Alert::Exception() << "Invalid --direction: " << value
+                             << ". Expected normal or z." << Alert::Raise;
       }
       else if (arg == "--input-format" || arg.rfind("--input-format=", 0) == 0)
       {
@@ -154,13 +153,13 @@ namespace
       }
       else if (arg == "--wedge-attribute" || arg.rfind("--wedge-attribute=", 0) == 0)
       {
-        options.wedgeAttribute =
-          parseAttribute(takeValue(i, argc, argv, "--wedge-attribute"), "--wedge-attribute");
+        options.wedgeAttribute = parseAttribute(
+          takeValue(i, argc, argv, "--wedge-attribute"), "--wedge-attribute");
       }
       else if (arg == "--bottom-attribute" || arg.rfind("--bottom-attribute=", 0) == 0)
       {
-        options.bottomAttribute =
-          parseAttribute(takeValue(i, argc, argv, "--bottom-attribute"), "--bottom-attribute");
+        options.bottomAttribute = parseAttribute(
+          takeValue(i, argc, argv, "--bottom-attribute"), "--bottom-attribute");
       }
       else if (arg == "--top-attribute" || arg.rfind("--top-attribute=", 0) == 0)
       {
@@ -169,8 +168,8 @@ namespace
       }
       else if (arg == "--side-attribute" || arg.rfind("--side-attribute=", 0) == 0)
       {
-        options.sideAttribute =
-          parseAttribute(takeValue(i, argc, argv, "--side-attribute"), "--side-attribute");
+        options.sideAttribute = parseAttribute(
+          takeValue(i, argc, argv, "--side-attribute"), "--side-attribute");
       }
       else if (!arg.empty() && arg[0] == '-')
       {
@@ -185,8 +184,8 @@ namespace
     if (positional.size() != 3)
     {
       usage(argv[0]);
-      Alert::Exception()
-        << "Expected input mesh, output mesh, and thickness." << Alert::Raise;
+      Alert::Exception() << "Expected input mesh, output mesh, and thickness."
+                         << Alert::Raise;
     }
 
     options.input = positional[0];
@@ -224,15 +223,13 @@ namespace
     {
       if (it->getGeometry() != Polytope::Type::Triangle)
       {
-        Alert::Exception()
-          << "Expected a triangular surface mesh; encountered "
-          << it->getGeometry() << " cell." << Alert::Raise;
+        Alert::Exception() << "Expected a triangular surface mesh; encountered "
+                           << it->getGeometry() << " cell." << Alert::Raise;
       }
 
       const auto& vs = it->getVertices();
-      triangles.push_back({
-        {vs(0), vs(1), vs(2)},
-        it->getAttribute().value_or(Attribute{0})});
+      triangles.push_back(
+        {{vs(0), vs(1), vs(2)}, it->getAttribute().value_or(Attribute{0})});
     }
 
     if (triangles.empty())
@@ -241,10 +238,10 @@ namespace
   }
 
   std::vector<Math::SpatialPoint> computeVertexNormals(
-    const LocalMesh& mesh,
-    const std::vector<TriangleData>& triangles)
+    const LocalMesh& mesh, const std::vector<TriangleData>& triangles)
   {
-    std::vector<Math::SpatialPoint> normals(mesh.getVertexCount(), Math::SpatialPoint::Zero(3));
+    std::vector<Math::SpatialPoint> normals(
+      mesh.getVertexCount(), Math::SpatialPoint::Zero(3));
 
     for (const auto& triangle : triangles)
     {
@@ -254,9 +251,8 @@ namespace
       const auto normal = (b - a).cross(c - a);
       if (normal.norm() == 0)
       {
-        Alert::Exception()
-          << "Encountered a degenerate triangle while computing normals."
-          << Alert::Raise;
+        Alert::Exception() << "Encountered a degenerate triangle while computing normals."
+                           << Alert::Raise;
       }
 
       for (Index v : triangle.vertices)
@@ -266,7 +262,8 @@ namespace
     for (Index v = 0; v < static_cast<Index>(normals.size()); ++v)
     {
       if (normals[v].norm() == 0)
-        Alert::Exception() << "Vertex " << v << " has no usable incident normal." << Alert::Raise;
+        Alert::Exception() << "Vertex " << v << " has no usable incident normal."
+                           << Alert::Raise;
       normals[v] /= normals[v].norm();
     }
     return normals;
@@ -280,16 +277,14 @@ namespace
   std::vector<EdgeData> collectBoundaryEdges(const std::vector<TriangleData>& triangles)
   {
     std::map<std::pair<Index, Index>, EdgeData> edges;
-    const auto addEdge =
-      [&edges](Index a, Index b)
-      {
-        const auto key = std::minmax(a, b);
-        auto it = edges.find(key);
-        if (it == edges.end())
-          edges.emplace(key, EdgeData{a, b, 1});
-        else
-          it->second.count++;
-      };
+    const auto addEdge = [&edges](Index a, Index b) {
+      const auto key = std::minmax(a, b);
+      auto it = edges.find(key);
+      if (it == edges.end())
+        edges.emplace(key, EdgeData{a, b, 1});
+      else
+        it->second.count++;
+    };
 
     for (const auto& triangle : triangles)
     {
@@ -318,10 +313,10 @@ namespace
 
     const auto triangles = collectTriangles(input);
     const auto boundaryEdges = collectBoundaryEdges(triangles);
-    const std::vector<Math::SpatialPoint> directions =
-      options.zDirection
-        ? std::vector<Math::SpatialPoint>(input.getVertexCount(), Math::SpatialPoint({0, 0, 1}))
-        : computeVertexNormals(input, triangles);
+    const std::vector<Math::SpatialPoint> directions = options.zDirection
+      ? std::vector<Math::SpatialPoint>(
+          input.getVertexCount(), Math::SpatialPoint({0, 0, 1}))
+      : computeVertexNormals(input, triangles);
 
     LocalMesh::Builder builder;
     builder.initialize(3)
@@ -333,8 +328,8 @@ namespace
     const Real offset = options.centered ? -Real(0.5) * options.thickness : Real(0);
     for (size_t layer = 0; layer <= options.layers; ++layer)
     {
-      const Real t = offset + options.thickness * static_cast<Real>(layer) /
-        static_cast<Real>(options.layers);
+      const Real t = offset +
+        options.thickness * static_cast<Real>(layer) / static_cast<Real>(options.layers);
       for (Index v = 0; v < static_cast<Index>(input.getVertexCount()); ++v)
       {
         const auto x = point3(input, v) + t * directions[v];
@@ -349,31 +344,35 @@ namespace
       for (const auto& triangle : triangles)
       {
         Index index;
-        builder.polytope(Polytope::Type::Wedge, {
-          layeredVertex(triangle.vertices[0], layer, input.getVertexCount()),
-          layeredVertex(triangle.vertices[1], layer, input.getVertexCount()),
-          layeredVertex(triangle.vertices[2], layer, input.getVertexCount()),
-          layeredVertex(triangle.vertices[0], layer + 1, input.getVertexCount()),
-          layeredVertex(triangle.vertices[1], layer + 1, input.getVertexCount()),
-          layeredVertex(triangle.vertices[2], layer + 1, input.getVertexCount())}, index);
-        builder.attribute({3, index}, options.wedgeAttribute.value_or(triangle.attribute));
+        builder.polytope(Polytope::Type::Wedge,
+          {layeredVertex(triangle.vertices[0], layer, input.getVertexCount()),
+            layeredVertex(triangle.vertices[1], layer, input.getVertexCount()),
+            layeredVertex(triangle.vertices[2], layer, input.getVertexCount()),
+            layeredVertex(triangle.vertices[0], layer + 1, input.getVertexCount()),
+            layeredVertex(triangle.vertices[1], layer + 1, input.getVertexCount()),
+            layeredVertex(triangle.vertices[2], layer + 1, input.getVertexCount())},
+          index);
+        builder.attribute(
+          {3, index}, options.wedgeAttribute.value_or(triangle.attribute));
       }
     }
 
     for (const auto& triangle : triangles)
     {
       Index bottom;
-      builder.polytope(Polytope::Type::Triangle, {
-        layeredVertex(triangle.vertices[2], 0, input.getVertexCount()),
-        layeredVertex(triangle.vertices[1], 0, input.getVertexCount()),
-        layeredVertex(triangle.vertices[0], 0, input.getVertexCount())}, bottom);
+      builder.polytope(Polytope::Type::Triangle,
+        {layeredVertex(triangle.vertices[2], 0, input.getVertexCount()),
+          layeredVertex(triangle.vertices[1], 0, input.getVertexCount()),
+          layeredVertex(triangle.vertices[0], 0, input.getVertexCount())},
+        bottom);
       builder.attribute({2, bottom}, options.bottomAttribute);
 
       Index top;
-      builder.polytope(Polytope::Type::Triangle, {
-        layeredVertex(triangle.vertices[0], options.layers, input.getVertexCount()),
-        layeredVertex(triangle.vertices[1], options.layers, input.getVertexCount()),
-        layeredVertex(triangle.vertices[2], options.layers, input.getVertexCount())}, top);
+      builder.polytope(Polytope::Type::Triangle,
+        {layeredVertex(triangle.vertices[0], options.layers, input.getVertexCount()),
+          layeredVertex(triangle.vertices[1], options.layers, input.getVertexCount()),
+          layeredVertex(triangle.vertices[2], options.layers, input.getVertexCount())},
+        top);
       builder.attribute({2, top}, options.topAttribute);
     }
 
@@ -382,11 +381,12 @@ namespace
       for (size_t layer = 0; layer < options.layers; ++layer)
       {
         Index side;
-        builder.polytope(Polytope::Type::Quadrilateral, {
-          layeredVertex(edge.first, layer, input.getVertexCount()),
-          layeredVertex(edge.second, layer, input.getVertexCount()),
-          layeredVertex(edge.second, layer + 1, input.getVertexCount()),
-          layeredVertex(edge.first, layer + 1, input.getVertexCount())}, side);
+        builder.polytope(Polytope::Type::Quadrilateral,
+          {layeredVertex(edge.first, layer, input.getVertexCount()),
+            layeredVertex(edge.second, layer, input.getVertexCount()),
+            layeredVertex(edge.second, layer + 1, input.getVertexCount()),
+            layeredVertex(edge.first, layer + 1, input.getVertexCount())},
+          side);
         builder.attribute({2, side}, options.sideAttribute);
       }
     }
@@ -407,13 +407,11 @@ int main(int argc, char** argv)
     LocalMesh output = extrude(input, options);
     output.save(options.output, options.outputFormat);
 
-    std::cout
-      << "Wrote " << options.output << ": "
-      << output.getVertexCount() << " vertices, "
-      << output.getPolytopeCount(Polytope::Type::Wedge) << " wedges, "
-      << output.getPolytopeCount(Polytope::Type::Triangle) << " triangles, "
-      << output.getPolytopeCount(Polytope::Type::Quadrilateral) << " quadrilaterals."
-      << std::endl;
+    std::cout << "Wrote " << options.output << ": " << output.getVertexCount()
+              << " vertices, " << output.getPolytopeCount(Polytope::Type::Wedge)
+              << " wedges, " << output.getPolytopeCount(Polytope::Type::Triangle)
+              << " triangles, " << output.getPolytopeCount(Polytope::Type::Quadrilateral)
+              << " quadrilaterals." << std::endl;
   }
   catch (const std::exception& e)
   {

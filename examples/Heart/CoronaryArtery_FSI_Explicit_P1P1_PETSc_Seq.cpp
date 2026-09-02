@@ -100,7 +100,7 @@ namespace
   {
       static constexpr Attribute FSI = 2;
       static constexpr Attribute Inlet = 4;
-      static constexpr std::array<Attribute, 6> Outlets{{7, 8 , 9, 10, 14, 15}};
+      static constexpr std::array<Attribute, 6> Outlets{{7, 8, 9, 10, 14, 15}};
       static constexpr Attribute FSIRing = 99;
   };
 
@@ -110,8 +110,7 @@ namespace
       static constexpr Attribute Inlet = 150;
       static constexpr std::array<Attribute, 6> Outlets{{151, 152, 153, 154, 155, 156}};
       static constexpr Attribute FSIRing = 99;
-      static constexpr std::array<Attribute, 1> Contact{
-        {101}};
+      static constexpr std::array<Attribute, 1> Contact{{101}};
       /// Outer (adventitial) surface pieces; xi = 1 there for the transmural
       /// coordinate (xi = 0 on the FSI/luminal surface).
       static constexpr std::array<Attribute, 2> Outer{{2, 101}};
@@ -179,8 +178,8 @@ namespace
   /// Rheological model used by the 0D outlet closure.
   enum class RheologyModel
   {
-      CarreauYasuda,
-      Quemada
+    CarreauYasuda,
+    Quemada
   };
 
   /// Quemada blood viscosity parameters (haematocrit axis); see
@@ -355,30 +354,30 @@ namespace
       Real heartDisplacementPenalty = 1.e7;
       Real heartDisplacementScale = 1.0;
 
-  // Viscoelastic outlet tethering (spring/dashpot per unit area on the cap
-  // annuli).  With the ring band now confined to the INLET, these springs are
-  // the ONLY thing holding the outlet ends: 5e1 Pa/m left them essentially
-  // free-flying, so the defaults are raised to a perivascular-tethering level
-  // (1e4-1e6 Pa/m is the physiological ballpark).
+      // Viscoelastic outlet tethering (spring/dashpot per unit area on the cap
+      // annuli).  With the ring band now confined to the INLET, these springs are
+      // the ONLY thing holding the outlet ends: 5e1 Pa/m left them essentially
+      // free-flying, so the defaults are raised to a perivascular-tethering level
+      // (1e4-1e6 Pa/m is the physiological ballpark).
       Real aViscCondition = 1.0e5;
       Real bViscCondition = 1.0e3;
 
-  // Transmural grading of the wall constitutive law, applied as a spatial
-  // multiplier m(xi) on the Yeoh energy (see GradedYeoh.h), where xi in [0,1]
-  // is the harmonic through-thickness coordinate (0 = lumen/intima side,
-  // 1 = adventitia).  Bands: xi < 1/3 intima, middle third media (reference),
-  // xi > 2/3 adventitia, blended with smoothsteps of half-width
-  // gradeTransitionWidth.
-  //
-  // Defaults follow the classical healthy-artery picture (Holzapfel-Gasser-
-  // Ogden 2000): a thin, mechanically insignificant intima (soft), the
-  // load-bearing media as reference, and a stiffer collagenous adventitial
-  // sleeve, normalized so the thickness-weighted mean is ~1 and the global
-  // compliance of the tuned homogenized wall is preserved.  NOTE: for aged /
-  // atherosclerotic coronaries Holzapfel et al. (2005) measured the OPPOSITE
-  // low-strain ordering (ground-matrix mu: intima 27.9, media 1.27,
-  // adventitia 7.56 kPa); to run that profile set roughly
-  // (intima, media, adventitia) = (2.3, 0.10, 0.76).
+      // Transmural grading of the wall constitutive law, applied as a spatial
+      // multiplier m(xi) on the Yeoh energy (see GradedYeoh.h), where xi in [0,1]
+      // is the harmonic through-thickness coordinate (0 = lumen/intima side,
+      // 1 = adventitia).  Bands: xi < 1/3 intima, middle third media (reference),
+      // xi > 2/3 adventitia, blended with smoothsteps of half-width
+      // gradeTransitionWidth.
+      //
+      // Defaults follow the classical healthy-artery picture (Holzapfel-Gasser-
+      // Ogden 2000): a thin, mechanically insignificant intima (soft), the
+      // load-bearing media as reference, and a stiffer collagenous adventitial
+      // sleeve, normalized so the thickness-weighted mean is ~1 and the global
+      // compliance of the tuned homogenized wall is preserved.  NOTE: for aged /
+      // atherosclerotic coronaries Holzapfel et al. (2005) measured the OPPOSITE
+      // low-strain ordering (ground-matrix mu: intima 27.9, media 1.27,
+      // adventitia 7.56 kPa); to run that profile set roughly
+      // (intima, media, adventitia) = (2.3, 0.10, 0.76).
       Real gradeIntima = 0.5;
       Real gradeMedia = 1.0;
       Real gradeAdventitia = 1.5;
@@ -1118,8 +1117,8 @@ namespace
     if (gradeSet)
       cfg.gradeMedia = std::max<Real>(0.0, gradeVal);
     gradeSet = PETSC_FALSE;
-    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_grade_adventitia",
-      &gradeVal, &gradeSet);
+    PetscOptionsGetReal(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_grade_adventitia", &gradeVal, &gradeSet);
     if (gradeSet)
       cfg.gradeAdventitia = std::max<Real>(0.0, gradeVal);
   }
@@ -1163,12 +1162,14 @@ namespace
     const Real p2 = phi * phi;
     const Real p3 = p2 * phi;
 
-    const Real qk0 = (qp.k0 > 0.0)
-      ? qp.k0 : std::exp(3.874 - 10.41 * phi + 13.8 * p2 - 6.738 * p3);
+    const Real qk0 =
+      (qp.k0 > 0.0) ? qp.k0 : std::exp(3.874 - 10.41 * phi + 13.8 * p2 - 6.738 * p3);
     const Real qkInf = (qp.kInf > 0.0)
-      ? qp.kInf : std::exp(1.3435 - 2.803 * phi + 2.711 * p2 - 0.6479 * p3);
+      ? qp.kInf
+      : std::exp(1.3435 - 2.803 * phi + 2.711 * p2 - 0.6479 * p3);
     const Real qgc = (qp.gammaC > 0.0)
-      ? qp.gammaC : std::exp(-6.1508 + 27.923 * phi - 25.6 * p2 + 3.697 * p3);
+      ? qp.gammaC
+      : std::exp(-6.1508 + 27.923 * phi - 25.6 * p2 + 3.697 * p3);
 
     auto muQ = [&](Real g) -> Real {
       const Real s = std::sqrt(std::max<Real>(g, 0.0) / qgc);
@@ -1316,8 +1317,8 @@ namespace
   // Implicit Euler + scalar Newton on p_tm; dq_v/dp_tm >= 0 everywhere, so
   // R' = C/dt + dq_v/dp_tm > 0 and the iteration converges globally.
   // --------------------------------------------------------------------------
-  static void updateOutlet0D(const Config& cfg, const WRMSTable& wrms,
-    const Model& model, RCR& bc, Real Q, Real dt)
+  static void updateOutlet0D(const Config& cfg, const WRMSTable& wrms, const Model& model,
+    RCR& bc, Real Q, Real dt)
   {
     const auto& s = model.getState();
     const auto& law = cfg.outletFlowLaw;
@@ -1344,9 +1345,8 @@ namespace
 
     auto viscosityFactorV = [&](Real q) -> Real {
       const Real aq = std::abs(q);
-      const Real g = (aq < law.zeroFlowTolerance)
-        ? law.zeroFlowTolerance
-        : bc.gammaV * aq / q0;
+      const Real g =
+        (aq < law.zeroFlowTolerance) ? law.zeroFlowTolerance : bc.gammaV * aq / q0;
       return wrms(g) / muN;
     };
 
@@ -1405,9 +1405,8 @@ namespace
     // Arteriolar modulation, exported here and consumed by the next 3D solve
     // through the implicit boundary term R_a Phi_a A (u.n)(v.n).
     const Real aQ = std::abs(Q);
-    const Real gammaA = (aQ < law.zeroFlowTolerance)
-      ? law.zeroFlowTolerance
-      : bc.gammaA * aQ / q0;
+    const Real gammaA =
+      (aQ < law.zeroFlowTolerance) ? law.zeroFlowTolerance : bc.gammaA * aQ / q0;
     bc.muA = wrms(gammaA) / muN;
 
     // Pressure applied to the 3D outlet as a Neumann traction.  The resistive
@@ -1456,11 +1455,13 @@ int main(int argc, char** argv)
     Model model(modelInput);
     initializeModel(model, modelInput);
 
-    const std::string fluidMesh = "../resources/examples/Heart/coronaria_estenosis_80.mesh";
+    const std::string fluidMesh =
+      "../resources/examples/Heart/coronaria_estenosis_80.mesh";
     MeshType meshFluid = makeMesh(cfg, fluidMesh);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
-    const std::string solidMesh = "../resources/examples/Heart/coronaria_80_prismatica.mesh";
+    const std::string solidMesh =
+      "../resources/examples/Heart/coronaria_80_prismatica.mesh";
     MeshType meshSolid = makeMesh(cfg, solidMesh);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 
@@ -1474,12 +1475,12 @@ int main(int argc, char** argv)
     // wedge layer every cap node is one edge away from the ring).  The
     // "outlets" argument is therefore filled with the inlet attribute so only
     // inlet-adjacent FSI faces are relabeled to 99.
-    const std::array<Attribute, 6> fluidInletOnly{{BoundaryFluid::Inlet,
-      BoundaryFluid::Inlet, BoundaryFluid::Inlet, BoundaryFluid::Inlet,
-      BoundaryFluid::Inlet, BoundaryFluid::Inlet}};
-    const std::array<Attribute, 6> solidInletOnly{{BoundarySolid::Inlet,
-      BoundarySolid::Inlet, BoundarySolid::Inlet, BoundarySolid::Inlet,
-      BoundarySolid::Inlet, BoundarySolid::Inlet}};
+    const std::array<Attribute, 6> fluidInletOnly{
+      {BoundaryFluid::Inlet, BoundaryFluid::Inlet, BoundaryFluid::Inlet,
+        BoundaryFluid::Inlet, BoundaryFluid::Inlet, BoundaryFluid::Inlet}};
+    const std::array<Attribute, 6> solidInletOnly{
+      {BoundarySolid::Inlet, BoundarySolid::Inlet, BoundarySolid::Inlet,
+        BoundarySolid::Inlet, BoundarySolid::Inlet, BoundarySolid::Inlet}};
     const std::size_t fluidRingFaces = tagFSIRingBand(meshFluid, BoundaryFluid::FSI,
       BoundaryFluid::FSIRing, BoundaryFluid::Inlet, fluidInletOnly);
     const std::size_t solidRingFaces = tagFSIRingBand(meshSolid, BoundarySolid::FSI,
@@ -1741,39 +1742,33 @@ int main(int argc, char** argv)
         bc.muV = phiV0;
 
         if (isRoot)
-          Alert::Info() << "  [calib] outlet " << tag << "  A=" << bc.area
-                        << " m^2" << "  Q=" << (Qi * 6.0e7) << " mL/min"
+          Alert::Info() << "  [calib] outlet " << tag << "  A=" << bc.area << " m^2"
+                        << "  Q=" << (Qi * 6.0e7) << " mL/min"
                         << "  Ra=" << bc.Ra << "  Rv=" << bc.Rv << " Pa s/m^3"
                         << "  C=" << bc.C << " m^3/Pa"
                         << "  tau=C*Rv=" << (bc.C * bc.Rv) << " s"
-                        << "  ptm0=" << ptmRest
-                        << "  pc0/pout0=" << bc.pc << "/" << bc.pout
-                        << " Pa (par=" << par0 << ", pim=" << pimRest << ")"
+                        << "  ptm0=" << ptmRest << "  pc0/pout0=" << bc.pc << "/"
+                        << bc.pout << " Pa (par=" << par0 << ", pim=" << pimRest << ")"
                         << Alert::Raise;
       }
 
       if (isRoot)
       {
-        Alert::Info() << "  [calib] WRMS nodes=" << wrms.logGamma.size()
-                      << "  reologia="
-                      << (cfg.rheologyModel == RheologyModel::Quemada
-                            ? "Quemada" : "Carreau-Yasuda")
-                      << "  mu_ap(" << gammaA0 << ")=" << wrms(gammaA0)
-                      << "  mu_ap(" << gammaV0 << ")=" << wrms(gammaV0)
-                      << "  (mu_N=" << muN << ")"
-                      << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0
-                      << "  |  T_a=" << Ta << " s  T_v=" << Tv
-                      << " s  (referencia " << cfg.referenceTransitTime << " s)"
-                      << Alert::Raise;
+        Alert::Info() << "  [calib] WRMS nodes=" << wrms.logGamma.size() << "  reologia="
+                      << (cfg.rheologyModel == RheologyModel::Quemada ? "Quemada"
+                                                                      : "Carreau-Yasuda")
+                      << "  mu_ap(" << gammaA0 << ")=" << wrms(gammaA0) << "  mu_ap("
+                      << gammaV0 << ")=" << wrms(gammaV0) << "  (mu_N=" << muN << ")"
+                      << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0 << "  |  T_a=" << Ta
+                      << " s  T_v=" << Tv << " s  (referencia "
+                      << cfg.referenceTransitTime << " s)" << Alert::Raise;
 
         const Real Tref = cfg.referenceTransitTime;
-        if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref ||
-          Tv > 2.0 * Tref)
+        if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref || Tv > 2.0 * Tref)
           Alert::Warning()
             << "  [calib] el tiempo de transito derivado se aparta mas de 2x "
             << "de la referencia: calibre, velocidad y reparto de presion no "
-            << "son consistentes con un solo tramo efectivo por rama."
-            << Alert::Raise;
+            << "son consistentes con un solo tramo efectivo por rama." << Alert::Raise;
       }
     }
     else
@@ -1788,8 +1783,8 @@ int main(int argc, char** argv)
         bc.q0 = Qi;
         bc.Ra = 4.5e9;
         bc.Rv = 6.8e8;
-        bc.C = cfg.coronaryComplianceTotal /
-          static_cast<Real>(BoundaryFluid::Outlets.size());
+        bc.C =
+          cfg.coronaryComplianceTotal / static_cast<Real>(BoundaryFluid::Outlets.size());
         bc.ptm = 1400.0;
         bc.pc = bc.ptm;
         bc.pout = bc.pc;
@@ -2081,7 +2076,6 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction uConv(uh);
     uConv = uOld;
 
-
     PressureFES tauFes(std::integral_constant<size_t, 1>{}, meshFluid);
     PETSc::Variational::TestFunction vmsScalarTest(tauFes);
     PETSc::Variational::TrialFunction vmsPiTilde(tauFes); // pi~ (projected)
@@ -2101,8 +2095,7 @@ int main(int argc, char** argv)
         std::sqrt(gammaReg * gammaReg + 2.0 * Dot(sym, sym).getValue(pp));
       return cy.muInf +
         deltaMu *
-        std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda),
-          (cy.n - 1.0) / cy.yasuda);
+        std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
     };
 
     // Shared stabilization parameter tau1 (Codina), c1 = 4, c2 = 2, k = 1
@@ -2120,7 +2113,8 @@ int main(int argc, char** argv)
     // Convective subscale parameter tau_K = vmsScale/(rho/dt + rho/tau1),
     // evaluated pointwise (fed straight into the VMS integrators).
     auto vmsTauAt = [&](const Point& pp) -> Real {
-      return cfg.vmsScale * (1.0 / (cfg.fluidDensity / dt + cfg.fluidDensity / tau1At(pp)));
+      return cfg.vmsScale *
+        (1.0 / (cfg.fluidDensity / dt + cfg.fluidDensity / tau1At(pp)));
     };
     RealFunction vmsTauFn = [&](const Point& pp) -> Real { return vmsTauAt(pp); };
 
@@ -2504,8 +2498,7 @@ int main(int argc, char** argv)
     xi.setData(xiT.getSolution().getData());
     if (isRoot)
       Alert::Info() << "  [grade] transmural xi solved; multipliers"
-                    << "  intima=" << cfg.gradeIntima
-                    << "  media=" << cfg.gradeMedia
+                    << "  intima=" << cfg.gradeIntima << "  media=" << cfg.gradeMedia
                     << "  adventitia=" << cfg.gradeAdventitia
                     << "  (transition half-width " << cfg.gradeTransitionWidth << ")"
                     << Alert::Raise;
@@ -2541,15 +2534,15 @@ int main(int argc, char** argv)
       Problem prestress(dPre, wPre);
       prestress = preTangent + preInternal + preLoadK + preLoad +
         a *
-          BoundaryIntegral(dPre, wPre).over(BoundarySolid::Outlets[0],
-            BoundarySolid::Outlets[1], BoundarySolid::Outlets[2],
-            BoundarySolid::Outlets[3], BoundarySolid::Outlets[4],
-            BoundarySolid::Outlets[5]) +
+          BoundaryIntegral(dPre, wPre)
+            .over(BoundarySolid::Outlets[0], BoundarySolid::Outlets[1],
+              BoundarySolid::Outlets[2], BoundarySolid::Outlets[3],
+              BoundarySolid::Outlets[4], BoundarySolid::Outlets[5]) +
         a *
-          BoundaryIntegral(dState, wPre).over(BoundarySolid::Outlets[0],
-            BoundarySolid::Outlets[1], BoundarySolid::Outlets[2],
-            BoundarySolid::Outlets[3], BoundarySolid::Outlets[4],
-            BoundarySolid::Outlets[5]) +
+          BoundaryIntegral(dState, wPre)
+            .over(BoundarySolid::Outlets[0], BoundarySolid::Outlets[1],
+              BoundarySolid::Outlets[2], BoundarySolid::Outlets[3],
+              BoundarySolid::Outlets[4], BoundarySolid::Outlets[5]) +
         DirichletBC(dPre, zero).on(BoundarySolid::Inlet, BoundarySolid::FSIRing);
 
       prestress.assemble();
@@ -2873,8 +2866,7 @@ int main(int argc, char** argv)
         VecGetArrayRead(mvec, &marr);
         VecGetArray(svec, &sarr);
         for (PetscInt i = 0; i < n; ++i)
-          sarr[i] =
-            (std::abs(marr[i]) > 1.0e-30) ? (barr[i] / marr[i]) : PetscScalar(0);
+          sarr[i] = (std::abs(marr[i]) > 1.0e-30) ? (barr[i] / marr[i]) : PetscScalar(0);
         VecRestoreArray(svec, &sarr);
         VecRestoreArrayRead(mvec, &marr);
         VecRestoreArrayRead(bvec, &barr);
@@ -2987,8 +2979,8 @@ int main(int argc, char** argv)
             volSum += bc.vol;
           }
           const Real nOut = static_cast<Real>(wk.size());
-          csv << ',' << pimNow << ',' << (ptmSum / nOut) << ','
-              << (muASum / nOut) << ',' << (muVSum / nOut) << ',' << volSum;
+          csv << ',' << pimNow << ',' << (ptmSum / nOut) << ',' << (muASum / nOut) << ','
+              << (muVSum / nOut) << ',' << volSum;
         }
         csv << ',' << eInterface << ',' << lastRel << '\n';
         csv.flush();

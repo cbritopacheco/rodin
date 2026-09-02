@@ -52,10 +52,10 @@ namespace Rodin::Examples::Heart
       using ScalarGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<ScalarFESType>;
 
-      using VectorTrialFunctionType = Rodin::PETSc::Variational::TrialFunction<
-        VectorGridFunctionType, VectorFESType>;
-      using ScalarTrialFunctionType = Rodin::PETSc::Variational::TrialFunction<
-        ScalarGridFunctionType, ScalarFESType>;
+      using VectorTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<VectorGridFunctionType, VectorFESType>;
+      using ScalarTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<ScalarGridFunctionType, ScalarFESType>;
       using VectorTestFunctionType =
         Rodin::PETSc::Variational::TestFunction<VectorFESType>;
       using ScalarTestFunctionType =
@@ -63,9 +63,9 @@ namespace Rodin::Examples::Heart
 
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
 
-      using FlowProblemType = Rodin::Variational::Problem<LinearSystemType,
-        VectorTrialFunctionType, ScalarTrialFunctionType,
-        VectorTestFunctionType, ScalarTestFunctionType>;
+      using FlowProblemType =
+        Rodin::Variational::Problem<LinearSystemType, VectorTrialFunctionType,
+          ScalarTrialFunctionType, VectorTestFunctionType, ScalarTestFunctionType>;
 
       using SpeciesProblemType = Rodin::Variational::Problem<LinearSystemType,
         ScalarTrialFunctionType, ScalarTrialFunctionType, ScalarTrialFunctionType,
@@ -284,8 +284,14 @@ namespace Rodin::Examples::Heart
       Atrium& initialize();
       int run();
 
-      Config& getConfig() noexcept { return m_cfg; }
-      const Config& getConfig() const noexcept { return m_cfg; }
+      Config& getConfig() noexcept
+      {
+        return m_cfg;
+      }
+      const Config& getConfig() const noexcept
+      {
+        return m_cfg;
+      }
 
     private:
       static MeshType makeMesh(const Rodin::Context::MPI& context, const Config& cfg);

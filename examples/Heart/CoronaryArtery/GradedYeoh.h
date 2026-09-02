@@ -55,7 +55,8 @@ namespace Rodin::Examples::Heart
        * @param scale Spatial multiplier m(x); empty means m = 1 everywhere.
        */
       GradedYeoh(Solid::Yeoh base, ScaleFunction scale)
-        : m_base(std::move(base)), m_scale(std::move(scale))
+        : m_base(std::move(base)),
+          m_scale(std::move(scale))
       {}
 
       /// @brief Copy constructor.
@@ -77,8 +78,8 @@ namespace Rodin::Examples::Heart
       }
 
       /// @brief Graded first Piola-Kirchhoff stress m(x) P(F).
-      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
-        const Cache& cache, const Solid::ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const Solid::ConstitutivePoint& cp) const
       {
         m_base.getFirstPiolaKirchhoffStress(P, cache, cp);
         P *= factor(cp);

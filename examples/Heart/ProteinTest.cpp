@@ -244,20 +244,22 @@ int main(int argc, char** argv)
 
   Config cfg;
 
-
   {
     PetscInt fcyc = cfg.flowCycles;
     PetscInt scyc = cfg.speciesCycles;
     PetscReal dtv = cfg.dt;
     PetscBool got = PETSC_FALSE;
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pt_flow_cycles", &fcyc, &got);
-    if (got) cfg.flowCycles = static_cast<int>(fcyc);
+    if (got)
+      cfg.flowCycles = static_cast<int>(fcyc);
     got = PETSC_FALSE;
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pt_species_cycles", &scyc, &got);
-    if (got) cfg.speciesCycles = static_cast<int>(scyc);
+    if (got)
+      cfg.speciesCycles = static_cast<int>(scyc);
     got = PETSC_FALSE;
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pt_dt", &dtv, &got);
-    if (got) cfg.dt = dtv;
+    if (got)
+      cfg.dt = dtv;
 
     PetscReal pm = cfg.inletPressureMean;
     got = PETSC_FALSE;
@@ -271,13 +273,15 @@ int main(int argc, char** argv)
     PetscReal pa = cfg.inletPressureAmplitude;
     got = PETSC_FALSE;
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pt_pamp", &pa, &got);
-    if (got) cfg.inletPressureAmplitude = pa;
+    if (got)
+      cfg.inletPressureAmplitude = pa;
 
     char meshBuf[512];
     got = PETSC_FALSE;
-    PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-pt_mesh",
-      meshBuf, sizeof(meshBuf), &got);
-    if (got) cfg.meshPath = meshBuf;
+    PetscOptionsGetString(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-pt_mesh", meshBuf, sizeof(meshBuf), &got);
+    if (got)
+      cfg.meshPath = meshBuf;
   }
 
   // -------------------------------------------------------------------------
@@ -301,9 +305,7 @@ int main(int argc, char** argv)
   mesh.getConnectivity().compute(1, 0);
 
   Alert::Info() << "[mesh] vertices=" << mesh.getVertexCount()
-                << " cells=" << mesh.getCellCount()
-                << " dim=" << dim << Alert::Raise;
-
+                << " cells=" << mesh.getCellCount() << " dim=" << dim << Alert::Raise;
 
   using VelocityFES = H1<1, Math::SpatialVector<Real>, MeshType>;
   using ScalarFES = H1<1, Real, MeshType>;
@@ -350,10 +352,9 @@ int main(int argc, char** argv)
   // Washout starts fully "old": every point holds the original bolus.
   washCur = Real(1);
   washPrev = Real(1);
-  fgCur = Real(cfg.thrombosis.fibrinogenSinusRhythm /
-                cfg.thrombosis.fibrinogenMolarMass);
-  fgPrev = Real(cfg.thrombosis.fibrinogenSinusRhythm /
-                cfg.thrombosis.fibrinogenMolarMass);
+  fgCur = Real(cfg.thrombosis.fibrinogenSinusRhythm / cfg.thrombosis.fibrinogenMolarMass);
+  fgPrev =
+    Real(cfg.thrombosis.fibrinogenSinusRhythm / cfg.thrombosis.fibrinogenMolarMass);
 
   // Wall-shear indices and the activation weight they produce
   PETSc::Variational::GridFunction wss(vh);
@@ -361,7 +362,8 @@ int main(int argc, char** argv)
   activation = Real(0);
 
   WallShearAccumulator<PETSc::Variational::GridFunction<VelocityFES>,
-    PETSc::Variational::GridFunction<ScalarFES>> indices(vh, sh);
+    PETSc::Variational::GridFunction<ScalarFES>>
+    indices(vh, sh);
 
   const auto normal = BoundaryNormal(mesh);
 
@@ -395,8 +397,8 @@ int main(int argc, char** argv)
   auto tau1At = [&](const Point& pp) -> Real {
     const auto uc = uOld.getValue(pp);
     const Real nu = cfg.viscosity.mu0 / cfg.rho;
-    const Real hK = std::pow(pp.getPolytope().getMeasure(),
-                             1.0 / pp.getPolytope().getDimension());
+    const Real hK =
+      std::pow(pp.getPolytope().getMeasure(), 1.0 / pp.getPolytope().getDimension());
     const Real speed = std::sqrt(Math::dot(uc, uc));
     return 1.0 / (4.0 * nu / (hK * hK) + 2.0 * speed / hK);
   };
@@ -421,8 +423,8 @@ int main(int argc, char** argv)
     });
 
   auto rhoTau2At = [&, tau1At](const Point& pp) -> Real {
-    const Real hK = std::pow(pp.getPolytope().getMeasure(),
-                             1.0 / pp.getPolytope().getDimension());
+    const Real hK =
+      std::pow(pp.getPolytope().getMeasure(), 1.0 / pp.getPolytope().getDimension());
     return gradDivScale * cfg.rho * (hK * hK) / (4.0 * tau1At(pp));
   };
 
@@ -448,8 +450,8 @@ int main(int argc, char** argv)
     Integral(vmsSqrtTauC, vmsTauCTest) - Integral(sqrtRhoTau2Fn, vmsTauCTest);
 
   Problem vmsPiTildeProj(vmsPiTilde, vmsTauCTest);
-  vmsPiTildeProj = Integral(vmsPiTilde, vmsTauCTest) -
-    Integral(vmsSqrtTauCOld * Div(uOld), vmsTauCTest);
+  vmsPiTildeProj =
+    Integral(vmsPiTilde, vmsTauCTest) - Integral(vmsSqrtTauCOld * Div(uOld), vmsTauCTest);
 
   Problem vmsTauPProj(vmsTauP, vmsTauCTest);
   vmsTauPProj = Integral(vmsTauP, vmsTauCTest) - Integral(vmsTauPFn, vmsTauCTest);
@@ -468,7 +470,6 @@ int main(int argc, char** argv)
   configureMassSolver(vmsSqrtTauCKSP, "pt_vms_sqrttauc_");
   configureMassSolver(vmsPiTildeKSP, "pt_vms_pitilde_");
   configureMassSolver(vmsTauPKSP, "pt_vms_taup_");
-
 
   PETSc::Variational::TrialFunction gradRecTrial0(vh);
   PETSc::Variational::TrialFunction gradRecTrial1(vh);
@@ -499,16 +500,17 @@ int main(int argc, char** argv)
     const Real Spouch = 2.0 / 4.5e-3;
     const Real Ttot = cfg.speciesCycles * cfg.period;
 
-    Alert::Info() << "[budget] simulated time = " << Ttot << " s ("
-                  << cfg.speciesCycles << " species cycles)" << Alert::Raise;
+    Alert::Info() << "[budget] simulated time = " << Ttot << " s (" << cfg.speciesCycles
+                  << " species cycles)" << Alert::Raise;
     for (auto [S, name] : {std::pair<Real, const char*>{Sconduit, "conduit r=1.5mm"},
-                           std::pair<Real, const char*>{Spouch, "pouch r=4.5mm"}})
+           std::pair<Real, const char*>{Spouch, "pouch r=4.5mm"}})
     {
       Alert::Info() << "  S=" << S << " 1/m (" << name << "):"
                     << "  t_res for 1% conversion = "
                     << residenceTimeFor(cfg.thrombosis, S, 0.01) << " s"
-                    << "  |  conversion at t=" << Ttot << " s if fully trapped = "
-                    << fibrinFraction(cfg.thrombosis, S, Ttot) << Alert::Raise;
+                    << "  |  conversion at t=" << Ttot
+                    << " s if fully trapped = " << fibrinFraction(cfg.thrombosis, S, Ttot)
+                    << Alert::Raise;
     }
     Alert::Info() << "[budget] compare those against the washout: if the "
                   << "residual fraction R decays to zero within a cycle or two, "
@@ -585,11 +587,10 @@ int main(int argc, char** argv)
   const auto symV = 0.5 * (Jacobian(v) + Transpose(Jacobian(v)));
   const auto symLag = 0.5 * (Jacobian(uOld) + Transpose(Jacobian(uOld)));
 
-  const auto shearLag = Sqrt(cy.gammaRegularization * cy.gammaRegularization +
-                             2.0 * Dot(symLag, symLag));
+  const auto shearLag =
+    Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symLag, symLag));
   const auto muLag = cy.muInf +
-    deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda),
-                  (cy.n - 1.0) / cy.yasuda);
+    deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
   const auto convU = Mult(Jacobian(u), uOld);
   const auto temam = Div(uOld) * Dot(u, v);
@@ -603,17 +604,15 @@ int main(int argc, char** argv)
   const Real condR = 1.5e-3, condL = 40.0e-3;
   const Real condA = std::numbers::pi_v<Real> * condR * condR;
   const Real condRpois =
-    8.0 * cfg.viscosity.muInf * condL /
-    (std::numbers::pi_v<Real> * std::pow(condR, 4.0));
+    8.0 * cfg.viscosity.muInf * condL / (std::numbers::pi_v<Real> * std::pow(condR, 4.0));
   const Real boundaryZ = cfg.boundaryImpedanceFraction * condRpois * condA;
-  const Real vPredicted =
-    cfg.inletPressureMean /
+  const Real vPredicted = cfg.inletPressureMean /
     ((1.0 + 2.0 * cfg.boundaryImpedanceFraction) * condRpois * condA);
 
   Alert::Info() << "[inlet] Z=" << boundaryZ << " Pa s/m at each end ("
                 << cfg.boundaryImpedanceFraction << " x R_pois A); predicted "
-                << "steady v=" << vPredicted << " m/s at p_mean="
-                << cfg.inletPressureMean << " Pa. Raise -pt_pmean to "
+                << "steady v=" << vPredicted << " m/s at p_mean=" << cfg.inletPressureMean
+                << " Pa. Raise -pt_pmean to "
                 << (0.2 / std::max(vPredicted, 1e-12) * cfg.inletPressureMean)
                 << " Pa for v=0.2 m/s." << Alert::Raise;
   if (0.5 * cfg.rho * vPredicted > boundaryZ)
@@ -630,46 +629,40 @@ int main(int argc, char** argv)
   const auto inletBackflow = 0.5 * cfg.rho * inletBeta;
   const auto outletBackflow = 0.5 * cfg.rho * outletBeta;
 
-  flow = (cfg.rho / cfg.dt) * Integral(u, v)
-       - (cfg.rho / cfg.dt) * Integral(uOld, v)
+  flow = (cfg.rho / cfg.dt) * Integral(u, v) - (cfg.rho / cfg.dt) * Integral(uOld, v)
 
-       + cfg.rho * Integral(Dot(convU, v))
-       + 0.5 * cfg.rho * Integral(temam)
+    + cfg.rho * Integral(Dot(convU, v)) + 0.5 * cfg.rho * Integral(temam)
 
-       + VMSConvectionBilinearIntegrator(
-           u, v, uOld, vmsTau.getSolution(), cfg.rho)
-       - VMSConvectionLinearIntegrator(v, vmsSub.getSolution(), uOld,
-           vmsUp.getSolution(), vmsTau.getSolution(), cfg.rho, cfg.dt)
+    + VMSConvectionBilinearIntegrator(u, v, uOld, vmsTau.getSolution(), cfg.rho) -
+    VMSConvectionLinearIntegrator(v, vmsSub.getSolution(), uOld, vmsUp.getSolution(),
+      vmsTau.getSolution(), cfg.rho, cfg.dt)
 
-       + VMSGradDivBilinearIntegrator(u, v, vmsTauC.getSolution())
-       - VMSGradDivLinearIntegrator(
-           v, vmsPiTilde.getSolution(), vmsSqrtTauC.getSolution())
+    + VMSGradDivBilinearIntegrator(u, v, vmsTauC.getSolution()) -
+    VMSGradDivLinearIntegrator(v, vmsPiTilde.getSolution(), vmsSqrtTauC.getSolution())
 
-       + 2.0 * Integral(muLag * symU, symV)
-       - Integral(p, Div(v)) + Integral(Div(u), q)
-       + cfg.pressurePenalty * Integral(p, q)
+    + 2.0 * Integral(muLag * symU, symV) - Integral(p, Div(v)) + Integral(Div(u), q) +
+    cfg.pressurePenalty * Integral(p, q)
 
        // PSPG / grad-p. REQUIRED for the equal-order P1/P1 pair.
-       + Integral(vmsTauP.getSolution() * Grad(p), Grad(q))
+    + Integral(vmsTauP.getSolution() * Grad(p), Grad(q))
 
-       + BoundaryIntegral(pIn * Dot(v, normal)).over(INLET)
+    + BoundaryIntegral(pIn * Dot(v, normal)).over(INLET)
        // No outlet traction term: p_out = 0 is still the free condition.
 
        // Normal impedance at BOTH ends: the O(|u|^2) restoring term that the
        // pressure-driven boundary needs. Positive semidefinite, so it can only
        // help conditioning.
-       + boundaryZ * BoundaryIntegral(Dot(uNormal, v)).over(INLET)
-       + boundaryZ * BoundaryIntegral(Dot(uNormal, v)).over(OUTLET)
+    + boundaryZ * BoundaryIntegral(Dot(uNormal, v)).over(INLET) +
+    boundaryZ * BoundaryIntegral(Dot(uNormal, v)).over(OUTLET)
 
        // A pure traction boundary says nothing about u_tau; without this the
        // inlet plane can develop an unopposed swirl.
-       + cfg.inletTangentialDamping *
-           BoundaryIntegral(Dot(uTangential, v)).over(INLET)
+    + cfg.inletTangentialDamping * BoundaryIntegral(Dot(uTangential, v)).over(INLET)
 
-       + BoundaryIntegral(inletBackflow * Dot(u, v)).over(INLET)
-       + BoundaryIntegral(outletBackflow * Dot(u, v)).over(OUTLET)
+    + BoundaryIntegral(inletBackflow * Dot(u, v)).over(INLET) +
+    BoundaryIntegral(outletBackflow * Dot(u, v)).over(OUTLET)
 
-       + DirichletBC(u, Zero(dim)).on(WALL);
+    + DirichletBC(u, Zero(dim)).on(WALL);
 
   // ---- Transport stabilisation ---------------------------------------------
   // These transport problems must NOT reuse the flow's tau1. tau1 is built from
@@ -692,8 +685,7 @@ int main(int argc, char** argv)
   const Real stabScale = cfg.thrombosis.stabilizationScale;
 
   auto hAt = [](const Point& pp) -> Real {
-    return std::pow(pp.getPolytope().getMeasure(),
-                    1.0 / pp.getPolytope().getDimension());
+    return std::pow(pp.getPolytope().getMeasure(), 1.0 / pp.getPolytope().getDimension());
   };
   auto speedAt = [&](const Point& pp) -> Real {
     const auto uc = uOld.getValue(pp);
@@ -748,34 +740,33 @@ int main(int argc, char** argv)
   // convective. The thrombin wall flux is a BOUNDARY term, so it contributes
   // nothing to the volumetric residual.
   auto crosswindK = [&, hAt](const Point& pp, Real cCur, Real cPrev,
-    const Math::SpatialVector<Real>& g, Real D, Real reactMinusSource) -> Real
-  {
+                      const Math::SpatialVector<Real>& g, Real D,
+                      Real reactMinusSource) -> Real {
     const Real gn = std::sqrt(Math::dot(g, g));
     if (gn < gradFloorCW)
       return 0.0;
     const auto uc = uOld.getValue(pp);
     const Real R = (cCur - cPrev) / cfg.dt + Math::dot(uc, g) + reactMinusSource;
-    return std::max<Real>(
-      0.0, cfg.crosswindC * std::abs(R) * hAt(pp) / (2.0 * gn) - D);
+    return std::max<Real>(0.0, cfg.crosswindC * std::abs(R) * hAt(pp) / (2.0 * gn) - D);
   };
 
   RealFunction kdcThFn = [&](const Point& pp) -> Real {
-    return crosswindK(pp, thCur.getValue(pp), thPrev.getValue(pp),
-                      gradThCur.getValue(pp), Dth, 0.0);
+    return crosswindK(
+      pp, thCur.getValue(pp), thPrev.getValue(pp), gradThCur.getValue(pp), Dth, 0.0);
   };
   RealFunction kdcFgFn = [&](const Point& pp) -> Real {
     const Real r = keff * thCur.getValue(pp) * fgCur.getValue(pp);
-    return crosswindK(pp, fgCur.getValue(pp), fgPrev.getValue(pp),
-                      gradFgCur.getValue(pp), Dfg, r);
+    return crosswindK(
+      pp, fgCur.getValue(pp), fgPrev.getValue(pp), gradFgCur.getValue(pp), Dfg, r);
   };
   RealFunction kdcFnFn = [&](const Point& pp) -> Real {
     const Real r = -keff * thCur.getValue(pp) * fgCur.getValue(pp);
-    return crosswindK(pp, fnCur.getValue(pp), fnPrev.getValue(pp),
-                      gradFnCur.getValue(pp), Dfn, r);
+    return crosswindK(
+      pp, fnCur.getValue(pp), fnPrev.getValue(pp), gradFnCur.getValue(pp), Dfn, r);
   };
   RealFunction kdcWashFn = [&](const Point& pp) -> Real {
     return crosswindK(pp, washCur.getValue(pp), washPrev.getValue(pp),
-                      gradWashCur.getValue(pp), 0.0, 0.0);
+      gradWashCur.getValue(pp), 0.0, 0.0);
   };
 
   // ---- Washout ---------------------------------------------------------------
@@ -808,19 +799,16 @@ int main(int argc, char** argv)
 
   const auto pW = Dot(uOld, Grad(vwash));
 
-  washout =
-      (1.0 / cfg.dt) * Integral(wash, vwash)
-    - (1.0 / cfg.dt) * Integral(washCur, vwash)
-    + Integral(Dot(uOld, Grad(wash)), vwash)
+  washout = (1.0 / cfg.dt) * Integral(wash, vwash) -
+    (1.0 / cfg.dt) * Integral(washCur, vwash) + Integral(Dot(uOld, Grad(wash)), vwash)
 
-    + (1.0 / cfg.dt) * Integral(tauWashFn * wash, pW)
-    - (1.0 / cfg.dt) * Integral(tauWashFn * washCur, pW)
-    + Integral(tauWashFn * Dot(uOld, Grad(wash)), pW)
+    + (1.0 / cfg.dt) * Integral(tauWashFn * wash, pW) -
+    (1.0 / cfg.dt) * Integral(tauWashFn * washCur, pW) +
+    Integral(tauWashFn * Dot(uOld, Grad(wash)), pW)
 
     // Codina crosswind
-    + Integral(kdcWashFn * Grad(wash), Grad(vwash))
-    - Integral(kdcWashFn * invSpeedSqFn * Dot(uOld, Grad(wash)),
-               Dot(uOld, Grad(vwash)))
+    + Integral(kdcWashFn * Grad(wash), Grad(vwash)) -
+    Integral(kdcWashFn * invSpeedSqFn * Dot(uOld, Grad(wash)), Dot(uOld, Grad(vwash)))
 
     + DirichletBC(wash, zeroFunction).on(INLET);
 
@@ -829,37 +817,35 @@ int main(int argc, char** argv)
   const auto pFg = Dot(uOld, Grad(vfg));
   const auto pFn = Dot(uOld, Grad(vfn));
 
-  protein =
-      (1.0 / cfg.dt) * Integral(th, vth) - (1.0 / cfg.dt) * Integral(thCur, vth)
-    + Dth * Integral(Grad(th), Grad(vth)) + Integral(Dot(uOld, Grad(th)), vth)
+  protein = (1.0 / cfg.dt) * Integral(th, vth) - (1.0 / cfg.dt) * Integral(thCur, vth) +
+    Dth * Integral(Grad(th), Grad(vth)) + Integral(Dot(uOld, Grad(th)), vth)
 
-    + (1.0 / cfg.dt) * Integral(fg, vfg) - (1.0 / cfg.dt) * Integral(fgCur, vfg)
-    + Dfg * Integral(Grad(fg), Grad(vfg)) + Integral(Dot(uOld, Grad(fg)), vfg)
-    + keff * Integral(thCur * fg, vfg)
+    + (1.0 / cfg.dt) * Integral(fg, vfg) - (1.0 / cfg.dt) * Integral(fgCur, vfg) +
+    Dfg * Integral(Grad(fg), Grad(vfg)) + Integral(Dot(uOld, Grad(fg)), vfg) +
+    keff * Integral(thCur * fg, vfg)
 
-    + (1.0 / cfg.dt) * Integral(fn, vfn) - (1.0 / cfg.dt) * Integral(fnCur, vfn)
-    + Dfn * Integral(Grad(fn), Grad(vfn)) + Integral(Dot(uOld, Grad(fn)), vfn)
-    - keff * Integral(thCur * fg, vfn)
+    + (1.0 / cfg.dt) * Integral(fn, vfn) - (1.0 / cfg.dt) * Integral(fnCur, vfn) +
+    Dfn * Integral(Grad(fn), Grad(vfn)) + Integral(Dot(uOld, Grad(fn)), vfn) -
+    keff * Integral(thCur * fg, vfn)
 
     // Endothelial thrombin flux: a wall flux weighted by the activation field.
-    - cfg.thrombosis.thrombinWallFlux *
-      BoundaryIntegral(activation * vth).over(WALL)
+    - cfg.thrombosis.thrombinWallFlux * BoundaryIntegral(activation * vth).over(WALL)
 
     // SUPG/VMS, expanded. Only Fg has a reaction proportional to its own
     // unknown, so only Fg carries a reactive adjoint.
-    + (1.0 / cfg.dt) * Integral(tauThFn * th, pTh)
-    - (1.0 / cfg.dt) * Integral(tauThFn * thCur, pTh)
-    + Integral(tauThFn * Dot(uOld, Grad(th)), pTh)
+    + (1.0 / cfg.dt) * Integral(tauThFn * th, pTh) -
+    (1.0 / cfg.dt) * Integral(tauThFn * thCur, pTh) +
+    Integral(tauThFn * Dot(uOld, Grad(th)), pTh)
 
-    + (1.0 / cfg.dt) * Integral(tauFgFn * fg, pFg)
-    - (1.0 / cfg.dt) * Integral(tauFgFn * fgCur, pFg)
-    + Integral(tauFgFn * Dot(uOld, Grad(fg)), pFg)
-    + keff * Integral(tauFgFn * thCur * fg, pFg)
+    + (1.0 / cfg.dt) * Integral(tauFgFn * fg, pFg) -
+    (1.0 / cfg.dt) * Integral(tauFgFn * fgCur, pFg) +
+    Integral(tauFgFn * Dot(uOld, Grad(fg)), pFg) +
+    keff * Integral(tauFgFn * thCur * fg, pFg)
 
-    + (keff / cfg.dt) * Integral(tauFgFn * fg, thCur * vfg)
-    - (keff / cfg.dt) * Integral(tauFgFn * fgCur, thCur * vfg)
-    + keff * Integral(tauFgFn * Dot(uOld, Grad(fg)), thCur * vfg)
-    + (keff * keff) * Integral(tauFgFn * thCur * fg, thCur * vfg)
+    + (keff / cfg.dt) * Integral(tauFgFn * fg, thCur * vfg) -
+    (keff / cfg.dt) * Integral(tauFgFn * fgCur, thCur * vfg) +
+    keff * Integral(tauFgFn * Dot(uOld, Grad(fg)), thCur * vfg) +
+    (keff * keff) * Integral(tauFgFn * thCur * fg, thCur * vfg)
 
     // ---- Inflow conditions. THE reason thrombin, fibrinogen and fibrin were
     //      all piling up in a cone at the inlet.
@@ -883,26 +869,22 @@ int main(int argc, char** argv)
     // never run and the omission had never shown up.
     // ---- Codina crosswind, one term pair per species --------------------
     //   k_dc [ grad c . grad v - (u.grad c)(u.grad v)/|u|^2 ]
-    + Integral(kdcThFn * Grad(th), Grad(vth))
-    - Integral(kdcThFn * invSpeedSqFn * Dot(uOld, Grad(th)),
-               Dot(uOld, Grad(vth)))
+    + Integral(kdcThFn * Grad(th), Grad(vth)) -
+    Integral(kdcThFn * invSpeedSqFn * Dot(uOld, Grad(th)), Dot(uOld, Grad(vth)))
 
-    + Integral(kdcFgFn * Grad(fg), Grad(vfg))
-    - Integral(kdcFgFn * invSpeedSqFn * Dot(uOld, Grad(fg)),
-               Dot(uOld, Grad(vfg)))
+    + Integral(kdcFgFn * Grad(fg), Grad(vfg)) -
+    Integral(kdcFgFn * invSpeedSqFn * Dot(uOld, Grad(fg)), Dot(uOld, Grad(vfg)))
 
-    + Integral(kdcFnFn * Grad(fn), Grad(vfn))
-    - Integral(kdcFnFn * invSpeedSqFn * Dot(uOld, Grad(fn)),
-               Dot(uOld, Grad(vfn)))
+    + Integral(kdcFnFn * Grad(fn), Grad(vfn)) -
+    Integral(kdcFnFn * invSpeedSqFn * Dot(uOld, Grad(fn)), Dot(uOld, Grad(vfn)))
 
-    + DirichletBC(th, zeroFunction).on(INLET)
-    + DirichletBC(fn, zeroFunction).on(INLET)
-    + DirichletBC(fg, fibrinogenInlet).on(INLET)
+    + DirichletBC(th, zeroFunction).on(INLET) + DirichletBC(fn, zeroFunction).on(INLET) +
+    DirichletBC(fg, fibrinogenInlet).on(INLET)
 
-    + (1.0 / cfg.dt) * Integral(tauFnFn * fn, pFn)
-    - (1.0 / cfg.dt) * Integral(tauFnFn * fnCur, pFn)
-    + Integral(tauFnFn * Dot(uOld, Grad(fn)), pFn)
-    - keff * Integral(tauFnFn * thCur * fg, pFn);
+    + (1.0 / cfg.dt) * Integral(tauFnFn * fn, pFn) -
+    (1.0 / cfg.dt) * Integral(tauFnFn * fnCur, pFn) +
+    Integral(tauFnFn * Dot(uOld, Grad(fn)), pFn) -
+    keff * Integral(tauFnFn * thCur * fg, pFn);
 
   // ---- Wall shear recovery, assigned once -----------------------------------
   {
@@ -914,34 +896,30 @@ int main(int argc, char** argv)
     const auto jacRow2 = VectorFunction(Component(Jacobian(uSol), 2, 0),
       Component(Jacobian(uSol), 2, 1), Component(Jacobian(uSol), 2, 2));
 
-    gradRecProj0 = Integral(gradRecTrial0, gradRecTest)
-                 - Integral(jacRow0, gradRecTest);
-    gradRecProj1 = Integral(gradRecTrial1, gradRecTest)
-                 - Integral(jacRow1, gradRecTest);
-    gradRecProj2 = Integral(gradRecTrial2, gradRecTest)
-                 - Integral(jacRow2, gradRecTest);
+    gradRecProj0 = Integral(gradRecTrial0, gradRecTest) - Integral(jacRow0, gradRecTest);
+    gradRecProj1 = Integral(gradRecTrial1, gradRecTest) - Integral(jacRow1, gradRecTest);
+    gradRecProj2 = Integral(gradRecTrial2, gradRecTest) - Integral(jacRow2, gradRecTest);
   }
 
   {
-    const auto symUw = 0.5 * (Jacobian(u.getSolution()) +
-                              Transpose(Jacobian(u.getSolution())));
-    const auto shearW = Sqrt(cy.gammaRegularization * cy.gammaRegularization +
-                             2.0 * Dot(symUw, symUw));
+    const auto symUw =
+      0.5 * (Jacobian(u.getSolution()) + Transpose(Jacobian(u.getSolution())));
+    const auto shearW =
+      Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symUw, symUw));
     const auto muW = cy.muInf +
-      deltaMu * Pow(1.0 + Pow(cy.lambda * shearW, cy.yasuda),
-                    (cy.n - 1.0) / cy.yasuda);
+      deltaMu * Pow(1.0 + Pow(cy.lambda * shearW, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
-    const auto tractionVec = VectorFunction(
-      muW * Dot(gradRecTrial0.getSolution(), normal),
-      muW * Dot(gradRecTrial1.getSolution(), normal),
-      muW * Dot(gradRecTrial2.getSolution(), normal));
+    const auto tractionVec =
+      VectorFunction(muW * Dot(gradRecTrial0.getSolution(), normal),
+        muW * Dot(gradRecTrial1.getSolution(), normal),
+        muW * Dot(gradRecTrial2.getSolution(), normal));
 
     const auto wallStress = tractionVec - Dot(tractionVec, normal) * normal;
     const Real wssReg = 1.0e-3;
 
-    wssProj = BoundaryIntegral(Dot(wssTrial, wssTest)).over(WALL)
-            + wssReg * Integral(Dot(wssTrial, wssTest))
-            - BoundaryIntegral(Dot(wallStress, wssTest)).over(WALL);
+    wssProj = BoundaryIntegral(Dot(wssTrial, wssTest)).over(WALL) +
+      wssReg * Integral(Dot(wssTrial, wssTest)) -
+      BoundaryIntegral(Dot(wallStress, wssTest)).over(WALL);
   }
 
   const Real PI = std::numbers::pi_v<Real>;
@@ -985,10 +963,9 @@ int main(int argc, char** argv)
   // the cycle just finished, and the activation field that drives the wall
   // thrombin flux is refreshed with them.
   // ===========================================================================
-  Alert::Info() << "[run] " << totalCycles << " cycles of " << stepsPerCycle
-                << " steps (" << totalSteps << " total); flow every step, "
-                << "species from cycle " << (cfg.flowCycles + 1) << " on"
-                << Alert::Raise;
+  Alert::Info() << "[run] " << totalCycles << " cycles of " << stepsPerCycle << " steps ("
+                << totalSteps << " total); flow every step, "
+                << "species from cycle " << (cfg.flowCycles + 1) << " on" << Alert::Raise;
   if (cfg.flowCycles < 2)
     Alert::Warning() << "[run] fewer than two warm-up cycles: the wall-shear "
                      << "indices that arm the source carry the start-up "
@@ -1015,21 +992,31 @@ int main(int argc, char** argv)
       pInValue = cfg.inletPressureMean +
         cfg.inletPressureAmplitude * std::sin(2.0 * PI * t / cfg.period);
 
-      vmsL2Conv.assemble();       vmsL2Conv.solve(vmsL2ConvKSP);
-      vmsTauProj.assemble();      vmsTauProj.solve(vmsTauKSP);
-      vmsSubProj.assemble();      vmsSubProj.solve(vmsSubKSP);
-      vmsSqrtTauCProj.assemble(); vmsSqrtTauCProj.solve(vmsSqrtTauCKSP);
+      vmsL2Conv.assemble();
+      vmsL2Conv.solve(vmsL2ConvKSP);
+      vmsTauProj.assemble();
+      vmsTauProj.solve(vmsTauKSP);
+      vmsSubProj.assemble();
+      vmsSubProj.solve(vmsSubKSP);
+      vmsSqrtTauCProj.assemble();
+      vmsSqrtTauCProj.solve(vmsSqrtTauCKSP);
 
       // tau_C as the exact pointwise square of the projected sqrt(tau_C),
       // following the P1/P1 coronary example.
       VecPointwiseMult(vmsTauC.getSolution().getData(),
         vmsSqrtTauC.getSolution().getData(), vmsSqrtTauC.getSolution().getData());
 
-      vmsPiTildeProj.assemble();  vmsPiTildeProj.solve(vmsPiTildeKSP);
-      vmsTauPProj.assemble();     vmsTauPProj.solve(vmsTauPKSP);
+      vmsPiTildeProj.assemble();
+      vmsPiTildeProj.solve(vmsPiTildeKSP);
+      vmsTauPProj.assemble();
+      vmsTauPProj.solve(vmsTauPKSP);
 
       flow.assemble();
-      if (!flowSplitsSet) { flow.setFieldSplits(); flowSplitsSet = true; }
+      if (!flowSplitsSet)
+      {
+        flow.setFieldSplits();
+        flowSplitsSet = true;
+      }
       flow.solve(flowKSP);
 
       {
@@ -1039,11 +1026,10 @@ int main(int argc, char** argv)
         KSPGetIterationNumber(flowKSP.getHandle(), &its);
         if (reason < 0)
           Alert::Warning() << "[flow] step " << step << " KSP DIVERGED ("
-                           << static_cast<int>(reason) << ") after " << its
-                           << " its" << Alert::Raise;
+                           << static_cast<int>(reason) << ") after " << its << " its"
+                           << Alert::Raise;
         else if (step == 0)
-          Alert::Info() << "[chk] first flow solve ok, KSP its=" << its
-                        << Alert::Raise;
+          Alert::Info() << "[chk] first flow solve ok, KSP its=" << its << Alert::Raise;
       }
 
       uOld.setData(u.getSolution().getData());
@@ -1061,28 +1047,32 @@ int main(int argc, char** argv)
       {
         Alert::Exception()
           << "[flow] diverged at step " << step << " (cycle " << (cycle + 1)
-          << "): max|u| = " << uSpeed << " m/s exceeds maxVelocity = "
-          << cfg.maxVelocity << " m/s at inletPressureMean = "
-          << cfg.inletPressureMean << " Pa. Poiseuille for this geometry gives "
+          << "): max|u| = " << uSpeed << " m/s exceeds maxVelocity = " << cfg.maxVelocity
+          << " m/s at inletPressureMean = " << cfg.inletPressureMean
+          << " Pa. Poiseuille for this geometry gives "
           << "v ~ 0.2 m/s at 140 Pa and scales linearly, so lower -pt_pmean "
           << "(or -pt_dt)." << Alert::Raise;
       }
 
-      costFlow += std::chrono::duration<Real>(
-        std::chrono::steady_clock::now() - t0).count();
+      costFlow +=
+        std::chrono::duration<Real>(std::chrono::steady_clock::now() - t0).count();
     }
 
     // ---- wall shear, every step; its cycle integrals close on the boundary --
     {
       const auto t0 = std::chrono::steady_clock::now();
-      gradRecProj0.assemble(); gradRecProj0.solve(gradRecKSP0);
-      gradRecProj1.assemble(); gradRecProj1.solve(gradRecKSP1);
-      gradRecProj2.assemble(); gradRecProj2.solve(gradRecKSP2);
-      wssProj.assemble();      wssProj.solve(wssKSP);
+      gradRecProj0.assemble();
+      gradRecProj0.solve(gradRecKSP0);
+      gradRecProj1.assemble();
+      gradRecProj1.solve(gradRecKSP1);
+      gradRecProj2.assemble();
+      gradRecProj2.solve(gradRecKSP2);
+      wssProj.assemble();
+      wssProj.solve(wssKSP);
       wss.setData(wssTrial.getSolution().getData());
       indices.accumulate(wss, cfg.dt);
-      costWss += std::chrono::duration<Real>(
-        std::chrono::steady_clock::now() - t0).count();
+      costWss +=
+        std::chrono::duration<Real>(std::chrono::steady_clock::now() - t0).count();
     }
 
     if (endOfCycle)
@@ -1106,8 +1096,8 @@ int main(int argc, char** argv)
         washout.solve(washoutKSP);
         washPrev.setData(washCur.getData());
         washCur.setData(wash.getSolution().getData());
-        costRes += std::chrono::duration<Real>(
-          std::chrono::steady_clock::now() - t0).count();
+        costRes +=
+          std::chrono::duration<Real>(std::chrono::steady_clock::now() - t0).count();
       }
 
       if (cfg.solveKinetics)
@@ -1123,8 +1113,8 @@ int main(int argc, char** argv)
         thCur.setData(th.getSolution().getData());
         fgCur.setData(fg.getSolution().getData());
         fnCur.setData(fn.getSolution().getData());
-        costKin += std::chrono::duration<Real>(
-          std::chrono::steady_clock::now() - t0).count();
+        costKin +=
+          std::chrono::duration<Real>(std::chrono::steady_clock::now() - t0).count();
       }
 
       // Residual fraction R = (1/V) int c dV: the share of the original bolus
@@ -1139,13 +1129,12 @@ int main(int argc, char** argv)
       // volume R decays exponentially and tau is its time constant; a trapped
       // pocket shows up as tau growing without bound as R stops falling.
       const Real drdt = (residual - prevResidual) / cfg.dt;
-      clearance = (drdt < -1e-12) ? -residual / drdt
-                                  : std::numeric_limits<Real>::infinity();
+      clearance =
+        (drdt < -1e-12) ? -residual / drdt : std::numeric_limits<Real>::infinity();
     }
 
-    csv << t << ',' << cycle << ',' << pInValue << ','
-        << residual << ',' << clearance << ','
-        << indices.tawss().max() << ',' << indices.osi().max() << ','
+    csv << t << ',' << cycle << ',' << pInValue << ',' << residual << ',' << clearance
+        << ',' << indices.tawss().max() << ',' << indices.osi().max() << ','
         << indices.ecap().max() << ',' << thCur.max() << ',' << fgCur.min() << ','
         << fnCur.max() << ',' << (fnCur.max() / fg0) << '\n';
     csv.flush();
@@ -1155,34 +1144,33 @@ int main(int argc, char** argv)
 
     if (step < 3 || (step + 1) % 10 == 0)
     {
-      const Real el = std::chrono::duration<Real>(
-        std::chrono::steady_clock::now() - wallClockStart).count();
+      const Real el =
+        std::chrono::duration<Real>(std::chrono::steady_clock::now() - wallClockStart)
+          .count();
       const Real per = el / static_cast<Real>(step + 1);
 
       // One Alert, one Raise. Each Alert::Info() is a distinct object, so
       // chaining several does not concatenate -- build the variable tail first.
       std::ostringstream tail;
       if (species)
-        tail << "  |  washout R=" << residual
-             << " tau=" << clearance << " s  Fn/Fg0="
-             << (fnCur.max() / fg0);
+        tail << "  |  washout R=" << residual << " tau=" << clearance
+             << " s  Fn/Fg0=" << (fnCur.max() / fg0);
       else
         tail << "  |  (warm-up)";
 
-      Alert::Info() << "[step " << (step + 1) << "/" << totalSteps
-                    << "] cycle " << (cycle + 1) << "/" << totalCycles
-                    << "  t=" << t << " s"
+      Alert::Info() << "[step " << (step + 1) << "/" << totalSteps << "] cycle "
+                    << (cycle + 1) << "/" << totalCycles << "  t=" << t << " s"
                     << "  max|u|=" << uSpeed << " m/s"
                     << "  " << per << " s/step"
-                    << "  ETA " << (per * (totalSteps - step - 1) / 60.0)
-                    << " min" << tail.str() << Alert::Raise;
+                    << "  ETA " << (per * (totalSteps - step - 1) / 60.0) << " min"
+                    << tail.str() << Alert::Raise;
       std::cout.flush();
     }
   }
 
   Alert::Info() << "[run] done.  flow=" << costFlow << " s  wss=" << costWss
-                << " s  washout=" << costRes << " s  kinetics=" << costKin
-                << " s" << Alert::Raise;
+                << " s  washout=" << costRes << " s  kinetics=" << costKin << " s"
+                << Alert::Raise;
 
   csv.close();
   xdmf.close();

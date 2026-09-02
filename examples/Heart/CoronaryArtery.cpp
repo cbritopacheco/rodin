@@ -235,8 +235,8 @@ int main(int argc, char** argv)
       // the calibration left at the healthy baseline (frozen bed geometry).
       PetscReal operatingPra = cfg.operatingRightAtrialPressure;
       PetscBool operatingPraSet = PETSC_FALSE;
-      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-        "-coronary_operating_pra", &operatingPra, &operatingPraSet);
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_operating_pra",
+        &operatingPra, &operatingPraSet);
       assert(ierr == PETSC_SUCCESS);
       if (operatingPraSet)
       {
@@ -249,8 +249,8 @@ int main(int argc, char** argv)
       // p_im = alpha p_LV. Baseline 0.7; subendocardium up to ~0.9.
       PetscReal alphaIm = cfg.intramyocardialFraction;
       PetscBool alphaImSet = PETSC_FALSE;
-      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-        "-coronary_alpha_im", &alphaIm, &alphaImSet);
+      ierr = PetscOptionsGetReal(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_alpha_im", &alphaIm, &alphaImSet);
       assert(ierr == PETSC_SUCCESS);
       if (alphaImSet)
       {

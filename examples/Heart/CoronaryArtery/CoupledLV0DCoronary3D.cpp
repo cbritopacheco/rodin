@@ -368,12 +368,14 @@ namespace Rodin::Examples::Heart
     const Real p2 = phi * phi;
     const Real p3 = p2 * phi;
 
-    const Real qk0 = (qp.k0 > 0.0)
-      ? qp.k0 : std::exp(3.874 - 10.41 * phi + 13.8 * p2 - 6.738 * p3);
+    const Real qk0 =
+      (qp.k0 > 0.0) ? qp.k0 : std::exp(3.874 - 10.41 * phi + 13.8 * p2 - 6.738 * p3);
     const Real qkInf = (qp.kInf > 0.0)
-      ? qp.kInf : std::exp(1.3435 - 2.803 * phi + 2.711 * p2 - 0.6479 * p3);
+      ? qp.kInf
+      : std::exp(1.3435 - 2.803 * phi + 2.711 * p2 - 0.6479 * p3);
     const Real qgc = (qp.gammaC > 0.0)
-      ? qp.gammaC : std::exp(-6.1508 + 27.923 * phi - 25.6 * p2 + 3.697 * p3);
+      ? qp.gammaC
+      : std::exp(-6.1508 + 27.923 * phi - 25.6 * p2 + 3.697 * p3);
 
     auto muQ = [&](Real g) -> Real {
       const Real s = std::sqrt(std::max<Real>(g, 0.0) / qgc);
@@ -388,8 +390,7 @@ namespace Rodin::Examples::Heart
     // outlet becomes the linear resistance R_inf = 8 mu_inf L / (N pi R^4).
     // The 3D field keeps Config::viscosity: only the reduced closure changes.
     const Real muPlateau = quemada
-      ? qp.plasmaViscosity /
-          ((1.0 - 0.5 * qkInf * phi) * (1.0 - 0.5 * qkInf * phi))
+      ? qp.plasmaViscosity / ((1.0 - 0.5 * qkInf * phi) * (1.0 - 0.5 * qkInf * phi))
       : muInf;
 
     auto mu = [&](Real g) -> Real {
@@ -500,8 +501,7 @@ namespace Rodin::Examples::Heart
       const Real gammaNom = tauW / muAp;
 
       // Nodes must stay strictly increasing for the lookup to be well posed.
-      if (!table.logGamma.empty() &&
-        std::log(gammaNom) <= table.logGamma.back())
+      if (!table.logGamma.empty() && std::log(gammaNom) <= table.logGamma.back())
         continue;
 
       table.logGamma.push_back(std::log(gammaNom));
@@ -518,8 +518,8 @@ namespace Rodin::Examples::Heart
     return table;
   }
 
-  void CoupledLV0DCoronary3D::updateOutlet0D(const Config& cfg,
-    const WRMSTable& wrms, const Model& model, RCR& bc, Real Q, Real dt)
+  void CoupledLV0DCoronary3D::updateOutlet0D(const Config& cfg, const WRMSTable& wrms,
+    const Model& model, RCR& bc, Real Q, Real dt)
   {
     // ---- Coronary outlet: Starling resistor in an intramyocardial bed ------
     //
@@ -621,9 +621,8 @@ namespace Rodin::Examples::Heart
 
     auto viscosityFactorV = [&](Real q) -> Real {
       const Real aq = std::abs(q);
-      const Real g = (aq < law.zeroFlowTolerance)
-        ? law.zeroFlowTolerance
-        : bc.gammaV * aq / q0;
+      const Real g =
+        (aq < law.zeroFlowTolerance) ? law.zeroFlowTolerance : bc.gammaV * aq / q0;
       return wrms(g) / muN;
     };
 
@@ -712,9 +711,8 @@ namespace Rodin::Examples::Heart
     // Arteriolar modulation. R_a Phi_a is assembled on the 3D outlet boundary,
     // so the factor is exported here and consumed by the next 3D solve.
     const Real aQ = std::abs(Q);
-    const Real gammaA = (aQ < law.zeroFlowTolerance)
-      ? law.zeroFlowTolerance
-      : bc.gammaA * aQ / q0;
+    const Real gammaA =
+      (aQ < law.zeroFlowTolerance) ? law.zeroFlowTolerance : bc.gammaA * aQ / q0;
     bc.muA = wrms(gammaA) / muN;
 
     // Pressure applied to the 3D outlet as a Neumann traction. The resistive
@@ -807,9 +805,8 @@ namespace Rodin::Examples::Heart
     // inherit the global direct (MUMPS LU) solver used for the coupled flow
     // system. The defaults are only applied when the user has not set the
     // corresponding option, so they remain overridable from the command line.
-    const auto setPrefixedDefault =
-      [](const std::string& prefix, const char* suffix, const char* value)
-    {
+    const auto setPrefixedDefault = [](const std::string& prefix, const char* suffix,
+                                      const char* value) {
       const std::string name = "-" + prefix + suffix;
       PetscBool set = PETSC_FALSE;
       PetscErrorCode ierr =
@@ -824,8 +821,7 @@ namespace Rodin::Examples::Heart
     };
 
     const auto configureMassSolver = [&](Rodin::Solver::KSP& ksp,
-                                       const std::string& prefix)
-    {
+                                       const std::string& prefix) {
       setPrefixedDefault(prefix, "ksp_type", "cg");
       setPrefixedDefault(prefix, "pc_type", "jacobi");
       ksp.setPrefix(prefix);
@@ -1042,8 +1038,7 @@ namespace Rodin::Examples::Heart
       // network, so the run does not open with a spurious transient.  The
       // venular drop is R_v Phi_v Q = (dPv/(Q_i f)) Phi_v (Q_i f) = dPv Phi_v,
       // independent of f, so this line is unchanged by dilation.
-      const Real ptmRest =
-        m_cfg.rightAtrialPressure + dPv * phiV0 - pimRest;
+      const Real ptmRest = m_cfg.rightAtrialPressure + dPv * phiV0 - pimRest;
 
       Real volumeTotal = 0.0;
       Real flowTotal = 0.0;
@@ -1077,10 +1072,9 @@ namespace Rodin::Examples::Heart
         // hypothesis (rarefaction in diabetes, capillary drop-out) can be
         // stated directly as a change of N_a instead of a change of the total
         // flow.
-        const Real QiStruct =
-          m_cfg.morphometricResistance
-            ? PI * ra * ra * va * std::max<Real>(m_cfg.arteriolarCount * w, 0.0)
-            : m_cfg.lcaTargetFlow * w;
+        const Real QiStruct = m_cfg.morphometricResistance
+          ? PI * ra * ra * va * std::max<Real>(m_cfg.arteriolarCount * w, 0.0)
+          : m_cfg.lcaTargetFlow * w;
         const Real Qi = std::max<Real>(QiStruct, 1e-12);
 
         auto& bc = m_wk.at(tag);
@@ -1115,17 +1109,17 @@ namespace Rodin::Examples::Heart
         const Real tau = bc.C * bc.Rv;
 
         if (isRoot())
-          Alert::Info() << "  [calib] outlet " << tag
-                        << "  rp=" << (rEq[tag] * 1e3) << " mm"
+          Alert::Info() << "  [calib] outlet " << tag << "  rp=" << (rEq[tag] * 1e3)
+                        << " mm"
                         << "  A=" << bc.area << " m^2"
                         << "  Q=" << (Qi * 6.0e7) << " mL/min"
                         << "  Ra=" << bc.Ra << "  Rv=" << bc.Rv << " Pa s/m^3"
                         << "  C=" << bc.C << " m^3/Pa"
                         << "  tau=C*Rv=" << tau << " s"
-                        << "  |  derivados: g_a=" << bc.gammaA
-                        << " g_v=" << bc.gammaV << " 1/s"
-                        << "  N_a=" << bc.Na << " N_v=" << bc.Nv
-                        << "  L_a=" << (La * 1e3) << " L_v=" << (Lv * 1e3) << " mm"
+                        << "  |  derivados: g_a=" << bc.gammaA << " g_v=" << bc.gammaV
+                        << " 1/s"
+                        << "  N_a=" << bc.Na << " N_v=" << bc.Nv << "  L_a=" << (La * 1e3)
+                        << " L_v=" << (Lv * 1e3) << " mm"
                         << "  T_a=" << Ta << " T_v=" << Tv << " s"
                         << "  dPa/dPv=" << dPa << "/" << dPv << " Pa"
                         << "  ptm0=" << ptmRest << " Pa"
@@ -1145,15 +1139,13 @@ namespace Rodin::Examples::Heart
                       << (m_cfg.morphometricResistance ? "morfometrico (N_a)"
                                                        : "prescrito (lcaTargetFlow)")
                       << "  N_a(total)=" << countTotal
-                      << "  Q(reposo)=" << (flowTotal / fVaso * 6.0e7)
+                      << "  Q(reposo)=" << (flowTotal / fVaso * 6.0e7) << " mL/min"
+                      << "  f_vaso=" << fVaso << "  Q(operativo)=" << (flowTotal * 6.0e7)
                       << " mL/min"
-                      << "  f_vaso=" << fVaso
-                      << "  Q(operativo)=" << (flowTotal * 6.0e7) << " mL/min"
-                      << "  |  referencia lcaTargetFlow="
-                      << (m_cfg.lcaTargetFlow * 6.0e7) << " mL/min"
+                      << "  |  referencia lcaTargetFlow=" << (m_cfg.lcaTargetFlow * 6.0e7)
+                      << " mL/min"
                       << "  cociente prediccion/referencia="
-                      << (flowTotal / fVaso
-                          / std::max<Real>(m_cfg.lcaTargetFlow, 1e-30))
+                      << (flowTotal / fVaso / std::max<Real>(m_cfg.lcaTargetFlow, 1e-30))
                       << Alert::Raise;
 
         Alert::Info() << "  [calib] totals:"
@@ -1162,21 +1154,21 @@ namespace Rodin::Examples::Heart
                       << "  |  WRMS table nodes=" << m_wrms.logGamma.size()
                       << "  reologia="
                       << (m_cfg.rheologyModel == RheologyModel::Quemada
-                            ? "Quemada" : "Carreau-Yasuda")
-                      << "  mu_ap(" << gammaA << ")=" << m_wrms(gammaA)
-                      << "  mu_ap(" << gammaV << ")=" << m_wrms(gammaV)
+                             ? "Quemada"
+                             : "Carreau-Yasuda")
+                      << "  mu_ap(" << gammaA << ")=" << m_wrms(gammaA) << "  mu_ap("
+                      << gammaV << ")=" << m_wrms(gammaV)
                       << "  (g_0 en reposo=" << gammaA0 << "/" << gammaV0
                       << ", f_shear=" << fShear << ")"
                       << "  (mu_N=" << muN << ", mu_inf=" << m_cfg.viscosity.muInf
                       << ", mu_0=" << m_cfg.viscosity.mu0 << ")"
                       << (m_cfg.constantOutletResistance
-                            ? "  [CONSTANT outlet closure: mu_ap frozen at the "
-                              "high-shear plateau; 3D rheology unchanged]"
-                            : "")
+                             ? "  [CONSTANT outlet closure: mu_ap frozen at the "
+                               "high-shear plateau; 3D rheology unchanged]"
+                             : "")
                       << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0
                       << "  |  outlet resistance is assembled implicitly: the "
-                      << "coupling is unconditionally stable in dt"
-                      << Alert::Raise;
+                      << "coupling is unconditionally stable in dt" << Alert::Raise;
 
         // Consistency check. (r, v) fix two degrees of freedom and the
         // pressure budget closes L, so the transit time is over-determined and
@@ -1192,8 +1184,7 @@ namespace Rodin::Examples::Heart
                       << "  ->  T_a/T_ref=" << (Ta / Tref)
                       << "  T_v/T_ref=" << (Tv / Tref) << Alert::Raise;
 
-        if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref ||
-          Tv > 2.0 * Tref)
+        if (Ta < 0.5 * Tref || Ta > 2.0 * Tref || Tv < 0.5 * Tref || Tv > 2.0 * Tref)
           Alert::Warning()
             << "  [calib] el tiempo de transito derivado se aparta mas de 2x "
             << "de la referencia: el calibre, la velocidad y el reparto de "
@@ -1208,14 +1199,12 @@ namespace Rodin::Examples::Heart
       for (const Attribute tag : m_cfg.outlets)
       {
         auto& bc = m_wk.at(tag);
-        const Real Qi = m_cfg.lcaTargetFlow /
-          static_cast<Real>(m_cfg.outlets.size());
+        const Real Qi = m_cfg.lcaTargetFlow / static_cast<Real>(m_cfg.outlets.size());
         bc.area = 1.0e-5;
         bc.q0 = Qi;
         bc.Ra = 4.5e9;
         bc.Rv = 6.8e8;
-        bc.C = m_cfg.coronaryComplianceTotal /
-          static_cast<Real>(m_cfg.outlets.size());
+        bc.C = m_cfg.coronaryComplianceTotal / static_cast<Real>(m_cfg.outlets.size());
         bc.vol0 = bc.C * std::max<Real>(bc.ptm, 0.0);
         bc.vol = bc.vol0;
       }
@@ -1658,18 +1647,12 @@ namespace Rodin::Examples::Heart
          * coupling unconditionally stable, and is what removes the need for the
          * outlet capacitor and, with it, the L_3D-C_a ringing.
          */
-        + outletResistance(outlet0) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet0) +
-        outletResistance(outlet1) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet1) +
-        outletResistance(outlet2) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet2) +
-        outletResistance(outlet3) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet3) +
-        outletResistance(outlet4) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet4) +
-        outletResistance(outlet5) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet5)
+        + outletResistance(outlet0) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet0) +
+        outletResistance(outlet1) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet1) +
+        outletResistance(outlet2) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet2) +
+        outletResistance(outlet3) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet3) +
+        outletResistance(outlet4) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet4) +
+        outletResistance(outlet5) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet5)
 
         /*
          * =========================
@@ -1755,8 +1738,7 @@ namespace Rodin::Examples::Heart
           BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet3) +
         outletResistance(outlet4) *
           BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet4) +
-        outletResistance(outlet5) *
-          BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet5)
+        outletResistance(outlet5) * BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet5)
 
         /*
          * Backflow stabilization residual.
@@ -1878,18 +1860,12 @@ namespace Rodin::Examples::Heart
          * unconditionally stable and removes the outlet capacitor together
          * with the L_3D-C_a resonance it produced.
          */
-        + outletResistance(outlet0) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet0) +
-        outletResistance(outlet1) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet1) +
-        outletResistance(outlet2) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet2) +
-        outletResistance(outlet3) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet3) +
-        outletResistance(outlet4) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet4) +
-        outletResistance(outlet5) *
-          BoundaryIntegral(Dot(duNormal, m_v)).over(outlet5)
+        + outletResistance(outlet0) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet0) +
+        outletResistance(outlet1) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet1) +
+        outletResistance(outlet2) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet2) +
+        outletResistance(outlet3) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet3) +
+        outletResistance(outlet4) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet4) +
+        outletResistance(outlet5) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet5)
 
         /*
          * =========================

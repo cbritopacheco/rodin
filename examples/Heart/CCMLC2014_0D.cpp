@@ -150,11 +150,10 @@ int main()
   in.proximalLength = 0.35;
   in.distalRadius = 0.002;
   in.distalLength = 0.55;
-  in.windkesselRheology =
-    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Cross;
+  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Cross;
   // Valve parameters
   in.Kat = 6.0e-7;
-  in.Kp  = 5.0e-11;
+  in.Kp = 5.0e-11;
   in.Kar = 1.0e-7;
 
   in.cavityCapacity = 5.0e-12;
