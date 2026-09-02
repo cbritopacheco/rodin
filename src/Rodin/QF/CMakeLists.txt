@@ -9,6 +9,11 @@ set(RodinQF_HEADERS
   Centroid.h
   GaussLegendre.h
   GrundmannMoller.h
+  TensorProduct.h
+  XiaoGimbutas.h
+  XiaoGimbutasData.h
+  WitherdenVincent.h
+  WitherdenVincentData.h
   PolytopeQuadratureFormula.h
 )
 
@@ -16,6 +21,8 @@ set(RodinQF_SRCS
   Centroid.cpp
   GaussLegendre.cpp
   GrundmannMoller.cpp
+  XiaoGimbutas.cpp
+  WitherdenVincent.cpp
   PolytopeQuadratureFormula.cpp
 )
 

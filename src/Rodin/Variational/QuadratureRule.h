@@ -47,6 +47,8 @@
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
+#include "Rodin/FormLanguage/IsSpecialized.h"
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/PolytopeQuadrature.h"
@@ -81,6 +83,9 @@ namespace Rodin::Variational
     : public FormLanguage::Base
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Integrand expression type.
       using IntegrandType = FunctionBase<FunctionDerived>;
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
@@ -235,6 +240,9 @@ namespace Rodin::Variational
   class QuadratureRule<GridFunction<FES, Data>> : public Integrator
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Finite element space type.
       using FESType = FES;
       /// @brief Integrand expression type.
@@ -422,6 +430,9 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
       /// @brief Right-hand side operand type.
@@ -535,8 +546,8 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder()));
 
         const bool recompute =
           !m_set || (m_order != order) || (m_geometry != geometry);
@@ -643,6 +654,9 @@ namespace Rodin::Variational
           ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Finite element space type.
       using FESType = FES;
       /// @brief Integrand expression type.
@@ -751,8 +765,8 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const bool recompute =
           !m_set || (m_order != order) || (m_geometry != geometry);

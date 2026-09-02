@@ -58,6 +58,9 @@
     vector-valued and complex-valued variants, and the
     `GridFunction` class
 
+  - @subpage guides-quadrature — Quadrature families, exactness ranges,
+    positive arbitrary-order fallbacks, and curved-element considerations
+
   @section guides-variational-index Weak formulations and variational problems
 
   From continuous PDEs to discrete linear systems:

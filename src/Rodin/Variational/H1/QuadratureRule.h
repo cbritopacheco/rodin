@@ -54,6 +54,9 @@ namespace Rodin::Variational
             H1<K, Scalar, Mesh>, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
       /// @brief Integrand expression type.
@@ -117,8 +120,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -252,6 +255,9 @@ namespace Rodin::Variational
             H1<K, Scalar, Mesh>, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
 
@@ -332,8 +338,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -482,6 +488,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -560,7 +569,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = k_tr + k_te;
+        const size_t order = this->getOrder(polytope).value_or(
+          getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -744,6 +754,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -831,7 +844,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = k_tr + k_te;
+        const size_t order = this->getOrder(polytope).value_or(
+          getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1020,6 +1034,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -1111,7 +1128,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1354,6 +1373,9 @@ namespace Rodin::Variational
                 H1<KTest, Scalar, Mesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -1437,7 +1459,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = k_tr + k_te;
+        const size_t order = this->getOrder(polytope).value_or(
+          getIntegrand().getOrder(polytope).value_or(k_tr + k_te));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1568,31 +1591,28 @@ namespace Rodin::Variational
    * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash q : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+    class TrialRange, class TestRange, class Mesh>
   class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+    Dot<ShapeFunctionBase<
+          Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+          H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<
+              Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+              H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+          ShapeFunctionBase<
+            ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+            H1<KTest, TestRange, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType  = H1<KTest, Scalar, Mesh>;
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      using TestFESType = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
       using LHSType =
@@ -1671,7 +1691,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = (k_tr == 0) ? 0 : (k_tr + k_te - 1);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            (k_tr == 0) ? 0 : (k_tr + k_te - 1)));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1806,23 +1828,19 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+    class TrialRange, class TestRange, class Mesh>
   QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
-    -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Div<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          ShapeFunctionBase<
-            ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+    const Dot<ShapeFunctionBase<
+                Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+                H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>&)
+    -> QuadratureRule<Dot<ShapeFunctionBase<Div<ShapeFunction<LHSDerived,
+                                              H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
+                            H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1845,31 +1863,28 @@ namespace Rodin::Variational
    * {\vdash p : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+    class TrialRange, class TestRange, class Mesh>
+  class QuadratureRule<Dot<
+    ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+      H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+    ShapeFunctionBase<
+      Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+      H1<KTest, TestRange, Mesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<
+              ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+              H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+          ShapeFunctionBase<
+            Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+            H1<KTest, TestRange, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType  = H1<KTest, Scalar, Mesh>;
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      using TestFESType = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
       using LHSType =
@@ -1948,7 +1963,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = (k_te == 0) ? 0 : (k_tr + k_te - 1);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            (k_te == 0) ? 0 : (k_tr + k_te - 1)));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2082,23 +2099,20 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+    class TrialRange, class TestRange, class Mesh>
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+      H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+    ShapeFunctionBase<
+      Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+      H1<KTest, TestRange, Mesh>, TestSpace>>&)
+    -> QuadratureRule<Dot<ShapeFunctionBase<ShapeFunction<LHSDerived,
+                                              H1<KTrial, TrialRange, Mesh>, TrialSpace>,
+                            H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
-    -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          ShapeFunctionBase<
-            Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+        Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
+        H1<KTest, TestRange, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2152,6 +2166,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -2243,7 +2260,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2549,6 +2568,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -2644,7 +2666,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2)));
 
         const auto geometry = polytope.getGeometry();
         const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
@@ -2897,6 +2921,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -2976,7 +3003,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
@@ -3258,6 +3287,9 @@ namespace Rodin::Variational
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
@@ -3344,7 +3376,9 @@ namespace Rodin::Variational
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
         // Gradient of trial (k_tr - 1) times value of test (k_te)
-        const size_t order = (k_tr == 0) ? k_te : (k_tr + k_te - 1);
+        const size_t order =
+          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+            ((k_tr == 0) ? k_te : (k_tr + k_te - 1))));
 
         const auto geometry = polytope.getGeometry();
         const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);

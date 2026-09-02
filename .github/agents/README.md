@@ -1,67 +1,59 @@
-# GitHub Copilot Agents for Rodin
+# Custom agents for Rodin
 
-This directory contains custom GitHub Copilot agents that provide specialized assistance for the Rodin finite element framework.
+This directory holds custom agent definitions for the Rodin finite element
+framework. Each agent is a Markdown file with YAML frontmatter:
 
-## Available Agents
-
-### Rodin Agent
-
-**File**: `rodin.yml`
-
-**Purpose**: The Rodin agent is an expert at building and testing Rodin code changes. It automatically compiles the codebase and runs tests whenever modifications are detected.
-
-**Capabilities**:
-- Compiles the Rodin codebase using CMake
-- Runs unit tests, manufactured tests, and benchmarks
-- Reports build and test results clearly
-- Suggests fixes for compilation errors or test failures
-- Provides guidance on the build system and test infrastructure
-
-**When to Use**:
-- After making changes to source code
-- When you need to verify tests pass
-- To troubleshoot build or test failures
-- For guidance on the CMake build system
-- To understand test results and failures
-
-**How to Use**:
-In GitHub Copilot Chat, you can invoke the Rodin agent with commands like:
-- `@Rodin build and test my changes`
-- `@Rodin compile the code and run unit tests`
-- `@Rodin why did the tests fail?`
-- `@Rodin help me fix this build error`
-
-## Agent Structure
-
-Each agent is defined in a YAML file with the following structure:
-
-```yaml
+```markdown
+---
 name: <AgentName>
-description: <Brief description of the agent's purpose>
-instructions: |
-  <Detailed instructions for the agent's behavior>
+description: <When this agent should be selected>
+---
+
+<the agent's operating instructions>
 ```
 
-## Creating New Agents
+## Available agents
 
-To create a new custom agent:
+### `rodin.agent.md` — Rodin
 
-1. Create a new YAML file in this directory (e.g., `my-agent.yml`)
-2. Define the agent's name, description, and instructions
-3. Follow the structure of existing agents
-4. Document the agent in this README
+The contributor agent. It carries the repository's architecture rules, the
+house style and the four CI style gates, how to scope builds and tests, the
+verification standard, and the commit/PR conventions used here.
 
-## Best Practices
+Use it for any code, test, or documentation change in this repository:
 
-- Keep agent instructions clear and specific
-- Include examples of commands and workflows
-- Document common issues and troubleshooting steps
-- Provide context about the Rodin codebase
-- Test agent responses to ensure they work as expected
+- `@Rodin add a Neumann term to the Poisson example and test it`
+- `@Rodin why does the ClangTidy gate fail on my branch?`
+- `@Rodin scope and run the tests affected by my Geometry change`
 
-## References
+## How this relates to the other instruction files
 
-- [Rodin Build System](../../CMakeLists.txt)
-- [Copilot Instructions](../copilot-instructions.md)
-- [Testing Documentation](../../tests/README.md)
-- [GitHub Copilot Documentation](https://docs.github.com/en/copilot)
+Agent guidance is deliberately layered; none of these files should duplicate
+another:
+
+| File | Audience | Contains |
+|---|---|---|
+| `.github/agents/*.agent.md` | A selected custom agent | How to *work*: gates, scoping, verification, commit voice |
+| `.github/copilot-instructions.md` | All Copilot requests in the repo | Architecture rules and style conventions in depth |
+| `AGENTS.md` (repo root) | Every AI agent (Claude, Codex, Cursor, …) | Entry point, non-negotiable rules, pointers |
+| `doc/agents/` | Every AI agent, on demand | The hierarchical knowledge base (philosophy, per-module, theory) |
+| `CONTRIBUTING.md` | Humans and agents | The five style layers and how to run each check |
+
+When a fact changes (a module moves, a gate is added, a command changes), update
+the one file that owns it and let the others keep pointing.
+
+## Environment
+
+`.github/workflows/copilot-setup-steps.yml` provisions the toolchain and
+dependencies for the GitHub coding agent. Keep it in step with the Build and
+Tests workflows: an agent that cannot configure the project cannot verify its
+own work.
+
+## Adding an agent
+
+1. Create `<name>.agent.md` here with `name` and `description` frontmatter.
+2. Write instructions that are *specific to this repository* — general C++
+   advice is noise. Prefer pointing at `doc/agents/` over restating it.
+3. State the verification the agent owes: which tests, which gates, what
+   evidence it must show.
+4. Add it to the table above.

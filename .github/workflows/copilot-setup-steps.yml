@@ -1,6 +1,21 @@
 name: Copilot setup steps
 
+# Provisions the ephemeral environment the GitHub coding agent works in.
+#
+# The job below MUST stay named `copilot-setup-steps` — that is how the agent
+# discovers it. `workflow_dispatch` and the path-scoped `push`/`pull_request`
+# triggers exist so the file can be run and validated on its own; without them
+# a `workflow_call`-only workflow that nothing calls is never exercised, and
+# breakage here is only discovered as a failing agent session.
+
 on:
+  workflow_dispatch:
+    inputs:
+      compiler:
+        description: "Compiler toolchain to install (e.g., gcc-14)"
+        required: false
+        type: string
+        default: gcc-14
   workflow_call:
     inputs:
       compiler:
@@ -8,16 +23,29 @@ on:
         required: false
         type: string
         default: gcc-14
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
 
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
 
     steps:
+      # Submodules are not optional: googletest and benchmark live in
+      # third-party/, so without them no test target configures.
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
-          compiler: ${{ inputs.compiler }}
+          compiler: ${{ inputs.compiler || 'gcc-14' }}
           cmake: true
 
       - name: Install dependencies
@@ -33,3 +61,21 @@ jobs:
           petsc-dev
           mpich
           lcov
+
+      # The four style gates (.github/workflows/Style.yml) are part of "done"
+      # for a change, so the agent needs to be able to run them locally.
+      # clang-format is pinned to the exact version the tree was formatted
+      # with — patch releases wrap lines differently.
+      - name: Install style tooling
+        run: |
+          sudo apt-get install -y clang-format-18 clang-tidy-18 texlive-binaries
+          pip install clang-format==18.1.8
+
+      # The doxygen warning baseline is only comparable against the version
+      # that generated it.
+      - name: Install pinned doxygen
+        run: |
+          curl -sSL -o doxygen.tar.gz \
+            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+          tar -xzf doxygen.tar.gz
+          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"

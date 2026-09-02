@@ -1,0 +1,112 @@
+/**
+  @page guides-quadrature Quadrature formulas
+  @brief Exactness ranges and default quadrature dispatch
+
+  @m_keywords{Quadrature, Cubature, Xiao-Gimbutas, Witherden-Vincent, Gauss-Jacobi}
+
+  @tableofcontents
+
+  @section guides-quadrature-contract Contract
+
+  A quadrature formula on a reference polytope @f$ \widehat K @f$ has points
+  @f$ \widehat x_q @f$ and weights @f$ w_q @f$ such that
+  @f[
+    \int_{\widehat K} f(\widehat x)\,d\widehat x
+    \simeq \sum_q w_q f(\widehat x_q).
+  @f]
+  In Rodin, the requested order @f$ p @f$ denotes the polynomial degree of
+  exactness, not the number of quadrature points. The default dispatcher
+  returns a rule exact on @f$ \mathbb P_p(\widehat K) @f$ with positive
+  weights and points inside @f$ \widehat K @f$.
+
+  @section guides-quadrature-dispatch Default dispatch
+
+  <table>
+    <tr><th>Reference polytope</th><th>Tabulated rule</th><th>Fallback</th></tr>
+    <tr><td>Point</td><td>Trivial rule</td><td>None</td></tr>
+    <tr><td>Segment</td><td>Gauss--Legendre</td><td>Same rule</td></tr>
+    <tr><td>Triangle</td><td>Xiao--Gimbutas, degrees 1--50</td><td>Positive conical product</td></tr>
+    <tr><td>Quadrilateral</td><td>Gauss--Legendre tensor product</td><td>Same rule</td></tr>
+    <tr><td>Tetrahedron</td><td>Xiao--Gimbutas, degrees 1--15</td><td>Positive conical product</td></tr>
+    <tr><td>Hexahedron</td><td>Gauss--Legendre tensor product</td><td>Same rule</td></tr>
+    <tr><td>Wedge</td><td>XG triangle times GL, degrees 1--50</td><td>Conical triangle times GL</td></tr>
+    <tr><td>Pyramid</td><td>Witherden--Vincent, degrees 1--10</td><td>Positive conical product</td></tr>
+  </table>
+
+  The complete directly constructible table ranges are:
+
+  <table>
+    <tr><th>Family</th><th>Triangle</th><th>Quadrilateral</th><th>Tetrahedron</th><th>Hexahedron</th><th>Wedge</th><th>Pyramid</th></tr>
+    <tr><td>Xiao--Gimbutas</td><td>1--50</td><td>--</td><td>1--15</td><td>--</td><td>--</td><td>--</td></tr>
+    <tr><td>Witherden--Vincent</td><td>1--20</td><td>1--20</td><td>1--10</td><td>1--10</td><td>1--10</td><td>1--10</td></tr>
+  </table>
+
+  The Xiao--Gimbutas @cite xiao2010numerical and Witherden--Vincent
+  @cite witherden2015identification rules are published positive-interior
+  formulas.
+  Rodin vendors their coefficients with the corresponding attribution licenses;
+  no numerical search occurs at runtime.
+
+  @section guides-quadrature-fallback Conical-product fallback
+
+  Let
+  @f[
+    n_p=\left\lceil\frac{p+1}{2}\right\rceil.
+  @f]
+  Each one-dimensional Gaussian factor uses @f$ n_p @f$ points. The simplex
+  rules follow the Duffy transformation @cite duffy1982quadrature and the
+  associated conical-product construction @cite stroud1971approximate.
+
+  For the triangle,
+  @f[
+    (r,s)=\bigl(u,(1-u)v\bigr),
+    \qquad dr\,ds=(1-u)\,du\,dv,
+  @f]
+  so the rule is a Gauss--Jacobi rule with weight @f$ 1-u @f$ times a
+  Gauss--Legendre rule. For the tetrahedron,
+  @f[
+    (r,s,t)=\bigl(u,(1-u)v,(1-u)(1-v)w\bigr),
+  @f]
+  and the Jacobian @f$ (1-u)^2(1-v) @f$ is carried by two Gauss--Jacobi
+  factors. For the pyramid,
+  @f[
+    (x,y,z)=\bigl((1-z)u,(1-z)v,z\bigr),
+  @f]
+  and the Jacobian @f$ (1-z)^2 @f$ is carried by the vertical
+  Gauss--Jacobi factor.
+
+  These fallbacks are deterministic, positive, interior, and available at
+  arbitrary order. They are not fully symmetric and can use more points than
+  optimized tabulated formulas.
+
+  @section guides-quadrature-api API and caching
+
+  @code{.cpp}
+  using namespace Rodin;
+
+  const auto& cached = QF::PolytopeQuadratureFormula::get(
+    8, Geometry::Polytope::Type::Tetrahedron);
+
+  QF::PolytopeQuadratureFormula owned(
+    8, Geometry::Polytope::Type::Tetrahedron);
+  @endcode
+
+  `PolytopeQuadratureFormula::get` returns a process-wide canonical formula.
+  Repeated per-thread requests are served by a small thread-local cache.
+  `PolytopeQuadratureFormula::build` and the constructor return owned
+  formulas. `XiaoGimbutas`, `WitherdenVincent`, `GaussLegendre`,
+  `GaussLobatto`, and `GrundmannMoller` can also be selected explicitly.
+  Grundmann--Moller is not a default because its weights are signed above
+  degree one.
+
+  @section guides-quadrature-curved Curved elements
+
+  The rule order applies on the reference polytope. On a physical cell, the
+  mapped integrand also contains the determinant of the geometric Jacobian.
+  Non-affine transformations can therefore require an order above the degree
+  suggested by the finite-element fields alone. A quadrature point must remain
+  inside the reference polytope because a curved transformation is not
+  required to extend beyond it.
+
+  @m_footernavigation
+*/
