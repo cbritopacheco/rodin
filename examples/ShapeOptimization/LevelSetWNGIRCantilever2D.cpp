@@ -367,12 +367,7 @@ int main(int argc, char** argv)
   const std::size_t n = parseSizeTOption(argc, argv, "n", 80);  // cells along H
   const Real ell = parseRealOption(argc, argv, "ell", Real(0.4));
   const Real h = H / static_cast<Real>(n);   // uniform cell size = metric h
-  const Real hmin = parseRealOption(argc, argv, "hmin", Real(0.1) * h);
-  const bool initialMMG = parseSizeTOption(argc, argv, "initial-mmg", 0) != 0;
-  const Real initialMMGHMin = parseRealOption(argc, argv, "initial-mmg-hmin", hmin);
-  const Real initialMMGHMax = parseRealOption(argc, argv, "initial-mmg-hmax", h);
-  const Real initialMMGHausd =
-    parseRealOption(argc, argv, "initial-mmg-hausd", Real(0.5) * hmin);
+  const bool initialMMG = Rodin::Examples::boolOption(argc, argv, "initial-mmg", false);
   // Design-smoothness knobs (sensitive — raise gently):
   //   alpha  : Hilbertian shape-gradient length. alpha~2h smooths the boundary
   //            while keeping members; alpha>~4h washes features out (holes fill).
@@ -460,16 +455,7 @@ int main(int argc, char** argv)
 
   if (initialMMG)
   {
-    std::cout << "  initial MMG remesh:"
-              << " hmin=" << initialMMGHMin << " hmax=" << initialMMGHMax
-              << " hausd=" << initialMMGHausd << "\n";
-    MMG::Mesh mmgMesh(std::move(mesh));
-    MMG::Optimizer optimizer;
-    optimizer.setHMin(initialMMGHMin).setHMax(initialMMGHMax).setAngleDetection(false);
-    if (initialMMGHausd > 0)
-      optimizer.setHausdorff(initialMMGHausd);
-    optimizer.optimize(mmgMesh);
-    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+    Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(2, 2);

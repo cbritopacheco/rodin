@@ -1,6 +1,6 @@
 # add_executable(MinOneState MinOneState.cpp Update.cpp)
 # target_link_libraries(MinOneState
-#   PUBLIC
+#   PRIVATE
 #   Rodin::Geometry
 #   Rodin::Solver
 #   Rodin::Variational
@@ -9,7 +9,7 @@
 
 add_executable(AmstutzMethod AmstutzMethod.cpp)
 target_link_libraries(AmstutzMethod
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational

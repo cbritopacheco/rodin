@@ -1,20 +1,20 @@
 add_executable(RodinSolidCantileverBeam CantileverBeam.cpp)
 target_link_libraries(RodinSolidCantileverBeam
-  PUBLIC
+  PRIVATE
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)
 
 add_executable(RodinSolidBlockGravity BlockGravity.cpp)
 target_link_libraries(RodinSolidBlockGravity
-  PUBLIC
+  PRIVATE
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)
 
 add_executable(RodinSolidActiveContractionPlaneWave ActiveContractionPlaneWave.cpp)
 target_link_libraries(RodinSolidActiveContractionPlaneWave
-  PUBLIC
+  PRIVATE
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)

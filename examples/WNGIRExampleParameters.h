@@ -10,9 +10,12 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <cmath>
+#include <iostream>
 #include <string>
 
 #include <Rodin/Adaptation/WNGIRParameters.h>
+#include <Rodin/MMG/MeshOptimizer.h>
 
 namespace Rodin::Examples
 {
@@ -20,12 +23,12 @@ namespace Rodin::Examples
   {
       std::size_t maxIterations = 200;
       std::size_t quadratureOrder = 0;
-      Real kappaBulk = Real(0.00703125);
+      Real kappaBulk = Adaptation::WNGIRParameters{}.kappaBulk;
       Real rDiv = 1;
       Real kappaJ = 1;
       Real kappaQ = 1;
-      Real tauRmsHFloor = Real(0.03);
-      Real tauInfHFloor = Real(0.20);
+      Real tauRmsHFloor = Adaptation::WNGIRParameters{}.tauRmsHFloor;
+      Real tauInfHFloor = Adaptation::WNGIRParameters{}.tauInfHFloor;
       bool parseLegacyMaxIterations = false;
   };
 
@@ -101,6 +104,40 @@ namespace Rodin::Examples
     return value;
   }
 
+  /// Remesh the linear background before constructing spaces or curved maps.
+  /// MMG lengths are physical: hmin = 0.1 h, hmax = h, hausd = 0.05 h.
+  inline void remeshWNGIRBackground(
+    Geometry::Mesh<Context::Local>& mesh, int argc, char** argv, Real h)
+  {
+    if (!boolOption(argc, argv, "initial-mmg", false))
+      return;
+    const Real hmin = realOption(argc, argv, "initial-mmg-hmin",
+      realOption(argc, argv, "hmin", Real(0.1) * h));
+    const Real hmax = realOption(argc, argv, "initial-mmg-hmax", h);
+    const Real hausd = realOption(argc, argv, "initial-mmg-hausd", Real(0.05) * h);
+    if (!(std::isfinite(hmin) && std::isfinite(hmax) && std::isfinite(hausd) &&
+        hmin > 0 && hmax >= hmin && hausd > 0))
+    {
+      try
+      {
+        Alert::Exception() << "Initial MMG requires 0 < hmin <= hmax and hausd > 0."
+                           << Alert::Raise;
+      }
+      catch (const Alert::Exception&)
+      {
+        std::exit(EXIT_FAILURE);
+      }
+    }
+    std::cout << "  initial MMG remesh: h=" << h << " hmin=" << hmin
+              << " hmax=" << hmax << " hausd=" << hausd << '\n';
+    MMG::Mesh mmgMesh(std::move(mesh));
+    MMG::Optimizer optimizer;
+    // Preserve the corners and ridges of the computational box.
+    optimizer.setHMin(hmin).setHMax(hmax).setHausdorff(hausd).setAngleDetection(true);
+    optimizer.optimize(mmgMesh);
+    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+  }
+
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
@@ -147,9 +184,9 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-sup-normal-jump-factor", p.tauJumpInf);
     // Zero delegates the physical tolerance to WNGIR, where the sampled
     // level-set gradient converts mesh length to field units.
-    p.tauRms = realOption(argc, argv, "wngir-rms-tol", Real(0));
-    p.tauInf = realOption(argc, argv, "wngir-sup-tol", Real(0));
-    p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
+    p.tauRms = realOption(argc, argv, "wngir-rms-tol", p.tauRms);
+    p.tauInf = realOption(argc, argv, "wngir-sup-tol", p.tauInf);
+    p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", p.energyStagTol);
     p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
     p.acceptedStepOverHTol =
       realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);

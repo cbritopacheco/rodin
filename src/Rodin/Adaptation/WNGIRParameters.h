@@ -21,7 +21,7 @@ namespace Rodin::Adaptation
         0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
       Real h = 0; ///< reference mesh size (required).
       Real kappaBulk =
-        Real(0.00703125); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
+        Real(0.001); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
                            ///< bulk-strain coefficient.
       Real rDiv = 1; ///< @f$r_D@f$, divergence/deviatoric bulk-coefficient ratio.
       Real kappaObs =
@@ -51,31 +51,31 @@ namespace Rodin::Adaptation
               ///< line search.
       /// @brief Absolute RMS tolerance @f$\tau_{\mathrm{rms}}@f$; zero selects
       /// four times the level-set mesh scale.
-      Real tauRms = 0;
+      Real tauRms = 1e-12;
 
       /// @brief Absolute supremum tolerance @f$\tau_\infty@f$; zero selects ten
       /// times the level-set mesh scale.
-      Real tauInf = 0;
+      Real tauInf = 1e-12;
 
       /// @brief Lower bound on the scale-aware tolerance
       /// @f$\tau_{\mathrm{rms},h}@f$.
-      Real tauRmsHFloor = Real(0.03);
+      Real tauRmsHFloor = Real(0.005);
 
       /// @brief Lower bound on the scale-aware tolerance @f$\tau_{\infty,h}@f$.
-      Real tauInfHFloor = Real(0.20);
+      Real tauInfHFloor = 0;
       /// @brief Factor @f$\tau^{\mathrm{rms}}_{\mathrm{jump}}@f$ multiplying the
       /// normal-jump estimate in @f$\tau_{\mathrm{rms},h}@f$.
-      Real tauJumpRms = Real(0.03);
+      Real tauJumpRms = 0;
 
       /// @brief Factor @f$\tau^{\infty}_{\mathrm{jump}}@f$ multiplying the
       /// normal-jump estimate in @f$\tau_{\infty,h}@f$.
-      Real tauJumpInf = Real(0.05);
-      Real energyStagTol = 1e-4; ///< Relative energy stagnation tolerance.
+      Real tauJumpInf = 0;
+      Real energyStagTol = 1e-8; ///< Relative energy stagnation tolerance.
       Real stepTol = 0; ///< ≤0 ⇒ 1e-4·h.
       Real acceptedStepOverHTol =
-        Real(5e-3); ///< >0 stops best-effort when accepted step/h is small.
+        Real(5e-4); ///< >0 stops best-effort when accepted step/h is small.
       Real rigidStabilisationLevel =
-        Real(0.5); ///< @f$\rho@f$, lifts weakly observed rigid modes to this
+        Real(1); ///< @f$\rho@f$, lifts weakly observed rigid modes to this
                    ///< fraction of the stiffest rigid mode; zero disables the
                    ///< stabilisation.
       Real cgRelativeTolerance =

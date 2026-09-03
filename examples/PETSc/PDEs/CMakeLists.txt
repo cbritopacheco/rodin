@@ -1,6 +1,6 @@
 add_executable(PETSc_Seq_Poisson Seq_Poisson.cpp)
 target_link_libraries(PETSc_Seq_Poisson
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -10,7 +10,7 @@ target_link_libraries(PETSc_Seq_Poisson
 
 add_executable(PETSc_Seq_Stokes Seq_Stokes.cpp)
 target_link_libraries(PETSc_Seq_Stokes
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -20,7 +20,7 @@ target_link_libraries(PETSc_Seq_Stokes
 
 add_executable(PETSc_Seq_Validation_Stokes Seq_Validation_Stokes.cpp)
 target_link_libraries(PETSc_Seq_Validation_Stokes
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -30,7 +30,7 @@ target_link_libraries(PETSc_Seq_Validation_Stokes
 
 add_executable(PETSc_Seq_NavierStokes Seq_NavierStokes.cpp)
 target_link_libraries(PETSc_Seq_NavierStokes
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -40,7 +40,7 @@ target_link_libraries(PETSc_Seq_NavierStokes
 
 add_executable(PETSc_Seq_OseenFlow Seq_OseenFlow.cpp)
 target_link_libraries(PETSc_Seq_OseenFlow
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -50,7 +50,7 @@ target_link_libraries(PETSc_Seq_OseenFlow
 
 add_executable(PETSc_Seq_OseenLidDrivenCavity Seq_OseenLidDrivenCavity.cpp)
 target_link_libraries(PETSc_Seq_OseenLidDrivenCavity
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -60,7 +60,7 @@ target_link_libraries(PETSc_Seq_OseenLidDrivenCavity
 
 add_executable(PETSc_Seq_BDF1_ALE_FSI Seq_BDF1_ALE_FSI.cpp)
 target_link_libraries(PETSc_Seq_BDF1_ALE_FSI
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -71,7 +71,7 @@ target_link_libraries(PETSc_Seq_BDF1_ALE_FSI
 
 add_executable(PETSc_Seq_BDF1_ALE_FSI_Monolithic Seq_BDF1_ALE_FSI_Monolithic.cpp)
 target_link_libraries(PETSc_Seq_BDF1_ALE_FSI_Monolithic
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -83,7 +83,7 @@ target_link_libraries(PETSc_Seq_BDF1_ALE_FSI_Monolithic
 if (RODIN_USE_MPI)
   add_executable(PETSc_MPI_Poisson MPI_Poisson.cpp)
   target_link_libraries(PETSc_MPI_Poisson
-    PUBLIC
+    PRIVATE
     Rodin::Geometry
     Rodin::Solver
     Rodin::Variational

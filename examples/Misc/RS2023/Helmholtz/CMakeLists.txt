@@ -1,6 +1,6 @@
 add_executable(RS2023_Helmholtz_NoScreen NoScreen.cpp)
 target_link_libraries(RS2023_Helmholtz_NoScreen
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -9,7 +9,7 @@ target_link_libraries(RS2023_Helmholtz_NoScreen
 
 add_executable(RS2023_Helmholtz_Perturbed Perturbed.cpp)
 target_link_libraries(RS2023_Helmholtz_Perturbed
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -18,7 +18,7 @@ target_link_libraries(RS2023_Helmholtz_Perturbed
 
 add_executable(RS2023_Helmholtz_Simulation Simulation.cpp)
 target_link_libraries(RS2023_Helmholtz_Simulation
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -27,7 +27,7 @@ target_link_libraries(RS2023_Helmholtz_Simulation
 
 add_executable(RS2023_Helmholtz_Animation Animation.cpp)
 target_link_libraries(RS2023_Helmholtz_Animation
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly

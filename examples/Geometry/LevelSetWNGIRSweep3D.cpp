@@ -351,6 +351,7 @@ int main(int argc, char** argv)
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
   mesh.scale(h);
+  Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
   mesh.getConnectivity().compute(3, 2);
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(0, 0);

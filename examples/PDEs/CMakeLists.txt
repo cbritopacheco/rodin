@@ -1,6 +1,6 @@
 add_executable(Poisson Poisson.cpp)
 target_link_libraries(Poisson
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -9,7 +9,7 @@ target_link_libraries(Poisson
 
 add_executable(Elasticity Elasticity.cpp)
 target_link_libraries(Elasticity
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -18,7 +18,7 @@ target_link_libraries(Elasticity
 
 add_executable(Periodic Periodic.cpp)
 target_link_libraries(Periodic
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -27,7 +27,7 @@ target_link_libraries(Periodic
 
 add_executable(Darcy Darcy.cpp)
 target_link_libraries(Darcy
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -36,7 +36,7 @@ target_link_libraries(Darcy
 
 add_executable(Helmholtz Helmholtz.cpp)
 target_link_libraries(Helmholtz
-  PUBLIC
+  PRIVATE
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly

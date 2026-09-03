@@ -373,11 +373,7 @@ int run(int argc, char** argv)
   const std::size_t n = sizeOption(argc, argv, "n", 20);
   const std::size_t maxIt = sizeOption(argc, argv, "iters", 200);
   const Real h = H / static_cast<Real>(n);
-  const Real hmin = realOption(argc, argv, "hmin", Real(0.1) * h);
-  const bool initialMMG = sizeOption(argc, argv, "initial-mmg", 0) != 0;
-  const Real initialMMGHMin = realOption(argc, argv, "initial-mmg-hmin", hmin);
-  const Real initialMMGHMax = realOption(argc, argv, "initial-mmg-hmax", h);
-  const Real initialMMGHausd = realOption(argc, argv, "initial-mmg-hausd", Real(0));
+  const bool initialMMG = Rodin::Examples::boolOption(argc, argv, "initial-mmg", false);
   const Real ell = realOption(argc, argv, "ell", Real(0.5));
   const Real perimeterWeight =
     realOption(argc, argv, "perimeter", realOption(argc, argv, "surface", Real(0)));
@@ -447,16 +443,7 @@ int run(int argc, char** argv)
 
   if (initialMMG)
   {
-    std::cout << "  initial MMG remesh:"
-              << " hmin=" << initialMMGHMin << " hmax=" << initialMMGHMax
-              << " hausd=" << initialMMGHausd << "\n";
-    MMG::Mesh mmgMesh(std::move(mesh));
-    MMG::Optimizer optimizer;
-    optimizer.setHMin(initialMMGHMin).setHMax(initialMMGHMax).setAngleDetection(false);
-    if (initialMMGHausd > 0)
-      optimizer.setHausdorff(initialMMGHausd);
-    optimizer.optimize(mmgMesh);
-    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+    Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
     mesh.getConnectivity().compute(2, 3);
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(3, 3);

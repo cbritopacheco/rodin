@@ -1,6 +1,6 @@
 add_executable(PETSc_LevelSetCantilever2D LevelSetCantilever2D.cpp)
 target_link_libraries(PETSc_LevelSetCantilever2D
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
@@ -11,7 +11,7 @@ target_link_libraries(PETSc_LevelSetCantilever2D
 
 add_executable(PETSc_LevelSetCantilever3D LevelSetCantilever3D.cpp)
 target_link_libraries(PETSc_LevelSetCantilever3D
-  PUBLIC
+  PRIVATE
   Rodin::Math
   Rodin::Solver
   Rodin::Geometry
