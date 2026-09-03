@@ -90,7 +90,7 @@
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;../resources/mfem/surface-meshes-example.mesh&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"../resources/mfem/surface-meshes-example.mesh"</span><span class="p">;</span>
 
 <span class="w">  </span><span class="c1">// Load mesh</span>
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="p">;</span>
@@ -120,8 +120,8 @@
 <span class="w">  </span><span class="n">rd</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cg</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// Save solution</span>
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;u.gf&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
-<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Omega.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">"u.gf"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"Omega.mesh"</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
 <span class="p">}</span></pre>
         <div class="m-note m-dim m-thin m-text-center"><a href="_p_d_es_2_poisson_8cpp-example.html" class="m-doc">&laquo; Poisson.cpp</a> | <a href="examples-pdes-surfacemesh.html" class="m-doc">Solving PDEs on surface meshes</a></div>
       </div>

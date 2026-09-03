@@ -101,7 +101,7 @@
             </li>
           </ul>
         </nav>
-<p>Specialized exception class that prepends the class name to the error message. Uses Boost.TypeIndex to automatically extract and format the class name with proper coloring and emphasis.</p><p>Example usage: <code class="m-code"><span class="n">ClassException</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Invalid state detected&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p><p>This produces output like: &quot;Error: In class MyClass. Invalid state detected&quot;</p>
+<p>Specialized exception class that prepends the class name to the error message. Uses Boost.TypeIndex to automatically extract and format the class name with proper coloring and emphasis.</p><p>Example usage: <code class="m-code"><span class="n">ClassException</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Invalid state detected"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></code></p><p>This produces output like: &quot;Error: In class MyClass. Invalid state detected&quot;</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

@@ -1565,13 +1565,13 @@ $ \Gamma_D $
 <span class="n">RealFunction</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">());</span><span class="w"> </span><span class="p">};</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 
-<span class="c1">// Identification: pin u on the boundary to v&#39;s DOFs</span>
+<span class="c1">// Identification: pin u on the boundary to v's DOFs</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 
 <span class="c1">// Identification: u = R(x) v on the boundary</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 
-<span class="c1">// Identification: scalar u equal to vector v&#39;s x-component</span>
+<span class="c1">// Identification: scalar u equal to vector v's x-component</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">x</span><span class="p">()).</span><span class="n">on</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 
 <span class="c1">// Affine identification: u = A(v) + d</span>
