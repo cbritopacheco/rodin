@@ -482,12 +482,21 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
       <br />
       Shape optimization of a cantilever in 2D
     </td>
-        <td align="center" width="50%">
+    <td align="center" width="50%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/LevelSetCantilever3D.webm">
         <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
       </a>
       <br />
      Shape optimization of a cantilever in 3D
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
+      </a>
+      <br />
+      Translational-rotational coupling optimization in Stokes flow
     </td>
   </tr>
 </table>
