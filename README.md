@@ -496,7 +496,7 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
         <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
       </a>
       <br />
-      Translational-rotational coupling optimization in Stokes flow
+      Translational-rotational coupling optimization in Stokes flow (by <a href="https://github.com/kazusa000">J. Wang</a>
     </td>
   </tr>
 </table>
