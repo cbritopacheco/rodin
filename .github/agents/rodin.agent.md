@@ -139,10 +139,12 @@ selectors CI uses. (`ctest --test-dir build/tests --print-labels` if in doubt.)
 
 ```sh
 git submodule update --init --recursive     # first time only
+git lfs pull                                # if examples/full resources are needed
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=ON \
-  -DRODIN_BUILD_MANUFACTURED_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF
+  -DRODIN_BUILD_MANUFACTURED_TESTS=ON -DRODIN_BUILD_EXAMPLES=OFF \
+  -DRODIN_INSTALL_RESOURCES=OFF
 
 cmake --build build -j2                     # match the machine; never a bare -j
 ```
@@ -166,9 +168,14 @@ cmake --build build -j2                     # match the machine; never a bare -j
 - A change is **not done** until the affected unit tests pass, and for
   assembly/solver changes the relevant manufactured tests too.
 - If public headers or exported targets changed, run
-  `bash tests/installation/test_installation.sh`.
+  `RODIN_INSTALL_RESOURCES=OFF bash tests/installation/test_installation.sh`.
 - Examples write `*.h5`/`*.xdmf`/`*.log` into the CWD — run them from a scratch
   directory and never commit the artifacts.
+- Large example/demo meshes and bulky files under `resources/` are Git LFS
+  objects. Small test and benchmark fixtures stay in regular Git so CI can run
+  with `lfs: false`. Before adding or replacing a resource, check
+  `git check-attr filter -- <path>`; use `git lfs track <path>` for large
+  resource payloads and verify with `git lfs status` before pushing.
 
 ## 5. Verification discipline
 

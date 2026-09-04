@@ -62,6 +62,8 @@ Rodin can be easily installed from source on Linux and macOS systems.
 git clone --recursive https://github.com/cbritopacheco/rodin.git
 cd rodin
 
+git lfs install
+
 # Fetch large example/resource meshes
 git lfs pull
 
@@ -76,6 +78,11 @@ sudo make install
 
 If you only need the library and headers, skip the large resource payloads with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
+
+Large meshes and bulky resource payloads are tracked through Git LFS. Small
+test and benchmark fixtures stay in regular Git so CI and lightweight clones do
+not have to hydrate LFS objects. If an example fails while reading a mesh, run
+`git lfs pull` from the repository root and retry.
 
 ### User-Local Installation
 
@@ -138,11 +145,13 @@ make
 **Ubuntu/Debian:**
 ```bash
 sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+sudo apt-get install git-lfs  # needed for large example/resource meshes
 ```
 
 **macOS (Homebrew):**
 ```bash
 brew install cmake boost eigen libomp
+brew install git-lfs  # needed for large example/resource meshes
 ```
 
 ### Troubleshooting

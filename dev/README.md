@@ -125,3 +125,9 @@ is intentionally incremental.
 Do not place generated reports, experiment outputs, meshes, solver logs, or
 one-off scratch files here. Those belong in a scratch directory and should not
 be committed.
+
+Large example/demo meshes and bulky resource payloads belong under
+`resources/` and must be tracked through Git LFS. Keep small test and benchmark
+fixtures in regular Git. Before committing a new resource file, check
+`git check-attr filter -- <path>` and confirm the intended state with
+`git lfs status`.

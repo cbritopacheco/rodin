@@ -19,6 +19,7 @@
   - **C++20 compatible compiler** - GCC 12+, Clang 14+, or AppleClang
   - **Boost 1.74+** - C++ libraries collection
   - **Eigen3** - Linear algebra library
+  - **Git LFS** - Required only for the large example/resource meshes
 
   @subsection guides-getting-started-installation-optional Optional Dependencies
 
@@ -39,6 +40,7 @@
   @code{.bash}
   sudo apt-get update
   sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+  sudo apt-get install git-lfs  # needed for large example/resource meshes
   @endcode
 
   For optional dependencies:
@@ -53,6 +55,7 @@
 
   @code{.bash}
   brew install cmake boost eigen libomp
+  brew install git-lfs  # needed for large example/resource meshes
   @endcode
 
   For optional dependencies:
@@ -75,6 +78,18 @@
   @note The `--recursive` flag is important as it clones third-party dependencies
   included as git submodules. If you forgot this flag, run:
   `git submodule update --init --recursive`
+
+  Large example meshes and bulky resource payloads are stored with Git LFS. If
+  you need those resources, hydrate them after cloning:
+
+  @code{.bash}
+  git lfs install
+  git lfs pull
+  @endcode
+
+  Library-only builds, CI-style checks, and installation tests that do not need
+  the full resource tree can skip LFS hydration by configuring with
+  `-DRODIN_INSTALL_RESOURCES=OFF`.
 
   @subsection guides-getting-started-installation-build Build and Install
 
@@ -189,6 +204,18 @@
 
   If you encounter linker errors, make sure all required dependencies (Boost,
   Eigen) are properly installed and visible to CMake.
+
+  @subsection guides-getting-started-installation-lfs-resources Git LFS Resources
+
+  If an example fails while reading a large mesh, the checkout probably still
+  contains an unresolved Git LFS pointer. Install Git LFS and run:
+
+  @code{.bash}
+  git lfs pull
+  @endcode
+
+  If you do not need examples or installed resources, configure with
+  `-DRODIN_INSTALL_RESOURCES=OFF`.
 
   @subsection guides-getting-started-installation-compiler-errors Compiler Errors
 

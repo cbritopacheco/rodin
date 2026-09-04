@@ -39,13 +39,16 @@ faster than grep.
 
 ```sh
 git submodule update --init --recursive   # first time only
+git lfs pull                              # if examples/full resources are needed
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j
 ```
 
 Key CMake options (all default ON): `RODIN_BUILD_EXAMPLES`,
-`RODIN_USE_PETSC`. An existing configured `build/` tree is usually present;
-prefer incremental builds of the target you need
+`RODIN_USE_PETSC`, `RODIN_INSTALL_RESOURCES`. Use
+`-DRODIN_INSTALL_RESOURCES=OFF` for library-only builds, installation tests, and
+CI-style jobs that do not need the full resource tree. An existing configured
+`build/` tree is usually present; prefer incremental builds of the target you need
 (`cmake --build build -j --target <name>`) over full rebuilds.
 
 ## Test
@@ -95,6 +98,12 @@ assembly/solver changes, the relevant manufactured tests pass too.
 
 - Example runs dump `*.h5` / `*.xdmf` / `*.log` output into the CWD. Run
   examples from a scratch directory, and never commit these artifacts.
+- Large meshes and bulky files under `resources/` are stored in Git LFS. Small
+  test/benchmark fixtures stay in regular Git. Before committing a new or
+  updated resource, check its attributes with `git check-attr filter -- <path>`;
+  use `git lfs track <path>` and commit the `.gitattributes` update when the
+  file is a large example/demo payload. Verify with `git lfs status` before
+  pushing.
 - Branches: `master` is the default; active development happens on
   `module/*`, `model/*` topic branches off `develop`. Do not commit or push
   unless asked.

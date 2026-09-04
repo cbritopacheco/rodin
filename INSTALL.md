@@ -18,6 +18,8 @@ This guide provides instructions for building and installing the Rodin finite el
 - **C++20 compatible compiler** - GCC 10+, Clang 10+, or MSVC 2019+
 - **Boost 1.74+** - Required components: `filesystem`, `serialization`
 - **Eigen3 3.4+** - Linear algebra library
+- **Git LFS** - Required only when cloning or installing the large
+  example/resource meshes
 
 ### Optional Dependencies
 
@@ -38,6 +40,17 @@ cd rodin
 ```
 
 **Important:** Use `--recursive` to initialize git submodules (eigen, googletest, etc.).
+Large example/resource meshes are Git LFS objects. If you need those resources,
+install Git LFS and hydrate them after cloning:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+If you are building only the library, headers, tests, or CI-style install
+checks, you can leave LFS objects unresolved and configure with
+`-DRODIN_INSTALL_RESOURCES=OFF`.
 
 If you've already cloned without `--recursive`, run:
 
@@ -274,6 +287,10 @@ brew install eigen                   # macOS
 # For Boost
 sudo apt-get install libboost-all-dev  # Ubuntu/Debian
 brew install boost                      # macOS
+
+# For Git LFS resources
+sudo apt-get install git-lfs  # Ubuntu/Debian
+brew install git-lfs          # macOS/Homebrew
 ```
 
 ### Submodules Not Initialized
