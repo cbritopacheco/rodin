@@ -140,6 +140,11 @@ target_link_libraries(UniformGrid
   PRIVATE
   Rodin::Geometry)
 
+add_executable(ExtrudeTriSurface ExtrudeTriSurface.cpp)
+target_link_libraries(ExtrudeTriSurface
+  PUBLIC
+  Rodin::Geometry)
+
 add_executable(Box Box.cpp)
 target_link_libraries(Box
   PRIVATE

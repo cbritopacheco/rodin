@@ -34,6 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          lfs: false
       - name: Install clang-format
         # The clang-format binary is pinned via pip to the exact version the
         # tree was formatted with — patch releases of clang-format can wrap
@@ -51,6 +52,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: false
       - name: Run house-style linter
         run: python3 dev/style_lint.py
 
@@ -62,6 +65,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+          lfs: false
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
@@ -71,6 +75,7 @@ jobs:
         run: >-
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_TIDY=ON
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_OPENMP=ON -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
           -DRODIN_USE_SCOTCH=ON -DRODIN_USE_UMFPACK=ON
           -DRODIN_USE_SPQR=ON -DRODIN_USE_CHOLMOD=ON
@@ -88,6 +93,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: false
       - name: Install pinned doxygen
         # The warning baseline (dev/doxygen_warnings.baseline) is only
         # comparable against the doxygen version it was generated with.

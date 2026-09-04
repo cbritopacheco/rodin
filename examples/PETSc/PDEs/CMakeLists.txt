@@ -91,4 +91,20 @@ if (RODIN_USE_MPI)
     Rodin::Math
     Rodin::MPI
     Rodin::PETSc)
+
+  add_executable(PETSc_MPI_BDF1_ALE_FSI_Monolithic MPI_BDF1_ALE_FSI_Monolithic.cpp)
+  target_link_libraries(PETSc_MPI_BDF1_ALE_FSI_Monolithic
+    PUBLIC
+    Rodin::Math
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solid
+    Rodin::MPI
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Assembly)
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(PETSc_MPI_BDF1_ALE_FSI_Monolithic PUBLIC Rodin::Scotch)
+  endif()
 endif()
