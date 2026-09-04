@@ -2998,7 +2998,6 @@ namespace Rodin::IO
       std::reference_wrapper<const ObjectType> m_gf;
   };
 
-
   /**
    * @brief Base class for printing P1 (continuous Lagrange) grid functions in MFEM format.
    *

@@ -118,7 +118,6 @@ namespace Rodin::Solver
   template <class LinearSystem>
   class LDLT;
 
-
   /**
    * @brief Dense LU factorization with partial pivoting for general matrices.
    * @tparam LinearSystem Type of linear system to solve
