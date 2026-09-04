@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solid::InternalVirtualWorkTangent class | Rodin</title>
+  <title>Rodin::Solid::InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -76,32 +76,9 @@
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWorkTangent <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Local bilinear form integrator for the internal virtual work tangent in hyperelastic problems.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">LawDerived</td>
-              <td>The hyperelastic constitutive law type</td>
-            </tr>
-            <tr>
-              <td>TrialFunctionType</td>
-              <td>The trial function type (backend-generic)</td>
-            </tr>
-            <tr>
-              <td>TestFunctionType</td>
-              <td>The test function type (backend-generic)</td>
-            </tr>
-            <tr>
-              <td>DisplacementType</td>
-              <td>The current displacement grid-function type</td>
-            </tr>
-          </tbody>
-        </table>
+        <p>Displacement tangent (pure displacement formulation).</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -115,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>Computes the element-level tangent stiffness matrix:</p><div class="m-math"><svg style="width: 16.164em; height: 2.819em;" viewBox="116.683272 -27.065451 155.176465 27.065451">
+<div class="m-math"><svg style="width: 16.164em; height: 2.819em;" viewBox="116.683272 -27.065451 155.176465 27.065451">
 <title>
 \[
   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
@@ -164,23 +141,7 @@
 <use x='255.121937' y='-10.793007' xlink:href='#eq1-g4-100'/>
 <use x='261.20463' y='-10.793007' xlink:href='#eq1-g4-88'/>
 </g>
-</svg></div><p>The material tangent action <svg class="m-math" style="width: 3.556em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 34.137054 8.302191">
-<title>
-$ \mathbf{A} : \delta\mathbf{F} $
-</title>
-<defs>
-<path id='eq2-g1-14' d='M3.108344-5.212453C1.578082-4.841843 .478207-3.251806 .478207-1.853051C.478207-.573848 1.338979 .143462 2.295392 .143462C3.706102 .143462 4.662516-1.793275 4.662516-3.383313C4.662516-4.459278 4.160399-5.116812 3.861519-5.511333C3.419178-6.073225 2.701868-6.993773 2.701868-7.567621C2.701868-7.770859 2.857285-8.129514 3.383313-8.129514C3.753923-8.129514 3.981071-7.998007 4.339726-7.79477C4.447323-7.723039 4.722291-7.567621 4.877709-7.567621C5.128767-7.567621 5.308095-7.81868 5.308095-8.009963C5.308095-8.237111 5.128767-8.272976 4.710336-8.368618C4.148443-8.488169 3.981071-8.488169 3.777833-8.488169S2.402989-8.488169 2.402989-7.268742C2.402989-6.682939 2.701868-6.001494 3.108344-5.212453ZM3.239851-4.985305C3.694147-4.040847 3.873474-3.682192 3.873474-2.905106C3.873474-1.972603 3.371357-.095641 2.307347-.095641C1.841096-.095641 1.171606-.406476 1.171606-1.518306C1.171606-2.295392 1.613948-4.554919 3.239851-4.985305Z'/>
-<path id='eq2-g2-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
-<path id='eq2-g0-65' d='M5.475467-8.093649C5.391781-8.308842 5.36787-8.368618 5.080946-8.368618C4.782067-8.368618 4.758157-8.308842 4.674471-8.093649L1.709589-.800996C1.625903-.609714 1.625903-.585803 1.291158-.549938C.992279-.514072 .944458-.514072 .681445-.514072H.466252V0C.777086-.02391 1.494396-.02391 1.841096-.02391C2.163885-.02391 3.036613-.02391 3.311582 0V-.514072C3.048568-.514072 2.594271-.514072 2.259527-.645579C2.295392-.753176 2.295392-.777086 2.319303-.824907L2.952927-2.379078H6.156912L6.910087-.514072H5.786301V0C6.168867-.02391 7.328518-.02391 7.782814-.02391C8.16538-.02391 9.384807-.02391 9.683686 0V-.514072H8.547945L5.475467-8.093649ZM4.554919-6.336239L5.941719-2.893151H3.156164L4.554919-6.336239Z'/>
-<path id='eq2-g0-70' d='M7.531756-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0C.800996-.02391 2.163885-.02391 2.606227-.02391C3.239851-.02391 4.303861-.02391 4.889664 0V-.514072H3.299626V-3.813699H3.957161C5.104857-3.813699 5.200498-3.287671 5.200498-2.414944H5.702615V-5.726526H5.200498C5.200498-4.853798 5.104857-4.327771 3.957161-4.327771H3.299626V-7.627397H5.009215C6.910087-7.627397 7.208966-6.75467 7.376339-5.308095H7.878456L7.531756-8.141469Z'/>
-</defs>
-<g id='eq2-page1'>
-<use x='0' y='0' xlink:href='#eq2-g0-65'/>
-<use x='13.477197' y='0' xlink:href='#eq2-g2-58'/>
-<use x='20.049688' y='0' xlink:href='#eq2-g1-14'/>
-<use x='25.682644' y='0' xlink:href='#eq2-g0-70'/>
-</g>
-</svg> encodes both material and geometric stiffness (no separate geometric-stiffness integrator is needed when using the first Piola-Kirchhoff formulation).</p><p>Typically constructed via <code>InternalVirtualWork::Tangent(u, v)</code> rather than directly.</p>
+</svg></div>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -219,7 +180,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
             <dt id="ae6311ea478e5e374583b826ab0607d73">
               using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
             </dt>
-            <dd>State finite element space type.</dd>
+            <dd>Displacement state finite element space type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -231,7 +192,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
               const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
-            <dd>Constructs the internal virtual work tangent integrator.</dd>
+            <dd>Constructs the pure-displacement tangent integrator.</dd>
             <dt id="ab244d6ada7d212a96583fdb761e92992">
               <span class="m-doc-wrap-bumper"><a href="#ab244d6ada7d212a96583fdb761e92992" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; other)</span>
             </dt>
@@ -244,7 +205,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
-            <dd>Rebinds the linearization point.</dd>
+            <dd>Rebinds the displacement linearization point.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6f9c764a5658c99ea5d1e110892bc8de" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
@@ -252,11 +213,11 @@ $ \mathbf{A} : \delta\mathbf{F} $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4e81f0ae3148f3e6a75f48fbe344f2c6" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
-            <dd>Sets an input for auxiliary constitutive data.</dd>
+            <dd>Sets an auxiliary constitutive input callback.</dd>
             <dt id="a8d68dad2ab293e76022ff4a5d3aad8a9">
               <span class="m-doc-wrap-bumper">auto <a href="#a8d68dad2ab293e76022ff4a5d3aad8a9" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
-            <dd>Sets the current polytope and assembles the element tangent matrix.</dd>
+            <dd>Sets the current polytope and assembles the element tangent.</dd>
             <dt id="af65301ad831f65b88eab3086cd8187cb">
               <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
@@ -277,7 +238,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
               <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
-            <dd>Gets the constitutive law.</dd>
+            <dd>Returns the stored constitutive law.</dd>
           </dl>
         </section>
         <section>
@@ -287,12 +248,12 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa85571937211060679825814880585e6" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa85571937211060679825814880585e6" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
               const <a href="#abe1f3d66cd00cb23235f1b594e220209" class="m-doc">TrialType</a>&amp; u,
               const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
             </h3>
-            <p>Constructs the internal virtual work tangent integrator.</p>
+            <p>Constructs the pure-displacement tangent integrator.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -300,19 +261,19 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <tbody>
                 <tr>
                   <td style="width: 1%">law</td>
-                  <td>The constitutive law (stored by value)</td>
+                  <td>The constitutive law</td>
                 </tr>
                 <tr>
                   <td>u</td>
-                  <td>The trial function</td>
+                  <td>The trial displacement function</td>
                 </tr>
                 <tr>
                   <td>v</td>
-                  <td>The test function</td>
+                  <td>The test displacement function</td>
                 </tr>
                 <tr>
                   <td>displacement</td>
-                  <td>Current displacement grid function</td>
+                  <td>The current displacement state</td>
                 </tr>
               </tbody>
             </table>
@@ -322,9 +283,9 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
             </h3>
-            <p>Rebinds the linearization point.</p>
+            <p>Rebinds the displacement linearization point.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -332,13 +293,13 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <tbody>
                 <tr>
                   <td style="width: 1%">gf</td>
-                  <td>Displacement grid function with the same concrete state type</td>
+                  <td>The new displacement state</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this object for chaining</td>
+                  <td>Reference to this object</td>
                 </tr>
               </tfoot>
             </table>
@@ -348,7 +309,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f9c764a5658c99ea5d1e110892bc8de" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f9c764a5658c99ea5d1e110892bc8de" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
             </h3>
             <p>Sets the quadrature order.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -358,26 +319,25 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <tbody>
                 <tr>
                   <td style="width: 1%">order</td>
-                  <td>Polynomial order for exact integration (0 = auto)</td>
+                  <td>The quadrature order, or zero for automatic selection</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this object for chaining</td>
+                  <td>Reference to this object</td>
                 </tr>
               </tfoot>
             </table>
-<p>When set to 0 (the default), the quadrature order is determined automatically from the finite element approximation order as <code>2</code> * fe.getOrder().</p>
           </div></section>
           <section class="m-doc-details" id="a4e81f0ae3148f3e6a75f48fbe344f2c6"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e81f0ae3148f3e6a75f48fbe344f2c6" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e81f0ae3148f3e6a75f48fbe344f2c6" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
             </h3>
-            <p>Sets an input for auxiliary constitutive data.</p>
+            <p>Sets an auxiliary constitutive input callback.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -385,17 +345,16 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <tbody>
                 <tr>
                   <td style="width: 1%">input</td>
-                  <td>A callable with signature void(ConstitutivePoint&amp;)</td>
+                  <td>The callback invoked on each constitutive point</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this object for chaining</td>
+                  <td>Reference to this object</td>
                 </tr>
               </tfoot>
             </table>
-<p>The input is called at each quadrature point after the ConstitutivePoint has been constructed with geometric context and kinematics, allowing injection of fiber directions, activation parameters, region-wise material properties, etc.</p>
           </div></section>
         </section>
       </div>
