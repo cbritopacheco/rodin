@@ -425,6 +425,11 @@ namespace Rodin::Advection
    * - Mass-conservative in variational form
    *
    * @tparam Params Parameter pack for class specialization
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Lagrangian "Lagrangian<TrialFunction<GridFunction<FES, Data>, FES>, TestFunction<FES>, Initial, VectorField, Step>" | Semi-Lagrangian projection update for a trial/test scalar transport formulation. |
+   * | @ref Lagrangian "Lagrangian<...>" | Primary template documenting the supported specialization family for advection schemes. |
    */
   template <class ... Params>
   class Lagrangian;

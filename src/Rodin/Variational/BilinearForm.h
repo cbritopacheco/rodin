@@ -61,7 +61,12 @@ namespace Rodin::Variational
   /**
    * @defgroup BilinearFormSpecializations BilinearForm Template Specializations
    * @brief Template specializations of the BilinearForm class.
-   * @see BilinearForm
+   * @see <a href="_variational_2_bilinear_form_8h.html">BilinearForm</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref BilinearForm "BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>" | Bilinear form assembled into a sparse matrix operator. |
+   * | @ref BilinearForm "BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>>" | Bilinear form assembled into a dense matrix operator. |
    */
 
   /**

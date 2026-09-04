@@ -34,7 +34,7 @@
  * solver.solve();
  * ```
  *
- * @see SimplicialLDLT for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html">SimplicialLDLT</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_SIMPLICIALLDLT_H
 #define RODIN_SOLVER_SIMPLICIALLDLT_H
@@ -63,7 +63,7 @@ namespace Rodin::Solver
   /**
    * @defgroup SimplicialLDLTSpecializations SimplicialLDLT Template Specializations
    * @brief Template specializations of the SimplicialLDLT class.
-   * @see SimplicialLDLT
+   * @see @ref SimplicialLDLT
    */
 
   /**

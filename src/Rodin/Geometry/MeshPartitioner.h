@@ -23,7 +23,8 @@ namespace Rodin::Geometry
    * useful for load balancing, parallel processing, and domain decomposition
    * methods. Each polytope is assigned to exactly one partition.
    *
-   * @see BalancedCompactPartitioner, GreedyPartitioner
+   * @see <a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html">BalancedCompactPartitioner</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html">GreedyPartitioner</a>
    */
   class Partitioner
   {

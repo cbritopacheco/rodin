@@ -101,10 +101,10 @@
  * PetscScalar val = u(pt);
  * ```
  *
- * @see Rodin::Variational::GridFunctionBase,
- *      Rodin::PETSc::Variational::TrialFunction,
- *      Rodin::PETSc::Variational::TestFunction,
- *      Rodin::PETSc::Math::LinearSystem
+ * @see <a href="class_rodin_1_1_variational_1_1_grid_function_base.html">Rodin::Variational::GridFunctionBase</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html">Rodin::PETSc::Variational::TrialFunction</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
+ * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a>
  */
 
 #include <petsc.h>
@@ -168,8 +168,8 @@ namespace Rodin::Variational
    * @tparam FES Finite element space type (e.g. `P1<Real, Mesh<Context::Local>>`
    *             or `P1<Real, Mesh<Context::MPI>>`).
    *
-   * @see Rodin::Variational::GridFunctionBase,
-   *      Rodin::PETSc::Variational::GridFunction (convenience wrapper)
+   * @see <a href="class_rodin_1_1_variational_1_1_grid_function_base.html">Rodin::Variational::GridFunctionBase</a>
+   * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a> convenience wrapper
    */
   template <class FES>
   class GridFunction<FES, ::Vec>
@@ -1541,7 +1541,7 @@ namespace Rodin::PETSc::Variational
    *
    * @tparam FES Finite element space type (deduced by CTAD).
    *
-   * @see Rodin::Variational::GridFunction<FES, ::Vec>
+   * @see <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::Variational::GridFunction<FES, ::Vec></a>
    */
   template <class FES>
   class GridFunction

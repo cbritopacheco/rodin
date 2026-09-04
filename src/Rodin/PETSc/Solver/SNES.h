@@ -16,9 +16,9 @@
  * the Jacobian system is solved by the associated
  * @ref Rodin::Solver::KSP linear solver.
  *
- * @see Rodin::Solver::KSP,
- *      Rodin::Solver::NewtonSolverBase,
- *      Rodin::PETSc::Math::LinearSystem
+ * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+ * @see <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html">Rodin::Solver::NewtonSolverBase</a>
+ * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a>
  */
 
 #include <petscsnes.h>
@@ -64,9 +64,9 @@ namespace Rodin::Solver
    * Supports both programmatic configuration (`setType`, `setTolerances`)
    * and PETSc command-line overrides (`-snes_type`, `-snes_rtol`, …).
    *
-   * @see Rodin::Solver::KSP,
-   *      Rodin::Solver::NewtonSolverBase,
-   *      Rodin::PETSc::Math::LinearSystem
+   * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+   * @see <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html">Rodin::Solver::NewtonSolverBase</a>
+   * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a>
    */
   class SNES
     : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>

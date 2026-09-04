@@ -25,10 +25,10 @@
  * for distributed assembly from the `/Shard/...` HDF5 datasets written by the
  * MPI printer.
  *
- * @see MeshPrinter
- * @see MeshLoader
- * @see Geometry::Mesh<Context::MPI>
- * @see Geometry::Shard
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
+ * @see <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Geometry::Mesh<Context::MPI></a>
+ * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Geometry::Shard</a>
  */
 
 #include "Rodin/IO/HDF5.h"
@@ -52,7 +52,8 @@ namespace Rodin::IO
    * @note Each rank must be given a rank-specific file path (e.g. via
    *       the callable filename overload on Mesh<Context::MPI>::load).
    *
-   * @see MeshLoader<FileFormat::HDF5, Context::Local>
+   * @ingroup MeshLoaderSpecializations
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader<FileFormat::HDF5, Context::Local></a>
    */
   template <>
   class MeshLoader<FileFormat::HDF5, Context::MPI>
@@ -308,8 +309,9 @@ namespace Rodin::IO
    * @note Each rank must be given a rank-specific file path (e.g. via
    *       the callable filename overload on Mesh<Context::MPI>::save).
    *
-   * @see MeshPrinter<FileFormat::HDF5, Context::Local>
-   * @see Geometry::Shard
+   * @ingroup PrinterSpecializations
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter<FileFormat::HDF5, Context::Local></a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Geometry::Shard</a>
    */
   template <>
   class MeshPrinter<FileFormat::HDF5, Context::MPI>

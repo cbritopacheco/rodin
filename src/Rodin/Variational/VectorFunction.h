@@ -46,7 +46,13 @@ namespace Rodin::Variational
   /**
    * @defgroup VectorFunctionSpecializations VectorFunction Template Specializations
    * @brief Template specializations of the VectorFunction class.
-   * @see VectorFunction
+   * @see @ref VectorFunction
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref VectorFunction "VectorFunction<Math::Vector<Scalar>>" | Constant vector-valued function backed by a dense vector. |
+   * | @ref VectorFunction "VectorFunction<V, Values...>" | Vector-valued function assembled from component values. |
+   * | @ref VectorFunction "VectorFunction<F>" | Callable vector-valued function evaluated from a point. |
    */
 
   /**
@@ -72,7 +78,9 @@ namespace Rodin::Variational
    * - Index notation: `f(i)` for the i-th component
    * - Coordinate accessors: `f.x()`, `f.y()`, `f.z()` for first three components
    *
-   * @see FunctionBase, RealFunction, MatrixFunction
+   * @see <a href="class_rodin_1_1_variational_1_1_function_base.html">FunctionBase</a>
+   * @see <a href="_real_function_8h.html">RealFunction</a>
+   * @see <a href="_matrix_function_8h.html">MatrixFunction</a>
    */
   template <class Scalar, class Derived>
   class VectorFunctionBase : public FunctionBase<VectorFunctionBase<Scalar, Derived>>
@@ -147,7 +155,7 @@ namespace Rodin::Variational
        * @param[in] i Component index (0-based)
        * @returns Component function object
        * @pre i < getDimension()
-       * @see Component
+       * @see <a href="_component_8h.html">Component</a>
        */
       constexpr
       auto operator()(size_t i) const

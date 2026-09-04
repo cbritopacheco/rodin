@@ -42,7 +42,7 @@ namespace Rodin::Solid
    * Parameterized by material constants @f$ c_1, c_2 @f$ and bulk modulus
    * @f$ \kappa @f$.
    *
-   * @see HyperElasticLaw
+   * @see <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html">HyperElasticLaw</a>
    */
   class MooneyRivlin final : public HyperElasticLaw<MooneyRivlin>
   {

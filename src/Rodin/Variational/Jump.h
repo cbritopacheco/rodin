@@ -32,7 +32,12 @@ namespace Rodin::Variational
   /**
    * @defgroup JumpSpecializations Jump Template Specializations
    * @brief Template specializations of the Jump class.
-   * @see Jump
+   * @see @ref Jump
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Jump "Jump<FunctionBase<FunctionDerived>>" | Jump of a traceable function across an interior interface. |
+   * | @ref Jump "Jump<ShapeFunctionBase<NestedDerived, FES, Space>>" | Jump of a test or trial shape function across an interior interface. |
    */
 
   /**
@@ -65,7 +70,7 @@ namespace Rodin::Variational
    *
    * @tparam FunctionDerived Type of the function being jumped
    *
-   * @see Average
+   * @see @ref Average
    */
   template <class FunctionDerived>
   class Jump<FunctionBase<FunctionDerived>> final

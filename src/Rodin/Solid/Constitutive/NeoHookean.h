@@ -48,7 +48,7 @@ namespace Rodin::Solid
   /**
    * @brief Compressible Neo-Hookean hyperelastic law.
    *
-   * @see HyperElasticLaw
+   * @see <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html">HyperElasticLaw</a>
    */
   class NeoHookean final : public HyperElasticLaw<NeoHookean>
   {

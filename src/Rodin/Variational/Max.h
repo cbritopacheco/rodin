@@ -22,7 +22,12 @@ namespace Rodin::Variational
   /**
    * @defgroup MaxSpecializations Max Template Specializations
    * @brief Template specializations of the Max class.
-   * @see Max
+   * @see @ref Max
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Max "Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>" | Pointwise maximum of two function expressions. |
+   * | @ref Max "Max<FunctionBase<NestedDerived>, Real>" | Pointwise maximum of a function expression and a scalar constant. |
    */
 
   /**

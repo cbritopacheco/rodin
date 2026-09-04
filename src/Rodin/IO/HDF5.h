@@ -81,8 +81,11 @@
  * GridFunctionLoader/GridFunctionPrinter API patterns established by the
  * MFEM and MEDIT format specializations.
  *
- * @see IO::MeshLoader, IO::MeshPrinter, IO::GridFunctionLoader,
- *      IO::GridFunctionPrinter, IO::XDMF
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">IO::MeshLoader</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">IO::MeshPrinter</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">IO::GridFunctionLoader</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">IO::GridFunctionPrinter</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">IO::XDMF</a>
  */
 #ifndef RODIN_IO_HDF5_H
 #define RODIN_IO_HDF5_H
@@ -1621,8 +1624,10 @@ namespace Rodin::IO
      * @param[in] mesh      Local mesh to export for visualization.
      * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      *
-     * @see writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute,
-     *      MeshPrinter<FileFormat::HDF5, Context::Local>
+     * @see writeXDMFTopology
+     * @see writeXDMFVertices
+     * @see writeXDMFRegionAttribute
+     * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter<FileFormat::HDF5, Context::Local></a>
      */
     inline void writeXDMFMesh(const boost::filesystem::path& filename,
       const Geometry::MeshBase& mesh, bool allowUniformCurvedTopology = true)
@@ -2125,7 +2130,8 @@ namespace Rodin::IO
    * loader.load("output.h5");
    * ```
    *
-   * @see MeshPrinter<FileFormat::HDF5, Context::Local>
+   * @ingroup MeshLoaderSpecializations
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter<FileFormat::HDF5, Context::Local></a>
    */
   template <>
   class MeshLoader<FileFormat::HDF5, Context::Local>
@@ -2413,7 +2419,9 @@ namespace Rodin::IO
    *   .print("output.h5");
    * ```
    *
-   * @see MeshLoader<FileFormat::HDF5, Context::Local>, IO::XDMF
+   * @ingroup PrinterSpecializations
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader<FileFormat::HDF5, Context::Local></a>
+   * @see <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">IO::XDMF</a>
    */
   template <>
   class MeshPrinter<FileFormat::HDF5, Context::Local>
@@ -2756,7 +2764,7 @@ namespace Rodin::IO
    * loader.load("field.h5");
    * ```
    *
-   * @see GridFunctionPrinter<FileFormat::HDF5, FES, Math::Vector<Scalar>>
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter<FileFormat::HDF5, FES, Math::Vector<Scalar>></a>
    */
   template <class FES, class Scalar>
   class GridFunctionLoader<FileFormat::HDF5, FES, Math::Vector<Scalar>>
@@ -2873,7 +2881,7 @@ namespace Rodin::IO
    *   .print("field.h5");
    * ```
    *
-   * @see GridFunctionLoader<FileFormat::HDF5, FES, Math::Vector<Scalar>>
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader<FileFormat::HDF5, FES, Math::Vector<Scalar>></a>
    */
   template <class FES, class Scalar>
   class GridFunctionPrinter<FileFormat::HDF5, FES, Math::Vector<Scalar>> final

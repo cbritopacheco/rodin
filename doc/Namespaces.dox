@@ -1570,7 +1570,8 @@
   @note Requires PETSc to be available and Rodin configured with
   `RODIN_USE_PETSC=ON`.
 
-  @see Rodin::Solver::KSP, Rodin::Solver::SNES
+  @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+  @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::Solver::SNES</a>
  */
 
 /**

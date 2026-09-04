@@ -24,7 +24,7 @@
  *
  * @note This module requires PETSc to be available and properly configured.
  *
- * @see Rodin::PETSc
+ * @see <a href="namespace_rodin_1_1_p_e_t_sc.html">Rodin::PETSc</a>
  */
 
 #include "PETSc/ForwardDecls.h"

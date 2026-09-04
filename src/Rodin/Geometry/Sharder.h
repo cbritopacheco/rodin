@@ -217,7 +217,13 @@ namespace Rodin::Geometry
    *
    * @tparam Context The context type (e.g., Context::Local, Context::MPI)
    *
-   * @see Shard, MeshShard
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Sharder "Sharder<Context::Local>" | Local mesh sharder that builds shard metadata without MPI communication. |
+   * | @ref Sharder "Sharder<Context::MPI>" | Distributed mesh sharder that prepares shards for MPI mesh ownership and halo exchange. |
+   *
+   * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh<Context::MPI></a>
    */
   template <class Context>
   class Sharder;

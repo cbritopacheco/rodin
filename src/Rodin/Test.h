@@ -15,7 +15,7 @@
  * implementations, including convergence tests, manufactured solutions, and
  * error analysis tools.
  *
- * @see Rodin::Test
+ * @see <a href="namespace_rodin_1_1_test.html">Rodin::Test</a>
  */
 
 #endif

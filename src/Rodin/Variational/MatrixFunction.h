@@ -40,7 +40,7 @@ namespace Rodin::Variational
   /**
    * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
    * @brief Template specializations of the MatrixFunction class.
-   * @see MatrixFunction
+   * @see <a href="_matrix_function_8h.html">MatrixFunction</a>
    */
 
   /**
@@ -66,7 +66,9 @@ namespace Rodin::Variational
    * - `A(i, j)` for the entry at row i, column j
    * - `A(i)` for the i-th row (returning a vector function)
    *
-   * @see FunctionBase, VectorFunction, Transpose
+   * @see <a href="class_rodin_1_1_variational_1_1_function_base.html">FunctionBase</a>
+   * @see <a href="_vector_function_8h.html">VectorFunction</a>
+   * @see <a href="_transpose_8h.html">Transpose</a>
    */
   template <class Scalar, class Derived>
   class MatrixFunctionBase : public FunctionBase<MatrixFunctionBase<Scalar, Derived>>

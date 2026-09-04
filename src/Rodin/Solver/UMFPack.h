@@ -40,7 +40,7 @@
  * @note This solver requires UMFPACK from SuiteSparse to be installed
  * and RODIN_USE_UMFPACK to be defined at compile time.
  *
- * @see UMFPack for the solver implementation
+ * @see <a href="_u_m_f_pack_8h.html">UMFPack</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_UMFPACK_H
 #define RODIN_SOLVER_UMFPACK_H
@@ -72,7 +72,7 @@ namespace Rodin::Solver
   /**
    * @defgroup UMFPackSpecializations UMFPack Template Specializations
    * @brief Template specializations of the UMFPack class.
-   * @see UMFPack
+   * @see @ref UMFPack
    */
 
   /**
@@ -210,5 +210,3 @@ namespace Rodin::Solver
 
 #endif // #ifdef RODIN_USE_UMFPACK
 #endif
-
-

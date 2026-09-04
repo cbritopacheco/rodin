@@ -33,7 +33,14 @@ namespace Rodin::Math
    * @tparam Operator Type of the linear operator (e.g., SparseMatrix, Matrix)
    * @tparam Vector Type of the vectors (solution and right-hand side)
    *
-   * @see LinearSystem
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref LinearSystem "LinearSystem<SparseMatrix, Vector>" | Local sparse linear system used by finite element assembly and iterative/direct sparse solvers. |
+   * | @ref LinearSystem "LinearSystem<Matrix, Vector>" | Local dense linear system used by dense solvers and small algebraic systems. |
+   * | @ref LinearSystem "LinearSystem<PETSc::Math::Matrix, PETSc::Math::Vector>" | PETSc-backed distributed linear system assembled and solved through PETSc objects. |
+   * | @ref LinearSystem "LinearSystem<Operator, Vector>" | Generic linear system interface for compatible operator/vector pairs. |
+   *
+   * @see <a href="class_rodin_1_1_math_1_1_linear_system.html">LinearSystem</a>
    */
   template <class Operator, class Vector>
   class LinearSystem;

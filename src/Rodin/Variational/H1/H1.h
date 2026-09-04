@@ -69,6 +69,13 @@ namespace Rodin::Variational
    * @defgroup H1Specializations H1 Template Specializations
    * @brief Template specializations of the H1 class.
    * @see H1
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref H1 "H1<K, Scalar, Mesh<Context::Local>>" | Scalar-valued local-mesh Lagrange space of degree @f$K@f$. |
+   * | @ref H1 "H1<K, SpatialVector<Scalar>, Mesh<Context::Local>>" | Vector-valued local-mesh Lagrange space of degree @f$K@f$. |
+   * | @ref H1 "H1<K, Scalar, Mesh<Context::MPI>>" | Scalar-valued distributed-mesh Lagrange space of degree @f$K@f$. |
+   * | @ref H1 "H1<K, SpatialVector<Scalar>, Mesh<Context::MPI>>" | Vector-valued distributed-mesh Lagrange space of degree @f$K@f$. |
    */
 
   template <size_t K, class Range, class Mesh = Geometry::Mesh<Context::Local>>

@@ -44,7 +44,8 @@
  * u.save("solution.vtu");
  * ```
  *
- * @see TrialFunction, FiniteElementSpace
+ * @see <a href="_variational_2_trial_function_8h.html">TrialFunction</a>
+ * @see <a href="_variational_2_finite_element_space_8h.html">FiniteElementSpace</a>
  */
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
@@ -103,7 +104,12 @@ namespace Rodin::Variational
   /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.
-   * @see GridFunction
+   * @see <a href="_variational_2_grid_function_8h.html">GridFunction</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GridFunction "GridFunction<FES, Math::Vector<Scalar>>" | Grid function backed by a dense local vector. |
+   * | @ref GridFunction "GridFunction<FES, Vec>" | Grid function backed by a PETSc vector for distributed assembly. |
    */
 
   /**

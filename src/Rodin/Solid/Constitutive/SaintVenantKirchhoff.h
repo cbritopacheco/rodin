@@ -45,7 +45,7 @@ namespace Rodin::Solid
    * This is the simplest hyperelastic law, extending linear elasticity
    * to large deformations through the Green-Lagrange strain tensor.
    *
-   * @see HyperElasticLaw
+   * @see <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html">HyperElasticLaw</a>
    */
   class SaintVenantKirchhoff final : public HyperElasticLaw<SaintVenantKirchhoff>
   {

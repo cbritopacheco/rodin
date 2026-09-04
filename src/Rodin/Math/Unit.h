@@ -56,7 +56,7 @@ namespace Rodin::Math
    * @tparam Derived The derived class type (CRTP pattern)
    * @tparam T The underlying value type (typically Real)
    *
-   * @see Rad
+   * @see <a href="class_rodin_1_1_math_1_1_rad.html">Rad</a>
    */
   template <class Derived, class T>
   class Unit
@@ -303,4 +303,3 @@ namespace Rodin::Math
 }
 
 #endif
-

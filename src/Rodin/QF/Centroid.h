@@ -59,8 +59,8 @@ namespace Rodin::QF
    * This is the simplest possible quadrature rule for each geometry type
    * and is computationally efficient when low accuracy is acceptable.
    *
-   * @see QuadratureFormulaBase
-   * @see GaussLegendre
+   * @see <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html">QuadratureFormulaBase</a>
+   * @see <a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html">GaussLegendre</a>
    */
   class Centroid final : public QuadratureFormulaBase
   {

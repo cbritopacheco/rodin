@@ -37,7 +37,7 @@ namespace Rodin::Geometry::Euclidean
    * @f]
    * are contained in the rectangle.
    *
-   * @see Point2D
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
    */
   template <class T>
   class Rectangle

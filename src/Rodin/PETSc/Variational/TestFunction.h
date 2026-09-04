@@ -16,9 +16,9 @@
  * PETSc namespace and triggers PETSc-specific template argument deduction
  * for linear forms, bilinear forms, and problems.
  *
- * @see Rodin::PETSc::Variational::TrialFunction,
- *      Rodin::PETSc::Variational::LinearForm,
- *      Rodin::PETSc::Variational::BilinearForm
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html">Rodin::PETSc::Variational::TrialFunction</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::PETSc::Variational::LinearForm</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::PETSc::Variational::BilinearForm</a>
  */
 
 #include <petsc.h>
@@ -38,7 +38,7 @@ namespace Rodin::PETSc::Variational
    *
    * @tparam FES Finite element space type (e.g. `P1<Real, Mesh<Context::Local>>`).
    *
-   * @see Rodin::Variational::TestFunction
+   * @see <a href="_variational_2_test_function_8h.html">Rodin::Variational::TestFunction</a>
    */
   template <class FES>
   class TestFunction : public Rodin::Variational::TestFunction<FES>

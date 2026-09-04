@@ -16,8 +16,8 @@
  * These operations are useful for compile-time metaprogramming and type-safe
  * container manipulation.
  *
- * @see Rodin::Tuple
- * @see Rodin::Pair
+ * @see <a href="class_rodin_1_1_tuple.html">Rodin::Tuple</a>
+ * @see <a href="class_rodin_1_1_pair.html">Rodin::Pair</a>
  */
 
 #include <tuple>

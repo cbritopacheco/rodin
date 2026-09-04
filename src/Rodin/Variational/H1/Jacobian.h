@@ -23,7 +23,10 @@
  *
  * For H1<K> elements, the Jacobian is polynomial of degree K-1 on each element.
  *
- * @see Jacobian, H1, Grad, Div
+ * @see <a href="_jacobian_8h.html">Jacobian</a>
+ * @see <a href="_variational_2_h1_8h.html">H1</a>
+ * @see <a href="_grad_8h.html">Grad</a>
+ * @see <a href="_div_8h.html">Div</a>
  */
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H

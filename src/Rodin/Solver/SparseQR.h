@@ -35,7 +35,7 @@
  * solver.solve();
  * ```
  *
- * @see SparseQR for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html">SparseQR</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_SPARSEQR_H
 #define RODIN_SOLVER_SPARSEQR_H
@@ -65,7 +65,7 @@ namespace Rodin::Solver
   /**
    * @defgroup SparseQRSpecializations SparseQR Template Specializations
    * @brief Template specializations of the SparseQR class.
-   * @see SparseQR
+   * @see @ref SparseQR
    */
 
   /**

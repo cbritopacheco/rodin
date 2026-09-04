@@ -42,8 +42,9 @@
  * xdmf.close();  // writes the XDMF XML; also called by destructor
  * ```
  *
- * @see IO::HDF5, IO::MeshPrinter<FileFormat::HDF5, Context::Local>,
- *      IO::GridFunctionPrinter<FileFormat::HDF5, FES, Data>
+ * @see <a href="_i_o_2_h_d_f5_8h.html">IO::HDF5</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">IO::MeshPrinter<FileFormat::HDF5, Context::Local></a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">IO::GridFunctionPrinter</a>
  * @see <a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">
  *      XDMF Model and Format Specification</a>
  */

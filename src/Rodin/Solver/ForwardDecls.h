@@ -60,6 +60,12 @@ namespace Rodin::Solver
    * The CG method is an iterative solver particularly efficient for large
    * sparse symmetric positive definite systems.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref CG "CG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Iterative conjugate gradient solver for sparse SPD systems. |
+   * | @ref CG "CG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Iterative conjugate gradient solver for dense SPD systems. |
+   * | @ref CG "CG<PETSc::Math::LinearSystem>" | PETSc KSP-backed conjugate gradient solver. |
+   *
    * @see CGSpecializations for available template specializations.
    */
   template <class LinearSystem>
@@ -71,6 +77,10 @@ namespace Rodin::Solver
    *
    * Performs Cholesky decomposition @f$ A = LL^T @f$ for symmetric positive
    * definite sparse matrices.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref SimplicialLLT "SimplicialLLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse LLT factorization for SPD sparse systems. |
    *
    * @see SimplicialLLTSpecializations for available template specializations.
    */
@@ -84,6 +94,10 @@ namespace Rodin::Solver
    * Performs Cholesky decomposition @f$ A = LDL^T @f$ without square root
    * for symmetric positive definite sparse matrices.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref SimplicialLDLT "SimplicialLDLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse LDLT factorization for SPD sparse systems. |
+   *
    * @see SimplicialLDLTSpecializations for available template specializations.
    */
   template <class LinearSystem>
@@ -94,6 +108,10 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * Performs robust Cholesky decomposition with pivoting for dense matrices.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref LDLT "LDLT<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Eigen dense LDLT factorization with pivoting. |
    *
    * @see LDLTSpecializations for available template specializations.
    */
@@ -107,6 +125,10 @@ namespace Rodin::Solver
    *
    * Performs LU decomposition with partial pivoting for dense matrices.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref PartialPivLU "PartialPivLU<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Eigen dense LU factorization with partial pivoting. |
+   *
    * @see PartialPivLUSpecializations for available template specializations.
    */
   template <class LinearSystem>
@@ -117,6 +139,10 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * Performs QR decomposition using Householder reflections for dense matrices.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref HouseholderQR "HouseholderQR<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Eigen dense Householder QR factorization. |
    *
    * @see HouseholderQRSpecializations for available template specializations.
    */
@@ -129,6 +155,10 @@ namespace Rodin::Solver
    *
    * Performs LU decomposition for general (non-symmetric) sparse matrices.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref SparseLU "SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse LU factorization for general sparse systems. |
+   *
    * @see SparseLUSpecializations for available template specializations.
    */
   template <class LinearSystem>
@@ -139,6 +169,10 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * Performs QR decomposition with numerical column pivoting for sparse matrices.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref SparseQR "SparseQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Eigen sparse QR factorization with column pivoting. |
    *
    * @see SparseQRSpecializations for available template specializations.
    */
@@ -151,6 +185,11 @@ namespace Rodin::Solver
    *
    * Iterative solver for least-squares problems @f$ \min_x \|Ax - b\|^2 @f$.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref LeastSquaresCG "LeastSquaresCG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Least-squares conjugate gradient solver for sparse systems. |
+   * | @ref LeastSquaresCG "LeastSquaresCG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Least-squares conjugate gradient solver for dense systems. |
+   *
    * @see LeastSquaresCGSpecializations for available template specializations.
    */
   template <class LinearSystem>
@@ -162,6 +201,10 @@ namespace Rodin::Solver
    *
    * The BiCGSTAB method is an iterative solver for non-symmetric linear systems.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref BiCGSTAB "BiCGSTAB<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized bi-conjugate gradient solver for sparse non-symmetric systems. |
+   *
    * @see BiCGSTABSpecializations for available template specializations.
    */
   template <class LinearSystem>
@@ -172,6 +215,12 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * GMRES is an iterative method for solving non-symmetric linear systems.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GMRES "GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Restarted GMRES solver for sparse non-symmetric systems. |
+   * | @ref GMRES "GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Restarted GMRES solver for dense non-symmetric systems. |
+   * | @ref GMRES "GMRES<PETSc::Math::LinearSystem>" | PETSc KSP-backed GMRES solver. |
    */
   template <class LinearSystem>
   class GMRES;
@@ -181,13 +230,36 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * DGMRES is a variant of GMRES with deflation techniques.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref DGMRES "DGMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Deflated GMRES solver for sparse non-symmetric systems. |
+   * | @ref DGMRES "DGMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Deflated GMRES solver for dense non-symmetric systems. |
    */
   template <class LinearSystem>
   class DGMRES;
 
+  /**
+   * @brief Induced dimension reduction iterative solver.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref IDRS "IDRS<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | IDR(s) solver for sparse non-symmetric systems. |
+   * | @ref IDRS "IDRS<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | IDR(s) solver for dense non-symmetric systems. |
+   */
   template <class LinearSystem>
   class IDRS;
 
+  /**
+   * @brief Minimum residual iterative solver.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref MINRES "MINRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | MINRES solver for sparse symmetric indefinite systems. |
+   * | @ref MINRES "MINRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | MINRES solver for dense symmetric indefinite systems. |
+   */
   template <class LinearSystem>
   class MINRES;
 
@@ -196,6 +268,11 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * IDR(s)STABL is an induced dimension reduction method with stabilization.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref IDRSTABL "IDRSTABL<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized IDR(s) solver for sparse non-symmetric systems. |
+   * | @ref IDRSTABL "IDRSTABL<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized IDR(s) solver for dense non-symmetric systems. |
    */
   template <class LinearSystem>
   class IDRSTABL;
@@ -206,6 +283,10 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * High-performance sparse QR factorization from the SuiteSparse library.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref SPQR "SPQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | SuiteSparseQR factorization for sparse systems. |
    *
    * @see SPQRSpecializations for available template specializations.
    */
@@ -219,6 +300,10 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    *
    * High-performance sparse direct solver from the SuiteSparse library.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref UMFPack "UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | UMFPACK multifrontal sparse LU factorization. |
    *
    * @see UMFPackSpecializations for available template specializations.
    */

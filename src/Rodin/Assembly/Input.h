@@ -538,6 +538,17 @@ namespace Rodin::Assembly
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
   };
 
+  /**
+   * @brief Input data for complete problem assembly.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref ProblemAssemblyInput "ProblemAssemblyInput<ProblemBody, TrialFunction, TestFunction>" | Assembly input for a single trial/test field problem. |
+   * | @ref ProblemAssemblyInput "ProblemAssemblyInput<ProblemBody, U1, U2, U3, Us...>" | Assembly input for mixed multi-field problems with multiple trial and test functions. |
+   *
+   * @tparam Ts Problem body and trial/test function types selected by the
+   *         concrete specialization.
+   */
   template <class ... Ts>
   class ProblemAssemblyInput;
 

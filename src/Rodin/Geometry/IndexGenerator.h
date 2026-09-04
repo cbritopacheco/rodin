@@ -45,7 +45,9 @@ namespace Rodin::Geometry
    * They support standard iterator operations (increment, dereference, end
    * check) and can be copied or moved.
    *
-   * @see EmptyIndexGenerator, BoundedIndexGenerator, IteratorIndexGenerator
+   * @see <a href="class_rodin_1_1_geometry_1_1_empty_index_generator.html">EmptyIndexGenerator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html">BoundedIndexGenerator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_iterator_index_generator.html">IteratorIndexGenerator</a>
    */
   class IndexGeneratorBase : public Copyable, public Moveable
   {

@@ -61,7 +61,17 @@ namespace Rodin::Variational
   /**
    * @defgroup GradSpecializations Grad Template Specializations
    * @brief Template specializations of the Grad class.
-   * @see Grad
+   * @see @ref Grad
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GradBase "GradBase<GridFunction<FES, Data>, Derived>" | Generic gradient base for scalar grid functions. |
+   * | @ref Grad "Grad<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Gradient of an H1 grid function. |
+   * | @ref Grad "Grad<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Gradient of an H1 shape-function expression. |
+   * | @ref Grad "Grad<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Gradient of a P1 grid function. |
+   * | @ref Grad "Grad<P1<Range, Mesh>, ShapeFunction<NestedDerived, P1<Range, Mesh>, Space>>" | Gradient of a P1 shape-function expression. |
+   * | @ref Grad "Grad<P0<Range, Mesh>, GridFunction<P0<Range, Mesh>, Data>>" | Gradient of a P0 grid function. |
+   * | @ref Grad "Grad<P0<Range, Mesh>, ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>" | Gradient of a P0 shape-function expression. |
    */
 
   /**

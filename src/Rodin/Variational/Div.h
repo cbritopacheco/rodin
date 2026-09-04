@@ -42,7 +42,17 @@ namespace Rodin::Variational
   /**
     * @defgroup DivSpecializations Div Template Specializations
     * @brief Template specializations of the Div class.
-    * @see Div
+    * @see @ref Div
+    *
+    * | Specialization | Description |
+    * |----------------|-------------|
+    * | @ref DivBase "DivBase<GridFunction<FES, Data>, Derived>" | Generic divergence base for vector-valued grid functions. |
+    * | @ref Div "Div<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Divergence of a discontinuous P0g grid function. |
+    * | @ref Div "Div<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Divergence of a P0g shape-function expression. |
+    * | @ref Div "Div<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Divergence of an H1 grid function. |
+    * | @ref Div "Div<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Divergence of an H1 shape-function expression. |
+    * | @ref Div "Div<P1<Scalar, Mesh>, GridFunction<P1<Scalar, Mesh>, Data>>" | Divergence of a P1 grid function. |
+    * | @ref Div "Div<P1<Scalar, Mesh>, ShapeFunction<NestedDerived, P1<Scalar, Mesh>, Space>>" | Divergence of a P1 shape-function expression. |
     */
 
   /**

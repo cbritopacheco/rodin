@@ -52,6 +52,11 @@ namespace Rodin::Variational
    * @brief Template specializations of the BoundaryIntegral class.
    *
    * @see BoundaryIntegral
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref BoundaryIntegral "BoundaryIntegral<Dot<TrialShapeFunction, TestShapeFunction>>" | Boundary integral of a trial/test dot product. |
+   * | @ref BoundaryIntegral "BoundaryIntegral<ShapeFunctionBase<Dot<FunctionBase, TestShapeFunction>>>" | Boundary integral of a test operator. |
    */
 
   /**

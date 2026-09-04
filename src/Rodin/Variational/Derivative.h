@@ -65,7 +65,12 @@ namespace Rodin::FormLanguage
 /**
  * @defgroup DerivativeSpecializations Derivative Template Specializations
  * @brief Template specializations of the Derivative class.
- * @see Derivative
+ * @see @ref Derivative
+ *
+ * | Specialization | Description |
+ * |----------------|-------------|
+ * | @ref Derivative "Derivative<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Directional derivative of an H1 shape function. |
+ * | @ref Derivative "Derivative<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Directional derivative of a P1 grid function. |
  */
 
 namespace Rodin::Variational

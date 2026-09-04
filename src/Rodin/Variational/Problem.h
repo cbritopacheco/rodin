@@ -93,6 +93,12 @@ namespace Rodin::Variational
    * @defgroup ProblemSpecializations Problem Template Specializations
    * @brief Template specializations of the Problem class.
    * @see Problem
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Problem "Problem<LinearSystem, U, V>" | Linear variational problem with one trial and one test function. |
+   * | @ref Problem "Problem<LinearSystem, U1, U2, U3, Us...>" | Mixed linear variational problem with three or more functions. |
+   * | @ref Problem "Problem<PETSc::LinearSystem, ...>" | PETSc-backed variational problem for distributed linear systems. |
    */
 
   /**

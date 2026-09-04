@@ -37,7 +37,7 @@ namespace Rodin::Geometry
    * polytope of dimension @f$ d @f$ the indices of all incident polytopes
    * of dimension @f$ d' @f$.
    *
-   * @see Connectivity
+   * @see <a href="class_rodin_1_1_geometry_1_1_connectivity.html">Connectivity</a>
    */
   using Incidence = std::vector<std::vector<Index>>;
 }

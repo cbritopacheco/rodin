@@ -177,7 +177,9 @@ namespace Rodin::Geometry
    * @f]
    * where each element @f$ K @f$ is a polytope (simplex or hypercube).
    *
-   * @see Mesh, Polytope, Connectivity
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_connectivity.html">Connectivity</a>
    */
 
   /**
@@ -278,7 +280,13 @@ namespace Rodin::Geometry
    * @defgroup MeshTypes Mesh Types and Template Specializations
    * @brief Different types of mesh and template specializations of the Mesh
    * class.
-   * @see Mesh
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | [Mesh<Context::Local>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html) | Sequential mesh storing the full incidence complex and geometry in a single process. |
+   * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local shard, global/local index maps, and MPI context for parallel assembly. |
+   *
+   * @see @ref Mesh
    */
 
   /**
@@ -296,15 +304,17 @@ namespace Rodin::Geometry
    * # Inheritance Hierarchy
    *
    * All concrete mesh implementations derive from this base class:
-   * - Mesh<Context::Local>: Sequential (non-distributed) meshes
-   * - SubMesh<Context::Local>: Submeshes representing subregions
-   * - Shard: Distributed mesh shards for parallel computing
+   * - <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh<Context::Local></a>: Sequential (non-distributed) meshes
+   * - <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh<Context::Local></a>: Submeshes representing subregions
+   * - <a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>: Distributed mesh shards for parallel computing
    *
    * # Thread Safety
    * MeshBase and derived classes are not thread-safe during construction.
    * Once finalized, read-only operations are thread-safe.
    *
-   * @see Mesh, SubMesh, Shard
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html">SubMesh</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>
    */
   class MeshBase
   {
@@ -837,6 +847,9 @@ namespace Rodin::Geometry
    * @ingroup MeshTypes
    * @brief Represents the subdivision of some domain into faces of (possibly)
    * different geometries.
+   *
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
+   * @see <a href="_geometry_2_mesh_8h.html">Mesh.h</a>
    */
   template <>
   class Mesh<Context::Local> : public MeshBase

@@ -21,7 +21,9 @@
  * For H1<K> elements, partial derivatives are polynomial of degree K-1 on
  * each element.
  *
- * @see Derivative, Grad, H1
+ * @see <a href="_derivative_8h.html">Derivative</a>
+ * @see <a href="_grad_8h.html">Grad</a>
+ * @see <a href="_variational_2_h1_8h.html">H1</a>
  */
 
 #include "Rodin/Geometry/Mesh.h"

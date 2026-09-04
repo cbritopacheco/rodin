@@ -56,7 +56,12 @@ namespace Rodin::Solver
   /**
    * @defgroup IDRSTABLSpecializations IDRSTABL Template Specializations
    * @brief Template specializations of the IDRSTABL class.
-   * @see IDRSTABL
+   * @see @ref IDRSTABL
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref IDRSTABL "IDRSTABL<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Stabilized IDR(s) solver for sparse systems. |
+   * | @ref IDRSTABL "IDRSTABL<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Stabilized IDR(s) solver for dense systems. |
    */
 
   /**

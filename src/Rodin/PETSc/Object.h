@@ -14,7 +14,8 @@
  * Provides a common interface for accessing the underlying PETSc handle
  * and querying the associated MPI communicator.
  *
- * @see Rodin::Solver::KSP, Rodin::Solver::SNES
+ * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+ * @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::Solver::SNES</a>
  */
 
 #include <cassert>

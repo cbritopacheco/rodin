@@ -34,7 +34,7 @@
  * - Eigen's PartialPivLU assumes the matrix is square and invertible.
  * - If rank deficiency is possible and must be handled robustly, FullPivLU is safer.
  *
- * @see Eigen::PartialPivLU
+ * @see <a href="https://eigen.tuxfamily.org/dox/classEigen_1_1PartialPivLU.html">Eigen::PartialPivLU</a>
  */
 #ifndef RODIN_SOLVER_PARTIALPIVLU_H
 #define RODIN_SOLVER_PARTIALPIVLU_H

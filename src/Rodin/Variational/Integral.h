@@ -65,6 +65,12 @@ namespace Rodin::Variational
    * @brief Template specializations of the Integral class.
    *
    * @see Integral
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Integral "Integral<Dot<TrialShapeFunction, TestShapeFunction>>" | Integral of a trial/test dot product. |
+   * | @ref Integral "Integral<ShapeFunctionBase<Dot<FunctionBase, TestShapeFunction>>>" | Integral of a test operator. |
+   * | @ref Integral "Integral<GridFunction<FES, Data>>" | Integral of a discrete grid function. |
    */
 
   /**

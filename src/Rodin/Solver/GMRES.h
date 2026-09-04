@@ -39,7 +39,7 @@
  *   std::cout << "Converged!\n";
  * ```
  *
- * @see GMRES for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_GMRES_H
 #define RODIN_SOLVER_GMRES_H
@@ -72,7 +72,13 @@ namespace Rodin::Solver
   /**
    * @defgroup GMRESSpecializations GMRES Template Specializations
    * @brief Template specializations of the GMRES class.
-   * @see GMRES
+   * @see @ref GMRES
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GMRES "GMRES<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Iterative GMRES solver for sparse systems. |
+   * | @ref GMRES "GMRES<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Iterative GMRES solver for dense systems. |
+   * | @ref GMRES "GMRES<PETSc::LinearSystem>" | PETSc-backed GMRES solver for distributed systems. |
    */
 
   /**

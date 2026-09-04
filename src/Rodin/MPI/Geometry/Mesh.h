@@ -40,10 +40,14 @@ namespace Rodin::Geometry
   using MPIMesh = Mesh<Context::MPI>;
 
   /**
+   * @ingroup MeshTypes
    * @brief Distributed mesh specialization for MPI contexts.
    *
    * Stores the rank-local shard of a partitioned mesh together with the MPI
    * context and global/local index mappings needed for distributed assembly.
+   *
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
+   * @see <a href="_m_p_i_2_geometry_2_mesh_8h.html">Mesh.h</a>
    */
   template <>
   class Mesh<Context::MPI> : public MeshBase

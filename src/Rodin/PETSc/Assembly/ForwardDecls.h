@@ -22,9 +22,9 @@ namespace Rodin::PETSc::Assembly
    * PETSc vectors (@c Vec) and matrices (@c Mat) from Rodin variational
    * forms.
    *
-   * @see Rodin::Assembly::Sequential, Rodin::Assembly::MPI
+   * @see <a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly::Sequential</a>
+   * @see <a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly::MPI</a>
    */
 }
 
 #endif
-

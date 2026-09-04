@@ -26,7 +26,7 @@ namespace Rodin::FormLanguage
   /**
    * @brief Container for polymorphic form language objects.
    * @tparam T Type of elements stored in the list
-   * @see List
+   * @see <a href="class_rodin_1_1_form_language_1_1_list.html">List</a>
    */
   template <class T>
   class List;
@@ -34,7 +34,7 @@ namespace Rodin::FormLanguage
   /**
    * @brief Type traits for form language objects.
    * @tparam Args Template parameters for trait specializations
-   * @see Traits
+   * @see <a href="struct_rodin_1_1_form_language_1_1_traits.html">Traits</a>
    */
   template <class ... Args>
   struct Traits;

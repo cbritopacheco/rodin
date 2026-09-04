@@ -20,7 +20,7 @@
  * - **Unsafe**: Markers for non-thread-safe operations
  * - **Mutable**: Thread-safe mutable state wrappers
  *
- * @see Rodin::Threads
+ * @see <a href="namespace_rodin_1_1_threads.html">Rodin::Threads</a>
  */
 
 #include "Threads/Mutex.h"

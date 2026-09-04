@@ -46,7 +46,8 @@ namespace Rodin::Variational
    * 3. Local contributions are mapped to global indices
    * 4. Global matrix/vector is updated with local contributions
    *
-   * @see LinearFormIntegratorBase, BilinearFormIntegratorBase
+   * @see <a href="_linear_form_integrator_8h.html">LinearFormIntegratorBase</a>
+   * @see <a href="_bilinear_form_integrator_8h.html">BilinearFormIntegratorBase</a>
    */
   class Integrator : public FormLanguage::Base
   {

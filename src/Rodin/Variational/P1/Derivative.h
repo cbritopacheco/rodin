@@ -22,7 +22,9 @@
  *
  * For P1 elements, partial derivatives are piecewise constant on each element.
  *
- * @see Derivative, Grad, P1
+ * @see <a href="_derivative_8h.html">Derivative</a>
+ * @see <a href="_grad_8h.html">Grad</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
  */
 
 #include "Rodin/Math/Vector.h"
