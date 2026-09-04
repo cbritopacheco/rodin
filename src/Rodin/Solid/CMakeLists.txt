@@ -16,9 +16,11 @@ set(RodinSolid_HEADERS
   Constitutive/NeoHookean.h
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
+  Constitutive/Yeoh.h
   Constitutive/HolzapfelOgden.h
   Constitutive/ActiveFiberLaw.h
   Constitutive/ActiveContraction.h
+  Integrators/FollowerPressure.h
   Integrators/InternalVirtualWorkResidual.h
   Integrators/InternalVirtualWorkTangent.h
   Integrators/InternalVirtualWork.h

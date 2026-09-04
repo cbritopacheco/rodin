@@ -373,6 +373,7 @@ This avoids spending time rebuilding and running tests that cannot possibly be a
 1. Update submodules if needed:
    ```bash
    git submodule update --init --recursive
+   git lfs pull  # only when examples/full resources are needed
    ```
 2. Configure an out-of-source **Release** build (default for manufactured tests):
    ```bash
@@ -382,6 +383,7 @@ This avoids spending time rebuilding and running tests that cannot possibly be a
      -DRODIN_BUILD_UNIT_TESTS=ON \
      -DRODIN_BUILD_MANUFACTURED_TESTS=ON \
      -DRODIN_BUILD_EXAMPLES=OFF \
+     -DRODIN_INSTALL_RESOURCES=OFF \
      -DRODIN_BUILD_DOC=OFF
    ```
    If you only need unit tests (e.g., for rapid iteration on a single class), you may use `Debug` and omit `-DRODIN_BUILD_MANUFACTURED_TESTS=ON`.
@@ -396,8 +398,23 @@ This avoids spending time rebuilding and running tests that cannot possibly be a
    ```
 5. If public headers / exported targets changed, validate install/downstream usage:
    ```bash
-   bash tests/installation/test_installation.sh
+   RODIN_INSTALL_RESOURCES=OFF bash tests/installation/test_installation.sh
    ```
+
+### Git LFS resources
+
+Large example/demo meshes and bulky files under `resources/` are tracked with
+Git LFS. Small unit-test and benchmark fixtures stay in regular Git so CI can
+run with `lfs: false` and without `git lfs pull`.
+
+Before adding or replacing a resource file:
+
+- Check the intended storage with `git check-attr filter -- <path>`.
+- For a large example/demo payload, run `git lfs track <path>` and commit the
+  `.gitattributes` change with the resource update.
+- Verify `git lfs status` before pushing.
+- Do not add broad LFS globs that sweep test fixtures into LFS unless CI is
+  updated deliberately.
 
 ### CI-derived hints (actual workflows)
 

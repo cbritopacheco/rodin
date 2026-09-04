@@ -1,0 +1,28 @@
+# Large example/demo resources live in Git LFS. Small fixtures stay in Git so
+# ordinary CI, tests, and benchmark jobs do not need to hydrate LFS objects.
+resources/examples/BoundaryOptimization/EMM.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/BoundaryOptimization/WaterTankVolume.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Geometry/skinning.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/Atrium/Coarse.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/FSIFluid.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/FSISolid.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/MergedFSI.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/Output3D.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/Prismatic80.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/Solid.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/Stenosis80.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/ProteinTest.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/SurfaceEvolution/FirePropagation/GroundPlane.mfem.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/SurfaceEvolution/FirePropagation/Topography.mfem.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/SurfaceOptimization/UnitBall.mfem.mesh filter=lfs diff=lfs merge=lfs -text
+resources/gmsh/Aircraft.stp filter=lfs diff=lfs merge=lfs -text
+resources/medit/AircraftCavity.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/medit/AircraftPML.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/medit/MechanicalPiece_1.mesh filter=lfs diff=lfs merge=lfs -text
+resources/medit/MechanicalPiece_2.mesh filter=lfs diff=lfs merge=lfs -text
+resources/medit/MechanicalPiece_2.o.mesh filter=lfs diff=lfs merge=lfs -text
+resources/medit/MechanicalPiece_2.o.sol filter=lfs diff=lfs merge=lfs -text
+resources/medit/WaterTankVolume.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/mfem/UnitBall.mfem.mesh filter=lfs diff=lfs merge=lfs -text

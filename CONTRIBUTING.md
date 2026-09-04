@@ -109,5 +109,13 @@ otherwise). Numerical claims are made with measurements (see
 
 - Run examples from a scratch directory — they write `*.h5`/`*.xdmf`/logs
   into the CWD; never commit these artifacts.
+- Large example/demo meshes and bulky files under `resources/` must be checked
+  in through Git LFS. Keep small unit-test and benchmark fixtures in regular
+  Git so CI can run with `actions/checkout` using `lfs: false`.
+- When adding or replacing a resource, run
+  `git check-attr filter -- <path>` before committing. If it is a large
+  resource payload, add or update the exact `.gitattributes` entry with
+  `git lfs track <path>`, then verify `git lfs status` shows the file as an LFS
+  object.
 - Branches: `master` is the default; development happens on `module/*`,
   `model/*` topic branches off `develop`.

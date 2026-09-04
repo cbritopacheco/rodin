@@ -27,6 +27,13 @@ From the repository root:
 bash tests/installation/test_installation.sh
 ```
 
+The script installs resources by default. To test the library/header install
+path without hydrating Git LFS resources, run:
+
+```bash
+RODIN_INSTALL_RESOURCES=OFF bash tests/installation/test_installation.sh
+```
+
 The script will:
 1. Build Rodin from source
 2. Install to a temporary directory (`build/install-test`)
