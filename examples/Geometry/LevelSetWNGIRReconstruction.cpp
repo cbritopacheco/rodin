@@ -460,7 +460,7 @@ int main(int argc, char** argv)
   GridFunction qRelMoved(p0FesMoved);
   qRelMoved.setName("q_rel");
 
-  IO::XDMF xdmf("LevelSetWNGIRReconstruction");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRReconstruction"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);

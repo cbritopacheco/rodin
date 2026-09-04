@@ -422,7 +422,7 @@ int main(int argc, char** argv)
   GridFunction qRelMoved(p0FesMoved);
   qRelMoved.setName("q_rel");
 
-  IO::XDMF xdmf("LevelSetWNGIRReconstruction3D");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRReconstruction3D"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
@@ -692,8 +692,10 @@ int main(int argc, char** argv)
     return levelSet.phi(vec3(X(0), X(1), X(2)));
   };
 
-  mesh.save("LevelSetWNGIRReconstruction3D.background.mesh", IO::FileFormat::MEDIT);
-  moved.save("LevelSetWNGIRReconstruction3D.moved.mesh", IO::FileFormat::MEDIT);
+  mesh.save(Rodin::Examples::wngirOutput("LevelSetWNGIRReconstruction3D.background.mesh"),
+    IO::FileFormat::MEDIT);
+  moved.save(Rodin::Examples::wngirOutput("LevelSetWNGIRReconstruction3D.moved.mesh"),
+    IO::FileFormat::MEDIT);
   xdmf.write(0).flush();
   xdmf.close();
 

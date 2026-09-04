@@ -580,7 +580,7 @@ int main(int argc, char** argv)
     phiH = [&](const Geometry::Point& p) -> Real { return phiP1.getValue(p); };
   }
 
-  IO::XDMF xdmf("LevelSetWNGIRCantilever2D");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever2D"));
   auto domainGrid = xdmf.grid("domain");
   domainGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   domainGrid.add(phiH, IO::XDMF::Center::Node);
@@ -614,7 +614,7 @@ int main(int argc, char** argv)
             << " eikTol=" << redistanceEikonalTol
             << " poissonTransferInterfaceWeight=" << poissonTransferInterfaceWeight
             << "  outputEvery=" << outputEvery << '\n';
-  std::ofstream fObj("LevelSetWNGIRCantilever2D.obj.txt");
+  std::ofstream fObj(Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever2D.obj.txt"));
 
   // Backtracking guard: body-fitted topology optimization can sever the load
   // path, making the elasticity solve singular (compliance -> inf/garbage).
@@ -1503,6 +1503,6 @@ int main(int argc, char** argv)
   xdmf.close();
   std::cout << "\nDone. Accepted shape iterations: " << acceptedShapeIterations << " / "
             << maxIt << "  attempts=" << shapeAttempts << "  stop=" << stopReason
-            << ". Objective history in LevelSetWNGIRCantilever2D.obj.txt\n";
+            << ". Objective history in wngir/LevelSetWNGIRCantilever2D.obj.txt\n";
   return 0;
 }

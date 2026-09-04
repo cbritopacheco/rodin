@@ -601,7 +601,7 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // XDMF writer in transient mode (background and moved grids).
   // -------------------------------------------------------------------------
-  IO::XDMF xdmf("LevelSetWNGIRAdvection");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRAdvection"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);

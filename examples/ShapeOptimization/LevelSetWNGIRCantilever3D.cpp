@@ -561,12 +561,13 @@ int run(int argc, char** argv)
   TrialFunction g(vhMoved);
   TestFunction w(vhMoved);
 
-  IO::XDMF xdmf("LevelSetWNGIRCantilever3D");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever3D"));
   auto domainGrid = xdmf.grid("domain");
   domainGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   auto fittedGrid = xdmf.grid("fitted");
   auto stateGrid = xdmf.grid("state");
-  std::ofstream objectiveFile("LevelSetWNGIRCantilever3D.obj.txt");
+  std::ofstream objectiveFile(
+    Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever3D.obj.txt"));
 
   Math::Vector<Real> phiGood = phiH.getData();
 
@@ -1264,7 +1265,7 @@ int run(int argc, char** argv)
 
   std::cout << "\nDone. Accepted shape iterations: " << acceptedShapeIterations << " / "
             << maxIt << "  attempts=" << shapeAttempts
-            << ". Objective history in LevelSetWNGIRCantilever3D.obj.txt\n";
+            << ". Objective history in wngir/LevelSetWNGIRCantilever3D.obj.txt\n";
   return 0;
 }
 

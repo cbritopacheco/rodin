@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -19,6 +20,12 @@
 
 namespace Rodin::Examples
 {
+  inline std::string wngirOutput(const std::string& name)
+  {
+    std::filesystem::create_directories("wngir");
+    return "wngir/" + name;
+  }
+
   struct WNGIRExampleDefaults
   {
       std::size_t maxIterations = 200;
