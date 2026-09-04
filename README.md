@@ -48,6 +48,7 @@ Rodin can be easily installed from source on Linux and macOS systems.
 - C++20 compatible compiler (GCC 12+, Clang 14+, or AppleClang)
 - Boost 1.74+
 - Eigen3
+- Git LFS, if you need the large example/resource meshes
 
 **Optional:**
 - OpenMP (for parallel execution)
@@ -61,6 +62,9 @@ Rodin can be easily installed from source on Linux and macOS systems.
 git clone --recursive https://github.com/cbritopacheco/rodin.git
 cd rodin
 
+# Fetch large example/resource meshes
+git lfs pull
+
 # Configure and build
 mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
@@ -69,6 +73,9 @@ make -j4
 # Install (may require sudo for system-wide installation)
 sudo make install
 ```
+
+If you only need the library and headers, skip the large resource payloads with
+`-DRODIN_INSTALL_RESOURCES=OFF`.
 
 ### User-Local Installation
 

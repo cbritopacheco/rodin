@@ -88,10 +88,16 @@ option(RODIN_USE_ASAN                 "Enable AddressSanitizer"                 
 option(RODIN_USE_UBSAN                "Enable UndefinedBehaviorSanitizer"         OFF)
 option(RODIN_USE_TSAN                 "Enable ThreadSanitizer"                    OFF)
 option(RODIN_USE_MSAN                 "Enable MemorySanitizer (Linux)"            OFF)
+option(RODIN_INSTALL_RESOURCES        "Install Rodin example and test resources"  ON)
 option(BUILD_SHARED_LIBS              "Build using shared libraries"              OFF)
 
 set(RODIN_RESOURCES_DIR "${PROJECT_SOURCE_DIR}/resources/")
 set(RODIN_THIRD_PARTY_DIR "${PROJECT_SOURCE_DIR}/third-party/")
+
+if(RODIN_INSTALL_RESOURCES)
+  include("${PROJECT_SOURCE_DIR}/cmake/CheckLFSResources.cmake")
+  rodin_check_lfs_resources("${RODIN_RESOURCES_DIR}")
+endif()
 
 # ---- Configure compiler ----------------------
 if(NOT CMAKE_BUILD_TYPE)
@@ -400,11 +406,13 @@ install(FILES
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 
-install(
-  DIRECTORY "${RODIN_RESOURCES_DIR}"
-  DESTINATION "${RODIN_INSTALL_SHARE_PATH}/Rodin/resources"
-  FILES_MATCHING
-    PATTERN "*"
-    PATTERN ".*"      EXCLUDE
-    PATTERN "*/.*"    EXCLUDE
-)
+if(RODIN_INSTALL_RESOURCES)
+  install(
+    DIRECTORY "${RODIN_RESOURCES_DIR}"
+    DESTINATION "${RODIN_INSTALL_SHARE_PATH}/Rodin/resources"
+    FILES_MATCHING
+      PATTERN "*"
+      PATTERN ".*"      EXCLUDE
+      PATTERN "*/.*"    EXCLUDE
+  )
+endif()

@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -42,6 +43,7 @@ jobs:
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=Release
           -DRODIN_BUILD_DOC=ON
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=ON
           -DRODIN_BUILD_SRC=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
@@ -53,4 +55,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{github.workspace}}/build/doc/html
           destination_dir: docs/${{ github.ref }}
-

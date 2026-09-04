@@ -34,6 +34,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Free Disk Space
         run: |
@@ -72,6 +73,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
@@ -132,6 +134,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Free Disk Space
         run: |
@@ -170,6 +173,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
@@ -230,6 +234,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
@@ -260,6 +265,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
@@ -308,6 +314,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
@@ -339,6 +346,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF

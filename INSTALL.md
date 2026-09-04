@@ -93,6 +93,10 @@ This will install:
 - **CMake config files** to `${CMAKE_INSTALL_PREFIX}/lib/cmake/Rodin`
 - **Resources** to `${CMAKE_INSTALL_PREFIX}/share/Rodin/resources`
 
+Large resource meshes are stored with Git LFS. Run `git lfs pull` before
+installing the full resource tree, or configure with
+`-DRODIN_INSTALL_RESOURCES=OFF` for a library-only install.
+
 ### User-local Installation
 
 ```bash
@@ -279,6 +283,20 @@ If you see errors about missing third-party libraries:
 ```bash
 git submodule update --init --recursive
 ```
+
+### Git LFS Resources
+
+Large example meshes and other bulky resource payloads are stored with Git LFS.
+If these files are missing or examples fail while reading meshes, install Git
+LFS and hydrate the resources:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+For library-only builds and CI jobs that do not need examples or installed
+resources, configure with `-DRODIN_INSTALL_RESOURCES=OFF`.
 
 ### Custom Dependency Paths
 
