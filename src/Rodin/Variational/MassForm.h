@@ -34,86 +34,6 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @brief Cell kernel of the mass form.
-   *
-   * Evaluates the reference bases once per polytope geometry and reuses
-   * them across cells; only the quadrature weights and the distortion of
-   * the map change from one cell to the next.
-   */
-  template <class Scalar, class TrialFES, class TestFES>
-  class MassFormKernel
-  {
-    public:
-      using ScalarType = Scalar;
-      using MatrixType = Math::Matrix<ScalarType>;
-
-      MassFormKernel(const TrialFES& trialFES, const TestFES& testFES)
-        : m_trialFES(trialFES), m_testFES(testFES)
-      {}
-
-      void compute(MatrixType& out, const Geometry::Polytope& polytope) const
-      {
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
-        const auto& testFE = m_testFES.get().getFiniteElement(d, i);
-        const size_t order = trialFE.getOrder() + testFE.getOrder();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(
-          order, polytope.getGeometry());
-        const auto& quadrature = polytope.getQuadrature(qf);
-
-        const bool rebuild =
-          !m_cached || m_geometry != polytope.getGeometry()
-          || m_order != order
-          || m_trialCount != trialFE.getCount()
-          || m_testCount != testFE.getCount();
-        if (rebuild)
-        {
-          m_cached = true;
-          m_geometry = polytope.getGeometry();
-          m_order = order;
-          m_trialCount = trialFE.getCount();
-          m_testCount = testFE.getCount();
-          m_reference.resize(qf.getSize());
-          for (size_t qp = 0; qp < qf.getSize(); ++qp)
-          {
-            auto& matrix = m_reference[qp];
-            matrix.resize(testFE.getCount(), trialFE.getCount());
-            const auto& reference = qf.getPoint(qp);
-            for (size_t te = 0; te < testFE.getCount(); ++te)
-            {
-              const auto testValue = testFE.getBasis(te)(reference);
-              for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
-                matrix(te, tr) = Math::dot(
-                  trialFE.getBasis(tr)(reference), testValue);
-            }
-          }
-        }
-
-        out.resize(testFE.getCount(), trialFE.getCount());
-        out.setZero();
-        for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
-        {
-          const auto& point = quadrature.getPoint(qp);
-          const ScalarType weight = static_cast<ScalarType>(
-            qf.getWeight(qp) * point.getDistortion());
-          out += weight * m_reference[qp];
-        }
-      }
-
-    private:
-      std::reference_wrapper<const TrialFES> m_trialFES;
-      std::reference_wrapper<const TestFES> m_testFES;
-      mutable bool m_cached = false;
-      mutable Geometry::Polytope::Type m_geometry =
-        Geometry::Polytope::Type::Point;
-      mutable size_t m_order = 0;
-      mutable size_t m_trialCount = 0;
-      mutable size_t m_testCount = 0;
-      mutable std::vector<MatrixType> m_reference;
-  };
-
-  /**
    * @brief Discrete mass form @f$ m(u,v) = \int_\Omega u \cdot v\,dx @f$.
    */
   template <class Solution, class TrialFES, class TestFES, class Operator>
@@ -130,7 +50,85 @@ namespace Rodin::Variational
       using TestFESType = TestFES;
       using OperatorType = Operator;
       using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
-      using KernelType = MassFormKernel<ScalarType, TrialFES, TestFES>;
+      /**
+       * @brief Cell kernel of the mass form.
+       *
+       * Evaluates the reference bases once per polytope geometry and reuses
+       * them across cells; only the quadrature weights and the distortion of
+       * the map change from one cell to the next.
+       */
+      class Kernel
+      {
+        public:
+          using MatrixType = Math::Matrix<ScalarType>;
+
+          Kernel(const TrialFES& trialFES, const TestFES& testFES)
+            : m_trialFES(trialFES), m_testFES(testFES)
+          {}
+
+          void compute(MatrixType& out, const Geometry::Polytope& polytope) const
+          {
+            const size_t d = polytope.getDimension();
+            const Index i = polytope.getIndex();
+            const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
+            const auto& testFE = m_testFES.get().getFiniteElement(d, i);
+            const size_t order = trialFE.getOrder() + testFE.getOrder();
+            const auto& qf = QF::PolytopeQuadratureFormula::get(
+              order, polytope.getGeometry());
+            const auto& quadrature = polytope.getQuadrature(qf);
+
+            const bool rebuild =
+              !m_cached || m_geometry != polytope.getGeometry()
+              || m_order != order
+              || m_trialCount != trialFE.getCount()
+              || m_testCount != testFE.getCount();
+            if (rebuild)
+            {
+              m_cached = true;
+              m_geometry = polytope.getGeometry();
+              m_order = order;
+              m_trialCount = trialFE.getCount();
+              m_testCount = testFE.getCount();
+              m_reference.resize(qf.getSize());
+              for (size_t qp = 0; qp < qf.getSize(); ++qp)
+              {
+                auto& matrix = m_reference[qp];
+                matrix.resize(testFE.getCount(), trialFE.getCount());
+                const auto& reference = qf.getPoint(qp);
+                for (size_t te = 0; te < testFE.getCount(); ++te)
+                {
+                  const auto testValue = testFE.getBasis(te)(reference);
+                  for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
+                    matrix(te, tr) = Math::dot(
+                      trialFE.getBasis(tr)(reference), testValue);
+                }
+              }
+            }
+
+            out.resize(testFE.getCount(), trialFE.getCount());
+            out.setZero();
+            for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+            {
+              const auto& point = quadrature.getPoint(qp);
+              const ScalarType weight = static_cast<ScalarType>(
+                qf.getWeight(qp) * point.getDistortion());
+              out += weight * m_reference[qp];
+            }
+          }
+
+        private:
+          std::reference_wrapper<const TrialFES> m_trialFES;
+          std::reference_wrapper<const TestFES> m_testFES;
+          mutable bool m_cached = false;
+          mutable Geometry::Polytope::Type m_geometry =
+            Geometry::Polytope::Type::Point;
+          mutable size_t m_order = 0;
+          mutable size_t m_trialCount = 0;
+          mutable size_t m_testCount = 0;
+          mutable std::vector<MatrixType> m_reference;
+      };
+
+      using KernelType = Kernel;
       using Parent = BilinearFormBase<OperatorType>;
       using AssemblyType =
         typename Assembly::Default<TrialContextType, TestContextType>
