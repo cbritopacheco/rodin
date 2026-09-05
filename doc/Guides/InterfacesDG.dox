@@ -98,8 +98,10 @@
   - assembled DG systems are not SPD in general — see
     @ref guides-solvers for appropriate solvers.
 
-  See `examples/DG` for a starting point, and the `Jump`/`Average` unit
-  tests (`tests/unit/Rodin/Variational/JumpTest.cpp`, `AverageTest.cpp`)
+  See [examples/DG](https://github.com/cbritopacheco/rodin/tree/develop/examples/DG)
+  for a starting point, and the `Jump`/`Average` unit tests
+  ([JumpTest.cpp](https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/JumpTest.cpp),
+  [AverageTest.cpp](https://github.com/cbritopacheco/rodin/blob/develop/tests/unit/Rodin/Variational/AverageTest.cpp))
   for the precise operational semantics.
 
   @section guides-ifdg-seealso See also

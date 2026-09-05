@@ -83,7 +83,7 @@
   | Problem | Constitutive Law | Example |
   |---------|-----------------|---------|
   | Linear cantilever beam | @f$ \sigma = \lambda(\operatorname{tr}\varepsilon)I + 2\mu\varepsilon @f$ | @ref examples-pdes-elasticity |
-  | Hyperelastic cantilever (NeoHookean, transient) | @f$ W = \frac{\mu}{2}(I_1-d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ | `examples/Solid/CantileverBeam.cpp` |
+  | Hyperelastic cantilever (NeoHookean, transient) | @f$ W = \frac{\mu}{2}(I_1-d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ | [CantileverBeam.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/CantileverBeam.cpp) |
 
   @section examples-index-eikonal Distance and Eikonal
 
@@ -93,8 +93,8 @@
 
   | Method | Description | Example |
   |--------|-------------|---------|
-  | FMM | Exact distance on unstructured meshes | `examples/Models/Eikonal/FMM.cpp` |
-  | Spalding-Tucker | Boundary-layer wall distance | `examples/Models/Distance/SpaldingTucker.cpp` |
+  | FMM | Exact distance on unstructured meshes | [FMM.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Models/Eikonal/FMM.cpp) |
+  | Spalding-Tucker | Boundary-layer wall distance | [SpaldingTucker.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Models/Distance/SpaldingTucker.cpp) |
 
   @section examples-index-petsc PETSc Examples
 
@@ -103,12 +103,12 @@
 
   | Problem | Description | Example |
   |---------|-------------|---------|
-  | Sequential Poisson | PETSc CG solver on local mesh | `examples/PETSc/PDEs/Seq_Poisson.cpp` |
-  | MPI Poisson | Distributed mesh + PETSc KSP | `examples/PETSc/PDEs/MPI_Poisson.cpp` |
-  | Sequential Stokes | Multi-field (velocity-pressure-Lagrange) | `examples/PETSc/PDEs/Seq_Stokes.cpp` |
-  | Oseen flow | Transient Picard/Oseen linearization | `examples/PETSc/PDEs/Seq_OseenFlow.cpp` |
-  | Oseen lid-driven cavity | Transient cavity with Picard/Oseen linearization | `examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp` |
-  | Navier-Stokes | Transient nonlinear lid-driven cavity with PETSc SNES | `examples/PETSc/PDEs/Seq_NavierStokes.cpp` |
+  | Sequential Poisson | PETSc CG solver on local mesh | [Seq_Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_Poisson.cpp) |
+  | MPI Poisson | Distributed mesh + PETSc KSP | [MPI_Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/MPI_Poisson.cpp) |
+  | Sequential Stokes | Multi-field (velocity-pressure-Lagrange) | [Seq_Stokes.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_Stokes.cpp) |
+  | Oseen flow | Transient Picard/Oseen linearization | [Seq_OseenFlow.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenFlow.cpp) |
+  | Oseen lid-driven cavity | Transient cavity with Picard/Oseen linearization | [Seq_OseenLidDrivenCavity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp) |
+  | Navier-Stokes | Transient nonlinear lid-driven cavity with PETSc SNES | [Seq_NavierStokes.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_NavierStokes.cpp) |
 
   @see @ref guides-petsc "PETSc Guide", @ref guides-mpi "MPI Guide"
 
@@ -120,7 +120,7 @@
 
   | Equation | Method | Example |
   |----------|--------|---------|
-  | @f$ -\Delta u = f @f$ | SIP-DG | `examples/DG/Poisson.cpp` |
+  | @f$ -\Delta u = f @f$ | SIP-DG | [Poisson.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp) |
 
   @see @ref guides-variational "Variational Formulations Guide" for the DG section.
 
@@ -132,8 +132,8 @@
 
   | Problem | Kernel | Example |
   |---------|--------|---------|
-  | Newtonian potential | @f$ \frac{1}{4\pi\lVert\mathbf{x}-\mathbf{y}\rVert} @f$ | `examples/IntegralEquations/NewtonianPotential.cpp` |
-  | Elastic distribution | Navier 3×3 kernel | `examples/IntegralEquations/ElasticDistribution.cpp` |
+  | Newtonian potential | @f$ \frac{1}{4\pi\lVert\mathbf{x}-\mathbf{y}\rVert} @f$ | [NewtonianPotential.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/IntegralEquations/NewtonianPotential.cpp) |
+  | Elastic distribution | Navier 3×3 kernel | [ElasticDistribution.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/IntegralEquations/ElasticDistribution.cpp) |
 
   @section examples-index-surfevol Surface Evolution
 
@@ -143,9 +143,9 @@
 
   | Problem | Description | Example |
   |---------|-------------|---------|
-  | Conormal advection | Move boundary along conormal | `examples/SurfaceEvolution/ConormalAdvection/Main.cpp` |
-  | Convergence study | Parametric sweep over resolution and CFL | `examples/SurfaceEvolution/ConormalAdvection/Test.cpp` |
-  | Plane evolution | Planar surface motion | `examples/SurfaceEvolution/ConormalAdvection/Plane.cpp` |
+  | Conormal advection | Move boundary along conormal | [Main.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Main.cpp) |
+  | Convergence study | Parametric sweep over resolution and CFL | [Test.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Test.cpp) |
+  | Plane evolution | Planar surface motion | [Plane.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/SurfaceEvolution/ConormalAdvection/Plane.cpp) |
 
   @section examples-index-boundaryopt Boundary Optimization
 
@@ -155,6 +155,6 @@
 
   | Problem | Description | Example |
   |---------|-------------|---------|
-  | Acoustic cloaking | Complex Helmholtz + adjoint-based shape gradient + conormal advection | `examples/BoundaryOptimization/AcousticCloaking.cpp` |
+  | Acoustic cloaking | Complex Helmholtz + adjoint-based shape gradient + conormal advection | [AcousticCloaking.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/BoundaryOptimization/AcousticCloaking.cpp) |
 
   */

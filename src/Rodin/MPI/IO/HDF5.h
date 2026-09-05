@@ -14,14 +14,14 @@
  * Provides MeshPrinter and MeshLoader specializations for
  * `Mesh<Context::MPI>` using the HDF5 file format.
  *
- * Each MPI rank persists its own local shard independently: the printer
- * delegates to `MeshPrinter<FileFormat::HDF5, Context::Local>` to write the
- * base mesh topology and then appends shard-specific metadata (ownership
+ * Each MPI rank persists its own local @ref Rodin::Geometry::Shard "shard" independently: the printer
+ * delegates to @ref Rodin::IO::MeshPrinter "MeshPrinter<FileFormat::HDF5, Context::Local>" to write the
+ * base mesh topology and then appends @ref Rodin::Geometry::Shard "shard"-specific metadata (ownership
  * flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the
  * `/Shard/...` HDF5 group.
  *
- * The loader delegates to `MeshLoader<FileFormat::HDF5, Context::Local>` to
- * restore the base mesh and then reconstructs the MPI shard metadata needed
+ * The loader delegates to @ref Rodin::IO::MeshLoader "MeshLoader<FileFormat::HDF5, Context::Local>" to
+ * restore the base mesh and then reconstructs the MPI @ref Rodin::Geometry::Shard "shard" metadata needed
  * for distributed assembly from the `/Shard/...` HDF5 datasets written by the
  * MPI printer.
  *
@@ -44,8 +44,8 @@ namespace Rodin::IO
   /**
    * @brief Loads a distributed MPI mesh from an HDF5 file.
    *
-   * Each MPI rank independently loads its local shard from the given HDF5 file
-   * path using the canonical local mesh HDF5 layout and the vertex/cell shard
+   * Each MPI rank independently loads its local @ref Rodin::Geometry::Shard "shard" from the given HDF5 file
+   * path using the canonical local mesh HDF5 layout and the vertex/cell @ref Rodin::Geometry::Shard "shard"
    * metadata stored under `/Shard/...`.  The file is expected to have been
    * produced by `MeshPrinter<FileFormat::HDF5, Context::MPI>`.
    *
@@ -287,11 +287,11 @@ namespace Rodin::IO
    * file path.  The process consists of two phases:
    *
    * 1. **Base mesh** — delegated to
-   *    `MeshPrinter<FileFormat::HDF5, Context::Local>`, which writes the
+   *    @ref Rodin::IO::MeshPrinter "MeshPrinter<FileFormat::HDF5, Context::Local>", which writes the
    *    canonical `/Mesh/...` datasets (vertices, connectivity, attributes,
    *    transformations).
    *
-   * 2. **Shard metadata** — the file is reopened in read-write mode and
+   * 2. @ref Rodin::Geometry::Shard "Shard" metadata — the file is reopened in read-write mode and
    *    the following datasets are appended under `/Shard/`:
    *
    *    | Dataset | Type | Description |

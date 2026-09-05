@@ -51,7 +51,7 @@ namespace Rodin::IO
    * | [MeshLoader<IO::FileFormat::MFEM, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html) | Loads local meshes from MFEM mesh files. |
    * | [MeshLoader<IO::FileFormat::MEDIT, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html) | Loads local meshes from MEDIT `.mesh` files. |
    * | [MeshLoader<IO::FileFormat::HDF5, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html) | Loads complete local meshes from Rodin HDF5 datasets. |
-   * | [MeshLoader<IO::FileFormat::HDF5, Context::MPI>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html) | Loads distributed MPI meshes from rank-local Rodin HDF5 shards. |
+   * | [MeshLoader<IO::FileFormat::HDF5, Context::MPI>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html) | Loads distributed MPI meshes from rank-local Rodin HDF5 @ref Rodin::Geometry::Shard "shards". |
    *
    * @tparam Fmt File format to use for loading
    * @tparam Trait Context trait (e.g., sequential or parallel)
@@ -68,7 +68,7 @@ namespace Rodin::IO
    * | [MeshPrinter<IO::FileFormat::MFEM, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html) | Writes local meshes in MFEM mesh format. |
    * | [MeshPrinter<IO::FileFormat::MEDIT, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html) | Writes local meshes in MEDIT `.mesh` format. |
    * | [MeshPrinter<IO::FileFormat::HDF5, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html) | Writes complete local meshes to Rodin HDF5 datasets. |
-   * | [MeshPrinter<IO::FileFormat::HDF5, Context::MPI>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html) | Writes distributed MPI mesh shards to rank-local Rodin HDF5 datasets. |
+   * | [MeshPrinter<IO::FileFormat::HDF5, Context::MPI>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html) | Writes distributed MPI @ref Rodin::Geometry::Shard "mesh shards" to rank-local Rodin HDF5 datasets. |
    *
    * @tparam Fmt File format to use for printing
    * @tparam Trait Context trait (e.g., sequential or parallel)

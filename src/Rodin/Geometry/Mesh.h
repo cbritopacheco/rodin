@@ -145,9 +145,9 @@ namespace Rodin::Geometry
    * # Key Components
    *
    * ## Mesh Data Structures
-   * - **Mesh**: Core unstructured mesh class with support for mixed element types
-   * - **SubMesh**: Mesh representing a subregion of a parent mesh
-   * - **Shard**: Mesh shard for distributed parallel computing
+   * - @ref Rodin::Geometry::Mesh "Mesh": Core unstructured mesh class with support for mixed element types
+   * - @ref Rodin::Geometry::SubMesh "SubMesh": Mesh representing a subregion of a parent mesh
+   * - @ref Rodin::Geometry::Shard "Shard": Mesh shard for distributed parallel computing
    *
    * ## Connectivity Management
    * - Automatic computation of incidence relations @f$ d \rightarrow d' @f$

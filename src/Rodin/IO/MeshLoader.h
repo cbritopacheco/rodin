@@ -27,7 +27,7 @@ namespace Rodin::IO
    * | <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html">MeshLoader<IO::FileFormat::MFEM, Context::Local></a> | Loads sequential meshes from MFEM mesh streams. |
    * | <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html">MeshLoader<IO::FileFormat::MEDIT, Context::Local></a> | Loads sequential meshes from MEDIT mesh streams. |
    * | <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader<IO::FileFormat::HDF5, Context::Local></a> | Loads sequential meshes from HDF5 files. |
-   * | <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html">MeshLoader<IO::FileFormat::HDF5, Context::MPI></a> | Loads distributed mesh shards and metadata from per-rank HDF5 files. |
+   * | <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html">MeshLoader<IO::FileFormat::HDF5, Context::MPI></a> | Loads distributed @ref Rodin::Geometry::Shard "mesh shards" and metadata from per-rank HDF5 files. |
    */
 
   /**

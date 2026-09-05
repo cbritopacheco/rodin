@@ -233,9 +233,9 @@
 
   | Strategy | Header | Context | Description |
   |----------|--------|---------|-------------|
-  | `Sequential` | `PETSc/Assembly/Sequential.h` | `Context::Local` | Single-thread assembly into PETSc objects |
-  | `OpenMP` | `PETSc/Assembly/OpenMP.h` | `Context::Local` | Shared-memory parallel assembly |
-  | `MPI` | `PETSc/Assembly/MPI.h` | `Context::MPI` | Distributed assembly (each rank contributes owned elements) |
+  | `Sequential` | <a href="_p_e_t_sc_2_assembly_2_sequential_8h.html">PETSc/Assembly/Sequential.h</a> | `Context::Local` | Single-thread assembly into PETSc objects |
+  | `OpenMP` | <a href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html">PETSc/Assembly/OpenMP.h</a> | `Context::Local` | Shared-memory parallel assembly |
+  | `MPI` | <a href="_p_e_t_sc_2_assembly_2_m_p_i_8h.html">PETSc/Assembly/MPI.h</a> | `Context::MPI` | Distributed assembly (each rank contributes owned elements) |
 
   The assembly strategy is selected automatically via the
   `Assembly::Default<TrialContext, TestContext>` trait based on the mesh

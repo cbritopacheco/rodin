@@ -21,10 +21,12 @@
   | Postprocessing | `Solid/Fields/` | Stress and strain fields for output |
   | Linear theory | `Solid/Linear/` | Small-strain elasticity integrators |
 
-  Working examples: `examples/Solid/BlockGravity.cpp` (quasi-static
-  NeoHookean block under ramped gravity), `examples/Solid/CantileverBeam.cpp`,
-  and `examples/Solid/ActiveContractionPlaneWave.cpp` (active fiber
-  contraction driven by an activation wave).
+  Working examples:
+  [BlockGravity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/BlockGravity.cpp)
+  (quasi-static NeoHookean block under ramped gravity),
+  [CantileverBeam.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/CantileverBeam.cpp),
+  and [ActiveContractionPlaneWave.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/ActiveContractionPlaneWave.cpp)
+  (active fiber contraction driven by an activation wave).
 
   The residual/tangent sign convention and finite-difference consistency
   checks used by Solid are part of Rodin's shared
@@ -71,7 +73,7 @@
   | `ActiveContraction<Passive, Active>` | passive law + active fiber law | Composition wrapper |
 
   Constructing a law and the internal virtual work form
-  (from `examples/Solid/BlockGravity.cpp`):
+  (from [BlockGravity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/BlockGravity.cpp)):
 
   @code{.cpp}
   Solid::NeoHookean law(lambda, mu);
@@ -123,10 +125,11 @@
 
   Laws that need more than kinematics (time step, activation, previous
   internal state, fiber directions) receive them through the
-  *constitutive point* mechanism (`Solid/Local/ConstitutivePoint.h`): the
-  integrators stamp tags — cell index, quadrature-point index, and any
-  user-relevant quantities — onto the point, and a user-supplied input
-  callable maps tags to law inputs:
+  *constitutive point* mechanism
+  (<a href="_constitutive_point_8h.html">Solid/Local/ConstitutivePoint.h</a>):
+  the integrators stamp tags — cell index, quadrature-point index, and any
+  user-relevant quantities — onto the point, and a user-supplied input callable
+  maps tags to law inputs:
 
   @code{.cpp}
   auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
@@ -134,8 +137,9 @@
 
   This keeps laws pure functions of local state (unit-testable against
   finite differences at a single point) and keeps integrators ignorant of
-  constitutive details. `Solid/Local/FiberKinematics.h` carries preferred
-  directions; fibers are *material* (reference-configuration) vectors —
+  constitutive details. <a href="_fiber_kinematics_8h.html">Solid/Local/FiberKinematics.h</a>
+  carries preferred directions; fibers are *material* (reference-configuration)
+  vectors —
   their pushforward @f$ F f_0 @f$ happens inside laws and fields, never in
   user setup.
 

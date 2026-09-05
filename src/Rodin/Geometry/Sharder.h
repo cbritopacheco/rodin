@@ -21,7 +21,7 @@ namespace Rodin::Geometry
   /**
    * @brief Base implementation for decomposing a partitioned mesh into shards.
    *
-   * Given a mesh partitioner, this class constructs one local Shard per
+   * Given a mesh partitioner, this class constructs one local @ref Rodin::Geometry::Shard "Shard" per
    * partition, including owned entities, shared entities, ghosts, owners, and
    * halo metadata.
    *

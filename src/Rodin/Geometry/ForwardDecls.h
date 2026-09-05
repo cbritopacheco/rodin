@@ -132,7 +132,7 @@ namespace Rodin::Geometry
    * | Specialization | Description |
    * |----------------|-------------|
    * | @ref Connectivity "Connectivity<Context::Local>" | Sequential connectivity table storing all requested incidence relations for a local mesh. |
-   * | @ref Connectivity "Connectivity<Context::MPI>" | Distributed connectivity facade for rank-local shard topology and MPI mesh operations. |
+   * | @ref Connectivity "Connectivity<Context::MPI>" | Distributed connectivity facade for rank-local @ref Rodin::Geometry::Shard "shard" topology and MPI mesh operations. |
    *
    * @tparam ContextType Context type (Local, MPI, etc.)
    * @see <a href="_connectivity_8h.html">Connectivity.h</a>
@@ -159,7 +159,7 @@ namespace Rodin::Geometry
    * | Specialization | Description |
    * |----------------|-------------|
    * | [Mesh<Context::Local>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html) | Sequential mesh storing the full incidence complex and geometry in a single process. |
-   * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local shard, global/local index maps, and MPI context for parallel assembly. |
+   * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local @ref Rodin::Geometry::Shard "shard", global/local index maps, and MPI context for parallel assembly. |
    *
    * @tparam ContextType Execution context (default: Context::Local)
    * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
@@ -209,7 +209,7 @@ namespace Rodin::Geometry
    * | Specialization | Description |
    * |----------------|-------------|
    * | [SubMesh<Context::Local>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html) | Sequential submesh view extracted from a local parent mesh. |
-   * | [SubMesh<Context::MPI>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed submesh view extracted from an MPI parent mesh and its rank-local shards. |
+   * | [SubMesh<Context::MPI>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed submesh view extracted from an MPI parent mesh and its rank-local @ref Rodin::Geometry::Shard "shards". |
    *
    * @tparam Context Execution context type
    * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a>
