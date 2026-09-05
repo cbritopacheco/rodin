@@ -1,5 +1,10 @@
 # PETSc backend notes
 
+Read [backend-support.md](backend-support.md) and
+[numerical-contracts.md](numerical-contracts.md) before changing PETSc-backed
+assembly, storage, or solver behavior. PETSc is a mirror of Rodin's finite
+element contracts, not a separate semantic path.
+
 ## Version skew: CI is the real gate
 
 CI (Ubuntu gcc-14 "Unit"/"Manufactured" jobs) builds against **PETSc 3.19.6**;

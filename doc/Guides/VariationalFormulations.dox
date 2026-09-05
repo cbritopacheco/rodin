@@ -17,6 +17,11 @@
   lets you express these variational formulations in C++ code that closely
   mirrors the mathematical notation.
 
+  The cross-module rules behind these examples are summarized in
+  @ref guides-numerical-contracts "Numerical contracts", including the
+  `Problem` sign convention and the distinction between interpolation and
+  `L2` projection.
+
   @section guides-variational-weak From Strong to Weak Form
 
   Consider a generic second-order PDE in its strong form:
@@ -383,5 +388,7 @@
   - @ref Rodin::Solid "Solid module" — Hyperelastic constitutive laws and Newton solvers
   - @ref Rodin::Advection "Advection module" — Semi-Lagrangian transport
   - @ref guides-solvers "Solvers guide" — Direct, iterative, and nonlinear solvers
+  - @ref guides-numerical-contracts "Numerical contracts" — Projection,
+    assembly signs, quadrature, constraints, and tangent consistency
 
   */

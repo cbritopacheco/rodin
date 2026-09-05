@@ -64,6 +64,10 @@ PETSc handle ownership is resource/lifecycle, the OpenMP and MPI assembly
 backends are concurrency, and CI building against PETSc 3.19 while local
 builds are newer is compatibility.
 
+Use [backend-support.md](backend-support.md) to decide which configurations a
+feature must test, and [numerical-contracts.md](numerical-contracts.md) to
+choose the invariant or manufactured check that proves the numerical behavior.
+
 Two rules that make the difference between coverage and theatre:
 
 - **A regression test must be shown to catch the bug.** Revert the fix,
