@@ -57,7 +57,7 @@
   Mesh tet_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
   @endcode
 
-  @subsection guides-getting-started-core-concepts-connectivity Connectivity
+  @section guides-getting-started-core-concepts-connectivity Connectivity
 
   Connectivity describes the relationships between polytopes of different
   dimensions. You need to compute connectivity before certain operations.
