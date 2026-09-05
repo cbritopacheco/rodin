@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_NAMEDFORMPATTERN_H
-#define RODIN_ASSEMBLY_NAMEDFORMPATTERN_H
+#ifndef RODIN_ASSEMBLY_SCATTERMAP_H
+#define RODIN_ASSEMBLY_SCATTERMAP_H
 
 #include <algorithm>
 #include <cmath>
@@ -41,7 +41,7 @@ namespace Rodin::Assembly
    * makes the value array reusable.
    */
   template <class Scalar>
-  class NamedFormPattern
+  class ScatterMap
   {
     public:
       /// @brief Scalar value type.

@@ -27,8 +27,7 @@
 #include "Sequential.h"
 
 #include "ForwardDecls.h"
-#include "NamedFormKernel.h"
-#include "NamedFormPattern.h"
+#include "ScatterMap.h"
 
 namespace Rodin::Assembly
 {
@@ -58,7 +57,7 @@ namespace Rodin::Assembly
         const size_t d = seq.getDimension();
         const Index count = seq.getCount();
         const int threadCount = omp_get_max_threads();
-        m_pattern.template assemble<MassFormKernel<Scalar, TrialFES, TestFES>>(
+        m_scatterMap.template assemble<typename InputType::KernelType>(
           out, trialFES, testFES, seq, d, count, threadCount);
       }
 
@@ -68,7 +67,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable NamedFormPattern<Scalar> m_pattern;
+      mutable ScatterMap<Scalar> m_scatterMap;
   };
 
   template <class Solution, class TrialFES, class TestFES, class Scalar>
@@ -97,7 +96,7 @@ namespace Rodin::Assembly
         const size_t d = seq.getDimension();
         const Index count = seq.getCount();
         const int threadCount = omp_get_max_threads();
-        m_pattern.template assemble<DiffusionFormKernel<Scalar, TrialFES, TestFES>>(
+        m_scatterMap.template assemble<typename InputType::KernelType>(
           out, trialFES, testFES, seq, d, count, threadCount);
       }
 
@@ -107,7 +106,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable NamedFormPattern<Scalar> m_pattern;
+      mutable ScatterMap<Scalar> m_scatterMap;
   };
 
   /**
