@@ -223,7 +223,7 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    *
-   * @see @ref LeastSquaresCG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+   * @see <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html">LeastSquaresCG</a>
    */
   template <class Scalar>
   class LeastSquaresCG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final

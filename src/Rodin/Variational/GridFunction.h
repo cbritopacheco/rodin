@@ -300,7 +300,8 @@ namespace Rodin::Variational
    *
    * @par Coefficients vs values
    * For nodal spaces of degree one (@ref P1 "P1") the coefficient vector
-   * holds vertex values. For higher-order spaces (`H1\<K\>`,
+   * holds vertex values. For higher-order spaces
+   * (<a href="_variational_2_h1_8h.html">H1&lt;K&gt;</a>,
    * @f$ K \ge 2 @f$) the underlying basis is not plain nodal Lagrange, and
    * @b coefficients @b are @b not @b nodal @b values: always evaluate
    * through getValue() (or the element basis) instead of reading the data
