@@ -4,6 +4,10 @@ The physics/application layers built on the form language. Structural
 facts only — parameter tuning and experiment history do not belong in the
 repo.
 
+For Solid or level-set terms that assemble residuals, tangents, constraints,
+or projection-like transfers, keep [workflows.md](workflows.md) and
+[numerical-contracts.md](numerical-contracts.md) open with this file.
+
 ## Solid (src/Rodin/Solid/) — finite-strain solid mechanics
 
 Layered like the mathematics:

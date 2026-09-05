@@ -6,6 +6,10 @@ cover the degrees for which compact rules are available, and positive
 Gaussian product rules provide deterministic arbitrary-order fallbacks. The
 runtime library contains no nonlinear rule generator.
 
+Read [numerical-contracts.md](numerical-contracts.md) before changing default
+orders, fast paths, or mapped-integrand assumptions; quadrature exactness is a
+cross-module numerical contract, not only a `QF` implementation detail.
+
 ## Contract
 
 For a requested order $p$, `PolytopeQuadratureFormula` returns a rule that is

@@ -116,6 +116,12 @@ python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
 python3 dev/check_doxygen_warnings.py               # needs doxygen 1.14.0 exactly
 ```
 
+For documentation changes, also preserve the rendered Doxygen/m.css contract:
+class pages that document multiple supported specializations include a complete
+`Specialization` / `Description` table with linked specialization entries, and
+public class/template/header references in `@see` blocks or prose lists are
+explicit `@ref` references or generated-page HTML links, not bare names.
+
 Every check is a **ratchet** measured against a committed baseline in `dev/`:
 
 - **A baseline may only shrink.** Never add an entry to

@@ -26,6 +26,10 @@
   and `examples/Solid/ActiveContractionPlaneWave.cpp` (active fiber
   contraction driven by an activation wave).
 
+  The residual/tangent sign convention and finite-difference consistency
+  checks used by Solid are part of Rodin's shared
+  @ref guides-numerical-contracts "Numerical contracts".
+
   @section guides-solid-kinematics Kinematics
 
   With displacement @f$ u @f$, the deformation gradient is
@@ -110,6 +114,10 @@
   once @f$ u @f$ satisfies the constraint; loads are ramped in steps
   (incremental loading) because a full load applied to the undeformed
   state may lie outside Newton's basin of attraction.
+
+  New solid terms should be documented and tested as residual/tangent pairs;
+  the tangent must be the derivative of the residual assembled into the Newton
+  problem.
 
   @section guides-solid-inputs Constitutive-point inputs
 
