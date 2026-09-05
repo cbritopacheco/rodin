@@ -27,9 +27,89 @@
 #include "Sequential.h"
 
 #include "ForwardDecls.h"
+#include "NamedFormKernel.h"
+#include "NamedFormPattern.h"
 
 namespace Rodin::Assembly
 {
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class OpenMP<
+    Math::SparseMatrix<Scalar>,
+    Variational::MassForm<
+      Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
+    : public AssemblyBase<
+        Math::SparseMatrix<Scalar>,
+        Variational::MassForm<
+          Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+  {
+    public:
+      using OperatorType = Math::SparseMatrix<Scalar>;
+      using FormType =
+        Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+      using Parent = AssemblyBase<OperatorType, FormType>;
+      using InputType = typename Parent::InputType;
+
+      void execute(OperatorType& out, const InputType& input) const override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        OpenMPIteration seq(mesh, Geometry::Region::Cells);
+        const size_t d = seq.getDimension();
+        const Index count = seq.getCount();
+        const int threadCount = omp_get_max_threads();
+        m_pattern.template assemble<MassFormKernel<Scalar, TrialFES, TestFES>>(
+          out, trialFES, testFES, seq, d, count, threadCount);
+      }
+
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
+
+    private:
+      mutable NamedFormPattern<Scalar> m_pattern;
+  };
+
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class OpenMP<
+    Math::SparseMatrix<Scalar>,
+    Variational::DiffusionForm<
+      Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
+    : public AssemblyBase<
+        Math::SparseMatrix<Scalar>,
+        Variational::DiffusionForm<
+          Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+  {
+    public:
+      using OperatorType = Math::SparseMatrix<Scalar>;
+      using FormType =
+        Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>;
+      using Parent = AssemblyBase<OperatorType, FormType>;
+      using InputType = typename Parent::InputType;
+
+      void execute(OperatorType& out, const InputType& input) const override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        OpenMPIteration seq(mesh, Geometry::Region::Cells);
+        const size_t d = seq.getDimension();
+        const Index count = seq.getCount();
+        const int threadCount = omp_get_max_threads();
+        m_pattern.template assemble<DiffusionFormKernel<Scalar, TrialFES, TestFES>>(
+          out, trialFES, testFES, seq, d, count, threadCount);
+      }
+
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
+
+    private:
+      mutable NamedFormPattern<Scalar> m_pattern;
+  };
+
   /**
    * @brief OpenMP-based parallel mesh iteration for multi-threaded assembly.
    *

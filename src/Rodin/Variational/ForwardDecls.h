@@ -308,6 +308,12 @@ namespace Rodin::Variational
   template <class Solution, class TrialFES, class TestFES, class OperatorType>
   class BilinearForm;
 
+  template <class Solution, class TrialFES, class TestFES, class OperatorType>
+  class MassForm;
+
+  template <class Solution, class TrialFES, class TestFES, class OperatorType>
+  class DiffusionForm;
+
   /**
    * @brief Base class for bilinear form integrators.
    */

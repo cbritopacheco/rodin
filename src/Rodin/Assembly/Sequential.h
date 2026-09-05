@@ -25,6 +25,8 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Variational/Integral.h"
+#include "Rodin/Variational/Grad.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
@@ -33,6 +35,8 @@
 #include "Rodin/Assembly/ConstraintMap.h"
 
 #include "ForwardDecls.h"
+#include "NamedFormKernel.h"
+#include "NamedFormPattern.h"
 
 namespace Rodin::Assembly
 {
@@ -95,6 +99,82 @@ namespace Rodin::Assembly
 
 namespace Rodin::Assembly
 {
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class Sequential<
+    Math::SparseMatrix<Scalar>,
+    Variational::MassForm<
+      Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
+    : public AssemblyBase<
+        Math::SparseMatrix<Scalar>,
+        Variational::MassForm<
+          Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+  {
+    public:
+      using OperatorType = Math::SparseMatrix<Scalar>;
+      using FormType =
+        Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+      using Parent = AssemblyBase<OperatorType, FormType>;
+      using InputType = typename Parent::InputType;
+
+      void execute(OperatorType& out, const InputType& input) const override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        SequentialIteration seq(mesh, Geometry::Region::Cells);
+        const size_t d = seq.getDimension();
+        const Index count = seq.getCount();
+        m_pattern.template assemble<MassFormKernel<Scalar, TrialFES, TestFES>>(
+          out, trialFES, testFES, seq, d, count);
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+
+    private:
+      mutable NamedFormPattern<Scalar> m_pattern;
+  };
+
+  template <class Solution, class TrialFES, class TestFES, class Scalar>
+  class Sequential<
+    Math::SparseMatrix<Scalar>,
+    Variational::DiffusionForm<
+      Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
+    : public AssemblyBase<
+        Math::SparseMatrix<Scalar>,
+        Variational::DiffusionForm<
+          Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+  {
+    public:
+      using OperatorType = Math::SparseMatrix<Scalar>;
+      using FormType =
+        Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>;
+      using Parent = AssemblyBase<OperatorType, FormType>;
+      using InputType = typename Parent::InputType;
+
+      void execute(OperatorType& out, const InputType& input) const override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        SequentialIteration seq(mesh, Geometry::Region::Cells);
+        const size_t d = seq.getDimension();
+        const Index count = seq.getCount();
+        m_pattern.template assemble<DiffusionFormKernel<Scalar, TrialFES, TestFES>>(
+          out, trialFES, testFES, seq, d, count);
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+
+    private:
+      mutable NamedFormPattern<Scalar> m_pattern;
+  };
+
   /**
    * @brief Sequential assembly implementation for linear forms.
    *

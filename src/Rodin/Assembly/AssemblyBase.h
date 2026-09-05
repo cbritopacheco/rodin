@@ -71,6 +71,36 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  template <class OperatorType, class Solution, class TrialFES, class TestFES>
+  class AssemblyBase<
+    OperatorType,
+    Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>>
+    : public FormLanguage::Base
+  {
+    public:
+      using InputType =
+        Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+
+      virtual ~AssemblyBase() = default;
+      virtual void execute(OperatorType& out, const InputType& input) const = 0;
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  template <class OperatorType, class Solution, class TrialFES, class TestFES>
+  class AssemblyBase<
+    OperatorType,
+    Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>>
+    : public FormLanguage::Base
+  {
+    public:
+      using InputType =
+        Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>;
+
+      virtual ~AssemblyBase() = default;
+      virtual void execute(OperatorType& out, const InputType& input) const = 0;
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
   /**
    * @brief Base class for assembling tuples of bilinear forms.
    *
