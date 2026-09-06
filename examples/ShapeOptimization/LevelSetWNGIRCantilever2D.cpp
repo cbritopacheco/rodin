@@ -15,7 +15,7 @@
 // skeleton lands on phi=0, the exterior is trimmed away, and linear elasticity
 // is solved on the fitted material submesh. The shape gradient (boundary strain
 // energy density minus a fixed Lagrange multiplier) is Hilbert-regularized,
-// the level set is reinitialized (FMM) and advected by the descent velocity.
+// the level set is optionally redistanced and advected by the descent velocity.
 //
 //   J(Omega) = compliance(Omega) + ell * |Omega|.
 //
@@ -26,6 +26,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/Region.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/Location.h>
 #include <Rodin/Math.h>
 #include <Rodin/MMG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
@@ -43,12 +44,15 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
+using namespace Rodin::Location;
 using namespace Rodin::Variational;
 using namespace Rodin::Adaptation;
 
@@ -64,7 +68,8 @@ namespace
   constexpr Attribute Gamma0 = 1;               // free outer       (bdr attr 1)
   constexpr Attribute GammaD = 2;               // clamped left     (bdr attr 2)
   constexpr Attribute GammaN = 3;               // loaded right-mid (bdr attr 3)
-  constexpr Attribute Gamma = 4;               // free interface   (bdr attr 4)
+  constexpr Attribute Gamma = 4; // free interface   (bdr attr 4)
+  constexpr Attribute WNGIRAnchor = 30;
 
   // Lame coefficients (plane, matching LevelSetCantilever2D).
   constexpr Real muLame = 0.3846;
@@ -78,9 +83,9 @@ namespace
     return out;
   }
 
-  Real applyPhaseMomentMap(Real phi, Real epsilon)
+  Real applyPhaseMomentMap(Real phi, Real epsilon, Real scale)
   {
-    return std::tanh(phi / epsilon);
+    return std::tanh(phi / (epsilon * std::max(scale, Real(1e-12))));
   }
 
   constexpr std::array<std::array<Real, 3>, 3> TriangleBarycentricQuadrature = {
@@ -94,6 +99,34 @@ namespace
     return (mesh.getVertexCoordinates(v[1]) - mesh.getVertexCoordinates(v[0])).norm();
   }
 
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  void installP2Transformations(WNGIRMesh& mesh)
+  {
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    const std::size_t sdim = mesh.getSpaceDimension();
+    for (std::size_t d = 1; d <= D; ++d)
+    {
+      for (auto pit = mesh.getPolytope(d); pit; ++pit)
+      {
+        const auto& polytope = *pit;
+        Variational::RealH1Element<2> geomFe(polytope.getGeometry());
+        Geometry::PointCloud pm(sdim, geomFe.getCount());
+        for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+        {
+          const auto& rc = geomFe.getNode(a);
+          polytope.getTransformation().transform(X, rc);
+          for (std::size_t c = 0; c < sdim; ++c)
+            pm(c, a) = X(c);
+        }
+        mesh.setPolytopeTransformation({d, polytope.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+      }
+    }
+  }
+#endif
+
   // Distance from point p to segment [a,b].
   Real pointSegmentDistance(const Vec2& p, const Vec2& a, const Vec2& b)
   {
@@ -104,74 +137,74 @@ namespace
     return (p - (a + t * ab)).norm();
   }
 
-  // Interface-residual (IR) reinit on a uniform lattice. Starting from the
-  // closest-point field `a` (exact zero set, medial-axis kinks), run K steps of
-  //   d_tau:  a <- a - dtau [ S0 (|grad a|_Godunov - 1) ]          (eikonal)
-  //                       + IR force from the fitted interface segments        (pin)
-  // The eikonal term cleans |grad a|->1 (smooths the kinks); the IR force
-  // -2*lambda*a(seg)*ds scattered to the 4 surrounding lattice nodes pins the
-  // zero set to the fitted interface (the int_Gamma a^2 gradient).
-  // `a` is row-major a[i*ny + j] on a gnx x gny lattice with spacing h.
-  void reinitIR(std::vector<Real>& a, int gnx, int gny, Real h,
-    const std::vector<std::array<Vec2, 2>>& seg, int K, Real lambdaIR)
+  struct FittedInterface2D
   {
-    auto AT = [&](int i, int j) -> Real& { return a[i * gny + j]; };
-    auto bilinear = [&](Real x, Real y) -> Real {
-      Real gx = x / h, gy = y / h;
-      int i = std::max(0, std::min(gnx - 2, (int)gx));
-      int j = std::max(0, std::min(gny - 2, (int)gy));
-      Real u = gx - i, v = gy - j;
-      return (1 - u) * (1 - v) * AT(i, j) + u * (1 - v) * AT(i + 1, j) +
-        (1 - u) * v * AT(i, j + 1) + u * v * AT(i + 1, j + 1);
-    };
-    std::vector<Real> S0(a.size());
-    for (std::size_t k = 0; k < a.size(); ++k)
-      S0[k] = a[k] / std::sqrt(a[k] * a[k] + h * h);
-    const Real dtau = Real(0.3) * h;
-    std::vector<Real> np = a;
-    for (int it = 0; it < K; ++it)
+      std::vector<std::array<Vec2, 2>> segments;
+      std::vector<Vec2> normals;
+  };
+
+  FittedInterface2D buildFittedInterface(const WNGIRMesh& background,
+    const WNGIRMesh& fitted, const std::vector<Index>& interfaceFacets)
+  {
+    FittedInterface2D out;
+    out.segments.reserve(interfaceFacets.size());
+    out.normals.reserve(interfaceFacets.size());
+    for (const Index f : interfaceFacets)
     {
-      np = a;
-      for (int i = 1; i < gnx - 1; ++i)
-        for (int j = 1; j < gny - 1; ++j)
-        {
-          const Real S = S0[i * gny + j];
-          const Real am = (AT(i, j) - AT(i - 1, j)) / h;
-          const Real ap = (AT(i + 1, j) - AT(i, j)) / h;
-          const Real cm = (AT(i, j) - AT(i, j - 1)) / h;
-          const Real cp = (AT(i, j + 1) - AT(i, j)) / h;
-          auto sq = [](Real x) { return x * x; };
-          Real gx2, gy2;
-          if (S > 0)
-          {
-            gx2 = std::max(sq(std::max(am, Real(0))), sq(std::min(ap, Real(0))));
-            gy2 = std::max(sq(std::max(cm, Real(0))), sq(std::min(cp, Real(0))));
-          }
-          else
-          {
-            gx2 = std::max(sq(std::min(am, Real(0))), sq(std::max(ap, Real(0))));
-            gy2 = std::max(sq(std::min(cm, Real(0))), sq(std::max(cp, Real(0))));
-          }
-          np[i * gny + j] -= dtau * S * (std::sqrt(gx2 + gy2) - Real(1));
-        }
-      // IR pin: scatter the int_Gamma a^2 gradient from each fitted segment.
-      for (const auto& s : seg)
+      const auto& vv = fitted.getFace(f)->getVertices();
+      const Vec2 a = fitted.getVertexCoordinates(vv[0]);
+      const Vec2 b = fitted.getVertexCoordinates(vv[1]);
+      Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));
+      const Real nn = nrm.norm();
+      nrm = nn > Real(1e-30) ? nrm / nn : vec2(1, 0);
+      const auto& inc = background.getConnectivity().getIncidence({1, 2}, f);
+      Vec2 cInt = vec2(0, 0);
+      bool haveInt = false;
+      for (const Index c : inc)
       {
-        const Vec2 m = Real(0.5) * (s[0] + s[1]);
-        const Real ds = (s[1] - s[0]).norm();
-        Real gx = m(0) / h, gy = m(1) / h;
-        int i = (int)gx, j = (int)gy;
-        if (i < 1 || i > gnx - 2 || j < 1 || j > gny - 2)
-          continue;
-        Real u = gx - i, v = gy - j;
-        const Real f = -dtau * lambdaIR * Real(2) * bilinear(m(0), m(1)) * ds / h;
-        np[i * gny + j] += f * (1 - u) * (1 - v);
-        np[(i + 1) * gny + j] += f * u * (1 - v);
-        np[i * gny + j + 1] += f * (1 - u) * v;
-        np[(i + 1) * gny + j + 1] += f * u * v;
+        const auto at = background.getAttribute(2, c);
+        if (at && *at == interiorAttribute)
+        {
+          const auto& cvv = background.getCell(c)->getVertices();
+          Vec2 ctr = vec2(0, 0);
+          for (const Index cv : cvv)
+            ctr += fitted.getVertexCoordinates(cv);
+          cInt = ctr / static_cast<Real>(cvv.size());
+          haveInt = true;
+          break;
+        }
       }
-      a.swap(np);
+      const Vec2 mid = Real(0.5) * (a + b);
+      if (haveInt && (mid - cInt).dot(nrm) < Real(0))
+        nrm = -nrm;
+      out.segments.push_back({a, b});
+      out.normals.push_back(nrm);
     }
+    return out;
+  }
+
+  Real signedDistanceToFittedInterface(
+    const Vec2& x, const FittedInterface2D& fittedInterface)
+  {
+    Real dmin = std::numeric_limits<Real>::infinity();
+    std::size_t kmin = 0;
+    for (std::size_t k = 0; k < fittedInterface.segments.size(); ++k)
+    {
+      const Real dk = pointSegmentDistance(
+        x, fittedInterface.segments[k][0], fittedInterface.segments[k][1]);
+      if (dk < dmin)
+      {
+        dmin = dk;
+        kmin = k;
+      }
+    }
+    if (!std::isfinite(dmin))
+      return Real(0);
+    const Vec2 mid =
+      Real(0.5) * (fittedInterface.segments[kmin][0] + fittedInterface.segments[kmin][1]);
+    const Real s =
+      (x - mid).dot(fittedInterface.normals[kmin]) >= Real(0) ? Real(1) : Real(-1);
+    return s * dmin;
   }
 
   struct CellMomentInfo
@@ -204,6 +237,25 @@ namespace
       const Vec2 e1 = info.x[1] - info.x[0];
       const Vec2 e2 = info.x[2] - info.x[0];
       info.area = std::abs(Real(0.5) * (e1(0) * e2(1) - e1(1) * e2(0)));
+      auto vertexValue = [&](Real r0, Real r1) -> Real {
+        Math::SpatialPoint rc(2);
+        rc(0) = r0;
+        rc(1) = r1;
+        return phiH.getValue(Geometry::Point(cell, rc));
+      };
+      const Real p0 = vertexValue(0, 0);
+      const Real p1 = vertexValue(1, 0);
+      const Real p2 = vertexValue(0, 1);
+      const Real det = e1(0) * e2(1) - e1(1) * e2(0);
+      Real gradScale = Real(1);
+      if (std::abs(det) > Real(1e-30))
+      {
+        const Real g0 = p1 - p0;
+        const Real g1 = p2 - p0;
+        const Real gx = (e2(1) * g0 - e1(1) * g1) / det;
+        const Real gy = (-e2(0) * g0 + e1(0) * g1) / det;
+        gradScale = std::sqrt(gx * gx + gy * gy);
+      }
       Real moment = 0;
       for (const auto& bary : TriangleBarycentricQuadrature)
       {
@@ -211,7 +263,7 @@ namespace
         rc(0) = bary[1];
         rc(1) = bary[2];
         const Geometry::Point pt(cell, rc);
-        moment += applyPhaseMomentMap(phiH.getValue(pt), epsilon);
+        moment += applyPhaseMomentMap(phiH.getValue(pt), epsilon, gradScale);
       }
       info.moment = moment / TriangleBarycentricQuadrature.size();
       cells.push_back(std::move(info));
@@ -231,6 +283,34 @@ namespace
       const auto& dofs = uFes.getDOFs(0, v);
       moved.setVertexCoordinates(v, vec2(x(0) + uData(dofs[0]), x(1) + uData(dofs[1])));
     }
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    const std::size_t sdim = mesh.getSpaceDimension();
+    for (std::size_t d = 1; d <= D; ++d)
+    {
+      for (auto pit = mesh.getPolytope(d); pit; ++pit)
+      {
+        const auto& polytope = *pit;
+        Variational::RealH1Element<2> geomFe(polytope.getGeometry());
+        Geometry::PointCloud pm(sdim, geomFe.getCount());
+        for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+        {
+          const auto& rc = geomFe.getNode(a);
+          polytope.getTransformation().transform(X, rc);
+          for (std::size_t c = 0; c < sdim; ++c)
+          {
+            const Real uc =
+              uData(uFes.getGlobalIndex({d, polytope.getIndex()}, a * sdim + c));
+            pm(c, a) = X(c) + uc;
+          }
+        }
+        moved.setPolytopeTransformation({d, polytope.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+      }
+    }
+#endif
   }
 
   std::size_t parseSizeTOption(
@@ -287,12 +367,7 @@ int main(int argc, char** argv)
   const std::size_t n = parseSizeTOption(argc, argv, "n", 80);  // cells along H
   const Real ell = parseRealOption(argc, argv, "ell", Real(0.4));
   const Real h = H / static_cast<Real>(n);   // uniform cell size = metric h
-  const Real hmin = parseRealOption(argc, argv, "hmin", Real(0.1) * h);
-  const bool initialMMG = parseSizeTOption(argc, argv, "initial-mmg", 0) != 0;
-  const Real initialMMGHMin = parseRealOption(argc, argv, "initial-mmg-hmin", hmin);
-  const Real initialMMGHMax = parseRealOption(argc, argv, "initial-mmg-hmax", h);
-  const Real initialMMGHausd =
-    parseRealOption(argc, argv, "initial-mmg-hausd", Real(0.5) * hmin);
+  const bool initialMMG = Rodin::Examples::boolOption(argc, argv, "initial-mmg", false);
   // Design-smoothness knobs (sensitive — raise gently):
   //   alpha  : Hilbertian shape-gradient length. alpha~2h smooths the boundary
   //            while keeping members; alpha>~4h washes features out (holes fill).
@@ -311,43 +386,29 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "objective-decrease-tol", Real(1e-10));
   // Empty (default) => uniform grid; pass --mesh=<file> to load instead.
   const std::string meshFile = parseStringOption(argc, argv, "mesh", "");
-  // Stage-6 redistance:
-  //   "cp" (default) : SUB-CELL reinit — signed closest-point distance to the
-  //                    WNGIR-fitted interface segments, signed by the outward
-  //                    normal of the nearest fitted segment (NOT the stale FMM
-  //                    sign, which produced the spurious crossings / singular
-  //                    phi). Carries the sub-cell fit; stable.
-  //   "fmm"          : fast-marching eikonal reinit pinned at the CLASSIFIED
-  //                    (cell-staircase) interface. Robust but not sub-cell.
-  //   "ir"           : Li-Xu distance-regularized level-set reinitialization.
-  //                    It starts from the clean FMM signed distance and uses
-  //                    the WNGIR-fitted interface only through an implicit
-  //                    surface pin, so the zero set is pulled sub-cell without
-  //                    feeding closest-point kinks to the distance regularizer.
-  //   "ir-phi"       : same Li-Xu distance regularizer, but the zero set is
-  //                    pinned by the carried level set phi_h through the
-  //                    coarea weight delta_eps(phi_h)|grad phi_h|. This does
-  //                    not use the fitted/classified mesh interface as the
-  //                    geometric reference.
-  //   "none"         : no reinitialization; advect the current carried phi_h.
-  //                    This is the cheapest path and avoids DRLSE texture, but
-  //                    the level-set scale is then controlled only by advection.
-  const std::string reinitMode = parseStringOption(argc, argv, "reinit", "cp");
-  const std::size_t irSteps = parseSizeTOption(argc, argv, "ir-steps", 30);
-  const Real irLambda = parseRealOption(argc, argv, "ir-lambda", Real(20));
-  const Real irDtauFactor = parseRealOption(argc, argv, "ir-dtau-factor", Real(0.1));
-  const Real irDeltaEps = parseRealOption(argc, argv, "ir-delta-eps", Real(1.5) * h);
-  const std::size_t reinitEvery = parseSizeTOption(argc, argv, "reinit-every", 1);
+  const std::string shapeDerivativeMode =
+    parseStringOption(argc, argv, "shape-derivative", "volume");
+  // Adaptive redistance is enabled by default. Periodic redistance is only
+  // requested through --redistance-every; use --redistance-mode=none to disable.
+  const std::size_t classifyEvery = parseSizeTOption(argc, argv, "classify-every", 1);
+  const std::string defaultRedistanceMode =
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    "cp";
+#else
+    "fmm";
+#endif
   const std::string redistanceMode =
-    parseStringOption(argc, argv, "redistance-mode", "none");
+    parseStringOption(argc, argv, "redistance-mode", defaultRedistanceMode);
+  const std::string redistanceTransfer =
+    parseStringOption(argc, argv, "redistance-transfer", "project");
   const std::size_t redistanceEvery = parseSizeTOption(argc, argv, "redistance-every", 0);
+  const bool adaptiveRedistance =
+    parseSizeTOption(argc, argv, "redistance-adaptive", 1) != 0;
+  const Real redistanceEikonalTol =
+    parseRealOption(argc, argv, "redistance-eikonal-tol", Real(0.35));
+  const Real poissonTransferInterfaceWeight =
+    parseRealOption(argc, argv, "poisson-transfer-interface-weight", Real(10) * h);
   const std::size_t outputEvery = parseSizeTOption(argc, argv, "output-every", 1);
-  const std::size_t irDpUpdateEvery =
-    std::max<std::size_t>(1, parseSizeTOption(argc, argv, "ir-dp-update-every", 1));
-  const std::size_t repairEvery = parseSizeTOption(argc, argv, "repair-every", 5);
-  const Real repairEta = parseRealOption(argc, argv, "repair-eta", Real(0.5) * h);
-  const Real repairBand = parseRealOption(argc, argv, "repair-band", Real(4) * h);
-  const bool repairCalibrate = parseSizeTOption(argc, argv, "repair-calibrate", 0) != 0;
   const bool printTiming = parseSizeTOption(argc, argv, "timing", 0) != 0;
   const bool trace = parseSizeTOption(argc, argv, "trace", 0) != 0;
 
@@ -394,43 +455,56 @@ int main(int argc, char** argv)
 
   if (initialMMG)
   {
-    std::cout << "  initial MMG remesh:"
-              << " hmin=" << initialMMGHMin << " hmax=" << initialMMGHMax
-              << " hausd=" << initialMMGHausd << "\n";
-    MMG::Mesh mmgMesh(std::move(mesh));
-    MMG::Optimizer optimizer;
-    optimizer.setHMin(initialMMGHMin).setHMax(initialMMGHMax).setAngleDetection(false);
-    if (initialMMGHausd > 0)
-      optimizer.setHausdorff(initialMMGHausd);
-    optimizer.optimize(mmgMesh);
-    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+    Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(0, 0);
     tagBoundary(mesh);
   }
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  installP2Transformations(mesh);
+#endif
 
+  Index wngirAnchorFacet = Index(-1);
+  Real wngirAnchorY = std::numeric_limits<Real>::infinity();
+  for (auto it = mesh.getBoundary(); it; ++it)
+  {
+    if (mesh.getAttribute(D - 1, it->getIndex()) != Attribute{GammaD})
+      continue;
+    const auto& vertices = it->getVertices();
+    Real ym = 0;
+    for (const Index vertex : vertices)
+      ym += mesh.getVertexCoordinates(vertex)(1);
+    ym /= static_cast<Real>(vertices.size());
+    if (ym < wngirAnchorY)
+    {
+      wngirAnchorY = ym;
+      wngirAnchorFacet = it->getIndex();
+    }
+  }
+
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  using ScalarFES = H1<2, Real, WNGIRMesh>;
+  using VectorFES = H1<2, Math::SpatialVector<Real>, WNGIRMesh>;
+#else
+  using ScalarFES = P1<Real, WNGIRMesh>;
+  using VectorFES = P1<Math::SpatialVector<Real>, WNGIRMesh>;
+#endif
   using ScalarP1 = P1<Real, WNGIRMesh>;
   using ScalarP0 = P0<Real, WNGIRMesh>;
   using VectorP1 = P1<Math::SpatialVector<Real>, WNGIRMesh>;
 
-  ScalarP1 sh(mesh);
-  // Uniform-grid lattice index (i,j)->vertex, for the FD IR reinit.
-  const int gnx = static_cast<int>(std::lround(L / h)) + 1;
-  const int gny = static_cast<int>(std::lround(H / h)) + 1;
-  std::vector<Index> gridVtx(static_cast<std::size_t>(gnx) * gny, 0);
-  if (meshFile.empty())
-    for (Index v = 0; v < mesh.getVertexCount(); ++v)
-    {
-      const Vec2 Xv = mesh.getVertexCoordinates(v);
-      const int i = static_cast<int>(std::lround(Xv(0) / h));
-      const int j = static_cast<int>(std::lround(Xv(1) / h));
-      if (i >= 0 && i < gnx && j >= 0 && j < gny)
-        gridVtx[static_cast<std::size_t>(i) * gny + j] = v;
-    }
-  ScalarP0 p0(mesh);
-  VectorP1 vh(mesh, 2);
+  ScalarFES sh(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    std::integral_constant<std::size_t, 2>{},
+#endif
+    mesh);
+  VectorFES vh(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    std::integral_constant<std::size_t, 2>{},
+#endif
+    mesh, 2);
 
   GridFunction phiH(sh);
   phiH.setName("phi");
@@ -439,11 +513,15 @@ int main(int argc, char** argv)
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");      // WNGIR fit
   GridFunction dJ(vh);
-  dJ.setName("dJ");            // shape velocity
+  dJ.setName("dJ"); // shape velocity
 
   // Reusable background-space objects. The background mesh connectivity is
   // fixed; only coefficients, attributes, and vertex coordinates are updated.
-  VectorP1 gradFes(mesh, 2);
+  VectorFES gradFes(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    std::integral_constant<std::size_t, 2>{},
+#endif
+    mesh, 2);
   GridFunction gradPhiSmoothed(gradFes);
   auto gradPhiDiscrete = Grad(phiH);
   TrialFunction gradTrial(gradFes);
@@ -453,34 +531,11 @@ int main(int argc, char** argv)
 
   GridFunction dist(sh);
   GridFunction speed(sh);
-  GridFunction phiR(sh);
-  GridFunction dp(p0);
-  TrialFunction irTrial(sh);
-  TestFunction irTest(sh);
-  BilinearForm irMass(irTrial, irTest);
-  irMass = Integral(irTrial, irTest);
-  irMass.assemble();
-  const Math::Vector<Real> irMassLump =
-    irMass.getOperator() * Math::Vector<Real>::Ones(phiH.getData().size());
-  BilinearForm irDiffusion(irTrial, irTest);
-  irDiffusion = Integral(dp * Grad(irTrial), Grad(irTest));
-  BilinearForm repairStiffness(irTrial, irTest);
-  repairStiffness = Integral(Grad(irTrial), Grad(irTest));
-  repairStiffness.assemble();
-  Math::SparseMatrix<Real> repairOperator = irMass.getOperator();
-  repairOperator += (repairEta * repairEta) * repairStiffness.getOperator();
-  Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
-    repairCG;
-  repairCG.setTolerance(Real(1e-10));
-  repairCG.setMaxIterations(static_cast<int>(phiH.getData().size()));
-  repairCG.compute(repairOperator);
 
   TrialFunction adv(sh);
   TestFunction advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  wngirDefaults.maxIterations = 60;
-  wngirDefaults.activeRMSOverHTol = Real(0.2);
   WNGIRParameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
@@ -514,24 +569,32 @@ int main(int argc, char** argv)
       if (ia != ib)
         mesh.setAttribute({D - 1, f}, Gamma);
     }
-    phiH = Real(0);
-    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiH)
+    ScalarP1 shP1(mesh);
+    GridFunction phiP1(shP1);
+    phiP1 = Real(0);
+    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiP1)
       .setInterior(interiorAttribute)
       .setInterface(Gamma)
       .solve()
       .sign();
+    phiH = [&](const Geometry::Point& p) -> Real { return phiP1.getValue(p); };
   }
 
-  IO::XDMF xdmf("LevelSetWNGIRCantilever2D");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever2D"));
   auto domainGrid = xdmf.grid("domain");
   domainGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   domainGrid.add(phiH, IO::XDMF::Center::Node);
   domainGrid.add(dJ, IO::XDMF::Center::Node);
 
   WNGIRMesh moved(mesh);
-  VectorP1 vhMoved(moved, 2);
+  VectorFES vhMoved(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    std::integral_constant<std::size_t, 2>{},
+#endif
+    moved, 2);
   TrialFunction g(vhMoved);
   TestFunction w(vhMoved);
+  auto fittedGrid = xdmf.grid("fitted");
   auto stateGrid = xdmf.grid("state");
 
   const std::string meshDescription = meshFile.empty()
@@ -542,19 +605,149 @@ int main(int argc, char** argv)
             << "\n  domain [0," << L << "]x[0," << H << "]"
             << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
-            << "\n  WNGIR: gammaM=" << wp.gammaM << " gammaDev=" << wp.gammaH
-            << " gammaDiv=" << wp.gammaDiv << " ellM=" << wp.ellM
-            << " rmsTol=" << wp.activeRMSTol << " supTol=" << wp.activeSupTol
-            << " steps=" << wp.maxIterations << "  reinit=" << reinitMode << "/"
-            << reinitEvery << "  redistance=" << redistanceMode << "/" << redistanceEvery
-            << "  repairEvery=" << repairEvery << "  outputEvery=" << outputEvery << '\n';
-  std::ofstream fObj("LevelSetWNGIRCantilever2D.obj.txt");
+            << "\n  WNGIR: kappaBulk=" << wp.kappaBulk
+            << " rDiv=" << wp.rDiv
+            << " rmsTol=" << wp.tauRms << " supTol=" << wp.tauInf
+            << " steps=" << wp.maxIterations << "  classify=" << classifyEvery
+            << "  redistance=" << redistanceMode << "/" << redistanceEvery
+            << " transfer=" << redistanceTransfer << " adaptive=" << adaptiveRedistance
+            << " eikTol=" << redistanceEikonalTol
+            << " poissonTransferInterfaceWeight=" << poissonTransferInterfaceWeight
+            << "  outputEvery=" << outputEvery << '\n';
+  std::ofstream fObj(Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever2D.obj.txt"));
 
   // Backtracking guard: body-fitted topology optimization can sever the load
   // path, making the elasticity solve singular (compliance -> inf/garbage).
   // We checkpoint the last good level set and, on a blown-up step, revert and
   // halve the step length.
   Math::Vector<Real> phiGood = phiH.getData();
+
+  auto resampleFromMoved = [&](auto& out, const auto& src, const WNGIRMesh& movedMesh) {
+    std::size_t misses = 0;
+    if (out.getData().size() == src.getData().size())
+      out.getData() = src.getData();
+    else
+      out = Real(0);
+    AABB locator(movedMesh);
+    Math::SpatialPoint x;
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const Index c = cellIt->getIndex();
+      const auto& fe = sh.getFiniteElement(D, c);
+      const auto& dofs = sh.getDOFs(D, c);
+      for (Index local = 0; local < fe.getCount(); ++local)
+      {
+        const Index global = dofs[local];
+        mesh.getPolytopeTransformation(D, c).transform(x, fe.getNode(local));
+        if (const auto p = locator.locate(x))
+          out.getData()(global) = src.getValue(*p);
+        else
+          misses++;
+      }
+    }
+    return misses;
+  };
+  auto fittedInterfaceResidual = [&](const std::vector<Index>& facets, const auto& gf,
+                                   const WNGIRMesh& gfMesh, bool locateOnBackground) {
+    AABB backgroundLocator(mesh);
+    Real maxResidual = 0;
+    Real rmsResidual = 0;
+    std::size_t samples = 0;
+    std::size_t misses = 0;
+    const std::array<Real, 3> qpts{Real(0), Real(0.5), Real(1)};
+    for (const Index f : facets)
+    {
+      const auto face = moved.getFace(f);
+      for (const Real t : qpts)
+      {
+        Math::SpatialPoint rc(1);
+        rc(0) = t;
+        Math::SpatialPoint y;
+        face->getTransformation().transform(y, rc);
+        Real value = 0;
+        if (locateOnBackground)
+        {
+          if (const auto p = backgroundLocator.locate(y))
+            value = gf.getValue(*p);
+          else
+          {
+            misses++;
+            continue;
+          }
+        }
+        else
+        {
+          value = gf.getValue(Geometry::Point(*face, rc, y));
+        }
+        const Real a = std::abs(value);
+        maxResidual = std::max(maxResidual, a);
+        rmsResidual += a * a;
+        samples++;
+      }
+    }
+    rmsResidual = samples > 0 ? std::sqrt(rmsResidual / samples) : Real(0);
+    return std::tuple<Real, Real, std::size_t>{maxResidual, rmsResidual, misses};
+  };
+  auto addFittedInterfacePenalty = [&](auto& transferSystem,
+                                     const std::vector<Index>& facets) {
+    if (!(poissonTransferInterfaceWeight > Real(0)))
+      return;
+    AABB backgroundLocator(mesh);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    triplets.reserve(facets.size() * 18);
+    const std::array<Real, 3> qx{Real(0.5) - std::sqrt(Real(3) / Real(5)) / Real(2),
+      Real(0.5), Real(0.5) + std::sqrt(Real(3) / Real(5)) / Real(2)};
+    const std::array<Real, 3> qw{
+      Real(5) / Real(18), Real(4) / Real(9), Real(5) / Real(18)};
+    std::size_t interfacePenaltyMisses = 0;
+    for (const Index f : facets)
+    {
+      const auto face = moved.getFace(f);
+      for (std::size_t q = 0; q < qx.size(); ++q)
+      {
+        Math::SpatialPoint rFace(1);
+        rFace(0) = qx[q];
+        Math::SpatialPoint y;
+        face->getTransformation().transform(y, rFace);
+        Math::SpatialMatrix<Real> JFace;
+        face->getTransformation().jacobian(JFace, rFace);
+        const Real ds = JFace.cols() > 0 ? JFace.col(0).norm() * qw[q] : Real(0);
+        if (!(ds > Real(0)))
+          continue;
+        const auto p = backgroundLocator.locate(y);
+        if (!p)
+        {
+          interfacePenaltyMisses++;
+          continue;
+        }
+        const Index c = p->getPolytope().getIndex();
+        const auto& fe = sh.getFiniteElement(D, c);
+        const auto& dofs = sh.getDOFs(D, c);
+        const Real wq = poissonTransferInterfaceWeight * ds;
+        for (Index a = 0; a < fe.getCount(); ++a)
+        {
+          const Real phiA = fe.getBasis(a)(p->getReferenceCoordinates());
+          if (std::abs(phiA) <= Real(1e-14))
+            continue;
+          const Index ia = dofs[a];
+          for (Index b = 0; b < fe.getCount(); ++b)
+          {
+            const Real phiB = fe.getBasis(b)(p->getReferenceCoordinates());
+            if (std::abs(phiB) <= Real(1e-14))
+              continue;
+            triplets.emplace_back(ia, dofs[b], wq * phiA * phiB);
+          }
+        }
+      }
+    }
+    Math::SparseMatrix<Real> interfacePenalty(
+      transferSystem.getOperator().rows(), transferSystem.getOperator().cols());
+    interfacePenalty.setFromTriplets(triplets.begin(), triplets.end());
+    transferSystem.getOperator() += interfacePenalty;
+    if (interfacePenaltyMisses > 0)
+      std::cout << "  redistance-interface-penalty:"
+                << " misses=" << interfacePenaltyMisses << '\n';
+  };
   Real dtCur = dt;
   Real complianceCap = std::numeric_limits<Real>::infinity();  // set after it 0
   Real lastAcceptedObjective = std::numeric_limits<Real>::infinity();
@@ -578,10 +771,38 @@ int main(int argc, char** argv)
     const Real gy = (-J01 * g0 + J00 * g1) / det;
     return std::sqrt(gx * gx + gy * gy);
   };
+  auto weightedEikonalDefect = [&](const auto& gf, Real eta) -> Real {
+    const Real eta2 = std::max(eta * eta, Real(1e-30));
+    Real weightedError = 0;
+    Real weightSum = 0;
+    for (auto cit = mesh.getCell(); cit; ++cit)
+    {
+      const auto& vv = cit->getVertices();
+      const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
+      const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
+      const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
+      const Real area = std::abs(Real(0.5) *
+        ((x1(0) - x0(0)) * (x2(1) - x0(1)) - (x1(1) - x0(1)) * (x2(0) - x0(0))));
+      Real phiAvg = 0;
+      for (const Index v : vv)
+        phiAvg += gf.getData()(sh.getGlobalIndex({0, v}, 0));
+      phiAvg /= static_cast<Real>(vv.size());
+      const Real omega = std::exp(-(phiAvg * phiAvg) / eta2);
+      const Real gradMag = backgroundCellGradientMagnitude(gf, *cit);
+      weightedError += area * omega * (gradMag - Real(1)) * (gradMag - Real(1));
+      weightSum += area * omega;
+    }
+    return weightSum > Real(0) ? std::sqrt(weightedError / weightSum) : Real(0);
+  };
 
   std::size_t shapeAttempts = 0;
   std::size_t acceptedShapeIterations = 0;
   std::string stopReason = "completed-requested-accepted-iterations";
+  bool haveClassification = false;
+  std::vector<char> previousInterior(mesh.getCellCount(), 0);
+  std::vector<Index> cachedInterfaceFacets;
+  Real cachedAreaInterior = 0;
+  std::size_t cachedInsideCount = 0;
   while (acceptedShapeIterations < maxIt)
   {
     const std::size_t it = acceptedShapeIterations;
@@ -590,138 +811,165 @@ int main(int argc, char** argv)
     StageTimer iterTimer;
     Real tClassify = 0, tGrad = 0, tWNGIR = 0, tMoveTrim = 0;
     Real tElasticity = 0, tHilbert = 0, tRedistance = 0, tAdvect = 0;
-    Real tRepair = 0, tWrite = 0;
+    Real tWrite = 0;
 
-    // ---- Stage 1: classify the carried level set -------------------------
-    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-      mesh.setAttribute({D, c}, Attribute{0});
-    // Clear ALL faces too: otherwise last iteration's Gamma interface faces
-    // persist, and FaceIntegral.over(Gamma)+traceOf(interior) hits a stale
-    // face with no interior neighbor -> crash. Re-tag the outer boundary after.
-    for (auto it = mesh.getFace(); it; ++it)
-      mesh.setAttribute({D - 1, it->getIndex()}, Attribute{0});
-    tagBoundary(mesh);
-
-    const auto cellMoments = collectCellMomentInfo(mesh, phiH, epsilon);
-    std::unordered_map<Index, std::size_t> cellToLocal;
-    std::vector<Index> localToCell;
-    cellToLocal.reserve(cellMoments.size());
-    for (std::size_t l = 0; l < cellMoments.size(); ++l)
-    {
-      cellToLocal[cellMoments[l].index] = l;
-      localToCell.push_back(cellMoments[l].index);
-    }
-    std::vector<Real> volumes(cellMoments.size()), moments(cellMoments.size());
-    for (std::size_t l = 0; l < cellMoments.size(); ++l)
-    {
-      volumes[l] = cellMoments[l].area;
-      moments[l] = cellMoments[l].moment;
-    }
-
-    std::vector<MinSTCut::Edge> graphEdges;
-    for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
-    {
-      const Index facet = faceIt->getIndex();
-      const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, facet);
-      if (inc.size() != 2)
-        continue;
-      const auto a = cellToLocal.find(inc[0]);
-      const auto b = cellToLocal.find(inc[1]);
-      if (a == cellToLocal.end() || b == cellToLocal.end())
-        continue;
-      graphEdges.push_back({static_cast<Index>(a->second), static_cast<Index>(b->second),
-        lambdaC * facetLength(mesh, facet), facet});
-    }
-
-    const MinSTCut cut;
-    const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
-
-    for (std::size_t l = 0; l < classified.labels.size(); ++l)
-      mesh.setAttribute({D, localToCell[l]},
-        classified.labels[l] == MinSTCut::Inside ? interiorAttribute : exteriorAttribute);
-
-    // ---- Connected-component cleanup -------------------------------------
-    // Remove interior material not connected, through interior cells, to the
-    // clamped support GammaD. Floating islands and load-only fragments carry
-    // rigid-body modes that make the elasticity solve singular; dropping them
-    // keeps every iteration well-posed (the body-fitted analogue of the weak
-    // ersatz material used on fixed grids).
-    {
-      std::vector<char> isSupportCell(mesh.getCellCount(), 0);
-      for (auto it = mesh.getBoundary(); it; ++it)
-      {
-        if (mesh.getAttribute(D - 1, it->getIndex()) != Attribute{GammaD})
-          continue;
-        for (const Index c : mesh.getConnectivity().getIncidence({1, 2}, it->getIndex()))
-          isSupportCell[c] = 1;
-      }
-      const auto comps = mesh
-                           .ccl([](const Polytope& a, const Polytope& b) {
-                             return a.getAttribute() == b.getAttribute();
-                           })
-                           .getComponents();
-      std::size_t removed = 0;
-      for (const auto& comp : comps)
-      {
-        if (comp.empty())
-          continue;
-        const Index rep = *comp.begin();
-        const auto ra = mesh.getAttribute(D, rep);
-        if (!ra || *ra != interiorAttribute)
-          continue;   // exterior component
-        bool anchored = false;
-        for (const Index c : comp)
-          if (isSupportCell[c])
-          {
-            anchored = true;
-            break;
-          }
-        if (!anchored)
-          for (const Index c : comp)
-          {
-            mesh.setAttribute({D, c}, exteriorAttribute);
-            ++removed;
-          }
-      }
-      if (removed)
-        std::cout << "  CCL: removed " << removed
-                  << " floating interior cells (unsupported components)\n";
-    }
-
-    // ---- Interface = internal faces between interior and exterior --------
     std::vector<Index> interfaceFacets;
-    for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+    std::size_t nInside = cachedInsideCount;
+    Real areaInterior = cachedAreaInterior;
+    const bool doClassify =
+      !haveClassification || classifyEvery == 0 || (it % classifyEvery == 0);
+    if (doClassify)
     {
-      const Index f = faceIt->getIndex();
-      const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-      if (inc.size() != 2)
-        continue;
-      const auto a = mesh.getAttribute(D, inc[0]);
-      const auto b = mesh.getAttribute(D, inc[1]);
-      const bool ia = a && *a == interiorAttribute;
-      const bool ib = b && *b == interiorAttribute;
-      if (ia != ib)
-      {
-        interfaceFacets.push_back(f);
-        mesh.setAttribute({D - 1, f}, Gamma);
-      }
-    }
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+        mesh.setAttribute({D, c}, Attribute{0});
+      for (auto fit = mesh.getFace(); fit; ++fit)
+        mesh.setAttribute({D - 1, fit->getIndex()}, Attribute{0});
+      tagBoundary(mesh);
 
-    std::size_t nInside = 0;
-    Real areaInterior = 0;
-    for (std::size_t l = 0; l < classified.labels.size(); ++l)
+      const auto cellMoments = collectCellMomentInfo(mesh, phiH, epsilon);
+      std::unordered_map<Index, std::size_t> cellToLocal;
+      std::vector<Index> localToCell;
+      cellToLocal.reserve(cellMoments.size());
+      for (std::size_t l = 0; l < cellMoments.size(); ++l)
+      {
+        cellToLocal[cellMoments[l].index] = l;
+        localToCell.push_back(cellMoments[l].index);
+      }
+      std::vector<Real> volumes(cellMoments.size()), moments(cellMoments.size());
+      for (std::size_t l = 0; l < cellMoments.size(); ++l)
+      {
+        volumes[l] = cellMoments[l].area;
+        moments[l] = cellMoments[l].moment;
+      }
+
+      std::vector<MinSTCut::Edge> graphEdges;
+      for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+      {
+        const Index facet = faceIt->getIndex();
+        const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, facet);
+        if (inc.size() != 2)
+          continue;
+        const auto a = cellToLocal.find(inc[0]);
+        const auto b = cellToLocal.find(inc[1]);
+        if (a == cellToLocal.end() || b == cellToLocal.end())
+          continue;
+        graphEdges.push_back({static_cast<Index>(a->second),
+          static_cast<Index>(b->second), lambdaC * facetLength(mesh, facet), facet});
+      }
+
+      const MinSTCut cut;
+      const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
+
+      for (std::size_t l = 0; l < classified.labels.size(); ++l)
+        mesh.setAttribute({D, localToCell[l]},
+          classified.labels[l] == MinSTCut::Inside ? interiorAttribute
+                                                   : exteriorAttribute);
+
+      {
+        std::vector<char> isSupportCell(mesh.getCellCount(), 0);
+        for (auto bit = mesh.getBoundary(); bit; ++bit)
+        {
+          if (mesh.getAttribute(D - 1, bit->getIndex()) != Attribute{GammaD})
+            continue;
+          for (const Index c :
+            mesh.getConnectivity().getIncidence({1, 2}, bit->getIndex()))
+            isSupportCell[c] = 1;
+        }
+        const auto comps = mesh
+                             .ccl([](const Polytope& a, const Polytope& b) {
+                               return a.getAttribute() == b.getAttribute();
+                             })
+                             .getComponents();
+        std::size_t removed = 0;
+        for (const auto& comp : comps)
+        {
+          if (comp.empty())
+            continue;
+          const Index rep = *comp.begin();
+          const auto ra = mesh.getAttribute(D, rep);
+          if (!ra || *ra != interiorAttribute)
+            continue;
+          bool anchored = false;
+          for (const Index c : comp)
+            if (isSupportCell[c])
+            {
+              anchored = true;
+              break;
+            }
+          if (!anchored)
+            for (const Index c : comp)
+            {
+              mesh.setAttribute({D, c}, exteriorAttribute);
+              ++removed;
+            }
+        }
+        if (removed)
+          std::cout << "  CCL: removed " << removed
+                    << " floating interior cells (unsupported components)\n";
+      }
+
+      for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+      {
+        const Index f = faceIt->getIndex();
+        const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
+        if (inc.size() != 2)
+          continue;
+        const auto a = mesh.getAttribute(D, inc[0]);
+        const auto b = mesh.getAttribute(D, inc[1]);
+        const bool ia = a && *a == interiorAttribute;
+        const bool ib = b && *b == interiorAttribute;
+        if (ia != ib)
+        {
+          interfaceFacets.push_back(f);
+          mesh.setAttribute({D - 1, f}, Gamma);
+        }
+      }
+
+      std::vector<char> currentInterior(mesh.getCellCount(), 0);
+      nInside = 0;
+      areaInterior = 0;
+      for (std::size_t l = 0; l < classified.labels.size(); ++l)
+      {
+        const auto a = mesh.getAttribute(D, localToCell[l]);
+        if (a && *a == interiorAttribute)
+        {
+          ++nInside;
+          areaInterior += cellMoments[l].area;
+          currentInterior[localToCell[l]] = 1;
+        }
+      }
+      std::size_t changedCells = 0;
+      if (haveClassification)
+        for (std::size_t c = 0; c < currentInterior.size(); ++c)
+          if (currentInterior[c] != previousInterior[c])
+            ++changedCells;
+      std::vector<Index> oldFacets = cachedInterfaceFacets;
+      std::vector<Index> newFacets = interfaceFacets;
+      std::sort(oldFacets.begin(), oldFacets.end());
+      std::sort(newFacets.begin(), newFacets.end());
+      std::vector<Index> changedFacets;
+      std::set_symmetric_difference(oldFacets.begin(), oldFacets.end(), newFacets.begin(),
+        newFacets.end(), std::back_inserter(changedFacets));
+      previousInterior = std::move(currentInterior);
+      cachedInterfaceFacets = interfaceFacets;
+      cachedAreaInterior = areaInterior;
+      cachedInsideCount = nInside;
+      haveClassification = true;
+      std::cout << "  classify: interior cells=" << nInside
+                << "  interface facets=" << interfaceFacets.size()
+                << "  area=" << std::fixed << std::setprecision(4) << areaInterior
+                << "  changedCells=" << changedCells
+                << "  changedInterface=" << changedFacets.size() << '\n';
+    }
+    else
     {
-      const auto a = mesh.getAttribute(D, localToCell[l]);
-      if (a && *a == interiorAttribute)
-      {
-        ++nInside;
-        areaInterior += cellMoments[l].area;
-      }
+      interfaceFacets = cachedInterfaceFacets;
+      std::cout << "  classify: skipped"
+                << "  interior cells=" << nInside
+                << "  interface facets=" << interfaceFacets.size()
+                << "  area=" << std::fixed << std::setprecision(4) << areaInterior
+                << '\n';
     }
-
-    std::cout << "  classify: interior cells=" << nInside
-              << "  interface facets=" << interfaceFacets.size()
-              << "  area=" << std::fixed << std::setprecision(4) << areaInterior << '\n';
     tClassify = iterTimer.reset();
 
     // ---- Stage 2: WNGIR fit mesh so skeleton lands on phi=0 --------------
@@ -738,8 +986,9 @@ int main(int argc, char** argv)
       /*dim=*/2);
 
     u.getData().setZero();
+    WNGIRReport rep;
     {
-      const auto rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
+      rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
       // Diagnostic: did WNGIR actually move the mesh, and did it converge?
       Real maxUoverH = 0;
       const auto& uFes = u.getFiniteElementSpace();
@@ -749,12 +998,18 @@ int main(int argc, char** argv)
         const Real ux = u.getData()(d[0]), uy = u.getData()(d[1]);
         maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
       }
-      const Real activeRMSOverH = h > Real(0) ? rep.activeRMS / h : Real(0);
-      const Real activeSupOverH = h > Real(0) ? rep.activeSup / h : Real(0);
+      const Real levelSetMeshScale = h * rep.levelSetGradientScale;
+      const Real activeRMSOverH =
+        levelSetMeshScale > Real(0) ? rep.activeRMS / levelSetMeshScale : Real(0);
+      const Real activeSupOverH =
+        levelSetMeshScale > Real(0) ? rep.activeSup / levelSetMeshScale : Real(0);
       std::cout << "  WNGIR: it=" << rep.iterations << "  exit=" << rep.exitReason
                 << "  activeRMS=" << std::scientific << std::setprecision(2)
-                << rep.activeRMS << "  activeRMS/h=" << activeRMSOverH
-                << "  activeSup/h=" << activeSupOverH << "  max|u|/h=" << maxUoverH
+                << rep.activeRMS << "  activeRMS/(hG)=" << activeRMSOverH
+                << "  activeSup/(hG)=" << activeSupOverH
+                << "  tolRMS/(hG)=" << rep.effectiveTauRmsH
+                << "  tolSup/(hG)=" << rep.effectiveTauInfH
+                << "  nJumpRMS=" << rep.normalJumpRMS << "  max|u|/h=" << maxUoverH
                 << '\n';
     }
     tWNGIR = iterTimer.reset();
@@ -774,9 +1029,20 @@ int main(int argc, char** argv)
     // ---- Stage 3: elasticity on the fitted material submesh --------------
     SubMesh<Context::Local> trimmed = moved.trim(exteriorAttribute);
     trimmed.getConnectivity().compute(1, 2);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    trimmed.getConnectivity().compute(2, 1);
+    trimmed.getConnectivity().compute(1, 0);
+    trimmed.getConnectivity().compute(2, 2);
+#endif
     tMoveTrim = iterTimer.reset();
 
-    VectorP1 vhInt(trimmed, 2);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    using StateVectorFES = H1<2, Math::SpatialVector<Real>, WNGIRMesh>;
+    StateVectorFES vhInt(std::integral_constant<std::size_t, 2>{}, trimmed, 2);
+#else
+    using StateVectorFES = P1<Math::SpatialVector<Real>, WNGIRMesh>;
+    StateVectorFES vhInt(trimmed, 2);
+#endif
     auto fLoad = VectorFunction{Real(0), Real(-1)};
     TrialFunction us(vhInt);
     TestFunction vs(vhInt);
@@ -867,18 +1133,139 @@ int main(int argc, char** argv)
     auto Ae = Real(2) * muLame * e + lambdaLame * Trace(e) * IdentityMatrix(2);
     auto nrm = FaceNormal(moved);
     nrm.traceOf(interiorAttribute);
+    auto shapeDensity = Dot(Ae, e) - ell;
+    if (trace)
+    {
+      Real minFaceDist = std::numeric_limits<Real>::infinity();
+      Real maxFaceDist = Real(0);
+      Real maxAbsRho = Real(0);
+      Real maxAbsWeightedRho = Real(0);
+      Index minDistFacet = -1;
+      Index maxRhoFacet = -1;
+      Index maxWeightedFacet = -1;
+      std::size_t faceCount = 0;
+      for (auto fit = moved.getFace(); fit; ++fit)
+      {
+        const auto attr = fit->getAttribute();
+        if (!attr || *attr != Gamma)
+          continue;
+        ++faceCount;
+        const auto& qf = QF::PolytopeQuadratureFormula::get(8, fit->getGeometry());
+        const auto& q = fit->getQuadrature(qf);
+        for (std::size_t qp = 0; qp < q.getSize(); ++qp)
+        {
+          const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, &qf, qp);
+          const Real dist = p.getDistortion();
+          const Real rho = shapeDensity(ip);
+          const Real absRho = std::abs(rho);
+          const Real absWeightedRho = absRho * dist;
+          if (dist < minFaceDist)
+          {
+            minFaceDist = dist;
+            minDistFacet = fit->getIndex();
+          }
+          if (dist > maxFaceDist)
+            maxFaceDist = dist;
+          if (absRho > maxAbsRho)
+          {
+            maxAbsRho = absRho;
+            maxRhoFacet = fit->getIndex();
+          }
+          if (absWeightedRho > maxAbsWeightedRho)
+          {
+            maxAbsWeightedRho = absWeightedRho;
+            maxWeightedFacet = fit->getIndex();
+          }
+        }
+      }
+      std::cout << "  hilbertFaceDiag: faces=" << faceCount
+                << " minDist=" << std::scientific << minFaceDist << "@f" << minDistFacet
+                << " maxDist=" << maxFaceDist << " max|rho|=" << maxAbsRho << "@f"
+                << maxRhoFacet << " max|rho|ds=" << maxAbsWeightedRho << "@f"
+                << maxWeightedFacet << '\n';
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      LinearForm faceRhs(w);
+      faceRhs -= FaceIntegral(shapeDensity, Dot(nrm, w)).over(Gamma);
+      faceRhs.assemble();
+
+      const auto assembleManualFaceRhs = [&](std::size_t order) {
+        Math::Vector<Real> manual(faceRhs.getVector().size());
+        manual.setZero();
+        const std::size_t vdim = vhMoved.getVectorDimension();
+        for (auto fit = moved.getFace(); fit; ++fit)
+        {
+          const auto attr = fit->getAttribute();
+          if (!attr || *attr != Gamma)
+            continue;
+          const auto& qf = QF::PolytopeQuadratureFormula::get(order, fit->getGeometry());
+          const auto& q = fit->getQuadrature(qf);
+          const Variational::RealH1Element<2> scalarFE(fit->getGeometry());
+          const auto& tab = scalarFE.getTabulation(qf);
+          const auto& dofs = vhMoved.getDOFs(fit->getDimension(), fit->getIndex());
+          for (std::size_t qp = 0; qp < q.getSize(); ++qp)
+          {
+            const auto& p = q.getPoint(qp);
+            const IntegrationPoint ip(p, &qf, qp);
+            const Real wdet = qf.getWeight(qp) * p.getDistortion();
+            const Real rho = shapeDensity(ip);
+            const Vec2 normal = nrm(ip);
+            for (std::size_t l = 0; l < static_cast<std::size_t>(dofs.size()); ++l)
+            {
+              const std::size_t scalarLocal = l / vdim;
+              const std::size_t comp = l % vdim;
+              manual(dofs(l)) -=
+                wdet * rho * normal(comp) * tab.getBasis(qp, scalarLocal);
+            }
+          }
+        }
+        return manual;
+      };
+      Eigen::Index iForm = 0;
+      const Real maxForm = faceRhs.getVector().cwiseAbs().maxCoeff(&iForm);
+      std::cout << "  faceRhsCheck: maxForm=" << maxForm << "@dof" << iForm;
+      for (const std::size_t order : {std::size_t(2), std::size_t(4), std::size_t(8)})
+      {
+        const Math::Vector<Real> manual = assembleManualFaceRhs(order);
+        const Math::Vector<Real> diff = faceRhs.getVector() - manual;
+        const Real manualNorm = std::max(manual.norm(), Real(1e-30));
+        Eigen::Index iManual = 0, iDiff = 0;
+        const Real maxManual = manual.cwiseAbs().maxCoeff(&iManual);
+        const Real maxDiff = diff.cwiseAbs().maxCoeff(&iDiff);
+        std::cout << " q" << order << " relL2=" << diff.norm() / manualNorm
+                  << " maxManual=" << maxManual << "@dof" << iManual
+                  << " maxDiff=" << maxDiff << "@dof" << iDiff;
+      }
+      std::cout << '\n';
+#endif
+    }
     Problem hilbert(g, w);
-    hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) + Integral(g, w) -
-      FaceIntegral(Dot(Ae, e) - ell, Dot(nrm, w)).over(Gamma) +
-      DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaD) +
-      DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaN);
+    if (shapeDerivativeMode == "volume")
+    {
+      auto eshelby = shapeDensity * IdentityMatrix(2) - Real(2) * jac.T() * Ae;
+      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) +
+        Integral(g, w) - Integral(eshelby, Jacobian(w)).over(interiorAttribute) +
+        DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaD) +
+        DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaN);
+    }
+    else
+    {
+      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) +
+        Integral(g, w) - FaceIntegral(shapeDensity, Dot(nrm, w)).over(Gamma) +
+        DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaD) +
+        DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaN);
+    }
     Solver::CG(hilbert).solve();
+    dJ.getData() = g.getSolution().getData();
+    speed = Frobenius(dJ);
+    const Real dJNormInf = std::max(speed.max(), Real(1e-30));
+    g.getSolution().getData() /= dJNormInf;
+    dJ.getData() /= dJNormInf;
     // Velocity is computed on `moved`; carry it to the fixed background grid
     // (same connectivity) to advect phi there. The moved->background transfer
     // is a coefficient copy; since the fit displacement is zero on the outer
     // boundary and the velocity is H1-smooth, the discrepancy is O(u) near the
     // interface (acceptable for the descent direction).
-    dJ.getData() = g.getSolution().getData();
     tHilbert = iterTimer.reset();
 
     // ---- XDMF snapshot of the accepted objective state -------------------
@@ -891,6 +1278,9 @@ int main(int argc, char** argv)
       domainGrid.clear();
       domainGrid.add("phi", phiH, IO::XDMF::Center::Node);
       domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
+      fittedGrid.clear();
+      fittedGrid.setMesh(moved, IO::XDMF::MeshPolicy::Transient);
+      fittedGrid.add("dJ_fit", g.getSolution(), IO::XDMF::Center::Node);
       stateGrid.clear();
       stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
       stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
@@ -898,442 +1288,214 @@ int main(int argc, char** argv)
     }
     tWrite = iterTimer.reset();
 
-    // ---- Stage 5: redistance from the WNGIR-FITTED interface -------------
-    // The FMM gives the correct *sign* field and far distances, but its zero
-    // set is the cell-quantized classifier staircase. Inside a narrow band we
-    // overwrite the magnitude with the exact distance to the WNGIR-fitted
-    // interface facets (moved-mesh segments at X+u), so phi carries the
-    // sub-cell interface position forward instead of re-quantizing every step.
-    std::string activeReinitMode = reinitMode;
-    bool doReinit = reinitMode != "none" && reinitEvery > 0 &&
-      (it % reinitEvery == 0 || it + 1 == maxIt);
-    if (!doReinit && reinitMode == "none" && redistanceMode != "none" &&
-      redistanceEvery > 0 && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt))
-    {
-      activeReinitMode = redistanceMode;
-      doReinit = true;
-    }
-    if (!doReinit)
+    // ---- Stage 5: optional redistance --------------------------------------
+    const Real redistanceEta = rep.levelSetGradientScale > Real(0)
+      ? std::max(rep.sigma / rep.levelSetGradientScale, Real(3) * h)
+      : Real(3) * h;
+    const Real eikonalDefect = weightedEikonalDefect(phiH, redistanceEta);
+    const bool periodicRedistance =
+      redistanceEvery > 0 && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt);
+    const bool adaptiveRedistanceNow =
+      adaptiveRedistance && eikonalDefect > redistanceEikonalTol;
+    const bool doRedistance =
+      redistanceMode != "none" && (periodicRedistance || adaptiveRedistanceNow);
+    if (!doRedistance)
     {
       dist.getData() = phiH.getData();
+      std::cout << "  redistance: skipped"
+                << " eikWelsch=" << std::scientific << eikonalDefect
+                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0)) << '\n';
     }
     else
     {
-      dist = Real(0);
-      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(dist)
-        .setInterior(interiorAttribute)
-        .setInterface(Gamma)
-        .solve()
-        .sign();
-      const Math::Vector<Real> fmmDist = dist.getData();
-      // reinit=fmm: use the plain FMM signed distance (the reference example's
-      // reinit) with NO closest-point/IR overwrite — diagnostic baseline.
-      if (activeReinitMode != "fmm")
+      bool distanciationApplied = true;
+      if ((redistanceMode == "cp" || redistanceMode == "poisson") &&
+        interfaceFacets.empty())
       {
-      // Each fitted segment gets an OUTWARD unit normal (pointing from the
-      // interior neighbour to the exterior), so the closest-point sign is taken
-      // from the fitted interface itself, NOT from the stale FMM/staircase sign.
-      // Using the FMM sign caused a spurious zero crossing (phantom sliver ->
-      // singular elasticity) wherever the fit moved the interface across a node.
-        std::vector<std::array<Vec2, 2>> fittedSeg;
-        std::vector<Vec2> fittedN;
-        fittedSeg.reserve(interfaceFacets.size());
-        fittedN.reserve(interfaceFacets.size());
-        for (const Index f : interfaceFacets)
+        dist.getData() = phiH.getData();
+        distanciationApplied = false;
+        std::cout << "  redistance: skipped-empty-interface"
+                  << " mode=" << redistanceMode << " eikWelsch=" << std::scientific
+                  << eikonalDefect << '\n';
+      }
+      else if (redistanceMode == "poisson")
+      {
+        ScalarFES shFit(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+          std::integral_constant<std::size_t, 2>{},
+#endif
+          moved);
+        ScalarP0 p0Fit(moved);
+        GridFunction source(p0Fit);
+        for (auto cellIt = moved.getCell(); cellIt; ++cellIt)
         {
-          const auto& vv = moved.getFace(f)->getVertices();
-          const Vec2 a = moved.getVertexCoordinates(vv[0]);
-          const Vec2 b = moved.getVertexCoordinates(vv[1]);
-          Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));        // perp to segment
-          const Real nn = nrm.norm();
-          if (nn > Real(1e-30))
-            nrm = nrm / nn;
-          else
-            nrm = vec2(1, 0);
-        // orient away from the interior incident cell's (moved) centroid
-          const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-          Vec2 cInt = vec2(0, 0);
-          bool haveInt = false;
-          for (const Index c : inc)
-          {
-            const auto at = mesh.getAttribute(D, c);
-            if (at && *at == interiorAttribute)
-            {
-              const auto& cvv = mesh.getCell(c)->getVertices();
-              Vec2 ctr = vec2(0, 0);
-              for (const Index cv : cvv)
-                ctr += moved.getVertexCoordinates(cv);
-              cInt = ctr / static_cast<Real>(cvv.size());
-              haveInt = true;
-              break;
-            }
-          }
-          const Vec2 mid = Real(0.5) * (a + b);
-          if (haveInt && (mid - cInt).dot(nrm) < Real(0))
-            nrm = -nrm;
-          fittedSeg.push_back({a, b});
-          fittedN.push_back(nrm);
+          const Index c = cellIt->getIndex();
+          const auto at = moved.getAttribute(D, c);
+          source.getData()(p0Fit.getGlobalIndex({D, c}, 0)) =
+            (at && *at == interiorAttribute) ? Real(-1) : Real(1);
         }
-        auto overwriteClosestPointBand = [&]() {
-          const Real band = Real(6) * h;
-          for (Index v = 0; v < mesh.getVertexCount(); ++v)
-          {
-            const Index d = sh.getGlobalIndex({0, v}, 0);
-            if (std::abs(fmmDist(d)) > band)
-              continue;
-            const Vec2 X = mesh.getVertexCoordinates(v);
-            Real dmin = std::numeric_limits<Real>::infinity();
-            std::size_t kmin = 0;
-            for (std::size_t k = 0; k < fittedSeg.size(); ++k)
-            {
-              const Real dk = pointSegmentDistance(X, fittedSeg[k][0], fittedSeg[k][1]);
-              if (dk < dmin)
-              {
-                dmin = dk;
-                kmin = k;
-              }
-            }
-            if (std::isfinite(dmin))
-            {
-              const Vec2 mid = Real(0.5) * (fittedSeg[kmin][0] + fittedSeg[kmin][1]);
-              const Real s = (X - mid).dot(fittedN[kmin]) >= Real(0)
-                ? Real(1)
-                : Real(-1);   // outward = exterior = +
-              dist.getData()(d) = s * dmin;
-            }
-          }
-        };
-
-        auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {
-          const auto& vv = cell.getVertices();
-          const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-          const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-          const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-          const Real p0v = gf.getData()(sh.getGlobalIndex({0, vv[0]}, 0));
-          const Real p1v = gf.getData()(sh.getGlobalIndex({0, vv[1]}, 0));
-          const Real p2v = gf.getData()(sh.getGlobalIndex({0, vv[2]}, 0));
-          const Real J00 = x1(0) - x0(0), J01 = x2(0) - x0(0);
-          const Real J10 = x1(1) - x0(1), J11 = x2(1) - x0(1);
-          const Real det = J00 * J11 - J01 * J10;
-          if (std::abs(det) < Real(1e-30))
-            return Real(1);
-          const Real g0 = p1v - p0v;
-          const Real g1 = p2v - p0v;
-          const Real gx = (J11 * g0 - J10 * g1) / det;
-          const Real gy = (-J01 * g0 + J00 * g1) / det;
-          return std::sqrt(gx * gx + gy * gy);
-        };
-
-        auto gradientStats = [&](const auto& gf, bool cutCellsOnly) {
-          Real gmin = std::numeric_limits<Real>::infinity();
-          Real gmax = Real(0);
-          const Real band = Real(4) * h;
-          std::size_t cnt = 0;
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            Real av = Real(0);
-            Real vmin = std::numeric_limits<Real>::infinity();
-            Real vmax = -std::numeric_limits<Real>::infinity();
-            for (const Index v : vv)
-            {
-              const Real pv = gf.getData()(sh.getGlobalIndex({0, v}, 0));
-              av += std::abs(pv);
-              vmin = std::min(vmin, pv);
-              vmax = std::max(vmax, pv);
-            }
-            av /= static_cast<Real>(vv.size());
-            if (cutCellsOnly)
-            {
-              if (!(vmin <= Real(0) && vmax >= Real(0)))
-                continue;
-            }
-            else if (av > band)
-            {
-              continue;
-            }
-            const Real gm = cellGradientMagnitude(gf, *cit);
-            gmin = std::min(gmin, gm);
-            gmax = std::max(gmax, gm);
-            ++cnt;
-          }
-          if (cnt == 0)
-            return std::array<Real, 2>{Real(0), Real(0)};
-          return std::array<Real, 2>{gmin, gmax};
-        };
-
-        if (activeReinitMode == "ir" || activeReinitMode == "ir-phi")
+        TrialFunction pd(shFit);
+        TestFunction qd(shFit);
+        RealFunction zero = 0;
+        Problem poissonDistance(pd, qd);
+        poissonDistance = Integral(Grad(pd), Grad(qd)) - Integral(source, qd) +
+          DirichletBC(pd, zero).on(Gamma);
+        Solver::CG(poissonDistance).solve();
+        const auto [srcMaxGamma, srcRMSGamma, srcMissesGamma] =
+          fittedInterfaceResidual(interfaceFacets, pd.getSolution(), moved, false);
+        GridFunction nodalDist(sh);
+        const std::size_t misses = resampleFromMoved(nodalDist, pd.getSolution(), moved);
+        if (redistanceTransfer == "resample")
         {
-        // Li-Xu DRLSE with the full signed bounded double-well diffusivity
-        //
-        //   d_p(s) = 1 - 1/s,                 s >= 1,
-        //          = sin(2*pi*s)/(2*pi*s),    s <  1,
-        //
-        // and an implicit interface pin. For reinit=ir, the pin is
-        // int_{Gamma_fit} phi^2 ds on the moved WNGIR segments. For
-        // reinit=ir-phi, the pin is the coarea approximation
-        // int delta_eps(phi_h) |grad phi_h| phi^2 dx, hence the geometric
-        // reference is the level set itself and not the classified mesh.
-          const Real dtauR = irDtauFactor * h * h;
-          const int Kr = static_cast<int>(irSteps);
-          if (activeReinitMode == "ir")
-          {
-          // Mesh-pinned variant: start from the clean FMM SDF and use the
-          // fitted mesh only as a zero-trace constraint.
-            dist.getData() = fmmDist;
-            phiR.getData() = dist.getData();
-          }
-          else
-          {
-            // Phi-pinned variant: start from the carried level set, rescaled by
-            // the average cut-cell gradient so the unknown has distance units.
-            Real gsum = Real(0);
-            std::size_t gcnt = 0;
-            for (auto cit = mesh.getCell(); cit; ++cit)
-            {
-              const auto& vv = cit->getVertices();
-              Real vmin = std::numeric_limits<Real>::infinity();
-              Real vmax = -std::numeric_limits<Real>::infinity();
-              for (const Index v : vv)
-              {
-                const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
-                vmin = std::min(vmin, pv);
-                vmax = std::max(vmax, pv);
-              }
-              if (vmin <= Real(0) && vmax >= Real(0))
-              {
-                gsum += cellGradientMagnitude(phiH, *cit);
-                ++gcnt;
-              }
-            }
-            const Real gscale =
-              gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12)) : Real(1);
-            phiR.getData() = phiH.getData() / gscale;
-          }
-          std::vector<Eigen::Triplet<Real>> pinTriplets;
-
-          auto addPinPoint = [&](const Vec2& y, Real w) {
-            Math::SpatialPoint pc(2);
-            pc(0) = y(0);
-            pc(1) = y(1);
-            constexpr Real tol = Real(1e-10);
-            for (auto cit = mesh.getCell(); cit; ++cit)
-            {
-              Math::SpatialPoint rc(2);
-              cit->getTransformation().inverse(rc, pc);
-              const Real l0 = Real(1) - rc(0) - rc(1);
-              const Real l1 = rc(0);
-              const Real l2 = rc(1);
-              if (l0 < -tol || l1 < -tol || l2 < -tol)
-                continue;
-              const auto& vv = cit->getVertices();
-              const std::array<Real, 3> N = {{l0, l1, l2}};
-              for (std::size_t a = 0; a < 3; ++a)
-              {
-                const Index ia = sh.getGlobalIndex({0, vv[a]}, 0);
-                for (std::size_t b = 0; b < 3; ++b)
-                {
-                  const Index ib = sh.getGlobalIndex({0, vv[b]}, 0);
-                  pinTriplets.emplace_back(
-                    static_cast<int>(ia), static_cast<int>(ib), w * N[a] * N[b]);
-                }
-              }
-              return;
-            }
-          };
-
-          if (activeReinitMode == "ir")
-          {
-            pinTriplets.reserve(18 * fittedSeg.size());
-            // Two-point Gauss quadrature on every moved interface segment.
-            constexpr Real q0 = Real(0.21132486540518711775);
-            constexpr Real q1 = Real(0.78867513459481288225);
-            for (const auto& seg : fittedSeg)
-            {
-              const Vec2 a = seg[0];
-              const Vec2 b = seg[1];
-              const Real ds = (b - a).norm();
-              addPinPoint((Real(1) - q0) * a + q0 * b, Real(0.5) * ds);
-              addPinPoint((Real(1) - q1) * a + q1 * b, Real(0.5) * ds);
-            }
-          }
-          else
-          {
-            pinTriplets.reserve(27 * mesh.getCellCount());
-            Real gsum = Real(0);
-            std::size_t gcnt = 0;
-            for (auto cit = mesh.getCell(); cit; ++cit)
-            {
-              const auto& vv = cit->getVertices();
-              Real vmin = std::numeric_limits<Real>::infinity();
-              Real vmax = -std::numeric_limits<Real>::infinity();
-              for (const Index v : vv)
-              {
-                const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
-                vmin = std::min(vmin, pv);
-                vmax = std::max(vmax, pv);
-              }
-              if (vmin <= Real(0) && vmax >= Real(0))
-              {
-                gsum += cellGradientMagnitude(phiH, *cit);
-                ++gcnt;
-              }
-            }
-            const Real gavg =
-              gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12)) : Real(1);
-            const Real epsPhi = std::max(irDeltaEps * gavg, Real(1e-12));
-            for (auto cit = mesh.getCell(); cit; ++cit)
-            {
-              const auto& vv = cit->getVertices();
-              const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-              const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-              const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-              const Real area = std::abs(Real(0.5) *
-                ((x1(0) - x0(0)) * (x2(1) - x0(1)) - (x1(1) - x0(1)) * (x2(0) - x0(0))));
-              const Real gmag = cellGradientMagnitude(phiH, *cit);
-              std::array<Index, 3> gd;
-              std::array<Real, 3> pv;
-              for (std::size_t a = 0; a < 3; ++a)
-              {
-                gd[a] = sh.getGlobalIndex({0, vv[a]}, 0);
-                pv[a] = phiH.getData()(gd[a]);
-              }
-              for (const auto& bary : TriangleBarycentricQuadrature)
-              {
-                const std::array<Real, 3> N = {{bary[0], bary[1], bary[2]}};
-                const Real phiq = N[0] * pv[0] + N[1] * pv[1] + N[2] * pv[2];
-                if (std::abs(phiq) >= epsPhi)
-                  continue;
-                const Real delta = (Real(1) / (Real(2) * epsPhi)) *
-                  (Real(1) + std::cos(M_PI * phiq / epsPhi));
-                const Real w = (area / Real(3)) * delta * gmag;
-                for (std::size_t a = 0; a < 3; ++a)
-                  for (std::size_t b = 0; b < 3; ++b)
-                    pinTriplets.emplace_back(
-                      static_cast<int>(gd[a]), static_cast<int>(gd[b]), w * N[a] * N[b]);
-              }
-            }
-          }
-
-          Math::SparseMatrix<Real> A(phiR.getData().size(), phiR.getData().size());
-          std::vector<Eigen::Triplet<Real>> aTriplets;
-          aTriplets.reserve(
-            static_cast<std::size_t>(phiR.getData().size()) + pinTriplets.size());
-          for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
-            aTriplets.emplace_back(
-              static_cast<int>(i), static_cast<int>(i), irMassLump(i) / dtauR);
-          for (const auto& t : pinTriplets)
-            aTriplets.emplace_back(t.row(), t.col(), Real(2) * irLambda * t.value());
-          A.setFromTriplets(aTriplets.begin(), aTriplets.end());
+          dist.getData() = nodalDist.getData();
+        }
+        else if (redistanceTransfer == "project")
+        {
+          AABB fittedLocator(moved);
+          RealFunction fittedPhi([&](const Geometry::Point& p) -> Real {
+            if (const auto q = fittedLocator.locate(p.getPhysicalCoordinates()))
+              return pd.getSolution().getValue(*q);
+            return nodalDist.getValue(p);
+          });
+          TrialFunction tp(sh);
+          TestFunction tq(sh);
+          Problem transfer(tp, tq);
+          transfer = Integral(tp, tq) - Integral(fittedPhi, tq);
+          transfer.assemble();
+          auto& transferSystem = transfer.getLinearSystem();
+          addFittedInterfacePenalty(transferSystem, interfaceFacets);
           Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
-            irCG;
-          irCG.setTolerance(Real(1e-10));
-          irCG.setMaxIterations(static_cast<int>(phiR.getData().size()));
-          irCG.compute(A);
-          const auto gInCut = gradientStats(phiR, true);
-          const auto gInBand = gradientStats(phiR, false);
-          Math::Vector<Real> rK(phiR.getData().size());
-          for (int kk = 0; kk < Kr; ++kk)
-          {
-            if (kk == 0 || static_cast<std::size_t>(kk) % irDpUpdateEvery == 0)
-            {
-              for (auto cit = mesh.getCell(); cit; ++cit)
-              {
-                const Index dc = p0.getGlobalIndex({D, cit->getIndex()}, 0);
-                const Real s = cellGradientMagnitude(phiR, *cit);
-                Real dpv;
-                if (s >= Real(1))
-                  dpv = Real(1) - Real(1) / s;
-                else
-                {
-                  const Real x = Real(2) * M_PI * s;
-                  dpv = s > Real(1e-6) ? std::sin(x) / x : Real(1);
-                }
-                dp.getData()(dc) = dpv;
-              }
-              irDiffusion.assemble();
-            }
-            rK = irDiffusion.getOperator() * phiR.getData();
-            Math::Vector<Real> rhs(phiR.getData().size());
-            for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
-              rhs(i) = (irMassLump(i) / dtauR) * phiR.getData()(i) - rK(i);
-            phiR.getData() = irCG.solve(rhs);
-          }
-          const auto gOutCut = gradientStats(phiR, true);
-          const auto gOutBand = gradientStats(phiR, false);
-          std::cout << "    IR-DRLSE" << (activeReinitMode == "ir-phi" ? "-phi" : "")
-                    << ": |grad phi| cut [" << std::fixed << std::setprecision(3)
-                    << gInCut[0] << "," << gInCut[1] << "] -> [" << gOutCut[0] << ","
-                    << gOutCut[1] << "]"
-                    << "  band [" << gInBand[0] << "," << gInBand[1] << "] -> ["
-                    << gOutBand[0] << "," << gOutBand[1] << "]\n";
-          dist.getData() = phiR.getData();
+            transferSolver;
+          transferSystem.getSolution() =
+            transferSolver.compute(transferSystem.getOperator())
+              .solve(transferSystem.getVector());
+          tp.getSolution().getData() = transferSystem.getSolution();
+          dist.getData() = tp.getSolution().getData();
         }
         else
         {
-          overwriteClosestPointBand();
+          std::cerr << "Unsupported redistance transfer: " << redistanceTransfer << '\n';
+          return 2;
         }
+        const auto [dstMaxGamma, dstRMSGamma, dstMissesGamma] =
+          fittedInterfaceResidual(interfaceFacets, dist, mesh, true);
+        const auto [nodalMaxGamma, nodalRMSGamma, nodalMissesGamma] =
+          fittedInterfaceResidual(interfaceFacets, nodalDist, mesh, true);
+        std::cout << "  distanciation-resample: misses=" << misses << '\n';
+        std::cout << "  distanciation-interface:"
+                  << " srcMax=" << srcMaxGamma << " srcRMS=" << srcRMSGamma
+                  << " srcMiss=" << srcMissesGamma << " nodalMax=" << nodalMaxGamma
+                  << " nodalRMS=" << nodalRMSGamma << " nodalMiss=" << nodalMissesGamma
+                  << " dstMax=" << dstMaxGamma << " dstRMS=" << dstRMSGamma
+                  << " dstMiss=" << dstMissesGamma << '\n';
+      }
+      else if (redistanceMode == "cp")
+      {
+        const auto fittedInterface = buildFittedInterface(mesh, moved, interfaceFacets);
+        dist = Real(0);
+        Math::SpatialPoint X;
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const Index c = cellIt->getIndex();
+          const auto& fe = sh.getFiniteElement(D, c);
+          const auto& dofs = sh.getDOFs(D, c);
+          for (Index local = 0; local < fe.getCount(); ++local)
+          {
+            mesh.getPolytopeTransformation(D, c).transform(X, fe.getNode(local));
+            dist.getData()(dofs[local]) =
+              signedDistanceToFittedInterface(X, fittedInterface);
+          }
+        }
+      }
+      else if (redistanceMode == "fmm")
+      {
+        ScalarP1 shP1(moved);
+        GridFunction distP1(shP1);
+        distP1 = Real(0);
+        Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
+          .setInterior(interiorAttribute)
+          .setInterface(Gamma)
+          .solve()
+          .sign();
+        GridFunction nodalDist(sh);
+        const std::size_t misses = resampleFromMoved(nodalDist, distP1, moved);
+        if (redistanceTransfer == "resample")
+        {
+          dist.getData() = nodalDist.getData();
+        }
+        else if (redistanceTransfer == "project")
+        {
+          AABB fittedLocator(moved);
+          RealFunction fittedPhi([&](const Geometry::Point& p) -> Real {
+            if (const auto q = fittedLocator.locate(p.getPhysicalCoordinates()))
+              return distP1.getValue(*q);
+            return nodalDist.getValue(p);
+          });
+          TrialFunction tp(sh);
+          TestFunction tq(sh);
+          Problem transfer(tp, tq);
+          transfer = Integral(tp, tq) - Integral(fittedPhi, tq);
+          transfer.assemble();
+          auto& transferSystem = transfer.getLinearSystem();
+          addFittedInterfacePenalty(transferSystem, interfaceFacets);
+          Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
+            transferSolver;
+          transferSystem.getSolution() =
+            transferSolver.compute(transferSystem.getOperator())
+              .solve(transferSystem.getVector());
+          tp.getSolution().getData() = transferSystem.getSolution();
+          dist.getData() = tp.getSolution().getData();
+        }
+        else
+        {
+          std::cerr << "Unsupported redistance transfer: " << redistanceTransfer << '\n';
+          return 2;
+        }
+        std::cout << "  redistance-resample: misses=" << misses << '\n';
+      }
+      else
+      {
+        std::cerr << "Unsupported redistance mode: " << redistanceMode << '\n';
+        return 2;
+      }
+      if (distanciationApplied)
+      {
+        const char* label = redistanceMode == "poisson" ? "distanciation" : "redistance";
+        std::cout << "  " << label << ": mode=" << redistanceMode << " reason="
+                  << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
+                         : periodicRedistance                     ? "periodic"
+                                                                  : "adaptive")
+                  << " eikWelsch=" << std::scientific << eikonalDefect
+                  << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0)) << '\n';
       }
     }
     tRedistance = iterTimer.reset();
 
-    // Normalize the descent velocity, advect distance by one step.
+    // Advect the current carrier with the normalized descent direction.
+    const Math::Vector<Real> phiBeforeAdvection = dist.getData();
     speed = Frobenius(dJ);
-    const Real vmax = std::max(speed.max(), Real(1e-30));
-    dJ /= vmax;
+    const Real dJMax = speed.max();
     Advection::Lagrangian(adv, advTest, dist, dJ).step(dtCur);
     phiH.getData() = adv.getSolution().getData();
+    Real maxPhiChange = 0;
+    for (Eigen::Index i = 0; i < phiH.getData().size(); ++i)
+      maxPhiChange =
+        std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
+    std::cout << "  advect: dt/h=" << (h > Real(0) ? dtCur / h : Real(0))
+              << " max|dJ|=" << dJMax
+              << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0)) << '\n';
     tAdvect = iterTimer.reset();
-
-    const bool doRepair =
-      repairEvery > 0 && ((it + 1) % repairEvery == 0 || it + 1 == maxIt);
-    if (doRepair)
-    {
-      const Math::Vector<Real> rhs = irMass.getOperator() * phiH.getData();
-      phiH.getData() = repairCG.solve(rhs);
-      if (repairCalibrate)
-      {
-        Real gsum = Real(0);
-        Real wsum = Real(0);
-        for (auto cit = mesh.getCell(); cit; ++cit)
-        {
-          const auto& vv = cit->getVertices();
-          Real av = Real(0);
-          for (const Index v : vv)
-            av += std::abs(phiH.getData()(sh.getGlobalIndex({0, v}, 0)));
-          av /= static_cast<Real>(vv.size());
-          if (av > repairBand)
-            continue;
-          const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-          const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-          const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-          const Real area = std::abs(Real(0.5) *
-            ((x1(0) - x0(0)) * (x2(1) - x0(1)) - (x1(1) - x0(1)) * (x2(0) - x0(0))));
-          gsum += area * backgroundCellGradientMagnitude(phiH, *cit);
-          wsum += area;
-        }
-        if (wsum > Real(0))
-        {
-          const Real c = std::max(gsum / wsum, Real(1e-12));
-          phiH.getData() /= c;
-          std::cout << "    repair: scale=" << std::scientific << std::setprecision(3)
-                    << c << '\n';
-        }
-      }
-    }
-    tRepair = iterTimer.reset();
 
     if (printTiming)
     {
       const Real total = tClassify + tGrad + tWNGIR + tMoveTrim + tElasticity + tHilbert +
-        tRedistance + tAdvect + tRepair + tWrite;
+        tRedistance + tAdvect + tWrite;
       std::cout << "  timing:"
                 << " classify=" << std::scientific << std::setprecision(2) << tClassify
                 << " grad=" << tGrad << " wngir=" << tWNGIR << " moveTrim=" << tMoveTrim
                 << " elas=" << tElasticity << " hilbert=" << tHilbert
                 << " redist=" << tRedistance << " advect=" << tAdvect
-                << " repair=" << tRepair << " write=" << tWrite << " total=" << total
-                << '\n';
+                << " write=" << tWrite << " total=" << total << '\n';
     }
     ++acceptedShapeIterations;
   }
@@ -1341,6 +1503,6 @@ int main(int argc, char** argv)
   xdmf.close();
   std::cout << "\nDone. Accepted shape iterations: " << acceptedShapeIterations << " / "
             << maxIt << "  attempts=" << shapeAttempts << "  stop=" << stopReason
-            << ". Objective history in LevelSetWNGIRCantilever2D.obj.txt\n";
+            << ". Objective history in wngir/LevelSetWNGIRCantilever2D.obj.txt\n";
   return 0;
 }

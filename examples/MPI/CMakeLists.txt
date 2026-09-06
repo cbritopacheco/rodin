@@ -1,5 +1,5 @@
 add_executable(MPITest MPITest.cpp)
-target_link_libraries(MPITest PUBLIC Rodin::MPI)
+target_link_libraries(MPITest PRIVATE Rodin::MPI)
 
 add_subdirectory(Boost)
 add_subdirectory(Context)

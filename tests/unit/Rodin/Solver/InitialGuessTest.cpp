@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include "Rodin/Assembly.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Solver/CG.h"
@@ -87,6 +89,8 @@ namespace Rodin::Tests::Unit::InitialGuess
     cg.setTolerance(1e-10).setMaxIterations(1);
     warm.solve(cg);
     EXPECT_TRUE(cg.success());
+    EXPECT_LE(cg.getIterationNumber(), 1);
+    EXPECT_TRUE(std::isfinite(cg.getError()));
     EXPECT_NEAR((u.getSolution().getData() - exact).norm(), 0.0, 1e-10);
 
     // From a zero guess, the same iteration budget must fail.
@@ -97,6 +101,8 @@ namespace Rodin::Tests::Unit::InitialGuess
     coldCG.setTolerance(1e-10).setMaxIterations(1);
     cold.solve(coldCG);
     EXPECT_FALSE(coldCG.success());
+    EXPECT_EQ(coldCG.getIterationNumber(), 1);
+    EXPECT_TRUE(std::isfinite(coldCG.getError()));
   }
 
   /**

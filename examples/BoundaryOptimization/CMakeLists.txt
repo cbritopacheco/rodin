@@ -1,6 +1,6 @@
 add_executable(AcousticCloaking AcousticCloaking.cpp)
 target_link_libraries(AcousticCloaking
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
@@ -9,7 +9,7 @@ target_link_libraries(AcousticCloaking
 
 add_executable(WaterTank WaterTank.cpp)
 target_link_libraries(WaterTank
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
@@ -18,7 +18,7 @@ target_link_libraries(WaterTank
 
 add_executable(ClampLocator ClampLocator.cpp)
 target_link_libraries(ClampLocator
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
@@ -27,7 +27,7 @@ target_link_libraries(ClampLocator
 
 add_executable(EMM EMM.cpp)
 target_link_libraries(EMM
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
@@ -37,7 +37,7 @@ target_link_libraries(EMM
 
 add_executable(SurfaceCooling SurfaceCooling.cpp)
 target_link_libraries(SurfaceCooling
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational

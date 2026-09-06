@@ -10,20 +10,32 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <cmath>
+#include <filesystem>
+#include <iostream>
 #include <string>
 
 #include <Rodin/Adaptation/WNGIRParameters.h>
+#include <Rodin/MMG/MeshOptimizer.h>
 
 namespace Rodin::Examples
 {
+  inline std::string wngirOutput(const std::string& name)
+  {
+    std::filesystem::create_directories("wngir");
+    return "wngir/" + name;
+  }
+
   struct WNGIRExampleDefaults
   {
-      std::size_t maxIterations = 60;
-      std::size_t quadratureOrder = 4;
-      Real betaMax = 50;
-      Real activeRMSOverHTol = 0;
-      Real activeSupOverHTol = 0;
-      Real gammaSize = 0;
+      std::size_t maxIterations = 200;
+      std::size_t quadratureOrder = 0;
+      Real kappaBulk = Adaptation::WNGIRParameters{}.kappaBulk;
+      Real rDiv = 1;
+      Real kappaJ = 1;
+      Real kappaQ = 1;
+      Real tauRmsHFloor = Adaptation::WNGIRParameters{}.tauRmsHFloor;
+      Real tauInfHFloor = Adaptation::WNGIRParameters{}.tauInfHFloor;
       bool parseLegacyMaxIterations = false;
   };
 
@@ -64,6 +76,13 @@ namespace Rodin::Examples
     return static_cast<Real>(std::atof(value.c_str()));
   }
 
+  inline Real realOption(int argc, char** argv, const std::string& name,
+    const std::string& legacyName, Real fallback)
+  {
+    const Real legacy = realOption(argc, argv, legacyName, fallback);
+    return realOption(argc, argv, name, legacy);
+  }
+
   inline std::size_t sizeOption(
     int argc, char** argv, const std::string& name, std::size_t fallback)
   {
@@ -83,76 +102,112 @@ namespace Rodin::Examples
     return std::strtoull(value.c_str(), nullptr, 10) != 0;
   }
 
+  inline std::string stringOption(
+    int argc, char** argv, const std::string& name, std::string fallback)
+  {
+    std::string value;
+    if (!findOption(argc, argv, name, &value) || value.empty())
+      return fallback;
+    return value;
+  }
+
+  /// Remesh the linear background before constructing spaces or curved maps.
+  /// MMG lengths are physical: hmin = 0.1 h, hmax = h, hausd = 0.05 h.
+  inline void remeshWNGIRBackground(
+    Geometry::Mesh<Context::Local>& mesh, int argc, char** argv, Real h)
+  {
+    if (!boolOption(argc, argv, "initial-mmg", false))
+      return;
+    const Real hmin = realOption(argc, argv, "initial-mmg-hmin",
+      realOption(argc, argv, "hmin", Real(0.1) * h));
+    const Real hmax = realOption(argc, argv, "initial-mmg-hmax", h);
+    const Real hausd = realOption(argc, argv, "initial-mmg-hausd", Real(0.05) * h);
+    if (!(std::isfinite(hmin) && std::isfinite(hmax) && std::isfinite(hausd) &&
+        hmin > 0 && hmax >= hmin && hausd > 0))
+    {
+      try
+      {
+        Alert::Exception() << "Initial MMG requires 0 < hmin <= hmax and hausd > 0."
+                           << Alert::Raise;
+      }
+      catch (const Alert::Exception&)
+      {
+        std::exit(EXIT_FAILURE);
+      }
+    }
+    std::cout << "  initial MMG remesh: h=" << h << " hmin=" << hmin
+              << " hmax=" << hmax << " hausd=" << hausd << '\n';
+    MMG::Mesh mmgMesh(std::move(mesh));
+    MMG::Optimizer optimizer;
+    // Preserve the corners and ridges of the computational box.
+    optimizer.setHMin(hmin).setHMax(hmax).setHausdorff(hausd).setAngleDetection(true);
+    optimizer.optimize(mmgMesh);
+    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+  }
+
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
     Adaptation::WNGIRParameters p;
     p.h = h;
 
-    const Real gammaMFactor = realOption(argc, argv, "wngir-gamma-m", Real(1));
-    const Real gammaHFactor = realOption(argc, argv, "wngir-gamma-h", Real(1));
-    const Real gammaDivFactor = realOption(argc, argv, "wngir-gamma-div", gammaHFactor);
-    p.gammaM = gammaMFactor / h;
-    p.gammaH = gammaHFactor / h;
-    p.gammaDiv = gammaDivFactor / h;
-    p.ellM = realOption(argc, argv, "wngir-ell", Real(3)) * h;
+    p.kappaBulk =
+      realOption(argc, argv, "wngir-kappa-bulk", defaults.kappaBulk);
+    p.rDiv = realOption(
+      argc, argv, "wngir-r-div", "wngir-divergence-ratio", defaults.rDiv);
 
-    p.gammaObs = realOption(argc, argv, "wngir-gamma-obs", Real(1));
-    p.residualStabilizedObservationMetric =
-      boolOption(argc, argv, "wngir-residual-stabilized-obs", true);
-    p.betaMax = realOption(argc, argv, "wngir-beta-max", defaults.betaMax);
+    p.kappaObs = realOption(argc, argv, "wngir-kappa-obs", Real(1));
+    p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
 
-    p.gammaJ = realOption(argc, argv, "wngir-gamma-j", Real(1));
-    p.gammaQ = realOption(argc, argv, "wngir-gamma-q", Real(1));
-    p.jSafe = realOption(argc, argv, "wngir-jsafe", Real(1e-2));
+    p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
+    p.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
+    p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
-    p.s0J = realOption(argc, argv, "wngir-s0j", Real(0.25));
-    p.s0Q = realOption(argc, argv, "wngir-s0q", Real(2));
-
-    p.gammaQual = realOption(argc, argv, "wngir-gamma-qual", Real(1));
-    p.qStar = realOption(argc, argv, "wngir-qstar", Real(1.75));
-    p.gammaSize = realOption(argc, argv, "wngir-gamma-size", defaults.gammaSize);
-    p.jStar = realOption(argc, argv, "wngir-jstar", Real(0.3));
-
+    p.primalBarrierIterations = std::max<std::size_t>(1,
+      sizeOption(
+        argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
+    p.primalBarrierRelativeTolerance = realOption(
+      argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
+    p.muHat =
+      realOption(argc, argv, "wngir-mu-hat", "wngir-primal-barrier-mu", p.muHat);
+    p.thetaBoundary = realOption(argc, argv, "wngir-theta-boundary",
+      "wngir-fraction-to-boundary", p.thetaBoundary);
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
-    p.energyLineSearch = !boolOption(argc, argv, "wngir-no-energy-ls", false);
+    p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
+    p.descentFraction =
+      realOption(argc, argv, "wngir-descent-fraction", p.descentFraction);
+    p.directionNormFactor =
+      realOption(argc, argv, "wngir-direction-norm-factor", p.directionNormFactor);
 
     p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
-    const Real jSafeRatio = realOption(argc, argv, "j-safe", Real(1e-3));
-    p.jLineSearchRatio =
-      realOption(argc, argv, "j-ls", std::max(p.jMinRatio, Real(10) * jSafeRatio));
-
-    p.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", Real(4) * h * h);
-    p.activeSupTol = realOption(argc, argv, "wngir-sup-tol", Real(10) * h * h);
-    p.activeRMSOverHTol =
-      realOption(argc, argv, "wngir-rms-h-tol", defaults.activeRMSOverHTol);
-    p.activeSupOverHTol =
-      realOption(argc, argv, "wngir-sup-h-tol", defaults.activeSupOverHTol);
-    p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
+    p.jLineSearchRatio = realOption(
+      argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
+    p.tauRmsHFloor = realOption(argc, argv, "wngir-rms-floor", defaults.tauRmsHFloor);
+    p.tauInfHFloor = realOption(argc, argv, "wngir-sup-floor", defaults.tauInfHFloor);
+    p.tauJumpRms =
+      realOption(argc, argv, "wngir-rms-normal-jump-factor", p.tauJumpRms);
+    p.tauJumpInf =
+      realOption(argc, argv, "wngir-sup-normal-jump-factor", p.tauJumpInf);
+    // Zero delegates the physical tolerance to WNGIR, where the sampled
+    // level-set gradient converts mesh length to field units.
+    p.tauRms = realOption(argc, argv, "wngir-rms-tol", p.tauRms);
+    p.tauInf = realOption(argc, argv, "wngir-sup-tol", p.tauInf);
+    p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", p.energyStagTol);
     p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
+    p.acceptedStepOverHTol =
+      realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
 
     p.quadratureOrder = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
     p.maxIterations = sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
     if (defaults.parseLegacyMaxIterations)
       p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
 
+    p.rigidStabilisationLevel = realOption(
+      argc, argv, "wngir-rigid-stabilisation", p.rigidStabilisationLevel);
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
-    p.andersonMemory = sizeOption(argc, argv, "wngir-aa-memory", p.andersonMemory);
-    p.andersonStart = sizeOption(argc, argv, "wngir-aa-start", p.andersonStart);
-    p.andersonDamping = realOption(argc, argv, "wngir-aa-damping", p.andersonDamping);
-    p.andersonMinDamping =
-      realOption(argc, argv, "wngir-aa-min-damping", p.andersonMinDamping);
-
-    p.includeQualityGradient = boolOption(argc, argv, "wngir-quality-energy", false);
-    p.includeQualityMetric = boolOption(argc, argv, "wngir-quality-metric", true);
-    p.includeAdmissibilityMetric =
-      boolOption(argc, argv, "wngir-admissibility-metric", true);
-    p.includeAdmissibilityGradient =
-      boolOption(argc, argv, "wngir-admissibility-gradient", false);
-
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;
     p.trace =

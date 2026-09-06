@@ -123,6 +123,12 @@ namespace Rodin::Solver
                          PetscReal dtol,
                          PetscInt  maxIt) noexcept;
 
+      /// @brief Returns the iteration count from the most recent solve.
+      std::size_t getIterationNumber() const;
+
+      /// @brief Returns the residual norm from the most recent solve.
+      Real getError() const;
+
       /**
        * @brief Sets an explicit preconditioner matrix.
        * @param P PETSc matrix to use as preconditioner operator.

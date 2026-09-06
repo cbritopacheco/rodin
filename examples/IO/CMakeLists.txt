@@ -1,22 +1,22 @@
 add_executable(Rodin_IO_MEDIT MEDIT.cpp)
 target_link_libraries(Rodin_IO_MEDIT
-  PUBLIC
+  PRIVATE
   Rodin::IO)
 
 add_executable(RodinIOMFEM MFEM.cpp)
 target_link_libraries(RodinIOMFEM
-  PUBLIC
+  PRIVATE
   Rodin::IO
   Rodin::Variational)
 
 add_executable(RodinIOH1MFEMGridFunction H1MFEMGridFunction.cpp)
 target_link_libraries(RodinIOH1MFEMGridFunction
-  PUBLIC
+  PRIVATE
   Rodin::IO
   Rodin::Variational)
 
 add_executable(RodinIOXDMF XDMF.cpp)
 target_link_libraries(RodinIOXDMF
-  PUBLIC
+  PRIVATE
   Rodin::IO
   Rodin::Variational)

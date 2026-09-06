@@ -8,7 +8,7 @@
 // Lobed-sphere sweep test for a WNGIR-style level-set mesh motion in 3D.
 //
 // At every frame the background tetrahedral grid is classified from the
-// analytic level set. WNGIR then registers the classified cut-surface
+// analytic level set. WNGIR then fits the classified cut-surface
 // skeleton directly to phi = 0 using the residual phi(X + u(X)) on the
 // classified interior faces. Between frames the target orbits the cube
 // center and its lobes rotate in phase, so each frame is a cold-start
@@ -336,12 +336,6 @@ int main(int argc, char** argv)
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  wngirDefaults.maxIterations = 120;
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 10;
-#else
-  wngirDefaults.betaMax = 100;
-#endif
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
@@ -351,12 +345,13 @@ int main(int argc, char** argv)
 
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
   mesh.scale(h);
+  Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
   mesh.getConnectivity().compute(3, 2);
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(0, 0);
@@ -402,6 +397,11 @@ int main(int argc, char** argv)
   TestFunction wngirTest(vectorFes);
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
+  auto wngirSolveParams = wngirParams;
+  if (fitTol > Real(0))
+    wngirSolveParams.tauRms = fitTol;
+  Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
+  wngirSolver.setParameters(wngirSolveParams);
 
   LocalMesh moved(mesh);
   ScalarP0 p0FesMoved(moved);
@@ -419,7 +419,7 @@ int main(int argc, char** argv)
   GridFunction qRelMoved(p0FesMoved);
   qRelMoved.setName("q_rel");
 
-  IO::XDMF xdmf("LevelSetWNGIRSweep3D");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRSweep3D"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
@@ -437,8 +437,8 @@ int main(int argc, char** argv)
   std::cout << "Lobed-sphere WNGIR sweep on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
-            << "  orbit R=" << orbitR << "  wngirEll=" << wngirParams.ellM
-            << "  betaMax=" << wngirParams.betaMax << '\n';
+            << "  orbit R=" << orbitR
+            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -594,6 +594,7 @@ int main(int argc, char** argv)
 
     Math::Vector<Real> bestU = u.getData();
     Real bestFit = interfaceFit;
+    Real effectiveFitTol = fitTol;
     Real minJ = Real(1);
     Real maxQRel = Real(1);
     Real lastAlpha = Real(0);
@@ -601,11 +602,8 @@ int main(int argc, char** argv)
     std::size_t iterations = 0;
     const char* exitReason = "iter-budget";
     {
-      auto wngir = wngirParams;
-      wngir.activeRMSTol = fitTol;
-      Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
-      wngirSolver.setParameters(wngir);
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      effectiveFitTol = wngirRep.effectiveTauRms;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -625,14 +623,14 @@ int main(int argc, char** argv)
         bestU = u.getData();
       }
       if (trace)
-        std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
-                  << ")\n";
+        std::cout << "      wngir sigma=" << wngirRep.sigma
+                  << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
     u.getData() = bestU;
     interfaceFit = bestFit;
 
-    const bool converged = interfaceFit <= fitTol;
+    const bool converged = interfaceFit <= effectiveFitTol;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);

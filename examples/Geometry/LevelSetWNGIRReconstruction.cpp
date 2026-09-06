@@ -8,7 +8,7 @@
 // Wavy-circle reconstruction benchmark for WNGIR.
 //
 // The background grid is classified from a fixed analytic level set. WNGIR
-// then registers the classified skeleton directly to the analytic target
+// then fits the classified skeleton directly to the analytic target
 // interface using phi(X + u(X)) on the skeleton. The example is deliberately
 // single-frame: it is the controlled reconstruction benchmark, while
 // LevelSetWNGIRSweep and LevelSetWNGIRAdvection provide time-dependent stress
@@ -35,6 +35,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -159,7 +160,9 @@ namespace
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, cell.getGeometry());
+      const std::size_t order =
+        qOrder > 0 ? qOrder : std::max<std::size_t>(2, 2 * fe.getOrder());
+      const auto& qf = QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
       {
@@ -358,27 +361,23 @@ int main(int argc, char** argv)
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.008));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  wngirDefaults.maxIterations = 120;
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 10;
-#else
-  wngirDefaults.betaMax = 50;
-#endif
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
   constexpr Attribute exteriorAttribute = 2;
   constexpr Attribute interfaceAttribute = 10;
   constexpr Attribute boundaryAttribute = 20;
+  constexpr Attribute supportAttribute = 21;
 
-  const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
+  auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
   mesh.scale(h);
+  Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 2);
   mesh.getConnectivity().compute(2, 2);
@@ -388,7 +387,19 @@ int main(int argc, char** argv)
 #endif
 
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
+  {
+    bool support = true;
+    Real ym = 0;
+    for (const Index vertex : faceIt->getVertices())
+    {
+      support = support && std::abs(mesh.getVertexCoordinates(vertex)(0)) < Real(1e-12);
+      ym += mesh.getVertexCoordinates(vertex)(1);
+    }
+    ym /= static_cast<Real>(faceIt->getVertices().size());
+    support = support && ym < h;
+    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
+      support ? supportAttribute : boundaryAttribute);
+  }
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
   using ScalarFES = H1<2, Real, LocalMesh>;
@@ -427,6 +438,11 @@ int main(int argc, char** argv)
   u.setName("displacement");
   GridFunction du(vectorFes);
   du.setName("wngir_step");
+  auto wngirSolveParams = wngirParams;
+  if (fitTol > Real(0))
+    wngirSolveParams.tauRms = fitTol;
+  Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
+  wngirSolver.setParameters(wngirSolveParams);
 
   LocalMesh moved(mesh);
   ScalarP0 p0FesMoved(moved);
@@ -444,7 +460,7 @@ int main(int argc, char** argv)
   GridFunction qRelMoved(p0FesMoved);
   qRelMoved.setName("q_rel");
 
-  IO::XDMF xdmf("LevelSetWNGIRReconstruction");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRReconstruction"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
@@ -464,8 +480,8 @@ int main(int argc, char** argv)
             << " unit-square mesh\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase << "  wngirEll=" << wngirParams.ellM
-            << "  betaMax=" << wngirParams.betaMax << '\n';
+            << "  phase=" << phase
+            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -490,7 +506,19 @@ int main(int argc, char** argv)
 
     clearXDMFRegionAttributes(mesh);
     for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
+    {
+      bool support = true;
+      Real ym = 0;
+      for (const Index vertex : faceIt->getVertices())
+      {
+        support = support && std::abs(mesh.getVertexCoordinates(vertex)(0)) < Real(1e-12);
+        ym += mesh.getVertexCoordinates(vertex)(1);
+      }
+      ym /= static_cast<Real>(faceIt->getVertices().size());
+      support = support && ym < h;
+      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
+        support ? supportAttribute : boundaryAttribute);
+    }
 
     const auto cellMoments = collectCellMomentInfo(
       mesh, [&](const Vec2& p) { return levelSet.phi(p); }, epsilon);
@@ -617,10 +645,17 @@ int main(int argc, char** argv)
                 << "  outside=" << (classified.labels.size() - insideCount)
                 << "  fit0=" << interfaceFit << "\n";
     }
-    Real bestFit = interfaceFit;
-    Math::Vector<Real> bestU = u.getData();
+    Real effectiveFitTol = fitTol;
     Real minJ = Real(1);
+    Real maxJ = Real(1);
     Real maxQRel = Real(1);
+    Real activeRMS = Real(0);
+    Real levelSetGradientScale = Real(0);
+    Real activeFraction = Real(0);
+    Real rigidModeCoercivity = Real(0);
+    std::size_t jacobianRejections = 0;
+    std::size_t distortionRejections = 0;
+    std::size_t energyRejections = 0;
     Real lastAlpha = Real(0);
     Real maxStep = Real(0);
     Real acceptedStep = Real(0);
@@ -628,11 +663,8 @@ int main(int argc, char** argv)
 
     const char* exitReason = "iter-budget";
     {
-      auto wngir = wngirParams;
-      wngir.activeRMSTol = fitTol;
-      Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
-      wngirSolver.setParameters(wngir);
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      effectiveFitTol = wngirRep.effectiveTauRms;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -643,27 +675,26 @@ int main(int argc, char** argv)
       lastAlpha = wngirRep.lastAlpha;
       acceptedStep = wngirRep.acceptedStep;
       minJ = wngirRep.minJ;
+      maxJ = wngirRep.maxJ;
       maxQRel = wngirRep.maxQRel;
+      activeRMS = wngirRep.activeRMS;
+      levelSetGradientScale = wngirRep.levelSetGradientScale;
+      activeFraction = wngirRep.activeFraction;
+      rigidModeCoercivity = wngirRep.rigidModeCoercivity;
+      jacobianRejections = wngirRep.jacobianRejections;
+      distortionRejections = wngirRep.distortionRejections;
+      energyRejections = wngirRep.energyRejections;
       exitReason = wngirRep.exitReason;
       interfaceFit = computeInterfaceFit();
-      if (interfaceFit < bestFit)
-      {
-        bestFit = interfaceFit;
-        bestU = u.getData();
-      }
       if (trace)
-        std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
-                  << ")\n";
+        std::cout << "      wngir sigma=" << wngirRep.sigma
+                  << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    u.getData() = bestU;
-    interfaceFit = bestFit;
-    const auto bestAdm =
-      evaluateWNGIRAdmissibilitySampled(u, u.getData(), wngirParams.jMinRatio, qOrder);
-    minJ = bestAdm.minJ;
-    maxQRel = bestAdm.maxQRel;
-
-    const bool converged = interfaceFit <= fitTol;
+    const std::string_view exit(exitReason);
+    const bool residualConverged = exit.starts_with("numerical-") ||
+      exit.starts_with("geometric-");
+    const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);
@@ -722,7 +753,15 @@ int main(int argc, char** argv)
     std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
               << "  step=" << acceptedStep << "  min_j=" << minJ
-              << "  max_qrel=" << maxQRel
+              << "  max_j=" << maxJ << "  max_qrel=" << maxQRel
+              << "  active_rms=" << activeRMS
+              << "  active_rms_hg="
+              << (h * levelSetGradientScale > Real(0)
+                    ? activeRMS / (h * levelSetGradientScale)
+                    : Real(0))
+              << "  act_frac=" << activeFraction << "  cR=" << rigidModeCoercivity
+              << "  rej_j=" << jacobianRejections << "  rej_q=" << distortionRejections
+              << "  rej_e=" << energyRejections
               << "  converged=" << (converged ? "yes" : "best-effort")
               << "  exit=" << exitReason << '\n';
 

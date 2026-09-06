@@ -143,6 +143,52 @@ rather than extended:
 
 ## No redundancy, no fragmentation
 
+- **Search before you build.** Before writing any helper, cache, loop over
+  quadrature points, or utility of any kind, establish that Rodin does not
+  already provide it. The library is mature: mesh and quadrature data are
+  already cached, geometric quantities already have nodes in the form
+  language, and assembly already has specialised paths. Code that duplicates
+  them is not merely redundant — it is *slower* (it defeats the existing
+  cache), *heavier* (more to read and maintain), and *wrong more often* (the
+  original handles cases the copy forgets).
+
+  Concretely, before adding anything ask:
+  - Does the form language already express this? Most bilinear and linear
+    forms are `Integral(Dot(...))` over existing nodes; a bespoke integrator
+    is warranted only when no composition of nodes can state the integrand.
+  - Does `Geometry` already compute this? Polytopes cache their quadrature
+    and transformations; `Point` lazily caches Jacobian, inverse and
+    distortion; normals, measures and incidence are already available.
+  - Does an existing class already hold this state? Prefer extending or
+    reusing a concept over introducing a parallel one.
+
+  A hand-rolled cache over data Rodin already caches is the single most
+  common failure of this rule, and it is always a regression: measure it and
+  it buys nothing, because the lookup it "avoids" was already a cache hit.
+
+- **A negative claim needs a tree-wide search.** "Rodin does not have X" is
+  the sentence that authorizes writing new code, so it carries a far higher
+  burden of proof than "Rodin has X" — a positive is self-verifying the
+  moment you find the thing, a negative never is. Before concluding a
+  capability is missing:
+  - **List the modules first** (`ls src/Rodin`). Rodin's capabilities are
+    *named by* its top-level modules — `Location` (AABB/BVH point location),
+    `Distance`, `Eikonal`, `Hilbert`, `QF`, `Solver` — so a capability you
+    assume belongs to `Geometry` is often its own module sitting next to it.
+    Searching the directory you expected is not searching the library.
+  - Search the **whole tree**, by concept and with synonyms, never a single
+    file or directory.
+  - Remember that per-space specializations live in subdirectories
+    (`Variational/P1/`, `Variational/H1/`, `Variational/P0g/`), not in the
+    base header. Finding only the generic template in `Variational/Foo.h` is
+    not evidence that `Foo` has no shape-function form — it usually has one,
+    one directory down.
+  - State the search you actually ran when reporting the negative, so the
+    conclusion can be challenged rather than taken on trust.
+
+  A false negative is the most expensive mistake available here: it silently
+  licenses hundreds of lines of duplicate code, and it reads like diligence.
+
 - One vocabulary: house aliases from `Rodin/Types.h` (`Real`, `Integer`,
   `Index`, `IndexVector`, `FlatSet`, `FlatMap`, `UnorderedMap`, `Optional`,
   `StringView`) — never raw `std::`/`boost::` spellings for these. Small

@@ -321,8 +321,8 @@ int main(int argc, char** argv)
   grid.add(u);
   grid.add(activationField);
   grid.add(fiberField, IO::XDMF::Center::Node,
-    IO::XDMF::AttributePolicy::Static);   // written once, reused
-  xdmf.write(0.0);
+    IO::XDMF::AttributePolicy::Static); // written once, reused
+  xdmf.write(0.0).flush();
 
   // ---- commit sweep -------------------------------------------------------
   // activeInput reads the state buffer as the previous step's values; this

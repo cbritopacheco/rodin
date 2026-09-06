@@ -1,6 +1,6 @@
 add_executable(RS2023_Conductivity_Simulation Simulation.cpp)
 target_link_libraries(RS2023_Conductivity_Simulation
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Solver
@@ -9,7 +9,7 @@ target_link_libraries(RS2023_Conductivity_Simulation
 
 add_executable(RS2023_Conductivity_Perturbed Perturbed.cpp)
 target_link_libraries(RS2023_Conductivity_Perturbed
-  PUBLIC
+  PRIVATE
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Solver

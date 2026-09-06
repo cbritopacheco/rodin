@@ -125,7 +125,7 @@ namespace
   //
   // phi is smooth away from the centre. Like the plain circle SDF, it is
   // NOT a strict signed distance (the radial perturbation makes the
-  // gradient norm differ from 1) but the registration pipeline only requires a
+  // gradient norm differ from 1) but the fitting pipeline only requires a
   // sufficiently smooth implicit function — phi, grad phi at quadrature
   // points — to operate.
   // -------------------------------------------------------------------------
@@ -498,6 +498,7 @@ int main(int argc, char** argv)
   // Build the background mesh ONCE; only attributes change per frame.
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
   mesh.scale(h);
+  Rodin::Examples::remeshWNGIRBackground(mesh, argc, argv, h);
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 2);
   mesh.getConnectivity().compute(2, 2);
@@ -600,7 +601,7 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // XDMF writer in transient mode (background and moved grids).
   // -------------------------------------------------------------------------
-  IO::XDMF xdmf("LevelSetWNGIRAdvection");
+  IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRAdvection"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
@@ -968,7 +969,6 @@ int main(int argc, char** argv)
 
       u.getData().setZero();
       Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-      wngirDefaults.maxIterations = 200;
       wngirDefaults.parseLegacyMaxIterations = true;
       const auto wngir = Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, interfaceAttribute, wngirDefaults);

@@ -1,6 +1,6 @@
 add_executable(CCMLC2014_0D CCMLC2014_0D.cpp)
 target_link_libraries(CCMLC2014_0D
-  PUBLIC
+  PRIVATE
   Rodin::Heart
   Rodin::Alert
   )
@@ -138,7 +138,7 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     CoronaryArtery/CoupledLV0DCoronary3D.cpp
     )
   target_link_libraries(CoronaryArtery
-    PUBLIC
+    PRIVATE
     Rodin::Heart
     Rodin::Variational
     Rodin::PETSc
@@ -147,6 +147,6 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     )
 
   if (RODIN_USE_SCOTCH)
-    target_link_libraries(CoronaryArtery PUBLIC Rodin::Scotch)
+    target_link_libraries(CoronaryArtery PRIVATE Rodin::Scotch)
   endif()
 endif()

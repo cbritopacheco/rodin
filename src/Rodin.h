@@ -21,6 +21,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
+#include "Rodin/Location.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver.h"

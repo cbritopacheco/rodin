@@ -1,2 +1,2 @@
 add_executable(GrundmannMoller GrundmannMoller.cpp)
-target_link_libraries(GrundmannMoller PUBLIC Rodin::QF)
+target_link_libraries(GrundmannMoller PRIVATE Rodin::QF)
