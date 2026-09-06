@@ -1154,6 +1154,33 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts a preassembled LinearForm from a ProblemBody that
+   * already carries a VectorType.
+   *
+   * The @f$ \mathrm{void} @f$-vector overload above covers the case where the
+   * LinearForm is what introduces the vector; this one covers a body that
+   * already holds linear-form content, so that several preassembled forms can
+   * be reused in one chain:
+   * @code
+   *   problem = preassembledBF + Integral(u, v) - Integral(f, v) - preassembledLF;
+   * @endcode
+   */
+  template <class OperatorType, class VectorType, class LHSScalar>
+  auto
+  operator-(
+      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+      const LinearFormBase<VectorType>& lf)
+  {
+    using RHSScalar = typename FormLanguage::Traits<
+      std::remove_reference_t<VectorType>>::ScalarType;
+    /// @brief Scalar value type.
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
+    res.getLFs().add(lf);
+    return res;
+  }
+
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LinearFormIntegratorBase<LHSScalar>>& lfis,

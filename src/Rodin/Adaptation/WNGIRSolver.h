@@ -68,6 +68,8 @@ namespace Rodin::Adaptation
       using StepSolverType = Solver::CG<LinearSystemType>;
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
+      using LinearFormType = std::decay_t<decltype(Variational::LinearForm(
+        std::declval<TestFunctionType&>()))>;
 
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
@@ -146,7 +148,8 @@ namespace Rodin::Adaptation
           m_stepProblem(m_duStep, m_vStep),
           m_stepSolver(m_stepProblem),
           m_bulkForm(m_duStep, m_vStep),
-          m_obsForm(m_duStep, m_vStep)
+          m_obsForm(m_duStep, m_vStep),
+          m_surfaceForm(m_vStep)
       {}
 
       /// @brief Sets WNGIR runtime parameters.
@@ -443,12 +446,14 @@ namespace Rodin::Adaptation
           // here and reused by every correction below.
           m_obsForm = obsMetric;
           m_obsForm.assemble();
+          m_surfaceForm = surfaceForce;
+          m_surfaceForm.assemble();
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
           bool solveOk = true;
           Real predictorAction = Real(0);
           typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
-          predictorBody = predictorBody + m_obsForm - surfaceForce;
+          predictorBody = predictorBody + m_obsForm - m_surfaceForm;
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
           {
@@ -508,7 +513,7 @@ namespace Rodin::Adaptation
                 Detail::WNGIRPrimalBarrierForce barrierForce(
                   m_vStep, u, vK, p, barrierCoefficient);
                 typename ProblemType::ProblemBodyType body(m_bulkForm);
-                body = body + m_obsForm + barrierMetric - surfaceForce - barrierForce;
+                body = body + m_obsForm + barrierMetric - m_surfaceForm - barrierForce;
                 m_stepProblem = body;
                 m_stepProblem.assemble();
                 {
@@ -1646,6 +1651,7 @@ namespace Rodin::Adaptation
       /// Both depend on the outer displacement only, so they are assembled once
       /// per nonlinear iteration and reused by every barrier correction.
       BilinearFormType m_obsForm;
+      LinearFormType m_surfaceForm;
       std::vector<Math::Vector<Real>> m_rigidModeBasis;
       Eigen::Index m_rigidModeSize = -1;
       std::size_t m_rigidModeDimension = 0;
