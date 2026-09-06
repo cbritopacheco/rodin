@@ -36,6 +36,11 @@
   is imposed on a boundary segment, homogeneous Neumann is automatically
   satisfied by the weak formulation.
 
+  @note Dirichlet and periodic conditions are structural constraints: Rodin
+  enforces them algebraically in the assembled system. Penalty terms are a
+  different modeling choice. See @ref guides-numerical-contracts "Numerical
+  contracts" for the shared constraint contract.
+
   @section guides-bc-dirichlet Dirichlet Boundary Conditions
 
   Dirichlet conditions specify the value of the solution on the boundary:
@@ -271,6 +276,7 @@
 
   - @ref guides-weak-formulations "Weak formulations"
   - @ref guides-getting-started-core-concepts "Core concepts"
+  - @ref guides-numerical-contracts "Numerical contracts"
   - @ref examples-pdes-poisson "Poisson example"
   - @ref examples-pdes-elasticity "Elasticity example"
   - @ref examples-pdes-periodic "Periodic Poisson example"

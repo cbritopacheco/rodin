@@ -27,9 +27,9 @@
  *     └── Data       (1-D array of double — DOF coefficients)
  * ```
  *
- * @see Rodin::IO::GridFunctionPrinter,
- *      Rodin::IO::GridFunctionLoader,
- *      Rodin::PETSc::Variational::GridFunction
+ * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">Rodin::IO::GridFunctionPrinter</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">Rodin::IO::GridFunctionLoader</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a>
  */
 
 #include <petscvec.h>
@@ -138,7 +138,7 @@ namespace Rodin::IO
    *
    * @note Stream-based loading is not supported; use the path-based overload.
    *
-   * @see GridFunctionPrinter
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <class FES>
   class GridFunctionLoader<FileFormat::HDF5, FES, ::Vec>
@@ -235,7 +235,7 @@ namespace Rodin::IO
    *
    * @note Stream-based printing is not supported; use the path-based overload.
    *
-   * @see GridFunctionLoader
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a>
    */
   template <class FES>
   class GridFunctionPrinter<FileFormat::HDF5, FES, ::Vec> final

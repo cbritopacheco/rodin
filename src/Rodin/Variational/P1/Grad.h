@@ -31,9 +31,7 @@
 namespace Rodin::Variational
 {
   /**
-   * @defgroup GradSpecializations Grad Template Specializations
-   * @brief Template specializations of the Grad class.
-   * @see Grad
+   * @addtogroup GradSpecializations
    */
 
   /**

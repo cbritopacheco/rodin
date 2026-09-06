@@ -39,7 +39,9 @@ namespace Rodin::Geometry::Euclidean
    * @note This class uses multiple inheritance from Eigen::Vector2 and Base,
    * providing both vector operations and CRTP-based geometry interface.
    *
-   * @see Line2D, Circle, LineSegment2D
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
    */
   template <class T>
   class Point2D : public Eigen::Vector2<T>, public Base<Point2D<T>, T>
@@ -79,7 +81,7 @@ namespace Rodin::Geometry::Euclidean
        * @retval std::nullopt If the points are equal (no segment can be formed)
        * @retval LineSegment2D If the points are distinct
        *
-       * @see LineSegment2D
+       * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
        */
       inline
       constexpr
@@ -96,7 +98,8 @@ namespace Rodin::Geometry::Euclidean
        * @retval std::nullopt If the point lies on the line
        * @retval LineSegment2D Perpendicular segment from point to line
        *
-       * @see Line2D, LineSegment2D
+       * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
+       * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
        */
       inline
       constexpr
@@ -113,7 +116,8 @@ namespace Rodin::Geometry::Euclidean
        * @retval std::nullopt If the point lies on the circle
        * @retval LineSegment2D Segment from point to nearest point on circle
        *
-       * @see Circle, LineSegment2D
+       * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
+       * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
        */
       inline
       constexpr

@@ -54,6 +54,11 @@ namespace Rodin::Test
    * constrained DOFs are zero.
    *
    * @tparam ProblemType Rodin variational problem type.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref FDProbe "FDProbe<ProblemType>" | Nonlinear problem probe comparing assembled tangent actions against central finite differences. |
+   * | @ref FDProbe "FDProbe<Math::LinearSystem<Operator, Vector>>" | Linear-system probe comparing @f$Aw@f$ against finite differences of @f$Ax-b@f$. |
    */
   template <class ProblemType>
   class FDProbe

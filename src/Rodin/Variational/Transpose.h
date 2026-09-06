@@ -22,7 +22,12 @@ namespace Rodin::Variational
   /**
    * @defgroup TransposeSpecializations Transpose Template Specializations
    * @brief Template specializations of the Transpose class.
-   * @see Transpose
+   * @see @ref Transpose
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Transpose "Transpose<FunctionBase<NestedDerived>>" | Pointwise transpose of a matrix-valued function expression. |
+   * | @ref Transpose "Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>" | Transpose of a matrix-valued test or trial shape-function expression. |
    */
 
   /**

@@ -66,7 +66,9 @@ namespace Rodin::Geometry
    * # Thread Safety
    * This class is **not** thread-safe. Each thread should use its own Point instances.
    *
-   * @see PolytopeTransformation, Polytope, Point
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html">PolytopeTransformation</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_point.html">Point</a>
    */
   class PointBase
   {
@@ -314,7 +316,9 @@ namespace Rodin::Geometry
    * # Thread Safety
    * Not thread-safe. Each thread should use separate Point instances.
    *
-   * @see PointBase, Polytope, PolytopeTransformation
+   * @see <a href="class_rodin_1_1_geometry_1_1_point_base.html">PointBase</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html">PolytopeTransformation</a>
    */
   class Point final : public PointBase
   {

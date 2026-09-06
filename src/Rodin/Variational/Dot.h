@@ -143,6 +143,14 @@ namespace Rodin::Variational
    * Provides dot product (inner product) operations for:
    * - Function × Function → Real-valued function
    * - Function × ShapeFunction → Real-valued shape function  
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Dot "Dot<FunctionBase<LHS>, FunctionBase<RHS>>" | Pointwise dot product of two function expressions. |
+   * | @ref Dot "Dot<FunctionBase<LHS>, ShapeFunctionBase<RHS, FES, Space>>" | Dot product of a function with a shape function. |
+   * | @ref Dot "Dot<ShapeFunctionBase<LHS, FES, Space>, FunctionBase<RHS>>" | Dot product of a shape function with a function expression. |
+   * | @ref Dot "Dot<ShapeFunctionBase<LHS>, ShapeFunctionBase<RHS>>" | Dot product of trial and test shape functions. |
+   * | @ref Dot "Dot<Potential, ShapeFunctionBase>" | Dot product of a potential with a test shape function. |
    * - ShapeFunction × Function → Real-valued shape function
    * - ShapeFunction × ShapeFunction → Bilinear form entry
    *

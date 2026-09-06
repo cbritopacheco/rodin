@@ -24,7 +24,7 @@
  *
  * @note This module requires MPI to be available and properly configured.
  *
- * @see Rodin::MPI
+ * @see <a href="namespace_rodin_1_1_m_p_i.html">Rodin::MPI</a>
  */
 
 #include "MPI/Context.h"

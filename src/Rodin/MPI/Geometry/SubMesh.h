@@ -57,7 +57,9 @@ namespace Rodin::Geometry
    * SubMesh<Context::MPI> boundary = builder.finalize();
    * @endcode
    *
-   * @see SubMeshBase, Mesh<Context::MPI>, SubMesh<Context::Local>
+   * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh<Context::MPI></a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh<Context::Local></a>
    */
   template <>
   class SubMesh<Context::MPI> final : public SubMeshBase, public Mesh<Context::MPI>

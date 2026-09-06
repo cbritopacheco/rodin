@@ -30,9 +30,9 @@
  * This specialization stores @f$ \mathbf{b} @f$ in a PETSc @c Vec and
  * evaluates @f$ L(u_h) = \mathbf{b}^\top \mathbf{u} @f$ via `VecDot`.
  *
- * @see Rodin::PETSc::Variational::TestFunction,
- *      Rodin::PETSc::Variational::BilinearForm,
- *      Rodin::PETSc::Variational::Problem
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::PETSc::Variational::BilinearForm</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::PETSc::Variational::Problem</a>
  */
 
 #include <petscsystypes.h>
@@ -53,8 +53,8 @@ namespace Rodin::Variational
    *
    * @tparam FES Finite element space type of the associated test function.
    *
-   * @see Rodin::Variational::LinearFormBase,
-   *      Rodin::PETSc::Variational::LinearForm
+   * @see <a href="_variational_2_linear_form_8h.html">Rodin::Variational::LinearFormBase</a>
+   * @see <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::PETSc::Variational::LinearForm</a>
    */
   template <class FES>
   class LinearForm<FES, ::Vec> final

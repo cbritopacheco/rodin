@@ -682,6 +682,8 @@ namespace Rodin::IO
   };
 
   /**
+   * @ingroup PrinterSpecializations
+   *
    * @brief MEDIT mesh printer for local meshes.
    */
   template <>

@@ -40,7 +40,7 @@
  *   std::cout << "Converged!\n";
  * ```
  *
- * @see MINRES for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html">MINRES</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_MINRES_H
 #define RODIN_SOLVER_MINRES_H
@@ -73,7 +73,12 @@ namespace Rodin::Solver
   /**
    * @defgroup MINRESSpecializations MINRES Template Specializations
    * @brief Template specializations of the MINRES class.
-   * @see MINRES
+   * @see @ref MINRES
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref MINRES "MINRES<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Minimal residual solver for sparse symmetric systems. |
+   * | @ref MINRES "MINRES<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Minimal residual solver for dense symmetric systems. |
    */
 
   /**

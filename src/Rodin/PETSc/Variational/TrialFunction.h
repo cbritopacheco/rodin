@@ -17,9 +17,9 @@
  * trial function with a PETSc-backed
  * PETSc-backed grid function as its solution type.
  *
- * @see Rodin::PETSc::Variational::TestFunction,
- *      Rodin::PETSc::Variational::GridFunction,
- *      Rodin::PETSc::Variational::BilinearForm
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::PETSc::Variational::BilinearForm</a>
  */
 
 #include <petsc.h>
@@ -43,7 +43,7 @@ namespace Rodin::PETSc::Variational
    *         `PETSc::Variational::GridFunction<FES>`).
    * @tparam FES      Finite element space type.
    *
-   * @see Rodin::Variational::TrialFunction
+   * @see <a href="_variational_2_trial_function_8h.html">Rodin::Variational::TrialFunction</a>
    */
   template <class Solution, class FES>
   class TrialFunction : public Rodin::Variational::TrialFunction<Solution, FES>

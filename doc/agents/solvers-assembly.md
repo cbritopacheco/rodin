@@ -1,5 +1,11 @@
 # Assembly and solvers
 
+For new assembly behavior, solver support, or backend claims, read
+[workflows.md](workflows.md), [backend-support.md](backend-support.md), and
+[numerical-contracts.md](numerical-contracts.md) with this file. They define
+the extension checklist, supported-configuration matrix, and numerical
+contracts that assembly/solver changes are expected to preserve.
+
 ## Assembly (src/Rodin/Assembly/)
 
 - Backends are mesh-iteration strategies: `Sequential` and `OpenMP`
@@ -67,3 +73,7 @@ are immutable for its lifetime; DOF elimination implements essential
 constraints; a new mesh/space means a new system object (this is a hard
 rule on the PETSc side — petsc.md). Warm starts: solution vectors are
 reused, not zeroed, across assemblies.
+
+When a feature claims backend support, update the expectation in
+[backend-support.md](backend-support.md) and cover every listed assembly path
+that can exercise it.

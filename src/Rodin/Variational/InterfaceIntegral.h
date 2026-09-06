@@ -44,7 +44,10 @@
  * auto symmetry = InterfaceIntegral(Jump(u), Average(Grad(v)));
  * ```
  *
- * @see FaceIntegral, BoundaryIntegral, Jump, Average
+ * @see <a href="_face_integral_8h.html">FaceIntegral</a>
+ * @see <a href="_boundary_integral_8h.html">BoundaryIntegral</a>
+ * @see <a href="_jump_8h.html">Jump</a>
+ * @see <a href="_average_8h.html">Average</a>
  */
 #ifndef RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 #define RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
@@ -62,7 +65,12 @@ namespace Rodin::Variational
    * @defgroup InterfaceIntegralSpecializations InterfaceIntegral Template Specializations
    * @brief Template specializations of the InterfaceIntegral class.
    *
-   * @see InterfaceIntegral
+   * @see @ref InterfaceIntegral
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref InterfaceIntegral "InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>" | Interior-face bilinear integrator for dot products of trial and test shape-function expressions. |
+   * | @ref InterfaceIntegral "InterfaceIntegral<FunctionBase<FunctionDerived>>" | Interior-face integrator for a general function expression. |
    */
 
   /**

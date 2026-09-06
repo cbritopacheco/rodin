@@ -34,7 +34,8 @@ namespace Rodin::Math
    * Rad radians = angle.toRad();  // π radians
    * ```
    *
-   * @see Rad, Unit
+   * @see <a href="class_rodin_1_1_math_1_1_rad.html">Rad</a>
+   * @see <a href="class_rodin_1_1_math_1_1_unit.html">Unit</a>
    */
   class Deg : public Unit<Deg, Real>
   {

@@ -19,7 +19,14 @@ namespace Rodin::IO
   /**
    * @defgroup PrinterSpecializations Printer Template Specializations
    * @brief Template specializations of the Printer class.
-   * @see Printer
+   * @see <a href="class_rodin_1_1_i_o_1_1_printer.html">Printer</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html">MeshPrinter<IO::FileFormat::MFEM, Context::Local></a> | Writes sequential meshes in MFEM format. |
+   * | <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html">MeshPrinter<IO::FileFormat::MEDIT, Context::Local></a> | Writes sequential meshes in MEDIT format. |
+   * | <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter<IO::FileFormat::HDF5, Context::Local></a> | Writes sequential meshes in HDF5 format. |
+   * | <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html">MeshPrinter<IO::FileFormat::HDF5, Context::MPI></a> | Writes distributed @ref Rodin::Geometry::Shard "mesh shards" and metadata to per-rank HDF5 files. |
    */
 
   /**
@@ -63,7 +70,8 @@ namespace Rodin::IO
    * printer.print(std::cout);
    * ```
    *
-   * @see MeshPrinter, GridFunctionPrinter
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a>
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <class T>
   class Printer

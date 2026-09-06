@@ -66,8 +66,23 @@ namespace Rodin::Variational
    * @defgroup QuadratureRuleSpecializations QuadratureRule Template Specializations
    * @brief Template specializations of the QuadratureRule class.
    *
-   * @see QuadratureRule
-   * @see RodinQuadrature
+   * @see @ref QuadratureRule
+   * @see @ref RodinQuadrature
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref QuadratureRule "QuadratureRule<FunctionBase<FunctionDerived>>" | Generic quadrature rule for function expressions on mesh polytopes. |
+   * | @ref QuadratureRule "QuadratureRule<GridFunction<FES, Data>>" | Quadrature rule for grid-function values on mesh polytopes. |
+   * | @ref QuadratureRule "QuadratureRule<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>" | Generic bilinear quadrature rule for trial/test dot products. |
+   * | @ref QuadratureRule "QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>" | Generic linear quadrature rule for test shape functions. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Grad<Trial>, Grad<Test>>>" | H1 stiffness integrator for gradients of trial and test functions. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Trial, Test>>" | H1 mass integrator for trial/test dot products. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Coefficient, Test>>" | H1 linear-form integrator with a coefficient function. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Grad<Coefficient>, Grad<Test>>>" | H1 linear-form integrator for gradient coefficients. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Grad<Trial>, Grad<Test>>>" | P1 stiffness integrator for gradients of trial and test functions. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Trial, Test>>" | P1 mass integrator for trial/test dot products. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Coefficient, Test>>" | P1 linear-form integrator with a coefficient function. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Grad<Coefficient>, Grad<Test>>>" | P1 linear-form integrator for gradient coefficients. |
    */
 
   /**

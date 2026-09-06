@@ -256,6 +256,6 @@
   - @ref guides-meshes-io "Mesh I/O"
   - @ref guides-meshes "Meshes overview"
   - @ref Rodin::Geometry::Mesh "Mesh class reference"
-  - Example: `examples/Geometry/UniformGrid.cpp`
+  - @ref examples-geometry-uniformgrid "UniformGrid example"
 
   */

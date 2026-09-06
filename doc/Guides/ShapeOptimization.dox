@@ -26,14 +26,14 @@
 
   | Example | What it shows |
   |---------|---------------|
-  | `examples/ShapeOptimization/SimpleCantilever2D.cpp` | Minimal compliance loop |
-  | `examples/ShapeOptimization/LevelSetCantilever2D.cpp` | Level-set representation with remeshing |
-  | `examples/ShapeOptimization/LevelSetCantilever3D.cpp` | The same in 3D |
-  | `examples/ShapeOptimization/LevelSetArch2D.cpp`, `LevelSetMast2D.cpp` | Other load cases |
-  | `examples/ShapeOptimization/LevelSetEigenvalue2D.cpp` | Eigenvalue objective |
-  | `examples/ShapeOptimization/LevelSetWNGIRCantilever2D.cpp` | Interface registration (WNGIR) instead of full remeshing |
-  | `examples/BoundaryOptimization` | Boundary-condition/support optimization |
-  | `examples/DensityOptimization` | Density (SIMP-type) approaches |
+  | @ref examples-shapeoptimization-simple_cantilever "SimpleCantilever2D.cpp" | Minimal compliance loop |
+  | @ref examples-shapeoptimization-levelset_cantilever "LevelSetCantilever2D.cpp" | Level-set representation with remeshing |
+  | [LevelSetCantilever3D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetCantilever3D.cpp) | The same in 3D |
+  | [LevelSetArch2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetArch2D.cpp), [LevelSetMast2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetMast2D.cpp) | Other load cases |
+  | [LevelSetEigenvalue2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetEigenvalue2D.cpp) | Eigenvalue objective |
+  | [LevelSetWNGIRCantilever2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetWNGIRCantilever2D.cpp) | Interface registration (WNGIR) instead of full remeshing |
+  | [BoundaryOptimization](https://github.com/cbritopacheco/rodin/tree/develop/examples/BoundaryOptimization) | Boundary-condition/support optimization |
+  | @ref examples-density_optimization-index "DensityOptimization" | Density (SIMP-type) approaches |
 
   @section guides-shapeopt-derivative The shape derivative
 
@@ -155,8 +155,9 @@
     mesh topology and connectivity stable between iterations.
   - **Ersatz material / density.** Keep a fixed mesh and interpolate
     material properties (void as weak material) — the
-    `examples/DensityOptimization` family. No remeshing, at the price of
-    a modeling error controlled by the material contrast.
+    @ref examples-density_optimization-index "DensityOptimization" family. No
+    remeshing, at the price of a modeling error controlled by the material
+    contrast.
 
   @section guides-shapeopt-loop The optimization loop
 
@@ -186,6 +187,7 @@
   - @ref Rodin::Hilbert "Hilbert" — extension-regularization
   - @ref Rodin::Distance "Distance", @ref Rodin::Eikonal "Eikonal" —
     redistancing
-  - MMG — remeshing and implicit-domain
-    discretization
+  - @ref Rodin::MMG "MMG" — remeshing and implicit-domain discretization
+  - @ref examples-shapeoptimization-index "Shape optimization examples"
+  - @ref examples-density_optimization-index "Density optimization examples"
 */

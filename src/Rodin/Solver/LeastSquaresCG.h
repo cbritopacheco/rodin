@@ -33,7 +33,7 @@
  * solver.setTolerance(1e-10).setMaxIterations(1000).solve();
  * ```
  *
- * @see LeastSquaresCG for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html">LeastSquaresCG</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_LEASTSQUARESCG_H
 #define RODIN_SOLVER_LEASTSQUARESCG_H
@@ -62,7 +62,12 @@ namespace Rodin::Solver
   /**
    * @defgroup LeastSquaresCGSpecializations LeastSquaresCG Template Specializations
    * @brief Template specializations of the LeastSquaresCG class.
-   * @see LeastSquaresCG
+   * @see @ref LeastSquaresCG
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref LeastSquaresCG "LeastSquaresCG<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Least-squares conjugate-gradient solver for sparse systems. |
+   * | @ref LeastSquaresCG "LeastSquaresCG<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Least-squares conjugate-gradient solver for dense systems. |
    */
 
   /**
@@ -218,7 +223,7 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    *
-   * @see LeastSquaresCG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+   * @see <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html">LeastSquaresCG</a>
    */
   template <class Scalar>
   class LeastSquaresCG<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final

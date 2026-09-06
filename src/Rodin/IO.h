@@ -19,7 +19,7 @@
  * - MEDIT (.mesh)
  * - MFEM (.mfem)
  *
- * @see Rodin::IO
+ * @see <a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a>
  */
 
 #include "IO/ForwardDecls.h"

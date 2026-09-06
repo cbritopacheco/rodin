@@ -20,15 +20,15 @@
  * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
  * and @f$ w_i @f$ are associated weights.
  *
- * @see Rodin::QF::QuadratureFormulaBase
- * @see Rodin::QF::GaussLegendre
- * @see Rodin::QF::GrundmannMoller
- * @see Rodin::QF::Centroid
- * @see Rodin::QF::PolytopeQuadratureFormula
- * @see Rodin::QF::XiaoGimbutas
- * @see Rodin::QF::WitherdenVincent
- * @see Rodin::QF::TensorProduct
- * @see Rodin::QF::GaussLobatto (header-only, include QF/GaussLobato.h separately)
+ * @see <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html">Rodin::QF::QuadratureFormulaBase</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html">Rodin::QF::GaussLegendre</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html">Rodin::QF::GrundmannMoller</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_centroid.html">Rodin::QF::Centroid</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html">Rodin::QF::PolytopeQuadratureFormula</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html">Rodin::QF::XiaoGimbutas</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html">Rodin::QF::WitherdenVincent</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_tensor_product.html">Rodin::QF::TensorProduct</a>
+ * @see <a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html">Rodin::QF::GaussLobatto</a> header-only, include QF/GaussLobato.h separately
  */
 
 #include "QF/QuadratureFormula.h"

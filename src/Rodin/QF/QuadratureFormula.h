@@ -26,7 +26,7 @@ namespace Rodin::QF
   /**
    * @defgroup RodinQuadrature Quadrature formulae
    * @brief Quadrature formulae utilized by Rodin
-   * @see QuadratureFormulaBase
+   * @see <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html">QuadratureFormulaBase</a>
    */
 
   /**

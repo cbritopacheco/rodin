@@ -55,7 +55,13 @@ namespace Rodin::Variational
   /**
    * @defgroup P1Specializations P1 Template Specializations
    * @brief Template specializations of the P1 class.
-   * @see P1
+   * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P1 "P1<Scalar, Mesh<Context::Local>>" | Scalar-valued local-mesh continuous piecewise linear space. |
+   * | @ref P1 "P1<SpatialVector<Scalar>, Mesh<Context::Local>>" | Vector-valued local-mesh continuous piecewise linear space. |
+   * | @ref P1 "P1<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh continuous piecewise linear space. |
    */
 
   template <class Range, class Mesh = Geometry::Mesh<Context::Local>>

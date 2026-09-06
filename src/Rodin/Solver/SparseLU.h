@@ -34,7 +34,7 @@
  * solver.solve();
  * ```
  *
- * @see SparseLU for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html">SparseLU</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_SPARSELU_H
 #define RODIN_SOLVER_SPARSELU_H
@@ -63,7 +63,7 @@ namespace Rodin::Solver
   /**
    * @defgroup SparseLUSpecializations SparseLU Template Specializations
    * @brief Template specializations of the SparseLU class.
-   * @see SparseLU
+   * @see @ref SparseLU
    */
 
   /**

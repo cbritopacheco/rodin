@@ -38,7 +38,12 @@ namespace Rodin::Variational
   /**
    * @defgroup ConjugateSpecializations Conjugate Template Specializations
    * @brief Template specializations of the Conjugate class.
-   * @see Conjugate
+   * @see @ref Conjugate
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Conjugate "Conjugate<FunctionBase<NestedDerived>>" | Pointwise complex conjugate of a function expression. |
+   * | @ref Conjugate "Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>" | Complex conjugate of a test or trial shape function expression. |
    */
 
   /**

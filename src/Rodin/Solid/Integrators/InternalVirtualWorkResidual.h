@@ -51,6 +51,17 @@
 
 namespace Rodin::Solid
 {
+  /**
+   * @brief Internal virtual work residual integrator family.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref InternalVirtualWorkResidual "InternalVirtualWorkResidual<LawDerived, TestFunctionType, DisplacementType>" | Momentum residual for pure-displacement hyperelastic formulations. |
+   * | @ref InternalVirtualWorkResidual "InternalVirtualWorkResidual<LawDerived, TestFunctionType, DisplacementType, PressureType>" | Momentum residual for mixed displacement-pressure formulations with pressure contribution. |
+   *
+   * @tparam Args Constitutive law, test function, displacement state, and
+   *         optional pressure state types selected by the specialization.
+   */
   template <class... Args>
   class InternalVirtualWorkResidual;
 

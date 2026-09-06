@@ -45,7 +45,10 @@ namespace Rodin::Geometry
    * Polytope iterators are **not** thread-safe. Each thread should use its
    * own iterator instance.
    *
-   * @see PolytopeIterator, CellIterator, FaceIterator, VertexIterator
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html">CellIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face_iterator.html">FaceIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html">VertexIterator</a>
    */
   template <class T, class Derived>
   class PolytopeIteratorBase
@@ -236,7 +239,9 @@ namespace Rodin::Geometry
    * # Thread Safety
    * Not thread-safe. Each thread should use its own iterator instance.
    *
-   * @see CellIterator, FaceIterator, VertexIterator
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html">CellIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face_iterator.html">FaceIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html">VertexIterator</a>
    */
   class PolytopeIterator : public PolytopeIteratorBase<Polytope, PolytopeIterator>
   {
@@ -327,7 +332,9 @@ namespace Rodin::Geometry
    * # Thread Safety
    * Not thread-safe. Each thread should use its own iterator instance.
    *
-   * @see PolytopeIterator, FaceIterator, VertexIterator
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face_iterator.html">FaceIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html">VertexIterator</a>
    */
   class CellIterator : public PolytopeIteratorBase<Cell, CellIterator>
   {
@@ -396,7 +403,9 @@ namespace Rodin::Geometry
    * # Thread Safety
    * Not thread-safe. Each thread should use its own iterator instance.
    *
-   * @see PolytopeIterator, CellIterator, VertexIterator
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html">CellIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html">VertexIterator</a>
    */
   class FaceIterator : public PolytopeIteratorBase<Face, FaceIterator>
   {
@@ -465,7 +474,9 @@ namespace Rodin::Geometry
    * # Thread Safety
    * Not thread-safe. Each thread should use its own iterator instance.
    *
-   * @see PolytopeIterator, CellIterator, FaceIterator
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html">CellIterator</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face_iterator.html">FaceIterator</a>
    */
   class VertexIterator : public PolytopeIteratorBase<Vertex, VertexIterator>
   {

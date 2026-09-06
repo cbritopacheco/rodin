@@ -83,7 +83,12 @@ namespace Rodin::Variational
   /**
    * @defgroup SumSpecializations Sum Template Specializations
    * @brief Template specializations of the Sum class.
-   * @see Sum
+   * @see @ref Sum
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Sum "Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>" | Pointwise sum of two function expressions. |
+   * | @ref Sum "Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>" | Sum of compatible test or trial shape-function expressions. |
    */
 
   /**

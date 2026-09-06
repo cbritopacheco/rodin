@@ -25,6 +25,11 @@ namespace Rodin::Utility
    *
    * Wrap takes a Tuple type and an external template, and produces a new
    * Tuple where each element type has been wrapped with the external template.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Wrap "Wrap<...>" | Undefined primary template used to restrict the metafunction to supported pack shapes. |
+   * | @ref Wrap "Wrap<Tuple<Ts...>>" | Tuple specialization that maps an external unary template over every tuple element. |
    */
   template <class ...>
   class Wrap;

@@ -25,6 +25,9 @@
   - @subpage guides-getting-started-core-concepts — Deeper dive into meshes,
     finite element spaces, operators, and variational formulations
 
+  - @subpage guides-numerical-contracts — Interpolation vs projection,
+    `Problem` sign conventions, quadrature, constraints, and solver lifetimes
+
   @subsection guides-getting-started-prerequisites Prerequisites
 
   Before starting, you should have:
@@ -77,6 +80,9 @@
   - @subpage guides-solvers — Direct solvers (SparseLU, UMFPack, CHOLMOD),
     iterative solvers (CG, GMRES, BiCGSTAB), and the Newton solver
 
+  - @subpage guides-numerical-contracts — Cross-module numerical contracts
+    for forms, projections, constraints, quadrature, and nonlinear tangents
+
   - @subpage guides-interfaces-dg — Facet integrals, traces, jump and
     average operators, interface tagging, and discontinuous Galerkin
     formulations
@@ -103,6 +109,9 @@
   @section guides-parallel-index Parallel and Distributed Computing
 
   Using MPI and PETSc for large-scale problems:
+
+  - @subpage guides-backends — Local, OpenMP, MPI, and PETSc backend choices
+    and what complete support means for each path
 
   - @subpage guides-mpi — Distributed mesh partitioning, sharding, and
     reconciliation with @ref Rodin::Context::MPI "Context::MPI",

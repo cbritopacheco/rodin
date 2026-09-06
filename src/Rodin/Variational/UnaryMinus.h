@@ -46,7 +46,16 @@ namespace Rodin::Variational
   /**
    * @defgroup UnaryMinusSpecializations UnaryMinus Template Specializations
    * @brief Template specializations of the UnaryMinus class.
-   * @see UnaryMinus
+   * @see @ref UnaryMinus
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref UnaryMinus "UnaryMinus<FunctionBase<NestedDerived>>" | Pointwise negation of a function expression. |
+   * | @ref UnaryMinus "UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>" | Negation of a test or trial shape-function expression. |
+   * | @ref UnaryMinus "UnaryMinus<LinearFormIntegratorBase<Number>>" | Negation of a linear-form integrator. |
+   * | @ref UnaryMinus "UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>" | Negation of a list of linear-form integrators. |
+   * | @ref UnaryMinus "UnaryMinus<LocalBilinearFormIntegratorBase<Number>>" | Negation of a local bilinear-form integrator. |
+   * | @ref UnaryMinus "UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>>" | Negation of a list of local bilinear-form integrators. |
    */
 
   /**

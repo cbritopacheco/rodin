@@ -29,7 +29,7 @@ namespace Rodin::IO
    * @note An exception is raised at runtime if this primary template is
    *       actually invoked.
    *
-   * @see GridFunctionLoader
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a>
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinter : public IO::Printer<Variational::GridFunction<FES, Data>>
@@ -64,6 +64,15 @@ namespace Rodin::IO
    *
    * Stores the grid function by reference and exposes it to derived printers
    * through @ref getObject().
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GridFunctionPrinterBase "GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>" | Base for MFEM grid function printers backed by local vector coefficients. |
+   * | @ref GridFunctionPrinterBase "GridFunctionPrinterBase<FileFormat::MFEM, FES, Vec>" | Base for MFEM grid function printers backed by PETSc vectors. |
+   * | @ref GridFunctionPrinterBase "GridFunctionPrinterBase<FileFormat::MEDIT, FES, Math::Vector<Scalar>>" | Base for MEDIT grid function printers backed by local vector coefficients. |
+   * | @ref GridFunctionPrinterBase "GridFunctionPrinterBase<FileFormat::MEDIT, FES, Vec>" | Base for MEDIT grid function printers backed by PETSc vectors. |
+   * | @ref GridFunctionPrinterBase "GridFunctionPrinterBase<FileFormat::HDF5, FES, Math::Vector<Scalar>>" | Base for HDF5 grid function printers backed by local vector coefficients. |
+   * | @ref GridFunctionPrinterBase "GridFunctionPrinterBase<FileFormat::HDF5, FES, Vec>" | Base for HDF5 grid function printers backed by PETSc vectors. |
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>

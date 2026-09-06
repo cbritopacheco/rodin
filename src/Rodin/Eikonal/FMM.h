@@ -39,6 +39,11 @@ namespace Rodin::Eikonal
    *
    * @tparam Solution Solution type (typically a GridFunction)
    * @tparam SpeedFunction Type of the speed function @f$ F(x) @f$
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref FMM "FMM<GridFunction<P1<Real, Mesh<Context::Local>>, Data>, SpeedFunction>" | Fast marching method for scalar P1 grid functions on local simplicial meshes. |
+   * | @ref FMM "FMM<Solution, SpeedFunction>" | Primary template for supported fast marching method implementations. |
    */
   template <class Solution, class SpeedFunction>
   class FMM;

@@ -24,6 +24,12 @@
   #include <Rodin/PETSc.h>
   @endcode
 
+  The relationship between local Eigen storage, threaded assembly, MPI mesh
+  contexts, and PETSc objects is summarized in
+  @ref guides-backends "Backends". The numerical contracts PETSc mirrors from
+  core Rodin assembly are summarized in
+  @ref guides-numerical-contracts "Numerical contracts".
+
   @note PETSc must be initialized before use and finalized after:
   @code{.cpp}
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
@@ -61,7 +67,7 @@
 
   | Feature | Description |
   |---------|-------------|
-  | Projection | `gf = expr` assigns DOF values from a function expression |
+  | Assignment | `gf = expr` assigns DOF values from a function expression |
   | Arithmetic | `+=`, `-=`, `*=`, `/=` for scalars and grid functions |
   | Point evaluation | `gf(point)` evaluates @f$ u_h @f$ at a geometric point |
   | DOF access | `gf[i]` accesses individual DOF coefficients |
@@ -227,9 +233,9 @@
 
   | Strategy | Header | Context | Description |
   |----------|--------|---------|-------------|
-  | `Sequential` | `PETSc/Assembly/Sequential.h` | `Context::Local` | Single-thread assembly into PETSc objects |
-  | `OpenMP` | `PETSc/Assembly/OpenMP.h` | `Context::Local` | Shared-memory parallel assembly |
-  | `MPI` | `PETSc/Assembly/MPI.h` | `Context::MPI` | Distributed assembly (each rank contributes owned elements) |
+  | `Sequential` | <a href="_p_e_t_sc_2_assembly_2_sequential_8h.html">PETSc/Assembly/Sequential.h</a> | `Context::Local` | Single-thread assembly into PETSc objects |
+  | `OpenMP` | <a href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html">PETSc/Assembly/OpenMP.h</a> | `Context::Local` | Shared-memory parallel assembly |
+  | `MPI` | <a href="_p_e_t_sc_2_assembly_2_m_p_i_8h.html">PETSc/Assembly/MPI.h</a> | `Context::MPI` | Distributed assembly (each rank contributes owned elements) |
 
   The assembly strategy is selected automatically via the
   `Assembly::Default<TrialContext, TestContext>` trait based on the mesh
@@ -347,6 +353,8 @@
   - @ref Rodin::PETSc "PETSc namespace reference"
   - @ref Rodin::Solver::KSP "KSP solver"
   - @ref Rodin::Solver::SNES "SNES nonlinear solver"
+  - @ref guides-backends "Backends"
+  - @ref guides-numerical-contracts "Numerical contracts"
   - @ref guides-mpi "MPI module"
   - @ref guides-solvers "Solvers guide"
 

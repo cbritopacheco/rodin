@@ -28,6 +28,9 @@
   #include <Rodin/MPI.h>
   @endcode
 
+  For a comparison of local, OpenMP, MPI, and PETSc execution/storage paths,
+  see @ref guides-backends "Backends".
+
   @section guides-mpi-context Execution Context
 
   The @ref Rodin::Context::MPI "Context::MPI" class wraps a
@@ -328,6 +331,7 @@
   - @ref Rodin::MPI "MPI namespace reference"
   - @ref Rodin::Context::MPI "Context::MPI"
   - @ref Rodin::Geometry::Shard "Shard"
+  - @ref guides-backends "Backends"
   - @ref guides-petsc "PETSc module"
   - @ref guides-solvers "Solvers"
 

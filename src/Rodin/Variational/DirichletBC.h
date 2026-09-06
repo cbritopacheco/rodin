@@ -236,6 +236,11 @@ namespace Rodin::Variational
    * @defgroup DirichletBCSpecializations DirichletBC Template Specializations
    * @brief Template specializations of the DirichletBC class.
    * @see DirichletBC
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref DirichletBC "DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>" | Value-prescribing condition @f$u=g@f$. |
+   * | @ref DirichletBC "DirichletBC<TrialFunction<Solution, FES>, Identification>" | Linear-in-DOFs identification condition between trial functions. |
    */
 
   /**

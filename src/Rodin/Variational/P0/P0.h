@@ -59,7 +59,12 @@ namespace Rodin::Variational
   /**
    * @defgroup P0Specializations P0 Template Specializations
    * @brief Template specializations of the P0 class.
-   * @see P0
+   * @see <a href="class_rodin_1_1_variational_1_1_p0.html">P0</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P0 "P0<Real, Mesh<Context::Local>>" | Scalar-valued local-mesh discontinuous piecewise constant space. |
+   * | @ref P0 "P0<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh discontinuous piecewise constant space. |
    */
 
   template <class Range, class Mesh = Geometry::Mesh<Context::Local>>

@@ -59,6 +59,17 @@
 namespace Rodin::Solid
 {
 
+  /**
+   * @brief Internal virtual work tangent integrator family.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref InternalVirtualWorkTangent "InternalVirtualWorkTangent<LawDerived, TrialFunctionType, TestFunctionType, DisplacementType>" | Displacement tangent for pure-displacement hyperelastic formulations. |
+   * | @ref InternalVirtualWorkTangent "InternalVirtualWorkTangent<LawDerived, TrialFunctionType, TestFunctionType, DisplacementType, PressureType>" | Displacement-displacement tangent for mixed displacement-pressure formulations. |
+   *
+   * @tparam Args Constitutive law, trial/test functions, displacement state,
+   *         and optional pressure state types selected by the specialization.
+   */
   template <class... Args>
   class InternalVirtualWorkTangent;
 

@@ -81,7 +81,12 @@ namespace Rodin::Variational
   /**
    * @defgroup P0ElementSpecializations P0Element Template Specializations
    * @brief Template specializations of the P0Element class.
-   * @see P0Element
+   * @see <a href="class_rodin_1_1_variational_1_1_p0_element.html">P0Element</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P0Element "P0Element<Scalar>" | Scalar-valued discontinuous piecewise constant element. |
+   * | @ref P0Element "P0Element<SpatialVector<Scalar>>" | Vector-valued discontinuous piecewise constant element. |
    */
 
   /**

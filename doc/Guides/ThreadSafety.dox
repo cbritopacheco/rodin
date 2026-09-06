@@ -53,11 +53,12 @@
   @section guides-threads-assembly Parallel assembly
 
   The @ref Rodin::Assembly "Assembly" module provides sequential and
-  OpenMP backends (selected by `Assembly/Default.h` according to the
-  build configuration). The OpenMP backend parallelizes the *evaluation*
+  OpenMP backends (selected by
+  <a href="_assembly_2_default_8h.html">Assembly/Default.h</a> according to
+  the build configuration). The OpenMP backend parallelizes the *evaluation*
   phase — each thread iterates a share of the polytopes, evaluating local
-  integrators into thread-local storage — followed by a merge into the
-  global matrix/vector. Two practical consequences:
+  integrators into thread-local storage — followed by a merge into the global
+  matrix/vector. Two practical consequences:
 
   - **Determinism.** Floating-point sums may be reordered between runs
     with different thread counts; bit-identical reproducibility across

@@ -58,7 +58,12 @@ namespace Rodin::Solver
   /**
    * @defgroup IDRSSpecializations IDRS Template Specializations
    * @brief Template specializations of the IDRS class.
-   * @see IDRS
+   * @see @ref IDRS
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref IDRS "IDRS<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Iterative IDR(s) solver for sparse systems. |
+   * | @ref IDRS "IDRS<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Iterative IDR(s) solver for dense systems. |
    */
 
   /**

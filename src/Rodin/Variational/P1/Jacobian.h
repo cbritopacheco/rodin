@@ -24,7 +24,10 @@
  * For P1 elements, the Jacobian is piecewise constant on each element since
  * P1 basis function gradients are constant per element.
  *
- * @see Jacobian, P1, Grad, Div
+ * @see <a href="_jacobian_8h.html">Jacobian</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
+ * @see <a href="_grad_8h.html">Grad</a>
+ * @see <a href="_div_8h.html">Div</a>
  */
 #ifndef RODIN_VARIATIONAL_P1_JACOBIAN_H
 #define RODIN_VARIATIONAL_P1_JACOBIAN_H

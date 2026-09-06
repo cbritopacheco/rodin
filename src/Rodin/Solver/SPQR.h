@@ -39,7 +39,7 @@
  * @note This solver requires SPQR from SuiteSparse to be installed
  * and RODIN_USE_SPQR to be defined at compile time.
  *
- * @see SPQR for the solver implementation
+ * @see <a href="_s_p_q_r_8h.html">SPQR</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_SPQR_H
 #define RODIN_SOLVER_SPQR_H
@@ -74,7 +74,7 @@ namespace Rodin::Solver
   /**
    * @defgroup SPQRSpecializations SPQR Template Specializations
    * @brief Template specializations of the SPQR class.
-   * @see SPQR
+   * @see @ref SPQR
    */
 
   /**

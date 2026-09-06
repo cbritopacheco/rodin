@@ -29,10 +29,10 @@
  * where @f$ \psi_j @f$ and @f$ \phi_i @f$ are trial and test basis
  * functions, respectively.
  *
- * @see Rodin::PETSc::Variational::LinearForm,
- *      Rodin::PETSc::Variational::Problem,
- *      Rodin::PETSc::Variational::TrialFunction,
- *      Rodin::PETSc::Variational::TestFunction
+ * @see <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::PETSc::Variational::LinearForm</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::PETSc::Variational::Problem</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html">Rodin::PETSc::Variational::TrialFunction</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
  */
 
 #include <petscmacros.h>
@@ -58,8 +58,8 @@ namespace Rodin::Variational
    * @tparam TrialFES  Finite element space type of the trial function.
    * @tparam TestFES   Finite element space type of the test function.
    *
-   * @see Rodin::Variational::BilinearFormBase,
-   *      Rodin::PETSc::Variational::BilinearForm
+   * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html">Rodin::Variational::BilinearFormBase</a>
+   * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::PETSc::Variational::BilinearForm</a>
    */
   template <class Solution, class TrialFES, class TestFES>
   class BilinearForm<Solution, TrialFES, TestFES, ::Mat> final

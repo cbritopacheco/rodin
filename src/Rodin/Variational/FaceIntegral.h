@@ -36,7 +36,10 @@
  * auto symmetry = FaceIntegral(Jump(u), Average(Grad(v)));
  * ```
  *
- * @see InterfaceIntegral, BoundaryIntegral, Jump, Average
+ * @see <a href="_interface_integral_8h.html">InterfaceIntegral</a>
+ * @see <a href="_boundary_integral_8h.html">BoundaryIntegral</a>
+ * @see <a href="_jump_8h.html">Jump</a>
+ * @see <a href="_average_8h.html">Average</a>
  */
 #ifndef RODIN_VARIATIONAL_FACEINTEGRAL_H
 #define RODIN_VARIATIONAL_FACEINTEGRAL_H
@@ -56,6 +59,11 @@ namespace Rodin::Variational
    * @brief Template specializations of the FaceIntegral class.
    *
    * @see FaceIntegral
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref FaceIntegral "FaceIntegral<Dot<TrialShapeFunction, TestShapeFunction>>" | Face integral of a trial/test dot product. |
+   * | @ref FaceIntegral "FaceIntegral<ShapeFunctionBase<Dot<FunctionBase, TestShapeFunction>>>" | Face integral of a test operator. |
    */
 
   /**

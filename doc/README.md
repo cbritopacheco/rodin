@@ -117,6 +117,15 @@ Useful conventions:
 - Use `@f$ ... @f$` for inline mathematics and `@f[ ... @f]` for displayed
   formulas.
 - Use links only when the target is documented and resolvable.
+- When a class or class template page describes a family with more than one
+  supported specialization, include a table in the class description with the
+  exact columns `Specialization` and `Description`. The specialization entry
+  must link to that specialization, and the table must list the complete
+  supported set for the family.
+- In `@see` blocks and prose lists that name public classes, templates,
+  specialization groups, or generated file pages, write explicit `@ref`
+  references or HTML links. Do not rely on m.css to autolink bare comma-
+  separated names such as `MeshBase, Mesh.h`.
 - Prefer plain code text over `@ref` for names that are intentionally not part
   of the generated public reference.
 - Keep generated files and local build output out of `doc/`.

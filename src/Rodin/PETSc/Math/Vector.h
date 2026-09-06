@@ -15,7 +15,8 @@
  * provides the @ref Rodin::FormLanguage::Traits specialization so that
  * Rodin's type-trait machinery recognises PETSc vectors.
  *
- * @see Rodin::PETSc::Math::Matrix, Rodin::PETSc::Math::LinearSystem
+ * @see <a href="_p_e_t_sc_2_math_2_matrix_8h.html">Rodin::PETSc::Math::Matrix</a>
+ * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a>
  */
 
 #include <boost/mpi/communicator.hpp>

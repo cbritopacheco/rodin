@@ -34,7 +34,7 @@
  * solver.solve();
  * ```
  *
- * @see HouseholderQR for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_householder_q_r.html">HouseholderQR</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_HOUSEHOLDERQR_H
 #define RODIN_SOLVER_HOUSEHOLDERQR_H
@@ -64,7 +64,7 @@ namespace Rodin::Solver
   /**
    * @defgroup HouseholderQRSpecializations HouseholderQR Template Specializations
    * @brief Template specializations of the HouseholderQR class.
-   * @see HouseholderQR
+   * @see @ref HouseholderQR
    */
 
   /**

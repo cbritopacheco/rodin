@@ -322,6 +322,11 @@ Use `override` on all overrides, `= 0` for pure virtuals, `virtual` destructors 
 - Classes: `@brief`, `@tparam`.
 - Methods: `@param[in]`, `@param[out]`, `@returns`.
 - Math: `@f$ ... @f$` for inline LaTeX.
+- Class pages documenting multiple supported specializations include a complete
+  `Specialization` / `Description` table with linked specialization entries.
+- Public class, template, specialization-family, and generated header-page
+  references in `@see` blocks or prose lists must be explicit `@ref` references
+  or generated-page HTML links, not bare comma-separated names.
 
 ### Optional and common types
 

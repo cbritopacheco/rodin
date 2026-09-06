@@ -35,7 +35,7 @@
  * solver.setTolerance(1e-10).setMaxIterations(1000).solve();
  * ```
  *
- * @see BiCGSTAB for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html">BiCGSTAB</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_BICGSTAB_H
 #define RODIN_SOLVER_BICGSTAB_H
@@ -64,7 +64,7 @@ namespace Rodin::Solver
   /**
    * @defgroup BiCGSTABSpecializations BiCGSTAB Template Specializations
    * @brief Template specializations of the BiCGSTAB class.
-   * @see BiCGSTAB
+   * @see @ref BiCGSTAB
    */
 
   /**

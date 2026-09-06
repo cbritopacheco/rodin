@@ -62,7 +62,9 @@ namespace Rodin::Geometry
    * for concurrent read access. The transform(), jacobian(), and inverse()
    * methods can be called concurrently from multiple threads.
    *
-   * @see IdentityTransformation, ParametricTransformation, Point
+   * @see <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html">IdentityTransformation</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html">ParametricTransformation</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_point.html">Point</a>
    */
   class PolytopeTransformation : public Copyable
   {

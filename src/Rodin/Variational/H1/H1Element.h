@@ -18,9 +18,9 @@
  * - Arbitrary polynomial degree K
  * - Support for scalar and vector-valued fields
  *
- * @see H1Element
- * @see RealH1Element
- * @see VectorH1Element
+ * @see <a href="_h1_element_8h.html">H1Element</a>
+ * @see <a href="_h1_element_8h.html">RealH1Element</a>
+ * @see <a href="_h1_element_8h.html">VectorH1Element</a>
  */
 
 #include <cstddef>
@@ -83,6 +83,11 @@ namespace Rodin::Variational
    * @defgroup H1ElementSpecializations H1Element Template Specializations
    * @brief Template specializations of the H1Element class.
    * @see H1Element
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref H1Element "H1Element<K, Scalar>" | Scalar-valued continuous Lagrange element of degree @f$K@f$. |
+   * | @ref H1Element "H1Element<K, SpatialVector<Scalar>>" | Vector-valued continuous Lagrange element of degree @f$K@f$. |
    */
 
   /**

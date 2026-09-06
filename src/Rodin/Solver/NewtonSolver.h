@@ -28,15 +28,18 @@ namespace Rodin::Solver
    * @brief Base interface for Newton-type nonlinear solvers.
    *
    * Newton solver class for solving nonlinear systems through a
-   * Variational::ProblemBase that assembles the tangent system at each iterate:
+   * <a href="_variational_2_problem_8h.html">Variational::ProblemBase</a>
+   * that assembles the tangent system at each iterate:
    * @f[
    * J(u^k)\,\delta u^k = -F(u^k), \qquad
    * u^{k + 1} = u^k + \delta u^k.
    * @f]
    *
    * The linear solver is passed by reference at construction time.
-   * The associated ProblemBase is obtained from the solver via
-   * LinearSolverBase::getProblem().
+   * The associated
+   * <a href="_variational_2_problem_8h.html">ProblemBase</a>
+   * is obtained from the solver via
+   * @ref LinearSolverBase "LinearSolverBase::getProblem()".
    *
    * @tparam LinearSolver Type of the linear solver used at each Newton step.
    *   Must have a FormLanguage::Traits specialization providing LinearSystemType.
@@ -182,12 +185,14 @@ namespace Rodin::Solver
    * used both as the initial guess and as the storage for the final iterate.
    *
    * @par Associated tangential problem
-   * The solver obtains the tangential @c Variational::ProblemBase from the
-   * supplied linear solver through @c LinearSolverBase::getProblem().
+   * The solver obtains the tangential
+   * <a href="_variational_2_problem_8h.html">Variational::ProblemBase</a>
+   * from the supplied linear solver through
+   * @ref LinearSolverBase "LinearSolverBase::getProblem()".
    * At each Newton iteration:
    * - the tangential problem is reassembled by calling @c assemble(),
    * - the assembled linear system is accessed through
-   *   @c ProblemBase::getLinearSystem(),
+   *   <a href="_variational_2_problem_8h.html">ProblemBase::getLinearSystem()</a>,
    * - the linear correction is computed by the associated linear solver.
    *
    * @par Contract

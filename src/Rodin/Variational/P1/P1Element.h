@@ -57,7 +57,12 @@ namespace Rodin::Variational
   /**
    * @defgroup P1ElementSpecializations P1Element Template Specializations
    * @brief Template specializations of the P1Element class.
-   * @see P1Element
+   * @see <a href="class_rodin_1_1_variational_1_1_p1_element.html">P1Element</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P1Element "P1Element<Scalar>" | Scalar-valued continuous piecewise linear element. |
+   * | @ref P1Element "P1Element<SpatialVector<Scalar>>" | Vector-valued continuous piecewise linear element. |
    */
 
   /**

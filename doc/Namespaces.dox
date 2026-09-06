@@ -66,12 +66,12 @@
 
   | Type | Color | Behavior |
   |------|-------|----------|
-  | `Alert::Info` | Blue | Informational message (non-fatal) |
-  | `Alert::Warning` | Yellow | Warning message (non-fatal) |
-  | `Alert::Success` | Green | Success notification (non-fatal) |
-  | `Alert::Exception` | Red | Throws an exception (fatal) |
-  | `Alert::MemberFunctionException` | Red | Exception with class/method context |
-  | `Alert::MemberFunctionWarning` | Yellow | Warning with class/method context |
+  | @ref Rodin::Alert::Info "Alert::Info" | Blue | Informational message (non-fatal) |
+  | @ref Rodin::Alert::Warning "Alert::Warning" | Yellow | Warning message (non-fatal) |
+  | @ref Rodin::Alert::Success "Alert::Success" | Green | Success notification (non-fatal) |
+  | @ref Rodin::Alert::Exception "Alert::Exception" | Red | Throws an exception (fatal) |
+  | @ref Rodin::Alert::MemberFunctionException "Alert::MemberFunctionException" | Red | Exception with class/method context |
+  | @ref Rodin::Alert::MemberFunctionWarning "Alert::MemberFunctionWarning" | Yellow | Warning with class/method context |
 
   ## Usage Pattern
 
@@ -121,40 +121,40 @@
 
   | Method | Description |
   |--------|-------------|
-  | `Mesh::UniformGrid(type, shape)` | Structured grid on the unit hypercube |
-  | `Mesh::Box(faceType, shape)` | Surface mesh (boundary of unit box) |
-  | `Mesh::Build()` | Programmatic construction via Builder pattern |
-  | `mesh.load(file, format)` | Load from MFEM, MEDIT, or HDF5 |
+  | @ref Rodin::Geometry::Mesh "Mesh::UniformGrid(type, shape)" | Structured grid on the unit hypercube |
+  | @ref Rodin::Geometry::Mesh "Mesh::Box(faceType, shape)" | Surface mesh (boundary of unit box) |
+  | @ref Rodin::Geometry::Mesh "Mesh::Build()" | Programmatic construction via Builder pattern |
+  | @ref Rodin::Geometry::Mesh "mesh.load(file, format)" | Load from MFEM, MEDIT, or HDF5 |
 
   ## Mesh Operations
 
   | Method | Description |
   |--------|-------------|
-  | `getConnectivity().compute(d1, d2)` | Compute incidence relation @f$ d_1 \to d_2 @f$ |
-  | `scale(factor)` | Scale all vertex coordinates by a scalar factor |
-  | `displace(vectorFunction)` | Apply a displacement field to all vertices |
-  | `skin()` | Extract the boundary surface mesh |
-  | `getDimension()` | Topological dimension (2 for triangles, 3 for tetrahedra) |
-  | `getSpaceDimension()` | Ambient space dimension (≥ topological dimension) |
-  | `getVertexCount()` | Number of vertices |
-  | `getCellCount()` | Number of cells |
-  | `getVolume()` | Total volume (or area) of the domain |
-  | `getPerimeter()` | Total perimeter (or surface area) of the domain boundary |
-  | `getVertex()` / `getCell()` / `getBoundary()` | Polytope iterators |
-  | `getVertexCoordinates(idx)` | Get coordinates of a vertex |
-  | `setAttribute({dim, idx}, attr)` | Set attribute of a polytope (for BC labeling) |
+  | @ref Rodin::Geometry::Connectivity "getConnectivity().compute(d1, d2)" | Compute incidence relation @f$ d_1 \to d_2 @f$ |
+  | @ref Rodin::Geometry::Mesh "scale(factor)" | Scale all vertex coordinates by a scalar factor |
+  | @ref Rodin::Geometry::Mesh "displace(vectorFunction)" | Apply a displacement field to all vertices |
+  | @ref Rodin::Geometry::Mesh "skin()" | Extract the boundary surface mesh |
+  | @ref Rodin::Geometry::Mesh "getDimension()" | Topological dimension (2 for triangles, 3 for tetrahedra) |
+  | @ref Rodin::Geometry::Mesh "getSpaceDimension()" | Ambient space dimension (>= topological dimension) |
+  | @ref Rodin::Geometry::Mesh "getVertexCount()" | Number of vertices |
+  | @ref Rodin::Geometry::Mesh "getCellCount()" | Number of cells |
+  | @ref Rodin::Geometry::Mesh "getVolume()" | Total volume (or area) of the domain |
+  | @ref Rodin::Geometry::Mesh "getPerimeter()" | Total perimeter (or surface area) of the domain boundary |
+  | @ref Rodin::Geometry::Mesh "getVertex() / getCell() / getBoundary()" | Polytope iterators |
+  | @ref Rodin::Geometry::Mesh "getVertexCoordinates(idx)" | Get coordinates of a vertex |
+  | @ref Rodin::Geometry::Mesh "setAttribute({dim, idx}, attr)" | Set attribute of a polytope (for BC labeling) |
 
   ## Polytope Types
 
   | Type | Dimension | Description |
   |------|-----------|-------------|
-  | `Point` | 0 | Vertex |
-  | `Segment` | 1 | Edge |
-  | `Triangle` | 2 | 3-vertex face/cell |
-  | `Quadrilateral` | 2 | 4-vertex face/cell |
-  | `Tetrahedron` | 3 | 4-vertex cell |
-  | `Hexahedron` | 3 | 8-vertex cell |
-  | `Wedge` | 3 | Triangular prism (6 vertices) |
+  | @ref Rodin::Geometry::Polytope "Point" | 0 | Vertex |
+  | @ref Rodin::Geometry::Polytope "Segment" | 1 | Edge |
+  | @ref Rodin::Geometry::Polytope "Triangle" | 2 | 3-vertex face/cell |
+  | @ref Rodin::Geometry::Polytope "Quadrilateral" | 2 | 4-vertex face/cell |
+  | @ref Rodin::Geometry::Polytope "Tetrahedron" | 3 | 4-vertex cell |
+  | @ref Rodin::Geometry::Polytope "Hexahedron" | 3 | 8-vertex cell |
+  | @ref Rodin::Geometry::Polytope "Wedge" | 3 | Triangular prism (6 vertices) |
 
   @code{.cpp}
   Mesh mesh;
@@ -186,9 +186,9 @@
 
   | Strategy | Class | Description |
   |----------|-------|-------------|
-  | **Sequential** | `Assembly::Sequential` | Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible. |
-  | **OpenMP** | `Assembly::OpenMP` | Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with `RODIN_USE_OPENMP=ON`. |
-  | **Default** | `Assembly::Default` | Compile-time policy selector. Maps to `OpenMP` when OpenMP is available, otherwise falls back to `Sequential`. Users rarely need to specify this directly. |
+  | **Sequential** | @ref Rodin::Assembly::Sequential "Assembly::Sequential" | Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible. |
+  | **OpenMP** | @ref Rodin::Assembly "Assembly::OpenMP" | Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with `RODIN_USE_OPENMP=ON`. |
+  | **Default** | @ref Rodin::Assembly::Default "Assembly::Default" | Compile-time policy selector. Maps to @ref Rodin::Assembly "OpenMP" when OpenMP is available, otherwise falls back to @ref Rodin::Assembly::Sequential "Sequential". Users rarely need to specify this directly. |
 
   ## What Gets Assembled
 
@@ -259,9 +259,9 @@
   The IO module provides facilities for reading and writing meshes and grid
   functions in several formats:
 
-  - **MFEM** (`IO::FileFormat::MFEM`) — Native MFEM mesh and grid function format
-  - **MEDIT** (`IO::FileFormat::MEDIT`) — MEDIT format used by MMG and INRIA tools
-  - **HDF5** (`IO::FileFormat::HDF5`) — High-performance binary format
+  - **MFEM** (@ref Rodin::IO::FileFormat "IO::FileFormat::MFEM") — Native MFEM mesh and grid function format
+  - **MEDIT** (@ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT") — MEDIT format used by MMG and INRIA tools
+  - **HDF5** (@ref Rodin::IO::FileFormat "IO::FileFormat::HDF5") — High-performance binary format
 
   Additionally, the @ref Rodin::IO::XDMF "XDMF" class provides XDMF 3.0
   output for scientific visualization in [ParaView](https://www.paraview.org/),
@@ -271,9 +271,9 @@
 
   The XDMF writer uses a two-level design:
 
-  - **XDMF** — Top-level writer that manages the `.xdmf` XML file and `.h5`
+  - @ref Rodin::IO::XDMF "XDMF" — Top-level writer that manages the `.xdmf` XML file and `.h5`
     HDF5 data. Provides `write()`, `flush()`, `close()`, `setPadding()`.
-  - **XDMF::Grid** — A lightweight handle returned by `xdmf.grid()` (default)
+  - @ref Rodin::IO::XDMF::Grid "XDMF::Grid" — A lightweight handle returned by `xdmf.grid()` (default)
     or `xdmf.grid("name")` (named). Provides `setMesh()`, `add()`, `hasMesh()`,
     `reset()` — all returning `Grid&` for method chaining.
 
@@ -292,10 +292,10 @@
 
   | Format | Extensions | Key Classes | Notes |
   |--------|-----------|-------------|-------|
-  | MFEM | `.mesh`, `.gf` | `IO::FileFormat::MFEM` | Text-based, compatible with MFEM ecosystem |
-  | MEDIT | `.mesh` | `IO::FileFormat::MEDIT` | Used by MMG, supports attributes |
-  | HDF5 | `.h5` | `IO::FileFormat::HDF5` | Binary, parallel-capable |
-  | XDMF | `.xdmf` + `.h5` | `IO::XDMF`, `IO::XDMF::Grid` | ParaView visualization, time series |
+  | MFEM | `.mesh`, `.gf` | @ref Rodin::IO::FileFormat "IO::FileFormat::MFEM" | Text-based, compatible with MFEM ecosystem |
+  | MEDIT | `.mesh` | @ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT" | Used by MMG, supports attributes |
+  | HDF5 | `.h5` | @ref Rodin::IO::FileFormat "IO::FileFormat::HDF5" | Binary, parallel-capable |
+  | XDMF | `.xdmf` + `.h5` | @ref Rodin::IO::XDMF "IO::XDMF", @ref Rodin::IO::XDMF::Grid "IO::XDMF::Grid" | ParaView visualization, time series |
 
   @see @ref guides-io "I/O in Rodin" for a comprehensive guide.
  */
@@ -537,19 +537,19 @@
 
   | Method | Class | Equation | Properties |
   |--------|-------|----------|------------|
-  | **Eikonal** | `Distance::Eikonal` | @f$ \lVert\nabla d\rVert = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
-  | **Poisson** | `Distance::Poisson` | @f$ -\Delta u = 1, \; u\vert_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
-  | **SignedPoisson** | `Distance::SignedPoisson` | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\vert_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
-  | **Rvachev** | `Distance::Rvachev` | @f$ d = \frac{u}{\sqrt{u^2 + \lVert\nabla u\rVert^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
-  | **SpaldingTucker** | `Distance::SpaldingTucker` | @f$ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\rvert}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
+  | **Eikonal** | @ref Rodin::Distance::Eikonal "Distance::Eikonal" | @f$ \lVert\nabla d\rVert = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
+  | **Poisson** | @ref Rodin::Distance::Poisson "Distance::Poisson" | @f$ -\Delta u = 1, \; u\vert_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
+  | **SignedPoisson** | @ref Rodin::Distance::SignedPoisson "Distance::SignedPoisson" | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\vert_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
+  | **Rvachev** | @ref Rodin::Distance::Rvachev "Distance::Rvachev" | @f$ d = \frac{u}{\sqrt{u^2 + \lVert\nabla u\rVert^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
+  | **SpaldingTucker** | @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" | @f$ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\rvert}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
 
-  All methods except `Rvachev` and `SpaldingTucker` inherit from a common CRTP
+  All methods except @ref Rodin::Distance::Rvachev "Rvachev" and @ref Rodin::Distance::SpaldingTucker "SpaldingTucker" inherit from a common CRTP
   `Base<Derived>` that provides `setInterior()` and `setInterface()` methods for
   specifying the signed-distance regions (mesh boundary attributes).
 
   ## Eikonal Distance (FMM)
 
-  The `Eikonal` class wraps the FMM solver and provides the most accurate
+  The @ref Rodin::Distance::Eikonal "Eikonal" class wraps the FMM solver and provides the most accurate
   distance computation. Seeds are automatically identified from the interface
   attributes. Calling `sign()` after `solve()` negates interior values to produce
   a signed distance field.
@@ -567,11 +567,11 @@
 
   ## Poisson Distance Approximation
 
-  `Poisson` solves @f$ -\Delta u = 1 @f$ with @f$ u = 0 @f$ on
+  @ref Rodin::Distance::Poisson "Poisson" solves @f$ -\Delta u = 1 @f$ with @f$ u = 0 @f$ on
   @f$ \partial\Omega @f$ in a single linear solve. The result is smooth but
   only approximates the true distance.
 
-  `SignedPoisson` extends this with region-dependent forcing: @f$ -\Delta u = 2 @f$
+  @ref Rodin::Distance::SignedPoisson "SignedPoisson" extends this with region-dependent forcing: @f$ -\Delta u = 2 @f$
   inside a specified region and @f$ -\Delta u = -1 @f$ elsewhere, with
   @f$ u = 0 @f$ on the interface. It supports both single-attribute and
   attribute-set overloads:
@@ -588,7 +588,7 @@
 
   ## Level-Set Normalization
 
-  `Rvachev` and `SpaldingTucker` are post-processing operators that normalize
+  @ref Rodin::Distance::Rvachev "Rvachev" and @ref Rodin::Distance::SpaldingTucker "SpaldingTucker" are post-processing operators that normalize
   an existing level-set field into an approximate distance function without
   solving any PDE:
 
@@ -615,7 +615,7 @@
 
   The Hilbert module implements @f$ H^1 @f$-based extension-regularization
   operators used in shape and topology optimization. The primary class
-  `H1a` solves the regularized extension problem:
+  @ref Rodin::Hilbert::H1a "H1a" solves the regularized extension problem:
   @f[
     \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
   @f]
@@ -630,14 +630,14 @@
 
   | Method | Description |
   |--------|-------------|
-  | `H1a(fes)` | Constructor: creates the extension operator on a finite element space |
-  | `setAlpha(alpha)` | Sets @f$ \alpha @f$ (typically proportional to mesh size @f$ h @f$) |
-  | `operator()(lf)` | Applies extension to a linear form (differential) |
-  | `operator+=(DirichletBC)` | Adds boundary conditions to the extension problem |
-  | `getProblem()` | Access the underlying `Problem` object |
-  | `getTrialFunction()` / `getTestFunction()` | Access trial/test functions |
+  | @ref Rodin::Hilbert::H1a "H1a(fes)" | Constructor: creates the extension operator on a finite element space |
+  | @ref Rodin::Hilbert::H1a "setAlpha(alpha)" | Sets @f$ \alpha @f$ (typically proportional to mesh size @f$ h @f$) |
+  | @ref Rodin::Hilbert::H1a "operator()(lf)" | Applies extension to a linear form (differential) |
+  | @ref Rodin::Hilbert::H1a "operator+=(DirichletBC)" | Adds boundary conditions to the extension problem |
+  | @ref Rodin::Hilbert::H1a "getProblem()" | Access the underlying @ref Rodin::Variational::Problem "Problem" object |
+  | @ref Rodin::Hilbert::H1a "getTrialFunction() / getTestFunction()" | Access trial/test functions |
 
-  For vector-valued problems, `H1a` uses `Jacobian()` instead of `Grad()`.
+  For vector-valued problems, @ref Rodin::Hilbert::H1a "H1a" uses `Jacobian()` instead of `Grad()`.
   The internal solver is `Solver::CG`.
  */
 
@@ -686,8 +686,8 @@
 
   | Policy | Behavior |
   |--------|----------|
-  | `StopInsideBoundaryPolicy` | Clamps the departure point to an interior point with a small inward offset (`eps_in_phys`, default @f$ 10^{-12} @f$). Used automatically for the **first time step** (from initial condition). |
-  | `TaylorBoundaryShiftPolicy<Field>` | Applies a first-order Taylor correction at the boundary hit: shifts the point inward and accumulates the gradient correction @f$ \nabla\phi \cdot \delta\mathbf{x} @f$. Used automatically for **subsequent steps** (from the current solution). |
+  | @ref Rodin::Advection::StopInsideBoundaryPolicy "StopInsideBoundaryPolicy" | Clamps the departure point to an interior point with a small inward offset (`eps_in_phys`, default @f$ 10^{-12} @f$). Used automatically for the **first time step** (from initial condition). |
+  | @ref Rodin::Advection::TaylorBoundaryShiftPolicy "TaylorBoundaryShiftPolicy<Field>" | Applies a first-order Taylor correction at the boundary hit: shifts the point inward and accumulates the gradient correction @f$ \nabla\phi \cdot \delta\mathbf{x} @f$. Used automatically for **subsequent steps** (from the current solution). |
 
   The `Lagrangian` class tracks time internally (`m_t`) and switches between
   the initial condition (first step) and the current solution (later steps).
@@ -822,33 +822,33 @@
 
   ## Kinematics
 
-  `KinematicState` encapsulates all finite-strain kinematic quantities at a
+  @ref Rodin::Solid::KinematicState "KinematicState" encapsulates all finite-strain kinematic quantities at a
   quadrature point. Set the displacement gradient with
   `setDisplacementGradient(H)` and query derived tensors:
 
   | Getter | Returns | Definition |
   |--------|---------|------------|
-  | `getDisplacementGradient()` | @f$ \nabla\mathbf{u} @f$ | Input gradient |
-  | `getDeformationGradient()` | @f$ \mathbf{F} @f$ | @f$ \mathbf{I} + \nabla\mathbf{u} @f$ |
-  | `getDeformationGradientInverse()` | @f$ \mathbf{F}^{-1} @f$ | Inverse |
-  | `getDeformationGradientInverseTranspose()` | @f$ \mathbf{F}^{-T} @f$ | Inverse transpose |
-  | `getRightCauchyGreenTensor()` | @f$ \mathbf{C} @f$ | @f$ \mathbf{F}^T\mathbf{F} @f$ |
-  | `getLeftCauchyGreenTensor()` | @f$ \mathbf{b} @f$ | @f$ \mathbf{F}\mathbf{F}^T @f$ |
-  | `getJacobian()` | @f$ J @f$ | @f$ \det\mathbf{F} @f$ |
-  | `getLogJacobian()` | @f$ \ln J @f$ | Natural log of Jacobian |
+  | @ref Rodin::Solid::KinematicState "getDisplacementGradient()" | @f$ \nabla\mathbf{u} @f$ | Input gradient |
+  | @ref Rodin::Solid::KinematicState "getDeformationGradient()" | @f$ \mathbf{F} @f$ | @f$ \mathbf{I} + \nabla\mathbf{u} @f$ |
+  | @ref Rodin::Solid::KinematicState "getDeformationGradientInverse()" | @f$ \mathbf{F}^{-1} @f$ | Inverse |
+  | @ref Rodin::Solid::KinematicState "getDeformationGradientInverseTranspose()" | @f$ \mathbf{F}^{-T} @f$ | Inverse transpose |
+  | @ref Rodin::Solid::KinematicState "getRightCauchyGreenTensor()" | @f$ \mathbf{C} @f$ | @f$ \mathbf{F}^T\mathbf{F} @f$ |
+  | @ref Rodin::Solid::KinematicState "getLeftCauchyGreenTensor()" | @f$ \mathbf{b} @f$ | @f$ \mathbf{F}\mathbf{F}^T @f$ |
+  | @ref Rodin::Solid::KinematicState "getJacobian()" | @f$ J @f$ | @f$ \det\mathbf{F} @f$ |
+  | @ref Rodin::Solid::KinematicState "getLogJacobian()" | @f$ \ln J @f$ | Natural log of Jacobian |
 
   Invariant classes compute derived quantities from the kinematic state:
-  - `IsotropicInvariants` — @f$ I_1 = \operatorname{tr}\mathbf{C} @f$,
+  - @ref Rodin::Solid::IsotropicInvariants "IsotropicInvariants" — @f$ I_1 = \operatorname{tr}\mathbf{C} @f$,
     @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$,
     @f$ I_3 = \det\mathbf{C} = J^2 @f$
-  - `FiberInvariants` — @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C}\mathbf{a}_0 @f$,
+  - @ref Rodin::Solid::FiberInvariants "FiberInvariants" — @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C}\mathbf{a}_0 @f$,
     @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2\mathbf{a}_0 @f$
     (for anisotropic materials; constructed with a fiber direction vector)
 
   ## Constitutive Point and Input Injection
 
-  `ConstitutivePoint` bundles a `KinematicState` with an optional
-  `Geometry::Point` (for spatial location) and a tag-based auxiliary data store.
+  @ref Rodin::Solid::ConstitutivePoint "ConstitutivePoint" bundles a @ref Rodin::Solid::KinematicState "KinematicState" with an optional
+  @ref Rodin::Geometry::Point "Geometry::Point" (for spatial location) and a tag-based auxiliary data store.
   Auxiliary data (fiber directions, activation values, etc.) is injected via
   typed tags:
 
@@ -858,13 +858,13 @@
   bool has = cp.has<Solid::Tags::Activation>();
   @endcode
 
-  The `Input<Derived>` CRTP base and `InputFunction` callable allow the user to
+  The @ref Rodin::Solid::Input "Input<Derived>" CRTP base and @ref Rodin::Solid::InputFunction "InputFunction" callable allow the user to
   inject auxiliary data at each quadrature point during assembly. Integrators
   accept input via `setInput()`.
 
   ## Constitutive Laws
 
-  Each law derives from `HyperElasticLaw<Derived>` (CRTP base) and provides:
+  Each law derives from @ref Rodin::Solid::HyperElasticLaw "HyperElasticLaw<Derived>" (CRTP base) and provides:
   - A `Cache` struct for precomputed invariant data
   - `setCache(cache, cp)` — populate the cache from a `ConstitutivePoint`
   - `getFirstPiolaKirchhoffStress(P, cache, cp)` — @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
@@ -873,10 +873,10 @@
 
   | Law | Constructor | Energy density @f$ W @f$ |
   |-----|-------------|--------------------------|
-  | `Hooke` | `Hooke(lambda, mu)` | @f$ \boldsymbol{\sigma} = \lambda(\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I} + 2\mu\boldsymbol{\varepsilon} @f$ (linear stress-strain; not hyperelastic) |
-  | `NeoHookean` | `NeoHookean(lambda, mu)` | @f$ \frac{\mu}{2}(I_1 - d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ |
-  | `SaintVenantKirchhoff` | `SaintVenantKirchhoff(lambda, mu)` | @f$ \frac{\lambda}{2}(\operatorname{tr}\mathbf{E})^2 + \mu\,\mathbf{E}:\mathbf{E} @f$ |
-  | `MooneyRivlin` | `MooneyRivlin(c1, c2, kappa)` | @f$ c_1(\bar{I}_1 - d) + c_2(\bar{I}_2 - d) + \frac{\kappa}{2}(J-1)^2 @f$ |
+  | @ref Rodin::Solid::Hooke "Hooke" | `Hooke(lambda, mu)` | @f$ \boldsymbol{\sigma} = \lambda(\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I} + 2\mu\boldsymbol{\varepsilon} @f$ (linear stress-strain; not hyperelastic) |
+  | @ref Rodin::Solid::NeoHookean "NeoHookean" | `NeoHookean(lambda, mu)` | @f$ \frac{\mu}{2}(I_1 - d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ |
+  | @ref Rodin::Solid::SaintVenantKirchhoff "SaintVenantKirchhoff" | `SaintVenantKirchhoff(lambda, mu)` | @f$ \frac{\lambda}{2}(\operatorname{tr}\mathbf{E})^2 + \mu\,\mathbf{E}:\mathbf{E} @f$ |
+  | @ref Rodin::Solid::MooneyRivlin "MooneyRivlin" | `MooneyRivlin(c1, c2, kappa)` | @f$ c_1(\bar{I}_1 - d) + c_2(\bar{I}_2 - d) + \frac{\kappa}{2}(J-1)^2 @f$ |
 
   where @f$ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) @f$ is the
   Green-Lagrange strain, @f$ \bar{I}_k = J^{-2k/d} I_k @f$ are modified
@@ -897,8 +897,8 @@
 
   | Integrator | Form type | Assembles | Mathematical expression |
   |------------|-----------|-----------|-------------------------|
-  | `InternalForce<Law, FES>` | Linear (residual) | Internal force vector | @f$ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX @f$ |
-  | `MaterialTangent<Law, Solution, FES>` | Bilinear (tangent) | Tangent stiffness matrix | @f$ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX @f$ |
+  | @ref Rodin::Solid::InternalVirtualWorkResidual "InternalForce<Law, FES>" | Linear (residual) | Internal force vector | @f$ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX @f$ |
+  | @ref Rodin::Solid::InternalVirtualWorkTangent "MaterialTangent<Law, Solution, FES>" | Bilinear (tangent) | Tangent stiffness matrix | @f$ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX @f$ |
 
   Constructor signatures (CTAD-deduced):
 
@@ -912,9 +912,9 @@
 
   ## Derived Fields
 
-  - `FirstPiolaKirchhoffStress<Law>` — Post-process @f$ \mathbf{P} @f$ field
-  - `CauchyStress<Law>` — Post-process @f$ \boldsymbol{\sigma} = J^{-1}\mathbf{P}\mathbf{F}^T @f$
-  - `GreenLagrangeStrain` — Post-process @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$
+  - @ref Rodin::Solid::FirstPiolaKirchhoffStress "FirstPiolaKirchhoffStress<Law>" — Post-process @f$ \mathbf{P} @f$ field
+  - @ref Rodin::Solid::CauchyStress "CauchyStress<Law>" — Post-process @f$ \boldsymbol{\sigma} = J^{-1}\mathbf{P}\mathbf{F}^T @f$
+  - @ref Rodin::Solid::GreenLagrangeStrain "GreenLagrangeStrain" — Post-process @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$
 
   ## Typical Usage
 
@@ -987,10 +987,10 @@
   *
   * | Rule | Class | Polytopes | Exactness |
   * |------|-------|-----------|-----------|
-  * | **Centroid** | `QF::Centroid` | All types | Degree 1 (linear). Single point at barycenter. |
-  * | **Gauss-Legendre** | `QF::GaussLegendre` | All types | Degree @f$ 2n-1 @f$ for @f$ n @f$ points (1D). Tensor-product or Duffy transform for higher dimensions. |
-  * | **Gauss-Lobatto** | `QF::GaussLobatto` | Segments | Degree @f$ 2n-3 @f$ for @f$ n @f$ points. Includes endpoints (useful for spectral methods). |
-  * | **Grundmann-Möller** | `QF::GrundmannMoller` | Simplices only | Degree @f$ 2s+1 @f$ for parameter @f$ s \geq 0 @f$. Designed specifically for simplicial elements. |
+  * | **Centroid** | @ref Rodin::QF::Centroid "QF::Centroid" | All types | Degree 1 (linear). Single point at barycenter. |
+  * | **Gauss-Legendre** | @ref Rodin::QF::GaussLegendre "QF::GaussLegendre" | All types | Degree @f$ 2n-1 @f$ for @f$ n @f$ points (1D). Tensor-product or Duffy transform for higher dimensions. |
+  * | **Gauss-Lobatto** | @ref Rodin::QF::GaussLobatto "QF::GaussLobatto" | Segments | Degree @f$ 2n-3 @f$ for @f$ n @f$ points. Includes endpoints (useful for spectral methods). |
+  * | **Grundmann-Möller** | @ref Rodin::QF::GrundmannMoller "QF::GrundmannMoller" | Simplices only | Degree @f$ 2s+1 @f$ for parameter @f$ s \geq 0 @f$. Designed specifically for simplicial elements. |
   *
   * ## Automatic Selection
   *
@@ -1083,12 +1083,12 @@
 
   | Type | Description |
   |------|-------------|
-  | `Math::Vector<T>` | Dense column vector (Eigen-based) |
-  | `Math::Matrix<T>` | Dense matrix (Eigen-based) |
-  | `Math::SparseMatrix<T>` | Compressed sparse column matrix |
-  | `Math::SpatialVector<T>` | Small fixed-size vector for physical coordinates |
-  | `Math::SpatialMatrix<T>` | Small fixed-size matrix (e.g.\ Jacobians, stress tensors) |
-  | `Math::LinearSystem` | Couples operator matrix @f$ A @f$, RHS vector @f$ b @f$, and solution @f$ x @f$ |
+  | @ref Rodin::Math::Vector "Math::Vector<T>" | Dense column vector (Eigen-based) |
+  | @ref Rodin::Math::Matrix "Math::Matrix<T>" | Dense matrix (Eigen-based) |
+  | @ref Rodin::Math::SparseMatrix "Math::SparseMatrix<T>" | Compressed sparse column matrix |
+  | @ref Rodin::Math::SpatialVector "Math::SpatialVector<T>" | Small fixed-size vector for physical coordinates |
+  | @ref Rodin::Math::SpatialMatrix "Math::SpatialMatrix<T>" | Small fixed-size matrix (e.g.\ Jacobians, stress tensors) |
+  | @ref Rodin::Math::LinearSystem "Math::LinearSystem" | Couples operator matrix @f$ A @f$, RHS vector @f$ b @f$, and solution @f$ x @f$ |
 
   ## Constants
 
@@ -1098,20 +1098,20 @@
 
   | Function | Signature | Domain |
   |----------|-----------|--------|
-  | `abs` | `abs(x)` | Scalar or matrix |
-  | `exp` | `exp(x)` | Scalar or matrix |
-  | `sqrt` | `sqrt(x)` | Scalar or matrix |
-  | `pow` | `pow(base, exp)` | Scalar or matrix |
-  | `pow2` | `pow2(x)` | Scalar or matrix |
-  | `log` | `log(x)` | Scalar |
-  | `log2` | `log2(x)` | Scalar |
-  | `log10` | `log10(x)` | Scalar |
-  | `sin`, `cos`, `tan` | Trigonometric | Scalar or matrix |
-  | `asin`, `acos`, `atan` | Inverse trig | Scalar |
-  | `atan2` | `atan2(y, x)` | Two-argument arctangent |
-  | `sinh`, `cosh`, `tanh` | Hyperbolic | Scalar or matrix |
-  | `min`, `max` | Element-wise | Scalar |
-  | `clamp` | `clamp(x, lo, hi)` | Scalar |
+  | @ref Rodin::Math "abs" | `abs(x)` | Scalar or matrix |
+  | @ref Rodin::Math "exp" | `exp(x)` | Scalar or matrix |
+  | @ref Rodin::Math "sqrt" | `sqrt(x)` | Scalar or matrix |
+  | @ref Rodin::Math "pow" | `pow(base, exp)` | Scalar or matrix |
+  | @ref Rodin::Math "pow2" | `pow2(x)` | Scalar or matrix |
+  | @ref Rodin::Math "log" | `log(x)` | Scalar |
+  | @ref Rodin::Math "log2" | `log2(x)` | Scalar |
+  | @ref Rodin::Math "log10" | `log10(x)` | Scalar |
+  | @ref Rodin::Math "sin, cos, tan" | Trigonometric | Scalar or matrix |
+  | @ref Rodin::Math "asin, acos, atan" | Inverse trig | Scalar |
+  | @ref Rodin::Math "atan2" | `atan2(y, x)` | Two-argument arctangent |
+  | @ref Rodin::Math "sinh, cosh, tanh" | Hyperbolic | Scalar or matrix |
+  | @ref Rodin::Math "min, max" | Element-wise | Scalar |
+  | @ref Rodin::Math "clamp" | `clamp(x, lo, hi)` | Scalar |
 
   ## Unit Types
 
@@ -1245,11 +1245,11 @@
 
   | Class | Purpose |
   |-------|---------|
-  | `MMG::Mesh` | Local mesh type extending `Geometry::Mesh<Local>` with corner, ridge, and required-entity metadata. |
-  | `MMG::Adapt` | Metric-based adaptation from a nodal size map. |
-  | `MMG::Optimizer` | Mesh-quality optimization without an external metric field. |
-  | `MMG::LevelSetDiscretizer` | Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface. |
-  | `MMG::MMG5` | Base class providing shared MMG configuration and native conversion helpers. |
+  | @ref Rodin::MMG::Mesh "MMG::Mesh" | Local mesh type extending @ref Rodin::Geometry::Mesh "Geometry::Mesh<Context::Local>" with corner, ridge, and required-entity metadata. |
+  | @ref Rodin::MMG::Adapt "MMG::Adapt" | Metric-based adaptation from a nodal size map. |
+  | @ref Rodin::MMG::Optimizer "MMG::Optimizer" | Mesh-quality optimization without an external metric field. |
+  | @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" | Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface. |
+  | @ref Rodin::MMG::MMG5 "MMG::MMG5" | Base class providing shared MMG configuration and native conversion helpers. |
 
   ## Workflow Semantics
 
@@ -1258,14 +1258,14 @@
 
   | Workflow | Expected behavior |
   |----------|-------------------|
-  | `Optimizer` | Improves element quality while keeping the mesh close to the existing local size distribution. |
-  | `Adapt` | Refines, coarsens, moves, and reconnects elements according to a size field. |
-  | `LevelSetDiscretizer` | Alters topology as needed to conform the output mesh to the selected level-set isovalue. |
+  | @ref Rodin::MMG::Optimizer "Optimizer" | Improves element quality while keeping the mesh close to the existing local size distribution. |
+  | @ref Rodin::MMG::Adapt "Adapt" | Refines, coarsens, moves, and reconnects elements according to a size field. |
+  | @ref Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" | Alters topology as needed to conform the output mesh to the selected level-set isovalue. |
 
-  All workflows convert an `MMG::Mesh` to native MMG structures, run MMG, and
-  convert the result back. The output is a remeshed object; input element
-  indices should be treated as stable only where the wrapper or tests
-  explicitly document preservation.
+  All workflows convert an @ref Rodin::MMG::Mesh "MMG::Mesh" to native MMG
+  structures, run MMG, and convert the result back. The output is a remeshed
+  object; input element indices should be treated as stable only where the
+  wrapper or tests explicitly document preservation.
 
   ## Auto-Dispatch
 
@@ -1280,29 +1280,29 @@
 
   ## Shared Configuration (MMG5 base)
 
-  The MMG wrappers inherit common configuration methods from `MMG5`; each
-  returns `*this` for chaining:
+  The MMG wrappers inherit common configuration methods from
+  @ref Rodin::MMG::MMG5 "MMG5"; each returns `*this` for chaining:
 
   | Method | Description |
   |--------|-------------|
-  | `setHMin(hmin)` | Minimal allowed edge size |
-  | `setHMax(hmax)` | Maximal allowed edge size |
-  | `setHausdorff(hausd)` | Hausdorff distance tolerance for boundary approximation |
-  | `setGradation(hgrad)` | Edge-size gradation ratio between adjacent elements |
-  | `setAngleDetection(bool)` | Enable ridge angle detection for feature preservation |
+  | @ref Rodin::MMG::MMG5 "setHMin(hmin)" | Minimal allowed edge size |
+  | @ref Rodin::MMG::MMG5 "setHMax(hmax)" | Maximal allowed edge size |
+  | @ref Rodin::MMG::MMG5 "setHausdorff(hausd)" | Hausdorff distance tolerance for boundary approximation |
+  | @ref Rodin::MMG::MMG5 "setGradation(hgrad)" | Edge-size gradation ratio between adjacent elements |
+  | @ref Rodin::MMG::MMG5 "setAngleDetection(bool)" | Enable ridge angle detection for feature preservation |
 
   ## Required Entities
 
-  `MMG::Mesh` stores MMG-specific metadata:
+  @ref Rodin::MMG::Mesh "MMG::Mesh" stores MMG-specific metadata:
 
   | Method | Description |
   |--------|-------------|
-  | `setCorner(vertexIdx)` | Mark a vertex as a geometric corner |
-  | `setRidge(edgeIdx)` | Mark an edge as a geometric ridge |
-  | `setRequiredVertex(idx)` | Mark a vertex as required (`MG_REQ`) |
-  | `setRequiredEdge(idx)` | Mark an edge as required (`MG_REQ`) |
-  | `setRequiredTriangle(idx)` | Mark a triangle as required (`MG_REQ`) |
-  | `setRequiredTetrahedron(idx)` | Mark a tetrahedron as required (`MG_REQ`) |
+  | @ref Rodin::MMG::Mesh "setCorner(vertexIdx)" | Mark a vertex as a geometric corner |
+  | @ref Rodin::MMG::Mesh "setRidge(edgeIdx)" | Mark an edge as a geometric ridge |
+  | @ref Rodin::MMG::Mesh "setRequiredVertex(idx)" | Mark a vertex as required (`MG_REQ`) |
+  | @ref Rodin::MMG::Mesh "setRequiredEdge(idx)" | Mark an edge as required (`MG_REQ`) |
+  | @ref Rodin::MMG::Mesh "setRequiredTriangle(idx)" | Mark a triangle as required (`MG_REQ`) |
+  | @ref Rodin::MMG::Mesh "setRequiredTetrahedron(idx)" | Mark a tetrahedron as required (`MG_REQ`) |
 
   Required vertices, edges, triangles, and tetrahedra are serialized through
   MEDIT, converted to native MMG `MG_REQ` tags, and restored from native MMG
@@ -1327,17 +1327,18 @@
 
   ## LevelSetDiscretizer API
 
-  In addition to `MMG5` parameters, `LevelSetDiscretizer` provides:
+  In addition to @ref Rodin::MMG::MMG5 "MMG5" parameters,
+  @ref Rodin::MMG::LevelSetDiscretizer "LevelSetDiscretizer" provides:
 
   | Method | Description |
   |--------|-------------|
-  | `setLevelSet(ls)` | Isovalue to extract (default: 0.0) |
-  | `surface(bool)` | When true, discretize the isosurface; when false, discretize the subdomain volume |
-  | `setRMC(rmc)` | Removal threshold for small parasitic components |
-  | `setBoundaryReference(ref)` | Material reference for the discretized boundary |
-  | `setBaseReferences(refs)` | Restrict level-set splitting to specified base materials |
-  | `split(ref, split)` | Split one material reference into inside/outside references |
-  | `noSplit(ref)` | Keep one material reference from being split by the material policy |
+  | @ref Rodin::MMG::LevelSetDiscretizer "setLevelSet(ls)" | Isovalue to extract (default: 0.0) |
+  | @ref Rodin::MMG::LevelSetDiscretizer "surface(bool)" | When true, discretize the isosurface; when false, discretize the subdomain volume |
+  | @ref Rodin::MMG::LevelSetDiscretizer "setRMC(rmc)" | Removal threshold for small parasitic components |
+  | @ref Rodin::MMG::LevelSetDiscretizer "setBoundaryReference(ref)" | Material reference for the discretized boundary |
+  | @ref Rodin::MMG::LevelSetDiscretizer "setBaseReferences(refs)" | Restrict level-set splitting to specified base materials |
+  | @ref Rodin::MMG::LevelSetDiscretizer "split(ref, split)" | Split one material reference into inside/outside references |
+  | @ref Rodin::MMG::LevelSetDiscretizer "noSplit(ref)" | Keep one material reference from being split by the material policy |
 
   `noSplit(ref)` is a material-reference splitting policy. It is not an
   element-integrity guarantee for an individual edge, triangle, or tetrahedron
@@ -1351,8 +1352,8 @@
     .discretize(phi);
   @endcode
 
-  Use `MMG::Mesh::Build()` to construct meshes programmatically via the
-  builder pattern.
+  Use @ref Rodin::MMG::Mesh "MMG::Mesh::Build()" to construct meshes
+  programmatically via the builder pattern.
 
   @note Requires the MMG library and Rodin configured with `RODIN_USE_MMG=ON`.
 
@@ -1570,7 +1571,8 @@
   @note Requires PETSc to be available and Rodin configured with
   `RODIN_USE_PETSC=ON`.
 
-  @see Rodin::Solver::KSP, Rodin::Solver::SNES
+  @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+  @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::Solver::SNES</a>
  */
 
 /**

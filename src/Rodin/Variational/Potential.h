@@ -166,7 +166,12 @@ namespace Rodin::Variational
   /**
    * @defgroup PotentialSpecializations Potential Template Specializations
    * @brief Template specializations of the Potential class.
-   * @see Potential
+   * @see @ref Potential
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Potential "Potential<LHS, FunctionBase<RHSDerived>>" | Nonlocal potential operator applied to a function expression. |
+   * | @ref Potential "Potential<LHS, ShapeFunctionBase<RHSDerived, FES, Space>>" | Nonlocal potential operator applied to a test or trial shape-function expression. |
    */
 
   /**

@@ -31,7 +31,12 @@ namespace Rodin::Variational
   /**
    * @defgroup AverageSpecializations Average Template Specializations
    * @brief Template specializations of the Average class.
-   * @see Average
+   * @see @ref Average
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Average "Average<FunctionBase<FunctionDerived>>" | Arithmetic average of a traceable function across an interior interface. |
+   * | @ref Average "Average<ShapeFunctionBase<NestedDerived, FES, Space>>" | Arithmetic average of a test or trial shape function across an interior interface. |
    */
 
   /**
@@ -63,7 +68,7 @@ namespace Rodin::Variational
    *
    * @tparam FunctionDerived Type of the function being averaged
    *
-   * @see Jump
+   * @see @ref Jump
    */
   template <class FunctionDerived>
   class Average<FunctionBase<FunctionDerived>> final

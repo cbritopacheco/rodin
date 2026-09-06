@@ -1,0 +1,64 @@
+/**
+  @page source-headers Source headers
+  @brief Curated links to the main Rodin source header pages.
+
+  The generated <a href="files.html">Files</a> index lists only a small subset
+  of file pages in the m.css output. This page collects the public module
+  headers and commonly referenced submodule headers so users can still navigate
+  to the generated file documentation directly.
+
+  @section source-headers-top Top-Level Headers
+
+  | Header | Description |
+  |--------|-------------|
+  | <a href="_rodin_8h.html">Rodin.h</a> | Top-level umbrella include |
+  | <a href="_geometry_8h.html">Rodin/Geometry.h</a> | Geometry and mesh API |
+  | <a href="_variational_8h.html">Rodin/Variational.h</a> | Finite element spaces and form language |
+  | <a href="_solver_8h.html">Rodin/Solver.h</a> | Linear and nonlinear solvers |
+  | <a href="_assembly_8h.html">Rodin/Assembly.h</a> | Assembly backend entry points |
+  | <a href="_i_o_8h.html">Rodin/IO.h</a> | Mesh and field I/O |
+  | <a href="_q_f_8h.html">Rodin/QF.h</a> | Quadrature formulae |
+  | <a href="_m_p_i_8h.html">Rodin/MPI.h</a> | MPI integration |
+  | <a href="_p_e_t_sc_8h.html">Rodin/PETSc.h</a> | PETSc integration |
+  | <a href="_m_m_g_8h.html">Rodin/MMG.h</a> | MMG integration |
+  | <a href="_solid_8h.html">Rodin/Solid.h</a> | Solid mechanics |
+  | <a href="_adaptation_8h.html">Rodin/Adaptation.h</a> | Moving-interface mesh adaptation |
+  | <a href="_heart_8h.html">Rodin/Heart.h</a> | Reduced heart models |
+
+  @section source-headers-geometry Geometry
+
+  | Header | Description |
+  |--------|-------------|
+  | <a href="_geometry_2_mesh_8h.html">Rodin/Geometry/Mesh.h</a> | Primary mesh template |
+  | <a href="_polytope_8h.html">Rodin/Geometry/Polytope.h</a> | Polytope types and entities |
+  | <a href="_connectivity_8h.html">Rodin/Geometry/Connectivity.h</a> | Incidence relations |
+  | <a href="_point_8h.html">Rodin/Geometry/Point.h</a> | Physical/reference evaluation point |
+  | <a href="_geometry_2_sub_mesh_8h.html">Rodin/Geometry/SubMesh.h</a> | Local submesh view |
+  | <a href="_shard_8h.html">Rodin/Geometry/Shard.h</a> | Distributed shard metadata |
+  | <a href="_geometry_2_sharder_8h.html">Rodin/Geometry/Sharder.h</a> | Mesh sharding utilities |
+  | <a href="_balanced_compact_partitioner_8h.html">Rodin/Geometry/BalancedCompactPartitioner.h</a> | Partitioning utility |
+
+  @section source-headers-mmg MMG
+
+  | Header | Description |
+  |--------|-------------|
+  | <a href="_m_m_g_2_mesh_8h.html">Rodin/MMG/Mesh.h</a> | MMG mesh wrapper |
+  | <a href="_adapt_8h.html">Rodin/MMG/Adapt.h</a> | Metric-based adaptation |
+  | <a href="_mesh_optimizer_8h.html">Rodin/MMG/MeshOptimizer.h</a> | Mesh-quality optimizer |
+  | <a href="_level_set_discretizer_8h.html">Rodin/MMG/LevelSetDiscretizer.h</a> | Level-set discretizer |
+  | <a href="_m_m_g5_8h.html">Rodin/MMG/MMG5.h</a> | Shared MMG wrapper base |
+  | <a href="_m_m_g_2_grid_function_8h.html">Rodin/MMG/GridFunction.h</a> | MMG grid-function aliases |
+  | <a href="_m_m_g_2_mesh_loader_8h.html">Rodin/MMG/MeshLoader.h</a> | MMG mesh loader |
+  | <a href="_m_m_g_2_mesh_printer_8h.html">Rodin/MMG/MeshPrinter.h</a> | MMG mesh printer |
+
+  @section source-headers-parallel Parallel and Backend Headers
+
+  | Header | Description |
+  |--------|-------------|
+  | <a href="_m_p_i_2_geometry_2_mesh_8h.html">Rodin/MPI/Geometry/Mesh.h</a> | MPI mesh specialization |
+  | <a href="_m_p_i_2_geometry_2_sub_mesh_8h.html">Rodin/MPI/Geometry/SubMesh.h</a> | MPI submesh specialization |
+  | <a href="_m_p_i_2_geometry_2_sharder_8h.html">Rodin/MPI/Geometry/Sharder.h</a> | MPI sharder |
+  | <a href="_p_e_t_sc_2_math_8h.html">Rodin/PETSc/Math.h</a> | PETSc linear algebra |
+  | <a href="_p_e_t_sc_2_solver_8h.html">Rodin/PETSc/Solver.h</a> | PETSc solver wrappers |
+  | <a href="_p_e_t_sc_2_variational_8h.html">Rodin/PETSc/Variational.h</a> | PETSc-backed variational wrappers |
+*/

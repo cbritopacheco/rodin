@@ -14,7 +14,8 @@
  *
  * @note Current implementation is a placeholder for future development.
  *
- * @see P1, Integral
+ * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
+ * @see <a href="_integral_8h.html">Integral</a>
  */
 #ifndef RODIN_VARIATIONAL_P1_POTENTIAL_H
 #define RODIN_VARIATIONAL_P1_POTENTIAL_H
@@ -34,4 +35,3 @@ namespace Rodin::Variational
 {}
 
 #endif
-

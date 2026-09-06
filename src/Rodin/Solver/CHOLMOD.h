@@ -40,7 +40,7 @@
  * @note This solver requires CHOLMOD from SuiteSparse to be installed
  * and RODIN_USE_CHOLMOD to be defined at compile time.
  *
- * @see CHOLMOD::SupernodalLLT for the solver implementation
+ * @see <a href="_c_h_o_l_m_o_d_8h.html">CHOLMOD::SupernodalLLT</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_CHOLMOD_H
 #define RODIN_SOLVER_CHOLMOD_H

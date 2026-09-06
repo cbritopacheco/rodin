@@ -136,7 +136,7 @@ namespace Rodin::Variational
        *
        * @param[in] i Component index
        * @returns Component function object
-       * @see Component
+       * @see <a href="_component_8h.html">Component</a>
        */
       auto operator()(size_t i) const
       {
@@ -149,7 +149,7 @@ namespace Rodin::Variational
        * @param[in] i Row index
        * @param[in] j Column index
        * @returns Component function object
-       * @see Component
+       * @see <a href="_component_8h.html">Component</a>
        */
       auto operator()(size_t i, size_t j) const
       {
@@ -192,7 +192,7 @@ namespace Rodin::Variational
        * For matrix-valued functions @f$ A(x) @f$, returns @f$ A^T(x) @f$.
        *
        * @returns Transposed function object
-       * @see Transpose
+       * @see <a href="_transpose_8h.html">Transpose</a>
        */
       constexpr
       auto T() const
@@ -209,7 +209,7 @@ namespace Rodin::Variational
        *
        * @param[in] attr Mesh attribute defining the trace domain
        * @returns Reference to self (for method chaining)
-       * @see getTraceDomain
+       * @see getTraceDomain()
        */
       constexpr
       Derived& traceOf(const Geometry::Attribute& attr)
@@ -241,7 +241,7 @@ namespace Rodin::Variational
        *
        * @param[in] attr Set of mesh attributes defining the trace domain
        * @returns Reference to self (for method chaining)
-       * @see getTraceDomain
+       * @see getTraceDomain()
        */
       constexpr
       Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)

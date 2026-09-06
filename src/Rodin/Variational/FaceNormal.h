@@ -104,7 +104,10 @@
  * auto un = Dot(velocity, n);
  * ```
  *
- * @see BoundaryNormal, InterfaceIntegral, Jump, Average
+ * @see <a href="_boundary_normal_8h.html">BoundaryNormal</a>
+ * @see <a href="_interface_integral_8h.html">InterfaceIntegral</a>
+ * @see <a href="_jump_8h.html">Jump</a>
+ * @see <a href="_average_8h.html">Average</a>
  */
 #ifndef RODIN_VARIATIONAL_FACENORMAL_H
 #define RODIN_VARIATIONAL_FACENORMAL_H

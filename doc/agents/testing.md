@@ -64,6 +64,10 @@ PETSc handle ownership is resource/lifecycle, the OpenMP and MPI assembly
 backends are concurrency, and CI building against PETSc 3.19 while local
 builds are newer is compatibility.
 
+Use [backend-support.md](backend-support.md) to decide which configurations a
+feature must test, and [numerical-contracts.md](numerical-contracts.md) to
+choose the invariant or manufactured check that proves the numerical behavior.
+
 Two rules that make the difference between coverage and theatre:
 
 - **A regression test must be shown to catch the bug.** Revert the fix,
@@ -111,3 +115,11 @@ CI facts that bite:
   look like an unrelated downstream failure.
 - Doxygen documentation is published per-branch; malformed doc comments
   can fail Documentation.yml.
+- Documentation.yml is also the review gate for specialization-family class
+  pages: if a class has multiple supported specializations, its Doxygen
+  description must include a complete `Specialization` / `Description` table
+  with each specialization linked.
+- Documentation review also treats unlinked public references as failures:
+  `@see` blocks and prose lists should use explicit `@ref` references or HTML
+  links for public classes, templates, specialization groups, and generated
+  file pages instead of bare comma-separated names.

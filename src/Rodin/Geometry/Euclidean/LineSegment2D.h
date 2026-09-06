@@ -36,7 +36,8 @@ namespace Rodin::Geometry::Euclidean
    * where @f$ t \in [0, 1] @f$ maps to points on the segment, though the
    * parameterization accepts any real @f$ t @f$.
    *
-   * @see Point2D, Line2D
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
    */
   template <class T>
   class LineSegment2D : public Base<LineSegment2D<T>, T>
@@ -159,4 +160,3 @@ namespace Rodin::Geometry::Euclidean
 #include "LineSegment2D.hpp"
 
 #endif
-

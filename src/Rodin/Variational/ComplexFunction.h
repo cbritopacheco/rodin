@@ -26,6 +26,13 @@ namespace Rodin::Variational
    * @defgroup ComplexFunctionSpecializations ComplexFunction Template Specializations
    * @brief Template specializations of the ComplexFunction class.
    * @see ComplexFunction
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref ComplexFunction "ComplexFunction<Complex>" | Constant complex-valued function. |
+   * | @ref ComplexFunction "ComplexFunction<FunctionBase<NestedDerived>>" | Complex wrapper around a nested function. |
+   * | @ref ComplexFunction "ComplexFunction<FunctionBase<Real>, FunctionBase<Imaginary>>" | Complex function assembled from real and imaginary parts. |
+   * | @ref ComplexFunction "ComplexFunction<F>" | Complex function constructed from an arbitrary scalar callable. |
    */
 
   /**

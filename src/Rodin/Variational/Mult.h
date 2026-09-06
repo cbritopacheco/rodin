@@ -152,7 +152,13 @@ namespace Rodin::Variational
   /**
    * @defgroup MultSpecializations Mult Template Specializations
    * @brief Template specializations of the Mult class.
-   * @see Mult
+   * @see @ref Mult
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Mult "Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>" | Pointwise product of two function expressions. |
+   * | @ref Mult "Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>" | Product of a function expression with a test or trial shape-function expression. |
+   * | @ref Mult "Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>" | Product of a test or trial shape-function expression with a function expression. |
    */
 
   /**
