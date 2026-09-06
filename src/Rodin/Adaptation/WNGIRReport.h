@@ -103,6 +103,15 @@ namespace Rodin::Adaptation
       Real tFactor = 0; ///< CG setup/preconditioner.
       Real tSolve = 0; ///< CG iterations.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
+      Real tValidation = 0; ///< Nonlinear geometry scans, including initial state.
+      Real tSurface = 0; ///< Surface energy/residual evaluations, including initial state.
+      Real tBarrierScale = 0; ///< Affine feasibility scans for predictor and corrections.
+      Real tRigidDiagnostics = 0; ///< Initial and final rigid-observation diagnostics.
+      Real tForceAction = 0; ///< Surface first-variation actions.
+      Real tTotal = 0; ///< Complete solve, excluding construction of the solver.
+      std::size_t validationCalls = 0;
+      std::size_t surfaceCalls = 0;
+      std::size_t barrierScaleCalls = 0;
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
       Real linearError = 0; ///< Last linear solver residual/error estimate.
   };
