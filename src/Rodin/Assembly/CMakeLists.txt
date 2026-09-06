@@ -7,6 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinAssembly_HEADERS
   AssemblyBase.h
+  ScatterMap.h
   Sequential.h
 )
 

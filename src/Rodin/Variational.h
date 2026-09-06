@@ -26,6 +26,8 @@
 
 #include "Variational/LinearForm.h"
 #include "Variational/BilinearForm.h"
+#include "Variational/MassForm.h"
+#include "Variational/DiffusionForm.h"
 
 #include "Variational/Zero.h"
 #include "Variational/Dot.h"
