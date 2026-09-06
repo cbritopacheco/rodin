@@ -21,8 +21,7 @@ namespace Rodin::Tests::Unit
   {
     LocalMesh unitSquare()
     {
-      LocalMesh mesh =
-        LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+      LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
       return mesh;
@@ -64,8 +63,7 @@ namespace Rodin::Tests::Unit
       ASSERT_EQ(a.cols(), e.cols());
       for (Eigen::Index i = 0; i < a.rows(); ++i)
         for (Eigen::Index j = 0; j < a.cols(); ++j)
-          EXPECT_NEAR(a(i, j), e(i, j), 1e-12)
-            << "entry (" << i << ", " << j << ")";
+          EXPECT_NEAR(a(i, j), e(i, j), 1e-12) << "entry (" << i << ", " << j << ")";
     }
 
     template <class FES>
@@ -95,10 +93,12 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Parameterized fixture running the named forms over one cell geometry.
   class Rodin_Variational_NamedFormGeometry
     : public ::testing::TestWithParam<Polytope::Type>
   {};
 
+  /// @brief Verifies the P0 mass form matches the equivalent Integral on every cell geometry.
   TEST_P(Rodin_Variational_NamedFormGeometry, P0MatchesIntegrals)
   {
     auto mesh = geometryMesh(GetParam());
@@ -106,6 +106,7 @@ namespace Rodin::Tests::Unit
     expectMassFormMatches(fes);
   }
 
+  /// @brief Verifies the P1 mass and diffusion forms match the equivalent Integrals on every cell geometry.
   TEST_P(Rodin_Variational_NamedFormGeometry, P1MatchesIntegrals)
   {
     auto mesh = geometryMesh(GetParam());
@@ -114,6 +115,7 @@ namespace Rodin::Tests::Unit
     expectDiffusionFormMatches(fes);
   }
 
+  /// @brief Verifies the H1 order 2 mass and diffusion forms match the equivalent Integrals on every cell geometry.
   TEST_P(Rodin_Variational_NamedFormGeometry, H1P2MatchesIntegrals)
   {
     auto mesh = geometryMesh(GetParam());
@@ -122,18 +124,13 @@ namespace Rodin::Tests::Unit
     expectDiffusionFormMatches(fes);
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllCellGeometries,
-    Rodin_Variational_NamedFormGeometry,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge));
+  /// @brief Instantiates Named Form Geometry over the All Cell Geometries parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllCellGeometries, Rodin_Variational_NamedFormGeometry,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
+  /// @brief Verifies the named form picks the context default assembly and that both backends agree with it.
   TEST(Rodin_Variational_NamedForm, SelectsContextAssembly)
   {
     auto mesh = unitSquare();
@@ -143,9 +140,8 @@ namespace Rodin::Tests::Unit
     MassForm mass(u, v);
 
     using Form = decltype(mass);
-    using Expected =
-      typename Assembly::Default<Context::Local, Context::Local>
-        ::template Type<typename Form::OperatorType, Form>;
+    using Expected = typename Assembly::Default<Context::Local,
+      Context::Local>::template Type<typename Form::OperatorType, Form>;
     static_assert(std::is_same_v<typename Form::AssemblyType, Expected>);
 
     typename Form::OperatorType sequentialOperator;
@@ -161,6 +157,7 @@ namespace Rodin::Tests::Unit
 #endif
   }
 
+  /// @brief Verifies the H1 order 2 mass form matches Integral(u, v) entry by entry.
   TEST(Rodin_Variational_NamedForm, MassMatchesIntegral)
   {
     auto mesh = unitSquare();
@@ -176,6 +173,7 @@ namespace Rodin::Tests::Unit
     expectNear(actual.getOperator(), expected.getOperator());
   }
 
+  /// @brief Verifies the H1 order 2 diffusion form matches Integral(Grad(u), Grad(v)) entry by entry.
   TEST(Rodin_Variational_NamedForm, DiffusionMatchesIntegral)
   {
     auto mesh = unitSquare();
@@ -191,6 +189,7 @@ namespace Rodin::Tests::Unit
     expectNear(actual.getOperator(), expected.getOperator());
   }
 
+  /// @brief Verifies the P0g mass form matches the equivalent Integral.
   TEST(Rodin_Variational_NamedForm, P0gMatchesIntegrals)
   {
     auto mesh = unitSquare();
@@ -198,6 +197,7 @@ namespace Rodin::Tests::Unit
     expectMassFormMatches(fes);
   }
 
+  /// @brief Verifies the vector valued P1 mass form matches the equivalent Integral.
   TEST(Rodin_Variational_NamedForm, VectorP1MatchesIntegrals)
   {
     auto mesh = unitSquare();
@@ -205,6 +205,7 @@ namespace Rodin::Tests::Unit
     expectMassFormMatches(fes);
   }
 
+  /// @brief Verifies mass and diffusion forms over trial and test spaces of different order match the equivalent Integrals.
   TEST(Rodin_Variational_NamedForm, MixedH1OrdersMatchIntegrals)
   {
     auto mesh = unitSquare();
@@ -226,6 +227,7 @@ namespace Rodin::Tests::Unit
     expectNear(diffusion.getOperator(), expectedDiffusion.getOperator());
   }
 
+  /// @brief Verifies repeated assembly keeps the values and the nonzero count of the first assembly.
   TEST(Rodin_Variational_NamedForm, ReassemblyMatchesIntegral)
   {
     auto mesh = unitSquare();
@@ -260,6 +262,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies the sequential and OpenMP backends agree with each other on reassembly.
   TEST(Rodin_Variational_NamedForm, ReassemblyAgreesAcrossBackends)
   {
     auto mesh = unitSquare();
@@ -284,6 +287,7 @@ namespace Rodin::Tests::Unit
 #endif
   }
 
+  /// @brief Verifies a named form sums with an Integral inside a Problem.
   TEST(Rodin_Variational_NamedForm, ComposesWithIntegralInProblem)
   {
     auto mesh = unitSquare();
@@ -299,7 +303,6 @@ namespace Rodin::Tests::Unit
     expected = Integral(u, v) + Integral(Grad(u), Grad(v));
     expected.assemble();
 
-    expectNear(
-      problem.getLinearSystem().getOperator(), expected.getOperator());
+    expectNear(problem.getLinearSystem().getOperator(), expected.getOperator());
   }
 }

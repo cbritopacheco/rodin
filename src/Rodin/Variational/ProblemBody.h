@@ -980,10 +980,8 @@ namespace Rodin::Variational
   }
 
   template <class OperatorType, class RHSScalar>
-  auto
-  operator+(
-      const BilinearFormBase<OperatorType>& bf,
-      const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
+  auto operator+(const BilinearFormBase<OperatorType>& bf,
+    const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
   {
     using LHSScalar =
       typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;

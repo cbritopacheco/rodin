@@ -71,33 +71,80 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for the assembly of a Variational::MassForm.
+   *
+   * Unlike the generic bilinear form, a named form carries its own cell
+   * kernel, so the assembly is handed the form itself rather than a
+   * BilinearFormAssemblyInput: it needs @c MassForm::KernelType.
+   *
+   * @tparam OperatorType Matrix type for the assembled operator.
+   * @tparam Solution Solution variable type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES Test finite element space type.
+   */
   template <class OperatorType, class Solution, class TrialFES, class TestFES>
-  class AssemblyBase<
-    OperatorType,
+  class AssemblyBase<OperatorType,
     Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
-      using InputType =
-        Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+      /// @brief Input data type for the assembly, the mass form itself.
+      using InputType = Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Executes the assembly operation.
+       * @param[in,out] out Matrix receiving the assembled mass form.
+       * @param[in] input Form supplying the two spaces and the cell kernel.
+       */
       virtual void execute(OperatorType& out, const InputType& input) const = 0;
+
+      /**
+       * @brief Creates a polymorphic copy of this assembly object.
+       * @returns Pointer to a new copy of this object.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for the assembly of a Variational::DiffusionForm.
+   *
+   * Unlike the generic bilinear form, a named form carries its own cell
+   * kernel, so the assembly is handed the form itself rather than a
+   * BilinearFormAssemblyInput: it needs @c DiffusionForm::KernelType.
+   *
+   * @tparam OperatorType Matrix type for the assembled operator.
+   * @tparam Solution Solution variable type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES Test finite element space type.
+   */
   template <class OperatorType, class Solution, class TrialFES, class TestFES>
-  class AssemblyBase<
-    OperatorType,
+  class AssemblyBase<OperatorType,
     Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>>
     : public FormLanguage::Base
   {
     public:
+      /// @brief Input data type for the assembly, the diffusion form itself.
       using InputType =
         Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Executes the assembly operation.
+       * @param[in,out] out Matrix receiving the assembled diffusion form.
+       * @param[in] input Form supplying the two spaces and the cell kernel.
+       */
       virtual void execute(OperatorType& out, const InputType& input) const = 0;
+
+      /**
+       * @brief Creates a polymorphic copy of this assembly object.
+       * @returns Pointer to a new copy of this object.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 

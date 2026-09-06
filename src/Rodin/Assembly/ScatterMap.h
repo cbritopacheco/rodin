@@ -56,10 +56,8 @@ namespace Rodin::Assembly
        * @tparam KernelType Cell kernel, constructible from the two spaces.
        */
       template <class KernelType, class IterationType, class TrialFES, class TestFES>
-      void assemble(
-          MatrixType& out,
-          const TrialFES& trialFES, const TestFES& testFES,
-          const IterationType& seq, size_t d, Index count) const
+      void assemble(MatrixType& out, const TrialFES& trialFES, const TestFES& testFES,
+        const IterationType& seq, size_t d, Index count) const
       {
         if (!isValid(out, trialFES, testFES, count))
         {
@@ -106,10 +104,8 @@ namespace Rodin::Assembly
        * @tparam KernelType Cell kernel, constructible from the two spaces.
        */
       template <class KernelType, class IterationType, class TrialFES, class TestFES>
-      void assemble(
-          MatrixType& out,
-          const TrialFES& trialFES, const TestFES& testFES,
-          const IterationType& seq, size_t d, Index count, int threadCount) const
+      void assemble(MatrixType& out, const TrialFES& trialFES, const TestFES& testFES,
+        const IterationType& seq, size_t d, Index count, int threadCount) const
       {
         if (!isValid(out, trialFES, testFES, count))
         {
@@ -135,9 +131,7 @@ namespace Rodin::Assembly
           std::vector<Eigen::Triplet<ScalarType>> triplets;
           triplets.reserve(capacity);
           for (auto& chunk : chunks)
-            triplets.insert(
-              triplets.end(),
-              std::make_move_iterator(chunk.begin()),
+            triplets.insert(triplets.end(), std::make_move_iterator(chunk.begin()),
               std::make_move_iterator(chunk.end()));
           setFromTriplets(out, triplets, trialFES, testFES);
           build(out, trialFES, testFES, d, count);
@@ -176,8 +170,12 @@ namespace Rodin::Assembly
 #endif
 
     private:
+#ifdef RODIN_USE_OPENMP
       /**
        * @brief Atomically accumulates @p s into @p value.
+       *
+       * Only the OpenMP scatter needs this, and the @c omp @c atomic
+       * directives are not valid outside an OpenMP build.
        */
       static void add(ScalarType& value, const ScalarType& s)
       {
@@ -196,6 +194,7 @@ namespace Rodin::Assembly
           parts[1] += s.imag();
         }
       }
+#endif
 
       template <class TrialFES, class TestFES>
       static size_t getCapacity(const TrialFES& trialFES, const TestFES& testFES)
@@ -204,10 +203,9 @@ namespace Rodin::Assembly
       }
 
       template <class TrialFES, class TestFES>
-      static void emplace(
-          std::vector<Eigen::Triplet<ScalarType>>& triplets,
-          const Math::Matrix<ScalarType>& local,
-          const TrialFES& trialFES, const TestFES& testFES, size_t d, Index i)
+      static void emplace(std::vector<Eigen::Triplet<ScalarType>>& triplets,
+        const Math::Matrix<ScalarType>& local, const TrialFES& trialFES,
+        const TestFES& testFES, size_t d, Index i)
       {
         const auto& rows = testFES.getDOFs(d, i);
         const auto& cols = trialFES.getDOFs(d, i);
@@ -217,10 +215,9 @@ namespace Rodin::Assembly
       }
 
       template <class TrialFES, class TestFES>
-      static void setFromTriplets(
-          MatrixType& out,
-          const std::vector<Eigen::Triplet<ScalarType>>& triplets,
-          const TrialFES& trialFES, const TestFES& testFES)
+      static void setFromTriplets(MatrixType& out,
+        const std::vector<Eigen::Triplet<ScalarType>>& triplets, const TrialFES& trialFES,
+        const TestFES& testFES)
       {
         out.resize(testFES.getSize(), trialFES.getSize());
         out.setFromTriplets(triplets.begin(), triplets.end());
@@ -228,26 +225,22 @@ namespace Rodin::Assembly
       }
 
       template <class TrialFES, class TestFES>
-      bool isValid(
-          const MatrixType& out,
-          const TrialFES& trialFES, const TestFES& testFES, Index count) const
+      bool isValid(const MatrixType& out, const TrialFES& trialFES,
+        const TestFES& testFES, Index count) const
       {
-        return m_built
-          && out.isCompressed()
-          && static_cast<size_t>(out.rows()) == testFES.getSize()
-          && static_cast<size_t>(out.cols()) == trialFES.getSize()
-          && static_cast<size_t>(out.nonZeros()) == m_nonZeroCount
-          && m_offsets.size() == static_cast<size_t>(count) + 1;
+        return m_built && out.isCompressed() &&
+          static_cast<size_t>(out.rows()) == testFES.getSize() &&
+          static_cast<size_t>(out.cols()) == trialFES.getSize() &&
+          static_cast<size_t>(out.nonZeros()) == m_nonZeroCount &&
+          m_offsets.size() == static_cast<size_t>(count) + 1;
       }
 
       /**
        * @brief Locates every cell-local entry in the value array of @p out.
        */
       template <class TrialFES, class TestFES>
-      void build(
-          const MatrixType& out,
-          const TrialFES& trialFES, const TestFES& testFES,
-          size_t d, Index count) const
+      void build(const MatrixType& out, const TrialFES& trialFES, const TestFES& testFES,
+        size_t d, Index count) const
       {
         const auto* const outer = out.outerIndexPtr();
         const auto* const inner = out.innerIndexPtr();
@@ -255,9 +248,9 @@ namespace Rodin::Assembly
         m_offsets[0] = 0;
         for (Index i = 0; i < count; ++i)
         {
-          m_offsets[i + 1] = m_offsets[i]
-            + static_cast<size_t>(testFES.getDOFs(d, i).size())
-            * static_cast<size_t>(trialFES.getDOFs(d, i).size());
+          m_offsets[i + 1] = m_offsets[i] +
+            static_cast<size_t>(testFES.getDOFs(d, i).size()) *
+              static_cast<size_t>(trialFES.getDOFs(d, i).size());
         }
         m_indices.resize(m_offsets.back());
         for (Index i = 0; i < count; ++i)

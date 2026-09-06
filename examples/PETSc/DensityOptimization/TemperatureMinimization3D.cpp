@@ -198,13 +198,10 @@ namespace
 
   bool isRodinOption(const std::string& arg)
   {
-    return arg.rfind("--n=", 0) == 0
-        || arg.rfind("--iters=", 0) == 0
-        || arg.rfind("--ell=", 0) == 0
-        || arg.rfind("--alpha=", 0) == 0
-        || arg.rfind("--mu=", 0) == 0
-        || arg.rfind("--radius=", 0) == 0
-        || arg.rfind("--output-every=", 0) == 0;
+    return arg.rfind("--n=", 0) == 0 || arg.rfind("--iters=", 0) == 0 ||
+      arg.rfind("--ell=", 0) == 0 || arg.rfind("--alpha=", 0) == 0 ||
+      arg.rfind("--mu=", 0) == 0 || arg.rfind("--radius=", 0) == 0 ||
+      arg.rfind("--output-every=", 0) == 0;
   }
 }
 
@@ -226,8 +223,7 @@ int main(int argc, char** argv)
   const size_t maxIterations =
     parseSizeTOption(argc, argv, "iters", defaultMaxIterations);
   const size_t requestedOutputEvery = parseSizeTOption(argc, argv, "output-every", 1);
-  const size_t outputEvery =
-    requestedOutputEvery == 0 ? 1 : requestedOutputEvery;
+  const size_t outputEvery = requestedOutputEvery == 0 ? 1 : requestedOutputEvery;
   const Real ell = parseRealOption(argc, argv, "ell", defaultEll);
   const Real alpha = parseRealOption(argc, argv, "alpha", defaultAlpha);
   const Real mu = parseRealOption(argc, argv, "mu", defaultMu);
@@ -256,19 +252,13 @@ int main(int argc, char** argv)
   if (world.rank() == 0)
   {
     Alert::Info() << "Generating uniform grid..." << Alert::Raise;
-    Alert::Info()
-      << "n=" << n
-      << ", iters=" << maxIterations
-      << ", ell=" << ell
-      << ", alpha=" << alpha
-      << ", mu=" << mu
-      << ", radius=" << radius
-      << ", output-every=" << outputEvery
-      << Alert::Raise;
+    Alert::Info() << "n=" << n << ", iters=" << maxIterations << ", ell=" << ell
+                  << ", alpha=" << alpha << ", mu=" << mu << ", radius=" << radius
+                  << ", output-every=" << outputEvery << Alert::Raise;
   }
 
   Context::MPI mpi(env, world);
-  auto mesh = Mesh<Context::MPI>::UniformGrid(mpi, g, { n, n, n });
+  auto mesh = Mesh<Context::MPI>::UniformGrid(mpi, g, {n, n, n});
 
   mesh.getConnectivity().compute(2, 3);
   mesh.reconcile(2);
@@ -323,15 +313,15 @@ int main(int argc, char** argv)
 
   {
     PETSc::Variational::TrialFunction u(vh);
-    PETSc::Variational::TestFunction  v(vh);
+    PETSc::Variational::TestFunction v(vh);
     xdmf.add("u", u.getSolution());
 
     PETSc::Variational::TrialFunction p(vh);
-    PETSc::Variational::TestFunction  q(vh);
+    PETSc::Variational::TestFunction q(vh);
     xdmf.add("p", p.getSolution());
 
     PETSc::Variational::TrialFunction gfun(vh);
-    PETSc::Variational::TestFunction  w(vh);
+    PETSc::Variational::TestFunction w(vh);
     xdmf.add("g", gfun.getSolution());
 
     PETSc::Variational::GridFunction gamma(vh);
@@ -352,9 +342,8 @@ int main(int argc, char** argv)
       const auto a = gmin + (gmax - gmin) * Pow(gamma, 3);
 
       Problem poisson(u, v);
-      poisson = Integral(a * Grad(u), Grad(v))
-              - Integral(f * v)
-              + DirichletBC(u, RealFunction(0.0)).on(GammaD);
+      poisson = Integral(a * Grad(u), Grad(v)) - Integral(f * v) +
+        DirichletBC(u, RealFunction(0.0)).on(GammaD);
 
       if (world.rank() == 0)
         Alert::Info() << "Assembling state equation..." << Alert::Raise;
@@ -376,20 +365,17 @@ int main(int argc, char** argv)
       //   Alert::Info() << "Objective: " << J << Alert::Raise;
 
       Problem adjoint(p, q);
-      adjoint = Integral(a * Grad(p), Grad(q))
-              + Integral(RealFunction(1.0 / vol), q)
-              + DirichletBC(p, RealFunction(0.0)).on(GammaD);
+      adjoint = Integral(a * Grad(p), Grad(q)) + Integral(RealFunction(1.0 / vol), q) +
+        DirichletBC(p, RealFunction(0.0)).on(GammaD);
       Solver::KSP(adjoint).solve();
 
       Problem hilbert(gfun, w);
-      hilbert = Integral(alpha * Grad(gfun), Grad(w))
-              + Integral(gfun, w)
-              - Integral(
-                  ell
-                  + 3 * (gmax - gmin) * Pow(gamma, 2)
-                    * Dot(Grad(u.getSolution()), Grad(p.getSolution())),
-                  w)
-              + DirichletBC(gfun, RealFunction(0.0)).on(GammaD);
+      hilbert = Integral(alpha * Grad(gfun), Grad(w)) + Integral(gfun, w) -
+        Integral(ell +
+            3 * (gmax - gmin) * Pow(gamma, 2) *
+              Dot(Grad(u.getSolution()), Grad(p.getSolution())),
+          w) +
+        DirichletBC(gfun, RealFunction(0.0)).on(GammaD);
       Solver::KSP(hilbert).solve();
 
       step = mu * gfun.getSolution();

@@ -98,23 +98,43 @@ namespace Rodin::Assembly
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief Assembly of a Variational::MassForm into a sparse matrix over a single thread.
+   *
+   * Runs the form's own cell kernel over the mesh cells and scatters the
+   * cell matrices through a ScatterMap, so that every assembly after the
+   * first reuses the sparsity pattern of the operator.
+   *
+   * @tparam Solution Solution variable type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES Test finite element space type.
+   * @tparam Scalar Scalar value type of the operator.
+   */
   template <class Solution, class TrialFES, class TestFES, class Scalar>
-  class Sequential<
-    Math::SparseMatrix<Scalar>,
-    Variational::MassForm<
-      Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
-    : public AssemblyBase<
-        Math::SparseMatrix<Scalar>,
-        Variational::MassForm<
-          Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+  class Sequential<Math::SparseMatrix<Scalar>,
+    Variational::MassForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+    final
+    : public AssemblyBase<Math::SparseMatrix<Scalar>,
+        Variational::MassForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
   {
     public:
+      /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<Scalar>;
-      using FormType =
-        Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+
+      /// @brief Mass form type being assembled.
+      using FormType = Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+
+      /// @brief Parent assembly base class.
       using Parent = AssemblyBase<OperatorType, FormType>;
+
+      /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
+      /**
+       * @brief Assembles the mass form into @p out.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the two spaces and the cell kernel.
+       */
       void execute(OperatorType& out, const InputType& input) const override
       {
         const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
@@ -127,6 +147,10 @@ namespace Rodin::Assembly
           out, trialFES, testFES, seq, d, count);
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -136,23 +160,44 @@ namespace Rodin::Assembly
       mutable ScatterMap<Scalar> m_scatterMap;
   };
 
+  /**
+   * @brief Assembly of a Variational::DiffusionForm into a sparse matrix over a single thread.
+   *
+   * Runs the form's own cell kernel over the mesh cells and scatters the
+   * cell matrices through a ScatterMap, so that every assembly after the
+   * first reuses the sparsity pattern of the operator.
+   *
+   * @tparam Solution Solution variable type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES Test finite element space type.
+   * @tparam Scalar Scalar value type of the operator.
+   */
   template <class Solution, class TrialFES, class TestFES, class Scalar>
-  class Sequential<
-    Math::SparseMatrix<Scalar>,
-    Variational::DiffusionForm<
-      Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>> final
-    : public AssemblyBase<
-        Math::SparseMatrix<Scalar>,
-        Variational::DiffusionForm<
-          Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+  class Sequential<Math::SparseMatrix<Scalar>,
+    Variational::DiffusionForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>>
+    final : public AssemblyBase<Math::SparseMatrix<Scalar>,
+              Variational::DiffusionForm<Solution, TrialFES, TestFES,
+                Math::SparseMatrix<Scalar>>>
   {
     public:
+      /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<Scalar>;
+
+      /// @brief Diffusion form type being assembled.
       using FormType =
         Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>;
+
+      /// @brief Parent assembly base class.
       using Parent = AssemblyBase<OperatorType, FormType>;
+
+      /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
+      /**
+       * @brief Assembles the diffusion form into @p out.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the two spaces and the cell kernel.
+       */
       void execute(OperatorType& out, const InputType& input) const override
       {
         const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
@@ -165,6 +210,10 @@ namespace Rodin::Assembly
           out, trialFES, testFES, seq, d, count);
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);

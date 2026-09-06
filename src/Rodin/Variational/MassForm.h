@@ -21,13 +21,28 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits of a Variational::MassForm.
+   *
+   * @tparam Solution Solution variable type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES Test finite element space type.
+   * @tparam Operator Assembled operator type.
+   */
   template <class Solution, class TrialFES, class TestFES, class Operator>
   struct Traits<Variational::MassForm<Solution, TrialFES, TestFES, Operator>>
   {
-    using SolutionType = Solution;
-    using TrialFESType = TrialFES;
-    using TestFESType = TestFES;
-    using OperatorType = Operator;
+    /// @brief Solution variable type.
+      using SolutionType = Solution;
+
+    /// @brief Trial finite element space type.
+      using TrialFESType = TrialFES;
+
+    /// @brief Test finite element space type.
+      using TestFESType = TestFES;
+
+    /// @brief Assembled operator type.
+      using OperatorType = Operator;
   };
 }
 
@@ -39,16 +54,25 @@ namespace Rodin::Variational
   template <class Solution, class TrialFES, class TestFES, class Operator>
   class MassForm final : public BilinearFormBase<Operator>
   {
-    using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
-    using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
-    using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
-    using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
+      using TrialMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
+      using TestMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
+      using TrialContextType = typename FormLanguage::Traits<TrialMeshType>::ContextType;
+      using TestContextType = typename FormLanguage::Traits<TestMeshType>::ContextType;
 
     public:
+      /// @brief Solution variable type.
       using SolutionType = Solution;
+
+      /// @brief Trial finite element space type.
       using TrialFESType = TrialFES;
+
+      /// @brief Test finite element space type.
       using TestFESType = TestFES;
+
+      /// @brief Assembled operator type.
       using OperatorType = Operator;
+
+      /// @brief Scalar value type of the operator.
       using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
       /**
        * @brief Cell kernel of the mass form.
@@ -60,12 +84,28 @@ namespace Rodin::Variational
       class Kernel
       {
         public:
+          /// @brief Cell matrix type produced by the kernel.
           using MatrixType = Math::Matrix<ScalarType>;
 
+          /**
+           * @brief Constructs the kernel over the two spaces.
+           * @param[in] trialFES Trial finite element space.
+           * @param[in] testFES Test finite element space.
+           */
           Kernel(const TrialFES& trialFES, const TestFES& testFES)
-            : m_trialFES(trialFES), m_testFES(testFES)
+            : m_trialFES(trialFES),
+              m_testFES(testFES)
           {}
 
+          /**
+           * @brief Computes the cell matrix of @p polytope.
+           *
+           * The reference bases are evaluated once per polytope geometry and
+           * reused across cells.
+           *
+           * @param[in,out] out Cell matrix, resized to the local DOF counts.
+           * @param[in] polytope Cell to integrate over.
+           */
           void compute(MatrixType& out, const Geometry::Polytope& polytope) const
           {
             const size_t d = polytope.getDimension();
@@ -73,15 +113,13 @@ namespace Rodin::Variational
             const auto& trialFE = m_trialFES.get().getFiniteElement(d, i);
             const auto& testFE = m_testFES.get().getFiniteElement(d, i);
             const size_t order = trialFE.getOrder() + testFE.getOrder();
-            const auto& qf = QF::PolytopeQuadratureFormula::get(
-              order, polytope.getGeometry());
+            const auto& qf =
+              QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
             const auto& quadrature = polytope.getQuadrature(qf);
 
-            const bool rebuild =
-              !m_cached || m_geometry != polytope.getGeometry()
-              || m_order != order
-              || m_trialCount != trialFE.getCount()
-              || m_testCount != testFE.getCount();
+            const bool rebuild = !m_cached || m_geometry != polytope.getGeometry() ||
+              m_order != order || m_trialCount != trialFE.getCount() ||
+              m_testCount != testFE.getCount();
             if (rebuild)
             {
               m_cached = true;
@@ -99,8 +137,8 @@ namespace Rodin::Variational
                 {
                   const auto testValue = testFE.getBasis(te)(reference);
                   for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
-                    matrix(te, tr) = Math::dot(
-                      trialFE.getBasis(tr)(reference), testValue);
+                    matrix(te, tr) =
+                      Math::dot(trialFE.getBasis(tr)(reference), testValue);
                 }
               }
             }
@@ -110,8 +148,8 @@ namespace Rodin::Variational
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {
               const auto& point = quadrature.getPoint(qp);
-              const ScalarType weight = static_cast<ScalarType>(
-                qf.getWeight(qp) * point.getDistortion());
+              const ScalarType weight =
+                static_cast<ScalarType>(qf.getWeight(qp) * point.getDistortion());
               out += weight * m_reference[qp];
             }
           }
@@ -120,35 +158,56 @@ namespace Rodin::Variational
           std::reference_wrapper<const TrialFES> m_trialFES;
           std::reference_wrapper<const TestFES> m_testFES;
           mutable bool m_cached = false;
-          mutable Geometry::Polytope::Type m_geometry =
-            Geometry::Polytope::Type::Point;
+          mutable Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
           mutable size_t m_order = 0;
           mutable size_t m_trialCount = 0;
           mutable size_t m_testCount = 0;
           mutable std::vector<MatrixType> m_reference;
       };
 
+      /// @brief Cell kernel of the form.
       using KernelType = Kernel;
-      using Parent = BilinearFormBase<OperatorType>;
-      using AssemblyType =
-        typename Assembly::Default<TrialContextType, TestContextType>
-          ::template Type<OperatorType, MassForm>;
 
-      MassForm(
-          const TrialFunction<SolutionType, TrialFESType>& u,
-          const TestFunction<TestFESType>& v)
-        : m_u(u), m_v(v)
+      /// @brief Parent class.
+      using Parent = BilinearFormBase<OperatorType>;
+
+      /// @brief Assembly backend selected by the mesh contexts.
+      using AssemblyType = typename Assembly::Default<TrialContextType,
+        TestContextType>::template Type<OperatorType, MassForm>;
+
+      /**
+       * @brief Constructs the form over @p u and @p v and assembles it.
+       * @param[in] u Trial function.
+       * @param[in] v Test function.
+       */
+      MassForm(const TrialFunction<SolutionType, TrialFESType>& u,
+        const TestFunction<TestFESType>& v)
+        : m_u(u),
+          m_v(v)
       {
         assemble();
       }
 
+      /// @brief Copy constructor.
       MassForm(const MassForm&) = default;
+
+      /// @brief Move constructor.
       MassForm(MassForm&&) = default;
+
+      /// @brief Copy assignment.
       MassForm& operator=(const MassForm&) = default;
+
+      /// @brief Move assignment.
       MassForm& operator=(MassForm&&) = default;
 
-      OperatorType& getOperator() override { return m_operator; }
-      const OperatorType& getOperator() const override { return m_operator; }
+      OperatorType& getOperator() override
+      {
+        return m_operator;
+      }
+      const OperatorType& getOperator() const override
+      {
+        return m_operator;
+      }
 
       void assemble() override
       {
@@ -165,7 +224,10 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
-      MassForm* copy() const noexcept override { return new MassForm(*this); }
+      MassForm* copy() const noexcept override
+      {
+        return new MassForm(*this);
+      }
 
     private:
       std::reference_wrapper<const TrialFunction<SolutionType, TrialFESType>> m_u;
@@ -174,14 +236,13 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
+  /// @brief Template argument deduction guide for MassForm.
   template <class Solution, class TrialFES, class TestFES>
   MassForm(const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
-    -> MassForm<
-        Solution, TrialFES, TestFES,
-        Math::SparseMatrix<
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>;
+    -> MassForm<Solution, TrialFES, TestFES,
+      Math::SparseMatrix<
+        typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>;
 }
 
 #endif
