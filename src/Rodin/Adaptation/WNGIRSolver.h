@@ -401,13 +401,16 @@ namespace Rodin::Adaptation
 
         SurfaceState currentSurface = surfaceState(u);
         recordSurfaceState(currentSurface);
-        auto rigidTic = Clock::now();
-        const RigidModeState initialRigid = getRigidModeState(mesh, fes, u, phi, grad,
-          interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-        rep.tRigidDiagnostics += secondsSince(rigidTic);
-        rep.rigidModeCoercivity = initialRigid.minimum;
-        rep.rigidModeCoercivityRatio = initialRigid.ratio;
-        rep.rigidModeDimension = initialRigid.dimension;
+        if (p.rigidDiagnostics)
+        {
+          auto rigidTic = Clock::now();
+          const RigidModeState initialRigid = getRigidModeState(mesh, fes, u, phi, grad,
+            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
+          rep.tRigidDiagnostics += secondsSince(rigidTic);
+          rep.rigidModeCoercivity = initialRigid.minimum;
+          rep.rigidModeCoercivityRatio = initialRigid.ratio;
+          rep.rigidModeDimension = initialRigid.dimension;
+        }
         if (!(currentSurface.activeLen > Real(0)))
         {
           rep.exitReason = "observation-degenerate-active-set";
@@ -442,7 +445,11 @@ namespace Rodin::Adaptation
           predictorBody = predictorBody + obsMetric - surfaceForce;
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
-          rep.tAssembly += secondsSince(tic);
+          {
+            const Real elapsed = secondsSince(tic);
+            rep.tAssembly += elapsed;
+            rep.tAssemblyPredictor += elapsed;
+          }
 
           tic = Clock::now();
           std::size_t predictorIterations = 0;
@@ -498,7 +505,11 @@ namespace Rodin::Adaptation
                 body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
                 m_stepProblem = body;
                 m_stepProblem.assemble();
-                rep.tAssembly += secondsSince(tic);
+                {
+                  const Real elapsed = secondsSince(tic);
+                  rep.tAssembly += elapsed;
+                  rep.tAssemblyInner += elapsed;
+                }
 
                 tic = Clock::now();
                 std::size_t barrierIterations = 0;
@@ -766,13 +777,16 @@ namespace Rodin::Adaptation
           ePrev = eNow;
         }
 
-        rigidTic = Clock::now();
-        const RigidModeState finalRigid = getRigidModeState(mesh, fes, u, phi, grad,
-          interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-        rep.tRigidDiagnostics += secondsSince(rigidTic);
-        rep.rigidModeCoercivity = finalRigid.minimum;
-        rep.rigidModeCoercivityRatio = finalRigid.ratio;
-        rep.rigidModeDimension = finalRigid.dimension;
+        if (p.rigidDiagnostics)
+        {
+          auto rigidTic = Clock::now();
+          const RigidModeState finalRigid = getRigidModeState(mesh, fes, u, phi, grad,
+            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
+          rep.tRigidDiagnostics += secondsSince(rigidTic);
+          rep.rigidModeCoercivity = finalRigid.minimum;
+          rep.rigidModeCoercivityRatio = finalRigid.ratio;
+          rep.rigidModeDimension = finalRigid.dimension;
+        }
 
         rep.tTotal = secondsSince(solveTic);
         m_report = rep;

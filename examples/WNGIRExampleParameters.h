@@ -212,6 +212,8 @@ namespace Rodin::Examples
     p.interfaceAttribute = interfaceAttribute;
     p.trace =
       boolOption(argc, argv, "trace", boolOption(argc, argv, "wngir-trace", false));
+    p.rigidDiagnostics =
+      boolOption(argc, argv, "wngir-rigid-diagnostics", p.rigidDiagnostics);
     return p;
   }
 }
