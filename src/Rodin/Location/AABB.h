@@ -175,6 +175,8 @@ namespace Rodin::Location
       {
           std::vector<Node> nodes;
           std::vector<Index> entries;      ///< Polytope indices, leaf-ordered
+          std::vector<Bound> entryLo;      ///< Per-entry box, leaf-ordered
+          std::vector<Bound> entryHi;
           std::atomic<bool> built{false};
           mutable std::mutex mutex;
       };
@@ -186,6 +188,8 @@ namespace Rodin::Location
           std::lock_guard lock(index.mutex);
           index.nodes.clear();
           index.entries.clear();
+          index.entryLo.clear();
+          index.entryHi.clear();
           index.built.store(false, std::memory_order_release);
         }
         computeScale();
@@ -247,6 +251,8 @@ namespace Rodin::Location
 
         index.entries.clear();
         index.nodes.clear();
+        index.entryLo.clear();
+        index.entryHi.clear();
         if (count == 0)
           return;
 
@@ -271,10 +277,17 @@ namespace Rodin::Location
         index.nodes.reserve(2 * count / LeafSize + 2);
         buildNode(index, order, 0, static_cast<uint32_t>(count), lo, hi, mid, sdim);
 
-        // Reorder entries to leaf order so leaves are contiguous.
+        // Reorder entries to leaf order so leaves are contiguous. The boxes
+        // follow, so that a leaf can reject a candidate before inverting it.
         std::vector<Index> reordered(count);
+        index.entryLo.resize(count);
+        index.entryHi.resize(count);
         for (size_t i = 0; i < count; ++i)
+        {
           reordered[i] = index.entries[order[i]];
+          index.entryLo[i] = lo[order[i]];
+          index.entryHi[i] = hi[order[i]];
+        }
         index.entries = std::move(reordered);
       }
 
@@ -411,15 +424,21 @@ namespace Rodin::Location
         }
       }
 
-      bool boxContains(const Node& node, const Math::SpatialPoint& x, size_t sdim) const
+      bool boxContains(
+        const Bound& lo, const Bound& hi, const Math::SpatialPoint& x, size_t sdim) const
       {
         for (size_t i = 0; i < sdim; ++i)
         {
           const Real xi = x[static_cast<Eigen::Index>(i)];
-          if (xi < node.lo[i] || xi > node.hi[i])
+          if (xi < lo[i] || xi > hi[i])
             return false;
         }
         return true;
+      }
+
+      bool boxContains(const Node& node, const Math::SpatialPoint& x, size_t sdim) const
+      {
+        return boxContains(node.lo, node.hi, x, sdim);
       }
 
       bool containsReference(
@@ -536,6 +555,10 @@ namespace Rodin::Location
           {
             for (uint32_t k = node.begin; k < node.end; ++k)
             {
+              // The entry box bounds the polytope, curvature included, so a
+              // miss here rules the candidate out without a Newton inversion.
+              if (!boxContains(index.entryLo[k], index.entryHi[k], x, sdim))
+                continue;
               if (auto p = narrowPhase(dimension, index.entries[k], x))
                 return p;
             }
