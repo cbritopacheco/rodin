@@ -145,7 +145,8 @@ namespace Rodin::Adaptation
           m_vStep(v.getFiniteElementSpace()),
           m_stepProblem(m_duStep, m_vStep),
           m_stepSolver(m_stepProblem),
-          m_bulkForm(m_duStep, m_vStep)
+          m_bulkForm(m_duStep, m_vStep),
+          m_obsForm(m_duStep, m_vStep)
       {}
 
       /// @brief Sets WNGIR runtime parameters.
@@ -437,12 +438,17 @@ namespace Rodin::Adaptation
           auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
           surfaceForce.setOrder(surfaceOrder);
           surfaceForce.over(p.interfaceAttribute);
+          // The observation metric and the fitting force depend on the outer
+          // displacement, not on the barrier increment, so they are assembled
+          // here and reused by every correction below.
+          m_obsForm = obsMetric;
+          m_obsForm.assemble();
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
           bool solveOk = true;
           Real predictorAction = Real(0);
           typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
-          predictorBody = predictorBody + obsMetric - surfaceForce;
+          predictorBody = predictorBody + m_obsForm - surfaceForce;
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
           {
@@ -502,7 +508,7 @@ namespace Rodin::Adaptation
                 Detail::WNGIRPrimalBarrierForce barrierForce(
                   m_vStep, u, vK, p, barrierCoefficient);
                 typename ProblemType::ProblemBodyType body(m_bulkForm);
-                body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
+                body = body + m_obsForm + barrierMetric - surfaceForce - barrierForce;
                 m_stepProblem = body;
                 m_stepProblem.assemble();
                 {
@@ -1635,6 +1641,11 @@ namespace Rodin::Adaptation
       StepSolverType m_stepSolver;
       BilinearFormType m_bulkForm;
       bool m_bulkFormAssembled = false;
+      /// @brief Observation metric and fitting force at the outer displacement.
+      ///
+      /// Both depend on the outer displacement only, so they are assembled once
+      /// per nonlinear iteration and reused by every barrier correction.
+      BilinearFormType m_obsForm;
       std::vector<Math::Vector<Real>> m_rigidModeBasis;
       Eigen::Index m_rigidModeSize = -1;
       std::size_t m_rigidModeDimension = 0;
