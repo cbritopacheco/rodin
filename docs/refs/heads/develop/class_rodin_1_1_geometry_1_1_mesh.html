@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -103,7 +104,7 @@ $ \mathcal{T}_h $
 <use x='0' y='0' xlink:href='#eq1-g0-84'/>
 <use x='6.511315' y='1.793263' xlink:href='#eq1-g1-104'/>
 </g>
-</svg>, which is a set containing finitely many convex polyhedra. The mesh provides access to polytopes of various dimensions and their connectivity.</p><section id="autotoc_md73"><h2><a href="#autotoc_md73">Key Features</a></h2><ul><li>Access to polytopes by dimension (vertices, faces, cells)</li><li>Connectivity information between polytopes</li><li>Support for attributes marking different regions</li><li>Thread-safe operations (context-dependent)</li></ul></section><section id="autotoc_md74"><h2><a href="#autotoc_md74">Context Types</a></h2><p>The template parameter <code>ContextType</code> determines the execution model:</p><ul><li>Context::Local for sequential execution</li><li>Context::MPI for distributed parallel execution</li></ul><aside class="m-note m-default"><h4>See also</h4><p>MeshBase, Mesh.h</p></aside></section>
+</svg>, which is a set containing finitely many convex polyhedra. The mesh provides access to polytopes of various dimensions and their connectivity.</p><section id="autotoc_md73"><h2><a href="#autotoc_md73">Key Features</a></h2><ul><li>Access to polytopes by dimension (vertices, faces, cells)</li><li>Connectivity information between polytopes</li><li>Support for attributes marking different regions</li><li>Thread-safe operations (context-dependent)</li></ul></section><section id="autotoc_md74"><h2><a href="#autotoc_md74">Context Types</a></h2><p>The template parameter <code>ContextType</code> determines the execution model.</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a></td><td>Sequential mesh storing the full incidence complex and geometry in a single process.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh&lt;Context::<wbr />MPI&gt;</a></td><td>Distributed mesh storing a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a>, global/local index maps, and MPI context for parallel assembly.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a></p><p><a href="_geometry_2_mesh_8h.html">Mesh.h</a></p></aside></section>
       </div>
     </div>
   </div>

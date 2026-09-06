@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -87,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p>Mesh</p></aside>
+<table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a></td><td>Sequential mesh storing the full incidence complex and geometry in a single process.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh&lt;Context::<wbr />MPI&gt;</a></td><td>Distributed mesh storing a rank-local shard, global/local index maps, and MPI context for parallel assembly.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></p></aside>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -96,6 +97,11 @@
               class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Rodin::Geometry::Mesh&lt;Context::Local&gt;</a>
             </dt>
             <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::Geometry::Mesh&lt;Context::MPI&gt;</a>
+            </dt>
+            <dd>Distributed mesh specialization for MPI contexts.</dd>
           </dl>
         </section>
       </div>

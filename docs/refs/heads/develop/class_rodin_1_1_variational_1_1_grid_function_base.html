@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -238,7 +239,7 @@ $ L^2 $
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 <span class="n">Problem</span><span class="w"> </span><span class="nf">l2</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">l2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">l2</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></aside><aside class="m-note m-default"><h4>Coefficients vs values</h4><p>For nodal spaces of degree one (<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>) the coefficient vector holds vertex values. For higher-order spaces (<code>H1\&lt;K\&gt;</code>, <svg class="m-math" style="width: 3.397em; height: 1.020em; vertical-align: -0.170em;" viewBox="0 -8.169366 32.610826 9.794923">
+<span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">l2</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></aside><aside class="m-note m-default"><h4>Coefficients vs values</h4><p>For nodal spaces of degree one (<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>) the coefficient vector holds vertex values. For higher-order spaces (<a href="_variational_2_h1_8h.html">H1&lt;K&gt;</a>, <svg class="m-math" style="width: 3.397em; height: 1.020em; vertical-align: -0.170em;" viewBox="0 -8.169366 32.610826 9.794923">
 <title>
 $ K \ge 2 $
 </title>

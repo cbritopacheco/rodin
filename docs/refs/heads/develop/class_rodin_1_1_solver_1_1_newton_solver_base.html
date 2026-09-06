@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -105,7 +106,7 @@
             </li>
           </ul>
         </nav>
-<p>Base interface for Newton-type nonlinear solvers.</p><p>Newton solver class for solving nonlinear systems through a Variational::ProblemBase that assembles the tangent system at each iterate:</p><div class="m-math"><svg style="width: 22.643em; height: 1.402em;" viewBox="85.582751 -13.45978 217.377511 13.45978">
+<p>Base interface for Newton-type nonlinear solvers.</p><p>Newton solver class for solving nonlinear systems through a <a href="_variational_2_problem_8h.html">Variational::<wbr />ProblemBase</a> that assembles the tangent system at each iterate:</p><div class="m-math"><svg style="width: 22.643em; height: 1.402em;" viewBox="85.582751 -13.45978 217.377511 13.45978">
 <title>
 \[
 J(u^k)\,\delta u^k = -F(u^k), \qquad
@@ -158,7 +159,7 @@ u^{k + 1} = u^k + \delta u^k.
 <use x='294.588853' y='-7.924978' xlink:href='#eq1-g1-107'/>
 <use x='299.708601' y='-2.988792' xlink:href='#eq1-g2-58'/>
 </g>
-</svg></div><p>The linear solver is passed by reference at construction time. The associated ProblemBase is obtained from the solver via LinearSolverBase::getProblem().</p>
+</svg></div><p>The linear solver is passed by reference at construction time. The associated <a href="_variational_2_problem_8h.html">ProblemBase</a> is obtained from the solver via <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase::<wbr />getProblem()</a>.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

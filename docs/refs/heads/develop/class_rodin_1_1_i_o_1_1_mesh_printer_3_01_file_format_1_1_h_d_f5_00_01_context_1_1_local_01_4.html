@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -96,7 +97,7 @@
         </nav>
 <p>Serializes a complete Geometry::Mesh to an HDF5 file including:</p><ul><li>Vertex geometry (<code>/Mesh/Geometry/Vertices</code>)</li><li>Full connectivity (entity CSR per dimension, incidence CSR, state)</li><li>Polytope attributes and transformations</li></ul><p>This printer is strictly for canonical Rodin mesh persistence. It does not write any XDMF-specific datasets. The XDMF visualization path (IO::XDMF) handles its own derived topology generation separately.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md135"><h3><a href="#autotoc_md135">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"output.h5"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;, IO::XDMF</p></aside></section>
+<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"output.h5"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p><p><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">IO::<wbr />XDMF</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

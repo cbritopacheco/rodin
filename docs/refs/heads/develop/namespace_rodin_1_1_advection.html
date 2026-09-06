@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -220,7 +221,7 @@ $ \mathbf{v} $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-118'/>
 </g>
-</svg>.</p></section><section id="autotoc_md451"><h3><a href="#autotoc_md451">Time Stepping and Boundary Policies</a></h3><p>The characteristic tracing uses configurable time-stepping schemes. The default is Runge-Kutta 4 (<code>Math::RungeKutta::RK4</code>); custom steppers can be passed as the fifth constructor argument.</p><p>Two boundary policies handle characteristics that hit the domain boundary:</p><table class="m-table"><thead><tr><th>Policy</th><th>Behavior</th></tr></thead><tbody><tr><td><code>StopInsideBoundaryPolicy</code></td><td>Clamps the departure point to an interior point with a small inward offset (<code>eps_in_phys</code>, default <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
+</svg>.</p></section><section id="autotoc_md451"><h3><a href="#autotoc_md451">Time Stepping and Boundary Policies</a></h3><p>The characteristic tracing uses configurable time-stepping schemes. The default is Runge-Kutta 4 (<code>Math::RungeKutta::RK4</code>); custom steppers can be passed as the fifth constructor argument.</p><p>Two boundary policies handle characteristics that hit the domain boundary:</p><table class="m-table"><thead><tr><th>Policy</th><th>Behavior</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_advection_1_1_stop_inside_boundary_policy.html" class="m-doc">StopInsideBoundaryPolicy</a></td><td>Clamps the departure point to an interior point with a small inward offset (<code>eps_in_phys</code>, default <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
 <title>
 $ 10^{-12} $
 </title>
@@ -238,7 +239,7 @@ $ 10^{-12} $
 <use x='18.292487' y='-4.338437' xlink:href='#eq8-g1-49'/>
 <use x='22.52667' y='-4.338437' xlink:href='#eq8-g1-50'/>
 </g>
-</svg>). Used automatically for the <strong>first time step</strong> (from initial condition).</td></tr><tr><td><code>TaylorBoundaryShiftPolicy&lt;Field&gt;</code></td><td>Applies a first-order Taylor correction at the boundary hit: shifts the point inward and accumulates the gradient correction <svg class="m-math" style="width: 3.985em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 38.256327 10.626798">
+</svg>). Used automatically for the <strong>first time step</strong> (from initial condition).</td></tr><tr><td><a href="class_rodin_1_1_advection_1_1_taylor_boundary_shift_policy.html" class="m-doc">TaylorBoundaryShiftPolicy&lt;Field&gt;</a></td><td>Applies a first-order Taylor correction at the boundary hit: shifts the point inward and accumulates the gradient correction <svg class="m-math" style="width: 3.985em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 38.256327 10.626798">
 <title>
 $ \nabla\phi \cdot \delta\mathbf{x} $
 </title>

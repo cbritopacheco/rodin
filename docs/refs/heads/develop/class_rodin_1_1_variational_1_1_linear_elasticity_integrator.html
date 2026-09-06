@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -218,7 +219,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
 <use x='104.941811' y='-4.338437' xlink:href='#eq2-g1-84'/>
 <use x='111.546301' y='0' xlink:href='#eq2-g4-41'/>
 </g>
-</svg> is the symmetric strain tensor.</p><p>This generic implementation works for any vector-valued finite element space by querying basis function derivatives through the standard FE element interface. Quadrature order is derived automatically from the polynomial order of the FE basis and the Lamé parameter functions.</p>
+</svg> is the symmetric strain tensor.</p><p>This generic implementation works for any vector-valued finite element space by querying basis function derivatives through the standard FE element interface. Quadrature order is derived automatically from the polynomial order of the FE basis and the Lamé parameter functions.</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator&lt;Solution, FES, LambdaDerived, MuDerived&gt;</a></td><td>Generic vector-valued finite element integrator for the linear elasticity bilinear form.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;</a></td><td>P1 vector-space specialization using the constant-gradient structure of linear elements.</td></tr></tbody></table>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

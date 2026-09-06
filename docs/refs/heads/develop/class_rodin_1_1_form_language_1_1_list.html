@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -107,7 +108,7 @@
             </li>
           </ul>
         </nav>
-<p>Polymorphic container for form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p>List</p></aside><p>List provides a dynamic container for storing polymorphic form language objects with value semantics. The container manages object lifetimes through unique pointers and provides deep copying capabilities.</p><section id="autotoc_md42"><h3><a href="#autotoc_md42">Features</a></h3><ul><li><strong>Polymorphic Storage</strong>: Stores derived types through base class pointers</li><li><strong>Value Semantics</strong>: Copy constructor and assignment perform deep copies</li><li><strong>Iterator Support</strong>: Provides standard forward iterators</li><li><strong>Type Safety</strong>: Elements are accessed through their stored type T</li></ul></section><section id="autotoc_md43"><h3><a href="#autotoc_md43">Memory Management</a></h3><ul><li>Elements are stored as std::unique_ptr&lt;T&gt;</li><li>Copy operations use the polymorphic copy() method</li><li>Automatic cleanup on destruction</li></ul></section><section id="autotoc_md44"><h3><a href="#autotoc_md44">Complexity</a></h3><ul><li>Access: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
+<p>Polymorphic container for form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_form_language_1_1_list.html">List</a></p></aside><p>List provides a dynamic container for storing polymorphic form language objects with value semantics. The container manages object lifetimes through unique pointers and provides deep copying capabilities.</p><section id="autotoc_md42"><h3><a href="#autotoc_md42">Features</a></h3><ul><li><strong>Polymorphic Storage</strong>: Stores derived types through base class pointers</li><li><strong>Value Semantics</strong>: Copy constructor and assignment perform deep copies</li><li><strong>Iterator Support</strong>: Provides standard forward iterators</li><li><strong>Type Safety</strong>: Elements are accessed through their stored type T</li></ul></section><section id="autotoc_md43"><h3><a href="#autotoc_md43">Memory Management</a></h3><ul><li>Elements are stored as std::unique_ptr&lt;T&gt;</li><li>Copy operations use the polymorphic copy() method</li><li>Automatic cleanup on destruction</li></ul></section><section id="autotoc_md44"><h3><a href="#autotoc_md44">Complexity</a></h3><ul><li>Access: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
 <title>
 $ O(1) $
 </title>

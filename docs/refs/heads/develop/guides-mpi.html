@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
-  <link rel="prev" href="guides-io.html" />
+  <link rel="prev" href="guides-backends.html" />
   <link rel="next" href="guides-petsc.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -35,6 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -107,7 +108,7 @@
             <li><a href="#guides-mpi-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="guides-mpi-intro"><h2><a href="#guides-mpi-intro">Introduction</a></h2><p>Rodin&#x27;s MPI module enables distributed finite element computations across multiple processes using the Message Passing Interface. It builds on <a href="https://www.boost.org/doc/libs/release/doc/html/mpi.html">Boost.MPI</a> and provides:</p><ul><li>A <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> execution context wrapping a Boost.MPI environment and communicator.</li><li>A <a href="namespace_rodin_1_1_geometry.html#a79f72df2bf2cffe9d0f8bc189d7924ad" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> distributed mesh that stores a rank-local shard with ownership and ghost metadata.</li><li>A <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> that partitions a global mesh and distributes shards to MPI ranks.</li><li>A <code>reconcile()</code> method that resolves shared entity ownership and distributed indices after local connectivity discovery.</li></ul><p>Include the module via: <code class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span></code></p></section><section id="guides-mpi-context"><h2><a href="#guides-mpi-context">Execution Context</a></h2><p>The <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> class wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/mpi/environment.hpp&gt;</span>
+<section id="guides-mpi-intro"><h2><a href="#guides-mpi-intro">Introduction</a></h2><p>Rodin&#x27;s MPI module enables distributed finite element computations across multiple processes using the Message Passing Interface. It builds on <a href="https://www.boost.org/doc/libs/release/doc/html/mpi.html">Boost.MPI</a> and provides:</p><ul><li>A <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> execution context wrapping a Boost.MPI environment and communicator.</li><li>A <a href="namespace_rodin_1_1_geometry.html#a79f72df2bf2cffe9d0f8bc189d7924ad" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> distributed mesh that stores a rank-local shard with ownership and ghost metadata.</li><li>A <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> that partitions a global mesh and distributes shards to MPI ranks.</li><li>A <code>reconcile()</code> method that resolves shared entity ownership and distributed indices after local connectivity discovery.</li></ul><p>Include the module via: <code class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span></code></p><p>For a comparison of local, OpenMP, MPI, and PETSc execution/storage paths, see <a href="guides-backends.html" class="m-doc">Backends</a>.</p></section><section id="guides-mpi-context"><h2><a href="#guides-mpi-context">Execution Context</a></h2><p>The <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> class wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/mpi/environment.hpp&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/mpi/communicator.hpp&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
 
@@ -240,8 +241,8 @@
 <span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
 
 <span class="w">  </span><span class="n">PetscFinalize</span><span class="p">();</span>
-<span class="p">}</span></pre></section><section id="guides-mpi-see-also"><h2><a href="#guides-mpi-see-also">See Also</a></h2><ul><li><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI namespace reference</a></li><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc module</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-io.html" class="m-doc">&laquo; I/O in Rodin</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-petsc.html" class="m-doc">PETSc: Parallel Solvers and Distributed Linear Algebra &raquo;</a></div>
+<span class="p">}</span></pre></section><section id="guides-mpi-see-also"><h2><a href="#guides-mpi-see-also">See Also</a></h2><ul><li><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI namespace reference</a></li><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></li><li><a href="guides-backends.html" class="m-doc">Backends</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc module</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-backends.html" class="m-doc">&laquo; Backends and supported configurations</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-petsc.html" class="m-doc">PETSc: Parallel Solvers and Distributed Linear Algebra &raquo;</a></div>
       </div>
     </div>
   </div>

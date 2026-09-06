@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -1693,7 +1694,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Creates a new HDF5 file containing only the datasets required for XDMF/ParaView visualization:</p><ul><li><code>/Mesh/Geometry/Vertices</code> — vertex coordinates</li><li><code>/Mesh/XDMF/Topology</code> — XDMF mixed-topology stream</li><li><code>/Mesh/XDMF/TopologySize</code> — length of the topology stream</li><li><code>/Mesh/Attributes/{d}</code> — polytope region labels</li></ul><p>This function does <strong>not</strong> write the full canonical Rodin persistence data (connectivity CSR, incidence, state, transformations). Use <code>MeshPrinter&lt;FileFormat::HDF5&gt;</code> for full persistence.</p><aside class="m-note m-default"><h4>See also</h4><p>writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute, MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</p></aside>
+<p>Creates a new HDF5 file containing only the datasets required for XDMF/ParaView visualization:</p><ul><li><code>/Mesh/Geometry/Vertices</code> — vertex coordinates</li><li><code>/Mesh/XDMF/Topology</code> — XDMF mixed-topology stream</li><li><code>/Mesh/XDMF/TopologySize</code> — length of the topology stream</li><li><code>/Mesh/Attributes/{d}</code> — polytope region labels</li></ul><p>This function does <strong>not</strong> write the full canonical Rodin persistence data (connectivity CSR, incidence, state, transformations). Use <code>MeshPrinter&lt;FileFormat::HDF5&gt;</code> for full persistence.</p><aside class="m-note m-default"><h4>See also</h4><p>writeXDMFTopology</p><p>writeXDMFVertices</p><p>writeXDMFRegionAttribute</p><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a69bcbfb344ddb4070284591b8344f31e"><div>
             <h3>

@@ -35,6 +35,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -120,7 +121,7 @@
             <li><a href="#guides-weak-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="guides-weak-intro"><h2><a href="#guides-weak-intro">Introduction</a></h2><p>The <strong>weak formulation</strong> (also called variational formulation) is the foundation of the finite element method. Instead of solving a PDE in its classical (strong) form, we reformulate it in a weaker sense that is more amenable to numerical approximation.</p><p>The general idea is to multiply the PDE by a test function, integrate over the domain, and apply integration by parts. This process:</p><ul><li>Reduces the regularity requirements on the solution</li><li>Naturally incorporates certain boundary conditions</li><li>Leads to a well-posed problem suitable for discretization</li></ul></section><section id="guides-weak-procedure"><h2><a href="#guides-weak-procedure">Derivation Procedure</a></h2><p>Consider a general second-order PDE on a domain <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+<section id="guides-weak-intro"><h2><a href="#guides-weak-intro">Introduction</a></h2><p>The <strong>weak formulation</strong> (also called variational formulation) is the foundation of the finite element method. Instead of solving a PDE in its classical (strong) form, we reformulate it in a weaker sense that is more amenable to numerical approximation.</p><p>The general idea is to multiply the PDE by a test function, integrate over the domain, and apply integration by parts. This process:</p><ul><li>Reduces the regularity requirements on the solution</li><li>Naturally incorporates certain boundary conditions</li><li>Leads to a well-posed problem suitable for discretization</li></ul><p>Rodin writes assembled <code>Problem</code> objects as residual equations with all terms moved to the left-hand side. See <a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a> for the sign convention, structural constraints, quadrature exactness, and nonlinear tangent checks.</p></section><section id="guides-weak-procedure"><h2><a href="#guides-weak-procedure">Derivation Procedure</a></h2><p>Consider a general second-order PDE on a domain <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
 <title>
 $ \Omega $
 </title>
@@ -1147,7 +1148,7 @@ $ F_{\mathrm{int}} $
 
 <span class="n">SparseLU</span><span class="w"> </span><span class="nf">linearSolver</span><span class="p">(</span><span class="n">newton</span><span class="p">);</span>
 <span class="n">NewtonSolver</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">linearSolver</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// updates u in place</span></pre><p>See <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> for the full API.</p></section></section><section id="guides-weak-general"><h2><a href="#guides-weak-general">General Structure</a></h2><p>Most weak formulations in Rodin follow this pattern:</p><div class="m-math"><svg style="width: 21.292em; height: 1.245em;" viewBox="92.069975 -11.955168 204.403097 11.955168">
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// updates u in place</span></pre><p>See <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> for the full API, and <a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a> for residual/tangent consistency checks.</p></section></section><section id="guides-weak-general"><h2><a href="#guides-weak-general">General Structure</a></h2><p>Most weak formulations in Rodin follow this pattern:</p><div class="m-math"><svg style="width: 21.292em; height: 1.245em;" viewBox="92.069975 -11.955168 204.403097 11.955168">
 <title>
 \[
   \text{Find } u \in V \text{ s.t. } \forall v \in V: \quad

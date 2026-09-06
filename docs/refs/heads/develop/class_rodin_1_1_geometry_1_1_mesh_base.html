@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -93,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>MeshBase provides the common interface for all mesh types in Rodin, defining fundamental operations such as:</p><ul><li>Point inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li>Polytope access through iterators</li><li>Mesh I/O operations</li><li>Connectivity queries</li></ul><section id="autotoc_md87"><h2><a href="#autotoc_md87">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li>Mesh&lt;Context::Local&gt;: Sequential (non-distributed) meshes</li><li>SubMesh&lt;Context::Local&gt;: Submeshes representing subregions</li><li>Shard: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md88"><h2><a href="#autotoc_md88">Thread Safety</a></h2><p>MeshBase and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p>Mesh, SubMesh, Shard</p></aside></section>
+<p>MeshBase provides the common interface for all mesh types in Rodin, defining fundamental operations such as:</p><ul><li>Point inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li>Polytope access through iterators</li><li>Mesh I/O operations</li><li>Connectivity queries</li></ul><section id="autotoc_md87"><h2><a href="#autotoc_md87">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md88"><h2><a href="#autotoc_md88">Thread Safety</a></h2><p>MeshBase and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html">SubMesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a></p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">

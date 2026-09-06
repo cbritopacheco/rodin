@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -94,7 +95,7 @@
             </tr>
           </tbody>
         </table>
-<p>Provides the interface for assembling variational forms into discrete linear algebra objects (matrices and vectors). Different specializations handle bilinear forms, linear forms, boundary conditions, and problems.</p>
+<p>Provides the interface for assembling variational forms into discrete linear algebra objects (matrices and vectors). Different specializations handle bilinear forms, linear forms, boundary conditions, and problems.</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;OperatorType, BilinearForm&lt;...&gt;&gt;</a></td><td>Base interface for assembling one bilinear form into one operator.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;OperatorType, Tuple&lt;BilinearForm&lt;...&gt;...&gt;&gt;</a></td><td>Base interface for assembling block/tuple bilinear forms.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;VectorType, LinearForm&lt;...&gt;&gt;</a></td><td>Base interface for assembling one linear form into one vector.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;VectorType, Tuple&lt;LinearForm&lt;...&gt;...&gt;&gt;</a></td><td>Base interface for assembling block/tuple linear forms.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;IndexMap&lt;Scalar&gt;, DirichletBC&lt;TrialFunction, FunctionBase&gt;&gt;</a></td><td>Base interface for scalar Dirichlet elimination maps.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;IndexMap&lt;pair&lt;IndexArray, Vector&gt;&gt;, DirichletBC&lt;TrialFunction, ShapeFunctionBase&gt;&gt;</a></td><td>Base interface for identification-style Dirichlet constraints.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;LinearSystem, Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;&gt;</a></td><td>Base interface for single-field problem assembly.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;LinearSystem, Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;</a></td><td>Base interface for mixed multi-field problem assembly.</td></tr></tbody></table>
       </div>
     </div>
   </div>
