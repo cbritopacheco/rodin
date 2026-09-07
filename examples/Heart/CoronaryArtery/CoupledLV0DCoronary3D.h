@@ -228,15 +228,15 @@ namespace Rodin::Examples::Heart
       struct CarreauYasuda
       {
     /// @brief Low-shear viscosity.
-          Real mu0 = 0.301;
+          Real mu0 = 0.346;
     /// @brief Infinite-shear viscosity.
-          Real muInf = 0.0055;
+          Real muInf = 0.0053;
     /// @brief Relaxation time.
-          Real lambda = 16.15;
+          Real lambda = 17.41;
     /// @brief Power-law index.
-          Real n = 0.21;
+          Real n = 0.22;
     /// @brief Yasuda transition exponent.
-          Real yasuda = 0.77;
+          Real yasuda = 0.69;
     /// @brief Shear-rate regularization used in the 3D viscosity.
           Real gammaRegularization = 1.0e-3;
       };
@@ -488,15 +488,15 @@ namespace Rodin::Examples::Heart
     /// @brief Initial distal pressure.
           Real initialPd = 10000.0;
     /// @brief Low-shear viscosity.
-          Real mu_0 = 0.301;
+          Real mu_0 = 0.346;
     /// @brief Infinite-shear viscosity.
-          Real mu_Inf = 0.0055;
+          Real mu_Inf = 0.0053;
     /// @brief Relaxation time.
-          Real lambda = 16.152;
+          Real lambda = 17.4172;
     /// @brief Power-law index.
-          Real n = 0.21;
+          Real n = 0.22;
     /// @brief Yasuda transition exponent.
-          Real yasuda = 0.77;
+          Real yasuda = 0.69;
     /// @brief Proximal surrogate vessel radius.
           Real proximalRadius = 0.0125;
     /// @brief Proximal surrogate vessel length.
@@ -711,9 +711,9 @@ namespace Rodin::Examples::Heart
           ///          unbounded flux. The model *is* sensitive to this value
           ///          and the systolic/diastolic inflow ratio should be checked
           ///          against it.
-          Real intramyocardialFraction = 0.7;
+          Real intramyocardialFraction = 0.75;
           /// @brief Right atrial (coronary sinus) drainage pressure.
-          Real rightAtrialPressure = 1800.0;
+          Real rightAtrialPressure = 700.0;
 
           /// @brief Operating right atrial pressure of the running 0D outlets
           ///        (Pa). <= 0 means "same as rightAtrialPressure".
@@ -730,7 +730,7 @@ namespace Rodin::Examples::Heart
           ///          The first cycles carry a small transient because the
           ///          calibrated initial p_tm uses the baseline value; discard
           ///          them as usual.
-          Real operatingRightAtrialPressure = 0.0;
+          Real operatingRightAtrialPressure = 2400.0;
 
           /// @brief Freeze the reduced outlet closure at its high-shear
           ///        plateau, giving a CONSTANT outlet resistance.

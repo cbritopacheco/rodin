@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 
     {
       Rodin::Examples::Heart::CoupledLV0DCoronary3D::Config cfg;
-      cfg.meshPath = "../resources/examples/Heart/salida_3d.mesh";
+      cfg.meshPath = "../resources/examples/Heart/coronaria3d.mesh";
       cfg.xdmfBasename = "hyp2/CoronaryArtery";
       cfg.csvPath = "hyp2/CoronaryArtery.csv";
 
