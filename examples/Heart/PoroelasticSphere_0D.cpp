@@ -16,6 +16,7 @@
  */
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <numbers>
 #include <type_traits>
@@ -252,6 +253,10 @@ int main()
   Real Vprev = (4.0 / 3.0) * std::numbers::pi_v<Real> * in.R0 * in.R0 * in.R0;
 
   std::ofstream out("poroelastic_sphere_0d_cycle.csv");
+  // Full precision: the porosity varies by O(1e-2) about phi0, so the default
+  // six significant digits quantize it too coarsely for its discrete rate --
+  // and hence for the fluid mass balance -- to be recovered from the file.
+  out << std::setprecision(12);
   out << "t,y,phi,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat,lambdaBar,pf,Qcor\n";
 
   for (int i = 0; i < nsteps; ++i)
