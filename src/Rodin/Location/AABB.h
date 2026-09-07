@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <limits>
 #include <vector>
+#include <map>
+#include <utility>
 #include <functional>
 
 #include "Rodin/Types.h"
@@ -34,10 +36,19 @@ namespace Rodin::Location
    * a physical residual check, so off-manifold points are rejected and a
    * diverged inversion can never be accepted.
    *
-   * Boxes of curved polytopes are inflated by the sampled chord deviation,
-   * which conservatively bounds quadratic (P2) geometries; for higher-order
-   * transformations the inflation is heuristic and an exhaustive narrow-phase
-   * fallback can be enabled with setExhaustiveFallback().
+   * Boxes bound the whole curved image, not just sampled points on it. The
+   * transformation is resampled on a unisolvent reference lattice and
+   * converted into control points of a non-negative partition of unity
+   * (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra
+   * and wedges, the collapsed-coordinate basis on pyramids), whose extrema
+   * bound the image exactly for every polytope type and order. Degree-one
+   * factors need no conversion: the mapped vertices are already the control
+   * points, so affine and multilinear cells keep the cheap vertex box. Should
+   * a geometry ever fall outside this construction the box degrades to a
+   * heuristic inflation, and an exhaustive narrow-phase fallback can be
+   * enabled with setExhaustiveFallback(). The degree is taken from
+   * PolytopeTransformation::getOrder(), so a transformation that understates
+   * its own order understates its box.
    *
    * Tolerances are relative to the mesh bounding-box diagonal. Queries are
    * thread-safe: the lazy per-dimension build is guarded by a mutex and
@@ -357,6 +368,360 @@ namespace Rodin::Location
         return self;
       }
 
+      /**
+       * @brief Per-factor polynomial degree of a geometry transformation.
+       *
+       * PolytopeTransformation::getOrder() reports the total degree, which on
+       * a tensor-product geometry is the sum over its factors: @f$ 2k @f$ on
+       * quadrilaterals, wedges and pyramids, @f$ 3k @f$ on hexahedra. The
+       * control-point basis is built per factor, so the total is divided by
+       * the number of factors. Rounding up keeps the recovered degree
+       * conservative if a transformation ever reports a total that is not an
+       * exact multiple.
+       */
+      static size_t factorDegree(Geometry::Polytope::Type g, size_t order)
+      {
+        using G = Geometry::Polytope::Type;
+        switch (g)
+        {
+          case G::Point:
+            return 0;
+          case G::Segment:
+          case G::Triangle:
+          case G::Tetrahedron:
+            return order;
+          case G::Quadrilateral:
+          case G::Wedge:
+          case G::Pyramid:
+            return (order + 1) / 2;
+          case G::Hexahedron:
+            return (order + 2) / 3;
+        }
+        assert(false);
+        return order;
+      }
+
+      static Real binomial(size_t n, size_t i)
+      {
+        if (i > n)
+          return 0;
+        if (i > n - i)
+          i = n - i;
+        Real out = 1;
+        for (size_t p = 1; p <= i; ++p)
+        {
+          out *= static_cast<Real>(n + 1 - p);
+          out /= static_cast<Real>(p);
+        }
+        return out;
+      }
+
+      /// @brief Univariate Bernstein polynomial of degree @f$ n @f$ on [0, 1].
+      static Real bernstein(size_t n, size_t i, Real x)
+      {
+        if (i > n)
+          return 0;
+        Real out = binomial(n, i);
+        for (size_t p = 0; p < i; ++p)
+          out *= x;
+        for (size_t p = 0; p < n - i; ++p)
+          out *= Real(1) - x;
+        return out;
+      }
+
+      /// @brief Multinomial coefficient @f$ k! / \prod_i \alpha_i! @f$.
+      static Real multinomial(size_t k, const std::array<size_t, 4>& alpha, size_t count)
+      {
+        Real out = 1;
+        for (size_t p = 2; p <= k; ++p)
+          out *= static_cast<Real>(p);
+        for (size_t i = 0; i < count; ++i)
+        {
+          for (size_t p = 2; p <= alpha[i]; ++p)
+            out /= static_cast<Real>(p);
+        }
+        return out;
+      }
+
+      /**
+       * @brief Bernstein polynomial of degree @f$ k @f$ on the reference
+       * simplex of dimension @p rdim, indexed by a barycentric multi-index.
+       */
+      static Real simplexBernstein(size_t k, const std::array<size_t, 4>& alpha,
+        size_t rdim, const Math::SpatialPoint& r)
+      {
+        Real lambda = 1;
+        for (size_t i = 0; i < rdim; ++i)
+          lambda -= r[static_cast<Eigen::Index>(i)];
+        Real out = multinomial(k, alpha, rdim + 1);
+        for (size_t p = 0; p < alpha[0]; ++p)
+          out *= lambda;
+        for (size_t i = 0; i < rdim; ++i)
+        {
+          for (size_t p = 0; p < alpha[i + 1]; ++p)
+            out *= r[static_cast<Eigen::Index>(i)];
+        }
+        return out;
+      }
+
+      /// @brief Evaluates one control-point basis function of degree @p k.
+      static Real controlBasisValue(Geometry::Polytope::Type g, size_t k,
+        const std::array<size_t, 4>& mode, const Math::SpatialPoint& r)
+      {
+        using G = Geometry::Polytope::Type;
+        switch (g)
+        {
+          case G::Segment:
+            return bernstein(k, mode[0], r.x());
+          case G::Triangle:
+            return simplexBernstein(k, mode, 2, r);
+          case G::Tetrahedron:
+            return simplexBernstein(k, mode, 3, r);
+          case G::Quadrilateral:
+            return bernstein(k, mode[0], r.x()) * bernstein(k, mode[1], r.y());
+          case G::Hexahedron:
+            return bernstein(k, mode[0], r.x()) * bernstein(k, mode[1], r.y())
+              * bernstein(k, mode[2], r.z());
+          case G::Wedge:
+            return simplexBernstein(k, mode, 2, r) * bernstein(k, mode[3], r.z());
+          case G::Pyramid:
+          {
+            // Collapsed coordinates a = x / (1 - z), b = y / (1 - z), as in
+            // the pyramid element itself. The apex layer carries the whole
+            // partition of unity at z = 1.
+            const size_t m = mode[2];
+            const size_t n = k - m;
+            const Real z = r.z();
+            const Real q = Real(1) - z;
+            const Real bz = bernstein(k, m, z);
+            if (n == 0)
+              return bz;
+            if (!(q > std::numeric_limits<Real>::epsilon()))
+              return 0;
+            return bernstein(n, mode[0], r.x() / q)
+              * bernstein(n, mode[1], r.y() / q) * bz;
+          }
+          case G::Point:
+            return 1;
+        }
+        assert(false);
+        return 0;
+      }
+
+      /**
+       * @brief Reference lattice and control-point basis indices of degree
+       * @p k on @p g.
+       *
+       * The lattice is the equispaced (collapsed, on pyramids) node set of
+       * the corresponding finite element, so it is unisolvent for the space
+       * the geometry transformation lives in.
+       */
+      static void makeControlLattice(Geometry::Polytope::Type g, size_t k,
+        std::vector<std::array<size_t, 4>>& modes,
+        std::vector<Math::SpatialPoint>& samples)
+      {
+        using G = Geometry::Polytope::Type;
+        const Real kr = static_cast<Real>(k);
+        const size_t rdim = Geometry::Polytope::Traits(g).getDimension();
+        auto emplace = [&](const std::array<size_t, 4>& mode,
+                          std::initializer_list<Real> coords)
+        {
+          modes.push_back(mode);
+          Math::SpatialPoint r;
+          r.resize(static_cast<Eigen::Index>(rdim));
+          Eigen::Index i = 0;
+          for (Real c : coords)
+            r[i++] = c;
+          assert(i == static_cast<Eigen::Index>(rdim));
+          samples.push_back(std::move(r));
+        };
+
+        switch (g)
+        {
+          case G::Segment:
+          {
+            for (size_t i = 0; i <= k; ++i)
+              emplace({ i, 0, 0, 0 }, { static_cast<Real>(i) / kr });
+            return;
+          }
+          case G::Triangle:
+          {
+            for (size_t a2 = 0; a2 <= k; ++a2)
+            {
+              for (size_t a1 = 0; a1 + a2 <= k; ++a1)
+              {
+                emplace({ k - a1 - a2, a1, a2, 0 },
+                  { static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr });
+              }
+            }
+            return;
+          }
+          case G::Tetrahedron:
+          {
+            for (size_t a3 = 0; a3 <= k; ++a3)
+            {
+              for (size_t a2 = 0; a2 + a3 <= k; ++a2)
+              {
+                for (size_t a1 = 0; a1 + a2 + a3 <= k; ++a1)
+                {
+                  emplace({ k - a1 - a2 - a3, a1, a2, a3 },
+                    { static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr,
+                      static_cast<Real>(a3) / kr });
+                }
+              }
+            }
+            return;
+          }
+          case G::Quadrilateral:
+          {
+            for (size_t j = 0; j <= k; ++j)
+            {
+              for (size_t i = 0; i <= k; ++i)
+              {
+                emplace({ i, j, 0, 0 },
+                  { static_cast<Real>(i) / kr, static_cast<Real>(j) / kr });
+              }
+            }
+            return;
+          }
+          case G::Hexahedron:
+          {
+            for (size_t l = 0; l <= k; ++l)
+            {
+              for (size_t j = 0; j <= k; ++j)
+              {
+                for (size_t i = 0; i <= k; ++i)
+                {
+                  emplace({ i, j, l, 0 },
+                    { static_cast<Real>(i) / kr, static_cast<Real>(j) / kr,
+                      static_cast<Real>(l) / kr });
+                }
+              }
+            }
+            return;
+          }
+          case G::Wedge:
+          {
+            for (size_t m = 0; m <= k; ++m)
+            {
+              for (size_t a2 = 0; a2 <= k; ++a2)
+              {
+                for (size_t a1 = 0; a1 + a2 <= k; ++a1)
+                {
+                  emplace({ k - a1 - a2, a1, a2, m },
+                    { static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr,
+                      static_cast<Real>(m) / kr });
+                }
+              }
+            }
+            return;
+          }
+          case G::Pyramid:
+          {
+            for (size_t m = 0; m <= k; ++m)
+            {
+              const size_t n = k - m;
+              const Real z = static_cast<Real>(m) / kr;
+              const Real q = Real(1) - z;
+              if (n == 0)
+              {
+                emplace({ 0, 0, m, 0 }, { Real(0), Real(0), z });
+                continue;
+              }
+              const Real nr = static_cast<Real>(n);
+              for (size_t j = 0; j <= n; ++j)
+              {
+                for (size_t i = 0; i <= n; ++i)
+                {
+                  emplace({ i, j, m, 0 },
+                    { q * static_cast<Real>(i) / nr, q * static_cast<Real>(j) / nr, z });
+                }
+              }
+            }
+            return;
+          }
+          case G::Point:
+            return;
+        }
+        assert(false);
+      }
+
+      /**
+       * @brief Reference samples and the map taking sampled coordinates to
+       * control points of a geometry transformation.
+       *
+       * The transformation of a polytope of per-factor degree @f$ k @f$ lies
+       * in the span of a basis @f$ \psi_n @f$ that is non-negative and sums
+       * to one on the reference domain: Bernstein polynomials on simplices,
+       * their tensor products on quadrilaterals, hexahedra and wedges, and
+       * the collapsed-coordinate product basis on pyramids. Writing
+       * @f[
+       *   T(r) = \sum_n C_n \, \psi_n(r),
+       * @f]
+       * every mapped point is a convex combination of the control points
+       * @f$ C_n @f$, so their componentwise extrema bound the entire curved
+       * image -- exactly, not heuristically, and for every order.
+       *
+       * The control points are recovered from values sampled on a unisolvent
+       * lattice: @f$ F_m = T(r_m) = \sum_n C_n \psi_n(r_m) @f$ reads
+       * @f$ F = C V^\top @f$ with @f$ V_{mn} = \psi_n(r_m) @f$, so
+       * @f$ C = F (V^{-1})^\top @f$. Only the conversion depends on the
+       * geometry and the degree, so it is built once and shared by every
+       * polytope of that kind.
+       */
+      struct ControlBasis
+      {
+        std::vector<Math::SpatialPoint> samples;
+        Math::Matrix<Real> conversion;
+        bool valid = false;
+      };
+
+      /// @brief Returns the cached control-point basis of degree @p k on @p g.
+      static const ControlBasis& getControlBasis(Geometry::Polytope::Type g, size_t k)
+      {
+        using Key = std::pair<int, size_t>;
+        static std::map<Key, ControlBasis> s_cache;
+        static std::mutex s_mutex;
+
+        const Key key{ static_cast<int>(g), k };
+        std::lock_guard<std::mutex> lock(s_mutex);
+        const auto it = s_cache.find(key);
+        if (it != s_cache.end())
+          return it->second;
+
+        ControlBasis basis;
+        std::vector<std::array<size_t, 4>> modes;
+        makeControlLattice(g, k, modes, basis.samples);
+        const size_t n = modes.size();
+        if (n > 0)
+        {
+          Math::Matrix<Real> vandermonde(n, n);
+          for (size_t m = 0; m < n; ++m)
+          {
+            for (size_t c = 0; c < n; ++c)
+            {
+              vandermonde(m, c) = controlBasisValue(g, k, modes[c], basis.samples[m]);
+            }
+          }
+          const Eigen::FullPivLU<Math::Matrix<Real>> lu(vandermonde);
+          if (lu.isInvertible())
+          {
+            basis.conversion = lu.inverse().transpose();
+            basis.valid = true;
+          }
+        }
+        return s_cache.emplace(key, std::move(basis)).first->second;
+      }
+
+      void padBox(Bound& lo, Bound& hi, Real pad, size_t sdim) const
+      {
+        for (size_t i = 0; i < sdim; ++i)
+        {
+          lo[i] -= pad;
+          hi[i] += pad;
+        }
+      }
+
       void makeBox(const Geometry::Polytope& polytope, Bound& lo, Bound& hi) const
       {
         const auto& mesh = m_mesh.get();
@@ -377,11 +742,11 @@ namespace Rodin::Location
         }
 
         const auto& transformation = polytope.getTransformation();
-        const Geometry::Polytope::Traits traits(polytope.getGeometry());
+        const auto g = polytope.getGeometry();
+        const Geometry::Polytope::Traits traits(g);
         const size_t nv = traits.getVertexCount();
 
         Math::SpatialPoint x;
-        std::vector<Math::SpatialPoint> vertex(nv);
         auto add = [&](const Math::SpatialPoint& p) {
           for (size_t i = 0; i < sdim; ++i)
           {
@@ -390,6 +755,50 @@ namespace Rodin::Location
           }
         };
 
+        // Degree one per factor: the control-point basis is the vertex
+        // partition of unity itself -- barycentric on a simplex, multilinear
+        // on a tensor geometry -- so the mapped vertices are the control
+        // points and their box already bounds the image. Affine cells stay
+        // on this path and pay nothing for the curved machinery.
+        const size_t degree = factorDegree(g, transformation.getOrder());
+        if (degree <= 1)
+        {
+          for (size_t i = 0; i < nv; ++i)
+          {
+            transformation.transform(x, traits.getVertex(i));
+            add(x);
+          }
+          padBox(lo, hi, physTol, sdim);
+          return;
+        }
+
+        const ControlBasis& basis = getControlBasis(g, degree);
+        if (basis.valid)
+        {
+          const size_t n = basis.samples.size();
+          Math::Matrix<Real> sampled(sdim, n);
+          for (size_t m = 0; m < n; ++m)
+          {
+            transformation.transform(x, basis.samples[m]);
+            for (size_t i = 0; i < sdim; ++i)
+              sampled(i, m) = x[static_cast<Eigen::Index>(i)];
+          }
+          const Math::Matrix<Real> control = sampled * basis.conversion;
+          for (size_t i = 0; i < sdim; ++i)
+          {
+            lo[i] = control.row(static_cast<Eigen::Index>(i)).minCoeff();
+            hi[i] = control.row(static_cast<Eigen::Index>(i)).maxCoeff();
+          }
+          padBox(lo, hi, physTol, sdim);
+          return;
+        }
+
+        // No conservative basis available for this geometry and degree: fall
+        // back to sampled vertices, centroid and edge midpoints inflated by
+        // the largest chord deviation. This bounds quadratic geometries and
+        // is heuristic beyond them, which is what setExhaustiveFallback()
+        // exists for.
+        std::vector<Math::SpatialPoint> vertex(nv);
         for (size_t i = 0; i < nv; ++i)
         {
           transformation.transform(vertex[i], traits.getVertex(i));
@@ -398,11 +807,6 @@ namespace Rodin::Location
         transformation.transform(x, traits.getCentroid());
         add(x);
 
-        // Chord-deviation inflation: for each vertex pair, the deviation of
-        // the mapped reference midpoint from the straight chord midpoint. For
-        // quadratic geometry the image of an edge is a parabola contained in
-        // the convex hull of its Bezier control points, and inflating by the
-        // sampled deviation bounds that hull. Affine maps contribute zero.
         Real deviation = 0;
         for (size_t i = 0; i < nv; ++i)
         {
@@ -416,12 +820,7 @@ namespace Rodin::Location
           }
         }
 
-        const Real pad = physTol + deviation;
-        for (size_t i = 0; i < sdim; ++i)
-        {
-          lo[i] -= pad;
-          hi[i] += pad;
-        }
+        padBox(lo, hi, physTol + deviation, sdim);
       }
 
       bool boxContains(
