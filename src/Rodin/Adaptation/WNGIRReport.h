@@ -98,24 +98,11 @@ namespace Rodin::Adaptation
       const char* exitReason = "iter-budget";
       // Wall-clock breakdown (seconds, accumulated over iterations).
       Real tAssembly = 0; ///< WNGIR variational problem assembly.
-      Real tAssemblyPredictor =
-        0; ///< Assembly of the predictor body: bulk, observation and surface force.
-      Real tAssemblyInner =
-        0; ///< Assembly inside the barrier corrections: predictor terms plus barrier.
       Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
       Real tBulk = 0; ///< One-time constant bulk metric assembly.
       Real tFactor = 0; ///< CG setup/preconditioner.
       Real tSolve = 0; ///< CG iterations.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
-      Real tValidation = 0; ///< Nonlinear geometry scans, including initial state.
-      Real tSurface = 0; ///< Surface energy/residual evaluations, including initial state.
-      Real tBarrierScale = 0; ///< Affine feasibility scans for predictor and corrections.
-      Real tRigidDiagnostics = 0; ///< Initial and final rigid-observation diagnostics.
-      Real tForceAction = 0; ///< Surface first-variation actions.
-      Real tTotal = 0; ///< Complete solve, excluding construction of the solver.
-      std::size_t validationCalls = 0;
-      std::size_t surfaceCalls = 0;
-      std::size_t barrierScaleCalls = 0;
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
       Real linearError = 0; ///< Last linear solver residual/error estimate.
   };

@@ -226,7 +226,6 @@ namespace Rodin::Adaptation
           return std::chrono::duration<Real>(Clock::now() - t0).count();
         };
         auto setupTic = Clock::now();
-        const auto solveTic = setupTic;
 
         // ============================================================
         // Per-frame geometry tabulation (only u changes per iteration).
@@ -304,28 +303,11 @@ namespace Rodin::Adaptation
         // ============================================================
         using FastAdm = AdmissibilityState;
         auto fastAdmissibility = [&](const Displacement& gf) {
-          const auto start = Clock::now();
-          const auto result = getAdmissibilityState(mesh, fes, validationCells, gf, meshDim);
-          rep.tValidation += secondsSince(start);
-          ++rep.validationCalls;
-          return result;
+          return getAdmissibilityState(mesh, fes, validationCells, gf, meshDim);
         };
         auto surfaceState = [&](const Displacement& gf) {
-          const auto start = Clock::now();
-          const auto result = getSurfaceState(mesh, fes, gf, phi, interfaceFacets, loss,
+          return getSurfaceState(mesh, fes, gf, phi, interfaceFacets, loss,
             dataNormalization, meshDim, locator);
-          rep.tSurface += secondsSince(start);
-          ++rep.surfaceCalls;
-          return result;
-        };
-        auto barrierStepScale = [&](const Displacement& increment,
-                                  const Displacement& direction) {
-          const auto start = Clock::now();
-          const Real result = getBarrierStepScale(
-            mesh, fes, validationCells, u, increment, direction, meshDim);
-          rep.tBarrierScale += secondsSince(start);
-          ++rep.barrierScaleCalls;
-          return result;
         };
         auto recordSurfaceState = [&rep](const SurfaceState& state) {
           rep.energy = state.energy;
@@ -335,14 +317,6 @@ namespace Rodin::Adaptation
           rep.interfaceMeasure = state.totalLen;
           rep.activeFraction =
             state.totalLen > Real(0) ? state.activeLen / state.totalLen : Real(0);
-        };
-
-        auto surfaceForceAction = [&](const Displacement& direction) {
-          const auto start = Clock::now();
-          const Real result = getSurfaceForceAction(mesh, fes, u, direction, phi, grad,
-            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-          rep.tForceAction += secondsSince(start);
-          return result;
         };
 
         rep.tSetup = secondsSince(setupTic);
@@ -407,10 +381,8 @@ namespace Rodin::Adaptation
         recordSurfaceState(currentSurface);
         if (p.rigidDiagnostics)
         {
-          auto rigidTic = Clock::now();
           const RigidModeState initialRigid = getRigidModeState(mesh, fes, u, phi, grad,
             interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-          rep.tRigidDiagnostics += secondsSince(rigidTic);
           rep.rigidModeCoercivity = initialRigid.minimum;
           rep.rigidModeCoercivityRatio = initialRigid.ratio;
           rep.rigidModeDimension = initialRigid.dimension;
@@ -456,11 +428,7 @@ namespace Rodin::Adaptation
           predictorBody = predictorBody + m_obsForm - m_surfaceForm;
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
-          {
-            const Real elapsed = secondsSince(tic);
-            rep.tAssembly += elapsed;
-            rep.tAssemblyPredictor += elapsed;
-          }
+          rep.tAssembly += secondsSince(tic);
 
           tic = Clock::now();
           std::size_t predictorIterations = 0;
@@ -477,7 +445,8 @@ namespace Rodin::Adaptation
 
           predictor = vK;
           predictorAction = std::max(Real(0),
-            surfaceForceAction(predictor));
+            getSurfaceForceAction(mesh, fes, u, predictor, phi, grad, interfaceFacets,
+              sigma2, dataNormalization, meshDim, locator));
           rep.stationarityNorm = std::sqrt(predictorAction);
 
           {
@@ -489,7 +458,7 @@ namespace Rodin::Adaptation
 
             uTrial *= Real(0);
             const Real predictorAlpha =
-              barrierStepScale(uTrial, vK);
+              getBarrierStepScale(mesh, fes, validationCells, u, uTrial, vK, meshDim);
             if (!(predictorAlpha > Real(0)))
             {
               solveOk = false;
@@ -516,11 +485,7 @@ namespace Rodin::Adaptation
                 body = body + m_obsForm + barrierMetric - m_surfaceForm - barrierForce;
                 m_stepProblem = body;
                 m_stepProblem.assemble();
-                {
-                  const Real elapsed = secondsSince(tic);
-                  rep.tAssembly += elapsed;
-                  rep.tAssemblyInner += elapsed;
-                }
+                rep.tAssembly += secondsSince(tic);
 
                 tic = Clock::now();
                 std::size_t barrierIterations = 0;
@@ -543,7 +508,8 @@ namespace Rodin::Adaptation
                 rep.primalBarrierRelativeCorrection = relativeCorrection;
                 ++rep.primalBarrierIterations;
                 ++rep.lastPrimalBarrierIterations;
-                const Real innerAlpha = barrierStepScale(vK, scratch);
+                const Real innerAlpha = getBarrierStepScale(
+                  mesh, fes, validationCells, u, vK, scratch, meshDim);
                 if (!(innerAlpha > Real(0)))
                 {
                   solveOk = false;
@@ -582,7 +548,8 @@ namespace Rodin::Adaptation
             break;
           }
 
-          Real directionAction = surfaceForceAction(vK);
+          Real directionAction = getSurfaceForceAction(mesh, fes, u, vK, phi, grad,
+            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
           const Real predictorNorm =
             std::max(std::abs(predictor.max()), std::abs(predictor.min()));
           Real directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
@@ -597,14 +564,15 @@ namespace Rodin::Adaptation
             vK = predictor;
             uTrial *= Real(0);
             const Real predictorAlpha =
-              barrierStepScale(uTrial, vK);
+              getBarrierStepScale(mesh, fes, validationCells, u, uTrial, vK, meshDim);
             if (!(predictorAlpha > Real(0)))
             {
               rep.exitReason = "descent-fallback-not-feasible";
               break;
             }
             vK *= predictorAlpha;
-            directionAction = surfaceForceAction(vK);
+            directionAction = getSurfaceForceAction(mesh, fes, u, vK, phi, grad,
+              interfaceFacets, sigma2, dataNormalization, meshDim, locator);
             directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
           }
           rep.directionAction = directionAction;
@@ -790,16 +758,13 @@ namespace Rodin::Adaptation
 
         if (p.rigidDiagnostics)
         {
-          auto rigidTic = Clock::now();
           const RigidModeState finalRigid = getRigidModeState(mesh, fes, u, phi, grad,
             interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-          rep.tRigidDiagnostics += secondsSince(rigidTic);
           rep.rigidModeCoercivity = finalRigid.minimum;
           rep.rigidModeCoercivityRatio = finalRigid.ratio;
           rep.rigidModeDimension = finalRigid.dimension;
         }
 
-        rep.tTotal = secondsSince(solveTic);
         m_report = rep;
         return rep;
       }

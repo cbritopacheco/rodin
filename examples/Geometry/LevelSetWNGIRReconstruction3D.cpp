@@ -599,20 +599,7 @@ int main(int argc, char** argv)
     effectiveFitTol = wngirRep.effectiveTauRms;
     std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
               << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
-              << " (predictor=" << wngirRep.tAssemblyPredictor
-              << " inner=" << wngirRep.tAssemblyInner << ")"
-              << "  geometrySetup=" << wngirRep.tSetup
-              << "  bulk=" << wngirRep.tBulk << "  solve=" << wngirRep.tSolve
-              << "  affineChecks=" << wngirRep.tBarrierScale
-              << "  affineCalls=" << wngirRep.barrierScaleCalls
-              << "  validation=" << wngirRep.tValidation
-              << "  validationCalls=" << wngirRep.validationCalls
-              << "  surface=" << wngirRep.tSurface
-              << "  surfaceCalls=" << wngirRep.surfaceCalls
-              << "  innerIt=" << wngirRep.primalBarrierIterations
-              << "  rigidDiagnostics=" << wngirRep.tRigidDiagnostics
-              << "  forceAction=" << wngirRep.tForceAction
-              << "  total=" << wngirRep.tTotal
+              << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
               << "  cgIt=" << wngirRep.linearIterations
               << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
               << "  exit=" << wngirRep.exitReason << '\n';
