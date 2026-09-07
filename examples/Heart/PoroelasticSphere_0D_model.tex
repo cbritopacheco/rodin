@@ -1,0 +1,377 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,bm}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\hypersetup{colorlinks,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black}
+
+\newcommand{\bF}{\mathbf F}
+\newcommand{\bP}{\mathbf P}
+\newcommand{\bI}{\mathbf I}
+\newcommand{\be}{\mathbf e}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\Rin}{R_{in}}
+\newcommand{\Rout}{R_{out}}
+\newcommand{\rin}{r_{in}}
+\newcommand{\lt}{\lambda_\theta}
+\newcommand{\lr}{\lambda_r}
+\newcommand{\lb}{\bar\lambda}
+\newcommand{\pf}{\tilde p}
+\newcommand{\Vw}{V_{w0}}
+\newcommand{\sig}{\sigma_{1D}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{The 0D Solid-Incompressible Poroelastic Sphere:\\ Complete Model, Time Discretization and a Step-by-Step Guide}
+\author{}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note collects, in one place, the complete lumped (0D) model of the left ventricle as a thick-walled, solid-incompressible poroelastic sphere, exactly as it is implemented in Rodin (\code{src/Rodin/Heart/PoroelasticSphere}). Part~I explains the model in plain terms; Part~II states every equation; Part~III gives the time discretization, the Newton linearization and the quadrature; Part~IV lists the consistency checks. The reduction follows the variationally consistent construction of the companion note (uniform Lagrangian porosity, exact pointwise incompressibility, Galerkin projection on the tangent fields of the constraint manifold), and the constitutive, active, valve and circulation laws are those of the CCMLC2014 reduced model (Caruel et al., \emph{Biomech.\ Model.\ Mechanobiol.} 2014), so that both models share one parameter set and the new model reduces to the old one in the membrane limit.
+\end{abstract}
+
+\tableofcontents
+
+%======================================================================
+\part{The model in words}
+%======================================================================
+
+\section{What is being modeled}
+
+The ventricle is a spherical shell of muscle. In the reference (unloaded) configuration the cavity has radius $\Rin$ and the wall extends to $\Rout=\Rin+d_0$. The wall is a \emph{porous} solid: a fraction of its volume is blood contained in the coronary microvasculature. Three things happen simultaneously during a heartbeat, and the model has one group of unknowns for each.
+
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{The wall deforms.} Blood enters and leaves the cavity, and the muscle contracts. Because the tissue is incompressible, the whole motion of the wall is fixed by a single number: the endocardial radius $\rin(t)$ (or equivalently the cavity volume $V=\tfrac{4\pi}{3}\rin^3$). We write $\rin=\Rin+y$ and use the displacement $y$ as the unknown.
+\item \textbf{The wall is perfused.} Blood flows into the microvasculature from the coronary arteries and out through the veins. The amount of blood stored in the wall is the \emph{Lagrangian porosity} $\Phi(t)$: fluid volume per unit reference volume of tissue. When $\Phi$ increases the wall swells (its volume ratio is $J=1-\phi_0+\Phi$, with $\phi_0$ the resting porosity), and when the muscle squeezes, the interstitial pressure $\pf$ rises and blood is pushed out --- the well-known \emph{systolic impediment} of coronary flow.
+\item \textbf{The muscle is activated.} The contractile state is described by the Bestel--Cl\'ement--Sorine variables of CCMLC2014: the contractile deformation $e_c$, the active stiffness $k_c$, the active stress $\tau_c$ and the load-dependent relaxation factor $w$, driven by an electrical activation function $u(t)$.
+\item \textbf{The circulation responds.} The cavity pressure $p_v$ is set by the valves (mitral inflow from a prescribed atrial pressure $p_{at}(t)$, aortic outflow when $p_v$ exceeds the arterial pressure), and the arterial side is a two-compartment Windkessel with pressures $p_{ar}$ and $p_d$.
+\end{enumerate}
+
+\section{The key idea of the reduction}
+
+A thick incompressible sphere that moves radially has an explicit deformation once the inner radius and the volume ratio $J$ are known: every material shell of reference radius $R$ moves to
+\[
+r^3(R)=\rin^3+J\,(R^3-\Rin^3).
+\]
+Assuming the porosity is uniform across the wall, $J$ is uniform, this formula is exact, and the entire kinematics is parametrized by the pair $(\rin,\Phi)$. Nothing else is assumed.
+
+The momentum balance is then tested with the two ``directions'' in which the state can move (variations of $\rin$ and of $\Phi$), which are the radial velocity fields
+\begin{gather*}
+v_1=\frac{\rin^2}{r^2}\quad(\text{cavity inflates, wall volume fixed}),\\
+v_2=\frac{R^3-\Rin^3}{3r^2}\quad(\text{wall swells, endocardium fixed}).
+\end{gather*}
+Because these motions never violate the incompressibility constraint, the Lagrange multiplier $\lambda$ that enforces it (the ``hydrostatic reaction'' of the solid) does no work in the first projection and appears only as its wall average $\lb$ in the second. This gives:
+\begin{itemize}[leftmargin=2em]
+\item from $v_1$: a \emph{pressure--volume law} $p_v=P_v(\rin,\Phi,\dots)$ --- the cavity pressure the wall can sustain, obtained by integrating the stresses across the thickness;
+\item from $v_2$: the \emph{average multiplier} $\lb$, which is (minus) the mean radial mechanical stress plus a transmural correction. It is what the fluid feels: the interstitial pressure is $\pf=\Psi_P'(\Phi)-\lb$.
+\end{itemize}
+The classical thin-shell model closes the problem by declaring $\sigma_{rr}=0$ everywhere; here $\lb$ is \emph{computed} from equilibrium instead, and the model stays valid for thick walls. In the limit of a thin wall it reduces exactly to the CCMLC2014 law.
+
+\section{One heartbeat, step by step}
+
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Diastolic filling.} $u(t)=0$, the active stress decays. The atrial pressure exceeds $p_v$, the mitral valve is open and the cavity fills: $\dot V=4\pi\rin^2\dot y>0$. The wall is stretched (hoop stretch $\lt>1$, largest at the endocardium) and the exponential passive law builds up $P_v$ to match $p_v$. The multiplier $\lb$ is small, $\pf$ is low, and the coronary inflow $\gamma_{ar}(p_{ar}-\pf)$ is at its maximum: the wall fills with blood, $\Phi$ rises, $J$ rises slightly.
+\item \textbf{Isovolumic contraction.} $u(t)>0$: $k_c$ and $\tau_c$ grow, the series element develops the fiber stress $\sig$. Both valves are closed, so $\dot V\approx 0$ (only the tiny cavity capacity term) and $p_v$ rises steeply until it reaches $p_{ar}$. The contraction compresses the wall radially: $\lb$ becomes strongly negative, $\pf$ rises above $p_{ar}$, coronary inflow stops or reverses and venous outflow surges --- systolic impediment.
+\item \textbf{Ejection.} The aortic path opens, $\dot V<0$, the Windkessel is charged ($p_{ar}$ rises). The active stress does work; the passive stress relaxes as $\lt$ decreases. Perfusion stays impeded while $\lb<0$.
+\item \textbf{Relaxation.} $u(t)<0$ accelerates the decay of $k_c,\tau_c$ (modulated by $w$). $p_v$ falls, the aortic path closes, the Windkessel discharges through $R_p,R_d$ into the venous pressure $p_{sv}$. $\lb\to 0$, $\pf$ drops, coronary inflow resumes with the characteristic diastolic peak, and the cycle repeats.
+\end{enumerate}
+At every instant the nine unknowns $(y,\Phi,p_v,p_{ar},p_d,e_c,k_c,\tau_c,w)$ are found together from nine equations by Newton's method; $\lb$ and $\pf$ are explicit by-products.
+
+%======================================================================
+\part{The complete continuous model}
+%======================================================================
+
+\section{Geometry, kinematics and incompressibility}
+
+Reference wall $R\in[\Rin,\Rout]$, radial motion $r=r(R,t)$,
+\begin{equation}
+\bF=\mathrm{diag}(\lr,\lt,\lt),\qquad \lt=\frac rR,\qquad \lr=r'(R),\qquad J=\det\bF=\lr\lt^2 .
+\end{equation}
+The solid phase is incompressible: with Lagrangian porosity $\Phi$ and reference porosity $\phi_0$,
+\begin{equation}
+J-\Phi=1-\phi_0 .
+\label{eq:constraint}
+\end{equation}
+\textbf{Reduction assumption (the only one):} $\Phi=\Phi(t)$ is uniform across the wall. Then $J(t)=1-\phi_0+\Phi(t)$ is uniform and \eqref{eq:constraint} integrates exactly:
+\begin{equation}
+\boxed{\;r^3(R,t)=\rin^3(t)+J(t)\,\big(R^3-\Rin^3\big),\qquad \lt=\frac rR,\qquad \lr=\frac{J}{\lt^2}\;}
+\label{eq:kin}
+\end{equation}
+with $\rin=\Rin+y$. The state of the wall is $(y,\Phi)$. The tangent fields and their radial derivatives are
+\begin{equation}
+v_1=\frac{\rin^2}{r^2},\quad v_2=\frac{R^3-\Rin^3}{3r^2},\qquad
+v_1'=-\frac{2\lr v_1}{r},\quad v_2'=\frac{R^2}{r^2}-\frac{2\lr v_2}{r},
+\label{eq:tangent}
+\end{equation}
+and the material rates follow from $\dot r=v_1\dot y+v_2\dot\Phi$:
+\begin{equation}
+\dot\lt=\frac{\dot r}{R},\qquad \dot\lr=\frac{\dot\Phi}{\lt^2}-\frac{2J\dot\lt}{\lt^3}.
+\label{eq:rates}
+\end{equation}
+
+\section{Stresses: the first Piola--Kirchhoff components}
+
+All wall equations are written in terms of the raw Piola components $P_{RR}$ and $P_{\theta\theta}=P_{\varphi\varphi}$ of the \emph{mechanical} stress (passive + viscous + active), evaluated along \eqref{eq:kin}. The multiplier part $\lambda J\bF^{-T}$ is never needed.
+
+\paragraph{Passive.} The CCMLC2014 reduced-invariant energy $W(J_1,J_2,J_4)$ is evaluated on the radial deformation $\bF=\mathrm{diag}(\lr,\lt,\lt)$, using the isochoric invariants and the in-plane fiber invariant
+\begin{equation}
+\begin{gathered}
+J_1=I_1J^{-2/3}=\lr^{4/3}\lt^{-4/3}+2\lr^{-2/3}\lt^{2/3},\\
+J_2=I_2J^{-4/3}=2\lr^{2/3}\lt^{-2/3}+\lr^{-4/3}\lt^{4/3},\qquad J_4=\lt^2 ,
+\end{gathered}
+\end{equation}
+(at $J=1$ these are the CCMLC2014 invariants $J_1=2C+C^{-2}$, $J_2=C^2+2C^{-1}$, $J_4=C$, $C=\lt^2$). With $\widehat W(\lr,\lt)=W(J_1,J_2,J_4)$,
+\begin{equation}
+\begin{gathered}
+P_{RR}^{pas}=\partial_{\lr}\widehat W=W_{,1}\partial_{\lr}J_1+W_{,2}\partial_{\lr}J_2,\\
+P_{\theta\theta}^{pas}=\tfrac12\partial_{\lt}\widehat W=\tfrac12\big(W_{,1}\partial_{\lt}J_1+W_{,2}\partial_{\lt}J_2+2\lt W_{,4}\big).
+\end{gathered}
+\end{equation}
+The default law is $W=\mu_1J_1+\mu_2J_2+C_0e^{C_1(J_1-3)^2}+C_2e^{C_3(J_4-1)^2}$ (\code{HolzapfelReducedLaw}). The volumetric response is carried by the constraint, not by $W$.
+
+\paragraph{Viscous.} $\bm\Sigma^{v}=\eta\,\dot{\mathbf e}$ (second Piola--Kirchhoff), i.e.
+\begin{equation}
+P_{RR}^{v}=\eta\lr^2\dot\lr,\qquad P_{\theta\theta}^{v}=\eta\lt^2\dot\lt .
+\end{equation}
+
+\paragraph{Active.} The CCMLC2014 series-element fiber stress $\sig$ acts along in-plane fibers; averaging $\mathbf f\otimes\mathbf f$ uniformly over in-plane orientations,
+\begin{equation}
+\bm\Sigma^{act}=\tfrac12\sig\,(\bI-\be_R\otimes\be_R)\quad\Longrightarrow\quad
+P_{RR}^{act}=0,\qquad P_{\theta\theta}^{act}=\tfrac12\sig\lt .
+\end{equation}
+The wall has a single contractile unit, evaluated at the mid-wall hoop strain $e=\tfrac12(\lt^2(R_m)-1)$, $R_m=\tfrac12(\Rin+\Rout)$:
+\begin{equation}
+\sig=\frac{E_s\,(e-e_c)}{(1+2e_c)^2}.
+\label{eq:sigma1d}
+\end{equation}
+Total: $P_{RR}=P^{pas}_{RR}+P^{v}_{RR}$, $P_{\theta\theta}=P^{pas}_{\theta\theta}+P^{v}_{\theta\theta}+\tfrac12\sig\lt$.
+
+\section{Wall equilibrium: the two projections}
+
+\paragraph{Projection on $v_1$ --- pressure--volume law.} The multiplier cancels identically and
+\begin{equation}
+\boxed{\;P_v(y,\Phi,\dot y,\dot\Phi,e_c)=\frac1{\rin^2}\int_{\Rin}^{\Rout}\Big[P_{RR}\,v_1'+2P_{\theta\theta}\frac{v_1}{R}\Big]R^2\,\dd R\;}
+\label{eq:pv}
+\end{equation}
+is the cavity pressure sustained by the wall. It is the exact first integral $P_v=\int_{\rin}^{r_{out}}2(\sigma_{\theta\theta}-\sigma_{rr})\,\dd r/r$ of radial equilibrium and, for a hyperelastic passive law with the active stress above,
+\[
+P_v=\int_{\lambda_{out}}^{\lambda_{in}}\frac{\widehat w'(\lt;J)}{\lt^3-J}\,\dd\lt+\text{(viscous, active)},\qquad \widehat w(\lt;J)=\widehat W\!\big(J/\lt^2,\lt\big).
+\]
+\paragraph{Projection on $v_2$ --- averaged multiplier.} The external work vanishes ($v_2(\Rin)=0$, free epicardium) and $\lb$ pairs with $\delta J|_{v_2}=1$:
+\begin{equation}
+\boxed{\;\lb=-\frac{3}{\Rout^3-\Rin^3}\int_{\Rin}^{\Rout}\Big[P_{RR}\,v_2'+2P_{\theta\theta}\frac{v_2}{R}\Big]R^2\,\dd R\;}
+\label{eq:lambda}
+\end{equation}
+Equivalently $\lb=-\langle\sigma_{M,rr}\rangle_{\Omega_0}-\frac1{\Vw}\int_{\Omega_t}2(\sigma_{M,\theta\theta}-\sigma_{M,rr})\frac{v_2}{r}\,\dd v$: the Caruel closure $\lambda=-\sigma_{M,rr}$ is its leading term, and $\lb$ coincides with the reference-volume average of the pointwise multiplier recovered from radial equilibrium.
+
+\section{Fluid balance and perfusion}
+
+The interstitial pressure and the lumped two-resistor coronary source are
+\begin{equation}
+\pf=\Psi_P'(\Phi)-\lb=K_\Phi(\Phi-\phi_0)-\lb,\qquad
+Q_{in}=\gamma_{ar}\,(p_{ar}-\pf),\qquad Q_{out}=\gamma_{ven}\,(\pf-p_{sv}),
+\end{equation}
+with $\Psi_P=\tfrac12K_\Phi(\Phi-\phi_0)^2$ a fluid storage (vascular compliance) term, $K_\Phi=0$ giving the pure Terzaghi case $\pf=-\lb$. Testing the mass balance with $\Phi^*=1$ (uniform $\pf$, Darcy term inert):
+\begin{equation}
+\boxed{\;\Vw\,\dot\Phi=Q_{in}-Q_{out},\qquad \Vw=\tfrac{4\pi}{3}\big(\Rout^3-\Rin^3\big).\;}
+\label{eq:fluid}
+\end{equation}
+The inflow $Q_{in}$ is drawn from the proximal arterial compartment so that fluid is conserved.
+
+\section{Active law (Bestel--Cl\'ement--Sorine, as in CCMLC2014)}
+
+With $u(t)$ the activation, $|u|_\pm$ its positive/negative parts, $n_0(e_c)$ the piecewise-linear recruitment function and $m_0(e_c)$ the relaxation target,
+\begin{align}
+(\tau_c+\mu\dot e_c)(1+2e_c)^3&=E_s\,(e-e_c)(1+2e), \label{eq:ec}\\
+\dot k_c&=-\big(|u|_++w|u|_-+\alpha|\dot e_c|\big)k_c+n_0(e_c)\,k_0\,|u|_+, \label{eq:kc}\\
+\dot\tau_c&=-\big(|u|_++w|u|_-+\alpha|\dot e_c|\big)\tau_c+k_c\dot e_c+n_0(e_c)\,\sigma_0\,|u|_+, \label{eq:tauc}\\
+\alpha_r\dot w&=m_0(e_c)-w . \label{eq:w}
+\end{align}
+($|\dot e_c|$ is regularized as $\sqrt{\dot e_c^2+\varepsilon^2}$; $\gamma=\sqrt{k_c}$, $\beta=\tau_c/\gamma$ are reported.)
+
+\section{Cavity and circulation (as in CCMLC2014)}
+
+\begin{align}
+C_{cav}\,\dot p_v+q_{valve}(p_v,p_{ar},p_{at})+4\pi\rin^2\dot y&=0, \label{eq:cavity}\\
+C_p\,\dot p_{ar}+q_p(p_{ar}-p_d)-Q_{ar}^+(p_v,p_{ar})+Q_{in}&=0, \label{eq:par}\\
+C_d\,\dot p_d-q_p(p_{ar}-p_d)-q_d(p_{sv}-p_d)&=0, \label{eq:pd}
+\end{align}
+where
+\[
+q_{valve}=\begin{cases}K_{at}(p_v-p_{at}) & p_v\le p_{at}\quad\text{(mitral open)}\\ K_p(p_v-p_{at}) & p_{at}\le p_v\le p_{ar}\quad\text{(both closed)}\\ K_{ar}(p_v-p_{ar})+K_p(p_{ar}-p_{at}) & p_v>p_{ar}\quad\text{(aortic open)}\end{cases}
+\]
+\[
+Q_{ar}^+=\max\big(0,K_{ar}(p_v-p_{ar})\big),
+\]
+and the branch flows $q_p,q_d$ are the Poiseuille law $\Delta p/R$ or the non-Newtonian tube-flow laws (Cross, Carreau--Yasuda, power law, Quemada) of the CCMLC2014 Windkessel.
+
+\section{The complete 0D model}
+
+\begin{tcolorbox}[breakable,title=State and equations]
+\textbf{Unknowns:} $\mathbf q=(y,\Phi,p_v,p_{ar},p_d,e_c,k_c,\tau_c,w)$; \textbf{explicit outputs:} $\lb$, $\pf$, $J$, $V=\tfrac{4\pi}{3}(\Rin+y)^3$.\\[2pt]
+\textbf{Kinematics (exact):} \eqref{eq:kin}--\eqref{eq:rates}.\\
+\textbf{Wall equilibrium (algebraic in $y$ if $\eta=0$):} $\;P_v(y,\Phi,\dot y,\dot\Phi,e_c)-p_v=0$ \hfill \eqref{eq:pv}\\
+\textbf{Multiplier and interstitial pressure (explicit):} $\;\lb$ from \eqref{eq:lambda}, $\;\pf=K_\Phi(\Phi-\phi_0)-\lb$\\
+\textbf{Fluid mass (ODE):} $\;\dot\Phi=\big[\gamma_{ar}(p_{ar}-\pf)-\gamma_{ven}(\pf-p_{sv})\big]/\Vw$ \hfill \eqref{eq:fluid}\\
+\textbf{Cavity and Windkessel:} \eqref{eq:cavity}--\eqref{eq:pd}\\
+\textbf{Active law:} \eqref{eq:ec}--\eqref{eq:w}\\[2pt]
+\textbf{Inputs:} $u(t)$, $p_{at}(t)$, $p_{sv}(t)$. \textbf{Geometry:} $\Rin$, $d_0$, $\phi_0$. \textbf{Wall:} $W$, $\eta$, $K_\Phi$, $\gamma_{ar}$, $\gamma_{ven}$. \textbf{Active:} $E_s,\mu,\alpha,\alpha_r,k_0,\sigma_0$. \textbf{Circulation:} $K_{at},K_p,K_{ar},C_{cav},C_p,C_d,R_p,R_d$ (+ rheology).
+\end{tcolorbox}
+
+This is a differential--algebraic system: eight ODEs (all but the wall equilibrium) and one scalar algebraic equation, plus two explicit evaluations.
+
+%======================================================================
+\part{Time discretization and solution}
+%======================================================================
+
+\section{Implicit time stepping}
+
+All rates are replaced by the same backward-difference formula, evaluated fully implicitly at $t_{n+1}$. With the step $\Delta t$ and any unknown $q$,
+\begin{equation}
+\dot q^{\,n+1}\approx a_0\,q^{n+1}+a_1\,q^{n}+a_2\,q^{n-1},\qquad
+(a_0,a_1,a_2)=\begin{cases}
+\big(\tfrac1{\Delta t},\,-\tfrac1{\Delta t},\,0\big) & \text{BE},\\[3pt]
+\big(\tfrac{3}{2\Delta t},\,-\tfrac{2}{\Delta t},\,\tfrac{1}{2\Delta t}\big) & \text{BDF2},
+\end{cases}
+\end{equation}
+BE is used for the first step (and throughout if \code{TimeScheme::BackwardEuler} is selected), BDF2 from the second step on. The scheme is L-stable, which matters because the valve and activation switches make the system stiff. The material rates $\dot\lt,\dot\lr$ inside the wall integrals are obtained from $\dot y^{\,n+1},\dot\Phi^{\,n+1}$ through \eqref{eq:rates}, so the viscous stress is implicit as well. Everything --- valve regime, Windkessel flows, active rates --- is evaluated at $t_{n+1}$.
+
+\section{The discrete residual}
+
+Writing $\mathbf x=\mathbf q^{n+1}$ and $D(q)=a_0q^{n+1}+a_1q^n+a_2q^{n-1}$, the nine residuals are
+\begin{align}
+\mathcal R_1&=P_v\big(y,\Phi,D(y),D(\Phi),e_c\big)-p_v, \\
+\mathcal R_2&=D(\Phi)-\big[\gamma_{ar}(p_{ar}-\pf)-\gamma_{ven}(\pf-p_{sv})\big]/\Vw,\\
+\mathcal R_3&=C_{cav}D(p_v)+q_{valve}+4\pi\rin^2D(y),\\
+\mathcal R_4&=C_pD(p_{ar})+q_p-Q_{ar}^++\gamma_{ar}(p_{ar}-\pf),\\
+\mathcal R_5&=C_dD(p_d)-q_p-q_d,\\
+\mathcal R_6&=\big(\tau_c+\mu D(e_c)\big)(1+2e_c)^3-E_s(e-e_c)(1+2e),\\
+\mathcal R_7&=D(k_c)+\rho_a k_c-n_0(e_c)k_0|u|_+,\\
+\mathcal R_8&=D(\tau_c)-k_cD(e_c)-n_0(e_c)\sigma_0|u|_++\rho_a\tau_c,\\
+\mathcal R_9&=D(w)-\big(m_0(e_c)-w\big)/\alpha_r\quad(w-m_0(e_c)\ \text{if}\ \alpha_r=0).
+\end{align}
+with $\pf=K_\Phi(\Phi-\phi_0)-\lb\big(y,\Phi,D(y),D(\Phi),e_c\big)$ and $\rho_a=|u|_++w|u|_-+\alpha\sqrt{D(e_c)^2+\varepsilon^2}$. $\mathcal R_1$ is in pascals (a pressure balance), $\mathcal R_2$ in s$^{-1}$, $\mathcal R_3$--$\mathcal R_5$ in m$^3$/s, as in CCMLC2014.
+
+\section{Transmural quadrature}
+
+The two wall integrals \eqref{eq:pv} and \eqref{eq:lambda} are evaluated with an $n$-point Gauss--Legendre rule on $[\Rin,\Rout]$ (default $n=8$; the integrands are smooth and $n=8$ already agrees with $n=16$ to six digits). At each node $R_q$: compute $r,\lt,\lr,v_1,v_2,v_1',v_2'$ from \eqref{eq:kin}--\eqref{eq:tangent}, the rates from \eqref{eq:rates}, the Piola components, and accumulate
+\[
+I_1=\sum_q w_q R_q^2\Big[P_{RR}v_1'+2P_{\theta\theta}\frac{v_1}{R_q}\Big],\qquad
+I_2=\sum_q w_q R_q^2\Big[P_{RR}v_2'+2P_{\theta\theta}\frac{v_2}{R_q}\Big],
+\]
+so that $P_v=I_1/\rin^2$ and $\lb=-3I_2/(\Rout^3-\Rin^3)$. The $R$-form is used rather than the $\lt$-form because it has no removable singularity at $\lt^3=J$ (the undeformed state).
+
+\section{Newton's method with the exact Jacobian}
+
+Each step solves $\mathcal R(\mathbf x)=0$ by Newton's method starting from $\mathbf x=\mathbf q^n$,
+\[
+\mathbf J(\mathbf x^{(k)})\,\delta\mathbf x=-\mathcal R(\mathbf x^{(k)}),\qquad \mathbf x^{(k+1)}=\mathbf x^{(k)}+\omega\,\delta\mathbf x,
+\]
+with a dense $9\times9$ LU solve and the analytic tangent. The only non-trivial entries are those of the wall: for $\xi\in\{y,\Phi\}$ the \emph{total} derivatives $\dd P_v/\dd\xi$ and $\dd\lb/\dd\xi$ include the rate dependence through $\partial D(\xi)/\partial\xi=a_0$. They are assembled node by node from
+\begin{align*}
+\frac{\dd P_{RR}}{\dd\xi}&=\frac{\partial P_{RR}^{pas}}{\partial\lr}\frac{\dd\lr}{\dd\xi}+\frac{\partial P_{RR}^{pas}}{\partial\lt}\frac{\dd\lt}{\dd\xi}+\eta\Big(2\lr\dot\lr\frac{\dd\lr}{\dd\xi}+\lr^2\frac{\dd\dot\lr}{\dd\xi}\Big),\\
+\frac{\dd P_{\theta\theta}}{\dd\xi}&=\frac{\partial P_{\theta\theta}^{pas}}{\partial\lr}\frac{\dd\lr}{\dd\xi}+\frac{\partial P_{\theta\theta}^{pas}}{\partial\lt}\frac{\dd\lt}{\dd\xi}+\eta\Big(2\lt\dot\lt\frac{\dd\lt}{\dd\xi}+\lt^2\frac{\dd\dot\lt}{\dd\xi}\Big)\\
+&\quad+\tfrac12\Big(\frac{\partial\sig}{\partial\xi}\lt+\sig\frac{\dd\lt}{\dd\xi}\Big),
+\end{align*}
+with the passive tangent $\partial P/\partial(\lr,\lt)$ from the Hessian of $W$ (Appendix~\ref{app:inv}) and the kinematic derivatives of Appendix~\ref{app:kin}; the $e_c$-derivative is $\partial P_{\theta\theta}/\partial e_c=\tfrac12\lt\,\partial\sig/\partial e_c$. The remaining rows are those of CCMLC2014 plus the perfusion couplings:
+\begin{gather*}
+\frac{\partial\mathcal R_2}{\partial\xi}=\frac{\gamma_{ar}+\gamma_{ven}}{\Vw}\frac{\partial\pf}{\partial\xi}\ (\xi=y,e_c),\qquad
+\frac{\partial\mathcal R_2}{\partial\Phi}=a_0+\frac{\gamma_{ar}+\gamma_{ven}}{\Vw}\frac{\partial\pf}{\partial\Phi},\\
+\frac{\partial\mathcal R_2}{\partial p_{ar}}=-\frac{\gamma_{ar}}{\Vw},\qquad
+\frac{\partial\mathcal R_4}{\partial(y,\Phi,e_c)}=-\gamma_{ar}\frac{\partial\pf}{\partial(y,\Phi,e_c)},
+\end{gather*}
+with $\partial\pf/\partial y=-\dd\lb/\dd y$, $\partial\pf/\partial\Phi=K_\Phi-\dd\lb/\dd\Phi$, $\partial\pf/\partial e_c=-\partial\lb/\partial e_c$. The Jacobian is verified against central finite differences (relative error $<10^{-3}$ across perturbation and data scales). In practice each step converges in 2--3 iterations to $\|\mathcal R\|<10^{-8}$.
+
+\section{Algorithm}
+
+\begin{tcolorbox}[title=One time step $t_n\to t_{n+1}$]
+\begin{enumerate}[leftmargin=1.5em,itemsep=1pt]
+\item Set $\mathbf x\leftarrow\mathbf q^n$; choose BE or BDF2 coefficients.
+\item Repeat until $\|\mathcal R\|<\text{tol}$:
+\begin{enumerate}[leftmargin=1.5em,itemsep=0pt]
+\item rates $D(y),D(\Phi),\dots$; $\rin=\Rin+y$, $J=1-\phi_0+\Phi$;
+\item mid-wall strain $e$ and $\sig$, $\partial\sig/\partial(y,\Phi,e_c)$ from \eqref{eq:sigma1d};
+\item wall quadrature: $P_v$, $\lb$ and their derivatives;
+\item $\pf$, $Q_{in}$, $Q_{out}$; valve regime and $q_{valve}$; Windkessel flows;
+\item assemble $\mathcal R$ and $\mathbf J$, solve, update $\mathbf x$.
+\end{enumerate}
+\item Accept: $\mathbf q^{n+1}\leftarrow\mathbf x$, store $\lb,\pf$, shift history $(\mathbf q^{n},\mathbf q^{n-1})$.
+\end{enumerate}
+\end{tcolorbox}
+
+\paragraph{Initialization.} $y=0$, $\Phi=\phi_0$ (so $J=1$ and $\lb=0$), $p_v=p_{at}(0)-100$\,Pa, $p_{ar},p_d$ at diastolic values, $e_c=k_c=\tau_c=0$, $w=m_0(0)$; the first step uses BE. As in CCMLC2014 the wall is not in equilibrium at $t=0$; without inertia, the viscosity $\eta$ regularizes the initial transient, and a periodic regime is reached within two to three cycles.
+
+\paragraph{Usage.} The stepper (\code{Heart::PoroelasticSphereT<>}) has the same interface as \code{CCMLC2014T<>}: \code{Input}, \code{State}, \code{initialize}, \code{step(dt)}, \code{getState}, \code{restore}.\\ It runs standalone (\code{examples/Heart/} \code{PoroelasticSphere\_0D.cpp}) or as the 0D cavity of a 3D coupling.
+
+%======================================================================
+\part{Consistency checks}
+%======================================================================
+
+\section{What is verified}
+
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Classical limit $J=1$.} For $W=\tfrac\mu2 J_1$ (incompressible neo-Hookean) the quadrature reproduces the Green--Ogden thick-sphere inflation formula
+$P_v=\tfrac\mu2\big[(4/\lambda_{out}+1/\lambda_{out}^4)-(4/\lambda_{in}+1/\lambda_{in}^4)\big]$ to $10^{-9}$.
+\item \textbf{Membrane limit.} For $d_0/\Rin\to0$ at $J=1$, $P_v\to\frac{d_0}{\Rin}\frac{\Sigma_{sph}}{\sqrt C}$ with $\Sigma_{sph}$ the CCMLC2014 passive + viscous + active wall stress; the error decreases linearly with $d_0/\Rin$. The passive, viscous and active terms are therefore the same laws, not merely analogous ones.
+\item \textbf{Multiplier.} $\lb$ from \eqref{eq:lambda} equals the reference-volume average of the pointwise field $\lambda(r)=\sigma_{rr}(r)-\sigma_{M,rr}(r)$, $\sigma_{rr}(r)=-P_v+\int_{\rin}^r2(\sigma_{\theta\theta}-\sigma_{rr})\,\dd s/s$, recovered by direct integration ($J=1.1$, active stress on), and $\sigma_{rr}(r_{out})=0$.
+\item \textbf{Tangent.} The Piola tangent and the full Jacobian match finite differences.
+\item \textbf{Physiology.} With the CCMLC2014 example parameters ($\Rin=2.4$\,cm, $d_0=1.45$\,cm, $\phi_0=0.1$, $K_\Phi=2\times10^5$\,Pa, $\gamma_{ar}=\gamma_{ven}=7\times10^{-10}$\,m$^3$\,s$^{-1}$\,Pa$^{-1}$) three cycles run at 2--3 Newton iterations per step, with $p_v\in[0.9,15]$\,kPa, $\pf\in[4.6,10.4]$\,kPa, $\lb$ down to $-5.8$\,kPa in systole and coronary flow between 39 and 372\,mL/min (mean 250) --- the systolic impediment emerges from the reduction. Note that at equal parameters the thick wall is softer than the CCMLC2014 membrane (larger end-diastolic volume, lower ejection fraction): this is the $O(d_0/\Rin)$ error of the membrane approximation, and parameters calibrated for CCMLC2014 should be re-calibrated.
+\end{enumerate}
+
+\appendix
+
+\section{Derivatives of the reduced invariants}
+\label{app:inv}
+With $(a,b)=(\lr,\lt)$:
+\begin{align*}
+J_1&=a^{4/3}b^{-4/3}+2a^{-2/3}b^{2/3}, & J_2&=2a^{2/3}b^{-2/3}+a^{-4/3}b^{4/3},\\
+\partial_aJ_1&=\tfrac43\big(a^{1/3}b^{-4/3}-a^{-5/3}b^{2/3}\big), & \partial_aJ_2&=\tfrac43\big(a^{-1/3}b^{-2/3}-a^{-7/3}b^{4/3}\big),\\
+\partial_bJ_1&=\tfrac43\big(-a^{4/3}b^{-7/3}+a^{-2/3}b^{-1/3}\big), & \partial_bJ_2&=\tfrac43\big(-a^{2/3}b^{-5/3}+a^{-4/3}b^{1/3}\big),\\
+\partial_{aa}J_1&=\tfrac19\big(4a^{-2/3}b^{-4/3}+20a^{-8/3}b^{2/3}\big), & \partial_{aa}J_2&=\tfrac19\big(-4a^{-4/3}b^{-2/3}+28a^{-10/3}b^{4/3}\big),\\
+\partial_{ab}J_1&=-\tfrac19\big(16a^{1/3}b^{-7/3}+8a^{-5/3}b^{-1/3}\big), & \partial_{ab}J_2&=-\tfrac19\big(8a^{-1/3}b^{-5/3}+16a^{-7/3}b^{1/3}\big),\\
+\partial_{bb}J_1&=\tfrac19\big(28a^{4/3}b^{-10/3}-4a^{-2/3}b^{-4/3}\big), & \partial_{bb}J_2&=\tfrac19\big(20a^{2/3}b^{-8/3}+4a^{-4/3}b^{-2/3}\big),
+\end{align*}
+$J_4=b^2$, $\partial_bJ_4=2b$, $\partial_{bb}J_4=2$. With $W_{,\alpha}$ and $W_{,\alpha\beta}$ the gradient and Hessian of $W$ and $W_{,\alpha;\xi}=\sum_\beta W_{,\alpha\beta}\partial_\xi J_\beta$,
+\begin{gather*}
+\partial_aP_{RR}=\sum_\alpha\big(W_{,\alpha;a}\partial_aJ_\alpha+W_{,\alpha}\partial_{aa}J_\alpha\big),\qquad
+\partial_bP_{RR}=\sum_\alpha\big(W_{,\alpha;b}\partial_aJ_\alpha+W_{,\alpha}\partial_{ab}J_\alpha\big),\\
+\partial_aP_{\theta\theta}=\tfrac12\sum_\alpha\big(W_{,\alpha;a}\partial_bJ_\alpha+W_{,\alpha}\partial_{ab}J_\alpha\big),\qquad
+\partial_bP_{\theta\theta}=\tfrac12\sum_\alpha\big(W_{,\alpha;b}\partial_bJ_\alpha+W_{,\alpha}\partial_{bb}J_\alpha\big).
+\end{gather*}
+
+
+\section{Kinematic derivatives at a material radius}
+\label{app:kin}
+With $\partial r/\partial y=v_1$, $\partial r/\partial\Phi=v_2$ ($\partial J/\partial\Phi=1$):
+\begin{align*}
+\partial_y\lt&=\frac{v_1}{R}, & \partial_\Phi\lt&=\frac{v_2}{R}, &
+\partial_y\lr&=-\frac{2J}{\lt^3}\partial_y\lt, & \partial_\Phi\lr&=\frac1{\lt^2}-\frac{2J}{\lt^3}\partial_\Phi\lt,\\
+\partial_yv_1&=\frac{2\rin}{r^2}-\frac{2v_1^2}{r}, & \partial_\Phi v_1&=-\frac{2v_1v_2}{r}, &
+\partial_yv_2&=-\frac{2v_1v_2}{r}, & \partial_\Phi v_2&=-\frac{2v_2^2}{r},
+\end{align*}
+\begin{gather*}
+\partial_\xi v_1'=-2\Big(\frac{\partial_\xi\lr\,v_1+\lr\,\partial_\xi v_1}{r}-\frac{\lr v_1\,\partial_\xi r}{r^2}\Big),\\
+\partial_\xi v_2'=-\frac{2R^2\partial_\xi r}{r^3}-2\Big(\frac{\partial_\xi\lr\,v_2+\lr\,\partial_\xi v_2}{r}-\frac{\lr v_2\,\partial_\xi r}{r^2}\Big),
+\end{gather*}
+and for the rates, with $\dot r=v_1\dot y+v_2\dot\Phi$ and $\dd\dot y/\dd y=\dd\dot\Phi/\dd\Phi=a_0$,
+\[
+\frac{\dd\dot r}{\dd y}=\partial_yv_1\,\dot y+v_1a_0+\partial_yv_2\,\dot\Phi,\qquad
+\frac{\dd\dot r}{\dd\Phi}=\partial_\Phi v_1\,\dot y+\partial_\Phi v_2\,\dot\Phi+v_2a_0,\qquad
+\frac{\dd\dot\lt}{\dd\xi}=\frac1R\frac{\dd\dot r}{\dd\xi},
+\]
+\begin{gather*}
+\frac{\dd\dot\lr}{\dd y}=-\frac{2\dot\Phi\,\partial_y\lt}{\lt^3}-\frac{2J}{\lt^3}\frac{\dd\dot\lt}{\dd y}+\frac{6J\dot\lt\,\partial_y\lt}{\lt^4},\\
+\frac{\dd\dot\lr}{\dd\Phi}=\frac{a_0}{\lt^2}-\frac{2\dot\Phi\,\partial_\Phi\lt}{\lt^3}-\frac{2\dot\lt}{\lt^3}-\frac{2J}{\lt^3}\frac{\dd\dot\lt}{\dd\Phi}+\frac{6J\dot\lt\,\partial_\Phi\lt}{\lt^4}.
+\end{gather*}
+The mid-wall strain derivatives are $\partial_ye=\lt(R_m)\partial_y\lt(R_m)$, $\partial_\Phi e=\lt(R_m)\partial_\Phi\lt(R_m)$, and
+$\partial\sig/\partial\xi=E_s(1+2e_c)^{-2}\partial_\xi e$, $\partial\sig/\partial e_c=-E_s\big[(1+2e_c)^{-2}+4(e-e_c)(1+2e_c)^{-3}\big]$.
+
+\end{document}
