@@ -1534,7 +1534,30 @@ namespace Rodin::Adaptation
         const RigidStabilisation& stabilisation, const Math::Vector<Real>& x,
         Math::Vector<Real>& y) const
       {
-        y = A * x;
+        // The step operator is a sum of symmetric bilinear forms and carries no
+        // boundary elimination, so it is symmetric and its column-major storage
+        // doubles as row-major: column k holds row k. Each output entry is then
+        // an independent dot product, which parallelises without the scattered
+        // writes a column-wise product would need.
+        y.resize(A.rows());
+        if (A.isCompressed())
+        {
+          const auto* const outer = A.outerIndexPtr();
+          const auto* const inner = A.innerIndexPtr();
+          const auto* const values = A.valuePtr();
+#pragma omp parallel for schedule(static)
+          for (Eigen::Index k = 0; k < A.outerSize(); ++k)
+          {
+            Real sum = 0;
+            for (auto p = outer[k]; p < outer[k + 1]; ++p)
+              sum += values[p] * x[inner[p]];
+            y[k] = sum;
+          }
+        }
+        else
+        {
+          y = A * x;
+        }
         for (std::size_t k = 0; k < stabilisation.weights.size(); ++k)
           y += stabilisation.weights[k] * stabilisation.modes[k].dot(x) *
             stabilisation.modes[k];
