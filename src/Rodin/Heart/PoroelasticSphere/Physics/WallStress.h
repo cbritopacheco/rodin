@@ -34,9 +34,12 @@
 #ifndef RODIN_HEART_POROELASTICSPHERE_PHYSICS_WALLSTRESS_H
 #define RODIN_HEART_POROELASTICSPHERE_PHYSICS_WALLSTRESS_H
 
+#include <cassert>
+#include <cmath>
+#include <numbers>
 #include <vector>
 
-#include "Rodin/QF/GaussLegendre.h"
+#include "Rodin/Types.h"
 #include "Rodin/Heart/PoroelasticSphere/Physics/Kinematics.h"
 
 namespace Rodin::Heart::PoroelasticSphere::Physics
@@ -59,7 +62,7 @@ namespace Rodin::Heart::PoroelasticSphere::Physics
       explicit WallStressEvaluator(const Input& input)
         : m_input(input), m_kinematics(input)
       {
-        QF::GaussLegendre::gl1dUnit(input.wallQuadraturePoints, m_x, m_w);
+        gaussLegendreUnit(input.wallQuadraturePoints, m_x, m_w);
       }
 
       /**
@@ -144,6 +147,47 @@ namespace Rodin::Heart::PoroelasticSphere::Physics
       }
 
     private:
+      /**
+       * @brief @f$ n @f$-point Gauss-Legendre nodes and weights on @f$ [0, 1] @f$
+       * (zeros of @f$ P_n @f$ by Newton iteration on the three-term recurrence).
+       */
+      static void gaussLegendreUnit(
+          size_t n, std::vector<Real>& x, std::vector<Real>& w)
+      {
+        assert(n >= 1);
+        x.assign(n, Real(0));
+        w.assign(n, Real(0));
+        const size_t m = (n + 1) / 2;
+        for (size_t k = 0; k < m; ++k)
+        {
+          Real z = std::cos(std::numbers::pi_v<Real> * (Real(k) + Real(0.75))
+              / (Real(n) + Real(0.5)));
+          Real dp = Real(1);
+          for (size_t it = 0; it < 100; ++it)
+          {
+            Real p0 = Real(1);
+            Real p1 = z;
+            for (size_t j = 2; j <= n; ++j)
+            {
+              const Real p = ((Real(2) * j - Real(1)) * z * p1 - (Real(j) - Real(1)) * p0) / Real(j);
+              p0 = p1;
+              p1 = p;
+            }
+            dp = Real(n) * (z * p1 - p0) / (z * z - Real(1));
+            const Real dz = p1 / dp;
+            z -= dz;
+            if (std::abs(dz) < Real(1e-15))
+              break;
+          }
+          // Map [-1, 1] -> [0, 1]; symmetric node n - 1 - k.
+          const Real wk = Real(1) / ((Real(1) - z * z) * dp * dp);
+          x[k] = Real(0.5) * (Real(1) - z);
+          x[n - 1 - k] = Real(0.5) * (Real(1) + z);
+          w[k] = wk;
+          w[n - 1 - k] = wk;
+        }
+      }
+
       const Input& m_input;
       WallKinematics<Input> m_kinematics;
       std::vector<Real> m_x;
