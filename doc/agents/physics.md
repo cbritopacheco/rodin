@@ -43,6 +43,17 @@ with reduced invariants and first/second derivatives). Pairs with the
 Solid active law for lumped-parameter studies (examples/Heart,
 examples/Models).
 
+`PoroelasticSphere` — 0D thick-walled, solid-incompressible poroelastic
+sphere with the same passive/active/valve/Windkessel laws and stepper
+interface as `CCMLC2014`. Uniform Lagrangian porosity `Φ` makes the
+incompressibility constraint integrate exactly (`r³ = r_in³ + J(R³ − R_in³)`);
+the momentum balance is projected on the two tangent fields `v₁` (cavity
+pressure–volume law, multiplier cancels) and `v₂` (wall-averaged multiplier
+`λ̄`, hence the interstitial pressure `p̃ = K_Φ(Φ − φ₀) − λ̄`), both by
+Gauss–Legendre quadrature across the wall (`Physics/WallStress.h`), and the
+porosity ODE is fed by a two-resistor coronary source. In the membrane limit
+at `J = 1` it reduces to the CCMLC2014 wall law (unit-tested).
+
 ## Level-set toolkit
 
 - **Distance/** — distance/redistancing models behind a common `Base`:

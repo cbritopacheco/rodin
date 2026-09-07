@@ -7,12 +7,14 @@
 /**
  * @file Heart.h
  * @brief Top-level include for the @ref Rodin::Heart module (reduced-order
- * cardiac models, currently the CCMLC2014 0D ventricular stepper).
+ * cardiac models: the CCMLC2014 0D ventricular stepper and the 0D
+ * poroelastic sphere).
  */
 #ifndef RODIN_HEART_H
 #define RODIN_HEART_H
 
 #include "Heart/ForwardDecls.h"
 #include "Heart/CCMLC2014.h"
+#include "Heart/PoroelasticSphere.h"
 
 #endif

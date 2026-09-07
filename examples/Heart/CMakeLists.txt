@@ -5,6 +5,13 @@ target_link_libraries(CCMLC2014_0D
   Rodin::Alert
   )
 
+add_executable(PoroelasticSphere_0D PoroelasticSphere_0D.cpp)
+target_link_libraries(PoroelasticSphere_0D
+  PUBLIC
+  Rodin::Heart
+  Rodin::Alert
+  )
+
 add_executable(CoronarySolid CoronarySolid.cpp)
 target_link_libraries(CoronarySolid
   PUBLIC

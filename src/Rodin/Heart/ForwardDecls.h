@@ -14,6 +14,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h"
 #include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
+#include "Rodin/Heart/PoroelasticSphere/PassiveLaw.h"
 
 namespace Rodin::Heart
 {
@@ -36,6 +37,27 @@ namespace Rodin::Heart
     class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
     class PassiveLaw = CCMLC2014PassiveLaw<Real>>
   using CCMLC2014T = CCMLC2014::Solver::StepperT<PassiveEnergyLaw, PassiveLaw>;
+
+  namespace PoroelasticSphere::Solver
+  {
+    template <class PassiveEnergyLaw, class PassiveLaw>
+    class StepperT;
+  }
+
+  /**
+   * @brief Default 0D poroelastic sphere model type.
+   *
+   * Thick-walled, solid-incompressible poroelastic spherical wall with the
+   * CCMLC2014 passive, active and circulation laws.
+   *
+   * @tparam PassiveEnergyLaw Reduced passive energy law.
+   * @tparam PassiveLaw Radial Piola stress operator from the reduced invariants.
+   */
+  template <
+    class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
+    class PassiveLaw = PoroelasticSpherePassiveLaw<Real>>
+  using PoroelasticSphereT =
+    PoroelasticSphere::Solver::StepperT<PassiveEnergyLaw, PassiveLaw>;
 }
 
 #endif
