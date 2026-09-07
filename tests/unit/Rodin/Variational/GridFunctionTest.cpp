@@ -145,6 +145,67 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies that copy-assignment on one space carries the
+  /// coefficients over verbatim, including states that are not the
+  /// interpolant of a smooth function.
+  TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentOnTheSameSpaceCopies)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+
+    GridFunction source(fes);
+    source = RealFunction(0.0);
+    for (Index i = 0; i < static_cast<Index>(source.getSize()); i++)
+      source[i] = static_cast<Real>(i) * 0.25 - 1.0;
+
+    GridFunction target(fes);
+    target = source;
+
+    ASSERT_EQ(target.getSize(), source.getSize());
+    for (Index i = 0; i < static_cast<Index>(source.getSize()); i++)
+      EXPECT_NEAR(target[i], source[i], RODIN_FUZZY_CONSTANT);
+  }
+
+  /// @brief Verifies that assigning between grid functions of the same type on
+  /// two spaces interpolates the source rather than copying its coefficients.
+  TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentBetweenSpacesInterpolates)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 sourceFES(mesh);
+    P1 targetFES(mesh);
+    ASSERT_NE(&sourceFES, &targetFES);
+
+    GridFunction source(sourceFES);
+    source = RealFunction([](const Point& p) { return 2.0 * p.x() + 3.0 * p.y(); });
+
+    GridFunction target(targetFES);
+    target = source;
+
+    // The target keeps its own space, and holds the interpolant of the source.
+    EXPECT_EQ(&target.getFiniteElementSpace(), &targetFES);
+    ASSERT_EQ(target.getSize(), targetFES.getSize());
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{ 0.25, 0.25 });
+    EXPECT_NEAR(target(p), 2.0 * p.x() + 3.0 * p.y(), 1e-12);
+  }
+
+  /// @brief Pins the limit of assignment across meshes: the source cannot be
+  /// evaluated at points of another mesh, so the interpolation is rejected
+  /// rather than silently copying coefficients that index a different basis.
+  TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentAcrossMeshesIsRejected)
+  {
+    Mesh coarse = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    Mesh fine = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    P1 coarseFES(coarse);
+    P1 fineFES(fine);
+
+    GridFunction source(coarseFES);
+    source = RealFunction(1.0);
+
+    GridFunction target(fineFES);
+    EXPECT_ANY_THROW(target = source);
+  }
+
   /// @brief Verifies project linear function for variational real P1 grid function by checking grid-function projection.
   TEST(Rodin_Variational_Real_P1_GridFunction, ProjectLinearFunction)
   {
