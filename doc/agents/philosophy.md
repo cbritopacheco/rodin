@@ -216,6 +216,14 @@ rather than extended:
 - Doxygen with real mathematics: `@f$ ... @f$` formulas, a "Mathematical
   Foundation"/usage section, `@defgroup <Name>Specializations` per
   specialization family. Documentation states the formula the code computes.
+- Infrastructure classes that implement a multi-stage algorithm or data
+  structure need an explicit `Architecture` overview in the class Doxygen.
+  State the mathematical query or object first, then the stages and their
+  invariants. For example, a locator should distinguish the broad phase, which
+  only filters candidates, from the narrow phase, which performs the actual
+  geometric certification. This overview is part of the implementation
+  contract: it prevents dense internal machinery from becoming a collection of
+  disconnected member-function comments.
 - Errors: `Rodin::Alert` exceptions (streamable, composable) at API
   boundaries for user mistakes; `assert` for internal invariants (remember
   it vanishes under `-DNDEBUG`); `assert(ierr == PETSC_SUCCESS)` after PETSc

@@ -29,12 +29,34 @@ namespace Rodin::Location
   /**
    * @brief Bounding-volume-hierarchy point locator over axis-aligned boxes.
    *
-   * Broad phase: a packed median-split BVH over per-polytope AABBs, built
-   * lazily per queried dimension. Narrow phase: Newton inversion of the
-   * polytope transformation (exact in one step for affine maps, iterative
-   * for bilinear/curved maps) followed by the reference half-space test and
-   * a physical residual check, so off-manifold points are rejected and a
-   * diverged inversion can never be accepted.
+   * @section AABBArchitecture Architecture
+   *
+   * The locator answers the following geometric query. Given a physical point
+   * @f$ x @f$, find a polytope @f$ K @f$ and a reference coordinate
+   * @f$ \widehat x \in \widehat K @f$ such that
+   * @f[
+   *   x = T_K(\widehat x),
+   * @f]
+   * where @f$ T_K : \widehat K \to K @f$ is the polytope transformation. The
+   * returned value is a Geometry::Point carrying the polytope, the recovered
+   * reference coordinate and the physical coordinate.
+   *
+   * The implementation separates the query into two stages:
+   *
+   * - Broad phase. For each requested polytope dimension, a packed
+   *   median-split bounding-volume hierarchy is built lazily over
+   *   per-polytope axis-aligned boxes @f$ B_K @f$ satisfying
+   *   @f[
+   *     T_K(\widehat K) \subset B_K .
+   *   @f]
+   *   Tree nodes reject groups of polytopes, and leaf entries reject
+   *   individual polytopes, using only componentwise box containment.
+   *
+   * - Narrow phase. For each surviving candidate, the actual transformation
+   *   is inverted by Newton iteration. The candidate is accepted only when
+   *   the physical residual is below tolerance and the recovered reference
+   *   coordinate lies in the reference polytope. Consequently, the AABB never
+   *   certifies membership; it only decides which candidates are worth testing.
    *
    * Boxes bound the whole curved image, not just sampled points on it. The
    * transformation is resampled on a unisolvent reference lattice and
