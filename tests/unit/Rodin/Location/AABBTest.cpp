@@ -57,6 +57,51 @@ TEST(Location_AABB, Locates0DVertex)
   EXPECT_EQ(p->getPolytope().getIndex(), 0);
 }
 
+TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
+{
+  for (const auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const size_t dimension = type == Polytope::Type::Triangle ? 2 : 3;
+    Mesh mesh = dimension == 2
+      ? LocalMesh::UniformGrid(type, {4, 4})
+      : LocalMesh::UniformGrid(type, {4, 4, 4});
+    Variational::RealH1Element<2> element(type);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      Geometry::PointCloud nodes(dimension, element.getCount());
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        Math::SpatialPoint x;
+        cell->getTransformation().transform(x, element.getNode(a));
+        x[1] += 0.15 * x[0] * x[0];
+        for (size_t i = 0; i < dimension; ++i)
+          nodes(i, a) = x[i];
+      }
+      mesh.setPolytopeTransformation({dimension, cell->getIndex()},
+        new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+          std::move(nodes), element));
+    }
+    AABB locator(mesh);
+    locator.setExhaustiveFallback(false);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Polytope::Traits traits(type);
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        Math::SpatialPoint x;
+        cell->getTransformation().transform(x,
+          0.9 * element.getNode(a) + 0.1 * traits.getCentroid());
+        const auto located = locator.locate(x);
+        ASSERT_TRUE(located.has_value()) << "cell=" << cell->getIndex();
+        Math::SpatialPoint mapped;
+        located->getPolytope().getTransformation().transform(
+          mapped, located->getReferenceCoordinates());
+        EXPECT_LT((mapped - x).norm(), 1e-9);
+      }
+    }
+  }
+}
+
 TEST(Location_AABB, Locates1DSegment)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()

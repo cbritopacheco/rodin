@@ -159,7 +159,12 @@ namespace Rodin::Tests::Unit
       source[i] = static_cast<Real>(i) * 0.25 - 1.0;
 
     GridFunction target(fes);
+    source.setName("source");
+    target.setName("target");
     target = source;
+
+    EXPECT_EQ(target.getName(), "target");
+    EXPECT_EQ(&target.getFiniteElementSpace(), &fes);
 
     ASSERT_EQ(target.getSize(), source.getSize());
     for (Index i = 0; i < static_cast<Index>(source.getSize()); i++)

@@ -1285,12 +1285,8 @@ namespace Rodin::Variational
         {
           if (&this->getFiniteElementSpace() == &other.getFiniteElementSpace())
           {
-            // Same space: the coefficients index the same basis, so they carry
-            // over directly. The base is qualified because GridFunctionBase's
-            // assignment template is an exact match for the derived type and
-            // would otherwise win over the base's copy-assignment, sending a
-            // plain copy through project().
-            Parent::operator=(static_cast<const Parent&>(other));
+            // Assignment updates the field in its existing space and preserves
+            // its display name. Identical bases permit a direct coefficient copy.
             m_data = other.m_data;
           }
           else

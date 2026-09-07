@@ -24,6 +24,41 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(MixedProblem_PreassembledLF, MultipleLoadsAfterInlineLoadReassemble)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+    P1 vh(mesh);
+    P0 qh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    TrialFunction p(qh);
+    TestFunction q(qh);
+    LinearForm first(v);
+    LinearForm second(q);
+    Problem direct(u, v, p, q);
+    Problem reused(u, v, p, q);
+
+    for (const Real value : {2.0, -7.0, 0.0})
+    {
+      first = Integral(RealFunction(value), v);
+      second = Integral(RealFunction(3.0), q);
+      first.assemble();
+      second.assemble();
+      direct = Integral(u, v) + Integral(p, q)
+        - Integral(RealFunction(1.0), v)
+        - Integral(RealFunction(value), v)
+        - Integral(RealFunction(3.0), q);
+      reused = Integral(u, v) + Integral(p, q)
+        - Integral(RealFunction(1.0), v) - first - second;
+      direct.assemble();
+      reused.assemble();
+      EXPECT_NEAR((direct.getLinearSystem().getOperator()
+        - reused.getLinearSystem().getOperator()).norm(), 0.0, 1e-12);
+      EXPECT_NEAR((direct.getLinearSystem().getVector()
+        - reused.getLinearSystem().getVector()).norm(), 0.0, 1e-12);
+    }
+  }
+
   // -----------------------------------------------------------------------
   // Helper: build two mixed systems — one with integrals only, one that
   // replaces one integral term with a preassembled BilinearForm — and

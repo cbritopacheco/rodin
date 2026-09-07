@@ -367,6 +367,11 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
+      /// @brief Retains inline integrators when introducing a preassembled vector.
+      ProblemBody(const ProblemBody<void, void, Scalar>& other)
+        : Parent(other)
+      {}
+
       /// @brief Copy constructor.
       ProblemBody(const ProblemBody& other)
         : Parent(other),
