@@ -502,8 +502,8 @@ namespace Rodin::Location
           case G::Quadrilateral:
             return bernstein(k, mode[0], r.x()) * bernstein(k, mode[1], r.y());
           case G::Hexahedron:
-            return bernstein(k, mode[0], r.x()) * bernstein(k, mode[1], r.y())
-              * bernstein(k, mode[2], r.z());
+            return bernstein(k, mode[0], r.x()) * bernstein(k, mode[1], r.y()) *
+              bernstein(k, mode[2], r.z());
           case G::Wedge:
             return simplexBernstein(k, mode, 2, r) * bernstein(k, mode[3], r.z());
           case G::Pyramid:
@@ -520,8 +520,8 @@ namespace Rodin::Location
               return bz;
             if (!(q > std::numeric_limits<Real>::epsilon()))
               return 0;
-            return bernstein(n, mode[0], r.x() / q)
-              * bernstein(n, mode[1], r.y() / q) * bz;
+            return bernstein(n, mode[0], r.x() / q) * bernstein(n, mode[1], r.y() / q) *
+              bz;
           }
           case G::Point:
             return 1;
@@ -546,8 +546,7 @@ namespace Rodin::Location
         const Real kr = static_cast<Real>(k);
         const size_t rdim = Geometry::Polytope::Traits(g).getDimension();
         auto emplace = [&](const std::array<size_t, 4>& mode,
-                          std::initializer_list<Real> coords)
-        {
+                         std::initializer_list<Real> coords) {
           modes.push_back(mode);
           Math::SpatialPoint r;
           r.resize(static_cast<Eigen::Index>(rdim));
@@ -563,7 +562,7 @@ namespace Rodin::Location
           case G::Segment:
           {
             for (size_t i = 0; i <= k; ++i)
-              emplace({ i, 0, 0, 0 }, { static_cast<Real>(i) / kr });
+              emplace({i, 0, 0, 0}, {static_cast<Real>(i) / kr});
             return;
           }
           case G::Triangle:
@@ -572,8 +571,8 @@ namespace Rodin::Location
             {
               for (size_t a1 = 0; a1 + a2 <= k; ++a1)
               {
-                emplace({ k - a1 - a2, a1, a2, 0 },
-                  { static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr });
+                emplace({k - a1 - a2, a1, a2, 0},
+                  {static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr});
               }
             }
             return;
@@ -586,9 +585,9 @@ namespace Rodin::Location
               {
                 for (size_t a1 = 0; a1 + a2 + a3 <= k; ++a1)
                 {
-                  emplace({ k - a1 - a2 - a3, a1, a2, a3 },
-                    { static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr,
-                      static_cast<Real>(a3) / kr });
+                  emplace({k - a1 - a2 - a3, a1, a2, a3},
+                    {static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr,
+                      static_cast<Real>(a3) / kr});
                 }
               }
             }
@@ -600,8 +599,8 @@ namespace Rodin::Location
             {
               for (size_t i = 0; i <= k; ++i)
               {
-                emplace({ i, j, 0, 0 },
-                  { static_cast<Real>(i) / kr, static_cast<Real>(j) / kr });
+                emplace(
+                  {i, j, 0, 0}, {static_cast<Real>(i) / kr, static_cast<Real>(j) / kr});
               }
             }
             return;
@@ -614,9 +613,9 @@ namespace Rodin::Location
               {
                 for (size_t i = 0; i <= k; ++i)
                 {
-                  emplace({ i, j, l, 0 },
-                    { static_cast<Real>(i) / kr, static_cast<Real>(j) / kr,
-                      static_cast<Real>(l) / kr });
+                  emplace({i, j, l, 0},
+                    {static_cast<Real>(i) / kr, static_cast<Real>(j) / kr,
+                      static_cast<Real>(l) / kr});
                 }
               }
             }
@@ -630,9 +629,9 @@ namespace Rodin::Location
               {
                 for (size_t a1 = 0; a1 + a2 <= k; ++a1)
                 {
-                  emplace({ k - a1 - a2, a1, a2, m },
-                    { static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr,
-                      static_cast<Real>(m) / kr });
+                  emplace({k - a1 - a2, a1, a2, m},
+                    {static_cast<Real>(a1) / kr, static_cast<Real>(a2) / kr,
+                      static_cast<Real>(m) / kr});
                 }
               }
             }
@@ -647,7 +646,7 @@ namespace Rodin::Location
               const Real q = Real(1) - z;
               if (n == 0)
               {
-                emplace({ 0, 0, m, 0 }, { Real(0), Real(0), z });
+                emplace({0, 0, m, 0}, {Real(0), Real(0), z});
                 continue;
               }
               const Real nr = static_cast<Real>(n);
@@ -655,8 +654,8 @@ namespace Rodin::Location
               {
                 for (size_t i = 0; i <= n; ++i)
                 {
-                  emplace({ i, j, m, 0 },
-                    { q * static_cast<Real>(i) / nr, q * static_cast<Real>(j) / nr, z });
+                  emplace({i, j, m, 0},
+                    {q * static_cast<Real>(i) / nr, q * static_cast<Real>(j) / nr, z});
                 }
               }
             }
@@ -693,9 +692,9 @@ namespace Rodin::Location
        */
       struct ControlBasis
       {
-        std::vector<Math::SpatialPoint> samples;
-        Math::Matrix<Real> conversion;
-        bool valid = false;
+          std::vector<Math::SpatialPoint> samples;
+          Math::Matrix<Real> conversion;
+          bool valid = false;
       };
 
       /// @brief Returns the cached control-point basis of degree @p k on @p g.
@@ -705,7 +704,7 @@ namespace Rodin::Location
         static std::map<Key, ControlBasis> s_cache;
         static std::mutex s_mutex;
 
-        const Key key{ static_cast<int>(g), k };
+        const Key key{static_cast<int>(g), k};
         std::lock_guard<std::mutex> lock(s_mutex);
         const auto it = s_cache.find(key);
         if (it != s_cache.end())

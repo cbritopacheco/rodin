@@ -24,6 +24,9 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies that subtracting two preassembled linear forms from a mixed
+  /// problem, after an inline load, reassembles to the same system as the
+  /// equivalent all-inline problem.
   TEST(MixedProblem_PreassembledLF, MultipleLoadsAfterInlineLoadReassemble)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -44,18 +47,20 @@ namespace Rodin::Tests::Unit
       second = Integral(RealFunction(3.0), q);
       first.assemble();
       second.assemble();
-      direct = Integral(u, v) + Integral(p, q)
-        - Integral(RealFunction(1.0), v)
-        - Integral(RealFunction(value), v)
-        - Integral(RealFunction(3.0), q);
-      reused = Integral(u, v) + Integral(p, q)
-        - Integral(RealFunction(1.0), v) - first - second;
+      direct = Integral(u, v) + Integral(p, q) - Integral(RealFunction(1.0), v) -
+        Integral(RealFunction(value), v) - Integral(RealFunction(3.0), q);
+      reused =
+        Integral(u, v) + Integral(p, q) - Integral(RealFunction(1.0), v) - first - second;
       direct.assemble();
       reused.assemble();
-      EXPECT_NEAR((direct.getLinearSystem().getOperator()
-        - reused.getLinearSystem().getOperator()).norm(), 0.0, 1e-12);
-      EXPECT_NEAR((direct.getLinearSystem().getVector()
-        - reused.getLinearSystem().getVector()).norm(), 0.0, 1e-12);
+      EXPECT_NEAR(
+        (direct.getLinearSystem().getOperator() - reused.getLinearSystem().getOperator())
+          .norm(),
+        0.0, 1e-12);
+      EXPECT_NEAR(
+        (direct.getLinearSystem().getVector() - reused.getLinearSystem().getVector())
+          .norm(),
+        0.0, 1e-12);
     }
   }
 

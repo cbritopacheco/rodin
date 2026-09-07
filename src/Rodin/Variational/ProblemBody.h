@@ -1172,13 +1172,11 @@ namespace Rodin::Variational
    * @endcode
    */
   template <class OperatorType, class VectorType, class LHSScalar>
-  auto
-  operator-(
-      const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
-      const LinearFormBase<VectorType>& lf)
+  auto operator-(const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
+    const LinearFormBase<VectorType>& lf)
   {
-    using RHSScalar = typename FormLanguage::Traits<
-      std::remove_reference_t<VectorType>>::ScalarType;
+    using RHSScalar =
+      typename FormLanguage::Traits<std::remove_reference_t<VectorType>>::ScalarType;
     /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
     ProblemBody<OperatorType, VectorType, ScalarType> res(pb);

@@ -150,7 +150,7 @@ namespace Rodin::Tests::Unit
   /// interpolant of a smooth function.
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentOnTheSameSpaceCopies)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 fes(mesh);
 
     GridFunction source(fes);
@@ -175,7 +175,7 @@ namespace Rodin::Tests::Unit
   /// two spaces interpolates the source rather than copying its coefficients.
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentBetweenSpacesInterpolates)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     P1 sourceFES(mesh);
     P1 targetFES(mesh);
     ASSERT_NE(&sourceFES, &targetFES);
@@ -190,7 +190,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&target.getFiniteElementSpace(), &targetFES);
     ASSERT_EQ(target.getSize(), targetFES.getSize());
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.25, 0.25 });
+    const Point p(*cell, Math::SpatialPoint{0.25, 0.25});
     EXPECT_NEAR(target(p), 2.0 * p.x() + 3.0 * p.y(), 1e-12);
   }
 
@@ -199,8 +199,8 @@ namespace Rodin::Tests::Unit
   /// rather than silently copying coefficients that index a different basis.
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentAcrossMeshesIsRejected)
   {
-    Mesh coarse = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    Mesh fine = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    Mesh coarse = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    Mesh fine = LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5});
     P1 coarseFES(coarse);
     P1 fineFES(fine);
 

@@ -62,9 +62,8 @@ TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
   for (const auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
   {
     const size_t dimension = type == Polytope::Type::Triangle ? 2 : 3;
-    Mesh mesh = dimension == 2
-      ? LocalMesh::UniformGrid(type, {4, 4})
-      : LocalMesh::UniformGrid(type, {4, 4, 4});
+    Mesh mesh = dimension == 2 ? LocalMesh::UniformGrid(type, {4, 4})
+                               : LocalMesh::UniformGrid(type, {4, 4, 4});
     Variational::RealH1Element<2> element(type);
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
@@ -89,8 +88,8 @@ TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
       for (size_t a = 0; a < element.getCount(); ++a)
       {
         Math::SpatialPoint x;
-        cell->getTransformation().transform(x,
-          0.9 * element.getNode(a) + 0.1 * traits.getCentroid());
+        cell->getTransformation().transform(
+          x, 0.9 * element.getNode(a) + 0.1 * traits.getCentroid());
         const auto located = locator.locate(x);
         ASSERT_TRUE(located.has_value()) << "cell=" << cell->getIndex();
         Math::SpatialPoint mapped;
@@ -579,7 +578,7 @@ namespace
         for (size_t i = 0; i < dimension; ++i)
           nodes(i, a) = x[i] + (i == dimension - 1 ? bump : Real(0));
       }
-      mesh.setPolytopeTransformation({ dimension, cell->getIndex() },
+      mesh.setPolytopeTransformation({dimension, cell->getIndex()},
         new Geometry::ParametricTransformation<Variational::RealH1Element<K>>(
           std::move(nodes), element));
     }
@@ -615,9 +614,8 @@ namespace
         cell->getTransformation().transform(x, rc);
 
         const auto located = locator.locate(x);
-        ASSERT_TRUE(located.has_value())
-          << "type=" << static_cast<int>(type) << " K=" << K
-          << " cell=" << cell->getIndex();
+        ASSERT_TRUE(located.has_value()) << "type=" << static_cast<int>(type)
+                                         << " K=" << K << " cell=" << cell->getIndex();
 
         Math::SpatialPoint mapped;
         located->getPolytope().getTransformation().transform(
@@ -631,10 +629,9 @@ namespace
 
 TEST(Location_AABB, BoxesBoundCurvedImageOfEveryPolytopeType)
 {
-  for (const auto type : { Polytope::Type::Segment, Polytope::Type::Triangle,
+  for (const auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
          Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-         Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
-         Polytope::Type::Wedge })
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
   {
     checkBoxesBoundCurvedImage<1>(type, 0.0);
     checkBoxesBoundCurvedImage<2>(type, 0.15);
@@ -651,10 +648,9 @@ TEST(Location_AABB, DegreeOneGeometryBasisIsANonNegativePartitionOfUnity)
   // shape functions on the pyramid.
   std::mt19937 rng(20260907u);
   std::uniform_real_distribution<Real> weight(0, 1);
-  for (const auto type : { Polytope::Type::Segment, Polytope::Type::Triangle,
+  for (const auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
          Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-         Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
-         Polytope::Type::Wedge })
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
   {
     const Polytope::Traits traits(type);
     const size_t dimension = traits.getDimension();
