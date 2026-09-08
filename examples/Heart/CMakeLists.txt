@@ -95,6 +95,19 @@ if (RODIN_USE_PETSC)
     Rodin::Geometry
     Rodin::Assembly)
 
+  # Closed-loop coronary FSI: P1/P1 explicit ALE FSI coupled (staggered) to
+  # the 0D poroelastic left ventricle.  Sequential, PETSc only.
+  add_executable(CoronaryArtery_Explicit_PoroElastic CoronaryArtery_Explicit_PoroElastic.cpp)
+  target_link_libraries(CoronaryArtery_Explicit_PoroElastic
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+
   # Coagulation-kinetics testbed on a simplified geometry: one inlet, one
   # outlet, an R_mu-Windkessel outlet and an ectatic segment that provides the
   # recirculation the kinetics need. Sequential and PETSc-only, like the P1/P1

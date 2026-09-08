@@ -169,6 +169,14 @@ namespace Rodin::Heart::PoroelasticSphere::Model
     std::function<Scalar(Scalar)> pSv =
       [](Scalar) { return Scalar(0); }; ///< Venous pressure boundary condition.
 
+    std::function<Scalar(Scalar)> qArterialExternal = [](Scalar) {
+      return Scalar(0);
+    }; ///< Flow drawn from the proximal Windkessel node by an external coronary model (e.g. a 3D tree), evaluated at @f$ t_{n+1} @f$.
+
+    std::function<Scalar(Scalar)> qPerfusionExternal = [](Scalar) {
+      return Scalar(0);
+    }; ///< Flow delivered into the interstitium by an external coronary model, evaluated at @f$ t_{n+1} @f$.
+
     PassiveEnergyLaw passiveEnergy; ///< Passive reduced constitutive law.
   };
 
@@ -277,6 +285,8 @@ namespace Rodin::Heart::PoroelasticSphere::Model
 
     Scalar perfusionInflow = 0.0;  ///< Arterial perfusion inflow @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$.
     Scalar perfusionOutflow = 0.0; ///< Venous perfusion outflow @f$ \gamma_{ven}(\tilde p - p_{sv}) @f$.
+    Scalar externalArterialOutflow = 0.0; ///< External flow drawn from the proximal Windkessel node (@ref InputT::qArterialExternal).
+    Scalar externalPerfusionInflow = 0.0; ///< External flow delivered into the interstitium (@ref InputT::qPerfusionExternal).
 
     Scalar pAtCur = 0.0;  ///< Atrial pressure at @f$ t_{n+1} @f$.
     Scalar pSvMid = 0.0;  ///< Venous pressure at @f$ t_{n+1} @f$.

@@ -20,7 +20,11 @@
  * is the differential equation of the porosity. The active, valve and
  * Windkessel equations are those of CCMLC2014 on the same implicit time grid.
  * The coronary inflow @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$ is drawn from the
- * proximal Windkessel compartment so that fluid is conserved.
+ * proximal Windkessel compartment so that fluid is conserved. An external
+ * coronary model (a 3D tree coupled in a staggered way) enters through the
+ * two lagged sources of the input, @f$ Q_{ar}^{ext}(t) @f$ drawn from the
+ * proximal node and @f$ Q_{\Phi}^{ext}(t) @f$ delivered into the interstitium;
+ * both are data at @f$ t_{n+1} @f$ and do not enter the Jacobian.
  */
 #ifndef RODIN_HEART_POROELASTICSPHERE_NUMERICS_DYNAMICSYSTEM_H
 #define RODIN_HEART_POROELASTICSPHERE_NUMERICS_DYNAMICSYSTEM_H
@@ -85,6 +89,8 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
 
         evalData.pAtCur = m_input.pAt(tnp1);
         evalData.pSvMid = m_input.pSv(tnp1);
+        evalData.externalArterialOutflow = m_input.qArterialExternal(tnp1);
+        evalData.externalPerfusionInflow = m_input.qPerfusionExternal(tnp1);
 
         evaluateKinematicsAndStresses(evalData);
         evaluateActiveDiagnostics(evalData);
@@ -122,16 +128,18 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         // Wall equilibrium (v1 projection): P_v(r_in, Phi) - p_v = 0.
         residualVector[Model::RadialDisplacement] = evalData.wallPressure - evalData.pv;
 
-        // Fluid mass balance: V_w0 dPhi/dt = Q_in - Q_out.
+        // Fluid mass balance: V_w0 dPhi/dt = Q_in + Q_Phi^ext - Q_out.
         residualVector[Model::Porosity] = evalData.phiDot -
-          (evalData.perfusionInflow - evalData.perfusionOutflow) / evalData.Vw0;
+          (evalData.perfusionInflow + evalData.externalPerfusionInflow -
+            evalData.perfusionOutflow) / evalData.Vw0;
 
         residualVector[Model::VentricularPressure] = m_input.cavityCapacity * pvDot +
           evalData.cavityFluxCur +
           Scalar(4) * std::numbers::pi_v<Scalar> * evalData.rin * evalData.rin * evalData.yDot;
 
-        residualVector[Model::ArterialPressure] =
-          m_input.Cp * parDot + evalData.windkesselflowP + evalData.perfusionInflow;
+        residualVector[Model::ArterialPressure] = m_input.Cp * parDot +
+          evalData.windkesselflowP + evalData.perfusionInflow +
+          evalData.externalArterialOutflow;
 
         residualVector[Model::DistalPressure] =
           m_input.Cd * pdDot + evalData.windkesselflowD;
