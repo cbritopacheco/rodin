@@ -1283,8 +1283,18 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(other);
-          m_data = other.m_data;
+          if (&this->getFiniteElementSpace() == &other.getFiniteElementSpace())
+          {
+            // Assignment updates the field in its existing space and preserves
+            // its display name. Identical bases permit a direct coefficient copy.
+            m_data = other.m_data;
+          }
+          else
+          {
+            // Different spaces: the coefficients are not comparable, so the
+            // source has to be interpolated onto this space.
+            this->project(other);
+          }
         }
         return *this;
       }

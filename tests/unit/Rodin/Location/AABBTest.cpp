@@ -57,6 +57,50 @@ TEST(Location_AABB, Locates0DVertex)
   EXPECT_EQ(p->getPolytope().getIndex(), 0);
 }
 
+TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
+{
+  for (const auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const size_t dimension = type == Polytope::Type::Triangle ? 2 : 3;
+    Mesh mesh = dimension == 2 ? LocalMesh::UniformGrid(type, {4, 4})
+                               : LocalMesh::UniformGrid(type, {4, 4, 4});
+    Variational::RealH1Element<2> element(type);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      Geometry::PointCloud nodes(dimension, element.getCount());
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        Math::SpatialPoint x;
+        cell->getTransformation().transform(x, element.getNode(a));
+        x[1] += 0.15 * x[0] * x[0];
+        for (size_t i = 0; i < dimension; ++i)
+          nodes(i, a) = x[i];
+      }
+      mesh.setPolytopeTransformation({dimension, cell->getIndex()},
+        new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+          std::move(nodes), element));
+    }
+    AABB locator(mesh);
+    locator.setExhaustiveFallback(false);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Polytope::Traits traits(type);
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        Math::SpatialPoint x;
+        cell->getTransformation().transform(
+          x, 0.9 * element.getNode(a) + 0.1 * traits.getCentroid());
+        const auto located = locator.locate(x);
+        ASSERT_TRUE(located.has_value()) << "cell=" << cell->getIndex();
+        Math::SpatialPoint mapped;
+        located->getPolytope().getTransformation().transform(
+          mapped, located->getReferenceCoordinates());
+        EXPECT_LT((mapped - x).norm(), 1e-9);
+      }
+    }
+  }
+}
+
 TEST(Location_AABB, Locates1DSegment)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()
@@ -505,4 +549,134 @@ TEST(Location_AABB, PerfSmoke3D)
             << "ms  hit=" << usPerQuery(tHit0, tHit1, hits.size())
             << "us/q  nearMiss=" << usPerQuery(tNear0, tNear1, nearCount) << "us/q  ("
             << mesh.getCellCount() << " cells)\n";
+}
+
+namespace
+{
+  // Curves every cell of a grid of `type` with a degree-K geometry, then
+  // requires the locator to find points taken from the interior of each
+  // curved cell. The exhaustive fallback is off, so a box that failed to
+  // bound its cell's curved image would drop the containing candidate and
+  // the query would come back empty.
+  template <size_t K>
+  void checkBoxesBoundCurvedImage(Polytope::Type type, Real amplitude)
+  {
+    const size_t dimension = Polytope::Traits(type).getDimension();
+    Array<size_t> grid(dimension);
+    grid.setConstant(2);
+    Mesh mesh = LocalMesh::UniformGrid(type, grid);
+
+    Variational::RealH1Element<K> element(type);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      Geometry::PointCloud nodes(dimension, element.getCount());
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        Math::SpatialPoint x;
+        cell->getTransformation().transform(x, element.getNode(a));
+        const Real bump = amplitude * std::sin(3 * x[0]);
+        for (size_t i = 0; i < dimension; ++i)
+          nodes(i, a) = x[i] + (i == dimension - 1 ? bump : Real(0));
+      }
+      mesh.setPolytopeTransformation({dimension, cell->getIndex()},
+        new Geometry::ParametricTransformation<Variational::RealH1Element<K>>(
+          std::move(nodes), element));
+    }
+
+    AABB locator(mesh);
+    locator.setExhaustiveFallback(false);
+
+    const Polytope::Traits traits(type);
+    const size_t nv = traits.getVertexCount();
+    std::mt19937 rng(20260907u + K);
+    std::uniform_real_distribution<Real> weight(0, 1);
+
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      for (size_t sample = 0; sample < 40; ++sample)
+      {
+        // A random convex combination of the reference vertices: every
+        // reference domain here is convex, so this lands inside. Pulling it
+        // toward the centroid keeps it clear of the boundary, where a hit on
+        // a neighbouring cell would be legitimate.
+        Math::SpatialPoint rc = Math::SpatialPoint::Zero(dimension);
+        Real total = 0;
+        for (size_t v = 0; v < nv; ++v)
+        {
+          const Real w = weight(rng);
+          rc += w * traits.getVertex(v);
+          total += w;
+        }
+        rc /= total;
+        rc = 0.85 * rc + 0.15 * traits.getCentroid();
+
+        Math::SpatialPoint x;
+        cell->getTransformation().transform(x, rc);
+
+        const auto located = locator.locate(x);
+        ASSERT_TRUE(located.has_value()) << "type=" << static_cast<int>(type)
+                                         << " K=" << K << " cell=" << cell->getIndex();
+
+        Math::SpatialPoint mapped;
+        located->getPolytope().getTransformation().transform(
+          mapped, located->getReferenceCoordinates());
+        EXPECT_LT((mapped - x).norm(), 1e-8)
+          << "type=" << static_cast<int>(type) << " K=" << K;
+      }
+    }
+  }
+}
+
+TEST(Location_AABB, BoxesBoundCurvedImageOfEveryPolytopeType)
+{
+  for (const auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    checkBoxesBoundCurvedImage<1>(type, 0.0);
+    checkBoxesBoundCurvedImage<2>(type, 0.15);
+    checkBoxesBoundCurvedImage<3>(type, 0.15);
+  }
+}
+
+TEST(Location_AABB, DegreeOneGeometryBasisIsANonNegativePartitionOfUnity)
+{
+  // The vertex-box fast path in makeBox is legal exactly because a degree-one
+  // geometry map is a convex combination of the mapped vertices. That holds
+  // when the basis is non-negative and sums to one -- barycentric on the
+  // simplices, multilinear on the tensor geometries, and the rational
+  // shape functions on the pyramid.
+  std::mt19937 rng(20260907u);
+  std::uniform_real_distribution<Real> weight(0, 1);
+  for (const auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    const Polytope::Traits traits(type);
+    const size_t dimension = traits.getDimension();
+    const size_t nv = traits.getVertexCount();
+    Variational::RealP1Element element(type);
+    ASSERT_EQ(element.getCount(), nv);
+    for (size_t sample = 0; sample < 500; ++sample)
+    {
+      Math::SpatialPoint rc = Math::SpatialPoint::Zero(dimension);
+      Real total = 0;
+      for (size_t v = 0; v < nv; ++v)
+      {
+        const Real w = weight(rng);
+        rc += w * traits.getVertex(v);
+        total += w;
+      }
+      rc /= total;
+
+      Real sum = 0;
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        const Real value = element.getBasis(a)(rc);
+        EXPECT_GE(value, -1e-12) << "type=" << static_cast<int>(type) << " a=" << a;
+        sum += value;
+      }
+      EXPECT_NEAR(sum, 1.0, 1e-12) << "type=" << static_cast<int>(type);
+    }
+  }
 }

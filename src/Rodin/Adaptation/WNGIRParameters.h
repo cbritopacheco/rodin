@@ -88,6 +88,12 @@ namespace Rodin::Adaptation
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
       bool trace = false; ///< Print per-iteration diagnostics when true.
+      /// @brief Compute the rigid-observation coercivity diagnostics.
+      ///
+      /// The initial and final rigid-mode states are reported but never read
+      /// by the solve, and they cost a generalized eigenproblem each. Set to
+      /// false to skip them when the report fields are not needed.
+      bool rigidDiagnostics = true;
   };
 }
 

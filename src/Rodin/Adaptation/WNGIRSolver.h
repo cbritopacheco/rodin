@@ -68,6 +68,8 @@ namespace Rodin::Adaptation
       using StepSolverType = Solver::CG<LinearSystemType>;
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
+      using LinearFormType = std::decay_t<decltype(Variational::LinearForm(
+        std::declval<TestFunctionType&>()))>;
 
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
@@ -145,7 +147,9 @@ namespace Rodin::Adaptation
           m_vStep(v.getFiniteElementSpace()),
           m_stepProblem(m_duStep, m_vStep),
           m_stepSolver(m_stepProblem),
-          m_bulkForm(m_duStep, m_vStep)
+          m_bulkForm(m_duStep, m_vStep),
+          m_obsForm(m_duStep, m_vStep),
+          m_surfaceForm(m_vStep)
       {}
 
       /// @brief Sets WNGIR runtime parameters.
@@ -375,11 +379,14 @@ namespace Rodin::Adaptation
 
         SurfaceState currentSurface = surfaceState(u);
         recordSurfaceState(currentSurface);
-        const RigidModeState initialRigid = getRigidModeState(mesh, fes, u, phi, grad,
-          interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-        rep.rigidModeCoercivity = initialRigid.minimum;
-        rep.rigidModeCoercivityRatio = initialRigid.ratio;
-        rep.rigidModeDimension = initialRigid.dimension;
+        if (p.rigidDiagnostics)
+        {
+          const RigidModeState initialRigid = getRigidModeState(mesh, fes, u, phi, grad,
+            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
+          rep.rigidModeCoercivity = initialRigid.minimum;
+          rep.rigidModeCoercivityRatio = initialRigid.ratio;
+          rep.rigidModeDimension = initialRigid.dimension;
+        }
         if (!(currentSurface.activeLen > Real(0)))
         {
           rep.exitReason = "observation-degenerate-active-set";
@@ -406,12 +413,19 @@ namespace Rodin::Adaptation
           auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
           surfaceForce.setOrder(surfaceOrder);
           surfaceForce.over(p.interfaceAttribute);
+          // The observation metric and the fitting force depend on the outer
+          // displacement, not on the barrier increment, so they are assembled
+          // here and reused by every correction below.
+          m_obsForm = obsMetric;
+          m_obsForm.assemble();
+          m_surfaceForm = surfaceForce;
+          m_surfaceForm.assemble();
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
           bool solveOk = true;
           Real predictorAction = Real(0);
           typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
-          predictorBody = predictorBody + obsMetric - surfaceForce;
+          predictorBody = predictorBody + m_obsForm - m_surfaceForm;
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
@@ -468,7 +482,7 @@ namespace Rodin::Adaptation
                 Detail::WNGIRPrimalBarrierForce barrierForce(
                   m_vStep, u, vK, p, barrierCoefficient);
                 typename ProblemType::ProblemBodyType body(m_bulkForm);
-                body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
+                body = body + m_obsForm + barrierMetric - m_surfaceForm - barrierForce;
                 m_stepProblem = body;
                 m_stepProblem.assemble();
                 rep.tAssembly += secondsSince(tic);
@@ -742,11 +756,14 @@ namespace Rodin::Adaptation
           ePrev = eNow;
         }
 
-        const RigidModeState finalRigid = getRigidModeState(mesh, fes, u, phi, grad,
-          interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-        rep.rigidModeCoercivity = finalRigid.minimum;
-        rep.rigidModeCoercivityRatio = finalRigid.ratio;
-        rep.rigidModeDimension = finalRigid.dimension;
+        if (p.rigidDiagnostics)
+        {
+          const RigidModeState finalRigid = getRigidModeState(mesh, fes, u, phi, grad,
+            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
+          rep.rigidModeCoercivity = finalRigid.minimum;
+          rep.rigidModeCoercivityRatio = finalRigid.ratio;
+          rep.rigidModeDimension = finalRigid.dimension;
+        }
 
         m_report = rep;
         return rep;
@@ -1482,7 +1499,30 @@ namespace Rodin::Adaptation
         const RigidStabilisation& stabilisation, const Math::Vector<Real>& x,
         Math::Vector<Real>& y) const
       {
-        y = A * x;
+        // The step operator is a sum of symmetric bilinear forms and carries no
+        // boundary elimination, so it is symmetric and its column-major storage
+        // doubles as row-major: column k holds row k. Each output entry is then
+        // an independent dot product, which parallelises without the scattered
+        // writes a column-wise product would need.
+        y.resize(A.rows());
+        if (A.isCompressed())
+        {
+          const auto* const outer = A.outerIndexPtr();
+          const auto* const inner = A.innerIndexPtr();
+          const auto* const values = A.valuePtr();
+#pragma omp parallel for schedule(static)
+          for (Eigen::Index k = 0; k < A.outerSize(); ++k)
+          {
+            Real sum = 0;
+            for (auto p = outer[k]; p < outer[k + 1]; ++p)
+              sum += values[p] * x[inner[p]];
+            y[k] = sum;
+          }
+        }
+        else
+        {
+          y = A * x;
+        }
         for (std::size_t k = 0; k < stabilisation.weights.size(); ++k)
           y += stabilisation.weights[k] * stabilisation.modes[k].dot(x) *
             stabilisation.modes[k];
@@ -1594,6 +1634,12 @@ namespace Rodin::Adaptation
       StepSolverType m_stepSolver;
       BilinearFormType m_bulkForm;
       bool m_bulkFormAssembled = false;
+      /// @brief Observation metric and fitting force at the outer displacement.
+      ///
+      /// Both depend on the outer displacement only, so they are assembled once
+      /// per nonlinear iteration and reused by every barrier correction.
+      BilinearFormType m_obsForm;
+      LinearFormType m_surfaceForm;
       std::vector<Math::Vector<Real>> m_rigidModeBasis;
       Eigen::Index m_rigidModeSize = -1;
       std::size_t m_rigidModeDimension = 0;
