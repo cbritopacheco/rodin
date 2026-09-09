@@ -152,6 +152,32 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     target_link_libraries(Atrium PUBLIC Rodin::Scotch)
   endif()
 
+  # Two-dimensional left atrium with a rectangular appendage. Same stabilised
+  # P1/P1 formulation and coagulation kinetics as Atrium, but driven by the two
+  # measured pressure waveforms in resources/examples/Heart rather than by a 0D
+  # ventricle. The mesh must be flattened once before the first run:
+  #   python3 examples/Heart/LA2D/make_la2d_mesh.py \
+  #           resources/examples/Heart/LA2D_rectLAA.mesh \
+  #           resources/examples/Heart/LA2D_rectLAA_2D.mesh
+  # LA2D_rectLAA.mesh is stored as MEDIT "Dimension 3" with z = 0, and Rodin
+  # reads the space dimension from that keyword, so loading it unchanged would
+  # give a three-component velocity on a surface.
+  add_executable(LeftAtrium2D LeftAtrium2D.cpp)
+  target_link_libraries(LeftAtrium2D
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(LeftAtrium2D PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(LeftAtrium2D PUBLIC Rodin::Scotch)
+  endif()
+
   add_executable(CoronaryArtery
     CoronaryArtery.cpp
     CoronaryArtery/CoupledLV0DCoronary3D.cpp

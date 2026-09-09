@@ -249,7 +249,7 @@ int main()
   }
 
   const Real dt = 1e-3;
-  const int nsteps = 3 * static_cast<int>(0.85 / dt);
+  const int nsteps = 10 * static_cast<int>(0.85 / dt);
   Real Vprev = (4.0 / 3.0) * std::numbers::pi_v<Real> * in.R0 * in.R0 * in.R0;
 
   std::ofstream out("poroelastic_sphere_0d_cycle.csv");

@@ -1,0 +1,39 @@
+== 1/2: Cross and Carreau-Yasuda analytic vs quadrature ==
+  Cross: max relative discrepancy over 3 states x 10 tau_w = 3.17e-13
+  CY: max relative discrepancy over 3 states x 10 tau_w = 1.55e-12
+== 3: Newtonian limits ==
+  Cross mu0=muInf: I_analytic/(tau_w^4/(4 mu)) = 1.000000000000
+  CY    mu0=muInf: I_analytic/(tau_w^4/(4 mu)) = 1.000000000000
+== 4: Quemada F(alpha,q) vs quadrature ==
+  healthy: implied k0=4.0497, kInf=1.9089 (admissibility 1-k0*phi/2 = 0.1496)
+/tmp/claude-0/-home-claude/eb2157e2-bafb-58c6-90dc-ac4258f50b23/scratchpad/verify_closures.py:45: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  the requested tolerance from being achieved.  The error may be 
+  underestimated.
+  val, err = quad(f, 0.0, gw, limit=400, epsabs=1e-300, epsrel=1e-12)
+  diabetes: implied k0=3.8886, kInf=1.6265 (admissibility 1-k0*phi/2 = 0.1251)
+  hyperviscous: implied k0=3.6170, kInf=1.1539 (admissibility 1-k0*phi/2 = 0.0650)
+  Quemada: max relative discrepancy = 1.49e-04
+== 5: exact tangent vs centred FD (CY healthy, R=25um,L=1mm,N=1) ==
+  dp=   50.0 Pa: dQ/ddp exact=3.094986e-14, FD=3.094986e-14, rel=1.17e-11
+  dp=  500.0 Pa: dQ/ddp exact=3.146228e-14, FD=3.146228e-14, rel=2.02e-11
+  dp= 5000.0 Pa: dQ/ddp exact=3.154064e-14, FD=3.154064e-14, rel=4.05e-11
+== 6: mu_eff table spot checks (CY fits) ==
+  healthy:
+    ga0=50: mu_eff=5.75 mPa.s, e_inf=-15.5%, e(1/10)=-44.0%, e(2)=+7.0%
+    ga0=100: mu_eff=5.38 mPa.s, e_inf=-9.6%, e(1/10)=-33.0%, e(2)=+4.2%
+    ga0=300: mu_eff=5.08 mPa.s, e_inf=-4.3%, e(1/10)=-18.1%, e(2)=+1.8%
+    ga0=800: mu_eff=4.96 mPa.s, e_inf=-2.0%, e(1/10)=-9.4%, e(2)=+0.9%
+  diabetes:
+    ga0=50: mu_eff=5.94 mPa.s, e_inf=-9.8%, e(1/10)=-36.0%, e(2)=+4.5%
+    ga0=100: mu_eff=5.69 mPa.s, e_inf=-5.7%, e(1/10)=-25.2%, e(2)=+2.6%
+    ga0=300: mu_eff=5.49 mPa.s, e_inf=-2.3%, e(1/10)=-12.3%, e(2)=+1.0%
+    ga0=800: mu_eff=5.42 mPa.s, e_inf=-1.0%, e(1/10)=-5.8%, e(2)=+0.5%
+  hyperviscous:
+    ga0=50: mu_eff=7.45 mPa.s, e_inf=-26.1%, e(1/10)=-55.4%, e(2)=+12.2%
+    ga0=100: mu_eff=6.64 mPa.s, e_inf=-17.1%, e(1/10)=-45.4%, e(2)=+7.7%
+    ga0=300: mu_eff=5.99 mPa.s, e_inf=-8.0%, e(1/10)=-28.6%, e(2)=+3.5%
+    ga0=800: mu_eff=5.73 mPa.s, e_inf=-3.9%, e(1/10)=-16.4%, e(2)=+1.7%
+== 7: transition shear rates mu_eff(g_tr)=(1+eps) muInf ==
+  healthy: eps=0.2: gamma_tr=44.9 1/s, eps=0.1: gamma_tr=108.0 1/s
+  diabetes: eps=0.2: gamma_tr=24.2 1/s, eps=0.1: gamma_tr=55.2 1/s
+  hyperviscous: eps=0.2: gamma_tr=103.9 1/s, eps=0.1: gamma_tr=252.5 1/s

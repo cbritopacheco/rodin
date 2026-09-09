@@ -1445,16 +1445,7 @@ namespace Rodin::Examples::Heart
     const auto oseenTemamJacobian = divLag * Dot(m_u, m_v);
 
     const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
-    // The incoming-kinetic-energy branch is max(-u.n, 0) on EVERY pressure
-    // boundary, inlets included. With the OUTWARD normal, taking v = u in the
-    // convective pair leaves (rho/2) int_G (u^n.n)|u|^2 on the left, so
-    // wherever fluid ENTERS (u.n < 0) that is a positive, cubic, unbounded
-    // energy source. max(+u.n, 0) arms the branch that is already dissipative
-    // and leaves the dangerous one untouched: over a whole filling phase it is
-    // identically zero. What kept this from showing here is the inlet
-    // impedance, which supplies a bound of its own -- and therefore also sets
-    // the inflow rate.
-    const auto inletBeta = Max(-Dot(m_uOld, normal), 0.0);
+    const auto inletBeta = Max(Dot(m_uOld, normal), 0.0);
     const auto outletBackflowDamping =
       0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
     const auto inletBackflowDamping =
@@ -2073,31 +2064,22 @@ namespace Rodin::Examples::Heart
     const auto gradUn1 = Dot(gradRec1, normal);
     const auto gradUn2 = Dot(gradRec2, normal);
 
-    // Wall shear rate. At a no-slip wall u vanishes identically on the surface,
-    // so every tangential derivative vanishes with it and the only surviving
-    // component of grad u is the wall-normal one: gamma_w = |du_t/dn|. It MUST
-    // be built from the RECOVERED gradient. Rebuilding it here from
-    // Jacobian(uSol) is what the previous version did, and that expression is
-    // evaluated at boundary quadrature points, where the P1 no-slip trace makes
-    // it collapse to zero: gamma_dot fell back to gammaRegularization and the
-    // Carreau-Yasuda law returned mu_0 instead of the local viscosity, which
-    // inflated tau_w by mu_0/mu_inf ~ 65. The volume viscosity field written to
-    // XDMF was unaffected (same expression, but under a volume Integral), which
-    // is why only the WSS map was wrong.
-    const auto gradUnVec = VectorFunction(gradUn0, gradUn1, gradUn2);
-    const auto gradUnTan = gradUnVec - Dot(gradUnVec, normal) * normal;
-    const auto gammaWall =
-      Sqrt(cy.gammaRegularization * cy.gammaRegularization
-           + Dot(gradUnTan, gradUnTan));
-
-    // Local Carreau-Yasuda viscosity at that shear rate. Same law as the
-    // viscosity field written to XDMF, so the WSS map and the viscosity map are
-    // consistent by construction: tau_w = mu(gamma_w) gamma_w.
-    const auto carreauBase = 1.0 + Pow(cy.lambda * gammaWall, cy.yasuda);
+    // Local Carreau-Yasuda viscosity, built from the SAME expression projected
+    // into m_mu (the "viscosity" field written to XDMF). The wall shear stress
+    // is tau_w = mu(gamma) * du/dn; using the constant muInf here decoupled the
+    // WSS from the rheology entirely, so the WSS map could not reflect the
+    // viscosity field (no correlation) and under-predicted tau_w in exactly the
+    // low-shear recirculation zones where mu departs from muInf.
+    const auto symU = 0.5 * (Jacobian(uSol) + Transpose(Jacobian(uSol)));
+    const auto gammaDot =
+      Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symU, symU));
+    const auto carreauBase = 1.0 + Pow(cy.lambda * gammaDot, cy.yasuda);
     const auto muLocal =
       cy.muInf + (cy.mu0 - cy.muInf) * Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
 
-    const auto wallStressRec = muLocal * gradUnTan;
+    const auto tracRec =
+      VectorFunction(muLocal * gradUn0, muLocal * gradUn1, muLocal * gradUn2);
+    const auto wallStressRec = tracRec - Dot(tracRec, normal) * normal;
 
     const Real wssReg = 1.0e-3;
     m_wssProj = BoundaryIntegral(Dot(m_wssTrial, m_wssTest)).over(m_cfg.wall) +

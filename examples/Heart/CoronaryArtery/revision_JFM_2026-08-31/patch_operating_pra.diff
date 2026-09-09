@@ -1,0 +1,124 @@
+--- CoronaryArtery/CoupledLV0DCoronary3D.h.prepatch_pra	2026-09-01 21:45:17.529687470 +0000
++++ CoronaryArtery/CoupledLV0DCoronary3D.h	2026-09-01 21:45:17.540340087 +0000
+@@ -715,6 +715,23 @@
+           /// @brief Right atrial (coronary sinus) drainage pressure.
+           Real rightAtrialPressure = 1800.0;
+ 
++          /// @brief Operating right atrial pressure of the running 0D outlets
++          ///        (Pa). <= 0 means "same as rightAtrialPressure".
++          /// @details Separates the runtime drainage pressure from the value
++          ///          used by the resting calibration. A venous-hypertension
++          ///          scenario (right-heart failure, tricuspid regurgitation,
++          ///          constrictive pericarditis; ~1800-2500 Pa, 13-19 mmHg)
++          ///          should displace the operating point of a bed whose
++          ///          (R_a, R_v, C) were calibrated at the healthy baseline:
++          ///          set THIS value and leave rightAtrialPressure alone.
++          ///          Setting rightAtrialPressure itself instead models a
++          ///          chronically adapted bed, because the calibration budget
++          ///          dP = p_ar(0) - P_RA then absorbs part of the change.
++          ///          The first cycles carry a small transient because the
++          ///          calibrated initial p_tm uses the baseline value; discard
++          ///          them as usual.
++          Real operatingRightAtrialPressure = 0.0;
++
+           Real inletTangentialDamping = 1e3;
+           Real inletVelocityDamping = 0.0;
+       };
+--- CoronaryArtery/CoupledLV0DCoronary3D.cpp.prepatch_pra	2026-09-01 21:45:17.532327957 +0000
++++ CoronaryArtery/CoupledLV0DCoronary3D.cpp	2026-09-01 21:45:17.543461038 +0000
+@@ -553,12 +553,18 @@
+     const auto& s = model.getState();
+     const auto& law = cfg.outletFlowLaw;
+ 
++    // Operating (runtime) right atrial pressure. May differ from the value the
++    // calibration used; see Config::operatingRightAtrialPressure.
++    const Real praOp = (cfg.operatingRightAtrialPressure > 0.0)
++      ? cfg.operatingRightAtrialPressure
++      : cfg.rightAtrialPressure;
++
+     const Real pim = cfg.intramyocardialFraction * s.pv;
+     const Real ptmOld = bc.ptm;
+ 
+     // Drainage pressure of the Starling throat. Outside the myocardium the
+     // reservoir is the right atrium; inside, the collapse pressure is p_im.
+-    const Real pDrain = std::max<Real>(pim, cfg.rightAtrialPressure);
++    const Real pDrain = std::max<Real>(pim, praOp);
+ 
+     // Is the venular lumen open?
+     //
+@@ -578,7 +584,7 @@
+     // Backflow through the *open* branch is self-limiting and needs no floor:
+     // q_v < 0 gives C dp_tm/dt > 0, which raises p_tm and closes the gradient.
+     // The Jacobian stays C/dt + G_v > 0 in both branches.
+-    const bool waterfall = pim > cfg.rightAtrialPressure;
++    const bool waterfall = pim > praOp;
+ 
+     auto venousLumenOpen = [&](Real p) { return !waterfall || p > 0.0; };
+ 
+--- CoronaryArtery.cpp.prepatch_pra	2026-09-01 21:45:17.533487554 +0000
++++ CoronaryArtery.cpp	2026-09-01 21:45:38.677436770 +0000
+@@ -230,6 +230,64 @@
+         cfg.timeAdaptivityMaxLevels = maxAdaptivityLevels;
+       }
+ 
++      // ---- Pathological-scenario knobs -----------------------------------
++      // Venous hypertension: runtime drainage pressure of the outlets, with
++      // the calibration left at the healthy baseline (frozen bed geometry).
++      PetscReal operatingPra = cfg.operatingRightAtrialPressure;
++      PetscBool operatingPraSet = PETSC_FALSE;
++      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
++        "-coronary_operating_pra", &operatingPra, &operatingPraSet);
++      assert(ierr == PETSC_SUCCESS);
++      if (operatingPraSet)
++      {
++        if (operatingPra <= 0)
++          throw std::runtime_error("-coronary_operating_pra must be positive (Pa).");
++        cfg.operatingRightAtrialPressure = operatingPra;
++      }
++
++      // Pressure-overload / subendocardial territory: transmission fraction
++      // p_im = alpha p_LV. Baseline 0.7; subendocardium up to ~0.9.
++      PetscReal alphaIm = cfg.intramyocardialFraction;
++      PetscBool alphaImSet = PETSC_FALSE;
++      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
++        "-coronary_alpha_im", &alphaIm, &alphaImSet);
++      assert(ierr == PETSC_SUCCESS);
++      if (alphaImSet)
++      {
++        if (alphaIm < 0 || alphaIm > 1)
++          throw std::runtime_error("-coronary_alpha_im must be in [0, 1].");
++        cfg.intramyocardialFraction = alphaIm;
++      }
++
++      // Sensitivity knob: total microvascular compliance (m^3/Pa). Changes the
++      // retrograde spike, hardly the mean flow; identified range 1e-10..3e-9.
++      PetscReal complianceTotal = cfg.coronaryComplianceTotal;
++      PetscBool complianceTotalSet = PETSC_FALSE;
++      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
++        "-coronary_compliance_total", &complianceTotal, &complianceTotalSet);
++      assert(ierr == PETSC_SUCCESS);
++      if (complianceTotalSet)
++      {
++        if (complianceTotal <= 0)
++        {
++          throw std::runtime_error(
++            "-coronary_compliance_total must be positive (m^3/Pa).");
++        }
++        cfg.coronaryComplianceTotal = complianceTotal;
++      }
++
++      // Per-scenario output directory: <prefix>/CoronaryArtery.{xdmf,csv}.
++      char outPrefix[256] = {};
++      PetscBool outPrefixSet = PETSC_FALSE;
++      ierr = PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR,
++        "-coronary_output_prefix", outPrefix, sizeof(outPrefix), &outPrefixSet);
++      assert(ierr == PETSC_SUCCESS);
++      if (outPrefixSet)
++      {
++        cfg.xdmfBasename = std::string(outPrefix) + "/CoronaryArtery";
++        cfg.csvPath = std::string(outPrefix) + "/CoronaryArtery.csv";
++      }
++
+       Rodin::Examples::Heart::CoupledLV0DCoronary3D simulation(context, cfg);
+       status = simulation.initialize().run();
+     }

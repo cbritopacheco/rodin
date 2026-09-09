@@ -625,7 +625,16 @@ int main(int argc, char** argv)
   const auto uNormal = Dot(u, normal) * normal;
   const auto uTangential = u - uNormal;
 
-  const auto inletBeta = Max(Dot(uOld, normal), 0.0);
+  // The incoming-kinetic-energy branch is max(-u.n, 0) on EVERY pressure
+  // boundary, inlets included. With the OUTWARD normal, taking v = u in the
+  // convective pair leaves (rho/2) int_G (u^n.n)|u|^2 on the left, so
+  // wherever fluid ENTERS (u.n < 0) that is a positive, cubic, unbounded
+  // energy source. max(+u.n, 0) arms the branch that is already dissipative
+  // and leaves the dangerous one untouched: over a whole filling phase it is
+  // identically zero. What kept this from showing here is the inlet
+  // impedance, which supplies a bound of its own -- and therefore also sets
+  // the inflow rate.
+  const auto inletBeta = Max(-Dot(uOld, normal), 0.0);
   const auto outletBeta = Max(-Dot(uOld, normal), 0.0);
   const auto inletBackflow = 0.5 * cfg.rho * inletBeta;
   const auto outletBackflow = 0.5 * cfg.rho * outletBeta;

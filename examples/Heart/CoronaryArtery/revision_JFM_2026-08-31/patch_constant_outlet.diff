@@ -1,0 +1,92 @@
+--- CoronaryArtery/CoupledLV0DCoronary3D.h.prepatch_const	2026-09-01 22:27:14.696701567 +0000
++++ CoronaryArtery/CoupledLV0DCoronary3D.h	2026-09-01 22:27:14.708810790 +0000
+@@ -732,6 +732,27 @@
+           ///          them as usual.
+           Real operatingRightAtrialPressure = 0.0;
+ 
++          /// @brief Freeze the reduced outlet closure at its high-shear
++          ///        plateau, giving a CONSTANT outlet resistance.
++          /// @details The comparison the paper reports at fixed haematological
++          ///          state: R_mu is replaced by
++          ///          R_inf = 8 mu_inf L / (N pi R^4), i.e. the WRMS table is
++          ///          built with mu(gammadot) == mu_inf so Phi = mu_inf/mu_N is
++          ///          constant and the pressure-flow relation of every outlet
++          ///          becomes linear. The plateau is taken from the ACTIVE law
++          ///          (mu_inf for Carreau-Yasuda; mu_F (1 - k_inf phi/2)^-2 for
++          ///          Quemada), so setting this is exactly "same mu_inf, zero
++          ///          shear-thinning".
++          ///
++          ///          Only the 0D closure changes: Config::viscosity still
++          ///          drives the 3D Carreau-Yasuda field, so a run with this
++          ///          flag differs from its R_mu twin ONLY in the reduced
++          ///          outlet model. That is what isolates the closure, and it
++          ///          is why the flag exists instead of setting
++          ///          viscosity.mu0 = viscosity.muInf, which would make the
++          ///          resolved domain Newtonian as well.
++          bool constantOutletResistance = false;
++
+           Real inletTangentialDamping = 1e3;
+           Real inletVelocityDamping = 0.0;
+       };
+--- CoronaryArtery/CoupledLV0DCoronary3D.cpp.prepatch_const	2026-09-01 22:27:14.699298969 +0000
++++ CoronaryArtery/CoupledLV0DCoronary3D.cpp	2026-09-01 22:27:14.711650649 +0000
+@@ -382,7 +382,19 @@
+       return qp.plasmaViscosity / (b * b);
+     };
+ 
++    // Constant-resistance closure: freeze the law at the high-shear plateau of
++    // whichever rheology is active. With mu constant the WRMS integral is
++    // I = tau_w^4 / (4 mu) exactly, so mu_ap == mu at every table node and the
++    // outlet becomes the linear resistance R_inf = 8 mu_inf L / (N pi R^4).
++    // The 3D field keeps Config::viscosity: only the reduced closure changes.
++    const Real muPlateau = quemada
++      ? qp.plasmaViscosity /
++          ((1.0 - 0.5 * qkInf * phi) * (1.0 - 0.5 * qkInf * phi))
++      : muInf;
++
+     auto mu = [&](Real g) -> Real {
++      if (cfg.constantOutletResistance)
++        return muPlateau;
+       if (quemada)
+         return muQ(g);
+       return muInf +
+@@ -390,6 +402,8 @@
+     };
+ 
+     auto dmu = [&](Real g) -> Real {
++      if (cfg.constantOutletResistance)
++        return 0.0;
+       if (quemada)
+       {
+         // Central difference in log g: the law is smooth and the table is
+@@ -1155,6 +1169,10 @@
+                       << ", f_shear=" << fShear << ")"
+                       << "  (mu_N=" << muN << ", mu_inf=" << m_cfg.viscosity.muInf
+                       << ", mu_0=" << m_cfg.viscosity.mu0 << ")"
++                      << (m_cfg.constantOutletResistance
++                            ? "  [CONSTANT outlet closure: mu_ap frozen at the "
++                              "high-shear plateau; 3D rheology unchanged]"
++                            : "")
+                       << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0
+                       << "  |  outlet resistance is assembled implicitly: the "
+                       << "coupling is unconditionally stable in dt"
+--- CoronaryArtery.cpp.prepatch_const	2026-09-01 22:27:14.700694336 +0000
++++ CoronaryArtery.cpp	2026-09-01 22:27:14.712873517 +0000
+@@ -276,6 +276,17 @@
+         cfg.coronaryComplianceTotal = complianceTotal;
+       }
+ 
++      // Constant-resistance outlet closure (the mu_inf comparison run): the
++      // reduced outlets lose their shear dependence while the 3D Carreau-Yasuda
++      // field is left untouched, so the pair of runs isolates the closure.
++      PetscBool constantOutlet = PETSC_FALSE;
++      PetscBool constantOutletSet = PETSC_FALSE;
++      ierr = PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
++        "-coronary_constant_outlet", &constantOutlet, &constantOutletSet);
++      assert(ierr == PETSC_SUCCESS);
++      if (constantOutletSet)
++        cfg.constantOutletResistance = (constantOutlet == PETSC_TRUE);
++
+       // Per-scenario output directory: <prefix>/CoronaryArtery.{xdmf,csv}.
+       char outPrefix[256] = {};
+       PetscBool outPrefixSet = PETSC_FALSE;

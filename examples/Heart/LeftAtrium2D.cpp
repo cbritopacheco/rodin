@@ -1,15 +1,22 @@
-// Atrium.cpp
+// LeftAtrium2D.cpp
 //
-// Run:
-//   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
+// Run (from the build directory):
+//   python3 ../examples/Heart/LA2D/make_la2d_mesh.py \
+//           ../resources/examples/Heart/LA2D_rectLAA.mesh \
+//           ../resources/examples/Heart/LA2D_rectLAA_2D.mesh
+//   mpirun -n 4 ./examples/Heart/LeftAtrium2D -la2d_dt 1e-3
 //
-// Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
-//          -atrium_species_cycles, -atrium_pin.
+// Options: -la2d_mesh, -la2d_pv, -la2d_mv, -la2d_mesh_scale, -la2d_dt,
+//          -la2d_period, -la2d_flow_cycles, -la2d_species_cycles,
+//          -la2d_output_every, -la2d_vms_scale, -la2d_graddiv_scale,
+//          -la2d_pspg_scale, -la2d_pspg_residual, -la2d_vms,
+//          -la2d_kinetics, -la2d_th_in, -la2d_inlet_impedance.
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <fstream>
 #include <iostream>
-#include <numbers>
+#include <sstream>
 #include <stdexcept>
 
 #include <boost/mpi/communicator.hpp>
@@ -25,7 +32,7 @@
 #include <Rodin/Scotch/MeshPartitioner.h>
 #endif
 
-#include "Atrium.h"
+#include "LeftAtrium2D.h"
 #include "CoronaryArtery/CoronaryArteryAlerts.h"
 #include "CoronaryArtery/CoronaryArteryTiming.h"
 
@@ -67,13 +74,104 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  Atrium::Atrium(const Context::MPI& context, const Config& cfg)
+  // ==========================================================================
+  // PressureWaveform
+  // ==========================================================================
+  void PressureWaveform::load(const std::string& path)
+  {
+    std::ifstream file(path);
+    if (!file)
+      throw std::runtime_error("Failed to open the pressure file " + path);
+
+    m_path = path;
+    m_t.clear();
+    m_p.clear();
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+      const auto first = line.find_first_not_of(" \t\r\n");
+      if (first == std::string::npos || line[first] == '#')
+        continue;
+
+      std::istringstream row(line.substr(first));
+      Real t = 0.0;
+      Real p = 0.0;
+      if (!(row >> t >> p))
+        throw std::runtime_error("Malformed line in " + path + ": " + line);
+
+      if (!m_t.empty() && !(t > m_t.back()))
+        throw std::runtime_error("Non-increasing time column in " + path);
+
+      m_t.push_back(t);
+      m_p.push_back(p);
+    }
+
+    if (m_t.size() < 2)
+      throw std::runtime_error("Fewer than two samples in " + path);
+
+    m_period = m_t.back() - m_t.front();
+    if (!(m_period > 0.0))
+      throw std::runtime_error("Zero period in " + path);
+
+    m_min = *std::min_element(m_p.begin(), m_p.end());
+    m_max = *std::max_element(m_p.begin(), m_p.end());
+
+    // Trapezoidal mean over one period, so the reported figure is the mean of
+    // the signal and not the mean of the samples: the file is uniformly
+    // sampled, but nothing here requires it to be.
+    Real integral = 0.0;
+    for (size_t i = 0; i + 1 < m_t.size(); ++i)
+      integral += 0.5 * (m_p[i] + m_p[i + 1]) * (m_t[i + 1] - m_t[i]);
+    m_mean = integral / m_period;
+  }
+
+  PressureWaveform::Real PressureWaveform::operator()(Real t) const
+  {
+    assert(m_t.size() >= 2);
+
+    const Real t0 = m_t.front();
+    Real tau = t - t0;
+    tau -= m_period * std::floor(tau / m_period);
+    const Real x = t0 + tau;
+
+    // upper_bound, then step back: the samples are strictly increasing, so the
+    // bracketing interval is [it - 1, it) and the index arithmetic cannot run
+    // off either end.
+    const auto it = std::upper_bound(m_t.begin(), m_t.end(), x);
+    if (it == m_t.begin())
+      return m_p.front();
+    if (it == m_t.end())
+      return m_p.back();
+
+    const size_t hi = static_cast<size_t>(it - m_t.begin());
+    const size_t lo = hi - 1;
+    const Real dt = m_t[hi] - m_t[lo];
+    const Real s = (x - m_t[lo]) / dt;
+    return (1.0 - s) * m_p[lo] + s * m_p[hi];
+  }
+
+  // ==========================================================================
+  // LeftAtrium2D
+  // ==========================================================================
+  LeftAtrium2D::AttributeSet LeftAtrium2D::makeInletSet(const Config& cfg)
+  {
+    return AttributeSet(cfg.labels.inlets.begin(), cfg.labels.inlets.end());
+  }
+
+  LeftAtrium2D::AttributeSet LeftAtrium2D::makeWallSet(const Config& cfg)
+  {
+    AttributeSet out(cfg.labels.wall.begin(), cfg.labels.wall.end());
+    out.insert(cfg.labels.appendage.begin(), cfg.labels.appendage.end());
+    return out;
+  }
+
+  LeftAtrium2D::LeftAtrium2D(const Context::MPI& context, const Config& cfg)
     : m_cfg(cfg),
-      m_input(makeInput(m_cfg)),
-      m_model(m_input),
       m_mesh(makeMesh(context, m_cfg)),
       m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
-      m_inletSet(m_cfg.inlets.begin(), m_cfg.inlets.end()),
+      m_inletSet(makeInletSet(m_cfg)),
+      m_wallSet(makeWallSet(m_cfg)),
       m_vh(std::integral_constant<size_t, 1>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_sh(std::integral_constant<size_t, 1>{}, m_mesh),
       m_u(m_vh), m_p(m_sh), m_v(m_vh), m_q(m_sh), m_uOld(m_vh),
@@ -88,7 +186,7 @@ namespace Rodin::Examples::Heart
       m_vth(m_sh), m_vfg(m_sh), m_vfn(m_sh),
       m_thCur(m_sh), m_fgCur(m_sh), m_fnCur(m_sh),
       m_thPrev(m_sh), m_fgPrev(m_sh), m_fnPrev(m_sh),
-      m_wss(m_vh), m_gradRec0(m_vh), m_gradRec1(m_vh), m_gradRec2(m_vh),
+      m_wss(m_vh), m_symRec0(m_vh), m_symRec1(m_vh),
       m_netShear(m_vh), m_absShear(m_sh), m_shearMagnitude(m_sh),
       m_tawss(m_sh), m_osi(m_sh), m_activation(m_sh),
       m_qFlux(m_sh), m_one(m_sh), m_flux(m_qFlux),
@@ -104,6 +202,9 @@ namespace Rodin::Examples::Heart
       m_wssProjection(m_wssTrial, m_wssTest),
       m_wssKSP(m_wssProjection)
   {
+    m_inletWave.load(m_cfg.inletPressurePath);
+    m_outletWave.load(m_cfg.outletPressurePath);
+
     // Queried on every rank, printed on one: nothing that may reduce over the
     // communicator belongs inside a root-only branch.
     const auto cellCount = m_mesh.getCellCount();
@@ -116,17 +217,46 @@ namespace Rodin::Examples::Heart
       Alert::Info() << "[mesh] cells=" << cellCount << " vertices=" << vertexCount
                     << " velocity DOFs=" << velocityDOFs
                     << " pressure DOFs=" << pressureDOFs << Alert::Raise;
+
+      const auto describe = [](const char* what, const PressureWaveform& w) {
+        Alert::Info() << "[" << what << "] " << w.getPath() << "  samples="
+                      << w.getSampleCount() << "  T=" << w.getPeriod()
+                      << " s  mean=" << w.getMean() << " Pa  range=["
+                      << w.getMinimum() << ", " << w.getMaximum() << "] Pa"
+                      << Alert::Raise;
+      };
+      describe("p_pv", m_inletWave);
+      describe("p_mv", m_outletWave);
+    }
+
+    // The two files must share a period, and the run's cycle length must be
+    // that period: the wall-shear indices are accumulated over one cycle, and
+    // a cycle that is not a period of the forcing averages two different
+    // phases of the flow into the same TAWSS.
+    const Real tolerance = 1.0e-9;
+    if (std::abs(m_inletWave.getPeriod() - m_outletWave.getPeriod()) > tolerance)
+      throw std::runtime_error("The inlet and outlet waveforms have different periods.");
+
+    if (std::abs(m_inletWave.getPeriod() - m_cfg.period) > 1.0e-6)
+    {
+      if (isRoot())
+        Alert::Warning() << "[waveform] Config::period = " << m_cfg.period
+                         << " s does not match the file period "
+                         << m_inletWave.getPeriod()
+                         << " s; taking the file's." << Alert::Raise;
+      m_cfg.period = m_inletWave.getPeriod();
     }
   }
 
-  Atrium::~Atrium() = default;
+  LeftAtrium2D::~LeftAtrium2D() = default;
 
-  bool Atrium::isRoot() const
+  bool LeftAtrium2D::isRoot() const
   {
     return m_mesh.getContext().getCommunicator().rank() == RootRank;
   }
 
-  Atrium::MeshType Atrium::makeMesh(const Context::MPI& context, const Config& cfg)
+  LeftAtrium2D::MeshType LeftAtrium2D::makeMesh(
+    const Context::MPI& context, const Config& cfg)
   {
     const auto& comm = context.getCommunicator();
 
@@ -136,8 +266,12 @@ namespace Rodin::Examples::Heart
       Geometry::Mesh<Context::Local> mesh;
       mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
 
-      if (mesh.getSpaceDimension() != 3)
-        throw std::runtime_error("Atrium expects a 3D tetrahedral mesh.");
+      if (mesh.getSpaceDimension() != 2 || mesh.getDimension() != 2)
+        throw std::runtime_error(
+          "LeftAtrium2D expects a planar triangular mesh written as MEDIT "
+          "\"Dimension 2\". LA2D_rectLAA.mesh is stored as \"Dimension 3\" "
+          "with z = 0; flatten it first with "
+          "examples/Heart/LA2D/make_la2d_mesh.py.");
 
       const size_t D = mesh.getDimension();
       mesh.getConnectivity().compute(D, D);
@@ -145,8 +279,6 @@ namespace Rodin::Examples::Heart
       mesh.getConnectivity().compute(D, D - 1);
       mesh.getConnectivity().compute(D - 1, D);
       mesh.getConnectivity().compute(D - 1, 0);
-      mesh.getConnectivity().compute(D - 1, 1);
-      mesh.getConnectivity().compute(1, 0);
 
 #ifdef RODIN_USE_SCOTCH
       Scotch::Partitioner partitioner(mesh);
@@ -167,147 +299,17 @@ namespace Rodin::Examples::Heart
     mesh.getConnectivity().compute(D, D - 1);
     mesh.getConnectivity().compute(D - 1, D);
     mesh.getConnectivity().compute(D - 1, 0);
-    mesh.getConnectivity().compute(D - 1, 1);
-    mesh.getConnectivity().compute(1, 0);
-    mesh.reconcile(2);
     mesh.reconcile(1);
 
     return mesh;
   }
 
-  Atrium::Model::Input Atrium::makeInput(const Config& cfg)
-  {
-    Model::Input input;
-
-    input.rho = cfg.lv.rho;
-    input.R0 = cfg.lv.R0;
-    input.d0 = cfg.lv.d0;
-    input.Es = cfg.lv.Es;
-    input.mu = cfg.lv.mu;
-    input.eta = cfg.lv.eta;
-    input.alpha = cfg.lv.alpha;
-    input.alphaR = cfg.lv.alphaR;
-    input.k0 = cfg.lv.k0;
-    input.sigma0 = cfg.lv.sigma0;
-
-    input.Rp = cfg.lv.Rp;
-    input.Cp = cfg.lv.Cp;
-    input.Rd = cfg.lv.Rd;
-    input.Cd = cfg.lv.Cd;
-
-    input.proximalRadius = cfg.lv.proximalRadius;
-    input.proximalLength = cfg.lv.proximalLength;
-    input.distalRadius = cfg.lv.distalRadius;
-    input.distalLength = cfg.lv.distalLength;
-
-    input.mu_0 = cfg.lv.mu_0;
-    input.mu_Inf = cfg.lv.mu_Inf;
-    input.lambda = cfg.lv.lambda;
-    input.n = cfg.lv.n;
-    input.yasuda = cfg.lv.yasuda;
-
-    input.Kat = cfg.lv.Kat;
-    input.Kp = cfg.lv.Kp;
-    input.Kar = cfg.lv.Kar;
-
-    input.cavityCapacity = cfg.lv.cavityCapacity;
-    input.localTolerance = cfg.lv.localTolerance;
-    input.localMaxIterations = static_cast<size_t>(cfg.lv.localMaxIterations);
-    input.localDamping = cfg.lv.localDamping;
-    input.absRegularization = cfg.lv.absRegularization;
-
-    input.pSv = [p = cfg.lv.systemicVenousPressure](Real) { return p; };
-    input.pAt = [p = cfg.atrialPressure](Real t) { return atrialWave(p, t); };
-    input.u = [a = cfg.activation](Real t) { return activationWave(a, t); };
-    input.m0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
-                 lowEc = cfg.lv.relaxationM0LowEc,
-                 highEc = cfg.lv.relaxationM0HighEc](Real ec) {
-      if (highEc <= lowEc || ec >= highEc)
-        return high;
-      if (ec <= lowEc)
-        return low;
-      const Real s = (ec - lowEc) / (highEc - lowEc);
-      return (1.0 - s) * low + s * high;
-    };
-    input.dm0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
-                  lowEc = cfg.lv.relaxationM0LowEc,
-                  highEc = cfg.lv.relaxationM0HighEc](Real ec) {
-      if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
-        return 0.0;
-      return (high - low) / (highEc - lowEc);
-    };
-
-    {
-      using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
-      typename PassiveEnergy::Parameters hp;
-      hp.C0 = cfg.lv.passiveC0;
-      hp.C1 = cfg.lv.passiveC1;
-      hp.C2 = cfg.lv.passiveC2;
-      hp.C3 = cfg.lv.passiveC3;
-      input.passiveEnergy = PassiveEnergy(hp);
-    }
-
-    return input;
-  }
-
-  Atrium::Real Atrium::activationWave(const Activation& cfg, Real t)
-  {
-    const Real T = cfg.period;
-    const Real tau = t - T * std::floor(t / T);
-
-    auto ss = [](Real s) {
-      s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
-      return s * s * (3.0 - 2.0 * s);
-    };
-
-    if (tau < cfg.tRampStart)
-      return 0.0;
-    if (tau < cfg.tRampEnd)
-      return cfg.positiveValue *
-        ss((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
-    if (tau < cfg.tPlateauEnd)
-      return cfg.positiveValue;
-    if (tau < cfg.tRelaxEnd)
-      return cfg.positiveValue + (cfg.negativeValue - cfg.positiveValue) *
-        ss((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
-    if (tau < cfg.tNegativeEnd)
-      return cfg.negativeValue;
-    return cfg.negativeValue *
-      (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
-  }
-
-  Atrium::Real Atrium::atrialWave(const AtrialPressure& cfg, Real t)
-  {
-    const Real T = cfg.period;
-    const Real tau = t - T * std::floor(t / T);
-
-    auto ss = [](Real s) {
-      s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
-      return s * s * (3.0 - 2.0 * s);
-    };
-    auto ramp = [&](Real a, Real b, Real s) { return a + (b - a) * ss(s); };
-
-    if (tau < cfg.t1)
-      return ramp(cfg.minValue, cfg.maxValue, tau / cfg.t1);
-    if (tau < cfg.t2)
-      return cfg.maxValue;
-    if (tau < cfg.t3)
-      return ramp(cfg.maxValue, cfg.minValue, (tau - cfg.t2) / (cfg.t3 - cfg.t2));
-    if (tau < cfg.t4)
-      return ramp(cfg.minValue, cfg.secondThreshold, (tau - cfg.t3) / (cfg.t4 - cfg.t3));
-    if (tau < cfg.t5)
-      return cfg.secondThreshold;
-    if (tau < cfg.t6)
-      return ramp(cfg.secondThreshold, cfg.minValue, (tau - cfg.t5) / (cfg.t6 - cfg.t5));
-    return cfg.minValue;
-  }
-
-  Atrium::Real Atrium::cellSize(const Point& p)
+  LeftAtrium2D::Real LeftAtrium2D::cellSize(const Point& p)
   {
     return std::pow(p.getPolytope().getMeasure(), 1.0 / p.getPolytope().getDimension());
   }
 
-  Atrium::Real Atrium::viscosityAt(const Point& p) const
+  LeftAtrium2D::Real LeftAtrium2D::viscosityAt(const Point& p) const
   {
     const auto& cy = m_cfg.viscosity;
 
@@ -322,7 +324,7 @@ namespace Rodin::Examples::Heart
                (cy.n - 1.0) / cy.yasuda);
   }
 
-  Atrium::Real Atrium::tau1At(const Point& p) const
+  LeftAtrium2D::Real LeftAtrium2D::tau1At(const Point& p) const
   {
     const auto uc = m_uOld.getValue(p);
     const Real h = cellSize(p);
@@ -330,29 +332,29 @@ namespace Rodin::Examples::Heart
     return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
   }
 
-  Atrium::Real Atrium::vmsTauAt(const Point& p) const
+  LeftAtrium2D::Real LeftAtrium2D::vmsTauAt(const Point& p) const
   {
     return m_cfg.vmsScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
   }
 
-  Atrium::Real Atrium::sqrtTauCAt(const Point& p) const
+  LeftAtrium2D::Real LeftAtrium2D::sqrtTauCAt(const Point& p) const
   {
     const Real h = cellSize(p);
     return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
   }
 
-  Atrium::Real Atrium::tauCAt(const Point& p) const
+  LeftAtrium2D::Real LeftAtrium2D::tauCAt(const Point& p) const
   {
     const Real s = sqrtTauCAt(p);
     return s * s;
   }
 
-  Atrium::Real Atrium::tauPAt(const Point& p) const
+  LeftAtrium2D::Real LeftAtrium2D::tauPAt(const Point& p) const
   {
     return m_cfg.pspgScale * tau1At(p) / m_cfg.rho;
   }
 
-  void Atrium::axpy(Real a, const ::Vec& x, ::Vec& y)
+  void LeftAtrium2D::axpy(Real a, const ::Vec& x, ::Vec& y)
   {
     PetscErrorCode ierr = VecAXPY(y, a, x);
     assert(ierr == PETSC_SUCCESS);
@@ -363,7 +365,7 @@ namespace Rodin::Examples::Heart
     (void)ierr;
   }
 
-  Atrium& Atrium::initialize()
+  LeftAtrium2D& LeftAtrium2D::initialize()
   {
     setupSpaces();
     setupFlow();
@@ -382,24 +384,9 @@ namespace Rodin::Examples::Heart
     return *this;
   }
 
-  void Atrium::setupSpaces()
+  void LeftAtrium2D::setupSpaces()
   {
-    Model::State s0;
-    s0.t = 0.0;
-    s0.y = m_cfg.lv.initialY;
-    s0.v = m_cfg.lv.initialV;
-    s0.pv = m_input.pAt(0.0) + m_cfg.lv.initialPvOffset;
-    s0.par = m_cfg.lv.initialPar;
-    s0.pd = m_cfg.lv.initialPd;
-    s0.w = m_input.m0(s0.ec);
-    m_model.setMaxIterations(m_cfg.lv.maxIterations)
-      .setAbsoluteTolerance(m_cfg.lv.absoluteTolerance)
-      .setRelativeTolerance(m_cfg.lv.relativeTolerance)
-      .setStepTolerance(m_cfg.lv.stepTolerance)
-      .setDampingFactor(m_cfg.lv.dampingFactor);
-    m_model.initialize(s0);
-
-    const auto zeroVector = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    const auto zeroVector = Math::SpatialVector<Real>{{0.0, 0.0}};
 
     m_uOld = zeroVector;
     m_subOld = zeroVector;
@@ -407,9 +394,8 @@ namespace Rodin::Examples::Heart
     m_convProjection = zeroVector;
     m_wss = zeroVector;
     m_netShear = zeroVector;
-    m_gradRec0 = zeroVector;
-    m_gradRec1 = zeroVector;
-    m_gradRec2 = zeroVector;
+    m_symRec0 = zeroVector;
+    m_symRec1 = zeroVector;
 
     m_piTilde = Real(0);
     m_absShear = Real(0);
@@ -421,16 +407,16 @@ namespace Rodin::Examples::Heart
 
     const Real fg0 =
       m_cfg.thrombosis.fibrinogenSinusRhythm / m_cfg.thrombosis.fibrinogenMolarMass;
-    m_thCur = Real(0);
-    m_thPrev = Real(0);
-    m_fnCur = Real(0);
-    m_fnPrev = Real(0);
+    m_thCur = Real(m_cfg.inletThrombin);
+    m_thPrev = Real(m_cfg.inletThrombin);
+    m_fnCur = Real(m_cfg.inletFibrin);
+    m_fnPrev = Real(m_cfg.inletFibrin);
     m_fgCur = fg0;
     m_fgPrev = fg0;
 
-    configureMassSolver(m_scalarProjectionKSP, "atrium_sproj_");
-    configureMassSolver(m_vectorProjectionKSP, "atrium_vproj_");
-    configureMassSolver(m_wssKSP, "atrium_wss_");
+    configureMassSolver(m_scalarProjectionKSP, "la2d_sproj_");
+    configureMassSolver(m_vectorProjectionKSP, "la2d_vproj_");
+    configureMassSolver(m_wssKSP, "la2d_wss_");
 
     m_u.setName("velocity");
     m_p.setName("pressure");
@@ -453,25 +439,30 @@ namespace Rodin::Examples::Heart
     m_xdmf.add("activation", m_activation);
     m_xdmf.add("shearStress", m_wss);
 
-    m_outletArea = boundaryArea(m_cfg.outlet);
-    m_pIn = m_cfg.inletPressureMean;
-    m_pOut = m_model.getState().pv;
-    m_outletPressure = m_pIn;
-    m_mitralZ = m_cfg.mitralResistanceOpen * m_outletArea;
+    // In 2D these are lengths, not areas: the "flux" through a boundary is a
+    // volumetric flow per unit depth, m^2/s.
+    m_outletMeasure = boundaryMeasure(AttributeSet{ m_cfg.labels.outlet });
+    m_inletMeasure = boundaryMeasure(m_inletSet);
+
+    m_pIn = m_inletWave(0.0) + m_cfg.pressureOffset;
+    m_pOut = m_outletWave(0.0) + m_cfg.pressureOffset;
+    m_outletPressure = m_pOut;
 
     if (isRoot())
-      Alert::Info() << "[outlet] area = " << m_outletArea << " m^2  pv0 = "
+      Alert::Info() << "[boundary] MV length = " << m_outletMeasure
+                    << " m  PV length = " << m_inletMeasure
+                    << " m  |  p_pv(0) = " << m_pIn << " Pa  p_mv(0) = "
                     << m_pOut << " Pa" << Alert::Raise;
   }
 
-  Atrium::Real Atrium::boundaryArea(Attribute tag)
+  LeftAtrium2D::Real LeftAtrium2D::boundaryMeasure(const AttributeSet& tags)
   {
-    m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(tags);
     m_flux.assemble();
     return std::max<Real>(m_flux(m_one), 1e-12);
   }
 
-  void Atrium::setupFlow()
+  void LeftAtrium2D::setupFlow()
   {
     const size_t dim = m_mesh.getSpaceDimension();
     const auto normal = BoundaryNormal(m_mesh);
@@ -479,6 +470,7 @@ namespace Rodin::Examples::Heart
     const Real deltaMu = cy.mu0 - cy.muInf;
     const Real rho = m_cfg.rho;
     const Real dt = m_cfg.dt;
+    const Real pspgR = m_cfg.pspgResidualScale * rho;
 
     const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
     const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
@@ -496,17 +488,12 @@ namespace Rodin::Examples::Heart
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
 
-    // The incoming-kinetic-energy branch is max(-u.n, 0) on EVERY pressure
-    // boundary, inlets included. With the OUTWARD normal, taking v = u in the
-    // convective pair leaves (rho/2) int_G (u^n.n)|u|^2 on the left, so
-    // wherever fluid ENTERS (u.n < 0) that is a positive, cubic, unbounded
-    // energy source. max(+u.n, 0) arms the branch that is already dissipative
-    // and leaves the dangerous one untouched: over a whole filling phase it is
-    // identically zero. What kept this from showing here is the inlet
-    // impedance, which supplies a bound of its own -- and therefore also sets
-    // the inflow rate.
+    // Reverse-flow stabilisation. At a pressure inlet the dangerous case is
+    // fluid leaving (u.n > 0), at the outlet fluid entering (u.n < 0): in both
+    // the convective boundary flux 0.5 rho |u|^2 (u.n) feeds energy in, and
+    // these terms remove exactly that.
     const auto inletBackflow = 0.5 * rho * m_cfg.inletBackflowStabilization *
-      Max(-Dot(m_uOld, normal), 0.0);
+      Max(Dot(m_uOld, normal), 0.0);
     const auto outletBackflow = 0.5 * rho * m_cfg.outletBackflowStabilization *
       Max(-Dot(m_uOld, normal), 0.0);
 
@@ -514,7 +501,6 @@ namespace Rodin::Examples::Heart
     // and only reassembled.
     RealFunction pInFn = [this](const Point&) { return m_pIn; };
     RealFunction pOutFn = [this](const Point&) { return m_pOut; };
-    RealFunction mitralFn = [this](const Point&) { return m_mitralZ; };
 
     m_flow = (rho / dt) * Integral(m_u, m_v)
            - (rho / dt) * Integral(m_uOld, m_v)
@@ -533,28 +519,42 @@ namespace Rodin::Examples::Heart
            - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q)
            + m_cfg.pressurePenalty * Integral(m_p, m_q)
 
-           // PSPG. Required by the equal-order pair.
+           // PSPG, tau_p grad(q) . R_M, required by the equal-order pair.
+           // Written out term by term:
+           //   grad p          the pressure gradient, always present;
+           //   rho (u - u^n)/dt    the transient part;
+           //   rho (grad u) u^n    the convective part.
+           // tau_p = tau_1/rho, so the last two carry one factor of rho each
+           // and the three have the same units. With pspgResidualScale = 0
+           // only the first survives and the term is the Brezzi-Pitkaranta
+           // penalty of the reference; at 1 the whole group vanishes on the
+           // exact solution, which is what makes the method consistent.
            + Integral(m_tauPFn * Grad(m_p), Grad(m_q))
+           + (pspgR / dt) * Integral(m_tauPFn * m_u, Grad(m_q))
+           - (pspgR / dt) * Integral(m_tauPFn * m_uOld, Grad(m_q))
+           + pspgR * Integral(m_tauPFn * convU, Grad(m_q))
 
+           // sigma.n = -p n on both pressure boundaries. The weak form carries
+           // -int_G (sigma n).v, so a prescribed p enters with a PLUS sign.
            + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet)
-           + BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.outlet)
+           + BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.labels.outlet)
 
-           // Source impedance of the pressure inlets and mitral resistance,
-           // both positive semidefinite and assembled implicitly.
+           // Source impedance of the pressure inlets: positive semidefinite
+           // and assembled implicitly. Default 0, see Config.
            + m_cfg.inletImpedance *
                BoundaryIntegral(Dot(uNormal, m_v)).over(m_inletSet)
-           + BoundaryIntegral(mitralFn * Dot(uNormal, m_v)).over(m_cfg.outlet)
 
            + m_cfg.inletTangentialDamping *
                BoundaryIntegral(Dot(uTangential, m_v)).over(m_inletSet)
 
            + BoundaryIntegral(inletBackflow * Dot(m_u, m_v)).over(m_inletSet)
-           + BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet)
+           + BoundaryIntegral(outletBackflow * Dot(m_u, m_v))
+               .over(m_cfg.labels.outlet)
 
-           + DirichletBC(m_u, Zero(dim)).on(m_cfg.wall);
+           + DirichletBC(m_u, Zero(dim)).on(m_wallSet);
   }
 
-  Atrium::Real Atrium::crosswind(const Point& p, Real cur, Real prev,
+  LeftAtrium2D::Real LeftAtrium2D::crosswind(const Point& p, Real cur, Real prev,
     const Math::SpatialVector<Real>& gradient, Real diffusivity, Real reaction) const
   {
     const Real gn = std::sqrt(Math::dot(gradient, gradient));
@@ -568,7 +568,7 @@ namespace Rodin::Examples::Heart
         diffusivity);
   }
 
-  void Atrium::setupSpecies()
+  void LeftAtrium2D::setupSpecies()
   {
     const Real Dth = m_cfg.thrombosis.diffusivityThrombin;
     const Real Dfg = m_cfg.thrombosis.diffusivityFibrinogen;
@@ -578,6 +578,8 @@ namespace Rodin::Examples::Heart
     const Real dt = m_cfg.dt;
     const Real fg0 =
       m_cfg.thrombosis.fibrinogenSinusRhythm / m_cfg.thrombosis.fibrinogenMolarMass;
+    const Real thIn = m_cfg.inletThrombin;
+    const Real fnIn = m_cfg.inletFibrin;
 
     // Cell Peclet is of order 1e6 here: these are essentially pure advection
     // problems and their tau is set by the advective and transient scales, not
@@ -638,8 +640,10 @@ namespace Rodin::Examples::Heart
       - keff * Integral(m_thCur * m_fg, m_vfn)
 
       // Endothelial thrombin flux: a surface flux, armed by the cycle indices.
+      // The activation field is identically zero until the first cycle has
+      // closed, so this term contributes nothing before the OSI exists.
       - m_cfg.thrombosis.thrombinWallFlux *
-          BoundaryIntegral(m_activation * m_vth).over(m_cfg.wall)
+          BoundaryIntegral(m_activation * m_vth).over(m_wallSet)
 
       // SUPG. Only fibrinogen has a sink proportional to its own unknown.
       + (1.0 / dt) * Integral(tauThFn * m_th, pTh)
@@ -669,14 +673,18 @@ namespace Rodin::Examples::Heart
       - Integral(kdcFnFn * invSpeedSqFn * Dot(m_uOld, Grad(m_fn)),
                  Dot(m_uOld, Grad(m_vfn)))
 
-      // Pure advection needs a Dirichlet condition on the inflow boundary;
-      // fresh blood carries plasma fibrinogen and no thrombin or fibrin.
-      + DirichletBC(m_th, RealFunction(Real(0))).on(m_inletSet)
-      + DirichletBC(m_fn, RealFunction(Real(0))).on(m_inletSet)
-      + DirichletBC(m_fg, RealFunction(fg0)).on(m_inletSet);
+      // Pure advection needs a Dirichlet condition on the inflow boundary. The
+      // veins carry plasma fibrinogen, the circulating thrombin level, and no
+      // fibrin. Imposing it on the whole PV patch rather than only where
+      // u.n < 0 is what makes this a *boundary* condition and not a switch:
+      // the mitral outlet is left free, so the reverse-flow terms there are
+      // the ones that have to hold the transport together during backflow.
+      + DirichletBC(m_th, RealFunction(Real(thIn))).on(m_inletSet)
+      + DirichletBC(m_fn, RealFunction(Real(fnIn))).on(m_inletSet)
+      + DirichletBC(m_fg, RealFunction(Real(fg0))).on(m_inletSet);
   }
 
-  void Atrium::setupWallShear()
+  void LeftAtrium2D::setupWallShear()
   {
     const auto normal = BoundaryNormal(m_mesh);
     const auto& cy = m_cfg.viscosity;
@@ -688,43 +696,29 @@ namespace Rodin::Examples::Heart
     const auto mu = cy.muInf + (cy.mu0 - cy.muInf) *
       Pow(1.0 + Pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
+    // t = 2 mu eps(u) n, from the two recovered rows of 2 eps(u).
     const auto traction = VectorFunction(
-      mu * Dot(m_gradRec0, normal),
-      mu * Dot(m_gradRec1, normal),
-      mu * Dot(m_gradRec2, normal));
+      mu * Dot(m_symRec0, normal),
+      mu * Dot(m_symRec1, normal));
     const auto wallStress = traction - Dot(traction, normal) * normal;
 
+    // An L2 projection restricted to the wall, regularised in the interior so
+    // the mass matrix stays invertible off it. It is used here, and not nodal
+    // interpolation, for one reason: a wall node belongs to two facets with
+    // different normals, so tau_w has two nodal values and the projection is
+    // what averages them by facet measure. Everything downstream of this --
+    // |tau_w|, TAWSS, OSI, the activation weight -- is nodal.
     const Real reg = 1.0e-3;
-    m_wssProjection = BoundaryIntegral(Dot(m_wssTrial, m_wssTest)).over(m_cfg.wall)
+    m_wssProjection = BoundaryIntegral(Dot(m_wssTrial, m_wssTest)).over(m_wallSet)
                     + reg * Integral(Dot(m_wssTrial, m_wssTest))
-                    - BoundaryIntegral(Dot(wallStress, m_wssTest)).over(m_cfg.wall);
+                    - BoundaryIntegral(Dot(wallStress, m_wssTest)).over(m_wallSet);
   }
 
-  bool Atrium::advance0D()
-  {
-    const auto rep = m_model.step(m_cfg.dt);
-    m_pOut = m_model.getState().pv;
-
-    if (isRoot())
-    {
-      const auto& s = m_model.getState();
-      ZeroDInfo() << (rep.converged ? "converged" : "NOT converged")
-                  << "  iter=" << rep.iterations << "  |F|=" << rep.finalResidual
-                  << "  |  pv=" << s.pv << " par=" << s.par << " pd=" << s.pd
-                  << " Pa" << Alert::Raise;
-    }
-
-    return rep.converged;
-  }
-
-  bool Atrium::solveFlow()
+  bool LeftAtrium2D::solveFlow()
   {
     const Real rho = m_cfg.rho;
     const Real dt = m_cfg.dt;
 
-    // The first steps are traced projection by projection: each of these
-    // assembles a mass matrix over the whole mesh, so on a fine mesh they are
-    // where the time goes, and a stall must be visible where it happens.
     const bool trace = isRoot() && m_step < 3;
     const auto phase = [trace](const char* what) {
       if (trace)
@@ -760,16 +754,14 @@ namespace Rodin::Examples::Heart
         }), m_sub);
 
       // Same sqrt(tau_C) that multiplies div(v) in the linear term and whose
-      // square is the implicit coefficient. Lagging one of the two by a step,
-      // as the reference does, leaves the explicit half larger than the
-      // implicit one on the step where the viscosity drops.
+      // square is the implicit coefficient.
       phase("VMS: projecting the grad-div residual");
       project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
     }
 
     m_timing.vms = secondsSince(vmsStart);
 
-    if (isRoot())
+    if (isRoot() && m_step < 3)
     {
       ThreeDInfo() << "Assembling the flow system ("
                    << (m_vh.getSize() + m_sh.getSize()) << " unknowns) ..."
@@ -789,16 +781,6 @@ namespace Rodin::Examples::Heart
       m_flowFieldSplitsSet = true;
     }
 
-    if (isRoot())
-    {
-      ThreeDInfo() << "Solving with PETSc KSP"
-                   << (m_step == 0 ? " (first solve: the direct factorization "
-                                     "is built here and is the slowest one)"
-                                   : "")
-                   << " ..." << Alert::Raise;
-      std::cout.flush();
-    }
-
     const auto solveStart = CoronaryClock::now();
     m_flow.solve(m_flowKSP);
     m_timing.solve = secondsSince(solveStart);
@@ -811,7 +793,7 @@ namespace Rodin::Examples::Heart
     assert(ierr == PETSC_SUCCESS);
     (void)ierr;
 
-    if (isRoot())
+    if (isRoot() && m_step < 3)
       KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
                 << "  iterations = " << iterations << "  (" << m_timing.solve
                 << " s)" << Alert::Raise;
@@ -826,7 +808,7 @@ namespace Rodin::Examples::Heart
     return reason > 0 && std::isfinite(m_speed) && m_speed <= m_cfg.maxVelocity;
   }
 
-  void Atrium::computeWallShear()
+  void LeftAtrium2D::computeWallShear()
   {
     const auto shearStart = CoronaryClock::now();
     const auto& uSol = m_u.getSolution();
@@ -837,50 +819,28 @@ namespace Rodin::Examples::Heart
       std::cout.flush();
     }
 
-    projectVector(VectorFunction(Component(Jacobian(uSol), 0, 0),
-      Component(Jacobian(uSol), 0, 1), Component(Jacobian(uSol), 0, 2)), m_gradRec0);
-    projectVector(VectorFunction(Component(Jacobian(uSol), 1, 0),
-      Component(Jacobian(uSol), 1, 1), Component(Jacobian(uSol), 1, 2)), m_gradRec1);
-    projectVector(VectorFunction(Component(Jacobian(uSol), 2, 0),
-      Component(Jacobian(uSol), 2, 1), Component(Jacobian(uSol), 2, 2)), m_gradRec2);
+    // The two rows of 2 eps(u) = grad u + grad u^T, recovered onto the nodes:
+    //   row 0 = (2 du_x/dx,            du_x/dy + du_y/dx)
+    //   row 1 = (du_x/dy + du_y/dx,    2 du_y/dy)
+    // grad u_h is elementwise constant on P1, so a recovery is unavoidable and
+    // an L2 projection is the right one here -- it is a linear functional of
+    // the solution, unlike the indices built from it further down.
+    const auto jac = Jacobian(uSol);
+    const auto offDiagonal = Component(jac, 0, 1) + Component(jac, 1, 0);
+
+    projectVector(
+      VectorFunction(2.0 * Component(jac, 0, 0), offDiagonal), m_symRec0);
+    projectVector(
+      VectorFunction(offDiagonal, 2.0 * Component(jac, 1, 1)), m_symRec1);
 
     m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
-
-    // Keep only the wall. tau_w is an L2 projection, not a nodal quantity, and
-    // the operator is (M_wall + reg M_vol). ON the wall the boundary mass
-    // dominates by reg*h ~ 5e-7, so the recovered traction there is exact --
-    // that part is sound. OFF the wall the only equation a node has is
-    // reg M x = 0, and for a consistent P1 mass matrix that forces
-    // x_i = -(1/M_ii) sum_j M_ij x_j with every M_ij > 0: the tail ALTERNATES
-    // IN SIGN from node to node, decaying by about a quarter per layer. A
-    // sign-alternating field is exactly what renders as dots rather than as a
-    // field, and it is what put a 0/0 inside OSI. It is not a solver failure:
-    // after Jacobi the operator has a condition number of about 3.
-    //
-    // Zeroing it leaves the wall untouched, makes the two cycle accumulators
-    // identically zero off the wall, and costs one nodal pass.
-    const size_t sdim = m_mesh.getSpaceDimension();
-    const size_t wallFaceDim = m_mesh.getDimension() - 1;
-    const auto onWallFacet = [this, wallFaceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(wallFaceDim, facet.getIndex());
-      return a && *a == m_cfg.wall;
-    };
-
-    const auto& wssSol = m_wssTrial.getSolution();
-    m_wss = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-    m_wss.project(Region::Boundary, VectorFunction(sdim,
-      [&wssSol, sdim](const Point& p) -> Math::SpatialVector<Real> {
-        const auto w = wssSol.getValue(p);
-        Math::SpatialVector<Real> out(sdim);
-        for (Index c = 0; c < static_cast<Index>(sdim); ++c)
-          out(c) = w(c);
-        return out;
-      }), onWallFacet);
+    m_wss.setData(m_wssTrial.getSolution().getData());
 
     // Cycle accumulators. Two are needed and they are not interchangeable: the
     // vector integral measures how much net direction survives, the scalar one
-    // how much shear was applied regardless of direction.
+    // how much shear was applied regardless of direction. Both are formed by
+    // VecAXPY, i.e. degree of freedom by degree of freedom.
     axpy(m_cfg.dt, m_wss.getData(), m_netShear.getData());
 
     // Nodal interpolation, NOT an L2 projection. |tau_w| is finite on the wall
@@ -894,72 +854,49 @@ namespace Rodin::Examples::Heart
     m_timing.shear = secondsSince(shearStart);
   }
 
-  void Atrium::closeCycle(Real elapsed)
+  void LeftAtrium2D::closeCycle(Real elapsed)
   {
     if (elapsed <= 0.0)
       return;
 
-    // The three indices live ON THE WALL and nowhere else.
-    //
-    // Projecting them over the whole domain is not merely untidy: off the wall
-    // tau_w decays to zero, so TAWSS -> 0, the activation logistic SATURATES at
-    // its ceiling 1/(1+exp(-tau_a/w)) = 0.935, and OSI becomes
-    // |int tau dt| / int |tau| dt with both accumulators vanishing -- a 0/0
-    // that drifts to 1/2. The product is 0.935 * 1 = 0.933, so the maximum of
-    // the whole field sits in the middle of the cavity, where there is no
-    // endothelium at all, and maxOSI is reported as 0.499. The 2D counterpart
-    // reproduced both numbers to five figures before this was restricted.
-    //
-    // The wall flux itself is unaffected -- BoundaryIntegral(...).over(wall)
-    // only ever reads wall nodes, whose TAWSS and OSI are genuine -- so this
-    // changes the diagnostics and the XDMF fields, not the physics. What it
-    // does change is the reported maxima, which were interior artefacts.
-    const size_t faceDim = m_mesh.getDimension() - 1;
-    const auto onWall = [this, faceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
-      return a && *a == m_cfg.wall;
-    };
-
-    // Zeroed first, so a node off the wall carries 0 rather than whatever the
-    // previous cycle left there.
-    m_tawss = Real(0);
-    m_osi = Real(0);
-    m_activation = Real(0);
-
-    // TAWSS = (1/T) int |tau_w| dt. Still an exact scaling of the accumulator,
-    // node by node: evaluating a P1 field at its own node returns the nodal
-    // value, so nothing here can change its sign.
-    m_tawss.project(Region::Boundary,
-      RealFunction([this, elapsed](const Point& p) -> Real {
-        return m_absShear.getValue(p) / elapsed;
-      }), onWall);
+    // TAWSS = (1/T) int |tau_w| dt. An exact scaling of the accumulator: no
+    // projection, no interpolation, no way to change its sign.
+    PetscErrorCode ierr = VecCopy(m_absShear.getData(), m_tawss.getData());
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecScale(m_tawss.getData(), 1.0 / elapsed);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGhostUpdateBegin(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGhostUpdateEnd(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
 
     // OSI = (1/2)[1 - |int tau_w dt| / int |tau_w| dt]. Both accumulators are
     // built from the same nodal values, so the triangle inequality holds node
     // by node and OSI lands in [0, 1/2] on its own; the clamp is insurance.
-    m_osi.project(Region::Boundary,
-      RealFunction([this](const Point& p) -> Real {
-        const Real abs = m_absShear.getValue(p);
-        if (abs <= 0.0)
-          return 0.0;
-        const auto net = m_netShear.getValue(p);
-        const Real mag = std::sqrt(Math::dot(net, net));
-        return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
-      }), onWall);
+    // Evaluated at the nodes: a ratio of two fields taken through quadrature
+    // is not the ratio of the two nodal fields, and it is not bounded by 1/2
+    // either.
+    m_osi.project(RealFunction([this](const Point& p) -> Real {
+      const Real abs = m_absShear.getValue(p);
+      if (abs <= 0.0)
+        return 0.0;
+      const auto net = m_netShear.getValue(p);
+      const Real mag = std::sqrt(Math::dot(net, net));
+      return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
+    }));
 
     // Smooth, bounded activation: a logistic in the measured shear threshold
     // times the oscillatory index mapped onto [0,1]. Clamped to [0,1] so the
     // endothelial thrombin flux can never turn into a sink -- a negative
     // activation is what drives thrombin, and with it fibrin, negative.
-    // Reads the two fields written just above, so it must come last.
     const Real tauA = m_cfg.thrombosis.activationShearStress;
     const Real width = std::max<Real>(m_cfg.thrombosis.activationShearWidth, 1e-12);
-    m_activation.project(Region::Boundary,
-      RealFunction([this, tauA, width](const Point& p) -> Real {
-        const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
-        const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
-        return std::clamp<Real>(low * osi, 0.0, 1.0);
-      }), onWall);
+    m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
+      const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
+      const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
+      return std::clamp<Real>(low * osi, 0.0, 1.0);
+    }));
 
     // The ghost entries must be zeroed too, or the next accumulation reads a
     // stale halo.
@@ -975,9 +912,11 @@ namespace Rodin::Examples::Heart
 
     zeroWithGhosts(m_netShear.getData());
     zeroWithGhosts(m_absShear.getData());
+
+    m_indicesReady = true;
   }
 
-  void Atrium::solveSpecies()
+  void LeftAtrium2D::solveSpecies()
   {
     const auto speciesStart = CoronaryClock::now();
 
@@ -1003,33 +942,36 @@ namespace Rodin::Examples::Heart
     m_timing.species = secondsSince(speciesStart);
   }
 
-  void Atrium::computeFluxes()
+  void LeftAtrium2D::computeFluxes()
   {
     const auto normal = BoundaryNormal(m_mesh);
     const auto& uSol = m_u.getSolution();
 
+    // In 2D these are flow rates per unit depth, m^2/s. n is outward, so qIn
+    // is negative while the veins fill the atrium.
     m_flux = BoundaryIntegral(Dot(uSol, normal), m_qFlux).over(m_inletSet);
     m_flux.assemble();
     m_qIn = m_flux(m_one);
 
-    m_flux = BoundaryIntegral(Dot(uSol, normal), m_qFlux).over(m_cfg.outlet);
+    m_flux = BoundaryIntegral(Dot(uSol, normal), m_qFlux).over(m_cfg.labels.outlet);
     m_flux.assemble();
     m_qOut = m_flux(m_one);
 
-    m_flux = BoundaryIntegral(m_p.getSolution(), m_qFlux).over(m_cfg.outlet);
+    m_flux = BoundaryIntegral(m_p.getSolution(), m_qFlux).over(m_cfg.labels.outlet);
     m_flux.assemble();
-    m_outletPressure = m_flux(m_one) / m_outletArea;
+    m_outletPressure = m_flux(m_one) / m_outletMeasure;
   }
 
-  void Atrium::writeCSVHeader()
+  void LeftAtrium2D::writeCSVHeader()
   {
-    m_csv << "t,cycle,pIn,pv,par,pd,valveOpen,qIn,qOut,maxU,"
+    m_csv << "t,cycle,pPV,pMV,dp,qIn,qOut,pOutletMean,maxU,"
           << "maxTAWSS,maxOSI,maxActivation,maxThrombin,minFibrinogen,maxFibrin\n";
   }
 
-  void Atrium::writeCSVRow(int cycle)
+  void LeftAtrium2D::writeCSVRow(int cycle)
   {
-    const auto& s = m_model.getState();
+    // Every one of these reduces over the communicator, so they are taken on
+    // all ranks before the root-only write.
     const Real tawss = m_tawss.max();
     const Real osi = m_osi.max();
     const Real activation = m_activation.max();
@@ -1040,19 +982,18 @@ namespace Rodin::Examples::Heart
     if (!isRoot())
       return;
 
-    m_csv << m_t << ',' << cycle << ',' << m_pIn << ',' << s.pv << ',' << s.par
-          << ',' << s.pd << ',' << (m_valveOpen ? 1 : 0) << ',' << m_qIn << ','
-          << m_qOut << ',' << m_speed << ',' << tawss << ',' << osi << ','
-          << activation << ',' << th << ',' << fg << ',' << fn << '\n';
+    m_csv << m_t << ',' << cycle << ',' << m_pIn << ',' << m_pOut << ','
+          << (m_pIn - m_pOut) << ',' << m_qIn << ',' << m_qOut << ','
+          << m_outletPressure << ',' << m_speed << ',' << tawss << ',' << osi
+          << ',' << activation << ',' << th << ',' << fg << ',' << fn << '\n';
     m_csv.flush();
   }
 
-  int Atrium::run()
+  int LeftAtrium2D::run()
   {
     if (!m_initialized)
       initialize();
 
-    const Real PI = std::numbers::pi_v<Real>;
     const int stepsPerCycle = static_cast<int>(m_cfg.period / m_cfg.dt + 0.5);
     const int totalCycles = m_cfg.flowCycles + m_cfg.speciesCycles;
     const int totalSteps = totalCycles * stepsPerCycle;
@@ -1060,7 +1001,8 @@ namespace Rodin::Examples::Heart
     if (isRoot())
       Alert::Info() << "[run] " << totalCycles << " cycles of " << stepsPerCycle
                     << " steps (" << totalSteps << " total); species from cycle "
-                    << (m_cfg.flowCycles + 1) << " on; XDMF every "
+                    << (m_cfg.flowCycles + 1)
+                    << " on, and never before the first OSI; XDMF every "
                     << m_cfg.outputEvery << " steps and at every cycle boundary"
                     << Alert::Raise;
 
@@ -1077,34 +1019,11 @@ namespace Rodin::Examples::Heart
       const int cycle = step / stepsPerCycle;
       const bool endOfCycle = (step % stepsPerCycle == stepsPerCycle - 1);
 
-      if (isRoot())
-      {
-        Alert::Info() << "---- Step " << (step + 1) << "/" << totalSteps
-                      << "  cycle " << (cycle + 1) << "/" << totalCycles
-                      << "  t = " << m_t << " s  (dt = " << m_cfg.dt << " s"
-                      << (cycle < m_cfg.flowCycles ? ", warm-up" : "") << ") ----"
-                      << Alert::Raise;
-        std::cout.flush();
-      }
-
-      const auto zeroDStart = CoronaryClock::now();
-      const bool advanced = advance0D();
-      m_timing.zeroD = secondsSince(zeroDStart);
-
-      if (!advanced)
-      {
-        Alert::Exception() << "[0D] Newton did not converge at t = " << m_t
-                           << Alert::Raise;
-        return 1;
-      }
-
-      m_pIn = m_cfg.inletPressureMean +
-        m_cfg.inletPressureAmplitude * std::sin(2.0 * PI * m_t / m_cfg.period);
-
-      // Mitral diode, switched on the previous step's outlet pressure.
-      m_valveOpen = (m_outletPressure > m_pOut);
-      m_mitralZ = (m_valveOpen ? m_cfg.mitralResistanceOpen
-                               : m_cfg.mitralResistanceClosed) * m_outletArea;
+      // Both tractions come from the tabulated waveforms. p_pv - p_mv is
+      // identically zero while the mitral valve is shut, so the pair carries
+      // the valve and no diode is imposed on top of it.
+      m_pIn = m_inletWave(m_t) + m_cfg.pressureOffset;
+      m_pOut = m_outletWave(m_t) + m_cfg.pressureOffset;
 
       if (!solveFlow())
       {
@@ -1120,6 +1039,9 @@ namespace Rodin::Examples::Heart
       computeFluxes();
       m_timing.fluxes = secondsSince(fluxStart);
 
+      // The indices are closed BEFORE the species are advanced, so that within
+      // this step the activation field the wall flux reads is the one that
+      // belongs to the cycle just finished.
       if (endOfCycle)
       {
         closeCycle(cycleElapsed);
@@ -1137,7 +1059,8 @@ namespace Rodin::Examples::Heart
                         << "  maxActivation=" << maxActivation << Alert::Raise;
       }
 
-      if (m_cfg.solveKinetics && cycle >= m_cfg.flowCycles)
+      // Kinetics: only once the flow is periodic AND the first OSI exists.
+      if (m_cfg.solveKinetics && m_indicesReady && cycle >= m_cfg.flowCycles)
         solveSpecies();
 
       writeCSVRow(cycle);
@@ -1155,23 +1078,32 @@ namespace Rodin::Examples::Heart
 
       m_timing.total = secondsSince(stepStart);
 
-      if (isRoot())
+      if (isRoot() && (m_step < 3 || step % 20 == 0 || endOfCycle))
       {
         const Real elapsed = secondsSince(runStart);
         const Real perStep = elapsed / static_cast<Real>(step + 1);
 
-        Alert::Info() << "[3D] max|u|=" << m_speed << " m/s  pIn=" << m_pIn
-                      << " Pa  pv=" << m_pOut << " Pa  valve="
-                      << (m_valveOpen ? "open" : "closed") << "  qIn=" << m_qIn
-                      << "  qOut=" << m_qOut << " m^3/s" << Alert::Raise;
+        Alert::Info() << "---- Step " << (step + 1) << "/" << totalSteps
+                      << "  cycle " << (cycle + 1) << "/" << totalCycles
+                      << "  t = " << m_t << " s"
+                      << (cycle < m_cfg.flowCycles ? "  (warm-up)" : "")
+                      << Alert::Raise;
 
-        Alert::Info() << "[timing] 0D=" << m_timing.zeroD << "  vms=" << m_timing.vms
-                     << "  asm=" << m_timing.assembly << "  ksp=" << m_timing.solve
-                     << "  wss=" << m_timing.shear << "  flux=" << m_timing.fluxes
-                     << "  species=" << m_timing.species << "  out="
-                     << m_timing.output << "  total=" << m_timing.total
-                     << " s  |  ETA " << (perStep * (totalSteps - step - 1) / 60.0)
-                     << " min" << Alert::Raise;
+        Alert::Info() << "[2D] max|u|=" << m_speed << " m/s  p_pv=" << m_pIn
+                      << " Pa  p_mv=" << m_pOut << " Pa  dp="
+                      << (m_pIn - m_pOut) << " Pa  qIn=" << m_qIn
+                      << "  qOut=" << m_qOut << " m^2/s" << Alert::Raise;
+
+        Alert::Info() << "[timing] vms=" << m_timing.vms
+                      << "  asm=" << m_timing.assembly
+                      << "  ksp=" << m_timing.solve
+                      << "  wss=" << m_timing.shear
+                      << "  flux=" << m_timing.fluxes
+                      << "  species=" << m_timing.species
+                      << "  out=" << m_timing.output
+                      << "  total=" << m_timing.total
+                      << " s  |  ETA " << (perStep * (totalSteps - step - 1) / 60.0)
+                      << " min" << Alert::Raise;
         std::cout.flush();
       }
     }
@@ -1212,82 +1144,111 @@ int main(int argc, char** argv)
     int status = 0;
 
     {
-      Rodin::Examples::Heart::Atrium::Config cfg;
+      Rodin::Examples::Heart::LeftAtrium2D::Config cfg;
 
       char buffer[512];
       PetscBool got = PETSC_FALSE;
-      PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh",
+      PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_mesh",
         buffer, sizeof(buffer), &got);
       if (got)
         cfg.meshPath = buffer;
 
+      got = PETSC_FALSE;
+      PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_pv",
+        buffer, sizeof(buffer), &got);
+      if (got)
+        cfg.inletPressurePath = buffer;
+
+      got = PETSC_FALSE;
+      PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_mv",
+        buffer, sizeof(buffer), &got);
+      if (got)
+        cfg.outletPressurePath = buffer;
+
       PetscReal real = 0.0;
       got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_mesh_scale",
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_mesh_scale",
         &real, &got);
       if (got)
         cfg.meshScale = real;
 
       got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_dt", &real, &got);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_dt", &real, &got);
       if (got)
         cfg.dt = real;
 
       got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pin", &real, &got);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_period", &real, &got);
       if (got)
-        cfg.inletPressureMean = real;
+        cfg.period = real;
+
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_th_in", &real, &got);
+      if (got)
+        cfg.inletThrombin = real;
+
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_inlet_impedance",
+        &real, &got);
+      if (got)
+        cfg.inletImpedance = real;
 
       PetscInt integer = 0;
       got = PETSC_FALSE;
-      PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_flow_cycles",
+      PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_flow_cycles",
         &integer, &got);
       if (got)
         cfg.flowCycles = static_cast<int>(integer);
 
       got = PETSC_FALSE;
-      PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_species_cycles",
+      PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_species_cycles",
         &integer, &got);
       if (got)
         cfg.speciesCycles = static_cast<int>(integer);
 
       got = PETSC_FALSE;
-      PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_output_every",
+      PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_output_every",
         &integer, &got);
       if (got)
         cfg.outputEvery = static_cast<int>(integer);
 
       got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_vms_scale",
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_vms_scale",
         &real, &got);
       if (got)
         cfg.vmsScale = real;
 
       got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_graddiv_scale",
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_graddiv_scale",
         &real, &got);
       if (got)
         cfg.gradDivScale = real;
 
       got = PETSC_FALSE;
-      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pspg_scale",
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_pspg_scale",
         &real, &got);
       if (got)
         cfg.pspgScale = real;
 
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_pspg_residual",
+        &real, &got);
+      if (got)
+        cfg.pspgResidualScale = real;
+
       PetscBool flag = PETSC_FALSE;
       got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_vms", &flag, &got);
+      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_vms", &flag, &got);
       if (got)
         cfg.useVMS = (flag == PETSC_TRUE);
 
       got = PETSC_FALSE;
-      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_kinetics",
+      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_kinetics",
         &flag, &got);
       if (got)
         cfg.solveKinetics = (flag == PETSC_TRUE);
 
-      Rodin::Examples::Heart::Atrium simulation(context, cfg);
+      Rodin::Examples::Heart::LeftAtrium2D simulation(context, cfg);
       status = simulation.initialize().run();
     }
 
