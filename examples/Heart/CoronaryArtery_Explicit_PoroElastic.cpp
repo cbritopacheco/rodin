@@ -250,6 +250,13 @@ namespace
       Real prestressFraction = 0.975;
       size_t prestressRampSteps = 10;
 
+      // The 0D model hands over p_ar(0), so a fixed number of increments makes
+      // the first increment grow with it.  The increment is capped instead, and
+      // an increment that does not converge is halved rather than abandoning
+      // the prestress silently.
+      Real prestressMaxIncrement = 150.0;
+      size_t prestressMaxBisections = 10;
+
       Real vmsScale = 1.0;
       Real gradDivScale = 1.0;
       Real pgpScale = 1.0;
@@ -275,8 +282,15 @@ namespace
       Real heartDisplacementPenalty = 1.e7;
       Real heartDisplacementScale = 1.0;
 
-      // Viscoelastic tethering of the outlet annuli (Pa/m, Pa s/m).
-      Real aViscCondition = 1.0e5;
+      // Viscoelastic tethering of the outlet annuli (Pa/m, Pa s/m).  These
+      // springs are the ONLY reaction to the unbalanced lumen pressure at the
+      // truncated ends: the axial pull is p times the outlet lumen area
+      // (~4e-2 N at 12 kPa) while the cap stiffness is a times the annulus area
+      // (~0.3 N/m at 1e5 Pa/m), so the ends only equilibrate after ~0.1 m of
+      // travel.  That soft mode -- not the load level -- is what puts the
+      // static prestress at the edge of Newton's basin; 1e9 Pa/m holds the ends
+      // to ~5 um and the prestress converges quadratically.
+      Real aViscCondition = 1.0e9;
       Real bViscCondition = 1.0e3;
 
       // Transmural Yeoh multipliers (xi < 1/3 intima, middle media, > 2/3
@@ -822,6 +836,10 @@ namespace
     optInt("-coronary_prestress_steps", cfg.prestressSteps, 0);
     optReal("-coronary_prestress_fraction", cfg.prestressFraction, 0.0, 1.0);
     optInt("-coronary_prestress_ramp_steps", cfg.prestressRampSteps, 0);
+    optReal("-coronary_prestress_max_increment", cfg.prestressMaxIncrement, 1.0, inf);
+    optInt("-coronary_prestress_max_bisections", cfg.prestressMaxBisections, 0);
+    optReal("-coronary_outlet_tether", cfg.aViscCondition, 0.0, inf);
+    optReal("-coronary_outlet_damping", cfg.bViscCondition, 0.0, inf);
     optReal("-coronary_vms_scale", cfg.vmsScale, 0.0, inf);
     optReal("-coronary_graddiv_scale", cfg.gradDivScale, 0.0, inf);
     optReal("-coronary_pgp_scale", cfg.pgpScale, 0.0, inf);
@@ -2156,23 +2174,60 @@ int main(int argc, char** argv)
         dState += etaState;
       });
 
-      for (size_t k = 1; k <= cfg.prestressSteps; ++k)
+      // Increment capped in Pa (so the ramp follows the hand-off pressure) and
+      // halved on failure, restoring the last converged state each time.
+      const size_t steps = std::max<size_t>(cfg.prestressSteps,
+        static_cast<size_t>(
+          std::ceil(p0 / std::max<Real>(cfg.prestressMaxIncrement, 1.0))));
+
+      ::Vec xSol = prestress.getLinearSystem().getSolution();
+      ::Vec xSafe = PETSC_NULLPTR, dSafe = PETSC_NULLPTR;
+      VecDuplicate(xSol, &xSafe);
+      VecDuplicate(dState.getData(), &dSafe);
+      VecCopy(xSol, xSafe);
+      VecCopy(dState.getData(), dSafe);
+
+      Real applied = 0.0;
+      Real increment = p0 / static_cast<Real>(steps);
+      size_t bisections = 0;
+      size_t solves = 0;
+
+      while (applied < p0 * (1.0 - 1.0e-12))
       {
-        prestressPressure =
-          (static_cast<Real>(k) / static_cast<Real>(cfg.prestressSteps)) * p0;
+        prestressPressure = std::min(applied + increment, p0);
         snesPre.solve();
-        if (!snesPre.converged())
+        ++solves;
+
+        if (snesPre.converged())
+        {
+          applied = prestressPressure;
+          VecCopy(xSol, xSafe);
+          VecCopy(dState.getData(), dSafe);
+          continue;
+        }
+
+        VecCopy(xSafe, xSol);
+        VecCopy(dSafe, dState.getData());
+
+        if (++bisections > cfg.prestressMaxBisections)
         {
           if (isRoot)
-            std::cerr << "Prestress SNES failed at increment " << k << " / "
-                      << cfg.prestressSteps << "; continuing with the last "
-                      << "converged (partial) prestress state.\n";
+            std::cerr << "Prestress stalled at " << applied << " / " << p0
+                      << " Pa after " << bisections << " increment bisection(s); "
+                      << "continuing with the partial prestress state.\n";
           break;
         }
+        increment *= 0.5;
       }
+
+      prestressPressure = applied;
+      VecDestroy(&xSafe);
+      VecDestroy(&dSafe);
+
       if (isRoot)
-        Alert::Info() << "Prestressed wall to " << prestressPressure << " Pa in "
-                      << cfg.prestressSteps << " increment(s)" << Alert::Raise;
+        Alert::Info() << "Prestressed wall to " << applied << " / " << p0 << " Pa in "
+                      << solves << " solve(s), " << steps << " nominal increment(s), "
+                      << bisections << " bisection(s)" << Alert::Raise;
 
       dOld.setData(dState.getData());
       dIter.setData(dState.getData());
