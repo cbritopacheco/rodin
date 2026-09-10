@@ -40,28 +40,28 @@ namespace Rodin::FormLanguage
       Variational::FunctionBase<LHSDerived>,
       Variational::FunctionBase<RHSDerived>>>
   {
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::FunctionBase<LHSDerived>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<RHSDerived>;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Scalar type of the left-hand side operand.
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-    /// @brief Scalar type of the right-hand side operand.
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
   };
 
@@ -71,32 +71,32 @@ namespace Rodin::FormLanguage
       Variational::FunctionBase<LHSDerived>,
       Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::FunctionBase<LHSDerived>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, Space>;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Scalar type of the left-hand side operand.
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-    /// @brief Scalar type of the right-hand side operand.
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
   };
 
@@ -106,30 +106,30 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>,
       Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>>>
   {
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType =
         Variational::ShapeFunctionBase<LHSDerived, TrialFES, Variational::TrialSpace>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType =
         Variational::ShapeFunctionBase<RHSDerived, TestFES, Variational::TestSpace>;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Scalar type of the left-hand side operand.
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
-    /// @brief Scalar type of the right-hand side operand.
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
   };
 }

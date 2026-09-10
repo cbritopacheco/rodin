@@ -33,9 +33,9 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Sum<Variational::FunctionBase<LHSDerived>, Variational::FunctionBase<RHSDerived>>>
   {
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::FunctionBase<LHSDerived>;
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<RHSDerived>;
   };
 
@@ -45,11 +45,11 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::FunctionBase<LHSDerived>;
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<RHSDerived>;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
@@ -60,19 +60,19 @@ namespace Rodin::FormLanguage
       Variational::LinearFormIntegratorBase<LHSNumber>,
       Variational::LinearFormIntegratorBase<RHSNumber>>>
   {
-    /// @brief Scalar type of the left-hand side operand.
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
-    /// @brief Scalar type of the right-hand side operand.
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::LinearFormIntegratorBase<LHSScalarType>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::LinearFormIntegratorBase<RHSScalarType>;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSScalarType, RHSScalarType>::Type;
   };
 

@@ -150,7 +150,7 @@ namespace Rodin::Solid
         Math::SpatialMatrix<Real> Xjac; ///< Reference geometric Jacobian X_{,xi}
         Real orientation;               ///< +-1: makes the cross point OUTWARD
 
-      /// @brief Initializes the geometric data associated with a boundary face.
+        /// @brief Initializes the geometric data associated with a boundary face.
         void setFace(const Geometry::Polytope& face)
         {
           const auto& mesh = face.getMesh();
@@ -198,13 +198,13 @@ namespace Rodin::Solid
           orientation = (dot > 0.0) ? -1.0 : 1.0;
         }
 
-      /// Nodal displacement of face vertex a, component c.
+        /// Nodal displacement of face vertex a, component c.
         Real nodal(const StateFES& fes, const State& d, size_t a, size_t c) const
         {
           return d[fes.getGlobalIndex({0, vertices[a]}, c)];
         }
 
-      /// Deformed tangents at this face (P1: constant over the face).
+        /// Deformed tangents at this face (P1: constant over the face).
         void deformedTangents(
           Math::SpatialMatrix<Real>& xjac, const StateFES& fes, const State& d) const
         {

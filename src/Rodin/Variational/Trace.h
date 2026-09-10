@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };

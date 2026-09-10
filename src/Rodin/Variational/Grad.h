@@ -28,13 +28,13 @@ namespace Rodin::FormLanguage
   template <class FES, class Data>
   struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType =
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
@@ -43,14 +43,14 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType =
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };

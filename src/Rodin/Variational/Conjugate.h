@@ -27,7 +27,7 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Conjugate<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };

@@ -82,9 +82,9 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Coefficient data storage type.
+      /// @brief Coefficient data storage type.
       using DataType = Data;
   };
 
@@ -92,9 +92,9 @@ namespace Rodin::FormLanguage
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Coefficient data storage type.
+      /// @brief Coefficient data storage type.
       using DataType = Data;
   };
 }

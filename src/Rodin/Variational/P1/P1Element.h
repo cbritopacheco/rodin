@@ -45,9 +45,9 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P1Element<Range>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 }

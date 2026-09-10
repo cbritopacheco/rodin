@@ -70,9 +70,9 @@ namespace Rodin::FormLanguage
   template <size_t K, class Range>
   struct Traits<Variational::H1Element<K, Range>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 }

@@ -24,17 +24,17 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::FunctionBase<RHSDerived>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<RHSDerived>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<LHSType>::RangeType;
   };
 }

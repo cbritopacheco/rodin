@@ -42,13 +42,13 @@ namespace Rodin::FormLanguage
   template <size_t K, class Scalar, class Mesh, class Data>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::H1<K, Scalar, Mesh>;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Scalar;
   };
 }

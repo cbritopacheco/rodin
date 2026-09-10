@@ -72,24 +72,24 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHSDerived>
   struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
 
       using KernelType = LHSType;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = RHSType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = std::conditional_t<
       // If
         std::is_same_v<RHSRangeType, ScalarType>,
@@ -104,7 +104,7 @@ namespace Rodin::FormLanguage
         // Else
           void>>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = RHSRangeType;
   };
 
@@ -118,30 +118,30 @@ namespace Rodin::FormLanguage
       LHS,
       Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType =
         Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>,
           FES, Space>;
 
       using KernelType = LHS;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = RHSType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = std::conditional_t<
       // If
         std::is_same_v<RHSRangeType, ScalarType>,
@@ -156,7 +156,7 @@ namespace Rodin::FormLanguage
         // Else
           void>>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = RHSRangeType;
   };
 }

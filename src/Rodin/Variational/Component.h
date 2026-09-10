@@ -27,21 +27,21 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Component<Variational::ShapeFunctionBase<OperandDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType =
         Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
 
-    /// @brief Range type of the operand.
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
   };
 }

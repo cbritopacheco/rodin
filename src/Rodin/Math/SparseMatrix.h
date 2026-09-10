@@ -74,7 +74,7 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::SparseMatrix<Number>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
   };
 }

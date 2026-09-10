@@ -37,13 +37,13 @@ namespace Rodin::FormLanguage
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 
@@ -52,14 +52,14 @@ namespace Rodin::FormLanguage
     Variational::Derivative<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 }

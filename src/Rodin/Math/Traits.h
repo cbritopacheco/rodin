@@ -50,7 +50,7 @@ namespace Rodin::FormLanguage
   template <class T, class = void>
   struct ColsAtCompileTime
   {
-    /// @brief The column count, or -1 if the type does not expose one.
+      /// @brief The column count, or -1 if the type does not expose one.
       static constexpr int Value = -1;
   };
 
@@ -58,7 +58,7 @@ namespace Rodin::FormLanguage
   template <class T>
   struct ColsAtCompileTime<T, std::void_t<decltype(std::decay_t<T>::ColsAtCompileTime)>>
   {
-    /// @brief The type's compile-time column count.
+      /// @brief The type's compile-time column count.
       static constexpr int Value = std::decay_t<T>::ColsAtCompileTime;
   };
 
@@ -68,7 +68,7 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Boolean>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Boolean;  ///< Scalar type is Boolean itself
   };
 
@@ -78,7 +78,7 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Integer>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Integer;  ///< Scalar type is Integer itself
   };
 
@@ -88,7 +88,7 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Real>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;  ///< Scalar type is Real itself
   };
 
@@ -98,7 +98,7 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Complex>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Complex;  ///< Scalar type is Complex itself
   };
 
@@ -127,7 +127,7 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsSpatialVector : std::false_type
   {
-    /// @brief False for non-spatial-vector types.
+      /// @brief False for non-spatial-vector types.
       static constexpr bool Value = false;
   };
 
@@ -135,7 +135,7 @@ namespace Rodin::FormLanguage
   template <class Scalar>
   struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type
   {
-    /// @brief True for Math::SpatialVector specializations.
+      /// @brief True for Math::SpatialVector specializations.
       static constexpr bool Value = true;
   };
 
@@ -143,7 +143,7 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsSpatialMatrix : std::false_type
   {
-    /// @brief False for non-spatial-matrix types.
+      /// @brief False for non-spatial-matrix types.
       static constexpr bool Value = false;
   };
 
@@ -151,7 +151,7 @@ namespace Rodin::FormLanguage
   template <class Scalar>
   struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type
   {
-    /// @brief True for Math::SpatialMatrix specializations.
+      /// @brief True for Math::SpatialMatrix specializations.
       static constexpr bool Value = true;
   };
 
@@ -166,7 +166,7 @@ namespace Rodin::FormLanguage
           && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
         )>
   {
-    /// @brief True if @c T has vector range.
+      /// @brief True if @c T has vector range.
       static constexpr bool Value = IsSpatialVector<std::decay_t<T>>::Value ||
         (IsEigenObject<std::decay_t<T>>::Value &&
           (ColsAtCompileTime<std::decay_t<T>>::Value == 1));
@@ -183,7 +183,7 @@ namespace Rodin::FormLanguage
           && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
         )>
   {
-    /// @brief True if @c T has matrix range.
+      /// @brief True if @c T has matrix range.
       static constexpr bool Value = IsSpatialMatrix<std::decay_t<T>>::Value ||
         (IsEigenObject<std::decay_t<T>>::Value &&
           (ColsAtCompileTime<std::decay_t<T>>::Value != 1));
@@ -193,7 +193,7 @@ namespace Rodin::FormLanguage
   template <class T>
   struct RangeKindOf
   {
-    /// @brief The deduced range kind.
+      /// @brief The deduced range kind.
       static constexpr RangeKind Value = std::is_same_v<std::decay_t<T>, Boolean>
         ? RangeKind::Boolean
         : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer

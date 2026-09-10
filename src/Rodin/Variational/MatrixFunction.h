@@ -29,7 +29,7 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::MatrixFunctionBase<Scalar, Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
       using DerivedType = Derived;
   };

@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Variational::ProblemBase<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 
@@ -60,7 +60,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem, class TrialFunction, class TestFunction>
   struct Traits<Variational::Problem<TrialFunction, TestFunction, LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
       /// @brief Trial function type.
       using TrialFunctionType = TrialFunction;

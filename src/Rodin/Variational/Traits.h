@@ -196,7 +196,7 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct RangeOf<Variational::FunctionBase<Derived>>
   {
-    /// @brief Result type of the evaluation.
+      /// @brief Result type of the evaluation.
       using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
       using Type = typename RangeOf<std::remove_cvref_t<ResultType>>::Type;
   };
@@ -212,7 +212,7 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct RangeOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    /// @brief Result type of the evaluation.
+      /// @brief Result type of the evaluation.
       using ResultType =
         typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
       using Type = typename RangeOf<std::remove_cvref_t<ResultType>>::Type;

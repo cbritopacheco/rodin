@@ -390,11 +390,11 @@ namespace Rodin::Solver
        */
       struct StepResult
       {
-        /// @brief Whether the step was accepted by the policy.
+          /// @brief Whether the step was accepted by the policy.
           bool accepted = true;
-        /// @brief Whether the policy declares convergence.
+          /// @brief Whether the policy declares convergence.
           bool converged = false;
-        /// @brief Norm reported for the accepted or rejected step.
+          /// @brief Norm reported for the accepted or rejected step.
           Real stepNorm = 0.0;
       };
 

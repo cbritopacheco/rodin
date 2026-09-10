@@ -75,13 +75,13 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
       VectorField, Step, BoundaryPolicy>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
 
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TestSpace;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType =
         Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
   };

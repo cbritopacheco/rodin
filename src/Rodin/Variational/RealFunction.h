@@ -27,7 +27,7 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::RealFunctionBase<Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;
       /// @brief Derived CRTP function type.
       using DerivedType = Derived;

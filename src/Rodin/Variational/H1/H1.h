@@ -39,26 +39,26 @@ namespace Rodin::FormLanguage
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Scalar, Mesh>>
   {
-    /// @brief Mesh type.
+      /// @brief Mesh type.
       using MeshType = Mesh;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
-    /// @brief Finite element type.
+      /// @brief Finite element type.
       using ElementType = Variational::H1Element<K, RangeType>;
   };
 
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
-    /// @brief Mesh type.
+      /// @brief Mesh type.
       using MeshType = Mesh;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
-    /// @brief Finite element type.
+      /// @brief Finite element type.
       using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
   };
 }

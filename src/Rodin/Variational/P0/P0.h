@@ -26,30 +26,30 @@ namespace Rodin::FormLanguage
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Number, Mesh>>
   {
-    /// @brief Mesh type.
+      /// @brief Mesh type.
       using MeshType = Mesh;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
-    /// @brief Execution context type.
+      /// @brief Execution context type.
       using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-    /// @brief Finite element type.
+      /// @brief Finite element type.
       using ElementType = Variational::P0Element<RangeType>;
   };
 
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
   {
-    /// @brief Mesh type.
+      /// @brief Mesh type.
       using MeshType = Mesh;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
-    /// @brief Execution context type.
+      /// @brief Execution context type.
       using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-    /// @brief Finite element type.
+      /// @brief Finite element type.
       using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
   };
 }

@@ -29,12 +29,12 @@ namespace Rodin::FormLanguage
   template <class Solution, class FES>
   struct Traits<Variational::TrialFunction<Solution, FES>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TrialSpace;
 
-    /// @brief Solution vector type.
+      /// @brief Solution vector type.
       using SolutionType = Solution;
   };
 }

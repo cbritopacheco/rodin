@@ -47,9 +47,9 @@ namespace Rodin::FormLanguage
       Variational::GridFunction<
         Variational::H1<K, Range, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::H1<K, Range, Mesh>;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
@@ -58,10 +58,10 @@ namespace Rodin::FormLanguage
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::H1<K, Range, Mesh>;
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }

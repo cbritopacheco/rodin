@@ -34,16 +34,16 @@ namespace Rodin::FormLanguage
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
   };
 
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
   };
 }
