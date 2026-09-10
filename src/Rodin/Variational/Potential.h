@@ -59,7 +59,6 @@
 #include "LinearFormIntegrator.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -123,6 +122,7 @@ namespace Rodin::FormLanguage
 
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Left-hand side operand type.
@@ -532,5 +532,4 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 }
 
-/// @endcond
 #endif

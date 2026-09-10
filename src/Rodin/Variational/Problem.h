@@ -45,7 +45,6 @@
 #include "ForwardDecls.h"
 #include "ProblemBody.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /// @brief Form-language traits for a problem base.
@@ -230,6 +229,7 @@ namespace Rodin::Variational
       using TrialFunctionType =
         U;
 
+      /// @brief Test function type.
       using TestFunctionType =
         V;
 
@@ -244,9 +244,11 @@ namespace Rodin::Variational
       using SolutionType =
         typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
 
+      /// @brief Trial finite element space type.
       using TrialFESType =
         typename FormLanguage::Traits<U>::FESType;
 
+      /// @brief Test finite element space type.
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
@@ -272,6 +274,7 @@ namespace Rodin::Variational
       using LinearFormIntegratorBaseType =
         LinearFormIntegratorBase<TestFESScalarType>;
 
+      /// @brief Problem body type.
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
@@ -1042,6 +1045,7 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Problem body type.
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
@@ -1120,5 +1124,4 @@ namespace Rodin::Variational
         U1, U2, U3, Us...>;
 }
 
-/// @endcond
 #endif

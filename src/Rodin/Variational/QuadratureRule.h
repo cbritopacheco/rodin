@@ -59,7 +59,6 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -859,5 +858,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

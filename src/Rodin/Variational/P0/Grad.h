@@ -23,9 +23,10 @@
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
+  /// space and the operand type.
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>, Data>>>
   {
@@ -35,6 +36,8 @@ namespace Rodin::FormLanguage
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<
@@ -42,6 +45,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Finite element space type.
       using FESType = Variational::P0<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
       /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
@@ -285,5 +289,4 @@ namespace Rodin::Variational
     -> Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

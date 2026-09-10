@@ -20,9 +20,10 @@
 #include "ForwardDecls.h"
 #include "P0Element.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Number, Mesh>>
   {
@@ -38,6 +39,8 @@ namespace Rodin::FormLanguage
       using ElementType = Variational::P0Element<RangeType>;
   };
 
+  /// @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
   {
@@ -139,6 +142,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -164,6 +168,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           /**
@@ -407,5 +412,4 @@ namespace Rodin::Variational
   using ComplexP0 = P0<Complex, Mesh>;
 }
 
-/// @endcond
 #endif

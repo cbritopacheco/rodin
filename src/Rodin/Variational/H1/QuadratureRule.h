@@ -20,7 +20,6 @@
 
 namespace Rodin::Variational
 {
-  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int v \ dx@f$ with an H1 test shape function.
@@ -491,7 +490,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -757,7 +758,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -1037,7 +1040,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -1376,7 +1381,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -1611,7 +1618,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -1883,7 +1892,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -2169,7 +2180,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -2571,7 +2584,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -2924,7 +2939,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -3290,7 +3307,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using TrialSFType =
@@ -3547,7 +3566,6 @@ namespace Rodin::Variational
            ShapeFunctionBase<
              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
              H1<KTest, Scalar, Mesh>, TestSpace>>>;
-  /// @endcond
 }
 
 #endif

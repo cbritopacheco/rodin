@@ -28,9 +28,9 @@
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c LinearFormBase: exposes the vector type.
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
@@ -38,6 +38,8 @@ namespace Rodin::FormLanguage
       using VectorType = Vector;
   };
 
+  /// @brief Type traits for @c LinearForm: exposes the finite element space and the
+  /// vector type.
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
@@ -460,5 +462,4 @@ namespace Rodin::Variational
     -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 }
 
-/// @endcond
 #endif

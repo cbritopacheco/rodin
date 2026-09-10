@@ -18,14 +18,16 @@
 #include "Component.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c TestFunction: exposes the finite element space and the
+  /// shape function space.
   template <class FES>
   struct Traits<Variational::TestFunction<FES>>
   {
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TestSpace;
   };
@@ -180,5 +182,4 @@ namespace Rodin::Variational
   TestFunction(const FES&) -> TestFunction<FES>;
 }
 
-/// @endcond
 #endif

@@ -36,9 +36,10 @@
 #include "ForwardDecls.h"
 #include "H1Element.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
+  /// element space, the operand type and the range type.
   template <size_t K, class Scalar, class Mesh, class Data>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
@@ -84,6 +85,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
@@ -260,5 +262,4 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>;
 }
 
-/// @endcond
 #endif

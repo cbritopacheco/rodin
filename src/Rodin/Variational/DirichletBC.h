@@ -229,7 +229,6 @@
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -1115,5 +1114,4 @@ namespace Rodin::Variational
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 
-/// @endcond
 #endif

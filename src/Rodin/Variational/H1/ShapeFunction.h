@@ -19,7 +19,6 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
@@ -32,10 +31,12 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Range (evaluation value) type.
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Parent class type.
@@ -196,10 +197,12 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType; // == Scalar
+      /// @brief Range (evaluation value) type.
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;  // == Math::Vector<Scalar>
 
       /// @brief Parent class type.
@@ -366,5 +369,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

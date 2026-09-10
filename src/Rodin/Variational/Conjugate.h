@@ -20,15 +20,17 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Conjugate over a shape function: exposes the finite
+  /// element space and the shape function space.
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Conjugate<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
@@ -157,6 +159,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -288,5 +291,4 @@ namespace Rodin::Variational
     -> Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

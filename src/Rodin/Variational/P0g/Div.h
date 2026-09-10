@@ -26,9 +26,10 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Div over a grid function: exposes the finite element
+  /// space, the scalar type and the operand type.
   template <class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
@@ -40,6 +41,8 @@ namespace Rodin::FormLanguage
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Div over a shape function: exposes the finite element
+  /// space, the shape function space, the scalar type and the operand type.
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
@@ -47,6 +50,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Finite element space type.
       using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -127,6 +131,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
@@ -228,5 +233,4 @@ namespace Rodin::Variational
     -> Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

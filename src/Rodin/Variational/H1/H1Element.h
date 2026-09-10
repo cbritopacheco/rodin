@@ -62,7 +62,6 @@
  */
 #define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-14
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -1201,5 +1200,4 @@ namespace Rodin::Variational
 
 #include "H1Element.hpp"
 
-/// @endcond
 #endif

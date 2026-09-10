@@ -28,7 +28,6 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -1117,5 +1116,4 @@ namespace Rodin::Variational
   > class Flow;
 }
 
-/// @endcond
 #endif

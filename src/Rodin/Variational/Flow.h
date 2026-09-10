@@ -60,7 +60,6 @@
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <
@@ -69,6 +68,8 @@ namespace Rodin::FormLanguage
     class VectorField,
     class Step,
     class BoundaryPolicy
+  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   >
   struct Traits<
     Variational::Flow<
@@ -78,6 +79,7 @@ namespace Rodin::FormLanguage
       /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TestSpace;
 
@@ -1312,5 +1314,4 @@ namespace Rodin::Variational
     -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
-/// @endcond
 #endif

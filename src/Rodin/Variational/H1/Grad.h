@@ -28,7 +28,6 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -52,6 +51,7 @@ namespace Rodin::Variational
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
       /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
@@ -196,12 +196,14 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Range (evaluation value) type.
       using RangeType  = Math::SpatialVector<ScalarType>;
       /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       struct Cache
@@ -381,5 +383,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

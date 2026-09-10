@@ -21,7 +21,6 @@
 
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -990,5 +989,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif // RODIN_VARIATIONAL_H1_WARPBLEND_H

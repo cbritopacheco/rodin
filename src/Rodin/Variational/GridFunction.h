@@ -138,7 +138,6 @@ namespace Rodin::Variational
    * - **Space Association**: Strong association with underlying finite element space
    */
 
-  /// @cond RODIN_DOXYGEN_INTERNAL
   template <class Derived>
   class GridFunctionBaseReference
     : public FunctionBase<GridFunctionBaseReference<Derived>>
@@ -272,7 +271,6 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const Derived> m_ref;
   };
-  /// @endcond
 
   /**
    * @brief Abstract base class for GridFunction objects.

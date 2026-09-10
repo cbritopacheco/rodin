@@ -27,9 +27,10 @@
 #include "Rodin/Variational/Div.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Div over a grid function: exposes the finite element
+  /// space, the scalar type and the operand type.
   template <size_t K, class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
@@ -43,6 +44,8 @@ namespace Rodin::FormLanguage
           Data>;
   };
 
+  /// @brief Type traits for @c Div over a shape function: exposes the finite element
+  /// space, the shape function space, the scalar type and the operand type.
   template <size_t K, class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
@@ -50,6 +53,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Finite element space type.
       using FESType = Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
       /// @brief Scalar value type.
       using ScalarType = Scalar;
@@ -89,6 +93,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
@@ -288,6 +293,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Number>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -297,6 +303,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       struct Cache
@@ -489,5 +496,4 @@ namespace Rodin::Variational
     -> Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

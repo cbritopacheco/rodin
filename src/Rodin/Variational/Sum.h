@@ -26,9 +26,10 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Sum over a function expression: exposes the left-hand side
+  /// operand and the right-hand side operand.
   template <class LHSDerived, class RHSDerived>
   struct Traits<
     Variational::Sum<Variational::FunctionBase<LHSDerived>, Variational::FunctionBase<RHSDerived>>>
@@ -39,6 +40,9 @@ namespace Rodin::FormLanguage
       using RHSType = Variational::FunctionBase<RHSDerived>;
   };
 
+  /// @brief Type traits for @c Sum over a shape function: exposes the finite element
+  /// space, the left-hand side operand, the right-hand side operand and the shape
+  /// function space.
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Sum<
@@ -51,9 +55,12 @@ namespace Rodin::FormLanguage
       using LHSType = Variational::FunctionBase<LHSDerived>;
       /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<RHSDerived>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 
+  /// @brief Type traits for @c Sum over linear form integrators: exposes the left-hand
+  /// side operand, the right-hand side operand and the scalar type.
   template <class LHSNumber, class RHSNumber>
   struct Traits<
     Variational::Sum<
@@ -322,6 +329,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Left-hand side operand type.
@@ -934,5 +942,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

@@ -28,7 +28,6 @@
  * spatial coordinates, enabling convenient construction of position-dependent
  * expressions in variational formulations.
  */
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational::F
 {
   /**
@@ -257,5 +256,4 @@ namespace Rodin::Variational::F
   static const Z z;
 }
 
-/// @endcond
 #endif

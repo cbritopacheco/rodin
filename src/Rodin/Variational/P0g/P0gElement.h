@@ -35,9 +35,9 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c P0gElement: exposes the scalar type and the range type.
   template <class Range>
   struct Traits<Variational::P0gElement<Range>>
   {
@@ -395,5 +395,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

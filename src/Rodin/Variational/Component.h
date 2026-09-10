@@ -20,15 +20,18 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Component over a shape function: exposes the finite
+  /// element space, the shape function space, the operand type, the scalar type and the
+  /// range type.
   template <class OperandDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Component<Variational::ShapeFunctionBase<OperandDerived, FES, Space>>>
   {
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -390,6 +393,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr const ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -527,5 +531,4 @@ namespace Rodin::Variational
     -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

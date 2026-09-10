@@ -17,7 +17,6 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -153,5 +152,4 @@ namespace Rodin::Variational
   class VandermondeTetrahedron;
 }
 
-/// @endcond
 #endif

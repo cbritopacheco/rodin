@@ -22,9 +22,10 @@
 #include "VectorFunction.h"
 #include "IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
+  /// space, the operand type and the range type.
   template <class FES, class Data>
   struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
   {
@@ -39,12 +40,15 @@ namespace Rodin::FormLanguage
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 
+  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
+  /// space, the shape function space, the operand type and the range type.
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -323,5 +327,4 @@ namespace Rodin::Variational
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

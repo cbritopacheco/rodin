@@ -50,7 +50,6 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -405,5 +404,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

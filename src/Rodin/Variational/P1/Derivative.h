@@ -31,9 +31,10 @@
 #include "Rodin/Variational/Derivative.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
+  /// element space, the operand type and the range type.
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
@@ -47,6 +48,8 @@ namespace Rodin::FormLanguage
       using RangeType = Range;
   };
 
+  /// @brief Type traits for @c Derivative over a shape function: exposes the finite
+  /// element space, the shape function space, the operand type and the range type.
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Derivative<
@@ -54,6 +57,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -84,6 +88,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
@@ -215,5 +220,4 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<P1<Range, Mesh>, Data>>;
 }
 
-/// @endcond
 #endif

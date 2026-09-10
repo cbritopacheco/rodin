@@ -54,7 +54,6 @@
 
 namespace Rodin::Variational
 {
-  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Integration of a P1 ShapeFunction.
@@ -508,8 +507,10 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -850,8 +851,10 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -1176,8 +1179,10 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -1440,8 +1445,10 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -1795,7 +1802,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -1816,6 +1825,7 @@ namespace Rodin::Variational
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
       /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType   = typename FormLanguage::Traits<InnerIntegrandType>::ScalarType;
 
       /// @brief Parent class type.
@@ -2030,7 +2040,9 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<Real, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -2276,7 +2288,9 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Real, LHSMesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<Math::SpatialVector<Real>, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -2530,8 +2544,10 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -2850,8 +2866,10 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
@@ -3231,7 +3249,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<LHSRange, LHSMesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<RHSRange, RHSMesh>;
 
       using TrialSFType =
@@ -3538,8 +3558,10 @@ namespace Rodin::Variational
 
       using KernelType = Kernel;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
 
+      /// @brief Test finite element space type.
       using TestFESType = P1<Range, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -4129,7 +4151,6 @@ namespace Rodin::Variational
 
       Math::Matrix<ScalarType> m_matrix;
   };
-  /// @endcond
 }
 
 #endif

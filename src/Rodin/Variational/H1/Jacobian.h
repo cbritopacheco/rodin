@@ -38,9 +38,10 @@
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+  /// space and the operand type.
   template <size_t K, class Range, class Data, class Mesh>
   struct Traits<
     Variational::Jacobian<
@@ -53,6 +54,8 @@ namespace Rodin::FormLanguage
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <size_t K, class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Jacobian<
@@ -60,6 +63,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Finite element space type.
       using FESType = Variational::H1<K, Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
       /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
@@ -112,8 +116,10 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       Jacobian(const OperandType& u) : Parent(u) {}
@@ -292,23 +298,29 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
+      /// @brief Parent class type.
       using Parent      =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
           FESType,
           SpaceType>;
 
+      /// @brief Scalar value type.
       using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType         = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       struct Cache
@@ -511,5 +523,4 @@ namespace Rodin::Variational
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

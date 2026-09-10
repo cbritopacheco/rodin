@@ -33,9 +33,10 @@
 
 #include "Rodin/Utility/DependentValue.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
+  /// and the finite element type.
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Scalar, Mesh>>
   {
@@ -49,6 +50,8 @@ namespace Rodin::FormLanguage
       using ElementType = Variational::H1Element<K, RangeType>;
   };
 
+  /// @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
+  /// and the finite element type.
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
@@ -181,6 +184,7 @@ namespace Rodin::Variational
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -209,6 +213,7 @@ namespace Rodin::Variational
         : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           /**
@@ -608,6 +613,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -633,6 +639,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -865,5 +872,4 @@ namespace Rodin::Variational
 
 #include "H1.hpp"
 
-/// @endcond
 #endif

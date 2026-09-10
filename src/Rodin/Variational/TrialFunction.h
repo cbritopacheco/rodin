@@ -23,14 +23,16 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c TrialFunction: exposes the finite element space, the shape
+  /// function space and the solution type.
   template <class Solution, class FES>
   struct Traits<Variational::TrialFunction<Solution, FES>>
   {
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TrialSpace;
 
@@ -413,5 +415,4 @@ namespace Rodin::Variational
         GridFunction<FES, Math::Vector<
           typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
 }
-/// @endcond
 #endif

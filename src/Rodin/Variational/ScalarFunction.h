@@ -19,14 +19,16 @@
 
 #include "Function.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c ScalarFunctionBase: exposes the scalar type and the
+  /// derived type.
   template <class Scalar, class Derived>
   struct Traits<Variational::ScalarFunctionBase<Scalar, Derived>>
   {
       /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Derived CRTP function type.
       using DerivedType = Derived;
   };
 }
@@ -131,5 +133,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

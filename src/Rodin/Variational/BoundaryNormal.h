@@ -59,7 +59,6 @@
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -79,6 +78,7 @@ namespace Rodin::Variational
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Parent class type.
@@ -300,5 +300,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

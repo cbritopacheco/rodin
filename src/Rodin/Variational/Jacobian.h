@@ -47,7 +47,6 @@
 #include "MatrixFunction.h"
 #include "IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -98,6 +97,7 @@ namespace Rodin::Variational
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
@@ -290,5 +290,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

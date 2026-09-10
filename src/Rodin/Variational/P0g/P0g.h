@@ -27,14 +27,18 @@
 
 #include "P0gElement.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0g<Number, Mesh>>
   {
+    /// @brief Mesh type.
     using MeshType    = Mesh;
+    /// @brief Scalar value type.
     using ScalarType  = Number;
+    /// @brief Range (evaluation value) type.
     using RangeType   = ScalarType;
     /// @brief Execution context type.
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
@@ -42,11 +46,16 @@ namespace Rodin::FormLanguage
     using ElementType = Variational::P0gElement<RangeType>;
   };
 
+  /// @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0g<Math::SpatialVector<Number>, Mesh>>
   {
+    /// @brief Mesh type.
     using MeshType    = Mesh;
+    /// @brief Scalar value type.
     using ScalarType  = Number;
+    /// @brief Range (evaluation value) type.
     using RangeType   = Math::SpatialVector<ScalarType>;
     /// @brief Execution context type.
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
@@ -78,13 +87,17 @@ namespace Rodin::Variational
         P0g<Real, Geometry::Mesh<Context::Local>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType  = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType   = ScalarType;
       /// @brief Execution context type.
       using ContextType = Context::Local;
+      /// @brief Mesh type.
       using MeshType    = Geometry::Mesh<ContextType>;
       /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
+      /// @brief Parent class type.
       using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
 
       template <class Callable>
@@ -92,6 +105,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -115,6 +129,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -251,13 +266,17 @@ namespace Rodin::Variational
         P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType  = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType   = Math::SpatialVector<Real>;
       /// @brief Execution context type.
       using ContextType = Context::Local;
+      /// @brief Mesh type.
       using MeshType    = Geometry::Mesh<ContextType>;
       /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
+      /// @brief Parent class type.
       using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
 
       template <class Callable>
@@ -265,6 +284,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -288,6 +308,7 @@ namespace Rodin::Variational
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           template <class Function>
@@ -442,5 +463,4 @@ namespace Rodin::Variational
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }
 
-/// @endcond
 #endif

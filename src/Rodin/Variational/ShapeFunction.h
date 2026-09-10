@@ -26,16 +26,20 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c ShapeFunctionBase: exposes the derived type, the finite
+  /// element space, the shape function space, the result type, the range type and the
+  /// scalar type.
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
+    /// @brief Derived CRTP function type.
     using DerivedType = Derived;
 
     /// @brief Finite element space type.
     using FESType = FES;
+    /// @brief Shape function space the expression belongs to, trial or test.
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
@@ -50,13 +54,18 @@ namespace Rodin::FormLanguage
     using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
+  /// @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
+  /// element space, the shape function space, the result type, the range type and the
+  /// scalar type.
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
+    /// @brief Derived CRTP function type.
     using DerivedType = Derived;
 
     /// @brief Finite element space type.
     using FESType = FES;
+    /// @brief Shape function space the expression belongs to, trial or test.
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
@@ -397,5 +406,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

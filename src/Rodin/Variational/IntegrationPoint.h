@@ -13,7 +13,6 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/QF/QuadratureFormula.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -89,5 +88,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif
