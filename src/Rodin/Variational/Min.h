@@ -162,6 +162,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Min.
   template <class LHSDerived, class RHSDerived>
   Min(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
@@ -283,6 +284,7 @@ namespace Rodin::Variational
       RHSType m_rhs;
   };
 
+  /// @brief Deduction guide for @c Min.
   template <class NestedDerived>
   Min(const FunctionBase<NestedDerived>&, Real) -> Min<FunctionBase<NestedDerived>, Real>;
 
@@ -324,6 +326,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Min.
   template <class NestedDerived>
   Min(Real, const FunctionBase<NestedDerived>&) -> Min<Real, FunctionBase<NestedDerived>>;
 }

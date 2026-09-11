@@ -74,6 +74,7 @@ namespace Rodin::Variational
       using Parent::operator=;
   };
 
+  /// @brief Deduction guide for @c DenseProblem.
   template <class U, class V>
   DenseProblem(U& u, V& v)
     -> DenseProblem<

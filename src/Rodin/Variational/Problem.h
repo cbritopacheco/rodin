@@ -1113,6 +1113,7 @@ namespace Rodin::Variational
       LinearSystemType m_axb;
   };
 
+  /// @brief Deduction guide for @c Problem.
   template <class U1, class U2, class U3, class ... Us>
   Problem(U1& u1, U2& u2, U3& u3, Us&... us)
     -> Problem<

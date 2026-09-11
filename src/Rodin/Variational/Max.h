@@ -167,6 +167,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Max.
   template <class LHSDerived, class RHSDerived>
   Max(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
@@ -289,6 +290,7 @@ namespace Rodin::Variational
       RHSType m_rhs;
   };
 
+  /// @brief Deduction guide for @c Max.
   template <class NestedDerived>
   Max(const FunctionBase<NestedDerived>&, Real) -> Max<FunctionBase<NestedDerived>, Real>;
 
@@ -330,6 +332,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Max.
   template <class NestedDerived>
   Max(Real, const FunctionBase<NestedDerived>&) -> Max<Real, FunctionBase<NestedDerived>>;
 }

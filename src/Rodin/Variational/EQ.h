@@ -123,6 +123,7 @@ namespace Rodin::Variational
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto
+  /// @brief Equality comparison of two function expressions.
   operator==(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(lhs, rhs);
@@ -131,6 +132,7 @@ namespace Rodin::Variational
   template <class RHSDerived>
   constexpr
   auto
+  /// @brief Equality comparison of two function expressions.
   operator==(Boolean lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(BooleanFunction(lhs), rhs);
@@ -139,6 +141,7 @@ namespace Rodin::Variational
   template <class LHSDerived>
   constexpr
   auto
+  /// @brief Equality comparison of two function expressions.
   operator==(const FunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return EQ(lhs, BooleanFunction(rhs));
@@ -148,6 +151,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Equality comparison of two function expressions.
   operator==(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(RealFunction(lhs), rhs);
@@ -157,6 +161,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Equality comparison of two function expressions.
   operator==(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return EQ(lhs, RealFunction(rhs));

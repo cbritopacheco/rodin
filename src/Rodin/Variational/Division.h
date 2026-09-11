@@ -351,12 +351,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Division.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   Division(
       const ShapeFunctionBase<LHSDerived, FES, Space>&,
       const FunctionBase<RHSDerived>&)
     -> Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
+  /// @brief Quotient of two shape function expressions.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   auto operator/(
       const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,

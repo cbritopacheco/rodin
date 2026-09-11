@@ -174,10 +174,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
     -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c Integral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
@@ -237,10 +239,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class NestedDerived, class FES>
   Integral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
+  /// @brief Deduction guide for @c Integral.
   template <class LHSDerived, class RHSDerived, class FES>
   Integral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
     -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>>>;
@@ -290,6 +294,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class FES, class Data>
   Integral(const GridFunction<FES, Data>&) -> Integral<GridFunction<FES, Data>>;
 }

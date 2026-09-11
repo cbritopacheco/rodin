@@ -174,6 +174,7 @@ namespace Rodin::Variational
       const Boolean m_v;
   };
 
+  /// @brief Deduction guide for @c BooleanFunction.
   BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 

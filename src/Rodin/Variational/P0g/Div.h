@@ -239,6 +239,7 @@ namespace Rodin::Variational
   Div(const GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>&)
     -> Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
+  /// @brief Deduction guide for @c Div.
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   Div(const ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
     -> Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;

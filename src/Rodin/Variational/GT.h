@@ -126,6 +126,7 @@ namespace Rodin::Variational
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto
+  /// @brief Greater-than comparison of two function expressions.
   operator>(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return GT(lhs, rhs);
@@ -135,6 +136,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Greater-than comparison of two function expressions.
   operator>(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return GT(RealFunction(lhs), rhs);
@@ -144,6 +146,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Greater-than comparison of two function expressions.
   operator>(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return GT(lhs, RealFunction(rhs));

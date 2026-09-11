@@ -153,10 +153,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c BoundaryIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   BoundaryIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
     -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c BoundaryIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   BoundaryIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
@@ -222,10 +224,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c BoundaryIntegral.
   template <class NestedDerived, class FES>
   BoundaryIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> BoundaryIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
+  /// @brief Deduction guide for @c BoundaryIntegral.
   template <class LHSDerived, class RHSDerived, class FES>
   BoundaryIntegral(
       const FunctionBase<LHSDerived>&,

@@ -571,6 +571,7 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
+  /// @brief Deduction guide for @c ProblemBody.
   template <class Scalar>
   ProblemBody(const LocalBilinearFormIntegratorBase<Scalar>&)
     -> ProblemBody<void, void, Scalar>;

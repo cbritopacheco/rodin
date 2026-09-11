@@ -146,6 +146,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Sin.
   template <class NestedDerived>
   Sin(const FunctionBase<NestedDerived>&) -> Sin<FunctionBase<NestedDerived>>;
 

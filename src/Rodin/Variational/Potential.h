@@ -525,6 +525,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(
       const Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
@@ -534,6 +535,7 @@ namespace Rodin::Variational
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c Integral.
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(
       const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,

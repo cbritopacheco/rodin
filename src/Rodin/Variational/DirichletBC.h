@@ -1109,6 +1109,7 @@ namespace Rodin::Variational
     const TrialFunction<Solution, FES1>&, const ShapeFunctionBase<Derived2, FES2, Sp>&)
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 
+  /// @brief Deduction guide for @c DirichletBC.
   template <class Solution, class FES1, class Derived2, class FES2,
     ShapeFunctionSpaceType Sp, class DefectDerived>
   DirichletBC(const TrialFunction<Solution, FES1>&,

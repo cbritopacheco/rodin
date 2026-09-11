@@ -800,6 +800,7 @@ namespace Rodin::Variational
       Optional<Geometry::Polytope::Type> m_geometry;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
     const Dot<
@@ -1140,6 +1141,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_basis;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
   QuadratureRule(const
     Dot<
@@ -1410,6 +1412,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
       const Dot<
@@ -2035,6 +2038,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
     const Mult<
@@ -2300,6 +2304,7 @@ namespace Rodin::Variational
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>;
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   QuadratureRule(const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
     -> QuadratureRule<P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
@@ -2555,6 +2560,7 @@ namespace Rodin::Variational
         Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
         P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>;
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
     -> QuadratureRule<P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
@@ -3576,6 +3582,7 @@ namespace Rodin::Variational
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
     class Range, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(
     const Dot<
       ShapeFunctionBase<

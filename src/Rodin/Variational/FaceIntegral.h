@@ -165,10 +165,12 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_prod;
   };
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   FaceIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
     -> FaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   FaceIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> FaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
@@ -233,10 +235,12 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
   };
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class NestedDerived, class FES>
   FaceIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> FaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class LHSDerived, class RHSDerived, class FES>
   FaceIntegral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
     -> FaceIntegral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;

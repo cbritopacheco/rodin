@@ -1296,6 +1296,7 @@ namespace Rodin::Variational
       const Geometry::Point* m_p;
   };
 
+  /// @brief Deduction guide for @c Flow.
   template <class Derived, class Velocity>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&)
     -> Flow<
@@ -1304,6 +1305,7 @@ namespace Rodin::Variational
          Math::RungeKutta::RK4,
          DefaultBoundaryPolicy>;
 
+  /// @brief Deduction guide for @c Flow.
   template <class Derived, class Velocity, class Step>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
     -> Flow<
@@ -1312,6 +1314,7 @@ namespace Rodin::Variational
          Step,
          DefaultBoundaryPolicy>;
 
+  /// @brief Deduction guide for @c Flow.
   template <class Derived, class Velocity, class Step, class BBP>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&)
     -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;

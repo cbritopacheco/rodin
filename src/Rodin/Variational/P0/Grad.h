@@ -294,6 +294,7 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
   };
 
+  /// @brief Deduction guide for @c Grad.
   template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   Grad(const ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>&)
     -> Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>;

@@ -137,6 +137,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
+  /// @brief Deduction guide for @c Exp.
   template <class NestedDerived>
   Exp(const FunctionBase<NestedDerived>&) -> Exp<FunctionBase<NestedDerived>>;
 

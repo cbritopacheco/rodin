@@ -147,6 +147,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Tan.
   template <class NestedDerived>
   Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
 

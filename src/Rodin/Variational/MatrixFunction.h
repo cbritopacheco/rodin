@@ -251,6 +251,7 @@ namespace Rodin::Variational
       const MatrixType m_matrix;
   };
 
+  /// @brief Deduction guide for @c MatrixFunction.
   template <class Scalar>
   MatrixFunction(const Math::Matrix<Scalar>&)
     -> MatrixFunction<Math::Matrix<Scalar>>;

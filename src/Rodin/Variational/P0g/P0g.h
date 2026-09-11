@@ -452,6 +452,7 @@ namespace Rodin::Variational
   };
 
   // CTAD (scalar)
+  /// @brief Deduction guide for @c P0g.
   template <class Context>
   P0g(const Geometry::Mesh<Context>&) -> P0g<Real, Geometry::Mesh<Context>>;
 

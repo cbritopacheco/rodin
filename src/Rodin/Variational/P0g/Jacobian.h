@@ -267,6 +267,7 @@ namespace Rodin::Variational
   Jacobian(const GridFunction<P0g<Range, Mesh>, Data>&)
     -> Jacobian<GridFunction<P0g<Range, Mesh>, Data>>;
 
+  /// @brief Deduction guide for @c Jacobian.
   template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   Jacobian(const ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;

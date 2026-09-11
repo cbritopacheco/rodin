@@ -40,6 +40,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c UndeterminedTraceDomainException.
   template <class T, class FuncName, class Iterator>
   UndeterminedTraceDomainException(const T&, const FuncName&, const std::pair<size_t, Index>&, Iterator, Iterator)
     -> UndeterminedTraceDomainException<T, FuncName>;

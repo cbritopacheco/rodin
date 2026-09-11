@@ -505,6 +505,7 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
+  /// @brief Deduction guide for @c Div.
   template <size_t K, class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
   Div(const ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
     -> Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;

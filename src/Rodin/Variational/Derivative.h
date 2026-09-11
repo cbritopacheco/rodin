@@ -352,6 +352,7 @@ namespace Rodin::Variational
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };
 
+  /// @brief Deduction guide for @c Derivative.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>
   Derivative(size_t i, const ShapeFunction<NestedDerived, FES, SpaceType>& u)
     -> Derivative<ShapeFunction<NestedDerived, FES, SpaceType>>;

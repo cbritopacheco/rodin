@@ -123,6 +123,7 @@ namespace Rodin::Variational
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto
+  /// @brief Inequality comparison of two function expressions.
   operator!=(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return NEQ(lhs, rhs);
@@ -131,6 +132,7 @@ namespace Rodin::Variational
   template <class RHSDerived>
   constexpr
   auto
+  /// @brief Inequality comparison of two function expressions.
   operator!=(Boolean lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return NEQ(BooleanFunction(lhs), rhs);
@@ -139,6 +141,7 @@ namespace Rodin::Variational
   template <class LHSDerived>
   constexpr
   auto
+  /// @brief Inequality comparison of two function expressions.
   operator!=(const FunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return NEQ(lhs, BooleanFunction(rhs));
@@ -148,6 +151,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Inequality comparison of two function expressions.
   operator!=(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return NEQ(RealFunction(lhs), rhs);
@@ -157,6 +161,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Inequality comparison of two function expressions.
   operator!=(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return NEQ(lhs, RealFunction(rhs));

@@ -172,6 +172,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Trace.
   template <class NestedDerived>
   Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
 
@@ -272,6 +273,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Trace.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   Trace(const ShapeFunctionBase<NestedDerived, FES, Space>&)
     -> Trace<ShapeFunctionBase<NestedDerived, FES, Space>>;

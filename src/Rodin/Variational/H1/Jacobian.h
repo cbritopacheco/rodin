@@ -532,6 +532,7 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
+  /// @brief Deduction guide for @c Jacobian.
   template <size_t K, class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
   Jacobian(const ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;

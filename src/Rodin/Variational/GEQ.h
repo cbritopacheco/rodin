@@ -122,6 +122,7 @@ namespace Rodin::Variational
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto
+  /// @brief Greater-or-equal comparison of two function expressions.
   operator>=(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return GEQ(lhs, rhs);
@@ -131,6 +132,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Greater-or-equal comparison of two function expressions.
   operator>=(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return GEQ(RealFunction(lhs), rhs);
@@ -140,6 +142,7 @@ namespace Rodin::Variational
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr
   auto
+  /// @brief Greater-or-equal comparison of two function expressions.
   operator>=(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return GEQ(lhs, RealFunction(rhs));
