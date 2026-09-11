@@ -247,7 +247,8 @@ namespace Rodin::Variational
       // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
       static constexpr
       /// @brief Gets the derivative of the basis function.
-      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
+        Real
+        getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
         const Real lambda[3] = { 1.0 - x - y, x, y };
 

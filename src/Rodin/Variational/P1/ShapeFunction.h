@@ -52,63 +52,69 @@ namespace Rodin::Variational
       struct Cache
       {
         /// @brief Key identifying the cached element structure.
-        struct StructureKey
-        {
+          struct StructureKey
+          {
           /// @brief Geometry of the cached polytope.
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
           /// @brief Vector dimension of the finite element space.
-          size_t vdim = 1;
+              size_t vdim = 1;
           /// @brief Whether the key holds a cached entry.
-          bool valid = false;
+              bool valid = false;
 
           /// @brief Tests whether the key holds a cached entry.
-          explicit operator bool() const noexcept { return valid; }
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
 
           /// @brief Equality comparison.
-          bool operator==(const StructureKey& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return geom == o.geom && vdim == o.vdim;
-          }
+              bool operator==(const StructureKey& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return geom == o.geom && vdim == o.vdim;
+              }
 
           /// @brief Resets the key, invalidating the cached entry.
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            geom = Geometry::Polytope::Type::Point;
-            vdim = 1;
-          }
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                geom = Geometry::Polytope::Type::Point;
+                vdim = 1;
+              }
         };
 
         /// @brief Key identifying the cached shape function values.
         struct ValueKey
         {
           /// @brief Quadrature formula the cached tabulation belongs to.
-          const QF::QuadratureFormulaBase* qf = nullptr;
+            const QF::QuadratureFormulaBase* qf = nullptr;
           /// @brief Index of the quadrature point.
-          size_t qp = 0;
+            size_t qp = 0;
           /// @brief Whether the key holds a cached entry.
-          bool valid = false;
+            bool valid = false;
 
           /// @brief Tests whether the key holds a cached entry.
-          explicit operator bool() const noexcept { return valid; }
+            explicit operator bool() const noexcept
+            {
+              return valid;
+            }
 
           /// @brief Equality comparison.
-          bool operator==(const ValueKey& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return qf == o.qf && qp == o.qp;
-          }
+            bool operator==(const ValueKey& o) const noexcept
+            {
+              if (!valid || !o.valid)
+                return false;
+              return qf == o.qf && qp == o.qp;
+            }
 
           /// @brief Resets the key, invalidating the cached entry.
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            qf = nullptr;
-            qp = 0;
-          }
+            void operator=(std::initializer_list<int>) noexcept
+            {
+              valid = false;
+              qf = nullptr;
+              qp = 0;
+            }
         };
 
         // For scalar: size = nv

@@ -153,9 +153,7 @@ namespace Rodin::Solver
        * @returns Pointer to a new SimplicialLDLT instance
        */
       /// @brief Returns a polymorphic copy of this solver.
-      inline
-        SimplicialLDLT*
-        copy() const noexcept override
+      inline SimplicialLDLT* copy() const noexcept override
       {
         return new SimplicialLDLT(*this);
       }

@@ -529,10 +529,9 @@ namespace Rodin::Variational
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
 
-      template <class A1, class A2, class ... As>
+      template <class A1, class A2, class... As>
       /// @brief Restricts the boundary condition to the given mesh attributes.
-      constexpr
-      DirichletBC& on(A1 a1, A2 a2, As... as)
+      constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
         return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }

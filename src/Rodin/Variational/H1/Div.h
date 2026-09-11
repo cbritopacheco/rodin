@@ -316,49 +316,49 @@ namespace Rodin::Variational
       /// @brief Per-cell tabulation cache.
       struct Cache
       {
-        /// @brief Key identifying a cached tabulation.
-        struct Key
-        {
-          /// @brief Geometry of the cached polytope.
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          /// @brief Spatial dimension.
-          size_t dim = 0;
-          /// @brief Cached cell tabulation.
-          Index cell = 0;
-
-          /// @brief Quadrature formula the cached tabulation belongs to.
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          /// @brief Index of the quadrature point.
-          size_t qp = 0;
-
-          /// @brief Whether the key holds a cached entry.
-          bool valid = false;
-
-          /// @brief Tests whether the key holds a cached entry.
-          explicit operator bool() const noexcept { return valid; }
-
-          /// @brief Equality comparison.
-          bool operator==(const Key& o) const noexcept
+          /// @brief Key identifying a cached tabulation.
+          struct Key
           {
-            if (!valid || !o.valid)
-              return false;
-            return geom == o.geom
-                && dim  == o.dim
-                && cell == o.cell
-                && qf   == o.qf
-                && qp   == o.qp;
-          }
+              /// @brief Geometry of the cached polytope.
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              /// @brief Spatial dimension.
+              size_t dim = 0;
+              /// @brief Cached cell tabulation.
+              Index cell = 0;
 
-          /// @brief Resets the key, invalidating the cached entry.
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            geom = Geometry::Polytope::Type::Point;
-            dim = 0;
-            cell = 0;
-            qf = nullptr;
-            qp = 0;
-          }
+              /// @brief Quadrature formula the cached tabulation belongs to.
+              const QF::QuadratureFormulaBase* qf = nullptr;
+              /// @brief Index of the quadrature point.
+              size_t qp = 0;
+
+              /// @brief Whether the key holds a cached entry.
+              bool valid = false;
+
+              /// @brief Tests whether the key holds a cached entry.
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
+
+              /// @brief Equality comparison.
+              bool operator==(const Key& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return geom == o.geom && dim == o.dim && cell == o.cell && qf == o.qf &&
+                  qp == o.qp;
+              }
+
+              /// @brief Resets the key, invalidating the cached entry.
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                geom = Geometry::Polytope::Type::Point;
+                dim = 0;
+                cell = 0;
+                qf = nullptr;
+                qp = 0;
+              }
         };
 
         /// @brief Cached physical divergences per vector DOF (size = ndof).

@@ -20,7 +20,6 @@
 
 #include "RealFunction.h"
 
-
 /**
  * @brief Contains built-in coordinate functions
  *

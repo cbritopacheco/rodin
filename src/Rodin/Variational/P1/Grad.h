@@ -226,73 +226,79 @@ namespace Rodin::Variational
       struct Cache
       {
         /// @brief Key identifying the cell a tabulation was computed for.
-        struct CellKey
-        {
+          struct CellKey
+          {
           /// @brief Mesh the cached tabulation belongs to.
-          const void* mesh = nullptr;
+              const void* mesh = nullptr;
           /// @brief Topological dimension of the cached polytope.
-          size_t d = 0;
+              size_t d = 0;
           /// @brief Index of the cached polytope.
-          Index i = 0;
+              Index i = 0;
           /// @brief Geometry of the cached polytope.
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
           /// @brief Order of the geometric transformation.
-          int transOrder = 1;
+              int transOrder = 1;
           /// @brief Whether the key holds a cached entry.
-          bool valid = false;
+              bool valid = false;
 
           /// @brief Tests whether the key holds a cached entry.
-          explicit operator bool() const noexcept { return valid; }
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
 
           /// @brief Equality comparison.
-          bool operator==(const CellKey& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return mesh == o.mesh && d == o.d && i == o.i
-                && geom == o.geom && transOrder == o.transOrder;
-          }
+              bool operator==(const CellKey& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
+                  transOrder == o.transOrder;
+              }
 
           /// @brief Resets the key, invalidating the cached entry.
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            mesh = nullptr;
-            d = 0;
-            i = 0;
-            geom = Geometry::Polytope::Type::Point;
-            transOrder = 1;
-          }
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                mesh = nullptr;
+                d = 0;
+                i = 0;
+                geom = Geometry::Polytope::Type::Point;
+                transOrder = 1;
+              }
         };
 
         /// @brief Key identifying the quadrature point a tabulation was computed for.
         struct QpKey
         {
-          /// @brief Quadrature formula the cached tabulation belongs to.
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          /// @brief Index of the quadrature point.
-          size_t qp = 0;
-          /// @brief Whether the key holds a cached entry.
-          bool valid = false;
+            /// @brief Quadrature formula the cached tabulation belongs to.
+            const QF::QuadratureFormulaBase* qf = nullptr;
+            /// @brief Index of the quadrature point.
+            size_t qp = 0;
+            /// @brief Whether the key holds a cached entry.
+            bool valid = false;
 
-          /// @brief Tests whether the key holds a cached entry.
-          explicit operator bool() const noexcept { return valid; }
+            /// @brief Tests whether the key holds a cached entry.
+            explicit operator bool() const noexcept
+            {
+              return valid;
+            }
 
-          /// @brief Equality comparison.
-          bool operator==(const QpKey& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return qf == o.qf && qp == o.qp;
-          }
+            /// @brief Equality comparison.
+            bool operator==(const QpKey& o) const noexcept
+            {
+              if (!valid || !o.valid)
+                return false;
+              return qf == o.qf && qp == o.qp;
+            }
 
-          /// @brief Resets the key, invalidating the cached entry.
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            qf = nullptr;
-            qp = 0;
-          }
+            /// @brief Resets the key, invalidating the cached entry.
+            void operator=(std::initializer_list<int>) noexcept
+            {
+              valid = false;
+              qf = nullptr;
+              qp = 0;
+            }
         };
 
         // Cached physical gradients \nabla_x φ_a (one per scalar basis function)

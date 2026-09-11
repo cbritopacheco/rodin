@@ -35,23 +35,23 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
     /// @brief Derived CRTP function type.
-    using DerivedType = Derived;
+      using DerivedType = Derived;
 
     /// @brief Finite element space type.
-    using FESType = FES;
+      using FESType = FES;
     /// @brief Shape function space the expression belongs to, trial or test.
-    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-    using ResultType =
-      typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+      using ResultType =
+        typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-    using RangeType =
-      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+      using RangeType =
+        typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
   /// @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
@@ -61,27 +61,23 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @brief Derived CRTP function type.
-    using DerivedType = Derived;
+      using DerivedType = Derived;
 
     /// @brief Finite element space type.
-    using FESType = FES;
+      using FESType = FES;
     /// @brief Shape function space the expression belongs to, trial or test.
-    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-    using ResultType =
-      typename ResultOf<
-        Variational::ShapeFunctionBase<
-          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+      using ResultType = typename ResultOf<Variational::ShapeFunctionBase<
+        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-    using RangeType =
-      typename RangeOf<
-        Variational::ShapeFunctionBase<
-          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+      using RangeType = typename RangeOf<Variational::ShapeFunctionBase<
+        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 
@@ -109,7 +105,7 @@ namespace Rodin::Variational
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
     /// @brief Whether the trait holds.
-    static constexpr Boolean Value = true;
+      static constexpr Boolean Value = true;
   };
 
   /**
@@ -128,7 +124,7 @@ namespace Rodin::Variational
   struct IsTestFunction<TestFunction<FES>>
   {
     /// @brief Whether the trait holds.
-    static constexpr Boolean Value = true;
+      static constexpr Boolean Value = true;
   };
 
   /**

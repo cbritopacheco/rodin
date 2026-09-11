@@ -156,49 +156,49 @@ namespace Rodin::Variational
       struct Tabulation
       {
         /// @brief Number of quadrature points tabulated.
-        size_t nqp  = 0;
+          size_t nqp = 0;
         /// @brief Number of degrees of freedom tabulated.
-        size_t ndof = 0;
+          size_t ndof = 0;
         /// @brief Spatial dimension.
-        size_t dim  = 0;
+          size_t dim = 0;
 
         // qp-major storage
         // phi[(qp*ndof) + a]
         /// @brief Tabulated basis values.
-        std::vector<Scalar> phi;
+          std::vector<Scalar> phi;
 
         // derivative in reference coordinates
         // dphi[((qp*ndof + a)*dim) + i]
         /// @brief Tabulated basis derivatives.
-        std::vector<Scalar> dphi;
+          std::vector<Scalar> dphi;
 
         // ---------- fast path (tight loops) ----------
         /// @brief Gets the basis function of a local degree of freedom.
-        const Scalar& getBasis(size_t qp, size_t a) const noexcept
-        {
-          return phi[qp * ndof + a];
-        }
-
-        /// @brief Gets the derivative of the basis function.
-        template <size_t Order>
-        const Scalar& getDerivative(size_t qp, size_t a, size_t i) const noexcept
-        {
-          if constexpr (Order == 0)
+          const Scalar& getBasis(size_t qp, size_t a) const noexcept
           {
-            assert(i == 0);
             return phi[qp * ndof + a];
           }
-          else if constexpr (Order == 1)
+
+        /// @brief Gets the derivative of the basis function.
+          template <size_t Order>
+          const Scalar& getDerivative(size_t qp, size_t a, size_t i) const noexcept
           {
-            assert(i < dim);
-            return dphi[(qp * ndof + a) * dim + i];
-          }
-          else
-          {
+            if constexpr (Order == 0)
+            {
+              assert(i == 0);
+              return phi[qp * ndof + a];
+            }
+            else if constexpr (Order == 1)
+            {
+              assert(i < dim);
+              return dphi[(qp * ndof + a) * dim + i];
+            }
+            else
+            {
             // Higher-order derivatives not implemented
-            static const Scalar zero = Scalar(0);
-            return zero;
-          }
+              static const Scalar zero = Scalar(0);
+              return zero;
+            }
         }
 
         /// @brief Gets the gradient of the basis function.
@@ -877,7 +877,8 @@ namespace Rodin::Variational
       /// @brief Degree-of-freedom functional of the vector-valued H1 element.
       class LinearForm
       {
-        /// @brief Constructs the functional of a local degree of freedom.
+          /// @brief Constructs the functional of a local degree of freedom.
+
         public:
           constexpr
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -931,7 +932,8 @@ namespace Rodin::Variational
           template <size_t Order>
           class DerivativeFunction
           {
-            /// @brief Constructs the derivative of a local basis function.
+              /// @brief Constructs the derivative of a local basis function.
+
             public:
               constexpr
               DerivativeFunction(size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1054,8 +1056,7 @@ namespace Rodin::Variational
 
           template <size_t Order>
           /// @brief Gets the derivative of the basis function.
-          constexpr
-          DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+          constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
             return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }

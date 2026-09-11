@@ -253,8 +253,7 @@ namespace Rodin::Variational
 
           template <size_t Order>
           /// @brief Gets the derivative of the basis function.
-          constexpr
-          DerivativeFunction<Order> getDerivative(size_t i) const
+          constexpr DerivativeFunction<Order> getDerivative(size_t i) const
           {
             return DerivativeFunction<Order>(i, m_local, m_g);
           }
@@ -922,7 +921,8 @@ namespace Rodin::Variational
       /// @brief Degree-of-freedom functional of the vector-valued P1 element.
       class LinearForm
       {
-        /// @brief Constructs the functional of a local degree of freedom.
+          /// @brief Constructs the functional of a local degree of freedom.
+
         public:
           constexpr
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1096,8 +1096,7 @@ namespace Rodin::Variational
 
           template <size_t Order>
           /// @brief Gets the derivative of the basis function.
-          constexpr
-          DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
+          constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
             return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }

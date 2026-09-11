@@ -61,9 +61,9 @@ namespace Rodin::Variational
       struct VectorCache
       {
         /// @brief Vector dimension of the finite element space.
-        size_t vdim = 0;
+          size_t vdim = 0;
         /// @brief Cached reference basis tabulation.
-        std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
+          std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
       };
 
       ShapeFunction() = delete;

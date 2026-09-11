@@ -239,8 +239,7 @@ namespace Rodin::Variational
 
       template <class DataType>
       /// @brief Sets the degree-of-freedom data.
-      constexpr
-      decltype(auto) setData(const DataType& data, size_t offset = 0)
+      constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
       }

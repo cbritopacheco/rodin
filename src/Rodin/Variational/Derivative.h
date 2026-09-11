@@ -54,13 +54,13 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Derivative<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
     /// @brief Shape function space the expression belongs to, trial or test.
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
     /// @brief Finite element space type.
-    using FESType = FES;
+      using FESType = FES;
     /// @brief Scalar value type.
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
     /// @brief Operand type.
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 

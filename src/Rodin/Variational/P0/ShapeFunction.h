@@ -49,32 +49,36 @@ namespace Rodin::Variational
       struct Cache
       {
         /// @brief Key identifying a cached tabulation.
-        struct Key
-        {
+          struct Key
+          {
           /// @brief Geometry of the cached polytope.
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
           /// @brief Vector dimension of the finite element space.
-          size_t vdim = 1;
+              size_t vdim = 1;
           /// @brief Whether the key holds a cached entry.
-          bool valid = false;
+              bool valid = false;
 
           /// @brief Tests whether the key holds a cached entry.
-          explicit operator bool() const noexcept { return valid; }
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
 
           /// @brief Equality comparison.
-          bool operator==(const Key& o) const noexcept
-          {
-            if (!valid || !o.valid) return false;
-            return geom == o.geom && vdim == o.vdim;
-          }
+              bool operator==(const Key& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return geom == o.geom && vdim == o.vdim;
+              }
 
           /// @brief Resets the key, invalidating the cached entry.
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            geom = Geometry::Polytope::Type::Point;
-            vdim = 1;
-          }
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                geom = Geometry::Polytope::Type::Point;
+                vdim = 1;
+              }
         };
 
         /// @brief Cached reference basis tabulation.

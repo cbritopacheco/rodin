@@ -128,17 +128,16 @@ namespace Rodin::Variational
     -> OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Logical disjunction of two boolean function expressions.
-  operator||(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  operator||(const BooleanFunctionBase<LHSDerived>& lhs,
+    const BooleanFunctionBase<RHSDerived>& rhs)
   {
     return OR(lhs, rhs);
   }
 
   template <class RHSDerived>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Logical disjunction of two boolean function expressions.
   operator||(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
   {
@@ -146,8 +145,7 @@ namespace Rodin::Variational
   }
 
   template <class LHSDerived>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Logical disjunction of two boolean function expressions.
   operator||(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
   {

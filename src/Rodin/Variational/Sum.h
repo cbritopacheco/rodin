@@ -464,11 +464,10 @@ namespace Rodin::Variational
     -> Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two shape function expressions.
   operator+(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
-            const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -522,12 +521,10 @@ namespace Rodin::Variational
     -> Sum<LinearFormIntegratorBase<LHSNumber>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two linear form integrators.
-  operator+(
-      const LinearFormIntegratorBase<LHSNumber>& lhs,
-      const LinearFormIntegratorBase<RHSNumber>& rhs)
+  operator+(const LinearFormIntegratorBase<LHSNumber>& lhs,
+    const LinearFormIntegratorBase<RHSNumber>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -581,12 +578,10 @@ namespace Rodin::Variational
     -> Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two linear form integrators.
-  operator+(
-      const LinearFormIntegratorBase<LHSNumber>& lhs,
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
+  operator+(const LinearFormIntegratorBase<LHSNumber>& lhs,
+    const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -642,12 +637,10 @@ namespace Rodin::Variational
     -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two linear form integrators.
-  operator+(
-      const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
-      const LinearFormIntegratorBase<RHSNumber>& rhs)
+  operator+(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
+    const LinearFormIntegratorBase<RHSNumber>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -706,12 +699,10 @@ namespace Rodin::Variational
         FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two linear form integrators.
-  operator+(
-      const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
+  operator+(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
+    const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -766,11 +757,9 @@ namespace Rodin::Variational
     -> Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two bilinear form integrators.
-  operator+(
-    const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+  operator+(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
     const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
   {
     return Sum(lhs, rhs);
@@ -828,12 +817,10 @@ namespace Rodin::Variational
         FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two bilinear form integrators.
-  operator+(
-      const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+  operator+(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -891,12 +878,10 @@ namespace Rodin::Variational
         LocalBilinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two bilinear form integrators.
-  operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
-      const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+  operator+(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+    const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -955,12 +940,10 @@ namespace Rodin::Variational
         FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two bilinear form integrators.
-  operator+(
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+  operator+(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -1004,8 +987,7 @@ namespace Rodin::Variational
     -> Sum<BilinearFormBase<Operator>, BilinearFormBase<Operator>>;
 
   template <class Operator>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Sum of two expressions.
   operator+(const BilinearFormBase<Operator>& lhs, const BilinearFormBase<Operator>& rhs)
   {

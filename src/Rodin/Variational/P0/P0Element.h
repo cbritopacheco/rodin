@@ -213,8 +213,7 @@ namespace Rodin::Variational
 
           template <size_t Order>
           /// @brief Gets the derivative of the basis function.
-          constexpr
-          DerivativeFunction<Order> getDerivative(size_t) const
+          constexpr DerivativeFunction<Order> getDerivative(size_t) const
           {
             return DerivativeFunction<Order>();
           }

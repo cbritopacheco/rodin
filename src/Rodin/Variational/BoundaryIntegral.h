@@ -189,10 +189,8 @@ namespace Rodin::Variational
 
       template <class LHSDerived, class RHSDerived>
       /// @brief Constructs the boundary integral of the given integrand.
-      constexpr
-      BoundaryIntegral(
-          const FunctionBase<LHSDerived>& lhs,
-          const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+      constexpr BoundaryIntegral(const FunctionBase<LHSDerived>& lhs,
+        const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : BoundaryIntegral(Dot(lhs, rhs))
       {}
 

@@ -3633,33 +3633,24 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Range, class Mesh>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
+    class Mesh>
   /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Mult<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-            P1<Range, Mesh>, TrialSpace>,
-          FunctionBase<CoefficientDerived>>,
-        P1<Range, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
+    const Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                         P1<Range, Mesh>, TrialSpace>>,
+                                       P1<Range, Mesh>, TrialSpace>,
+                                  FunctionBase<CoefficientDerived>>,
+                P1<Range, Mesh>, TrialSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
         P1<Range, Mesh>, TestSpace>>&)
     -> QuadratureRule<
-      Dot<
-        ShapeFunctionBase<
-          Mult<
-            ShapeFunctionBase<
-              Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-              P1<Range, Mesh>, TrialSpace>,
-            FunctionBase<CoefficientDerived>>,
-          P1<Range, Mesh>, TrialSpace>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
+      Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                     P1<Range, Mesh>, TrialSpace>>,
+                                   P1<Range, Mesh>, TrialSpace>,
+                              FunctionBase<CoefficientDerived>>,
+            P1<Range, Mesh>, TrialSpace>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
           P1<Range, Mesh>, TestSpace>>>;
 
   /**

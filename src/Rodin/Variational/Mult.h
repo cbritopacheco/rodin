@@ -510,28 +510,26 @@ namespace Rodin::Variational
     -> Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Product of two shape function expressions.
-  operator*(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  operator*(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(lhs, rhs);
   }
 
   template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Product of two shape function expressions.
-  operator*(const Real& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  operator*(const Real & lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(RealFunction(lhs), rhs);
   }
 
   template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Product of two shape function expressions.
-  operator*(const Complex& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  operator*(const Complex & lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(ComplexFunction(lhs), rhs);
   }
@@ -689,28 +687,26 @@ namespace Rodin::Variational
     -> Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Product of two shape function expressions.
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const FunctionBase<RHSDerived>& rhs)
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
   {
     return Mult(lhs, rhs);
   }
 
   template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Product of two shape function expressions.
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Real& rhs)
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Real & rhs)
   {
     return Mult(lhs, RealFunction(rhs));
   }
 
   template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
+  constexpr auto
   /// @brief Product of two shape function expressions.
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Complex& rhs)
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Complex & rhs)
   {
     return Mult(lhs, ComplexFunction(rhs));
   }
@@ -806,8 +802,8 @@ namespace Rodin::Variational
 
   template <class Number, class RHSScalar>
   /// @brief Product of two bilinear form integrators.
-  constexpr
-  auto operator*(const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
+  constexpr auto operator*(
+    const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
   }
@@ -903,8 +899,8 @@ namespace Rodin::Variational
 
   template <class Number, class RHSScalar>
   /// @brief Product of two linear form integrators.
-  constexpr
-  auto operator*(const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
+  constexpr auto operator*(
+    const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
   }
@@ -912,17 +908,12 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  template <
-    class CoeffDerived,
-    class TrialDerived, class TrialFES,
-    class TestDerived,  class TestFES>
+  template <class CoeffDerived, class TrialDerived, class TrialFES, class TestDerived,
+    class TestFES>
   /// @brief Product of two shape function expressions.
-  constexpr
-  auto operator*(
-      const FunctionBase<CoeffDerived>& coeff,
-      const Dot<
-        ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
-        ShapeFunctionBase<TestDerived,  TestFES,  TestSpace>>& dot)
+  constexpr auto operator*(const FunctionBase<CoeffDerived>& coeff,
+    const Dot<ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<TestDerived, TestFES, TestSpace>>& dot)
   {
     using CoeffType = FunctionBase<CoeffDerived>;
     using CoeffRangeType = typename FormLanguage::Traits<CoeffType>::RangeType;
@@ -938,17 +929,13 @@ namespace Rodin::Variational
     return Dot(coeff * dot.getLHS(), dot.getRHS());
   }
 
-  template <
-    class TrialDerived, class TrialFES,
-    class TestDerived,  class TestFES,
+  template <class TrialDerived, class TrialFES, class TestDerived, class TestFES,
     class CoeffDerived>
   /// @brief Product of two shape function expressions.
-  constexpr
-  auto operator*(
-      const Dot<
-        ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
-        ShapeFunctionBase<TestDerived,  TestFES,  TestSpace>>& dot,
-      const FunctionBase<CoeffDerived>& coeff)
+  constexpr auto operator*(
+    const Dot<ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<TestDerived, TestFES, TestSpace>>& dot,
+    const FunctionBase<CoeffDerived>& coeff)
   {
     using CoeffType = FunctionBase<CoeffDerived>;
     using CoeffRangeType = typename FormLanguage::Traits<CoeffType>::RangeType;

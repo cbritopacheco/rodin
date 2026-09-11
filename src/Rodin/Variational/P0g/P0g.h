@@ -35,15 +35,15 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::P0g<Number, Mesh>>
   {
     /// @brief Mesh type.
-    using MeshType    = Mesh;
+      using MeshType = Mesh;
     /// @brief Scalar value type.
-    using ScalarType  = Number;
+      using ScalarType = Number;
     /// @brief Range (evaluation value) type.
-    using RangeType   = ScalarType;
+      using RangeType = ScalarType;
     /// @brief Execution context type.
-    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     /// @brief Finite element type.
-    using ElementType = Variational::P0gElement<RangeType>;
+      using ElementType = Variational::P0gElement<RangeType>;
   };
 
   /// @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
@@ -52,15 +52,15 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::P0g<Math::SpatialVector<Number>, Mesh>>
   {
     /// @brief Mesh type.
-    using MeshType    = Mesh;
+      using MeshType = Mesh;
     /// @brief Scalar value type.
-    using ScalarType  = Number;
+      using ScalarType = Number;
     /// @brief Range (evaluation value) type.
-    using RangeType   = Math::SpatialVector<ScalarType>;
+      using RangeType = Math::SpatialVector<ScalarType>;
     /// @brief Execution context type.
-    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     /// @brief Finite element type.
-    using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
+      using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
   };
 }
 
