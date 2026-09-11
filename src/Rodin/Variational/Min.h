@@ -324,6 +324,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      /// @brief Creates a polymorphic copy.
       virtual Min* copy() const noexcept override
       {
         return new Min(*this);

@@ -432,11 +432,13 @@ namespace Rodin::Variational
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
+      /// @brief Gets the assembled vector.
       VectorType& getVector() override
       {
         return m_vector;
       }
 
+      /// @brief Gets the assembled vector.
       const VectorType& getVector() const override
       {
         return m_vector;

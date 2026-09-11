@@ -330,6 +330,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      /// @brief Creates a polymorphic copy.
       virtual Max* copy() const noexcept override
       {
         return new Max(*this);
