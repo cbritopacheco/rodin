@@ -23,6 +23,7 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Shape function expression.
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, P0g<Range, Mesh>, Space>
     : public ShapeFunctionBase<
@@ -54,6 +55,7 @@ namespace Rodin::Variational
       static_assert(IsScalarRange || IsVectorRange);
 
       // Cache is only instantiated/used for the vector case.
+      /// @brief Cached per-cell values of a vector-valued P0g shape function.
       struct VectorCache
       {
         /// @brief Vector dimension of the finite element space.

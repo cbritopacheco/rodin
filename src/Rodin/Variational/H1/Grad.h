@@ -214,8 +214,10 @@ namespace Rodin::Variational
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
+        /// @brief Key identifying a cached tabulation.
         struct Key
         {
           /// @brief Geometry of the cached polytope.

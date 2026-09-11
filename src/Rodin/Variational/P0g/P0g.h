@@ -80,6 +80,7 @@ namespace Rodin::Variational
   // --------------------------------------------------------------------------
   // Scalar P0g<Real, Mesh<Local>>
   // --------------------------------------------------------------------------
+  /// @brief Cellwise-constant scalar finite element space with a global basis.
   template <>
   class P0g<Real, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
@@ -100,6 +101,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
 
+      /// @brief Pullback of a P0g function to the reference element.
       template <class Callable>
       class Pullback :
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
@@ -124,6 +126,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Pushforward of a P0g function to the physical element.
       template <class Callable>
       class Pushforward :
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
@@ -261,6 +264,7 @@ namespace Rodin::Variational
   // --------------------------------------------------------------------------
   // Vector P0g<Math::SpatialVector<Real>, Mesh<Local>>
   // --------------------------------------------------------------------------
+  /// @brief Cellwise-constant vector-valued finite element space with a global basis.
   template <>
   class P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
@@ -281,6 +285,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
 
+      /// @brief Pullback of a vector-valued P0g function to the reference element.
       template <class Callable>
       class Pullback :
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
@@ -305,6 +310,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Pushforward of a vector-valued P0g function to the physical element.
       template <class Callable>
       class Pushforward :
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>

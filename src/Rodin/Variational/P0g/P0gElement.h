@@ -66,6 +66,7 @@ namespace Rodin::Variational
     /// @brief Range (evaluation value) type.
     using RangeType = Scalar;
 
+    /// @brief Degree-of-freedom functional of the P0g element.
     class LinearForm
     {
     public:
@@ -83,12 +84,14 @@ namespace Rodin::Variational
       const G m_g;
     };
 
+    /// @brief Basis function of the P0g element.
     class BasisFunction
     {
     public:
       /// @brief Type returned by the callable.
       using ReturnType = Scalar;
 
+      /// @brief Derivative of a P0g basis function, identically zero.
       template <size_t Order>
       class DerivativeFunction
       {
@@ -218,6 +221,7 @@ namespace Rodin::Variational
   // ----------------------------------------------------------------------------
   // Vector P0gElement
   // ----------------------------------------------------------------------------
+  /// @brief Vector-valued cellwise-constant finite element.
   template <class Scalar>
   class P0gElement<Math::SpatialVector<Scalar>> final
     : public FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>
@@ -232,6 +236,7 @@ namespace Rodin::Variational
     /// @brief Range (evaluation value) type.
     using RangeType = Math::SpatialVector<Scalar>;
 
+    /// @brief Degree-of-freedom functional of the vector-valued P0g element.
     class LinearForm
     {
     public:
@@ -259,12 +264,14 @@ namespace Rodin::Variational
       const G m_g;
     };
 
+    /// @brief Basis function of the vector-valued P0g element.
     class BasisFunction
     {
     public:
       /// @brief Type returned by the callable.
       using ReturnType = RangeType;
 
+      /// @brief Derivative of a vector-valued P0g basis function, identically zero.
       template <size_t Order>
       class DerivativeFunction
       {

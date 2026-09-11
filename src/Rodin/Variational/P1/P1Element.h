@@ -905,6 +905,7 @@ namespace Rodin::Variational
       /// Type of range
       using RangeType = Math::SpatialVector<Scalar>;
 
+      /// @brief Degree-of-freedom functional of the vector-valued P1 element.
       class LinearForm
       {
         public:
@@ -933,6 +934,7 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;
       };
 
+      /// @brief Basis function of the vector-valued P1 element.
       class BasisFunction
       {
         public:
@@ -1007,6 +1009,7 @@ namespace Rodin::Variational
               const Geometry::Polytope::Type m_g;
           };
 
+          /// @brief Jacobian of a vector-valued P1 basis function.
           class JacobianFunction
           {
             public:

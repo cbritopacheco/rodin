@@ -39,6 +39,7 @@ namespace Rodin::Variational
   template <class Operand, class Derived>
   class GradBase;
 
+  /// @brief Gradient of a P1 grid function.
   template <class Scalar, class Mesh, class Data>
   class Grad<GridFunction<P1<Scalar, Mesh>, Data>> final
     : public GradBase<GridFunction<P1<Scalar, Mesh>, Data>, Grad<GridFunction<P1<Scalar, Mesh>, Data>>>
@@ -221,8 +222,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
+        /// @brief Key identifying the cell a tabulation was computed for.
         struct CellKey
         {
           /// @brief Mesh the cached tabulation belongs to.
@@ -261,6 +264,7 @@ namespace Rodin::Variational
           }
         };
 
+        /// @brief Key identifying the quadrature point a tabulation was computed for.
         struct QpKey
         {
           /// @brief Quadrature formula the cached tabulation belongs to.

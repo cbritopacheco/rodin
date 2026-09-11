@@ -251,6 +251,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
   };
 
+  /// @brief Partial derivative of a shape function.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>
   class Derivative<ShapeFunction<NestedDerived, FES, SpaceType>> final
     : public ShapeFunctionBase<Derivative<ShapeFunction<NestedDerived, FES, SpaceType>>>

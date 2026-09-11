@@ -464,6 +464,7 @@ namespace Rodin::Variational
   Potential(const LHSType&, const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>&)
     -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
 
+  /// @brief Integral of a potential tested against a shape function.
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Integral<
     Dot<

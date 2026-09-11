@@ -420,6 +420,8 @@ namespace Rodin::Variational
       LinearFormBaseListType m_lfs;
   };
 
+  /// @brief Accumulated bilinear forms, linear forms and boundary conditions of a
+  /// Problem.
   template <class Operator, class Vector, class Scalar>
   class ProblemBody : public ProblemBodyBase<Scalar>
   {

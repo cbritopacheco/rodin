@@ -491,6 +491,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, P1<Math::SpatialVector<Scalar>, MeshType>>;
 
+      /// @brief Pullback of a vector-valued P1 function to the reference element.
       template <class Callable>
       class Pullback :
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
@@ -517,6 +518,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Pushforward of a vector-valued P1 function to the physical element.
       template <class Callable>
       class Pushforward :
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>

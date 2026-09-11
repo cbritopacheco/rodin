@@ -168,6 +168,7 @@ namespace Rodin::Variational
   Min(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
+  /// @brief Pointwise minimum of a function expression.
   template <class NestedDerived>
   class Min<FunctionBase<NestedDerived>, Real>
     : public RealFunctionBase<Min<FunctionBase<NestedDerived>, Real>>
@@ -290,6 +291,7 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Min(const FunctionBase<NestedDerived>&, Real) -> Min<FunctionBase<NestedDerived>, Real>;
 
+  /// @brief Pointwise minimum of a function expression.
   template <class NestedDerived>
   class Min<Real, FunctionBase<NestedDerived>>
     : public Min<FunctionBase<NestedDerived>, Real>

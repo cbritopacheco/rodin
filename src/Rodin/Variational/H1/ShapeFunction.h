@@ -21,6 +21,7 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Shape function expression.
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, H1<K, Scalar, Mesh>, Space>
     : public ShapeFunctionBase<
@@ -46,8 +47,10 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
+        /// @brief Key identifying a cached tabulation.
         struct Key
         {
           /// @brief Geometry of the cached polytope.
@@ -203,6 +206,7 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
+  /// @brief Shape function of a vector-valued H1 finite element space.
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>
     : public ShapeFunctionBase<
@@ -230,8 +234,10 @@ namespace Rodin::Variational
 
       static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
+        /// @brief Key identifying a cached tabulation.
         struct Key
         {
           /// @brief Geometry of the cached polytope.

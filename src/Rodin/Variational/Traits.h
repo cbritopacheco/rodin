@@ -143,6 +143,7 @@ namespace Rodin::FormLanguage
       Math::SpatialVector<Scalar>;
   };
 
+  /// @brief Range type deduced for @c Math::SpatialVector.
   template <class Scalar>
   struct RangeOf<Math::SpatialVector<Scalar>>
   {
@@ -152,6 +153,7 @@ namespace Rodin::FormLanguage
   };
 
 
+  /// @brief Range type deduced for @c Math::SpatialMatrix.
   template <class Scalar>
   struct RangeOf<Math::SpatialMatrix<Scalar>>
   {

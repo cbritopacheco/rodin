@@ -148,6 +148,7 @@ namespace Rodin::Variational
   template <size_t K>
   class VandermondeTriangle;
 
+  /// @brief Vandermonde matrix of the modal basis on the reference tetrahedron.
   template <size_t K>
   class VandermondeTetrahedron;
 }

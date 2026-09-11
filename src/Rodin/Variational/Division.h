@@ -237,6 +237,7 @@ namespace Rodin::Variational
     return Division(RealFunction(lhs), rhs);
   }
 
+  /// @brief Quotient of a shape function.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
     : public ShapeFunctionBase<

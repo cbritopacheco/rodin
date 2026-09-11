@@ -19,6 +19,7 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Raised when the trace of a function is taken without a determined domain.
   template <class T, class FuncName>
   class UndeterminedTraceDomainException : public Alert::MemberFunctionException<T, FuncName>
   {

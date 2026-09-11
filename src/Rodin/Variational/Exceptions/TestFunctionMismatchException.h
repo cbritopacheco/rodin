@@ -17,6 +17,7 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Raised when an expression is combined with a foreign test function.
   class TestFunctionMismatchException : public Alert::Exception
   {
     public:

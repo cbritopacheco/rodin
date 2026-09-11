@@ -21,6 +21,7 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Shape function expression.
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, P0<Range, Mesh>, Space>
     : public ShapeFunctionBase<ShapeFunction<Derived, P0<Range, Mesh>, Space>, P0<Range, Mesh>, Space>
@@ -44,8 +45,10 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
+        /// @brief Key identifying a cached tabulation.
         struct Key
         {
           /// @brief Geometry of the cached polytope.

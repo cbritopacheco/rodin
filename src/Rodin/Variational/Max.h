@@ -296,6 +296,7 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Max(const FunctionBase<NestedDerived>&, Real) -> Max<FunctionBase<NestedDerived>, Real>;
 
+  /// @brief Pointwise maximum of a function expression.
   template <class NestedDerived>
   class Max<Real, FunctionBase<NestedDerived>>
     : public Max<FunctionBase<NestedDerived>, Real>

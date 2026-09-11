@@ -40,12 +40,14 @@
 
 namespace Rodin::Variational
 {
+  /// @brief Indexing of the tensor-product modes on the reference pyramid.
   template <size_t K>
   struct PyramidIndex
   {
       /// @brief Number of entries.
       static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
+      /// @brief Pair of tensor-product indices of a pyramid mode.
       struct IJ
       {
           /// @brief Index of the cached polytope.
@@ -126,6 +128,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Bernstein basis on the reference pyramid.
   template <size_t K>
   class BernsteinPyramid
   {
@@ -177,6 +180,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Modal basis on the reference pyramid.
   template <size_t K>
   class PyramidModal
   {
@@ -231,6 +235,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Vandermonde matrix of the modal basis on the reference pyramid.
   template <size_t K>
   class VandermondePyramid
   {

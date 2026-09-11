@@ -150,6 +150,7 @@ namespace Rodin::Variational
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
+      /// @brief Basis values and derivatives tabulated on the reference element.
       struct Tabulation
       {
         size_t nqp  = 0;
@@ -864,6 +865,7 @@ namespace Rodin::Variational
       /// Type of range
       using RangeType = Math::SpatialVector<Scalar>;
 
+      /// @brief Degree-of-freedom functional of the vector-valued H1 element.
       class LinearForm
       {
         public:
@@ -901,6 +903,7 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;
       };
 
+      /// @brief Basis function of the vector-valued H1 element.
       class BasisFunction
       {
         public:
@@ -968,6 +971,7 @@ namespace Rodin::Variational
               const Geometry::Polytope::Type m_g;
           };
 
+          /// @brief Jacobian of a vector-valued H1 basis function.
           class JacobianFunction
           {
             public:

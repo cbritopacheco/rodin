@@ -473,6 +473,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum expression.
   template <class LHSNumber, class RHSNumber>
   class Sum<LinearFormIntegratorBase<LHSNumber>, LinearFormIntegratorBase<RHSNumber>>
     : public FormLanguage::List<
@@ -531,6 +532,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum of a linear form integrator and a list of them.
   template <class LHSNumber, class RHSNumber>
   class Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>
     : public FormLanguage::List<
@@ -589,6 +591,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum of a list of linear form integrators and a single one.
   template <class LHSNumber, class RHSNumber>
   class Sum<
     FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>
@@ -649,6 +652,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum of two lists of linear form integrators.
   template <class LHSNumber, class RHSNumber>
   class Sum<
     FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
@@ -712,6 +716,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum expression.
   template <class LHSNumber, class RHSNumber>
   class Sum<LocalBilinearFormIntegratorBase<LHSNumber>, LocalBilinearFormIntegratorBase<RHSNumber>>
     : public FormLanguage::List<
@@ -771,6 +776,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum of a bilinear form integrator and a list of them.
   template <class LHSNumber, class RHSNumber>
   class Sum<LocalBilinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>
     : public FormLanguage::List<
@@ -832,6 +838,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum of a list of bilinear form integrators and a single one.
   template <class LHSNumber, class RHSNumber>
   class Sum<
     FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>, LocalBilinearFormIntegratorBase<RHSNumber>>
@@ -957,6 +964,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum expression.
   template <class Operator>
   class Sum<BilinearFormBase<Operator>, BilinearFormBase<Operator>>
     : public FormLanguage::List<BilinearFormBase<Operator>>

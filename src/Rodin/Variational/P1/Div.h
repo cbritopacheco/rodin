@@ -269,8 +269,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
+        /// @brief Key identifying the cell a tabulation was computed for.
         struct CellKey
         {
           /// @brief Mesh the cached tabulation belongs to.
@@ -311,6 +313,7 @@ namespace Rodin::Variational
           }
         };
 
+        /// @brief Key identifying the quadrature point a tabulation was computed for.
         struct QpKey
         {
           /// @brief Quadrature formula the cached tabulation belongs to.

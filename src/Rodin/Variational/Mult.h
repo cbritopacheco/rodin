@@ -714,6 +714,7 @@ namespace Rodin::Variational
     return Mult(lhs, ComplexFunction(rhs));
   }
 
+  /// @brief Product expression.
   template <class LHS, class RHSNumber>
   class Mult<LHS, LocalBilinearFormIntegratorBase<RHSNumber>>
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
@@ -810,6 +811,7 @@ namespace Rodin::Variational
     return Mult(lhs, rhs);
   }
 
+  /// @brief Product expression.
   template <class LHS, class RHSNumber>
   class Mult<LHS, LinearFormIntegratorBase<RHSNumber>>
     : public LinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>

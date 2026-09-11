@@ -364,6 +364,7 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Vandermonde matrix of the Dubiner basis on the reference tetrahedron.
   template <size_t K>
   class VandermondeTetrahedron
   {

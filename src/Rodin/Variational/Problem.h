@@ -1029,6 +1029,7 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
+  /// @brief Variational problem in three or more unknown fields.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class Problem<LinearSystem, U1, U2, U3, Us...>
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>

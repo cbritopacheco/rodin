@@ -169,6 +169,8 @@ namespace Rodin::Variational
       std::unique_ptr<FormLanguage::Base> m_v;
   };
 
+  /// @brief Base class for bilinear form integrators whose trial and test functions live
+  /// on the same polytope.
   template <class Number>
   class LocalBilinearFormIntegratorBase
     : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
@@ -260,6 +262,8 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_attrs;
   };
 
+  /// @brief Base class for bilinear form integrators coupling a trial and a test polytope
+  /// across the mesh.
   template <class Number>
   class GlobalBilinearFormIntegratorBase
     : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>

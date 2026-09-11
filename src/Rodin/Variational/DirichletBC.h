@@ -830,6 +830,7 @@ namespace Rodin::Variational
       /// @brief Assembly backend type.
       using AssemblyType = DefaultAssemblyType;
 
+      /// @brief Type-erased base for the defect a Dirichlet constraint imposes.
       class DefectBase
       {
         public:
@@ -842,6 +843,7 @@ namespace Rodin::Variational
           virtual DefectBase* copy() const noexcept = 0;
       };
 
+      /// @brief Defect a Dirichlet constraint imposes on the trial function.
       template <class DefectDerived>
       class Defect final : public DefectBase
       {

@@ -177,6 +177,7 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
 
+  /// @brief Trace of a shape function.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   class Trace<ShapeFunctionBase<NestedDerived, FES, Space>> final
     : public ShapeFunctionBase<Trace<ShapeFunctionBase<NestedDerived, FES, Space>>>
