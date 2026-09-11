@@ -215,6 +215,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       Mult& traceOf(Geometry::Attribute attr)
       {
         m_lhs->traceOf(attr);

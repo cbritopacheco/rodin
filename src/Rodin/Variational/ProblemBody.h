@@ -406,6 +406,7 @@ namespace Rodin::Variational
         return m_lfs;
       }
 
+      /// @brief Gets the linear forms of the problem.
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
@@ -534,6 +535,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -545,21 +547,25 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the linear forms of the problem.
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
+      /// @brief Gets the bilinear forms of the problem.
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
+      /// @brief Gets the linear forms of the problem.
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
 
+      /// @brief Gets the bilinear forms of the problem.
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;

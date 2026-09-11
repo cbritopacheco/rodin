@@ -252,6 +252,7 @@ namespace Rodin::Variational
         : m_vdim(0), m_local(0), m_g(G::Point)
       {}
 
+      /// @brief Constructs the functional of a local degree of freedom.
       constexpr LinearForm(size_t vdim, size_t local, G g)
         : m_vdim(vdim), m_local(local), m_g(g)
       {}
@@ -301,6 +302,7 @@ namespace Rodin::Variational
         : m_vdim(0), m_local(0), m_g(G::Point)
       {}
 
+      /// @brief Constructs the basis function of a local degree of freedom.
       constexpr BasisFunction(size_t vdim, size_t local, G g)
         : m_vdim(vdim), m_local(local), m_g(g)
       {}

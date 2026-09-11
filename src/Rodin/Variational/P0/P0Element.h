@@ -63,6 +63,8 @@
 namespace Rodin::FormLanguage
 {
   /**
+   * @brief Type traits for @c P0Element: exposes the scalar type and the range type of
+   * the element.
    * @ingroup TraitsSpecializations
    */
   template <class Range>
@@ -326,6 +328,7 @@ namespace Rodin::Variational
           LinearForm()
             : m_vdim(0), m_local(0), m_g(Geometry::Polytope::Type::Point)
           {}
+/// @brief Constructs the functional of a local degree of freedom.
 
           constexpr
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -420,6 +423,7 @@ namespace Rodin::Variational
           BasisFunction()
             : m_vdim(0), m_local(0), m_g(Geometry::Polytope::Type::Point)
           {}
+/// @brief Constructs the basis function of a local degree of freedom.
 
           constexpr
           BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)

@@ -906,6 +906,7 @@ namespace Rodin::Variational
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Range type of the multiplicand.
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
@@ -1517,6 +1518,7 @@ namespace Rodin::Variational
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Range type of the multiplicand.
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
@@ -1883,6 +1885,7 @@ namespace Rodin::Variational
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
+      /// @brief Type of the inner integrand.
       using InnerIntegrandType = Dot<LHSType, RHSType>;
       /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
@@ -2317,6 +2320,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Integrand type of the P1 divergence trial term.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   using P1DivTrialIntegrand =
     Dot<
@@ -2574,6 +2578,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Integrand type of the P1 divergence test term.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   using P1DivTestIntegrand =
     Dot<
@@ -3376,6 +3381,7 @@ namespace Rodin::Variational
       /// @brief Test finite element space type.
       using TestFESType  = P1<RHSRange, RHSMesh>;
 
+      /// @brief Trial shape function type.
       using TrialSFType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,

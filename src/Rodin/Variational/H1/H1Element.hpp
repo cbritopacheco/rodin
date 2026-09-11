@@ -242,6 +242,7 @@ namespace Rodin::Variational
   class VandermondePyramid
   {
     public:
+      /// @brief Gets the underlying matrix.
       static const Math::Matrix<Real>& getMatrix()
       {
         static const Math::Matrix<Real> s_vandermonde = [] {
@@ -261,6 +262,7 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
+      /// @brief Gets the inverse of the matrix.
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {

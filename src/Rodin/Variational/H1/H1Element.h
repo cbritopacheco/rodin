@@ -65,6 +65,8 @@
 namespace Rodin::FormLanguage
 {
   /**
+   * @brief Type traits for @c H1Element: exposes the scalar type and the
+   * range type of the element.
    */
   template <size_t K, class Range>
   struct Traits<Variational::H1Element<K, Range>>
@@ -870,6 +872,7 @@ namespace Rodin::Variational
       /// @brief Degree-of-freedom functional of the vector-valued H1 element.
       class LinearForm
       {
+        /// @brief Constructs the functional of a local degree of freedom.
         public:
           constexpr
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -923,6 +926,7 @@ namespace Rodin::Variational
           template <size_t Order>
           class DerivativeFunction
           {
+            /// @brief Constructs the derivative of a local basis function.
             public:
               constexpr
               DerivativeFunction(size_t i, size_t j, size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -932,6 +936,7 @@ namespace Rodin::Variational
               constexpr
               /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
+/// @brief Evaluates into the output argument at a reference point.
 
               constexpr
               void operator()(Scalar& out, const Math::SpatialPoint& r) const
@@ -984,6 +989,7 @@ namespace Rodin::Variational
             public:
               /// @brief Type returned by the callable.
               using ReturnType = Math::SpatialMatrix<ScalarType>;
+/// @brief Constructs the Jacobian of a local basis function.
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1016,6 +1022,7 @@ namespace Rodin::Variational
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
           };
+/// @brief Constructs the basis function of a local degree of freedom.
 
           constexpr
           BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)

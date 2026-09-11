@@ -152,6 +152,7 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
 
+  /// @brief Builds the pointwise tangent of a function expression.
   template <class NestedDerived>
   auto tan(const FunctionBase<NestedDerived>& f)
   {

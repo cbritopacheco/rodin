@@ -72,7 +72,7 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @defgroup RodinVariational Variational Module
+   * @defgroup RodinVariational Variational module
    * @brief Variational formulations and finite element problem definitions.
    *
    * The Variational module provides the infrastructure for defining and solving
@@ -358,6 +358,7 @@ namespace Rodin::Variational
 
       virtual ProblemUVBase& assemble() override = 0;
 
+      /// @brief Solves the assembled problem with the given solver.
       virtual void solve(SolverBaseType& solver) override = 0;
 
       virtual ProblemUVBase& operator=(const ProblemBodyType& rhs) override = 0;
@@ -1084,6 +1085,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)

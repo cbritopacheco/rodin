@@ -133,6 +133,7 @@ namespace Rodin::Variational
 
   template <class NestedDerived>
   constexpr auto
+  /// @brief Builds the pointwise absolute value of a function expression.
   abs(const FunctionBase<NestedDerived>& op)
   {
     return Abs(op);

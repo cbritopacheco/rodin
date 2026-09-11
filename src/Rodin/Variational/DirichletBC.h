@@ -604,6 +604,7 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
+      /// @brief Gets the assembly backend.
       const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
         assert(m_assembly);
@@ -1094,6 +1095,7 @@ namespace Rodin::Variational
         return m_values;
       }
 
+      /// @brief Gets the assembly backend.
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {
         return m_assembly;

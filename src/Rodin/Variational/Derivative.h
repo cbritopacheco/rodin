@@ -91,6 +91,7 @@ namespace Rodin::Variational
   class DerivativeBase;
 
   /**
+   * @brief CRTP base for the partial derivative of a grid function.
    * @ingroup GradSpecializations
    */
   template <class FES, class Data, class Derived>

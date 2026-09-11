@@ -62,14 +62,14 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <
     class Derived,
     class FES,
     class VectorField,
     class Step,
     class BoundaryPolicy
-  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
-  /// space, the shape function space and the operand type.
   >
   struct Traits<
     Variational::Flow<

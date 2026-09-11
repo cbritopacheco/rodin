@@ -39,6 +39,8 @@
 namespace Rodin::FormLanguage
 {
   /**
+   * @brief Type traits for @c P1Element: exposes the scalar type and the range type of
+   * the element.
    * @ingroup TraitsSpecializations
    */
   template <class Range>
@@ -296,6 +298,7 @@ namespace Rodin::Variational
         Parent::operator=(other);
         return *this;
       }
+/// @brief Move assignment.
 
       constexpr
       P1Element& operator=(P1Element&& other)
@@ -870,6 +873,7 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
+/// @brief Serializes the object through a Boost archive.
 
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
@@ -915,6 +919,7 @@ namespace Rodin::Variational
       /// @brief Degree-of-freedom functional of the vector-valued P1 element.
       class LinearForm
       {
+        /// @brief Constructs the functional of a local degree of freedom.
         public:
           constexpr
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -974,6 +979,7 @@ namespace Rodin::Variational
               constexpr
               /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
+/// @brief Evaluates into the output argument at a reference point.
 
               constexpr
               void operator()(Scalar& out, const Math::SpatialPoint& r) const
@@ -1026,6 +1032,7 @@ namespace Rodin::Variational
             public:
               /// @brief Type returned by the callable.
               using ReturnType = Math::SpatialMatrix<ScalarType>;
+/// @brief Constructs the Jacobian of a local basis function.
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1059,6 +1066,7 @@ namespace Rodin::Variational
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
           };
+/// @brief Constructs the basis function of a local degree of freedom.
 
           constexpr
           BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1231,6 +1239,7 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
+/// @brief Serializes the object through a Boost archive.
 
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)

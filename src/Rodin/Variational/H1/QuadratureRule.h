@@ -1449,6 +1449,7 @@ namespace Rodin::Variational
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, TestFESType, TestSpace>, TestFESType, TestSpace>;
 
+      /// @brief Type of the inner integrand.
       using InnerIntegrandType = Dot<LHSType, RHSType>;
       /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
@@ -3421,6 +3422,7 @@ namespace Rodin::Variational
       /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Trial shape function type.
       using TrialSFType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,

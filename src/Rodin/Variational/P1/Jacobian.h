@@ -445,6 +445,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Tests whether a polytope geometry is a tensor-product one.
       static constexpr bool isTensorGeom(Geometry::Polytope::Type g) noexcept
       {
         return g == Geometry::Polytope::Type::Quadrilateral

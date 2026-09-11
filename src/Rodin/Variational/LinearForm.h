@@ -256,6 +256,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Replaces the integrators of the form.
       LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
         m_lfis.clear();
@@ -349,6 +350,7 @@ namespace Rodin::Variational
       using Parent =
         LinearFormBase<VectorType>;
 
+      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;

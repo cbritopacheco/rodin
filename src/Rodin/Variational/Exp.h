@@ -144,6 +144,7 @@ namespace Rodin::Variational
 
   template <class NestedDerived>
   constexpr auto
+  /// @brief Builds the pointwise exponential of a function expression.
   exp(const FunctionBase<NestedDerived>& op)
   {
     return Exp(op);

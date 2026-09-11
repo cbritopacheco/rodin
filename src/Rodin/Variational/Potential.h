@@ -221,6 +221,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<Potential<LHSType, RHSType>>;
 
+      /// @brief Constructs the potential of an operand against a kernel.
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u.copy())
       {}
@@ -239,6 +240,7 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the kernel of the potential.
       const auto& getKernel() const
       {
         return m_kernel.get();
@@ -414,6 +416,7 @@ namespace Rodin::Variational
           // Else
           void>>;
 
+      /// @brief Constructs the potential of an operand against a kernel.
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u)
       {}
@@ -430,6 +433,7 @@ namespace Rodin::Variational
           m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the kernel of the potential.
       const KernelType& getKernel() const
       {
         return m_kernel;

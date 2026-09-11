@@ -103,6 +103,7 @@ namespace Rodin::Variational
   class TriangleBlend
   {
     public:
+      /// @brief Gets the alpha parameter.
       static constexpr Real getAlpha()
       {
         if constexpr (K <= 2)
@@ -150,6 +151,7 @@ namespace Rodin::Variational
   class TetrahedronBlend
   {
     public:
+      /// @brief Gets the alpha parameter.
       static constexpr Real getAlpha()
       {
         if constexpr (K <= 3)
@@ -281,6 +283,7 @@ namespace Rodin::Variational
   class WarpBlendTriangle
   {
     public:
+      /// @brief Applies the transformation to the reference nodes.
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
@@ -519,6 +522,7 @@ namespace Rodin::Variational
       }
 
     public:
+      /// @brief Applies the transformation to the reference nodes.
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {

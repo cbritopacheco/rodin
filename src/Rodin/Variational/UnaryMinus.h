@@ -128,6 +128,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       UnaryMinus& traceOf(Geometry::Attribute attr)
       {
         Parent::traceOf(attr);
@@ -136,6 +137,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       UnaryMinus& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);

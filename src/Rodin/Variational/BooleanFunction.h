@@ -127,6 +127,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Boolean-valued constant function.
    * @ingroup BooleanFunctionSpecializations
    */
   template <>
@@ -160,6 +161,7 @@ namespace Rodin::Variational
         return m_v;
       }
 
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       template <class ... Args>
       constexpr
       BooleanFunction& traceOf(const Args& ... args)

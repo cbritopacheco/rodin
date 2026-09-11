@@ -137,6 +137,7 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pushforward of a function.
           template <class Function>
           explicit Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
@@ -327,6 +328,7 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pushforward of a function.
           template <class Function>
           explicit Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
