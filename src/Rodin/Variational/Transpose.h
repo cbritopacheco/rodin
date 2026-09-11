@@ -65,12 +65,14 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
@@ -159,12 +161,14 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
@@ -211,6 +215,7 @@ namespace Rodin::Variational
         return m_operand->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Transpose& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);

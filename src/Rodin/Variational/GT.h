@@ -63,16 +63,19 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<GT<LHSType, RHSType>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       GT(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       GT(const GT& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
           m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       GT(GT&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),

@@ -144,6 +144,7 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       static Real getBasis(size_t n, size_t i, Real x)
       {
         if (i > n)
@@ -178,6 +179,7 @@ namespace Rodin::Variational
   class PyramidModal
   {
     public:
+      /// @brief Gets the basis function of a local degree of freedom.
       static Real getBasis(size_t mode, const Math::SpatialPoint& r)
       {
         size_t i, j, k;

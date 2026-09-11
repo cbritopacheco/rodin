@@ -258,29 +258,34 @@ namespace Rodin::Variational
       using Parent =
         ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Division(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()),
           m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Division(const Division& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
           m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Division(Division&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
@@ -303,17 +308,20 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_lhs->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const auto& ip = getIntegrationPoint();

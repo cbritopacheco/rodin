@@ -255,6 +255,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Jump(const Jump& other)
         : Parent(other),
           m_operand(other.m_operand->copy()),
@@ -262,6 +263,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       Jump(Jump&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand)),

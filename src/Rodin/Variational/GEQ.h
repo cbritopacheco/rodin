@@ -60,15 +60,18 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       GEQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       GEQ(const GEQ& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       GEQ(GEQ&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),

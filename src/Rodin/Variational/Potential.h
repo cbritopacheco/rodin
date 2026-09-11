@@ -222,12 +222,14 @@ namespace Rodin::Variational
         : m_kernel(kernel), m_u(u.copy())
       {}
 
+      /// @brief Copy constructor.
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel),
           m_u(other.m_u->copy())
       {}
 
+      /// @brief Move constructor.
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)),
@@ -239,6 +241,7 @@ namespace Rodin::Variational
         return m_kernel.get();
       }
 
+      /// @brief Gets the operand function.
       const auto& getOperand() const
       {
         assert(m_u);
@@ -409,11 +412,13 @@ namespace Rodin::Variational
         : m_kernel(kernel), m_u(u)
       {}
 
+      /// @brief Copy constructor.
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel), m_u(other.m_u)
       {}
 
+      /// @brief Move constructor.
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
@@ -424,11 +429,13 @@ namespace Rodin::Variational
         return m_kernel;
       }
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
@@ -486,18 +493,22 @@ namespace Rodin::Variational
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Integral(const LHSType& lhs, const RHSType& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
+      /// @brief Copy constructor.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
@@ -507,6 +518,7 @@ namespace Rodin::Variational
         return Geometry::Region::Cells;
       }
 
+      /// @brief Creates a polymorphic copy.
       Integral* copy() const noexcept override
       {
         return new Integral(*this);

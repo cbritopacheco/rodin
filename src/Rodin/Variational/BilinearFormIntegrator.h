@@ -246,6 +246,7 @@ namespace Rodin::Variational
 
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const = 0;
 
       virtual

@@ -185,12 +185,14 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Conjugate(const Conjugate& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Conjugate(Conjugate&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))

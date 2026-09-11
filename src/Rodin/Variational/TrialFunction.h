@@ -111,6 +111,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_ref.get().getIntegrationPoint();

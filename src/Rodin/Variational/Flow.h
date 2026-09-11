@@ -270,6 +270,7 @@ namespace Rodin::Variational
           m_p(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Flow(const Flow& other)
         : Parent(other),
           m_maxZeroHops(other.m_maxZeroHops),
@@ -292,6 +293,7 @@ namespace Rodin::Variational
           m_p(other.m_p)
       {}
 
+      /// @brief Move constructor.
       Flow(Flow&& other)
         : Parent(std::move(other)),
           m_maxZeroHops(std::move(other.m_maxZeroHops)),
@@ -1082,6 +1084,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return m_operand->getLeaf();

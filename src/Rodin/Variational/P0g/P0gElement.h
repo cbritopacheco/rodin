@@ -70,6 +70,7 @@ namespace Rodin::Variational
     {
     public:
       constexpr explicit LinearForm(G g) : m_g(g) {}
+      /// @brief Copy constructor.
       constexpr LinearForm(const LinearForm&) = default;
 
       template <class T>
@@ -93,6 +94,7 @@ namespace Rodin::Variational
       public:
         constexpr DerivativeFunction() = default;
 
+        /// @brief Copy constructor.
         constexpr DerivativeFunction(const DerivativeFunction&) = default;
 
         constexpr ReturnType operator()(const Math::SpatialVector<Real>&) const
@@ -103,6 +105,7 @@ namespace Rodin::Variational
 
       constexpr BasisFunction() = default;
 
+      /// @brief Copy constructor.
       constexpr BasisFunction(const BasisFunction&) = default;
 
       constexpr ReturnType operator()(const Math::SpatialVector<Real>&) const
@@ -123,8 +126,10 @@ namespace Rodin::Variational
       : Parent(geometry)
     {}
 
+    /// @brief Copy constructor.
     constexpr P0gElement(const P0gElement&) = default;
 
+    /// @brief Move constructor.
     constexpr P0gElement(P0gElement&& other)
       : Parent(std::move(other))
     {}
@@ -199,6 +204,7 @@ namespace Rodin::Variational
       return LinearForm(this->getGeometry());
     }
 
+    /// @brief Gets the basis function of a local degree of freedom.
     constexpr BasisFunction getBasis(size_t) const
     {
       return BasisFunction();
@@ -322,6 +328,7 @@ namespace Rodin::Variational
       }
     }
 
+    /// @brief Copy constructor.
     constexpr P0gElement(const P0gElement& other)
       : Parent(other)
       , m_vdim(other.m_vdim)
@@ -329,6 +336,7 @@ namespace Rodin::Variational
       , m_bs(other.m_bs)
     {}
 
+    /// @brief Move constructor.
     constexpr P0gElement(P0gElement&& other)
       : Parent(std::move(other))
       , m_vdim(std::exchange(other.m_vdim, 0))
@@ -366,6 +374,7 @@ namespace Rodin::Variational
       return m_lfs.at(local);
     }
 
+    /// @brief Gets the basis function of a local degree of freedom.
     constexpr BasisFunction getBasis(size_t local) const
     {
       return m_bs.at(local);

@@ -1056,11 +1056,13 @@ namespace Rodin::Variational
         : Parent(u1, u2, u3, us...)
       {}
 
+      /// @brief Copy constructor.
       Problem(const Problem& other)
         : Parent(other),
           m_axb(other.m_axb)
       {}
 
+      /// @brief Move constructor.
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_axb(std::move(other.m_axb))

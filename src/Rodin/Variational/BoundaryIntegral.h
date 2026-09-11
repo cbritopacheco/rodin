@@ -194,16 +194,19 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Constructs the integrator for the given integrand.
       BoundaryIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
       constexpr
+      /// @brief Copy constructor.
       BoundaryIntegral(const BoundaryIntegral& other)
         : Parent(other)
       {}
 
       constexpr
+      /// @brief Move constructor.
       BoundaryIntegral(BoundaryIntegral&& other)
         : Parent(std::move(other))
       {}

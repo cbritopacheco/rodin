@@ -211,14 +211,17 @@ namespace Rodin::Variational
         : Integral(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
+      /// @brief Copy constructor.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
@@ -266,10 +269,12 @@ namespace Rodin::Variational
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
       }
 
+      /// @brief Copy constructor.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}

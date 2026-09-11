@@ -505,12 +505,14 @@ namespace Rodin::Variational
         : Parent(parent)
       {}
 
+      /// @brief Copy constructor.
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs),
           m_bfs(other.m_bfs)
       {}
 
+      /// @brief Move constructor.
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs)),

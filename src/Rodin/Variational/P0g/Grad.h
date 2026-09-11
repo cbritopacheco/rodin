@@ -50,14 +50,17 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Grad(const OperandType& u)
         : Parent(u)
       {}
 
+      /// @brief Copy constructor.
       Grad(const Grad& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Grad(Grad&& other)
         : Parent(std::move(other))
       {}
@@ -85,6 +88,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Creates a polymorphic copy.
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
@@ -114,18 +118,21 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
           m_ip(nullptr)
       {}
 
+      /// @brief Move constructor.
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -133,18 +140,21 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
       constexpr
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // Keep operand aligned (even though basis is constant).

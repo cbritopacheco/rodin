@@ -96,6 +96,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Component(const Component& other)
         : Parent(other),
           m_fn(other.m_fn->copy()),
@@ -103,6 +104,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_fn(std::move(other.m_fn)),
@@ -207,6 +209,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Component(const Component& other)
         : Parent(other),
           m_fn(other.m_fn->copy()),
@@ -215,6 +218,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_fn(std::move(other.m_fn)),
@@ -309,6 +313,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Component(const Component& other)
         : Parent(other),
           m_u(other.m_u),
@@ -316,6 +321,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -424,12 +430,14 @@ namespace Rodin::Variational
           m_idx(component)
       {}
 
+      /// @brief Copy constructor.
       Component(const Component& other)
         : Parent(other),
           m_u(other.m_u->copy()),
           m_idx(other.m_idx)
       {}
 
+      /// @brief Move constructor.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -489,6 +497,7 @@ namespace Rodin::Variational
         return m_u->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Component& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_u->setIntegrationPoint(ip);

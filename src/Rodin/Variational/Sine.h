@@ -118,6 +118,7 @@ namespace Rodin::Variational
         return Math::sin(getOperand().getValue(p));
       }
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         assert(m_operand);

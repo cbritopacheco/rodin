@@ -244,6 +244,7 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
+      /// @brief Creates a polymorphic copy.
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);

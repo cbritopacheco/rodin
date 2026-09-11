@@ -193,6 +193,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the integrator type.
       Integrator::Type getType() const final override
       {
         return Integrator::Type::Linear;
@@ -206,6 +207,7 @@ namespace Rodin::Variational
 
       virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const = 0;
 
     private:

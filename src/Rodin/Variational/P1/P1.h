@@ -571,6 +571,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Copy constructor.
       P1(const P1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
@@ -578,6 +579,7 @@ namespace Rodin::Variational
           m_dofs(other.m_dofs)
       {}
 
+      /// @brief Move constructor.
       P1(P1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),

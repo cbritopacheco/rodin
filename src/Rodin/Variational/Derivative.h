@@ -111,6 +111,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
+      /// @brief Constructs the expression from its operand.
       DerivativeBase(const OperandType& u)
         : m_u(u)
       {
@@ -231,6 +232,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
@@ -272,12 +274,14 @@ namespace Rodin::Variational
           m_u(u)
       {}
 
+      /// @brief Copy constructor.
       Derivative(const Derivative& other)
         : Parent(other),
           m_i(other.m_i),
           m_u(other.m_u)
       {}
 
+      /// @brief Move constructor.
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_i(other.m_i),
@@ -285,23 +289,27 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -324,6 +332,7 @@ namespace Rodin::Variational
       //   return *this;
       // }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       decltype(auto) getBasis(size_t local) const
       {
         return m_gradients[local](m_i);

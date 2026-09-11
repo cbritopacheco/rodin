@@ -69,6 +69,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_ip(nullptr),
@@ -76,6 +77,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
           m_ip(std::exchange(other.m_ip, nullptr)),
@@ -83,6 +85,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope&) const
       {
         if constexpr (IsScalarRange)
@@ -97,12 +100,14 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // P0g basis does not depend on the integration point.
@@ -119,6 +124,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       decltype(auto) getBasis(size_t local) const
       {
         if constexpr (IsScalarRange)
@@ -143,6 +149,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();

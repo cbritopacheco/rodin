@@ -97,26 +97,32 @@ namespace Rodin::Variational
       FiniteElementSpaceBase() = default;
 
       constexpr
+      /// @brief Copy constructor.
       FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
 
       constexpr
+      /// @brief Move constructor.
       FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
 
       constexpr
+      /// @brief Move assignment.
       FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
 
       constexpr
+      /// @brief Copy assignment.
       FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
 
       virtual ~FiniteElementSpaceBase() = default;
 
       constexpr
+      /// @brief Equality comparison.
       bool operator==(const FiniteElementSpaceBase& other) const
       {
         return this == &other;
       }
 
       constexpr
+      /// @brief Inequality comparison.
       bool operator!=(const FiniteElementSpaceBase& other) const
       {
         return this != &other;
@@ -203,19 +209,24 @@ namespace Rodin::Variational
       FiniteElementSpace() = default;
 
       constexpr
+      /// @brief Copy constructor.
       FiniteElementSpace(const FiniteElementSpace&) = default;
 
       constexpr
+      /// @brief Move constructor.
       FiniteElementSpace(FiniteElementSpace&&) = default;
 
       constexpr
+      /// @brief Move assignment.
       FiniteElementSpace& operator=(FiniteElementSpace&&) = default;
 
       constexpr
+      /// @brief Copy assignment.
       FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
 
       virtual ~FiniteElementSpace() = default;
 
+      /// @brief Gets the underlying mesh.
       const Mesh& getMesh() const override
       {
         return static_cast<const Derived&>(*this).getMesh();
@@ -317,15 +328,19 @@ namespace Rodin::Variational
       FiniteElementSpacePullbackBase() = default;
 
       constexpr
+      /// @brief Copy constructor.
       FiniteElementSpacePullbackBase(const FiniteElementSpacePullbackBase&) = default;
 
       constexpr
+      /// @brief Move constructor.
       FiniteElementSpacePullbackBase(FiniteElementSpacePullbackBase&&) = default;
 
       constexpr
+      /// @brief Move assignment.
       FiniteElementSpacePullbackBase& operator=(FiniteElementSpacePullbackBase&&) = default;
 
       constexpr
+      /// @brief Copy assignment.
       FiniteElementSpacePullbackBase& operator=(const FiniteElementSpacePullbackBase&) = default;
 
       virtual ~FiniteElementSpacePullbackBase() = default;
@@ -372,15 +387,19 @@ namespace Rodin::Variational
       FiniteElementSpacePushforwardBase() = default;
 
       constexpr
+      /// @brief Copy constructor.
       FiniteElementSpacePushforwardBase(const FiniteElementSpacePushforwardBase&) = default;
 
       constexpr
+      /// @brief Move constructor.
       FiniteElementSpacePushforwardBase(FiniteElementSpacePushforwardBase&&) = default;
 
       constexpr
+      /// @brief Move assignment.
       FiniteElementSpacePushforwardBase& operator=(FiniteElementSpacePushforwardBase&&) = default;
 
       constexpr
+      /// @brief Copy assignment.
       FiniteElementSpacePushforwardBase& operator=(const FiniteElementSpacePushforwardBase&) = default;
 
       virtual ~FiniteElementSpacePushforwardBase() = default;

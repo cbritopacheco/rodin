@@ -165,6 +165,7 @@ namespace Rodin::Variational
         std::vector<Scalar> dphi;
 
         // ---------- fast path (tight loops) ----------
+        /// @brief Gets the basis function of a local degree of freedom.
         const Scalar& getBasis(size_t qp, size_t a) const noexcept
         {
           return phi[qp * ndof + a];
@@ -230,6 +231,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           LinearForm(const LinearForm&) = default;
 
           /**
@@ -297,6 +299,7 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
 
               /**
@@ -334,6 +337,7 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               GradientFunction(const GradientFunction&) = default;
 
               /**
@@ -366,6 +370,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           BasisFunction(const BasisFunction&) = default;
 
           /**
@@ -1054,11 +1059,13 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Copy constructor.
       H1Element(const H1Element& other)
         : Parent(other), m_vdim(other.m_vdim), m_lfs(other.m_lfs), m_bs(other.m_bs)
       {}
 
       constexpr
+      /// @brief Move constructor.
       H1Element(H1Element&& other)
         : Parent(std::move(other)), m_vdim(std::move(other.m_vdim)),
           m_lfs(std::move(other.m_lfs)), m_bs(std::move(other.m_bs))
@@ -1117,6 +1124,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];

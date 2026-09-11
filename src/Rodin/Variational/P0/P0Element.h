@@ -131,6 +131,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           LinearForm(const LinearForm&) = default;
 
           template <class T>
@@ -178,6 +179,7 @@ namespace Rodin::Variational
               DerivativeFunction() = default;
 
               constexpr
+              /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
 
               /**
@@ -195,6 +197,7 @@ namespace Rodin::Variational
           BasisFunction() = default;
 
           constexpr
+          /// @brief Copy constructor.
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
@@ -220,11 +223,13 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       P0Element(const P0Element& other)
         : Parent(other)
       {}
 
       constexpr
+      /// @brief Move constructor.
       P0Element(P0Element&& other)
         : Parent(std::move(other))
       {}
@@ -253,6 +258,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       BasisFunction getBasis(size_t) const
       {
         return BasisFunction();
@@ -486,6 +492,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Copy constructor.
       P0Element(const P0Element& other)
         : Parent(other)
         , m_vdim(other.m_vdim)
@@ -494,6 +501,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       P0Element(P0Element&& other)
         : Parent(std::move(other))
         , m_vdim(std::exchange(other.m_vdim, 0))
@@ -535,6 +543,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];

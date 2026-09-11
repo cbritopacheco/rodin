@@ -57,6 +57,7 @@ namespace Rodin::Variational
 
           explicit operator bool() const noexcept { return valid; }
 
+          /// @brief Equality comparison.
           bool operator==(const StructureKey& o) const noexcept
           {
             if (!valid || !o.valid)
@@ -80,6 +81,7 @@ namespace Rodin::Variational
 
           explicit operator bool() const noexcept { return valid; }
 
+          /// @brief Equality comparison.
           bool operator==(const ValueKey& o) const noexcept
           {
             if (!valid || !o.valid)
@@ -115,6 +117,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_ip(nullptr),
@@ -122,6 +125,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
           m_ip(std::exchange(other.m_ip, nullptr)),
@@ -129,6 +133,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -143,6 +148,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -254,6 +260,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       const RangeType& getBasis(size_t local) const
       {
         assert(m_cache.skey);
@@ -262,6 +269,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();

@@ -192,46 +192,54 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
       constexpr
+      /// @brief Constructs the expression from its operand.
       Trace(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Trace& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
@@ -239,6 +247,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).trace();

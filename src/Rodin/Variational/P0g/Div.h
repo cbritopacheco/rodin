@@ -85,14 +85,17 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Div(const OperandType& u)
         : Parent(u)
       {}
 
+      /// @brief Copy constructor.
       Div(const Div& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Div(Div&& other)
         : Parent(std::move(other))
       {}
@@ -111,6 +114,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Creates a polymorphic copy.
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -143,6 +147,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
@@ -150,6 +155,7 @@ namespace Rodin::Variational
           m_zero(ScalarType(0))
       {}
 
+      /// @brief Copy constructor.
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u),
@@ -157,6 +163,7 @@ namespace Rodin::Variational
           m_zero(other.m_zero)
       {}
 
+      /// @brief Move constructor.
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -165,24 +172,28 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
       constexpr
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // keep operand aligned

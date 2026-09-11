@@ -71,12 +71,14 @@ namespace Rodin::Variational
           m_attr(attr)
       {}
 
+      /// @brief Copy constructor.
       TraceOperator(const TraceOperator& other)
         :  FunctionBase(other),
           m_fn(other.m_fn->copy()),
           m_attr(other.m_attr)
       {}
 
+      /// @brief Move constructor.
       TraceOperator(TraceOperator&& other)
         :  FunctionBase(std::move(other)),
           m_fn(std::move(other.m_fn)),

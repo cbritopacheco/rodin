@@ -204,14 +204,17 @@ namespace Rodin::Variational
         : FaceIntegral(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       FaceIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
+      /// @brief Copy constructor.
       FaceIntegral(const FaceIntegral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       FaceIntegral(FaceIntegral&& other)
         : Parent(std::move(other))
       {}

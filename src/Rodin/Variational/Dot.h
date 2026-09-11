@@ -377,18 +377,21 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
@@ -423,11 +426,13 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return this->getRHS().getDOFs(element);
@@ -438,11 +443,13 @@ namespace Rodin::Variational
         return this->getRHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return this->getRHS().getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
@@ -450,6 +457,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
@@ -540,18 +548,21 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
@@ -572,11 +583,13 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
@@ -587,11 +600,13 @@ namespace Rodin::Variational
         return getLHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return getLHS().getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
@@ -599,6 +614,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
@@ -686,17 +702,20 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_trial(lhs.copy()), m_test(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Dot(const Dot& other)
         : Base(other),
           m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Dot(Dot&& other)
         : Base(std::move(other)),
           m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
@@ -716,11 +735,13 @@ namespace Rodin::Variational
         return *m_test;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_trial->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_trial->setIntegrationPoint(ip);
@@ -793,17 +814,20 @@ namespace Rodin::Variational
       using Parent = FormLanguage::Base;
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))

@@ -168,6 +168,7 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
 
               /**
@@ -208,6 +209,7 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               GradientFunction(const GradientFunction&) = default;
 
               /**
@@ -235,6 +237,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           BasisFunction(const BasisFunction& other)
             : m_local(other.m_local), m_g(other.m_g)
           {}
@@ -271,11 +274,13 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       P1Element(const P1Element& other)
         : Parent(other)
       {}
 
       constexpr
+      /// @brief Move constructor.
       P1Element(P1Element&& other)
         : Parent(std::move(other))
       {}
@@ -574,6 +579,7 @@ namespace Rodin::Variational
         return s_null;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       const BasisFunction& getBasis(size_t i) const
       {
         const Geometry::Polytope::Type g = this->getGeometry();
@@ -1092,6 +1098,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Copy constructor.
       P1Element(const P1Element& other)
         : Parent(other),
           m_vdim(other.m_vdim),
@@ -1100,6 +1107,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       P1Element(P1Element&& other)
         : Parent(std::move(other)),
           m_vdim(std::exchange(other.m_vdim, 0)),
@@ -1140,6 +1148,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];

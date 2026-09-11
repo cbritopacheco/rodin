@@ -202,11 +202,13 @@ namespace Rodin::Variational
         : m_matrix(matrix)
       {}
 
+      /// @brief Copy constructor.
       MatrixFunction(const MatrixFunction& other)
         : Parent(other),
           m_matrix(other.m_matrix)
       {}
 
+      /// @brief Move constructor.
       MatrixFunction(MatrixFunction&& other)
         : Parent(std::move(other)),
           m_matrix(std::move(other.m_matrix))

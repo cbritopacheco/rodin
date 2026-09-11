@@ -63,11 +63,13 @@ namespace Rodin::Variational
       using Parent = BooleanFunctionBase<OR<LHSType, RHSType>>;
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       OR(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       OR(const OR& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
@@ -75,6 +77,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       OR(OR&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),

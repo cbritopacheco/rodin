@@ -140,11 +140,13 @@ namespace Rodin::Variational
         : m_v(v)
       {}
 
+      /// @brief Copy constructor.
       BooleanFunction(const BooleanFunction& other)
         : Parent(other),
           m_v(other.m_v)
       {}
 
+      /// @brief Move constructor.
       BooleanFunction(BooleanFunction&& other)
         : Parent(std::move(other)),
           m_v(other.m_v)

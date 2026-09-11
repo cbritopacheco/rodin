@@ -84,23 +84,27 @@ namespace Rodin::Variational
       using Parent = FunctionBase<UnaryMinus<OperandType>>;
 
       constexpr
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
         : m_op(op.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         assert(m_op);
@@ -199,30 +203,35 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
       constexpr
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_operand(op.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
@@ -239,12 +248,14 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       UnaryMinus& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
@@ -322,27 +333,32 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
         : Parent(op),
           m_op(op.copy())
       {}
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return getOperand().getRegion();
@@ -417,16 +433,19 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBaseType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
       {
         for (const auto& p : op)
           add(UnaryMinus<LinearFormIntegratorBaseType>(p));
       }
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other))
       {}
@@ -474,27 +493,32 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
         : Parent(op),
           m_op(op.copy())
       {}
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return getOperand().getRegion();
@@ -574,16 +598,19 @@ namespace Rodin::Variational
       using Parent =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
       {
         for (const auto& p : op)
           add(UnaryMinus<LocalBilinearFormIntegratorBaseType>(p));
       }
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other))
       {}

@@ -827,6 +827,7 @@ namespace Rodin::Variational
 
           virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
 
+          /// @brief Creates a polymorphic copy.
           virtual DefectBase* copy() const noexcept = 0;
       };
 
@@ -849,6 +850,7 @@ namespace Rodin::Variational
             return (*m_value)(p);
           }
 
+          /// @brief Creates a polymorphic copy.
           Defect* copy() const noexcept override
           {
             return new Defect(*this);

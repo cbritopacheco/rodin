@@ -160,11 +160,13 @@ namespace Rodin::Variational
         assert(m_sdim > 0);
       }
 
+      /// @brief Copy constructor.
       FaceNormal(const FaceNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim)
       {}
 
+      /// @brief Move constructor.
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim))

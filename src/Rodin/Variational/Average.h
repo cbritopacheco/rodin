@@ -253,6 +253,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Average(const Average& other)
         : Parent(other),
           m_operand(other.m_operand->copy()),
@@ -260,6 +261,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       Average(Average&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand)),

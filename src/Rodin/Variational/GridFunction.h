@@ -263,6 +263,7 @@ namespace Rodin::Variational
         return m_ref.get().getOrder(geom);
       }
 
+      /// @brief Creates a polymorphic copy.
       GridFunctionBaseReference* copy() const noexcept final override
       {
         return new GridFunctionBaseReference(*this);

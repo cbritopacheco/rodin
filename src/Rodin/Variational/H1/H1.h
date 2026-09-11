@@ -666,6 +666,7 @@ namespace Rodin::Variational
        */
       H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh, size_t vdim);
 
+      /// @brief Copy constructor.
       H1(const H1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
@@ -674,6 +675,7 @@ namespace Rodin::Variational
           m_size(other.m_size)
       {}
 
+      /// @brief Move constructor.
       H1(H1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),

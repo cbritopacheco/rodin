@@ -362,6 +362,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Copy constructor.
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
@@ -370,6 +371,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Move constructor.
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),

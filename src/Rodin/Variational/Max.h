@@ -307,16 +307,19 @@ namespace Rodin::Variational
       using Parent = Max<FunctionBase<NestedDerived>, Real>;
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Max(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Max(const Max& other)
         : Parent(other)
       {}
 
       constexpr
+      /// @brief Move constructor.
       Max(Max&& other)
         : Parent(std::move(other))
       {}

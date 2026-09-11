@@ -98,12 +98,14 @@ namespace Rodin::Variational
         assert(m_sdim > 0);
       }
 
+      /// @brief Copy constructor.
       BoundaryNormal(const BoundaryNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim),
           m_mesh(other.m_mesh)
       {}
 
+      /// @brief Move constructor.
       BoundaryNormal(BoundaryNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim)),

@@ -115,6 +115,7 @@ namespace Rodin::Variational
   class LagrangeBasisPoint
   {
     public:
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis()
       {
         return 1.0;
@@ -148,6 +149,7 @@ namespace Rodin::Variational
   {
     public:
       // Node index i, 0 <= i <= K, x in [0,1]
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -212,6 +214,7 @@ namespace Rodin::Variational
   {
     public:
       // Node identified by (i,j) with i+j <= K.
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
@@ -326,6 +329,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j,k) with i+j+k <= K.
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(
         size_t i, size_t j, size_t k, Real x, Real y, Real z)
       {
@@ -454,6 +458,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j), 0 ≤ i,j ≤ K, φ_{i,j}(x,y) = L_i^K(x) L_j^K(y)
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -602,6 +607,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j,k): triangle indices (i,j) with i+j ≤ K, segment index k.
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(
         size_t i, size_t j, size_t k,
         Real x, Real y, Real z)

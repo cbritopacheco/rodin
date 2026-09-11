@@ -311,6 +311,7 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
 
+      /// @brief Evaluates at a geometric point, outside a quadrature loop.
       Derived& setPoint(const Geometry::Point& p)
       {
         m_pointIntegrationPoint.emplace(p);

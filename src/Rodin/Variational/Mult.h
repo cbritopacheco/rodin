@@ -197,15 +197,18 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<Mult<LHSType, RHSType>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
@@ -395,30 +398,35 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
@@ -443,11 +451,13 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_rhs->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
@@ -455,6 +465,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
@@ -557,30 +568,35 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       constexpr
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
       constexpr
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
@@ -606,11 +622,13 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_lhs->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
@@ -618,6 +636,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
@@ -691,21 +710,25 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return getRHS().getRegion();
@@ -776,21 +799,25 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return m_rhs->getRegion();

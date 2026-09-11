@@ -122,12 +122,15 @@ namespace Rodin::Variational
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Constructs the expression from its operand.
       Jacobian(const OperandType& u) : Parent(u) {}
 
+      /// @brief Copy constructor.
       Jacobian(const Jacobian& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
@@ -139,6 +142,7 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
+      /// @brief Creates a polymorphic copy.
       Jacobian* copy() const noexcept override { return new Jacobian(*this); }
 
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
@@ -338,6 +342,7 @@ namespace Rodin::Variational
 
           explicit operator bool() const noexcept { return valid; }
 
+          /// @brief Equality comparison.
           bool operator==(const Key& o) const noexcept
           {
             if (!valid || !o.valid)
@@ -366,12 +371,14 @@ namespace Rodin::Variational
         Key key;
       };
 
+      /// @brief Constructs the expression from its operand.
       Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u),
@@ -379,6 +386,7 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
+      /// @brief Move constructor.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -387,18 +395,21 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
       constexpr
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
       constexpr
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
@@ -411,12 +422,14 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -471,6 +484,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       RangeType getBasis(size_t local) const
       {
         assert(m_cache.key);
