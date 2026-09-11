@@ -118,6 +118,7 @@ namespace Rodin::Variational
         return m_sdim;
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
       {
         Math::SpatialVector<ScalarType> out;
@@ -125,6 +126,7 @@ namespace Rodin::Variational
         res = out.getData().head(m_sdim);
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(Math::SpatialVector<ScalarType>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -247,6 +249,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       RangeType getValue(const Geometry::Point& p) const
       {
         SpatialVectorType res;
@@ -286,6 +289,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;

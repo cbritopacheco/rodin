@@ -154,6 +154,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
@@ -254,12 +255,14 @@ namespace Rodin::Variational
         return this->getOperand().getBasis(local).trace();
       }
 
+      /// @brief Gets the finite element space.
       const FES& getFiniteElementSpace() const
       {
         return this->getOperand().getFiniteElementSpace();
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);

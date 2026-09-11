@@ -120,6 +120,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) && getRHS().getValue(ip);

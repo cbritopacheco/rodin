@@ -98,6 +98,7 @@ namespace Rodin::Variational
         return Math::abs(getOperand().getValue(p));
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);

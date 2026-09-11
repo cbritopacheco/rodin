@@ -220,6 +220,7 @@ namespace Rodin::Variational
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
+      /// @brief Restricts integration to the given mesh attributes.
       template <class A1, class A2, class ... As>
       LocalBilinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
@@ -240,10 +241,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
+      /// @brief Binds the expression to a polytope.
       virtual LocalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
+      /// @brief Returns an entry of the element matrix.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
       /// @brief Returns the integration region.
@@ -331,8 +335,10 @@ namespace Rodin::Variational
       }
 
       virtual
+      /// @brief Binds the expression to a polytope.
       GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
+      /// @brief Returns an entry of the element matrix.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
       virtual Geometry::Region getTrialRegion() const = 0;

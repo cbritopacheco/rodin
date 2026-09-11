@@ -82,12 +82,14 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the left-hand side operand.
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const auto& getRHS() const
       {
         assert(m_rhs);
@@ -95,12 +97,14 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Evaluates the expression at a geometric point.
       auto getValue(const Geometry::Point& p) const
       {
         return this->getLHS().getValue(p) == this->getRHS().getValue(p);
       }
 
       constexpr
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         return this->getLHS().getValue(ip) == this->getRHS().getValue(ip);

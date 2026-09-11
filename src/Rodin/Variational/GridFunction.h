@@ -201,12 +201,14 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Evaluates the expression at a geometric point.
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
       constexpr
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
@@ -247,6 +249,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the finite element space.
       const auto& getFiniteElementSpace() const
       {
         return m_ref.get().getFiniteElementSpace();
@@ -258,6 +261,7 @@ namespace Rodin::Variational
         return m_ref.get().getSize();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
         return m_ref.get().getOrder(geom);

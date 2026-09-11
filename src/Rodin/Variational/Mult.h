@@ -223,6 +223,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         assert(m_lhs);
@@ -230,6 +231,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -251,6 +253,7 @@ namespace Rodin::Variational
         return Internal::materializeProduct(product);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
@@ -435,11 +438,13 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the finite element space.
       const auto& getFiniteElementSpace() const
       {
         return getRHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the left-hand side operand.
       constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
@@ -447,6 +452,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -477,6 +483,7 @@ namespace Rodin::Variational
         return Internal::materializeProduct(product);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
@@ -609,12 +616,14 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the finite element space.
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
       constexpr
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         assert(m_lhs);
@@ -622,6 +631,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -652,6 +662,7 @@ namespace Rodin::Variational
         return Internal::materializeProduct(product);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
@@ -744,28 +755,33 @@ namespace Rodin::Variational
         return getRHS().getRegion();
       }
 
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         return m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return m_rhs->getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       Mult& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_rhs->setPolytope(polytope);
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) override
       {
         return getLHS() * m_rhs->integrate(tr, te);
@@ -835,28 +851,33 @@ namespace Rodin::Variational
         return m_rhs->getRegion();
       }
 
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         return m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return m_rhs->getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       Mult& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_rhs->setPolytope(polytope);
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       ScalarType integrate(size_t local) override
       {
         return getLHS() * m_rhs->integrate(local);

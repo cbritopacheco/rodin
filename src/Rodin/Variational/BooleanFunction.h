@@ -96,6 +96,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
@@ -153,6 +154,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Evaluates the expression at a geometric point.
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;

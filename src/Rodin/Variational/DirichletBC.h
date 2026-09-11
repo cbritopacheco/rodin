@@ -825,6 +825,7 @@ namespace Rodin::Variational
         public:
           virtual ~DefectBase() = default;
 
+          /// @brief Evaluates the expression at a geometric point.
           virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
 
           /// @brief Creates a polymorphic copy.
@@ -845,6 +846,7 @@ namespace Rodin::Variational
             : m_value(other.m_value->copy())
           {}
 
+          /// @brief Evaluates the expression at a geometric point.
           FESRangeType getValue(const Geometry::Point& p) const override
           {
             return (*m_value)(p);

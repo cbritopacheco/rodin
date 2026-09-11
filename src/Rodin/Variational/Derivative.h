@@ -223,6 +223,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Interpolates at an integration point.
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, ScalarType& r, const IntegrationPoint& q) { f.interpolate(r, q); })

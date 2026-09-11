@@ -265,6 +265,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order.
       size_t getOrder() const
       {
         return 0;
@@ -565,6 +566,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order.
       size_t getOrder() const
       {
         return 0;

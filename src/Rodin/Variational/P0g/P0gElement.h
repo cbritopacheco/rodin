@@ -210,6 +210,7 @@ namespace Rodin::Variational
       return BasisFunction();
     }
 
+    /// @brief Returns the polynomial order.
     constexpr size_t getOrder() const { return 0; }
   };
 
@@ -395,6 +396,7 @@ namespace Rodin::Variational
         out(component) = coefficient(component);
     }
 
+    /// @brief Returns the polynomial order.
     constexpr size_t getOrder() const { return 0; }
 
   private:

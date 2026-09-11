@@ -206,6 +206,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
@@ -447,6 +448,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
@@ -775,6 +777,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -1116,6 +1119,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -1386,6 +1390,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -1754,6 +1759,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -2015,6 +2021,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -2267,6 +2274,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -2523,6 +2531,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -2835,6 +2844,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -3222,6 +3232,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -3548,6 +3559,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -4202,6 +4214,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_distortion * m_weight * m_matrix(te, tr);

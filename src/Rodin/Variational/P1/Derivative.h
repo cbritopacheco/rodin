@@ -123,11 +123,13 @@ namespace Rodin::Variational
           m_i(std::move(other.m_i))
       {}
 
+      /// @brief Interpolates at an integration point.
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();

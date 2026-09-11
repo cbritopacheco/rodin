@@ -121,6 +121,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
@@ -164,6 +165,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(polytope);
@@ -215,6 +217,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Evaluates the expression at a geometric point.
       MatrixType getValue(const Geometry::Point&) const
       {
         return m_matrix;
@@ -237,6 +240,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& ) const noexcept
       {
         return 0;

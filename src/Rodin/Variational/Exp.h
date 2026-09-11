@@ -112,6 +112,7 @@ namespace Rodin::Variational
         return Math::exp(this->getOperand().getValue(p));
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         // Exponential of a polynomial is not a polynomial unless operand is constant.

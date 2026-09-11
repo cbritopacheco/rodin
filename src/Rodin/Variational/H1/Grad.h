@@ -65,6 +65,7 @@ namespace Rodin::Variational
       /// @brief Move constructor.
       Grad(Grad&& other) : Parent(std::move(other)) {}
 
+      /// @brief Interpolates at an integration point.
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -94,6 +95,7 @@ namespace Rodin::Variational
         out = JinvT * ref;
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -172,6 +174,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
@@ -376,6 +379,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);

@@ -211,6 +211,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Interpolates at an integration point.
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, ScalarType& r, const IntegrationPoint& q) { f.interpolate(r, q); })
@@ -219,6 +220,7 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);

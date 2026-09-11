@@ -199,10 +199,13 @@ namespace Rodin::Variational
         return Integrator::Type::Linear;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
+      /// @brief Binds the expression to a polytope.
       virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
+      /// @brief Returns an entry of the element vector.
       virtual ScalarType integrate(size_t local) = 0;
 
       virtual LinearFormIntegratorBase* copy() const noexcept override = 0;

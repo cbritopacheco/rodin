@@ -248,6 +248,7 @@ namespace Rodin::Variational
         return *m_u;
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();

@@ -842,6 +842,7 @@ namespace Rodin::Variational
         return s_null;
       }
 
+      /// @brief Returns the polynomial order.
       size_t getOrder() const
       {
         switch (this->getGeometry())
@@ -1182,6 +1183,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order.
       size_t getOrder() const
       {
         switch (this->getGeometry())

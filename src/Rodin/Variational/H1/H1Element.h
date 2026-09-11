@@ -1158,6 +1158,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order.
       size_t getOrder() const
       {
         using G = Geometry::Polytope::Type;

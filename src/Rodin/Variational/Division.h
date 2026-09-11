@@ -163,6 +163,7 @@ namespace Rodin::Variational
         return lhs / rhs;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -291,17 +292,20 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
+      /// @brief Gets the finite element space.
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -330,6 +334,7 @@ namespace Rodin::Variational
         return lhs / rhs;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);

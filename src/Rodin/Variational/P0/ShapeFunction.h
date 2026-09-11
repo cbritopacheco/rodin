@@ -187,6 +187,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         // P0 basis functions are constant on the reference element for any geometry.

@@ -105,6 +105,7 @@ namespace Rodin::Variational
           return v.transpose();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);
@@ -247,6 +248,7 @@ namespace Rodin::Variational
         return m_operand->getFiniteElementSpace();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);

@@ -179,6 +179,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         // Uses your H1Element::getOrder() (K / 2K / 3K depending on geometry)
@@ -368,6 +369,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         // Order of the underlying scalar polynomial space (your total-degree convention)

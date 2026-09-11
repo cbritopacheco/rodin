@@ -83,23 +83,27 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Evaluates the expression at a geometric point.
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) > getRHS().getValue(p);
       }
 
       constexpr
+      /// @brief Evaluates the expression at an integration point.
       Boolean getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) > getRHS().getValue(ip);
       }
 
+      /// @brief Gets the left-hand side operand.
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const auto& getRHS() const
       {
         assert(m_rhs);

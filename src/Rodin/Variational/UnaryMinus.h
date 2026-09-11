@@ -144,6 +144,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return getOperand().getOrder(polytope);
@@ -276,12 +277,14 @@ namespace Rodin::Variational
           return -v;
       }
 
+      /// @brief Gets the finite element space.
       const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return getOperand().getOrder(polytope);
@@ -364,11 +367,13 @@ namespace Rodin::Variational
         return getOperand().getRegion();
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return getOperand().getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);
@@ -524,11 +529,13 @@ namespace Rodin::Variational
         return getOperand().getRegion();
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return getOperand().getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);

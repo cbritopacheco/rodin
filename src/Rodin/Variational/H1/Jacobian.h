@@ -136,6 +136,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
@@ -145,6 +146,7 @@ namespace Rodin::Variational
       /// @brief Creates a polymorphic copy.
       Jacobian* copy() const noexcept override { return new Jacobian(*this); }
 
+      /// @brief Interpolates at an integration point.
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -187,6 +189,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -416,6 +419,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the finite element space.
       const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
@@ -512,6 +516,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);

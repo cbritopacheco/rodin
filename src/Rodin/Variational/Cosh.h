@@ -118,6 +118,7 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);

@@ -88,6 +88,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      /// @brief Interpolates at an integration point.
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
@@ -177,6 +178,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
@@ -436,6 +438,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);
