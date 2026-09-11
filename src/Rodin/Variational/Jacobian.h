@@ -270,8 +270,8 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(polytope);

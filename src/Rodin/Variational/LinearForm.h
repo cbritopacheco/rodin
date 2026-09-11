@@ -255,8 +255,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Replaces the integrators of the form.
+      constexpr
       LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
         m_lfis.clear();
@@ -367,8 +367,8 @@ namespace Rodin::Variational
         : m_v(v)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
@@ -376,8 +376,8 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
@@ -385,6 +385,7 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /// @brief Copy assignment.
       LinearForm& operator=(const LinearForm& other)
       {
         if (this != &other)
@@ -397,6 +398,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       LinearForm& operator=(LinearForm&& other) noexcept
       {
         if (this != &other)

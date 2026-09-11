@@ -289,8 +289,8 @@ namespace Rodin::Variational
         return Math::dot(lhs, rhs);
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
@@ -377,61 +377,61 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       LHSType& getLHS()
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       RHSType& getRHS()
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
@@ -462,8 +462,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
@@ -472,8 +472,8 @@ namespace Rodin::Variational
         return Math::dot(lhs, rhs);
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
@@ -554,45 +554,45 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
@@ -623,8 +623,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
@@ -633,8 +633,8 @@ namespace Rodin::Variational
         return Math::dot(lhs, rhs);
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
@@ -712,36 +712,36 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_trial(lhs.copy()), m_test(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Dot(const Dot& other)
         : Base(other),
           m_trial(other.m_trial->copy()), m_test(other.m_test->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Dot(Dot&& other)
         : Base(std::move(other)),
           m_trial(std::move(other.m_trial)), m_test(std::move(other.m_test))
       {}
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_trial);
         return *m_trial;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_test);
@@ -762,6 +762,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       constexpr
       auto operator()(size_t tr, size_t te)
       {
@@ -770,8 +771,8 @@ namespace Rodin::Variational
         return Math::dot(lhs, rhs);
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
@@ -827,44 +828,44 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::Base;
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Dot(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Dot(const Dot& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Dot(Dot&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;

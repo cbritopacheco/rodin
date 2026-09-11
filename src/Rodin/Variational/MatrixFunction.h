@@ -120,8 +120,8 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
@@ -164,8 +164,8 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getColumns();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(polytope);
@@ -182,6 +182,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Matrix-valued constant function.
    * @ingroup MatrixFunctionSpecializations
    */
   template <class Scalar>
@@ -200,6 +201,7 @@ namespace Rodin::Variational
 
       using Parent::traceOf;
 
+      /// @brief Constructs the MatrixFunction from the given arguments.
       MatrixFunction(const MatrixType& matrix)
         : m_matrix(matrix)
       {}
@@ -216,13 +218,14 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       MatrixType getValue(const Geometry::Point&) const
       {
         return m_matrix;
       }
 
+      /// @brief Gets the number of rows.
       constexpr
       size_t getRows() const
       {
@@ -239,8 +242,8 @@ namespace Rodin::Variational
         return m_matrix.cols();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& ) const noexcept
       {
         return 0;

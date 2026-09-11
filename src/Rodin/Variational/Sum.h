@@ -141,15 +141,15 @@ namespace Rodin::Variational
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Sum(const Sum& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Sum(Sum&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
@@ -205,8 +205,8 @@ namespace Rodin::Variational
         return lhs + rhs;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
@@ -351,8 +351,8 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Sum<LHSType, RHSType>, FES, Space>;
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Sum(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -360,45 +360,45 @@ namespace Rodin::Variational
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
       }
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Sum(const Sum& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Sum(Sum&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         assert(getLHS().getDOFs(element) == getRHS().getDOFs(element));
@@ -419,8 +419,8 @@ namespace Rodin::Variational
         return m_lhs->getIntegrationPoint();
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       auto getBasis(size_t local) const
       {
         decltype(auto) lhs = getLHS().getBasis(local);
@@ -428,15 +428,15 @@ namespace Rodin::Variational
         return lhs + rhs;
       }
 
-      constexpr
       /// @brief Gets the finite element space.
+      constexpr
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto lo = getLHS().getOrder(poly);
@@ -901,6 +901,7 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /// @brief Sum of two lists of bilinear form integrators.
   template <class LHSNumber, class RHSNumber>
   class Sum<
     FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,

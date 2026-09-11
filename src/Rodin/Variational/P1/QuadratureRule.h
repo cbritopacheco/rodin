@@ -139,8 +139,8 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -233,6 +233,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class NestedDerived, class Range, class Mesh>
@@ -350,8 +351,8 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -476,6 +477,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -560,8 +562,8 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      constexpr
       /// @brief Constructs the integrator for the given integrand.
+      constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
@@ -588,8 +590,8 @@ namespace Rodin::Variational
           m_geometry(std::move(other.m_geometry))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -960,8 +962,8 @@ namespace Rodin::Variational
           m_basis(std::move(other.m_basis))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -1293,8 +1295,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -1511,6 +1513,7 @@ namespace Rodin::Variational
       using MultiplicandType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Type of the multiplicand operand.
       using MultiplicandOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
@@ -1526,6 +1529,7 @@ namespace Rodin::Variational
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
+      /// @brief Range type of the multiplicand operand.
       using MultiplicandOperandRangeType =
         typename FormLanguage::Traits<MultiplicandOperandType>::RangeType;
 
@@ -1587,8 +1591,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -1806,6 +1810,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -1933,8 +1938,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2171,8 +2176,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2429,8 +2434,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2725,8 +2730,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2899,6 +2904,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -3071,8 +3077,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -3295,6 +3301,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Mesh>
@@ -3443,8 +3450,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -3725,30 +3732,30 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       QuadratureRule(const LHSType& lhs, const RHSType& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
-      constexpr
       /// @brief Constructs the integrator for the given integrand.
+      constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getOperand().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
           m_qfs(Geometry::Polytope::Type::Segment)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_qfs(other.m_qfs)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -3772,8 +3779,8 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -4256,11 +4263,13 @@ namespace Rodin::Variational
         return m_distortion * m_weight * m_matrix(te, tr);
       }
 
+      /// @brief Returns the region the trial function is integrated over.
       Geometry::Region getTrialRegion() const override
       {
         return getIntegrand().getLHS().getRegion();
       }
 
+      /// @brief Returns the region the test function is integrated over.
       virtual Geometry::Region getTestRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;

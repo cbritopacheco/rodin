@@ -96,15 +96,15 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) != getRHS().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       Boolean getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) != getRHS().getValue(ip);
@@ -120,6 +120,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c NEQ.
   template <class LHSDerived, class RHSDerived>
   NEQ(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> NEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;

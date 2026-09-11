@@ -52,9 +52,11 @@ namespace Rodin::Variational
       {
           /// @brief Index of the cached polytope.
           size_t i;
+          /// @brief Second tensor-product index.
           size_t j;
       };
 
+      /// @brief Gets the index offset of a pyramid layer.
       static constexpr size_t getLayerOffset(size_t layer)
       {
         size_t out = 0;
@@ -66,12 +68,14 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the linear index of a tensor-product mode.
       static constexpr size_t getIndex(size_t i, size_t j, size_t k)
       {
         const size_t n = K - k + 1;
         return getLayerOffset(k) + j * n + i;
       }
 
+      /// @brief Decodes a linear index into its tensor-product indices.
       static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
       {
         size_t rem = idx;
@@ -91,6 +95,7 @@ namespace Rodin::Variational
         i = j = k = 0;
       }
 
+      /// @brief Gets the number of modes on a triangular lattice.
       static constexpr IJ getTriangleLattice(size_t alpha)
       {
         size_t pos = 0;
@@ -105,6 +110,7 @@ namespace Rodin::Variational
         return IJ{0, 0};
       }
 
+      /// @brief Gets the index of a mode on a pyramid side.
       static constexpr size_t getSideIndex(size_t local, size_t alpha)
       {
         const auto ij = getTriangleLattice(alpha);
@@ -133,6 +139,7 @@ namespace Rodin::Variational
   class BernsteinPyramid
   {
     public:
+      /// @brief Gets a binomial coefficient.
       static Real getBinomial(size_t n, size_t k)
       {
         if (k > n)

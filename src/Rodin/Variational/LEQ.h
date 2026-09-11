@@ -44,6 +44,7 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Pointwise less-or-equal comparison of two function expressions.
    * @ingroup LEQSpecializations
    */
   template <class LHSDerived, class RHSDerived>
@@ -79,15 +80,15 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) <= getRHS().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       Boolean getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) <= getRHS().getValue(ip);
@@ -117,13 +118,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c LEQ.
   template <class LHSDerived, class RHSDerived>
   LEQ(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> LEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  constexpr
   /// @brief Less-or-equal comparison of two function expressions.
+  constexpr
   auto
   operator<=(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
@@ -132,8 +134,8 @@ namespace Rodin::Variational
 
   template <class Number, class RHSDerived,
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  constexpr
   /// @brief Less-or-equal comparison of two function expressions.
+  constexpr
   auto
   operator<=(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
@@ -142,8 +144,8 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class Number,
            typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  constexpr
   /// @brief Less-or-equal comparison of two function expressions.
+  constexpr
   auto
   operator<=(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {

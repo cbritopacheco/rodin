@@ -277,6 +277,7 @@ namespace Rodin::Variational
 
       using Parent::Parent;
 
+      /// @brief Copy constructor.
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
@@ -338,15 +339,17 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual
       /// @brief Binds the expression to a polytope.
+      virtual
       GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
       /// @brief Returns an entry of the element matrix.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
+      /// @brief Returns the region the trial function is integrated over.
       virtual Geometry::Region getTrialRegion() const = 0;
 
+      /// @brief Returns the region the test function is integrated over.
       virtual Geometry::Region getTestRegion() const = 0;
 
       virtual

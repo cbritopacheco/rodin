@@ -238,8 +238,8 @@ namespace Rodin::Variational
         }
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();

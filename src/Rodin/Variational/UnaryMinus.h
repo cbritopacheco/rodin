@@ -83,28 +83,28 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<UnaryMinus<OperandType>>;
 
-      constexpr
       /// @brief Constructs the expression from its operand.
+      constexpr
       UnaryMinus(const OperandType& op)
         : m_op(op.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         assert(m_op);
@@ -127,8 +127,8 @@ namespace Rodin::Variational
           return -v;
       }
 
-      constexpr
       /// @brief Restricts the trace of the expression to a mesh attribute.
+      constexpr
       UnaryMinus& traceOf(Geometry::Attribute attr)
       {
         Parent::traceOf(attr);
@@ -136,8 +136,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Restricts the trace of the expression to a mesh attribute.
+      constexpr
       UnaryMinus& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
         Parent::traceOf(attrs);
@@ -145,8 +145,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return getOperand().getOrder(polytope);
@@ -205,36 +205,36 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
-      constexpr
       /// @brief Constructs the expression from its operand.
+      constexpr
       UnaryMinus(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_operand(op.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
@@ -285,8 +285,8 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return getOperand().getOrder(polytope);

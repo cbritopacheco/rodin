@@ -306,20 +306,20 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Min<FunctionBase<NestedDerived>, Real>;
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Min(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Min(const Min& other)
         : Parent(other)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Min(Min&& other)
         : Parent(std::move(other))
       {}

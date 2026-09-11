@@ -99,8 +99,8 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -325,8 +325,8 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -560,8 +560,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -848,8 +848,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -1146,8 +1146,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -1489,8 +1489,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -1734,8 +1734,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2017,8 +2017,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2327,8 +2327,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -2745,8 +2745,8 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
-      constexpr
       /// @brief Gets the integrand.
+      constexpr
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);

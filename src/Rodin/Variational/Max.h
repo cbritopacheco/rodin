@@ -174,6 +174,7 @@ namespace Rodin::Variational
     -> Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
+   * @brief Pointwise maximum of a function expression and a real.
    * @ingroup MaxSpecializations
    */
   template <class NestedDerived>
@@ -311,20 +312,20 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Max<FunctionBase<NestedDerived>, Real>;
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Max(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Max(const Max& other)
         : Parent(other)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Max(Max&& other)
         : Parent(std::move(other))
       {}

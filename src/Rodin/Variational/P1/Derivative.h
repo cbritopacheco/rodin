@@ -100,6 +100,7 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the derivative of an @f$ \mathbb{P}^1 @f$ function
        * @f$ u @f$.
+       * @param[in] i Index of the direction the derivative is taken along
        * @param[in] u P1 GridFunction
        */
       Derivative(size_t i, const OperandType& u)

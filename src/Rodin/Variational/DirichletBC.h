@@ -530,6 +530,7 @@ namespace Rodin::Variational
       }
 
       template <class A1, class A2, class ... As>
+      /// @brief Restricts the boundary condition to the given mesh attributes.
       constexpr
       DirichletBC& on(A1 a1, A2 a2, As... as)
       {
@@ -809,6 +810,7 @@ namespace Rodin::Variational
       /// Identified-DOFs alternative populated by this specialization
       using IdentifiedDOFs = typename Parent::IdentifiedDOFs;
 
+      /// @brief Values identified by a periodic boundary condition.
       using IdentificationValues = typename Parent::IdentificationValues;
 
       /// Variant DOFs type
@@ -849,8 +851,10 @@ namespace Rodin::Variational
       class Defect final : public DefectBase
       {
         public:
+          /// @brief Type of the prescribed value.
           using FunctionType = FunctionBase<DefectDerived>;
 
+          /// @brief Constructs the defect from the prescribed value.
           explicit Defect(const FunctionType& value)
             : m_value(value.copy())
           {}

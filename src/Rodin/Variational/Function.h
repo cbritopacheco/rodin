@@ -220,9 +220,8 @@ namespace Rodin::Variational
       /**
        * @brief Sets multiple attributes as the trace domain.
        *
-       * @param[in] a1 First attribute
-       * @param[in] a2 Second attribute
-       * @param[in] as Additional attributes (variadic)
+       * The attributes are collected into the trace domain of the function.
+       *
        * @returns Reference to self (for method chaining)
        */
       template <class A1, class A2, class ... As>

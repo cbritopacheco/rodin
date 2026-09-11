@@ -66,6 +66,7 @@ namespace Rodin::Variational
   class TraceOperator<FunctionBase> : public FunctionBase
   {
     public:
+      /// @brief Constructs the trace of a function on a mesh attribute.
       TraceOperator(const FunctionBase& fn, Geometry::Attribute attr)
         : m_fn(fn.copy()),
           m_attr(attr)

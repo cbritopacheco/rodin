@@ -161,8 +161,8 @@ namespace Rodin::Variational
           /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
-          constexpr
           /// @brief Evaluates at a geometric point.
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
@@ -547,8 +547,8 @@ namespace Rodin::Variational
           /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
-          constexpr
           /// @brief Evaluates at a geometric point.
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
@@ -558,6 +558,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Constructs the P1 from the given arguments.
       P1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
@@ -601,6 +602,7 @@ namespace Rodin::Variational
 
       virtual ~P1() = default;
 
+      /// @brief Move assignment.
       P1& operator=(P1&& other)
       {
         if (this != &other)
@@ -613,6 +615,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Copy assignment.
       P1& operator=(const P1& other)
       {
         if (this != &other)

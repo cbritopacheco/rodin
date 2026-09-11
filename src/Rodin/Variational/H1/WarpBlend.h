@@ -198,6 +198,7 @@ namespace Rodin::Variational
   class WarpShiftFace2D
   {
     public:
+      /// @brief Applies the warp to the given barycentric coordinates.
       static std::array<Real, 2> apply(Real L1, Real L2, Real L3, Real alpha)
       {
         if constexpr (K <= 1)
@@ -255,6 +256,7 @@ namespace Rodin::Variational
   class WarpShiftFace3D
   {
     public:
+      /// @brief Applies the warp to the given barycentric coordinates.
       static std::array<Real, 2> apply(Real La, Real Lb, Real Lc, Real Ld, Real alpha)
       {
         (void) La;

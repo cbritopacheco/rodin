@@ -64,15 +64,15 @@ namespace Rodin::Variational
         : m_operand(m.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
@@ -161,15 +161,15 @@ namespace Rodin::Variational
           m_operand(op.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))

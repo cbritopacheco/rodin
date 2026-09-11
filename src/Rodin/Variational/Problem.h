@@ -915,6 +915,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles the requested part of the linear system.
       virtual ProblemUsBase& assemble(AssemblyTarget target) override
       {
         auto& axb = getLinearSystem();
@@ -985,6 +986,7 @@ namespace Rodin::Variational
             });
       }
 
+      /// @brief Copy assignment.
       ProblemUsBase& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -992,11 +994,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the offsets of the trial degrees of freedom.
       const auto& getTrialOffsets() const
       {
         return m_trialOffsets;
       }
 
+      /// @brief Gets the offsets of the test degrees of freedom.
       const auto& getTestOffsets() const
       {
         return m_testOffsets;
@@ -1058,6 +1062,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ProblemUsBase<LinearSystem, U1, U2, U3, Us...>;
 
+      /// @brief Constructs the problem over the given unknown fields.
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)
         : Parent(u1, u2, u3, us...)
       {}

@@ -172,8 +172,8 @@ namespace Rodin::Variational
           m_sdim(std::move(other.m_sdim))
       {}
 
-      constexpr
       /// @brief Gets the topological dimension.
+      constexpr
       size_t getDimension() const
       {
         return m_sdim;
@@ -335,8 +335,8 @@ namespace Rodin::Variational
         return res;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;

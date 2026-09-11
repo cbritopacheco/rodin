@@ -337,6 +337,7 @@ namespace Rodin::Variational
       //   b = 2 y / (1 - z) - 1          if 1 - z > tol
       //   a = 2 x / (1 - y - z) - 1      if 1 - y - z > tol
       //
+      /// @brief Maps reference coordinates to collapsed coordinates.
       static constexpr void getCollapsed(Real& a,
                                          Real& b,
                                          Real& c,

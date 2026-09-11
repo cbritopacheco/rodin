@@ -95,8 +95,8 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
@@ -108,8 +108,10 @@ namespace Rodin::Variational
       /**
        * @brief Sets the trace domain for the function.
        *
+       * The arguments specify the trace domain; they are forwarded to the
+       * derived class.
+       *
        * @tparam Args Variadic template for trace domain specification
-       * @param[in] args Arguments specifying the trace domain
        * @returns Reference to derived object (for method chaining)
        */
       template <class ... Args>
@@ -138,6 +140,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
+      /// @brief Constructs the constant boolean function.
       BooleanFunction(Boolean v)
         : m_v(v)
       {}
@@ -154,8 +157,8 @@ namespace Rodin::Variational
           m_v(other.m_v)
       {}
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;

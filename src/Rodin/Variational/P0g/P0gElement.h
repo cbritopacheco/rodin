@@ -70,6 +70,7 @@ namespace Rodin::Variational
     class LinearForm
     {
     public:
+      /// @brief Constructs the LinearForm from the given arguments.
       constexpr explicit LinearForm(G g) : m_g(g) {}
       /// @brief Copy constructor.
       constexpr LinearForm(const LinearForm&) = default;
@@ -130,6 +131,7 @@ namespace Rodin::Variational
 
     constexpr P0gElement() = default;
 
+    /// @brief Constructs the P0gElement from the given arguments.
     constexpr explicit P0gElement(G geometry)
       : Parent(geometry)
     {}
@@ -287,6 +289,7 @@ namespace Rodin::Variational
       class DerivativeFunction
       {
       public:
+        /// @brief Constructs the derivative of a local basis function.
         constexpr DerivativeFunction(size_t, size_t, size_t, size_t, G) {}
         /// @brief Copy constructor.
         constexpr DerivativeFunction(const DerivativeFunction&) = default;
@@ -342,6 +345,7 @@ namespace Rodin::Variational
       : P0gElement(geometry, Geometry::Polytope::Traits(geometry).getDimension())
     {}
 
+    /// @brief Constructs the P0gElement from the given arguments.
     constexpr P0gElement(G geometry, size_t vdim)
       : Parent(geometry), m_vdim(vdim)
     {
@@ -373,6 +377,7 @@ namespace Rodin::Variational
 
     constexpr ~P0gElement() override = default;
 
+    /// @brief Copy assignment.
     constexpr P0gElement& operator=(const P0gElement& other)
     {
       Parent::operator=(other);
@@ -382,6 +387,7 @@ namespace Rodin::Variational
       return *this;
     }
 
+    /// @brief Move assignment.
     constexpr P0gElement& operator=(P0gElement&& other)
     {
       Parent::operator=(std::move(other));

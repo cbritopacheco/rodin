@@ -62,22 +62,22 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<OR<LHSType, RHSType>>;
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       OR(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       OR(const OR& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
           m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       OR(OR&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
@@ -98,15 +98,15 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) || getRHS().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) || getRHS().getValue(ip);
@@ -122,6 +122,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c OR.
   template <class LHSDerived, class RHSDerived>
   OR(const BooleanFunctionBase<LHSDerived>&, const BooleanFunctionBase<RHSDerived>&)
     -> OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;

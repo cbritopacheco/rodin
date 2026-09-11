@@ -108,6 +108,7 @@ namespace Rodin::Variational
   template <class Solution, class FES>
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
+    /// @brief Whether the trait holds.
     static constexpr Boolean Value = true;
   };
 
@@ -126,6 +127,7 @@ namespace Rodin::Variational
   template <class FES>
   struct IsTestFunction<TestFunction<FES>>
   {
+    /// @brief Whether the trait holds.
     static constexpr Boolean Value = true;
   };
 

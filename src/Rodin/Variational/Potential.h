@@ -177,6 +177,7 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Potential of a function expression against a kernel.
    * @ingroup PotentialSpecializations
    */
   template <class LHS, class RHSDerived>
@@ -329,6 +330,7 @@ namespace Rodin::Variational
       //   }
       // }
 
+      /// @brief Gets the quadrature formula of the potential.
       const auto& getQuadratureFormula() const
       {
         return m_qf;
@@ -525,6 +527,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      /// @brief Returns the region the test function is integrated over.
       Geometry::Region getTestRegion() const override
       {
         return Geometry::Region::Cells;

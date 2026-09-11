@@ -216,8 +216,8 @@ namespace Rodin::Variational
         }
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
@@ -344,6 +344,7 @@ namespace Rodin::Variational
         };
 
         // Cached divergence of each vector basis (scalar), size = vdim * nvertices
+        /// @brief Cached divergence values.
         std::vector<ScalarType> div;
 
         /// @brief Key of the cached cell tabulation.
@@ -375,29 +376,29 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return getOperand().getDOFs(polytope);
       }
 
-      constexpr
       /// @brief Gets the integration point the expression is evaluated at.
+      constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -512,8 +513,8 @@ namespace Rodin::Variational
         return m_cache.div[local];
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);

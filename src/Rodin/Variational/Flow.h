@@ -1083,8 +1083,8 @@ namespace Rodin::Variational
         return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return m_operand->getLeaf();

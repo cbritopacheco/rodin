@@ -117,39 +117,42 @@ namespace Rodin::Variational
         std::vector<RangeType>  basis;
 
         // Scalar vertex basis values: size = nv
+        /// @brief Cached vertex basis values.
         std::vector<ScalarType> phi_vertex;
 
+        /// @brief Key of the cached element structure.
         StructureKey skey;
+        /// @brief Key of the cached shape function values.
         ValueKey vkey;
       };
 
       ShapeFunction() = delete;
 
-      constexpr
       /// @brief Constructs the shape function over a finite element space.
+      constexpr
       ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_ip(nullptr),
           m_cache(other.m_cache)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
           m_ip(std::exchange(other.m_ip, nullptr)),
           m_cache(std::move(other.m_cache))
       {}
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -163,8 +166,8 @@ namespace Rodin::Variational
         }
       }
 
-      constexpr
       /// @brief Gets the integration point the expression is evaluated at.
+      constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -275,8 +278,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       const RangeType& getBasis(size_t local) const
       {
         assert(m_cache.skey);
@@ -284,15 +287,15 @@ namespace Rodin::Variational
         return m_cache.basis[local];
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return P1Element<ScalarType>(poly.getGeometry()).getOrder();

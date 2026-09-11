@@ -188,8 +188,8 @@ namespace Rodin::Variational
           /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
-          constexpr
           /// @brief Evaluates at a geometric point.
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());

@@ -89,8 +89,8 @@ namespace Rodin::Variational
         return 0;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return size_t(0);
@@ -174,8 +174,8 @@ namespace Rodin::Variational
         return v;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return size_t(0);

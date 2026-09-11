@@ -47,6 +47,7 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Pointwise greater-than comparison of two function expressions.
    * @ingroup GTSpecializations
    */
   template <class LHSDerived, class RHSDerived>
@@ -82,15 +83,15 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) > getRHS().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       Boolean getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) > getRHS().getValue(ip);

@@ -142,15 +142,15 @@ namespace Rodin::Variational
           m_ip(std::exchange(other.m_ip, nullptr))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      constexpr
       /// @brief Gets the integration point the expression is evaluated at.
+      constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -196,8 +196,8 @@ namespace Rodin::Variational
         return m_zero;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;

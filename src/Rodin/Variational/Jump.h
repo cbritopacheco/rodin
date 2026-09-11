@@ -187,8 +187,8 @@ namespace Rodin::Variational
         return v1 - v2;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
@@ -256,16 +256,16 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Jump(const Jump& other)
         : Parent(other),
           m_operand(other.m_operand->copy()),
           m_ip(nullptr)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Jump(Jump&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand)),
@@ -375,8 +375,8 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);

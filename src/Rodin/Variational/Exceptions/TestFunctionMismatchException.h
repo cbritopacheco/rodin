@@ -24,6 +24,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Alert::Exception;
 
+      /// @brief Constructs the exception for the offending shape function.
       template <class UPb>
       TestFunctionMismatchException(const UPb& uPb)
       {

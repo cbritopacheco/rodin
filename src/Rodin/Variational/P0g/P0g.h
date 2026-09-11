@@ -143,8 +143,8 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
-          constexpr
           /// @brief Evaluates at a geometric point.
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
@@ -154,6 +154,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Constructs the P0g from the given arguments.
       explicit P0g(const MeshType& mesh)
         : m_mesh(mesh)
       {}
@@ -172,6 +173,7 @@ namespace Rodin::Variational
 
       ~P0g() override = default;
 
+      /// @brief Copy assignment.
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -182,6 +184,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       P0g& operator=(P0g&& other)
       {
         if (this != &other)
@@ -334,8 +337,8 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
-          constexpr
           /// @brief Evaluates at a geometric point.
+          constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
@@ -345,6 +348,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Constructs the P0g from the given arguments.
       explicit P0g(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
@@ -354,6 +358,7 @@ namespace Rodin::Variational
           m_dofs[k] = static_cast<Index>(k);
       }
 
+      /// @brief Constructs the P0g from the given arguments.
       template <size_t VDim>
       explicit P0g(std::integral_constant<size_t, VDim>, const MeshType& mesh)
         : P0g(mesh, VDim)
@@ -377,6 +382,7 @@ namespace Rodin::Variational
 
       ~P0g() override = default;
 
+      /// @brief Copy assignment.
       P0g& operator=(const P0g& other)
       {
         Parent::operator=(other);
@@ -389,6 +395,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       P0g& operator=(P0g&& other)
       {
         Parent::operator=(std::move(other));
@@ -477,13 +484,16 @@ namespace Rodin::Variational
   P0g(const Geometry::Mesh<Context>&) -> P0g<Real, Geometry::Mesh<Context>>;
 
   // Aliases (scalar spaces)
+  /// @brief Cellwise-constant real space with a global basis.
   template <class Mesh>
   using RealP0g = P0g<Real, Mesh>;
 
+  /// @brief Cellwise-constant complex space with a global basis.
   template <class Mesh>
   using ComplexP0g = P0g<Complex, Mesh>;
 
   // Aliases (vector spaces)
+  /// @brief Cellwise-constant vector-valued space with a global basis.
   template <class Mesh>
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }

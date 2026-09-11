@@ -96,15 +96,15 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->getLHS().getValue(p) == this->getRHS().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return this->getLHS().getValue(ip) == this->getRHS().getValue(ip);
@@ -120,6 +120,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c EQ.
   template <class LHSDerived, class RHSDerived>
   EQ(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;

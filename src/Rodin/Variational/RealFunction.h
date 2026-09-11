@@ -138,8 +138,10 @@ namespace Rodin::Variational
       /**
        * @brief Sets the trace domain for the function.
        *
+       * The arguments specify the trace domain; they are forwarded to the
+       * derived class.
+       *
        * @tparam Args Variadic template for trace domain specification
-       * @param[in] args Arguments specifying the trace domain
        * @returns Reference to derived object (for method chaining)
        */
       template <class ... Args>

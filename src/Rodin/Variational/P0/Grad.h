@@ -244,22 +244,22 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);

@@ -64,19 +64,19 @@ namespace Rodin::FormLanguage
   };
 }
 
-/**
- * @defgroup DerivativeSpecializations Derivative Template Specializations
- * @brief Template specializations of the Derivative class.
- * @see @ref Derivative
- *
- * | Specialization | Description |
- * |----------------|-------------|
- * | @ref Derivative "Derivative<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Directional derivative of an H1 shape function. |
- * | @ref Derivative "Derivative<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Directional derivative of a P1 grid function. |
- */
-
 namespace Rodin::Variational
 {
+  /**
+   * @defgroup DerivativeSpecializations Derivative Template Specializations
+   * @brief Template specializations of the Derivative class.
+   * @see @ref Derivative
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Derivative "Derivative<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Directional derivative of an H1 shape function. |
+   * | @ref Derivative "Derivative<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Directional derivative of a P1 grid function. |
+   */
+
   /**
    * @ingroup RodinVariational
    * @brief Base class for directional derivative operators.
@@ -135,8 +135,8 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      constexpr
       /// @brief Gets the topological dimension.
+      constexpr
       size_t getDimension() const
       {
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
@@ -224,8 +224,8 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
-      constexpr
       /// @brief Interpolates at an integration point.
+      constexpr
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, ScalarType& r, const IntegrationPoint& q) { f.interpolate(r, q); })
@@ -234,8 +234,8 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
@@ -273,6 +273,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = ShapeFunctionBase<Derivative<OperandType>, FESType, Space>;
 
+      /// @brief Constructs the partial derivative of an operand along a direction.
       Derivative(size_t i, const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_i(i),
@@ -293,22 +294,22 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);

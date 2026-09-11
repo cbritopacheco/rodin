@@ -98,8 +98,8 @@ namespace Rodin::Variational
         return Math::SpatialMatrix<Real>::Identity(m_n, m_n);
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;

@@ -188,6 +188,7 @@ namespace Rodin::Variational
       using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>
+      /// @brief Constructs the boundary integral of the given integrand.
       constexpr
       BoundaryIntegral(
           const FunctionBase<LHSDerived>& lhs,
@@ -195,20 +196,20 @@ namespace Rodin::Variational
         : BoundaryIntegral(Dot(lhs, rhs))
       {}
 
-      constexpr
       /// @brief Constructs the integrator for the given integrand.
+      constexpr
       BoundaryIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       BoundaryIntegral(const BoundaryIntegral& other)
         : Parent(other)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       BoundaryIntegral(BoundaryIntegral&& other)
         : Parent(std::move(other))
       {}

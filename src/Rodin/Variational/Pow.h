@@ -144,11 +144,13 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
+      /// @brief Gets the base of the power.
       const BaseType& getBase() const
       {
         return *m_s;
       }
 
+      /// @brief Gets the exponent of the power.
       const ExponentType& getExponent() const
       {
         return m_p;
@@ -165,6 +167,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c Pow.
    * @ingroup RodinCTAD
    */
   template <class BaseDerived, class Number>

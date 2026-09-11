@@ -127,13 +127,14 @@ namespace Rodin::Variational
       class LinearForm
       {
         public:
+          /// @brief Constructs the LinearForm from the given arguments.
           constexpr
           LinearForm(Geometry::Polytope::Type g)
             : m_g(g)
           {}
 
-          constexpr
           /// @brief Copy constructor.
+          constexpr
           LinearForm(const LinearForm&) = default;
 
           /// @brief Applies the functional to a callable.
@@ -181,8 +182,8 @@ namespace Rodin::Variational
               constexpr
               DerivativeFunction() = default;
 
-              constexpr
               /// @brief Copy constructor.
+              constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
 
               /**
@@ -199,20 +200,20 @@ namespace Rodin::Variational
           constexpr
           BasisFunction() = default;
 
-          constexpr
           /// @brief Copy constructor.
+          constexpr
           BasisFunction(const BasisFunction&) = default;
 
-          constexpr
           /// @brief Evaluates at a point on the reference element.
+          constexpr
           ReturnType operator()(const Math::SpatialVector<Real>&) const
           {
             return 1;
           }
 
           template <size_t Order>
-          constexpr
           /// @brief Gets the derivative of the basis function.
+          constexpr
           DerivativeFunction<Order> getDerivative(size_t) const
           {
             return DerivativeFunction<Order>();
@@ -222,19 +223,20 @@ namespace Rodin::Variational
       constexpr
       P0Element() = default;
 
+      /// @brief Constructs the P0Element from the given arguments.
       constexpr
       P0Element(Geometry::Polytope::Type geometry)
         : Parent(geometry)
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       P0Element(const P0Element& other)
         : Parent(other)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       P0Element(P0Element&& other)
         : Parent(std::move(other))
       {}
@@ -257,22 +259,22 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
-      constexpr
       /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
+      constexpr
       LinearForm getLinearForm(size_t) const
       {
         return LinearForm(this->getGeometry());
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       BasisFunction getBasis(size_t) const
       {
         return BasisFunction();
       }
 
-      constexpr
       /// @brief Returns the polynomial order.
+      constexpr
       size_t getOrder() const
       {
         return 0;
@@ -328,19 +330,19 @@ namespace Rodin::Variational
           LinearForm()
             : m_vdim(0), m_local(0), m_g(Geometry::Polytope::Type::Point)
           {}
-/// @brief Constructs the functional of a local degree of freedom.
+          /// @brief Constructs the functional of a local degree of freedom.
 
           constexpr
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_local(local), m_g(g)
           {}
 
-          constexpr
           /// @brief Copy constructor.
+          constexpr
           LinearForm(const LinearForm&) = default;
 
-          constexpr
           /// @brief Move constructor.
+          constexpr
           LinearForm(LinearForm&&) = default;
 
           /**
@@ -398,8 +400,8 @@ namespace Rodin::Variational
                 : m_i(i), m_j(j), m_vdim(vdim), m_local(local), m_g(g)
               {}
 
-              constexpr
               /// @brief Copy constructor.
+              constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
 
               /**
@@ -423,19 +425,19 @@ namespace Rodin::Variational
           BasisFunction()
             : m_vdim(0), m_local(0), m_g(Geometry::Polytope::Type::Point)
           {}
-/// @brief Constructs the basis function of a local degree of freedom.
+          /// @brief Constructs the basis function of a local degree of freedom.
 
           constexpr
           BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_local(local), m_g(g)
           {}
 
-          constexpr
           /// @brief Copy constructor.
+          constexpr
           BasisFunction(const BasisFunction&) = default;
 
-          constexpr
           /// @brief Move constructor.
+          constexpr
           BasisFunction(BasisFunction&&) = default;
 
           /**
@@ -506,8 +508,8 @@ namespace Rodin::Variational
         }
       }
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       P0Element(const P0Element& other)
         : Parent(other)
         , m_vdim(other.m_vdim)
@@ -515,8 +517,8 @@ namespace Rodin::Variational
         , m_bs(other.m_bs)
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       P0Element(P0Element&& other)
         : Parent(std::move(other))
         , m_vdim(std::exchange(other.m_vdim, 0))
@@ -524,6 +526,7 @@ namespace Rodin::Variational
         , m_bs(std::move(other.m_bs))
       {}
 
+      /// @brief Copy assignment.
       constexpr
       P0Element& operator=(const P0Element& other)
       {
@@ -534,6 +537,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       constexpr
       P0Element& operator=(P0Element&& other)
       {
@@ -544,30 +548,30 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the number of degrees of freedom of the element.
+      constexpr
       size_t getCount() const
       {
         // One DOF per vector component (all share the same barycenter)
         return m_vdim;
       }
 
-      constexpr
       /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
+      constexpr
       const auto& getLinearForm(size_t local) const
       {
         return m_lfs[local];
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];
       }
 
-      constexpr
       /// @brief Gets the node of a local degree of freedom.
+      constexpr
       const Math::SpatialVector<Real>& getNode(size_t local) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
@@ -583,8 +587,8 @@ namespace Rodin::Variational
           out(component) = coefficient(component);
       }
 
-      constexpr
       /// @brief Returns the polynomial order.
+      constexpr
       size_t getOrder() const
       {
         return 0;

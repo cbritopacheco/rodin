@@ -153,8 +153,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);
@@ -194,43 +194,43 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
-      constexpr
       /// @brief Constructs the expression from its operand.
+      constexpr
       Trace(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
-      constexpr
       /// @brief Gets the operand function.
+      constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
@@ -249,8 +249,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).trace();
@@ -262,8 +262,8 @@ namespace Rodin::Variational
         return this->getOperand().getFiniteElementSpace();
       }
 
-      constexpr
       /// @brief Returns the polynomial order used on a mesh entity.
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
         return this->getOperand().getOrder(p);

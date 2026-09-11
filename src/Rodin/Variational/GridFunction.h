@@ -188,58 +188,58 @@ namespace Rodin::Variational
 
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
-      constexpr
       /// @brief Evaluates at a geometric point.
+      constexpr
       auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates at an integration point.
+      constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
-      constexpr
       /// @brief Evaluates the expression at a geometric point.
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
-      constexpr
       /// @brief Evaluates the expression at an integration point.
+      constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
-      constexpr
       /// @brief Gets the first component.
+      constexpr
       auto x() const
       {
         return m_ref.get().x();
       }
 
-      constexpr
       /// @brief Gets the second component.
+      constexpr
       auto y() const
       {
         return m_ref.get().y();
       }
 
-      constexpr
       /// @brief Gets the third component.
+      constexpr
       auto z() const
       {
         return m_ref.get().z();
       }
 
       template <class DataType>
-      constexpr
       /// @brief Sets the degree-of-freedom data.
+      constexpr
       decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
@@ -254,15 +254,15 @@ namespace Rodin::Variational
         return m_ref.get().getData();
       }
 
-      constexpr
       /// @brief Gets the finite element space.
+      constexpr
       const auto& getFiniteElementSpace() const
       {
         return m_ref.get().getFiniteElementSpace();
       }
 
-      constexpr
       /// @brief Gets the number of degrees of freedom.
+      constexpr
       size_t getSize() const
       {
         return m_ref.get().getSize();

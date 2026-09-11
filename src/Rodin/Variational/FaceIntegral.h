@@ -199,6 +199,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
+      /// @brief Constructs the face integral of the given integrand.
       template <class LHSDerived, class RHSDerived>
       FaceIntegral(
           const FunctionBase<LHSDerived>& lhs,

@@ -74,6 +74,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c SparseProblem.
    * @ingroup RodinCTAD
    */
   template <class U, class V>

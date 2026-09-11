@@ -214,8 +214,8 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Restricts the trace of the expression to a mesh attribute.
+      constexpr
       Mult& traceOf(Geometry::Attribute attr)
       {
         m_lhs->traceOf(attr);
@@ -223,16 +223,16 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -403,43 +403,43 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }
 
-      constexpr
       /// @brief Gets the finite element space.
+      constexpr
       const auto& getFiniteElementSpace() const
       {
         return getRHS().getFiniteElementSpace();
@@ -452,8 +452,8 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -473,8 +473,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
@@ -581,58 +581,58 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
-      constexpr
       /// @brief Constructs the expression from its left and right operands.
+      constexpr
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      constexpr
       /// @brief Copy constructor.
+      constexpr
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      constexpr
       /// @brief Move constructor.
+      constexpr
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      constexpr
       /// @brief Gets the operand in the shape function expression.
+      constexpr
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
-      constexpr
       /// @brief Gets the global DOF indices for a polytope.
+      constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
       }
 
-      constexpr
       /// @brief Gets the finite element space.
+      constexpr
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      constexpr
       /// @brief Gets the left-hand side operand.
+      constexpr
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      constexpr
       /// @brief Gets the right-hand side operand.
+      constexpr
       const RHSType& getRHS() const
       {
         assert(m_rhs);
@@ -652,8 +652,8 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
       /// @brief Gets the basis function of a local degree of freedom.
+      constexpr
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
@@ -805,8 +805,8 @@ namespace Rodin::Variational
     -> Mult<Number, LocalBilinearFormIntegratorBase<RHSScalar>>;
 
   template <class Number, class RHSScalar>
-  constexpr
   /// @brief Product of two bilinear form integrators.
+  constexpr
   auto operator*(const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
@@ -902,8 +902,8 @@ namespace Rodin::Variational
     -> Mult<Number, LinearFormIntegratorBase<RHSScalar>>;
 
   template <class Number, class RHSScalar>
-  constexpr
   /// @brief Product of two linear form integrators.
+  constexpr
   auto operator*(const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
@@ -916,8 +916,8 @@ namespace Rodin::Variational
     class CoeffDerived,
     class TrialDerived, class TrialFES,
     class TestDerived,  class TestFES>
-  constexpr
   /// @brief Product of two shape function expressions.
+  constexpr
   auto operator*(
       const FunctionBase<CoeffDerived>& coeff,
       const Dot<
@@ -942,8 +942,8 @@ namespace Rodin::Variational
     class TrialDerived, class TrialFES,
     class TestDerived,  class TestFES,
     class CoeffDerived>
-  constexpr
   /// @brief Product of two shape function expressions.
+  constexpr
   auto operator*(
       const Dot<
         ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
