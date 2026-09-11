@@ -522,6 +522,7 @@ namespace Rodin::Variational
           m_bfs(std::move(other.m_bfs))
       {}
 
+      /// @brief Copy assignment.
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)

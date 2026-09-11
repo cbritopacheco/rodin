@@ -188,12 +188,14 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
+      /// @brief Sets the name of the field.
       TrialFunctionReference& setName(const std::string& name)
       {
         m_ref.get().setName(name);
         return *this;
       }
 
+      /// @brief Gets the name of the field.
       Optional<StringView> getName() const override
       {
         return m_ref.get().getName();
@@ -381,12 +383,14 @@ namespace Rodin::Variational
         return m_gf;
       }
 
+      /// @brief Sets the name of the field.
       TrialFunction& setName(const std::string& name)
       {
         m_gf.setName(name);
         return *this;
       }
 
+      /// @brief Gets the name of the field.
       Optional<StringView> getName() const override
       {
         return m_gf.getName();

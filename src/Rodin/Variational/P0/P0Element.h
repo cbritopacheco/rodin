@@ -134,6 +134,7 @@ namespace Rodin::Variational
           /// @brief Copy constructor.
           LinearForm(const LinearForm&) = default;
 
+          /// @brief Applies the functional to a callable.
           template <class T>
           ScalarType operator()(const T& v) const
           {
@@ -201,6 +202,7 @@ namespace Rodin::Variational
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
+          /// @brief Evaluates at a point on the reference element.
           ReturnType operator()(const Math::SpatialVector<Real>&) const
           {
             return 1;
@@ -208,6 +210,7 @@ namespace Rodin::Variational
 
           template <size_t Order>
           constexpr
+          /// @brief Gets the derivative of the basis function.
           DerivativeFunction<Order> getDerivative(size_t) const
           {
             return DerivativeFunction<Order>();
@@ -246,12 +249,14 @@ namespace Rodin::Variational
         return 1;
       }
 
+      /// @brief Gets the node of a local degree of freedom.
       const Math::SpatialVector<Real>& getNode(size_t i) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
       constexpr
+      /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
       LinearForm getLinearForm(size_t) const
       {
         return LinearForm(this->getGeometry());
@@ -328,9 +333,11 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           LinearForm(const LinearForm&) = default;
 
           constexpr
+          /// @brief Move constructor.
           LinearForm(LinearForm&&) = default;
 
           /**
@@ -389,6 +396,7 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
 
               /**
@@ -419,9 +427,11 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
+          /// @brief Move constructor.
           BasisFunction(BasisFunction&&) = default;
 
           /**
@@ -531,6 +541,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the number of degrees of freedom of the element.
       size_t getCount() const
       {
         // One DOF per vector component (all share the same barycenter)
@@ -538,6 +549,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
       const auto& getLinearForm(size_t local) const
       {
         return m_lfs[local];
@@ -551,11 +563,13 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the node of a local degree of freedom.
       const Math::SpatialVector<Real>& getNode(size_t local) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
+      /// @brief Evaluates the integrand into the output argument.
       template <class Coefficient>
       constexpr void evaluate(
         RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint&) const

@@ -67,6 +67,7 @@ namespace Rodin::Variational
       ShapeFunction() = delete;
 
       constexpr
+      /// @brief Constructs the shape function over a finite element space.
       explicit ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)

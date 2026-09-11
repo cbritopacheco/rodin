@@ -68,6 +68,7 @@ namespace Rodin::Variational
             return geom == o.geom && vdim == o.vdim;
           }
 
+          /// @brief Resets the key, invalidating the cached entry.
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;
@@ -85,6 +86,7 @@ namespace Rodin::Variational
       ShapeFunction() = delete;
 
       constexpr
+      /// @brief Constructs the shape function over a finite element space.
       ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)

@@ -113,6 +113,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
+      /// @brief Gets the topological dimension.
       size_t getDimension() const
       {
         return m_sdim;

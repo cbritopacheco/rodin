@@ -250,6 +250,7 @@ namespace Rodin::Variational
                 && qp   == o.qp;
           }
 
+          /// @brief Resets the key, invalidating the cached entry.
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;

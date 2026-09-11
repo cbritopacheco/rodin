@@ -854,6 +854,7 @@ namespace Rodin::Variational
             : m_value(value.copy())
           {}
 
+          /// @brief Copy constructor.
           Defect(const Defect& other)
             : m_value(other.m_value->copy())
           {}

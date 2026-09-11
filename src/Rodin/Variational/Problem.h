@@ -1073,6 +1073,7 @@ namespace Rodin::Variational
           m_axb(std::move(other.m_axb))
       {}
 
+      /// @brief Copy assignment.
       Problem& operator=(const Problem& other)
       {
         if (this != &other)

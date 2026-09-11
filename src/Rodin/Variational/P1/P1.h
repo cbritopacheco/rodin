@@ -117,13 +117,16 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pullback of a function on a polytope.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pullback(const Pullback&) = default;
 
+          /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -155,9 +158,11 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
           constexpr
+          /// @brief Evaluates at a geometric point.
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
@@ -500,13 +505,16 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pullback of a function on a polytope.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pullback(const Pullback&) = default;
 
+          /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -536,9 +544,11 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
           constexpr
+          /// @brief Evaluates at a geometric point.
           auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
@@ -615,6 +625,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the finite element attached to a polytope.
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto& g = getMesh().getGeometry(d, i);
@@ -728,6 +739,7 @@ namespace Rodin::Variational
         return p(q) + r * m_mesh.get().getVertexCount();
       }
 
+      /// @brief Gets the pullback of a callable on a polytope.
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
@@ -736,6 +748,7 @@ namespace Rodin::Variational
         return Pullback<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
+      /// @brief Gets the pushforward of a callable on a polytope.
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {

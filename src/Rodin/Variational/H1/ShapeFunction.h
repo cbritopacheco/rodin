@@ -73,6 +73,7 @@ namespace Rodin::Variational
             return geom == o.geom && qf == o.qf && qp == o.qp;
           }
 
+          /// @brief Resets the key, invalidating the cached entry.
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;
@@ -91,6 +92,7 @@ namespace Rodin::Variational
       ShapeFunction() = delete;
 
       constexpr
+      /// @brief Constructs the shape function over a finite element space.
       ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
@@ -262,6 +264,7 @@ namespace Rodin::Variational
             return geom == o.geom && qf == o.qf && qp == o.qp && vdim == o.vdim;
           }
 
+          /// @brief Resets the key, invalidating the cached entry.
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;
@@ -281,6 +284,7 @@ namespace Rodin::Variational
       ShapeFunction() = delete;
 
       constexpr
+      /// @brief Constructs the shape function over a finite element space.
       ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)

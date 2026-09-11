@@ -287,6 +287,7 @@ namespace Rodin::Variational
         basis = pA * pB * pC * scaleB * scaleC;
       }
 
+      /// @brief Gets the gradient of the basis function.
       template <size_t P, size_t Q, size_t R>
       static constexpr void getGradient(Real& dpsi_da,
                                         Real& dpsi_db,

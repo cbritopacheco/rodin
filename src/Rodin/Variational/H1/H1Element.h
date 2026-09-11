@@ -173,6 +173,7 @@ namespace Rodin::Variational
           return phi[qp * ndof + a];
         }
 
+        /// @brief Gets the derivative of the basis function.
         template <size_t Order>
         const Scalar& getDerivative(size_t qp, size_t a, size_t i) const noexcept
         {
@@ -194,6 +195,7 @@ namespace Rodin::Variational
           }
         }
 
+        /// @brief Gets the gradient of the basis function.
         std::span<const Scalar> getGradient(size_t qp, size_t a) const noexcept
         {
           return std::span<const Scalar>(&dphi[(qp * ndof + a) * dim], dim);
@@ -875,11 +877,14 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           LinearForm(const LinearForm&) = default;
 
           constexpr
+          /// @brief Move constructor.
           LinearForm(LinearForm&&) = default;
 
+          /// @brief Applies the functional to a callable.
           template <class T>
           ScalarType operator()(const T& v) const
           {
@@ -925,6 +930,7 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               DerivativeFunction(const DerivativeFunction&) = default;
 
               constexpr
@@ -934,6 +940,7 @@ namespace Rodin::Variational
               }
 
               constexpr
+              /// @brief Evaluates at a point on the reference element.
               Scalar operator()(const Math::SpatialPoint& rc) const
               {
                 if constexpr (Order == 0)
@@ -984,11 +991,14 @@ namespace Rodin::Variational
               {}
 
               constexpr
+              /// @brief Copy constructor.
               JacobianFunction(const JacobianFunction&) = default;
 
               constexpr
+              /// @brief Move constructor.
               JacobianFunction(JacobianFunction&&) = default;
 
+              /// @brief Evaluates at a point on the reference element.
               ReturnType operator()(const Math::SpatialPoint& r) const
               {
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
@@ -1013,11 +1023,14 @@ namespace Rodin::Variational
           {}
 
           constexpr
+          /// @brief Copy constructor.
           BasisFunction(const BasisFunction&) = default;
 
           constexpr
+          /// @brief Move constructor.
           BasisFunction(BasisFunction&&) = default;
 
+          /// @brief Evaluates at a point on the reference element.
           ReturnType operator()(const Math::SpatialPoint& rc) const
           {
             ReturnType out(static_cast<std::uint8_t>(m_vdim));
@@ -1029,12 +1042,14 @@ namespace Rodin::Variational
 
           template <size_t Order>
           constexpr
+          /// @brief Gets the derivative of the basis function.
           DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
             return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
           }
 
           constexpr
+          /// @brief Gets the Jacobian of the basis function.
           const JacobianFunction& getJacobian() const
           {
             return m_jac;
@@ -1099,6 +1114,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the number of degrees of freedom of the element.
       size_t getCount() const
       {
         switch (this->getGeometry())
@@ -1125,6 +1141,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
       const LinearForm& getLinearForm(size_t local) const
       {
         return m_lfs[local];
@@ -1138,11 +1155,13 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the node of a local degree of freedom.
       const Math::SpatialPoint& getNode(size_t local) const
       {
         return H1Element<K, ScalarType>::getNodes(this->getGeometry())[local / m_vdim];
       }
 
+      /// @brief Evaluates the integrand into the output argument.
       template <class Coefficient>
       constexpr void evaluate(
         RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const

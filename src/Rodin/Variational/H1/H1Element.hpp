@@ -163,6 +163,7 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the derivative of the basis function.
       static Real getDerivative(size_t n, size_t i, Real x)
       {
         if (n == 0)
@@ -204,6 +205,7 @@ namespace Rodin::Variational
           BernsteinPyramid<K>::getBasis(n, j, b) * BernsteinPyramid<K>::getBasis(K, k, z);
       }
 
+      /// @brief Gets the derivative of the basis function.
       static Real getDerivative(size_t mode, size_t deriv, const Math::SpatialPoint& r)
       {
         size_t i, j, k;

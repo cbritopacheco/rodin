@@ -189,12 +189,14 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       constexpr
+      /// @brief Evaluates at a geometric point.
       auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
       constexpr
+      /// @brief Evaluates at an integration point.
       auto operator()(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
@@ -215,18 +217,21 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the first component.
       auto x() const
       {
         return m_ref.get().x();
       }
 
       constexpr
+      /// @brief Gets the second component.
       auto y() const
       {
         return m_ref.get().y();
       }
 
       constexpr
+      /// @brief Gets the third component.
       auto z() const
       {
         return m_ref.get().z();
@@ -234,6 +239,7 @@ namespace Rodin::Variational
 
       template <class DataType>
       constexpr
+      /// @brief Sets the degree-of-freedom data.
       decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
@@ -256,6 +262,7 @@ namespace Rodin::Variational
       }
 
       constexpr
+      /// @brief Gets the number of degrees of freedom.
       size_t getSize() const
       {
         return m_ref.get().getSize();

@@ -253,6 +253,7 @@ namespace Rodin::Variational
                 && geom == o.geom && transOrder == o.transOrder;
           }
 
+          /// @brief Resets the key, invalidating the cached entry.
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;
@@ -285,6 +286,7 @@ namespace Rodin::Variational
             return qf == o.qf && qp == o.qp;
           }
 
+          /// @brief Resets the key, invalidating the cached entry.
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;
