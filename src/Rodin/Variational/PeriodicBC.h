@@ -72,6 +72,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Degree-of-freedom index container type.
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /**
@@ -140,6 +141,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Degree-of-freedom index container type.
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /// Parent class

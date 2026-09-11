@@ -154,6 +154,7 @@ namespace Rodin::Variational
       {
         size_t nqp  = 0;
         size_t ndof = 0;
+        /// @brief Spatial dimension.
         size_t dim  = 0;
 
         // qp-major storage
@@ -903,6 +904,7 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
+          /// @brief Type returned by the callable.
           using ReturnType = Math::SpatialVector<ScalarType>;
 
           /**
@@ -969,6 +971,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
+              /// @brief Type returned by the callable.
               using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr

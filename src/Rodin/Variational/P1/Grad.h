@@ -203,6 +203,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P1<Scalar, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar value type.
@@ -224,13 +225,20 @@ namespace Rodin::Variational
       {
         struct CellKey
         {
+          /// @brief Mesh the cached tabulation belongs to.
           const void* mesh = nullptr;
+          /// @brief Topological dimension of the cached polytope.
           size_t d = 0;
+          /// @brief Index of the cached polytope.
           Index i = 0;
+          /// @brief Geometry of the cached polytope.
           Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          /// @brief Order of the geometric transformation.
           int transOrder = 1;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -255,10 +263,14 @@ namespace Rodin::Variational
 
         struct QpKey
         {
+          /// @brief Quadrature formula the cached tabulation belongs to.
           const QF::QuadratureFormulaBase* qf = nullptr;
+          /// @brief Index of the quadrature point.
           size_t qp = 0;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -280,7 +292,9 @@ namespace Rodin::Variational
         // Cached physical gradients \nabla_x φ_a (one per scalar basis function)
         std::vector<SpatialVectorType> grad;
 
+        /// @brief Key of the cached cell tabulation.
         CellKey cellKey;
+        /// @brief Key of the cached quadrature-point tabulation.
         QpKey qpKey;
       };
 

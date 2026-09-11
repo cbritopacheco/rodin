@@ -43,10 +43,12 @@ namespace Rodin::Variational
   template <size_t K>
   struct PyramidIndex
   {
+      /// @brief Number of entries.
       static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
       struct IJ
       {
+          /// @brief Index of the cached polytope.
           size_t i;
           size_t j;
       };

@@ -594,6 +594,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
 

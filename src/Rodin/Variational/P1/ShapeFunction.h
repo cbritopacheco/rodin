@@ -51,10 +51,14 @@ namespace Rodin::Variational
       {
         struct StructureKey
         {
+          /// @brief Geometry of the cached polytope.
           Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          /// @brief Vector dimension of the finite element space.
           size_t vdim = 1;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -75,10 +79,14 @@ namespace Rodin::Variational
 
         struct ValueKey
         {
+          /// @brief Quadrature formula the cached tabulation belongs to.
           const QF::QuadratureFormulaBase* qf = nullptr;
+          /// @brief Index of the quadrature point.
           size_t qp = 0;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -99,6 +107,7 @@ namespace Rodin::Variational
 
         // For scalar: size = nv
         // For vector: size = nv * vdim, where local = a*vdim + c
+        /// @brief Cached reference basis tabulation.
         std::vector<RangeType>  basis;
 
         // Scalar vertex basis values: size = nv

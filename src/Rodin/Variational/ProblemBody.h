@@ -449,6 +449,7 @@ namespace Rodin::Variational
       /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<VectorScalarType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<OperatorScalarType>;
 
       using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<OperatorScalarType>;

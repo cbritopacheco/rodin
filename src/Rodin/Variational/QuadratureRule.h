@@ -102,6 +102,7 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = FunctionBase<FunctionDerived>;
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;

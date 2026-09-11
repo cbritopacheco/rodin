@@ -39,6 +39,7 @@ namespace Rodin::Variational
   class GLL
   {
     public:
+      /// @brief Number of entries.
       static constexpr size_t Count = K + 1;
 
       /// Number of GLL nodes (K + 1).

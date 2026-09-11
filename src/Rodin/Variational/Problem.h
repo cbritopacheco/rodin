@@ -226,6 +226,7 @@ namespace Rodin::Variational
   class ProblemUVBase : public ProblemBase<LinearSystem>
   {
     public:
+      /// @brief Trial function type.
       using TrialFunctionType =
         U;
 
@@ -237,6 +238,7 @@ namespace Rodin::Variational
       using LinearSystemType =
         LinearSystem;
 
+      /// @brief Solver base class type.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystem>;
 
@@ -264,9 +266,11 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Scalar value type of the trial space.
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
+      /// @brief Scalar value type of the test space.
       using TestFESScalarType =
         typename FormLanguage::Traits<TestFESType>::ScalarType;
 

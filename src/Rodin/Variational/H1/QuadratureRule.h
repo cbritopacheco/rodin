@@ -61,6 +61,7 @@ namespace Rodin::Variational
       /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>, FESType, TestSpace>;
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
@@ -790,10 +791,13 @@ namespace Rodin::Variational
       /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>, TrialFESType, TrialSpace>;
 
@@ -1081,10 +1085,13 @@ namespace Rodin::Variational
       /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<
           Grad<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
@@ -1431,6 +1438,7 @@ namespace Rodin::Variational
       /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.
@@ -2257,10 +2265,13 @@ namespace Rodin::Variational
       /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
@@ -3415,6 +3426,7 @@ namespace Rodin::Variational
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
           TrialFESType, TrialSpace>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.

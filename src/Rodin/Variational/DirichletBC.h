@@ -464,19 +464,24 @@ namespace Rodin::Variational
       using ValueType =
         FunctionBase<ValueDerived>;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Range type of the finite element space.
       using FESRangeType =
         typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<ValueDOFs,
           DirichletBC>;
 
+      /// @brief Assembly backend type.
       using AssemblyType =
         DefaultAssemblyType;
 
@@ -808,16 +813,21 @@ namespace Rodin::Variational
       /// Variant DOFs type
       using DOFs = typename Parent::DOFs;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Range type of the finite element space.
       using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<IdentifiedDOFs,
           DirichletBC>;
 
+      /// @brief Assembly backend type.
       using AssemblyType = DefaultAssemblyType;
 
       class DefectBase

@@ -99,6 +99,7 @@ namespace Rodin::Variational
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 
       /// @brief Scalar value type.
@@ -304,6 +305,7 @@ namespace Rodin::Variational
       using IntegrandType =
         ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
@@ -882,8 +884,10 @@ namespace Rodin::Variational
       /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
@@ -898,6 +902,7 @@ namespace Rodin::Variational
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
@@ -1223,9 +1228,11 @@ namespace Rodin::Variational
       using LHSType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Type of the left-hand side operand.
       using LHSOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
@@ -1233,9 +1240,11 @@ namespace Rodin::Variational
       using RHSType =
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, RHSFESType, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
@@ -1494,14 +1503,17 @@ namespace Rodin::Variational
       /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
       using MultiplicandOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
@@ -1520,9 +1532,11 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, RHSFESType, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
@@ -1858,6 +1872,7 @@ namespace Rodin::Variational
       /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.
@@ -2633,9 +2648,11 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Type of the left-hand side operand.
       using LHSOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
@@ -2644,15 +2661,18 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, RHSFESType, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
@@ -2958,11 +2978,14 @@ namespace Rodin::Variational
       /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
@@ -2971,9 +2994,11 @@ namespace Rodin::Variational
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
+      /// @brief Type of the left-hand side operand.
       using LHSOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
@@ -2982,15 +3007,18 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
@@ -3353,6 +3381,7 @@ namespace Rodin::Variational
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
           TrialFESType, TrialSpace>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.
@@ -3659,6 +3688,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
+      /// @brief Cell kernel type.
       using KernelType = Kernel;
 
       /// @brief Trial finite element space type.

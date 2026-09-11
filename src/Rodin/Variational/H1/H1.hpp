@@ -89,6 +89,7 @@ namespace Rodin::Variational
 
       /** @} */
 
+      /// @brief Number of entries.
       static constexpr size_t Count =
         []()
         {

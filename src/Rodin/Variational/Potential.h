@@ -80,6 +80,7 @@ namespace Rodin::FormLanguage
       /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
 
+      /// @brief Cell kernel type.
       using KernelType = LHSType;
 
       /// @brief Operand type.
@@ -133,6 +134,7 @@ namespace Rodin::FormLanguage
         Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>,
           FES, Space>;
 
+      /// @brief Cell kernel type.
       using KernelType = LHS;
 
       /// @brief Operand type.
@@ -188,6 +190,7 @@ namespace Rodin::Variational
       /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
+      /// @brief Cell kernel type.
       using KernelType = LHSType;
 
       /// @brief Right-hand side operand type.
@@ -374,6 +377,7 @@ namespace Rodin::Variational
 
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar value type.
@@ -382,6 +386,7 @@ namespace Rodin::Variational
       /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
+      /// @brief Cell kernel type.
       using KernelType = LHS;
 
       /// @brief Right-hand side operand type.
@@ -470,6 +475,7 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
+      /// @brief Cell kernel type.
       using KernelType = Kernel;
 
       /// @brief Left-hand side operand type.

@@ -52,6 +52,7 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct ResultOf<Variational::FunctionBase<Derived>>
   {
+    /// @brief Deduced result type.
     using Type =
       std::invoke_result_t<Variational::FunctionBase<Derived>, const Geometry::Point&>;
   };
@@ -67,6 +68,7 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
+    /// @brief Deduced result type.
     using Type =
       std::invoke_result_t<Variational::ShapeFunctionBase<Derived, FES, Space>, size_t>;
   };
@@ -87,6 +89,7 @@ namespace Rodin::FormLanguage
   template <>
   struct RangeOf<Boolean>
   {
+    /// @brief Deduced result type.
     using Type =
       Boolean;
   };
@@ -97,6 +100,7 @@ namespace Rodin::FormLanguage
   template <>
   struct RangeOf<Integer>
   {
+    /// @brief Deduced result type.
     using Type =
       Integer;
   };
@@ -107,6 +111,7 @@ namespace Rodin::FormLanguage
   template <>
   struct RangeOf<Real>
   {
+    /// @brief Deduced result type.
     using Type =
       Real;
   };
@@ -117,6 +122,7 @@ namespace Rodin::FormLanguage
   template <>
   struct RangeOf<Complex>
   {
+    /// @brief Deduced result type.
     using Type =
       Complex;
   };
@@ -132,6 +138,7 @@ namespace Rodin::FormLanguage
   template <class Scalar, int Rows, int Options, int MaxRows, int MaxCols>
   struct RangeOf<Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, MaxCols>>
   {
+    /// @brief Deduced result type.
     using Type =
       Math::SpatialVector<Scalar>;
   };
@@ -139,6 +146,7 @@ namespace Rodin::FormLanguage
   template <class Scalar>
   struct RangeOf<Math::SpatialVector<Scalar>>
   {
+    /// @brief Deduced result type.
     using Type =
       Math::SpatialVector<Scalar>;
   };
@@ -147,6 +155,7 @@ namespace Rodin::FormLanguage
   template <class Scalar>
   struct RangeOf<Math::SpatialMatrix<Scalar>>
   {
+    /// @brief Deduced result type.
     using Type =
       Math::SpatialMatrix<Scalar>;
   };
@@ -163,6 +172,7 @@ namespace Rodin::FormLanguage
   template <class Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
   struct RangeOf<Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>
   {
+    /// @brief Deduced result type.
     using Type =
       Math::SpatialMatrix<Scalar>;
   };
@@ -176,6 +186,7 @@ namespace Rodin::FormLanguage
   template <class MatrixXpr>
   struct RangeOf
   {
+    /// @brief Deduced result type.
     using Type =
       std::conditional_t<
         MatrixXpr::IsVectorAtCompileTime, Math::SpatialVector<typename MatrixXpr::Scalar>,
@@ -197,6 +208,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Result type of the evaluation.
       using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+      /// @brief Deduced result type.
       using Type = typename RangeOf<std::remove_cvref_t<ResultType>>::Type;
   };
 
@@ -214,6 +226,7 @@ namespace Rodin::FormLanguage
       /// @brief Result type of the evaluation.
       using ResultType =
         typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, Space>>::Type;
+      /// @brief Deduced result type.
       using Type = typename RangeOf<std::remove_cvref_t<ResultType>>::Type;
   };
 }

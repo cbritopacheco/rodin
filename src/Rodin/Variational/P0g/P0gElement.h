@@ -86,6 +86,7 @@ namespace Rodin::Variational
     class BasisFunction
     {
     public:
+      /// @brief Type returned by the callable.
       using ReturnType = Scalar;
 
       template <size_t Order>
@@ -261,6 +262,7 @@ namespace Rodin::Variational
     class BasisFunction
     {
     public:
+      /// @brief Type returned by the callable.
       using ReturnType = RangeType;
 
       template <size_t Order>

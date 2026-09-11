@@ -329,15 +329,19 @@ namespace Rodin::Variational
       using VectorType =
         Math::Vector<ScalarType>;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<VectorType, LinearForm>;
 
+      /// @brief Assembly backend type.
       using AssemblyType =
         DefaultAssemblyType;
 

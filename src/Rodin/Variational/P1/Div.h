@@ -273,14 +273,22 @@ namespace Rodin::Variational
       {
         struct CellKey
         {
+          /// @brief Mesh the cached tabulation belongs to.
           const void* mesh = nullptr;
+          /// @brief Topological dimension of the cached polytope.
           size_t d = 0;
+          /// @brief Index of the cached polytope.
           Index i = 0;
+          /// @brief Geometry of the cached polytope.
           Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          /// @brief Order of the geometric transformation.
           int transOrder = 1;
+          /// @brief Vector dimension of the finite element space.
           size_t vdim = 0;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -305,10 +313,14 @@ namespace Rodin::Variational
 
         struct QpKey
         {
+          /// @brief Quadrature formula the cached tabulation belongs to.
           const QF::QuadratureFormulaBase* qf = nullptr;
+          /// @brief Index of the quadrature point.
           size_t qp = 0;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -329,7 +341,9 @@ namespace Rodin::Variational
         // Cached divergence of each vector basis (scalar), size = vdim * nvertices
         std::vector<ScalarType> div;
 
+        /// @brief Key of the cached cell tabulation.
         CellKey cellKey;
+        /// @brief Key of the cached quadrature-point tabulation.
         QpKey qpKey;
       };
 

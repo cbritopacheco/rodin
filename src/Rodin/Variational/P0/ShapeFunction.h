@@ -48,10 +48,14 @@ namespace Rodin::Variational
       {
         struct Key
         {
+          /// @brief Geometry of the cached polytope.
           Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          /// @brief Vector dimension of the finite element space.
           size_t vdim = 1;
+          /// @brief Whether the key holds a cached entry.
           bool valid = false;
 
+          /// @brief Tests whether the key holds a cached entry.
           explicit operator bool() const noexcept { return valid; }
 
           /// @brief Equality comparison.
@@ -69,7 +73,9 @@ namespace Rodin::Variational
           }
         };
 
+        /// @brief Cached reference basis tabulation.
         std::vector<RangeType> basis;
+        /// @brief Key identifying the cached entry.
         Key key;
       };
 

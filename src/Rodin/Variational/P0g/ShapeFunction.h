@@ -56,7 +56,9 @@ namespace Rodin::Variational
       // Cache is only instantiated/used for the vector case.
       struct VectorCache
       {
+        /// @brief Vector dimension of the finite element space.
         size_t vdim = 0;
+        /// @brief Cached reference basis tabulation.
         std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
       };
 
