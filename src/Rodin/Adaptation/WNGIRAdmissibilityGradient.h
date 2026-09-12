@@ -17,7 +17,9 @@ namespace Rodin::Adaptation::Detail
     : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename TestFunction::ScalarType;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
       WNGIRAdmissibilityGradient(const TestFunction& v, const Displacement& current,

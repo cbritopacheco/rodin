@@ -63,7 +63,7 @@ namespace Rodin::PETSc::Assembly
        */
       struct Options
       {
-        /// @brief Local row count owned by this MPI rank, or @c PETSC_DECIDE.
+          /// @brief Local row count owned by this MPI rank, or @c PETSC_DECIDE.
           PetscInt localRows;
           /// @brief Local column count owned by this MPI rank, or @c PETSC_DECIDE.
           PetscInt localCols;

@@ -15,15 +15,16 @@
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/Identifier.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
+  /// @brief Raised when an expression is combined with a foreign trial function.
   class TrialFunctionMismatchException : public Alert::Exception
   {
     public:
       /// @brief Parent class type.
       using Parent = Alert::Exception;
 
+      /// @brief Constructs the exception for the offending shape function.
       template <class UPb>
       TrialFunctionMismatchException(const UPb& uPb)
       {
@@ -50,5 +51,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

@@ -82,9 +82,9 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Coefficient data storage type.
+      /// @brief Coefficient data storage type.
       using DataType = Data;
   };
 
@@ -92,9 +92,9 @@ namespace Rodin::FormLanguage
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Coefficient data storage type.
+      /// @brief Coefficient data storage type.
       using DataType = Data;
   };
 }
@@ -138,7 +138,6 @@ namespace Rodin::Variational
    * - **Space Association**: Strong association with underlying finite element space
    */
 
-  /// @cond RODIN_DOXYGEN_INTERNAL
   template <class Derived>
   class GridFunctionBaseReference
     : public FunctionBase<GridFunctionBaseReference<Derived>>
@@ -189,42 +188,49 @@ namespace Rodin::Variational
 
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
+      /// @brief Evaluates at a geometric point.
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
+      /// @brief Evaluates at an integration point.
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
+      /// @brief Gets the first component.
       constexpr
       auto x() const
       {
         return m_ref.get().x();
       }
 
+      /// @brief Gets the second component.
       constexpr
       auto y() const
       {
         return m_ref.get().y();
       }
 
+      /// @brief Gets the third component.
       constexpr
       auto z() const
       {
@@ -232,8 +238,8 @@ namespace Rodin::Variational
       }
 
       template <class DataType>
-      constexpr
-      decltype(auto) setData(const DataType& data, size_t offset = 0)
+      /// @brief Sets the degree-of-freedom data.
+      constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
       }
@@ -247,23 +253,27 @@ namespace Rodin::Variational
         return m_ref.get().getData();
       }
 
+      /// @brief Gets the finite element space.
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return m_ref.get().getFiniteElementSpace();
       }
 
+      /// @brief Gets the number of degrees of freedom.
       constexpr
       size_t getSize() const
       {
         return m_ref.get().getSize();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
         return m_ref.get().getOrder(geom);
       }
 
+      /// @brief Creates a polymorphic copy.
       GridFunctionBaseReference* copy() const noexcept final override
       {
         return new GridFunctionBaseReference(*this);
@@ -272,7 +282,6 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const Derived> m_ref;
   };
-  /// @endcond
 
   /**
    * @brief Abstract base class for GridFunction objects.

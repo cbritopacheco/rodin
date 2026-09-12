@@ -46,35 +46,37 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Derivative over a shape function: exposes the shape
+  /// function space, the finite element space, the scalar type and the operand type.
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Derivative<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Shape function space the expression belongs to, trial or test.
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
     /// @brief Finite element space type.
-    using FESType = FES;
+      using FESType = FES;
     /// @brief Scalar value type.
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
     /// @brief Operand type.
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
-/**
- * @defgroup DerivativeSpecializations Derivative Template Specializations
- * @brief Template specializations of the Derivative class.
- * @see @ref Derivative
- *
- * | Specialization | Description |
- * |----------------|-------------|
- * | @ref Derivative "Derivative<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Directional derivative of an H1 shape function. |
- * | @ref Derivative "Derivative<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Directional derivative of a P1 grid function. |
- */
-
 namespace Rodin::Variational
 {
+  /**
+   * @defgroup DerivativeSpecializations Derivative Template Specializations
+   * @brief Template specializations of the Derivative class.
+   * @see @ref Derivative
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Derivative "Derivative<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Directional derivative of an H1 shape function. |
+   * | @ref Derivative "Derivative<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Directional derivative of a P1 grid function. |
+   */
+
   /**
    * @ingroup RodinVariational
    * @brief Base class for directional derivative operators.
@@ -89,6 +91,7 @@ namespace Rodin::Variational
   class DerivativeBase;
 
   /**
+   * @brief CRTP base for the partial derivative of a grid function.
    * @ingroup GradSpecializations
    */
   template <class FES, class Data, class Derived>
@@ -109,6 +112,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
+      /// @brief Constructs the expression from its operand.
       DerivativeBase(const OperandType& u)
         : m_u(u)
       {
@@ -131,6 +135,7 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the topological dimension.
       constexpr
       size_t getDimension() const
       {
@@ -219,6 +224,7 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /// @brief Interpolates at an integration point.
       constexpr
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
@@ -228,6 +234,7 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
@@ -246,6 +253,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
   };
 
+  /// @brief Partial derivative of a shape function.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>
   class Derivative<ShapeFunction<NestedDerived, FES, SpaceType>> final
     : public ShapeFunctionBase<Derivative<ShapeFunction<NestedDerived, FES, SpaceType>>>
@@ -253,6 +261,7 @@ namespace Rodin::Variational
     public:
       /// Finite element space type
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar value type.
@@ -264,42 +273,49 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = ShapeFunctionBase<Derivative<OperandType>, FESType, Space>;
 
+      /// @brief Constructs the partial derivative of an operand along a direction.
       Derivative(size_t i, const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_i(i),
           m_u(u)
       {}
 
+      /// @brief Copy constructor.
       Derivative(const Derivative& other)
         : Parent(other),
           m_i(other.m_i),
           m_u(other.m_u)
       {}
 
+      /// @brief Move constructor.
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_i(other.m_i),
           m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -322,6 +338,7 @@ namespace Rodin::Variational
       //   return *this;
       // }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       decltype(auto) getBasis(size_t local) const
       {
         return m_gradients[local](m_i);
@@ -341,6 +358,7 @@ namespace Rodin::Variational
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };
 
+  /// @brief Deduction guide for @c Derivative.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>
   Derivative(size_t i, const ShapeFunction<NestedDerived, FES, SpaceType>& u)
     -> Derivative<ShapeFunction<NestedDerived, FES, SpaceType>>;
@@ -394,5 +412,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

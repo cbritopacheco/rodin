@@ -29,14 +29,16 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c UnaryMinus over a shape function: exposes the finite
+  /// element space and the shape function space.
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
@@ -81,23 +83,27 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<UnaryMinus<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       constexpr
       UnaryMinus(const OperandType& op)
         : m_op(op.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
@@ -121,6 +127,7 @@ namespace Rodin::Variational
           return -v;
       }
 
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       constexpr
       UnaryMinus& traceOf(Geometry::Attribute attr)
       {
@@ -129,6 +136,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       constexpr
       UnaryMinus& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -137,6 +145,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -187,6 +196,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -195,30 +205,35 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
+      /// @brief Constructs the expression from its operand.
       constexpr
       UnaryMinus(const OperandType& op)
         : Parent(op.getFiniteElementSpace()),
           m_operand(op.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
@@ -236,12 +251,14 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       UnaryMinus& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
@@ -262,11 +279,13 @@ namespace Rodin::Variational
           return -v;
       }
 
+      /// @brief Gets the finite element space.
       const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -319,37 +338,44 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
         : Parent(op),
           m_op(op.copy())
       {}
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return getOperand().getRegion();
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return getOperand().getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);
@@ -414,16 +440,19 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBaseType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
       {
         for (const auto& p : op)
           add(UnaryMinus<LinearFormIntegratorBaseType>(p));
       }
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other))
       {}
@@ -471,37 +500,44 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
         : Parent(op),
           m_op(op.copy())
       {}
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other),
           m_op(other.m_op->copy())
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         assert(m_op);
         return *m_op;
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return getOperand().getRegion();
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return getOperand().getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       UnaryMinus& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_op->setPolytope(polytope);
@@ -560,6 +596,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -571,16 +608,19 @@ namespace Rodin::Variational
       using Parent =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief Constructs the expression from its operand.
       UnaryMinus(const OperandType& op)
       {
         for (const auto& p : op)
           add(UnaryMinus<LocalBilinearFormIntegratorBaseType>(p));
       }
 
+      /// @brief Copy constructor.
       UnaryMinus(const UnaryMinus& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       UnaryMinus(UnaryMinus&& other)
         : Parent(std::move(other))
       {}
@@ -612,5 +652,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

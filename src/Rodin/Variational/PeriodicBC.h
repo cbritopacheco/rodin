@@ -52,7 +52,6 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -73,6 +72,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Degree-of-freedom index container type.
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /**
@@ -141,16 +141,19 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Degree-of-freedom index container type.
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /// Parent class
       using Parent = PeriodicBCBase<ScalarType>;
 
+      /// @brief Constructs the periodic boundary condition from an identification map.
       PeriodicBC(const OperandType& u, const IndexMap<IndexSet>& adjacency)
         : m_u(u),
           m_adjacency(adjacency)
       {}
 
+      /// @brief Constructs the periodic boundary condition from an identification map.
       PeriodicBC(const OperandType& u, IndexMap<IndexSet>&& adjacency)
         : m_u(u),
           m_adjacency(std::move(adjacency))
@@ -194,6 +197,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Gets the degree-of-freedom identification map.
       const IndexMap<IndexSet>& getAdjacency() const
       {
         return m_adjacency;
@@ -236,5 +240,4 @@ namespace Rodin::Variational
     -> PeriodicBC<TrialFunction<Solution, FES>, IndexMap<IndexSet>>;
 }
 
-/// @endcond
 #endif

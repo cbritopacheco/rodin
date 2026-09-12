@@ -31,35 +31,39 @@
 #include "Rodin/Variational/Derivative.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
+  /// element space, the operand type and the range type.
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 
+  /// @brief Type traits for @c Derivative over a shape function: exposes the finite
+  /// element space, the shape function space, the operand type and the range type.
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Derivative<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 }
@@ -84,6 +88,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
@@ -95,6 +100,7 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the derivative of an @f$ \mathbb{P}^1 @f$ function
        * @f$ u @f$.
+       * @param[in] i Index of the direction the derivative is taken along
        * @param[in] u P1 GridFunction
        */
       Derivative(size_t i, const OperandType& u)
@@ -118,11 +124,13 @@ namespace Rodin::Variational
           m_i(std::move(other.m_i))
       {}
 
+      /// @brief Interpolates at an integration point.
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -197,6 +205,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Creates a polymorphic copy.
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);
@@ -215,5 +224,4 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<P1<Range, Mesh>, Data>>;
 }
 
-/// @endcond
 #endif

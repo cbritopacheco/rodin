@@ -19,14 +19,16 @@
 
 #include "Function.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c ScalarFunctionBase: exposes the scalar type and the
+  /// derived type.
   template <class Scalar, class Derived>
   struct Traits<Variational::ScalarFunctionBase<Scalar, Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Derived CRTP function type.
       using DerivedType = Derived;
   };
 }
@@ -107,6 +109,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -116,6 +119,7 @@ namespace Rodin::Variational
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
@@ -131,5 +135,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

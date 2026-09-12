@@ -22,35 +22,39 @@
 #include "VectorFunction.h"
 #include "IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
+  /// space, the operand type and the range type.
   template <class FES, class Data>
   struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType =
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 
+  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
+  /// space, the shape function space, the operand type and the range type.
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType =
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
@@ -270,6 +274,7 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /// @brief Interpolates at an integration point.
       constexpr
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
@@ -289,6 +294,7 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -323,5 +329,4 @@ namespace Rodin::Variational
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

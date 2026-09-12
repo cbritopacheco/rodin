@@ -27,31 +27,40 @@
 
 #include "P0gElement.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0g<Number, Mesh>>
   {
-    using MeshType    = Mesh;
-    using ScalarType  = Number;
-    using RangeType   = ScalarType;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
+    /// @brief Range (evaluation value) type.
+      using RangeType = ScalarType;
     /// @brief Execution context type.
-    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     /// @brief Finite element type.
-    using ElementType = Variational::P0gElement<RangeType>;
+      using ElementType = Variational::P0gElement<RangeType>;
   };
 
+  /// @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0g<Math::SpatialVector<Number>, Mesh>>
   {
-    using MeshType    = Mesh;
-    using ScalarType  = Number;
-    using RangeType   = Math::SpatialVector<ScalarType>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Math::SpatialVector<ScalarType>;
     /// @brief Execution context type.
-    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     /// @brief Finite element type.
-    using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
+      using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -71,6 +80,7 @@ namespace Rodin::Variational
   // --------------------------------------------------------------------------
   // Scalar P0g<Real, Mesh<Local>>
   // --------------------------------------------------------------------------
+  /// @brief Cellwise-constant scalar finite element space with a global basis.
   template <>
   class P0g<Real, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
@@ -78,27 +88,35 @@ namespace Rodin::Variational
         P0g<Real, Geometry::Mesh<Context::Local>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType  = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType   = ScalarType;
       /// @brief Execution context type.
       using ContextType = Context::Local;
+      /// @brief Mesh type.
       using MeshType    = Geometry::Mesh<ContextType>;
       /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
+      /// @brief Parent class type.
       using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
 
+      /// @brief Pullback of a P0g function to the reference element.
       template <class Callable>
       class Pullback :
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pullback of a function on a polytope.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -110,18 +128,22 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Pushforward of a P0g function to the physical element.
       template <class Callable>
       class Pushforward :
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pushforward of a function.
           template <class Function>
           explicit Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Evaluates at a geometric point.
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -132,15 +154,18 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Constructs the P0g from the given arguments.
       explicit P0g(const MeshType& mesh)
         : m_mesh(mesh)
       {}
 
+      /// @brief Copy constructor.
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh)
       {}
 
+      /// @brief Move constructor.
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh))
@@ -148,6 +173,7 @@ namespace Rodin::Variational
 
       ~P0g() override = default;
 
+      /// @brief Copy assignment.
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -158,6 +184,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       P0g& operator=(P0g&& other)
       {
         if (this != &other)
@@ -183,6 +210,7 @@ namespace Rodin::Variational
         return m_mesh.get();
       }
 
+      /// @brief Gets the finite element attached to a polytope.
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto g = getMesh().getGeometry(d, i);
@@ -223,6 +251,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Gets the pullback of a callable on a polytope.
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
@@ -231,6 +260,7 @@ namespace Rodin::Variational
         return Pullback<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
+      /// @brief Gets the pushforward of a callable on a polytope.
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {
@@ -244,6 +274,7 @@ namespace Rodin::Variational
   // --------------------------------------------------------------------------
   // Vector P0g<Math::SpatialVector<Real>, Mesh<Local>>
   // --------------------------------------------------------------------------
+  /// @brief Cellwise-constant vector-valued finite element space with a global basis.
   template <>
   class P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
@@ -251,27 +282,35 @@ namespace Rodin::Variational
         P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType  = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType   = Math::SpatialVector<Real>;
       /// @brief Execution context type.
       using ContextType = Context::Local;
+      /// @brief Mesh type.
       using MeshType    = Geometry::Mesh<ContextType>;
       /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
+      /// @brief Parent class type.
       using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
 
+      /// @brief Pullback of a vector-valued P0g function to the reference element.
       template <class Callable>
       class Pullback :
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pullback of a function on a polytope.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -283,18 +322,22 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Pushforward of a vector-valued P0g function to the physical element.
       template <class Callable>
       class Pushforward :
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pushforward of a function.
           template <class Function>
           explicit Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Evaluates at a geometric point.
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -305,6 +348,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Constructs the P0g from the given arguments.
       explicit P0g(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
@@ -314,11 +358,13 @@ namespace Rodin::Variational
           m_dofs[k] = static_cast<Index>(k);
       }
 
+      /// @brief Constructs the P0g from the given arguments.
       template <size_t VDim>
       explicit P0g(std::integral_constant<size_t, VDim>, const MeshType& mesh)
         : P0g(mesh, VDim)
       {}
 
+      /// @brief Copy constructor.
       P0g(const P0g& other)
         : Parent(other),
           m_dofs(other.m_dofs),
@@ -326,6 +372,7 @@ namespace Rodin::Variational
           m_vdim(other.m_vdim)
       {}
 
+      /// @brief Move constructor.
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_dofs(std::move(other.m_dofs)),
@@ -335,6 +382,7 @@ namespace Rodin::Variational
 
       ~P0g() override = default;
 
+      /// @brief Copy assignment.
       P0g& operator=(const P0g& other)
       {
         Parent::operator=(other);
@@ -347,6 +395,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       P0g& operator=(P0g&& other)
       {
         Parent::operator=(std::move(other));
@@ -365,6 +414,7 @@ namespace Rodin::Variational
 
       const MeshType& getMesh() const override { return m_mesh.get(); }
 
+      /// @brief Gets the finite element attached to a polytope.
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto g = getMesh().getGeometry(d, i);
@@ -406,6 +456,7 @@ namespace Rodin::Variational
         return local;
       }
 
+      /// @brief Gets the pullback of a callable on a polytope.
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
@@ -414,6 +465,7 @@ namespace Rodin::Variational
         return Pullback<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
+      /// @brief Gets the pushforward of a callable on a polytope.
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {
@@ -427,20 +479,23 @@ namespace Rodin::Variational
   };
 
   // CTAD (scalar)
+  /// @brief Deduction guide for @c P0g.
   template <class Context>
   P0g(const Geometry::Mesh<Context>&) -> P0g<Real, Geometry::Mesh<Context>>;
 
   // Aliases (scalar spaces)
+  /// @brief Cellwise-constant real space with a global basis.
   template <class Mesh>
   using RealP0g = P0g<Real, Mesh>;
 
+  /// @brief Cellwise-constant complex space with a global basis.
   template <class Mesh>
   using ComplexP0g = P0g<Complex, Mesh>;
 
   // Aliases (vector spaces)
+  /// @brief Cellwise-constant vector-valued space with a global basis.
   template <class Mesh>
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }
 
-/// @endcond
 #endif

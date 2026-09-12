@@ -24,7 +24,6 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Operand, class Derived>
@@ -33,6 +32,7 @@ namespace Rodin::Variational
   // ---------------------------------------------------------------------------
   // Grad of a GridFunction in P0g
   // ---------------------------------------------------------------------------
+  /// @brief Gradient of a P0g grid function.
   template <class Scalar, class Mesh, class Data>
   class Grad<GridFunction<P0g<Scalar, Mesh>, Data>> final
     : public GradBase<GridFunction<P0g<Scalar, Mesh>, Data>, Grad<GridFunction<P0g<Scalar, Mesh>, Data>>>
@@ -45,19 +45,23 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Grad(const OperandType& u)
         : Parent(u)
       {}
 
+      /// @brief Copy constructor.
       Grad(const Grad& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Grad(Grad&& other)
         : Parent(std::move(other))
       {}
@@ -85,6 +89,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Creates a polymorphic copy.
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
@@ -94,6 +99,7 @@ namespace Rodin::Variational
   // ---------------------------------------------------------------------------
   // Grad of a ShapeFunction in P0g
   // ---------------------------------------------------------------------------
+  /// @brief Gradient of a P0g shape function.
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
   class Grad<ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, SpaceType>> final
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, SpaceType>>, P0g<Scalar, Mesh>, SpaceType>
@@ -101,6 +107,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Scalar, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Operand type.
@@ -108,35 +115,41 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
           m_ip(nullptr)
       {}
 
+      /// @brief Move constructor.
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_ip(std::exchange(other.m_ip, nullptr))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -144,6 +157,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // Keep operand aligned (even though basis is constant).
@@ -182,6 +196,7 @@ namespace Rodin::Variational
         return m_zero;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -202,5 +217,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

@@ -23,18 +23,20 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c TrialFunction: exposes the finite element space, the shape
+  /// function space and the solution type.
   template <class Solution, class FES>
   struct Traits<Variational::TrialFunction<Solution, FES>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TrialSpace;
 
-    /// @brief Solution vector type.
+      /// @brief Solution vector type.
       using SolutionType = Solution;
   };
 }
@@ -109,6 +111,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_ref.get().getIntegrationPoint();
@@ -185,12 +188,14 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
+      /// @brief Sets the name of the field.
       TrialFunctionReference& setName(const std::string& name)
       {
         m_ref.get().setName(name);
         return *this;
       }
 
+      /// @brief Gets the name of the field.
       Optional<StringView> getName() const override
       {
         return m_ref.get().getName();
@@ -378,12 +383,14 @@ namespace Rodin::Variational
         return m_gf;
       }
 
+      /// @brief Sets the name of the field.
       TrialFunction& setName(const std::string& name)
       {
         m_gf.setName(name);
         return *this;
       }
 
+      /// @brief Gets the name of the field.
       Optional<StringView> getName() const override
       {
         return m_gf.getName();
@@ -413,5 +420,4 @@ namespace Rodin::Variational
         GridFunction<FES, Math::Vector<
           typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
 }
-/// @endcond
 #endif

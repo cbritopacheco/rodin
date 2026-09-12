@@ -35,15 +35,15 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c P0gElement: exposes the scalar type and the range type.
   template <class Range>
   struct Traits<Variational::P0gElement<Range>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
   };
 }
@@ -66,12 +66,16 @@ namespace Rodin::Variational
     /// @brief Range (evaluation value) type.
     using RangeType = Scalar;
 
+    /// @brief Degree-of-freedom functional of the P0g element.
     class LinearForm
     {
     public:
+      /// @brief Constructs the LinearForm from the given arguments.
       constexpr explicit LinearForm(G g) : m_g(g) {}
+      /// @brief Copy constructor.
       constexpr LinearForm(const LinearForm&) = default;
 
+      /// @brief Applies the functional to a callable.
       template <class T>
       constexpr ScalarType operator()(const T& v) const
       {
@@ -82,19 +86,24 @@ namespace Rodin::Variational
       const G m_g;
     };
 
+    /// @brief Basis function of the P0g element.
     class BasisFunction
     {
     public:
+      /// @brief Type returned by the callable.
       using ReturnType = Scalar;
 
+      /// @brief Derivative of a P0g basis function, identically zero.
       template <size_t Order>
       class DerivativeFunction
       {
       public:
         constexpr DerivativeFunction() = default;
 
+        /// @brief Copy constructor.
         constexpr DerivativeFunction(const DerivativeFunction&) = default;
 
+        /// @brief Evaluates at a point on the reference element.
         constexpr ReturnType operator()(const Math::SpatialVector<Real>&) const
         {
           return ReturnType(0);
@@ -103,13 +112,16 @@ namespace Rodin::Variational
 
       constexpr BasisFunction() = default;
 
+      /// @brief Copy constructor.
       constexpr BasisFunction(const BasisFunction&) = default;
 
+      /// @brief Evaluates at a point on the reference element.
       constexpr ReturnType operator()(const Math::SpatialVector<Real>&) const
       {
         return ReturnType(1);
       }
 
+      /// @brief Gets the derivative of the basis function.
       template <size_t Order>
       constexpr DerivativeFunction<Order> getDerivative(size_t) const
       {
@@ -119,16 +131,20 @@ namespace Rodin::Variational
 
     constexpr P0gElement() = default;
 
+    /// @brief Constructs the P0gElement from the given arguments.
     constexpr explicit P0gElement(G geometry)
       : Parent(geometry)
     {}
 
+    /// @brief Copy constructor.
     constexpr P0gElement(const P0gElement&) = default;
 
+    /// @brief Move constructor.
     constexpr P0gElement(P0gElement&& other)
       : Parent(std::move(other))
     {}
 
+    /// @brief Copy assignment.
     constexpr P0gElement& operator=(const P0gElement& other)
     {
       Parent::operator=(other);
@@ -137,8 +153,10 @@ namespace Rodin::Variational
 
     constexpr ~P0gElement() override = default;
 
+    /// @brief Gets the number of degrees of freedom of the element.
     constexpr size_t getCount() const { return 1; }
 
+    /// @brief Gets the node of a local degree of freedom.
     const Math::SpatialVector<Real>& getNode(size_t i) const
     {
       assert(i == 0);
@@ -194,22 +212,26 @@ namespace Rodin::Variational
       return s_null;
     }
 
+    /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
     constexpr LinearForm getLinearForm(size_t) const
     {
       return LinearForm(this->getGeometry());
     }
 
+    /// @brief Gets the basis function of a local degree of freedom.
     constexpr BasisFunction getBasis(size_t) const
     {
       return BasisFunction();
     }
 
+    /// @brief Returns the polynomial order.
     constexpr size_t getOrder() const { return 0; }
   };
 
   // ----------------------------------------------------------------------------
   // Vector P0gElement
   // ----------------------------------------------------------------------------
+  /// @brief Vector-valued cellwise-constant finite element.
   template <class Scalar>
   class P0gElement<Math::SpatialVector<Scalar>> final
     : public FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>
@@ -224,6 +246,7 @@ namespace Rodin::Variational
     /// @brief Range (evaluation value) type.
     using RangeType = Math::SpatialVector<Scalar>;
 
+    /// @brief Degree-of-freedom functional of the vector-valued P0g element.
     class LinearForm
     {
     public:
@@ -231,12 +254,15 @@ namespace Rodin::Variational
         : m_vdim(0), m_local(0), m_g(G::Point)
       {}
 
+      /// @brief Constructs the functional of a local degree of freedom.
       constexpr LinearForm(size_t vdim, size_t local, G g)
         : m_vdim(vdim), m_local(local), m_g(g)
       {}
 
+      /// @brief Copy constructor.
       constexpr LinearForm(const LinearForm&) = default;
 
+      /// @brief Applies the functional to a callable.
       template <class T>
       ScalarType operator()(const T& v) const
       {
@@ -251,18 +277,24 @@ namespace Rodin::Variational
       const G m_g;
     };
 
+    /// @brief Basis function of the vector-valued P0g element.
     class BasisFunction
     {
     public:
+      /// @brief Type returned by the callable.
       using ReturnType = RangeType;
 
+      /// @brief Derivative of a vector-valued P0g basis function, identically zero.
       template <size_t Order>
       class DerivativeFunction
       {
       public:
+        /// @brief Constructs the derivative of a local basis function.
         constexpr DerivativeFunction(size_t, size_t, size_t, size_t, G) {}
+        /// @brief Copy constructor.
         constexpr DerivativeFunction(const DerivativeFunction&) = default;
 
+        /// @brief Evaluates at a point on the reference element.
         constexpr ScalarType operator()(const Math::SpatialVector<Real>&) const
         {
           return ScalarType(0);
@@ -273,12 +305,15 @@ namespace Rodin::Variational
         : m_vdim(0), m_local(0), m_g(G::Point)
       {}
 
+      /// @brief Constructs the basis function of a local degree of freedom.
       constexpr BasisFunction(size_t vdim, size_t local, G g)
         : m_vdim(vdim), m_local(local), m_g(g)
       {}
 
+      /// @brief Copy constructor.
       constexpr BasisFunction(const BasisFunction&) = default;
 
+      /// @brief Evaluates at a point on the reference element.
       const ReturnType& operator()(const Math::SpatialVector<Real>&) const
       {
         static thread_local ReturnType s_out;
@@ -288,6 +323,7 @@ namespace Rodin::Variational
         return s_out;
       }
 
+      /// @brief Gets the derivative of the basis function.
       template <size_t Order>
       constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
       {
@@ -309,6 +345,7 @@ namespace Rodin::Variational
       : P0gElement(geometry, Geometry::Polytope::Traits(geometry).getDimension())
     {}
 
+    /// @brief Constructs the P0gElement from the given arguments.
     constexpr P0gElement(G geometry, size_t vdim)
       : Parent(geometry), m_vdim(vdim)
     {
@@ -322,6 +359,7 @@ namespace Rodin::Variational
       }
     }
 
+    /// @brief Copy constructor.
     constexpr P0gElement(const P0gElement& other)
       : Parent(other)
       , m_vdim(other.m_vdim)
@@ -329,6 +367,7 @@ namespace Rodin::Variational
       , m_bs(other.m_bs)
     {}
 
+    /// @brief Move constructor.
     constexpr P0gElement(P0gElement&& other)
       : Parent(std::move(other))
       , m_vdim(std::exchange(other.m_vdim, 0))
@@ -338,6 +377,7 @@ namespace Rodin::Variational
 
     constexpr ~P0gElement() override = default;
 
+    /// @brief Copy assignment.
     constexpr P0gElement& operator=(const P0gElement& other)
     {
       Parent::operator=(other);
@@ -347,6 +387,7 @@ namespace Rodin::Variational
       return *this;
     }
 
+    /// @brief Move assignment.
     constexpr P0gElement& operator=(P0gElement&& other)
     {
       Parent::operator=(std::move(other));
@@ -356,27 +397,32 @@ namespace Rodin::Variational
       return *this;
     }
 
+    /// @brief Gets the number of degrees of freedom of the element.
     constexpr size_t getCount() const
     {
       return m_vdim;
     }
 
+    /// @brief Gets the degree-of-freedom functional of a local degree of freedom.
     constexpr auto getLinearForm(size_t local) const
     {
       return m_lfs.at(local);
     }
 
+    /// @brief Gets the basis function of a local degree of freedom.
     constexpr BasisFunction getBasis(size_t local) const
     {
       return m_bs.at(local);
     }
 
+    /// @brief Gets the node of a local degree of freedom.
     constexpr const Math::SpatialVector<Real>& getNode(size_t local) const
     {
       // All components share the same barycentric node
       return P0gElement<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
     }
 
+    /// @brief Evaluates the integrand into the output argument.
     template <class Coefficient>
     constexpr void evaluate(
       RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint&) const
@@ -386,6 +432,7 @@ namespace Rodin::Variational
         out(component) = coefficient(component);
     }
 
+    /// @brief Returns the polynomial order.
     constexpr size_t getOrder() const { return 0; }
 
   private:
@@ -395,5 +442,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

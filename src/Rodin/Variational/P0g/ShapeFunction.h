@@ -21,9 +21,9 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
+  /// @brief Shape function expression.
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, P0g<Range, Mesh>, Space>
     : public ShapeFunctionBase<
@@ -34,10 +34,12 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Range (evaluation value) type.
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Parent class type.
@@ -47,26 +49,33 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
+      /// @brief Whether the range of the space is scalar.
       static constexpr bool IsScalarRange = std::is_same_v<RangeType, ScalarType>;
+      /// @brief Whether the range of the space is vector valued.
       static constexpr bool IsVectorRange = FormLanguage::IsVectorRange<RangeType>::Value;
 
       static_assert(IsScalarRange || IsVectorRange);
 
       // Cache is only instantiated/used for the vector case.
+      /// @brief Cached per-cell values of a vector-valued P0g shape function.
       struct VectorCache
       {
-        size_t vdim = 0;
-        std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
+        /// @brief Vector dimension of the finite element space.
+          size_t vdim = 0;
+        /// @brief Cached reference basis tabulation.
+          std::vector<RangeType> basis; // basis[c] = e_c (size vdim)
       };
 
       ShapeFunction() = delete;
 
+      /// @brief Constructs the shape function over a finite element space.
       constexpr
       explicit ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
@@ -74,6 +83,7 @@ namespace Rodin::Variational
           m_vcache(other.m_vcache)
       {}
 
+      /// @brief Move constructor.
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
@@ -81,6 +91,7 @@ namespace Rodin::Variational
           m_vcache(std::move(other.m_vcache))
       {}
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope&) const
       {
@@ -95,6 +106,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -102,6 +114,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // P0g basis does not depend on the integration point.
@@ -117,6 +130,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       constexpr
       decltype(auto) getBasis(size_t local) const
       {
@@ -135,12 +149,14 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
@@ -175,5 +191,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

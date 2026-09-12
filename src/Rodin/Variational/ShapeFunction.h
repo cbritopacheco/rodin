@@ -26,53 +26,58 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c ShapeFunctionBase: exposes the derived type, the finite
+  /// element space, the shape function space, the result type, the range type and the
+  /// scalar type.
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
-    using DerivedType = Derived;
+    /// @brief Derived CRTP function type.
+      using DerivedType = Derived;
 
     /// @brief Finite element space type.
-    using FESType = FES;
-    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+      using FESType = FES;
+    /// @brief Shape function space the expression belongs to, trial or test.
+      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-    using ResultType =
-      typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+      using ResultType =
+        typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-    using RangeType =
-      typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
+      using RangeType =
+        typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
+  /// @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
+  /// element space, the shape function space, the result type, the range type and the
+  /// scalar type.
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
-    using DerivedType = Derived;
+    /// @brief Derived CRTP function type.
+      using DerivedType = Derived;
 
     /// @brief Finite element space type.
-    using FESType = FES;
-    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+      using FESType = FES;
+    /// @brief Shape function space the expression belongs to, trial or test.
+      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
     /// @brief Result type of the evaluation.
-    using ResultType =
-      typename ResultOf<
-        Variational::ShapeFunctionBase<
-          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+      using ResultType = typename ResultOf<Variational::ShapeFunctionBase<
+        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Range (evaluation value) type.
-    using RangeType =
-      typename RangeOf<
-        Variational::ShapeFunctionBase<
-          Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
+      using RangeType = typename RangeOf<Variational::ShapeFunctionBase<
+        Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
     /// @brief Scalar value type.
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
 
@@ -99,7 +104,8 @@ namespace Rodin::Variational
   template <class Solution, class FES>
   struct IsTrialFunction<TrialFunction<Solution, FES>>
   {
-    static constexpr Boolean Value = true;
+    /// @brief Whether the trait holds.
+      static constexpr Boolean Value = true;
   };
 
   /**
@@ -117,7 +123,8 @@ namespace Rodin::Variational
   template <class FES>
   struct IsTestFunction<TestFunction<FES>>
   {
-    static constexpr Boolean Value = true;
+    /// @brief Whether the trait holds.
+      static constexpr Boolean Value = true;
   };
 
   /**
@@ -302,6 +309,7 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
 
+      /// @brief Evaluates at a geometric point, outside a quadrature loop.
       Derived& setPoint(const Geometry::Point& p)
       {
         m_pointIntegrationPoint.emplace(p);
@@ -397,5 +405,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

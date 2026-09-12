@@ -19,9 +19,9 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
+  /// @brief Shape function expression.
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, H1<K, Scalar, Mesh>, Space>
     : public ShapeFunctionBase<
@@ -32,10 +32,12 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Range (evaluation value) type.
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Parent class type.
@@ -45,51 +47,68 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
-        struct Key
-        {
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = 0;
-          bool valid = false;
-
-          explicit operator bool() const noexcept { return valid; }
-
-          bool operator==(const Key& o) const noexcept
+        /// @brief Key identifying a cached tabulation.
+          struct Key
           {
-            if (!valid || !o.valid)
-              return false;
-            return geom == o.geom && qf == o.qf && qp == o.qp;
-          }
+          /// @brief Geometry of the cached polytope.
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          /// @brief Quadrature formula the cached tabulation belongs to.
+              const QF::QuadratureFormulaBase* qf = nullptr;
+          /// @brief Index of the quadrature point.
+              size_t qp = 0;
+          /// @brief Whether the key holds a cached entry.
+              bool valid = false;
 
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            geom = Geometry::Polytope::Type::Point;
-            qf = nullptr;
-            qp = 0;
-          }
+          /// @brief Tests whether the key holds a cached entry.
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
+
+          /// @brief Equality comparison.
+              bool operator==(const Key& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return geom == o.geom && qf == o.qf && qp == o.qp;
+              }
+
+          /// @brief Resets the key, invalidating the cached entry.
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                geom = Geometry::Polytope::Type::Point;
+                qf = nullptr;
+                qp = 0;
+              }
         };
 
+        /// @brief Cached reference basis tabulation.
         std::vector<RangeType> basis;
+        /// @brief Key identifying the cached entry.
         Key key;
       };
 
       ShapeFunction() = delete;
 
+      /// @brief Constructs the shape function over a finite element space.
       constexpr
       ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_ip(nullptr)
       {}
 
+      /// @brief Move constructor.
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
@@ -97,6 +116,7 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
@@ -104,6 +124,7 @@ namespace Rodin::Variational
         return H1Element<K, ScalarType>(polytope.getGeometry()).getCount();
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -111,6 +132,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -155,6 +177,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       constexpr
       const RangeType& getBasis(size_t local) const
       {
@@ -163,12 +186,14 @@ namespace Rodin::Variational
         return m_cache.basis[local];
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -186,6 +211,7 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
+  /// @brief Shape function of a vector-valued H1 finite element space.
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>
     : public ShapeFunctionBase<
@@ -196,10 +222,12 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType; // == Scalar
+      /// @brief Range (evaluation value) type.
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;  // == Math::Vector<Scalar>
 
       /// @brief Parent class type.
@@ -211,47 +239,64 @@ namespace Rodin::Variational
 
       static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
-        struct Key
-        {
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = 0;
-          size_t vdim = 0;
-          bool valid = false;
-
-          explicit operator bool() const noexcept { return valid; }
-
-          bool operator==(const Key& o) const noexcept
+          /// @brief Key identifying a cached tabulation.
+          struct Key
           {
-            if (!valid || !o.valid)
-              return false;
-            return geom == o.geom && qf == o.qf && qp == o.qp && vdim == o.vdim;
-          }
+              /// @brief Geometry of the cached polytope.
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              /// @brief Quadrature formula the cached tabulation belongs to.
+              const QF::QuadratureFormulaBase* qf = nullptr;
+              /// @brief Index of the quadrature point.
+              size_t qp = 0;
+              /// @brief Vector dimension of the finite element space.
+              size_t vdim = 0;
+              /// @brief Whether the key holds a cached entry.
+              bool valid = false;
 
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            geom = Geometry::Polytope::Type::Point;
-            qf = nullptr;
-            qp = 0;
-            vdim = 0;
-          }
+              /// @brief Tests whether the key holds a cached entry.
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
+
+              /// @brief Equality comparison.
+              bool operator==(const Key& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return geom == o.geom && qf == o.qf && qp == o.qp && vdim == o.vdim;
+              }
+
+              /// @brief Resets the key, invalidating the cached entry.
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                geom = Geometry::Polytope::Type::Point;
+                qf = nullptr;
+                qp = 0;
+                vdim = 0;
+              }
         };
 
+        /// @brief Cached reference basis tabulation.
         std::vector<RangeType> basis;
+        /// @brief Key identifying the cached entry.
         Key key;
       };
 
       ShapeFunction() = delete;
 
+      /// @brief Constructs the shape function over a finite element space.
       constexpr
       ShapeFunction(const FESType& fes)
         : Parent(fes),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
@@ -259,6 +304,7 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
+      /// @brief Move constructor.
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
@@ -266,6 +312,7 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
@@ -275,6 +322,7 @@ namespace Rodin::Variational
         return ndofScalar * vdim;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -282,6 +330,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -334,6 +383,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       constexpr
       const RangeType& getBasis(size_t local) const
       {
@@ -342,12 +392,14 @@ namespace Rodin::Variational
         return m_cache.basis[local];
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -366,5 +418,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

@@ -26,7 +26,6 @@
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -158,6 +157,7 @@ namespace Rodin::Variational
         return v1 - v2;
       }
 
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -187,6 +187,7 @@ namespace Rodin::Variational
         return v1 - v2;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -255,6 +256,7 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Jump(const Jump& other)
         : Parent(other),
@@ -262,6 +264,7 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Jump(Jump&& other)
         : Parent(std::move(other)),
@@ -372,6 +375,7 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -396,5 +400,4 @@ namespace Rodin::Variational
     -> Jump<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

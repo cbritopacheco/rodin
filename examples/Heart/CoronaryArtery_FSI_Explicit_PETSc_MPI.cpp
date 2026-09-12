@@ -147,15 +147,15 @@ namespace
 
   struct OutletFlowLaw
   {
-  /// @brief Proximal surrogate vessel radius.
+      /// @brief Proximal surrogate vessel radius.
       Real proximalRadius = 6.e-4;
-  /// @brief Proximal surrogate vessel length.
+      /// @brief Proximal surrogate vessel length.
       Real proximalLength = 0.00075;
-  /// @brief Distal surrogate vessel radius.
+      /// @brief Distal surrogate vessel radius.
       Real distalRadius = 1e-4;
-  /// @brief Distal surrogate vessel length.
+      /// @brief Distal surrogate vessel length.
       Real distalLength = 0.0025;
-  /// @brief Array with radius and large for each branch
+      /// @brief Array with radius and large for each branch
       std::unordered_map<Attribute, GeoArtery> geometricParam{
         {7, {6.e-4, 0.0125, 3e-4, 0.0025}},
         {8, {4.e-4, 0.01, 2e-4, 0.0025}},
@@ -164,35 +164,35 @@ namespace
         {14, {6.e-4, 0.0125, 3e-4, 0.0025}},
         {15, {6.e-4, 0.0125, 3e-4, 0.0025}},
       };
-  /// @brief Pressure-drop threshold for the Poiseuille fallback.
+      /// @brief Pressure-drop threshold for the Poiseuille fallback.
       Real pressureDropTolerance = 1.0e-12;
-  /// @brief Minimum shear-rate bracket.
+      /// @brief Minimum shear-rate bracket.
       Real minShearRate = 1.0e-8;
-  /// @brief Number of RK4 substeps for the WRMS flow integral.
+      /// @brief Number of RK4 substeps for the WRMS flow integral.
       int integralSteps = 100;
-  /// @brief Maximum bracketing expansions for outlet scalar solves.
+      /// @brief Maximum bracketing expansions for outlet scalar solves.
       int maxBracketIterations = 100;
-  /// @brief Wall shear root solver absolute tolerance.
+      /// @brief Wall shear root solver absolute tolerance.
       Real shearAbsoluteTolerance = 1.0e-12;
-  /// @brief Wall shear root solver relative tolerance.
+      /// @brief Wall shear root solver relative tolerance.
       Real shearRelativeTolerance = 1.0e-10;
-  /// @brief Wall shear root solver step tolerance.
+      /// @brief Wall shear root solver step tolerance.
       Real shearStepTolerance = 1.0e-12;
-  /// @brief Wall shear root solver maximum iterations.
+      /// @brief Wall shear root solver maximum iterations.
       int shearMaxIterations = 50;
-  /// @brief Flow inversion root solver absolute tolerance.
+      /// @brief Flow inversion root solver absolute tolerance.
       Real flowAbsoluteTolerance = 1.0e-10;
-  /// @brief Flow inversion root solver relative tolerance.
+      /// @brief Flow inversion root solver relative tolerance.
       Real flowRelativeTolerance = 1.0e-9;
-  /// @brief Flow inversion root solver step tolerance.
+      /// @brief Flow inversion root solver step tolerance.
       Real flowStepTolerance = 1.0e-12;
-  /// @brief Flow inversion root solver maximum iterations.
+      /// @brief Flow inversion root solver maximum iterations.
       int flowMaxIterations = 50;
-  /// @brief Flow magnitude treated as zero in pressure-drop inversion.
+      /// @brief Flow magnitude treated as zero in pressure-drop inversion.
       Real zeroFlowTolerance = 1.0e-16;
-  /// @brief Minimum pressure-drop bracket.
+      /// @brief Minimum pressure-drop bracket.
       Real pressureDropBracketMin = 1.0;
-  /// @brief Distal capacitor bracket pressure pad.
+      /// @brief Distal capacitor bracket pressure pad.
       Real distalPressureBracketPad = 1000.0;
   };
 

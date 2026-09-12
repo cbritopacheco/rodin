@@ -15,15 +15,6 @@ src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member AnalyticVectorF
 src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member AnalyticVectorFunction(F f, std::size_t dimension) (function) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
 src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member AnalyticVectorFunction(F, std::size_t) -> AnalyticVectorFunction< F > (function) of namespace Rodin::Adaptation is not documented.
 src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member AnalyticVectorFunction(const AnalyticVectorFunction &other) (function) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member Parent (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member Parent (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member RangeType (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member RangeType (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member SpatialMatrixType (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member SpatialVectorType (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member copy() const noexcept override (function) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
 src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member getColumns() const noexcept (function) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
 src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member getDimension() const noexcept (function) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
 src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member getOrder(const Geometry::Polytope &) const noexcept (function) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
@@ -40,25 +31,13 @@ src/Rodin/Adaptation/WNGIRAdmissibility.h: warning: Member maxQRel (variable) of
 src/Rodin/Adaptation/WNGIRAdmissibility.h: warning: Member minJ (variable) of struct Rodin::Adaptation::WNGIRAdmissibilityReport is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibility.h: warning: Member wngirAdmissibilityQuadratureOrder(std::size_t feOrder) (function) of namespace Rodin::Adaptation is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Compound Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member Parent (typedef) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member WNGIRAdmissibilityGradient(const TestFunction &v, const Displacement &current, const WNGIRParameters &parameters) (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member WNGIRAdmissibilityGradient(const WNGIRAdmissibilityGradient &)=default (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member copy() const noexcept final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member getPolytope() const final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member integrate(std::size_t local) final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityGradient is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Compound Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member Parent (typedef) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member WNGIRAdmissibilityMetric(const TrialFunction &du, const TestFunction &v, const Displacement &current, const WNGIRParameters &parameters) (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member WNGIRAdmissibilityMetric(const WNGIRAdmissibilityMetric &)=default (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member copy() const noexcept final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member getPolytope() const final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
 src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member integrate(std::size_t tr, std::size_t te) final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
 src/Rodin/Adaptation/WNGIRParameters.h: warning: Compound Rodin::Adaptation::WNGIRParameters is not documented.
 src/Rodin/Adaptation/WNGIRParameters.h: warning: Member energyLineSearch (variable) of struct Rodin::Adaptation::WNGIRParameters is not documented.
 src/Rodin/Adaptation/WNGIRParameters.h: warning: Member energyStagTol (variable) of struct Rodin::Adaptation::WNGIRParameters is not documented.
@@ -94,25 +73,13 @@ src/Rodin/Adaptation/WNGIRSolver.h: warning: Member setParameters(const WNGIRPar
 src/Rodin/Adaptation/WNGIRSolver.h: warning: Member solve(const Mesh &mesh, const std::vector< Rodin::Index > &interfaceFacets, const Variational::RealFunctionBase< PhiDerived > &phi, const Variational::VectorFunctionBase< Real, GradDerived > &grad) (function) of class Rodin::Adaptation::WNGIR is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Compound Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member GradType (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member Parent (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member PhiType (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member WNGIRSurfaceForce(const PhiType &phi, const GradType &grad, const TestFunction &v, const Displacement &current, const WNGIRParameters &parameters, Real sigma2) (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member WNGIRSurfaceForce(const WNGIRSurfaceForce &other) (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member copy() const noexcept final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member getPolytope() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member integrate(std::size_t local) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceForce.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceForce is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Compound Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member GradType (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member Parent (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member PhiType (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member WNGIRSurfaceObservationMetric(const PhiType &phi, const GradType &grad, const TrialFunction &du, const TestFunction &v, const Displacement &current, const WNGIRParameters &parameters, Real sigma2) (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member WNGIRSurfaceObservationMetric(const WNGIRSurfaceObservationMetric &other) (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member copy() const noexcept final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getPolytope() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member integrate(std::size_t tr, std::size_t te) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.

@@ -43,35 +43,38 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Mult over a function expression: exposes the finite
+  /// element space, the shape function space, the scalar type, the left-hand side
+  /// operand, the right-hand side operand and the range type.
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Mult<
       Variational::FunctionBase<LHSDerived>,
       Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::FunctionBase<LHSDerived>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = std::conditional_t<
         // If
         std::is_same_v<LHSRangeType, ScalarType>,
@@ -119,6 +122,8 @@ namespace Rodin::FormLanguage
             void>>>;
   };
 
+  /// @brief Type traits for @c Mult over a shape function: exposes the finite element
+  /// space and the shape function space.
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Mult<
@@ -127,6 +132,7 @@ namespace Rodin::FormLanguage
   {
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
@@ -191,20 +197,24 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<Mult<LHSType, RHSType>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       constexpr
       Mult& traceOf(Geometry::Attribute attr)
       {
@@ -213,6 +223,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the left-hand side operand.
       constexpr
       const LHSType& getLHS() const
       {
@@ -220,6 +231,7 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       constexpr
       const RHSType& getRHS() const
       {
@@ -242,6 +254,7 @@ namespace Rodin::Variational
         return Internal::materializeProduct(product);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
@@ -340,6 +353,7 @@ namespace Rodin::Variational
 
   template <class LHSDerived>
   auto
+  /// @brief Product of two function expressions.
   operator*(const FunctionBase<LHSDerived>& lhs, const Math::Matrix<Real>& rhs)
   {
     return Mult(lhs, MatrixFunction(rhs));
@@ -347,6 +361,7 @@ namespace Rodin::Variational
 
   template <class LHSDerived>
   auto
+  /// @brief Product of two function expressions.
   operator*(const Math::Matrix<Real>& lhs, const FunctionBase<LHSDerived>& rhs)
   {
     return Mult(MatrixFunction(lhs), rhs);
@@ -370,6 +385,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Left-hand side operand type.
@@ -387,48 +403,56 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
+      /// @brief Constructs the expression from its left and right operands.
       constexpr
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getRHS().getDOFs(element);
       }
 
+      /// @brief Gets the finite element space.
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getRHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the left-hand side operand.
       constexpr const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       constexpr
       const RHSType& getRHS() const
       {
@@ -436,17 +460,20 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_rhs->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       constexpr
       auto getBasis(size_t local) const
       {
@@ -457,6 +484,7 @@ namespace Rodin::Variational
         return Internal::materializeProduct(product);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
@@ -476,30 +504,32 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Mult.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   Mult(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
     -> Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
-  operator*(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  constexpr auto
+  /// @brief Product of two shape function expressions.
+  operator*(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(lhs, rhs);
   }
 
   template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
-  operator*(const Real& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  constexpr auto
+  /// @brief Product of two shape function expressions.
+  operator*(const Real & lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(RealFunction(lhs), rhs);
   }
 
   template <class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
-  operator*(const Complex& lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+  constexpr auto
+  /// @brief Product of two shape function expressions.
+  operator*(const Complex & lhs, const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
     return Mult(ComplexFunction(lhs), rhs);
   }
@@ -522,6 +552,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Left-hand side operand type.
@@ -548,42 +579,49 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
+      /// @brief Constructs the expression from its left and right operands.
       constexpr
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
       }
 
+      /// @brief Gets the finite element space.
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the left-hand side operand.
       constexpr
       const LHSType& getLHS() const
       {
@@ -591,6 +629,7 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       constexpr
       const RHSType& getRHS() const
       {
@@ -598,17 +637,20 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_lhs->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       constexpr
       auto getBasis(size_t local) const
       {
@@ -619,6 +661,7 @@ namespace Rodin::Variational
         return Internal::materializeProduct(product);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
@@ -638,34 +681,37 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Mult.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   Mult(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
     -> Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const FunctionBase<RHSDerived>& rhs)
+  constexpr auto
+  /// @brief Product of two shape function expressions.
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
   {
     return Mult(lhs, rhs);
   }
 
   template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Real& rhs)
+  constexpr auto
+  /// @brief Product of two shape function expressions.
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Real & rhs)
   {
     return Mult(lhs, RealFunction(rhs));
   }
 
   template <class LHSDerived, class FES, ShapeFunctionSpaceType Space>
-  constexpr
-  auto
-  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Complex& rhs)
+  constexpr auto
+  /// @brief Product of two shape function expressions.
+  operator*(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs, const Complex & rhs)
   {
     return Mult(lhs, ComplexFunction(rhs));
   }
 
+  /// @brief Product expression.
   template <class LHS, class RHSNumber>
   class Mult<LHS, LocalBilinearFormIntegratorBase<RHSNumber>>
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
@@ -683,48 +729,57 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return getRHS().getRegion();
       }
 
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         return m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return m_rhs->getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       Mult& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_rhs->setPolytope(polytope);
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) override
       {
         return getLHS() * m_rhs->integrate(tr, te);
@@ -740,17 +795,20 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Mult.
   template <class Number, class RHSScalar>
   Mult(const Number&, const LocalBilinearFormIntegratorBase<RHSScalar>&)
     -> Mult<Number, LocalBilinearFormIntegratorBase<RHSScalar>>;
 
   template <class Number, class RHSScalar>
-  constexpr
-  auto operator*(const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
+  /// @brief Product of two bilinear form integrators.
+  constexpr auto operator*(
+    const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
   }
 
+  /// @brief Product expression.
   template <class LHS, class RHSNumber>
   class Mult<LHS, LinearFormIntegratorBase<RHSNumber>>
     : public LinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
@@ -768,48 +826,57 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs),
           m_lhs(lhs), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Mult(const Mult& other)
         : Parent(other),
           m_lhs(other.m_lhs), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Mult(Mult&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return m_rhs->getRegion();
       }
 
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         return m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       const Geometry::Polytope& getPolytope() const override
       {
         return m_rhs->getPolytope();
       }
 
+      /// @brief Binds the expression to a polytope.
       Mult& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_rhs->setPolytope(polytope);
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       ScalarType integrate(size_t local) override
       {
         return getLHS() * m_rhs->integrate(local);
@@ -825,13 +892,15 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Mult.
   template <class Number, class RHSScalar>
   Mult(const Number&, const LinearFormIntegratorBase<RHSScalar>&)
     -> Mult<Number, LinearFormIntegratorBase<RHSScalar>>;
 
   template <class Number, class RHSScalar>
-  constexpr
-  auto operator*(const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
+  /// @brief Product of two linear form integrators.
+  constexpr auto operator*(
+    const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
   {
     return Mult(lhs, rhs);
   }
@@ -839,16 +908,12 @@ namespace Rodin::Variational
 
 namespace Rodin::Variational
 {
-  template <
-    class CoeffDerived,
-    class TrialDerived, class TrialFES,
-    class TestDerived,  class TestFES>
-  constexpr
-  auto operator*(
-      const FunctionBase<CoeffDerived>& coeff,
-      const Dot<
-        ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
-        ShapeFunctionBase<TestDerived,  TestFES,  TestSpace>>& dot)
+  template <class CoeffDerived, class TrialDerived, class TrialFES, class TestDerived,
+    class TestFES>
+  /// @brief Product of two shape function expressions.
+  constexpr auto operator*(const FunctionBase<CoeffDerived>& coeff,
+    const Dot<ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<TestDerived, TestFES, TestSpace>>& dot)
   {
     using CoeffType = FunctionBase<CoeffDerived>;
     using CoeffRangeType = typename FormLanguage::Traits<CoeffType>::RangeType;
@@ -864,16 +929,13 @@ namespace Rodin::Variational
     return Dot(coeff * dot.getLHS(), dot.getRHS());
   }
 
-  template <
-    class TrialDerived, class TrialFES,
-    class TestDerived,  class TestFES,
+  template <class TrialDerived, class TrialFES, class TestDerived, class TestFES,
     class CoeffDerived>
-  constexpr
-  auto operator*(
-      const Dot<
-        ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
-        ShapeFunctionBase<TestDerived,  TestFES,  TestSpace>>& dot,
-      const FunctionBase<CoeffDerived>& coeff)
+  /// @brief Product of two shape function expressions.
+  constexpr auto operator*(
+    const Dot<ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<TestDerived, TestFES, TestSpace>>& dot,
+    const FunctionBase<CoeffDerived>& coeff)
   {
     using CoeffType = FunctionBase<CoeffDerived>;
     using CoeffRangeType = typename FormLanguage::Traits<CoeffType>::RangeType;
@@ -888,5 +950,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

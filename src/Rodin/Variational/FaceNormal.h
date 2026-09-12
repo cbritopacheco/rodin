@@ -124,7 +124,6 @@
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -143,6 +142,7 @@ namespace Rodin::Variational
       using ScalarType = Real;
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
       /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
@@ -160,22 +160,26 @@ namespace Rodin::Variational
         assert(m_sdim > 0);
       }
 
+      /// @brief Copy constructor.
       FaceNormal(const FaceNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim)
       {}
 
+      /// @brief Move constructor.
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim))
       {}
 
+      /// @brief Gets the topological dimension.
       constexpr
       size_t getDimension() const
       {
         return m_sdim;
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       RangeType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -331,6 +335,7 @@ namespace Rodin::Variational
         return res;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -347,5 +352,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

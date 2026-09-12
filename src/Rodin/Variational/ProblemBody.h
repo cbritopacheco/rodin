@@ -47,7 +47,6 @@
 #include "BilinearFormIntegrator.h"
 #include "Potential.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -407,6 +406,7 @@ namespace Rodin::Variational
         return m_lfs;
       }
 
+      /// @brief Gets the linear forms of the problem.
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
@@ -421,6 +421,8 @@ namespace Rodin::Variational
       LinearFormBaseListType m_lfs;
   };
 
+  /// @brief Accumulated bilinear forms, linear forms and boundary conditions of a
+  /// Problem.
   template <class Operator, class Vector, class Scalar>
   class ProblemBody : public ProblemBodyBase<Scalar>
   {
@@ -431,33 +433,44 @@ namespace Rodin::Variational
       /// @brief Assembled operator type.
       using OperatorType = Operator;
 
+      /// @brief Scalar value type of the vector.
       using VectorScalarType =
         typename FormLanguage::Traits<
           std::remove_reference_t<VectorType>>::ScalarType;
 
+      /// @brief Scalar value type of the operator.
       using OperatorScalarType =
         typename FormLanguage::Traits<
           std::remove_reference_t<OperatorType>>::ScalarType;
 
+      /// @brief Linear form base type.
       using LinearFormBaseType = LinearFormBase<VectorType>;
 
+      /// @brief Bilinear form base type.
       using BilinearFormBaseType = BilinearFormBase<OperatorType>;
 
+      /// @brief List type of linear forms.
       using LinearFormBaseListType = FormLanguage::List<LinearFormBaseType>;
 
+      /// @brief List type of bilinear forms.
       using BilinearFormBaseListType = FormLanguage::List<BilinearFormBaseType>;
 
       /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<VectorScalarType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<OperatorScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<OperatorScalarType>;
 
+      /// @brief List type of linear form integrators.
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
+      /// @brief List type of local bilinear form integrators.
       using LocalBilinearFormIntegratorBaseListType = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief List type of global bilinear form integrators.
       using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
       /// @brief Parent class type.
@@ -465,59 +478,70 @@ namespace Rodin::Variational
 
       ProblemBody() = default;
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         this->getLocalBFIs().add(bfi);
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         this->getGlobalBFIs().add(bfi);
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         this->getLocalBFIs().add(bfis);
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         this->getGlobalBFIs().add(bfis);
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const ProblemBody<OperatorType, void, Scalar>& pbo)
         : Parent(pbo)
       {
         m_bfs.add(pbo.getBFs());
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const BilinearFormBaseType& bf)
       {
         m_bfs.add(bf);
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const ProblemBody<void, VectorType, Scalar>& pbv)
         : Parent(pbv)
       {
         m_lfs.add(pbv.getLFs());
       }
 
+      /// @brief Constructs the ProblemBody from the given arguments.
       ProblemBody(const ProblemBody<void, void, Scalar>& parent)
         : Parent(parent)
       {}
 
+      /// @brief Copy constructor.
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs),
           m_bfs(other.m_bfs)
       {}
 
+      /// @brief Move constructor.
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs)),
           m_bfs(std::move(other.m_bfs))
       {}
 
+      /// @brief Copy assignment.
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -529,6 +553,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -540,21 +565,25 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the linear forms of the problem.
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
+      /// @brief Gets the bilinear forms of the problem.
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
+      /// @brief Gets the linear forms of the problem.
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
 
+      /// @brief Gets the bilinear forms of the problem.
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
@@ -570,6 +599,7 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
+  /// @brief Deduction guide for @c ProblemBody.
   template <class Scalar>
   ProblemBody(const LocalBilinearFormIntegratorBase<Scalar>&)
     -> ProblemBody<void, void, Scalar>;
@@ -1209,5 +1239,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

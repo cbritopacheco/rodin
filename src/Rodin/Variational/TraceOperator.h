@@ -47,7 +47,6 @@
 #include "ForwardDecls.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -67,17 +66,20 @@ namespace Rodin::Variational
   class TraceOperator<FunctionBase> : public FunctionBase
   {
     public:
+      /// @brief Constructs the trace of a function on a mesh attribute.
       TraceOperator(const FunctionBase& fn, Geometry::Attribute attr)
         : m_fn(fn.copy()),
           m_attr(attr)
       {}
 
+      /// @brief Copy constructor.
       TraceOperator(const TraceOperator& other)
         :  FunctionBase(other),
           m_fn(other.m_fn->copy()),
           m_attr(other.m_attr)
       {}
 
+      /// @brief Move constructor.
       TraceOperator(TraceOperator&& other)
         :  FunctionBase(std::move(other)),
           m_fn(std::move(other.m_fn)),
@@ -91,5 +93,4 @@ namespace Rodin::Variational
   // TraceOperator(const FunctionBase&, Geometry::Attribute) -> TraceOperator<FunctionBase>;
 }
 
-/// @endcond
 #endif

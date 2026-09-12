@@ -38,20 +38,25 @@
 #include "GLL.h"
 #include "LegendrePolynomial.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
+  /// @brief Indexing of the tensor-product modes on the reference pyramid.
   template <size_t K>
   struct PyramidIndex
   {
+      /// @brief Number of entries.
       static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
+      /// @brief Pair of tensor-product indices of a pyramid mode.
       struct IJ
       {
+          /// @brief Index of the cached polytope.
           size_t i;
+          /// @brief Second tensor-product index.
           size_t j;
       };
 
+      /// @brief Gets the index offset of a pyramid layer.
       static constexpr size_t getLayerOffset(size_t layer)
       {
         size_t out = 0;
@@ -63,12 +68,14 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the linear index of a tensor-product mode.
       static constexpr size_t getIndex(size_t i, size_t j, size_t k)
       {
         const size_t n = K - k + 1;
         return getLayerOffset(k) + j * n + i;
       }
 
+      /// @brief Decodes a linear index into its tensor-product indices.
       static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
       {
         size_t rem = idx;
@@ -88,6 +95,7 @@ namespace Rodin::Variational
         i = j = k = 0;
       }
 
+      /// @brief Gets the number of modes on a triangular lattice.
       static constexpr IJ getTriangleLattice(size_t alpha)
       {
         size_t pos = 0;
@@ -102,6 +110,7 @@ namespace Rodin::Variational
         return IJ{0, 0};
       }
 
+      /// @brief Gets the index of a mode on a pyramid side.
       static constexpr size_t getSideIndex(size_t local, size_t alpha)
       {
         const auto ij = getTriangleLattice(alpha);
@@ -125,10 +134,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Bernstein basis on the reference pyramid.
   template <size_t K>
   class BernsteinPyramid
   {
     public:
+      /// @brief Gets a binomial coefficient.
       static Real getBinomial(size_t n, size_t k)
       {
         if (k > n)
@@ -145,6 +156,7 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       static Real getBasis(size_t n, size_t i, Real x)
       {
         if (i > n)
@@ -158,6 +170,7 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the derivative of the basis function.
       static Real getDerivative(size_t n, size_t i, Real x)
       {
         if (n == 0)
@@ -175,10 +188,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Modal basis on the reference pyramid.
   template <size_t K>
   class PyramidModal
   {
     public:
+      /// @brief Gets the basis function of a local degree of freedom.
       static Real getBasis(size_t mode, const Math::SpatialPoint& r)
       {
         size_t i, j, k;
@@ -197,6 +212,7 @@ namespace Rodin::Variational
           BernsteinPyramid<K>::getBasis(n, j, b) * BernsteinPyramid<K>::getBasis(K, k, z);
       }
 
+      /// @brief Gets the derivative of the basis function.
       static Real getDerivative(size_t mode, size_t deriv, const Math::SpatialPoint& r)
       {
         size_t i, j, k;
@@ -228,10 +244,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Vandermonde matrix of the modal basis on the reference pyramid.
   template <size_t K>
   class VandermondePyramid
   {
     public:
+      /// @brief Gets the underlying matrix.
       static const Math::Matrix<Real>& getMatrix()
       {
         static const Math::Matrix<Real> s_vandermonde = [] {
@@ -251,6 +269,7 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
+      /// @brief Gets the inverse of the matrix.
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {
@@ -957,5 +976,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

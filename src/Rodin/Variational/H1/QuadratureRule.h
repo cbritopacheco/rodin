@@ -20,7 +20,6 @@
 
 namespace Rodin::Variational
 {
-  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int v \ dx@f$ with an H1 test shape function.
@@ -62,12 +61,14 @@ namespace Rodin::Variational
       /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>, FESType, TestSpace>;
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
@@ -76,6 +77,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -84,6 +86,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -96,6 +99,7 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -103,12 +107,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -182,11 +188,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       inline ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -204,6 +212,7 @@ namespace Rodin::Variational
       Math::Vector<ScalarType> m_vec;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t K, class NestedDerived, class Scalar, class Mesh>
   QuadratureRule(
     const ShapeFunctionBase<
@@ -285,6 +294,7 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
@@ -293,6 +303,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -301,6 +312,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -313,6 +325,7 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -320,12 +333,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -404,11 +419,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       inline ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -426,6 +443,7 @@ namespace Rodin::Variational
       Math::Vector<ScalarType> m_vec;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t K, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(
     const ShapeFunctionBase<
@@ -491,7 +509,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -509,6 +529,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -517,6 +538,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -525,6 +547,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -537,6 +560,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -544,12 +568,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -662,11 +688,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -684,6 +712,7 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(
     const Dot<
@@ -757,13 +786,18 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>, TrialFESType, TrialSpace>;
 
@@ -782,6 +816,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -790,6 +825,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -798,6 +834,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -811,6 +848,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -818,12 +856,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -930,11 +970,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -953,34 +995,25 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<
+      Mult<FunctionBase<CoefficientDerived>,
+        ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+      H1<KTest, Scalar, Mesh>, TestSpace>>&)
     -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Mult<
-              FunctionBase<CoefficientDerived>,
-              ShapeFunctionBase<
-                ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                              ShapeFunctionBase<ShapeFunction<LHSDerived,
+                                                  H1<KTrial, Scalar, Mesh>, TrialSpace>,
+                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
             H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          ShapeFunctionBase<
-            ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+        ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1037,13 +1070,18 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<
           Grad<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
@@ -1066,6 +1104,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1074,6 +1113,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1082,6 +1122,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1095,6 +1136,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1102,12 +1144,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1273,11 +1317,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1296,34 +1342,26 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
+                                            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                          H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+      H1<KTest, Scalar, Mesh>, TestSpace>>&)
     -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Mult<
-              FunctionBase<CoefficientDerived>,
-              ShapeFunctionBase<
-                Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                              ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
+                                                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
             H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          ShapeFunctionBase<
-            Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+        ShapeFunctionBase<
+          Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1376,9 +1414,12 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.
@@ -1389,6 +1430,7 @@ namespace Rodin::Variational
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, TestFESType, TestSpace>, TestFESType, TestSpace>;
 
+      /// @brief Type of the inner integrand.
       using InnerIntegrandType = Dot<LHSType, RHSType>;
       /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
@@ -1397,6 +1439,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getRHS().getLHS().getLeaf(), integrand.getRHS().getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1405,6 +1448,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1413,6 +1457,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1425,6 +1470,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1432,12 +1478,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1523,11 +1571,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1545,30 +1595,20 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  QuadratureRule(
-    const Mult<
-      FunctionBase<CoefficientDerived>,
-      Dot<
-        ShapeFunctionBase<
-          ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
+  QuadratureRule(const Mult<FunctionBase<CoefficientDerived>,
+    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-          H1<KTest, Scalar, Mesh>, TestSpace>>>&)
-    -> QuadratureRule<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          Dot<
-            ShapeFunctionBase<
-              ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>>;
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>&)
+    -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+      Dot<
+        ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1611,7 +1651,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -1631,6 +1673,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1639,6 +1682,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1647,6 +1691,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1659,6 +1704,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1666,12 +1712,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1806,11 +1854,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1830,6 +1880,7 @@ namespace Rodin::Variational
 
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(
     const Dot<ShapeFunctionBase<
                 Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
@@ -1883,7 +1934,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, TrialRange, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType = H1<KTest, TestRange, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -1903,6 +1956,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1911,6 +1965,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1919,6 +1974,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1931,6 +1987,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1938,12 +1995,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2077,11 +2136,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2101,6 +2162,7 @@ namespace Rodin::Variational
 
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(const Dot<
     ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       H1<KTrial, TrialRange, Mesh>, TrialSpace>,
@@ -2169,13 +2231,18 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
@@ -2198,6 +2265,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2206,6 +2274,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2214,6 +2283,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2227,6 +2297,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2234,12 +2305,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2472,11 +2545,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2495,34 +2570,27 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                        ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                          H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    ShapeFunctionBase<
+      Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+      H1<KTest, Scalar, Mesh>, TestSpace>>&)
     -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Mult<
-              FunctionBase<CoefficientDerived>,
-              ShapeFunctionBase<
-                Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                              ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
             H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2571,7 +2639,9 @@ namespace Rodin::Variational
       /// @brief Reports this handler as an optimized specialization.
       static constexpr bool Specialized = true;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -2591,6 +2661,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2604,6 +2675,7 @@ namespace Rodin::Variational
           m_teCount(0)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2617,6 +2689,7 @@ namespace Rodin::Variational
           m_teCount(0)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2634,6 +2707,7 @@ namespace Rodin::Variational
           m_mat(std::move(other.m_mat))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2641,12 +2715,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2824,11 +2900,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       inline ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_mat(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -2858,26 +2936,26 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
     };
 
-  // CTAD helper
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
-  -> QuadratureRule<
-       Dot<
-         ShapeFunctionBase<
-           Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-           H1<KTrial, Scalar, Mesh>, TrialSpace>,
-         ShapeFunctionBase<
-           Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-           H1<KTest, Scalar, Mesh>, TestSpace>>>;
+    // CTAD helper
+    /// @brief Deduction guide for @c QuadratureRule.
+    template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+      class Scalar, class Mesh>
+    QuadratureRule(
+      const Dot<ShapeFunctionBase<
+                  Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                  H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<
+          Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>&)
+      -> QuadratureRule<
+        Dot<ShapeFunctionBase<
+              Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+              H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          ShapeFunctionBase<
+            Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+            H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  /**
+    /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int J u : J v \ dx@f$ with H1 trial and test shape functions.
    *
@@ -2898,339 +2976,344 @@ namespace Rodin::Variational
    * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+      class Scalar, class Mesh>
+    class QuadratureRule<
+      Dot<ShapeFunctionBase<
+            Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+            H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>
+      : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+          Dot<ShapeFunctionBase<
+                Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                H1<KTrial, Scalar, Mesh>, TrialSpace>,
             ShapeFunctionBase<
               Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
               H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
-  {
-    public:
-      /// @brief Reports this handler as an optimized specialization.
-      static constexpr bool Specialized = true;
+    {
+      public:
+        /// @brief Reports this handler as an optimized specialization.
+        static constexpr bool Specialized = true;
 
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType  = H1<KTest, Scalar, Mesh>;
+        /// @brief Trial finite element space type.
+        using TrialFESType = H1<KTrial, Scalar, Mesh>;
+        /// @brief Test finite element space type.
+        using TestFESType = H1<KTest, Scalar, Mesh>;
 
-      /// @brief Left-hand side operand type.
-      using LHSType =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
-          TrialFESType, TrialSpace>;
+        /// @brief Left-hand side operand type.
+        using LHSType =
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
+            TrialFESType, TrialSpace>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
-          TestFESType, TestSpace>;
+        /// @brief Right-hand side operand type.
+        using RHSType =
+          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
+            TestFESType, TestSpace>;
 
-      /// @brief Integrand expression type.
-      using IntegrandType = Dot<LHSType, RHSType>;
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
-      /// @brief Parent class type.
-      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+        /// @brief Integrand expression type.
+        using IntegrandType = Dot<LHSType, RHSType>;
+        /// @brief Scalar value type.
+        using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+        /// @brief Parent class type.
+        using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      QuadratureRule(const IntegrandType& integrand)
-        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy()),
-          m_qf(nullptr),
-          m_polytope(nullptr),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
-      {}
+        /// @brief Constructs the integrator for the given integrand.
+        QuadratureRule(const IntegrandType& integrand)
+          : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+            m_integrand(integrand.copy()),
+            m_qf(nullptr),
+            m_polytope(nullptr),
+            m_set(false),
+            m_order(0),
+            m_geometry(Geometry::Polytope::Type::Point)
+        {}
 
-      QuadratureRule(const QuadratureRule& other)
-        : Parent(other),
-          m_integrand(other.m_integrand->copy()),
-          m_qf(nullptr),
-          m_polytope(nullptr),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
-      {}
+        /// @brief Copy constructor.
+        QuadratureRule(const QuadratureRule& other)
+          : Parent(other),
+            m_integrand(other.m_integrand->copy()),
+            m_qf(nullptr),
+            m_polytope(nullptr),
+            m_set(false),
+            m_order(0),
+            m_geometry(Geometry::Polytope::Type::Point)
+        {}
 
-      QuadratureRule(QuadratureRule&& other)
-        : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand)),
-          m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
-          m_polytope(std::exchange(other.m_polytope, nullptr)),
-          m_set(std::exchange(other.m_set, false)),
-          m_order(std::exchange(other.m_order, 0)),
-          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_mat(std::move(other.m_mat))
-      {}
+        /// @brief Move constructor.
+        QuadratureRule(QuadratureRule&& other)
+          : Parent(std::move(other)),
+            m_integrand(std::move(other.m_integrand)),
+            m_qf(std::exchange(other.m_qf, nullptr)),
+            m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+            m_polytope(std::exchange(other.m_polytope, nullptr)),
+            m_set(std::exchange(other.m_set, false)),
+            m_order(std::exchange(other.m_order, 0)),
+            m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
+            m_mat(std::move(other.m_mat))
+        {}
 
-      const Geometry::Polytope& getPolytope() const final override
-      {
-        assert(m_polytope);
-        return *m_polytope;
-      }
-
-      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
-      {
-        m_polytope = &polytope;
-
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
-
-        auto& integrand = *m_integrand;
-        const auto& lhs = integrand.getLHS();
-        const auto& rhs = integrand.getRHS();
-
-        const auto& trialfes = lhs.getFiniteElementSpace();
-        const auto& testfes  = rhs.getFiniteElementSpace();
-
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe  = testfes .getFiniteElement(d, idx);
-
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe .getOrder();
-        const size_t order =
-          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
-            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
-
-        const auto geometry = polytope.getGeometry();
-        const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
-
-        if (recomputeQf)
+        /// @brief Returns the polytope the integrator is bound to.
+        const Geometry::Polytope& getPolytope() const final override
         {
-          m_set      = true;
-          m_order    = order;
-          m_geometry = geometry;
-
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          assert(m_polytope);
+          return *m_polytope;
         }
 
-        assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
-
-        const size_t ntr = lhs.getDOFs(polytope);
-        const size_t nte = rhs.getDOFs(polytope);
-
-        // --- infer vdim from H1Element<K, Scalar> conventions ---
-        // Each element's scalar count depends on its polynomial order.
-        const H1Element<KTrial, ScalarType> trialScalarElement(polytope.getGeometry());
-        const H1Element<KTest,  ScalarType> testScalarElement(polytope.getGeometry());
-        const size_t trialScalarCount = trialScalarElement.getCount();
-        const size_t testScalarCount  = testScalarElement.getCount();
-
-        assert(trialScalarCount > 0);
-        assert(testScalarCount  > 0);
-        assert(ntr % trialScalarCount == 0);
-        assert(nte % testScalarCount  == 0);
-
-        const size_t vdimTr = ntr / trialScalarCount;
-        assert(vdimTr == nte / testScalarCount);
-        const size_t vdim = vdimTr;
-
-        const bool symmetric =
-          (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
-
-        m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
-        m_mat.setZero();
-        ScalarType* A = m_mat.data(); // row-major (rows=test, cols=trial)
-
-        // Use scalar tabulations (fast, cached in H1Element<K, Scalar>::getTabulation)
-        const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
-        const auto& teTabS = testScalarElement.getTabulation(*m_qf);
-
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
-
-        if (GtrS.size() < trialScalarCount) GtrS.resize(trialScalarCount);
-        if (GteS.size() < testScalarCount)  GteS.resize(testScalarCount);
-        for (size_t a = 0; a < trialScalarCount; ++a) GtrS[a].resize(static_cast<std::uint8_t>(d));
-        for (size_t b = 0; b < testScalarCount;  ++b) GteS[b].resize(static_cast<std::uint8_t>(d));
-
-        assert(m_quadrature);
-        const auto& q = *m_quadrature;
-        for (size_t qp = 0; qp < q.getSize(); ++qp)
+        /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+        QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
         {
-          const auto& p = q.getPoint(qp);
-          const ScalarType wdet =
-            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+          m_polytope = &polytope;
 
-          const auto Jinv = p.getJacobianInverse();
+          const size_t d = polytope.getDimension();
+          const Index idx = polytope.getIndex();
 
-          // Map scalar reference gradients to physical gradients (once per scalar DOF)
-          if (d == 3)
-          {
-            const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0), a20 = Jinv(2,0);
-            const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
-            const ScalarType a02 = Jinv(0,2), a12 = Jinv(1,2), a22 = Jinv(2,2);
+          auto& integrand = *m_integrand;
+          const auto& lhs = integrand.getLHS();
+          const auto& rhs = integrand.getRHS();
 
-            for (size_t a = 0; a < trialScalarCount; ++a)
-            {
-              const auto g = trTabS.getGradient(qp, a);
-              const ScalarType gx = g[0], gy = g[1], gz = g[2];
-              GtrS[a][0] = a00*gx + a10*gy + a20*gz;
-              GtrS[a][1] = a01*gx + a11*gy + a21*gz;
-              GtrS[a][2] = a02*gx + a12*gy + a22*gz;
-            }
-            for (size_t b = 0; b < testScalarCount; ++b)
-            {
-              const auto g = teTabS.getGradient(qp, b);
-              const ScalarType gx = g[0], gy = g[1], gz = g[2];
-              GteS[b][0] = a00*gx + a10*gy + a20*gz;
-              GteS[b][1] = a01*gx + a11*gy + a21*gz;
-              GteS[b][2] = a02*gx + a12*gy + a22*gz;
-            }
-          }
-          else if (d == 2)
-          {
-            const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0);
-            const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1);
+          const auto& trialfes = lhs.getFiniteElementSpace();
+          const auto& testfes = rhs.getFiniteElementSpace();
 
-            for (size_t a = 0; a < trialScalarCount; ++a)
-            {
-              const auto g = trTabS.getGradient(qp, a);
-              const ScalarType gx = g[0], gy = g[1];
-              GtrS[a][0] = a00*gx + a10*gy;
-              GtrS[a][1] = a01*gx + a11*gy;
-            }
-            for (size_t b = 0; b < testScalarCount; ++b)
-            {
-              const auto g = teTabS.getGradient(qp, b);
-              const ScalarType gx = g[0], gy = g[1];
-              GteS[b][0] = a00*gx + a10*gy;
-              GteS[b][1] = a01*gx + a11*gy;
-            }
-          }
-          else if (d == 1)
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
+
+          const size_t k_tr = trialfe.getOrder();
+          const size_t k_te = testfe.getOrder();
+          const size_t order =
+            this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+              ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
+
+          const auto geometry = polytope.getGeometry();
+          const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
+
+          if (recomputeQf)
           {
-            const ScalarType a00 = Jinv(0,0);
-            for (size_t a = 0; a < trialScalarCount; ++a)
-            {
-              const auto g = trTabS.getGradient(qp, a);
-              GtrS[a][0] = a00 * g[0];
-            }
-            for (size_t b = 0; b < testScalarCount; ++b)
-            {
-              const auto g = teTabS.getGradient(qp, b);
-              GteS[b][0] = a00 * g[0];
-            }
-          }
-          else
-          {
-            assert(false);
+            m_set = true;
+            m_order = order;
+            m_geometry = geometry;
+
+            m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
           }
 
-          // Assemble: for each component c, add the same scalar matrix into block (c,c)
-          // Local DOF mapping is exactly your convention: dof = scalarIndex*vdim + c.
+          assert(m_qf);
+          m_quadrature = &polytope.getQuadrature(*m_qf);
+
+          const size_t ntr = lhs.getDOFs(polytope);
+          const size_t nte = rhs.getDOFs(polytope);
+
+          // --- infer vdim from H1Element<K, Scalar> conventions ---
+          // Each element's scalar count depends on its polynomial order.
+          const H1Element<KTrial, ScalarType> trialScalarElement(polytope.getGeometry());
+          const H1Element<KTest, ScalarType> testScalarElement(polytope.getGeometry());
+          const size_t trialScalarCount = trialScalarElement.getCount();
+          const size_t testScalarCount = testScalarElement.getCount();
+
+          assert(trialScalarCount > 0);
+          assert(testScalarCount > 0);
+          assert(ntr % trialScalarCount == 0);
+          assert(nte % testScalarCount == 0);
+
+          const size_t vdimTr = ntr / trialScalarCount;
+          assert(vdimTr == nte / testScalarCount);
+          const size_t vdim = vdimTr;
+
+          const bool symmetric =
+            (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
+
+          m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+          m_mat.setZero();
+          ScalarType* A = m_mat.data(); // row-major (rows=test, cols=trial)
+
+          // Use scalar tabulations (fast, cached in H1Element<K, Scalar>::getTabulation)
+          const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
+          const auto& teTabS = testScalarElement.getTabulation(*m_qf);
+
+          static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
+          static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
+
+          if (GtrS.size() < trialScalarCount)
+            GtrS.resize(trialScalarCount);
+          if (GteS.size() < testScalarCount)
+            GteS.resize(testScalarCount);
+          for (size_t a = 0; a < trialScalarCount; ++a)
+            GtrS[a].resize(static_cast<std::uint8_t>(d));
+          for (size_t b = 0; b < testScalarCount; ++b)
+            GteS[b].resize(static_cast<std::uint8_t>(d));
+
+          assert(m_quadrature);
+          const auto& q = *m_quadrature;
+          for (size_t qp = 0; qp < q.getSize(); ++qp)
+          {
+            const auto& p = q.getPoint(qp);
+            const ScalarType wdet =
+              static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+
+            const auto Jinv = p.getJacobianInverse();
+
+            // Map scalar reference gradients to physical gradients (once per scalar DOF)
+            if (d == 3)
+            {
+              const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0), a20 = Jinv(2, 0);
+              const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1), a21 = Jinv(2, 1);
+              const ScalarType a02 = Jinv(0, 2), a12 = Jinv(1, 2), a22 = Jinv(2, 2);
+
+              for (size_t a = 0; a < trialScalarCount; ++a)
+              {
+                const auto g = trTabS.getGradient(qp, a);
+                const ScalarType gx = g[0], gy = g[1], gz = g[2];
+                GtrS[a][0] = a00 * gx + a10 * gy + a20 * gz;
+                GtrS[a][1] = a01 * gx + a11 * gy + a21 * gz;
+                GtrS[a][2] = a02 * gx + a12 * gy + a22 * gz;
+              }
+              for (size_t b = 0; b < testScalarCount; ++b)
+              {
+                const auto g = teTabS.getGradient(qp, b);
+                const ScalarType gx = g[0], gy = g[1], gz = g[2];
+                GteS[b][0] = a00 * gx + a10 * gy + a20 * gz;
+                GteS[b][1] = a01 * gx + a11 * gy + a21 * gz;
+                GteS[b][2] = a02 * gx + a12 * gy + a22 * gz;
+              }
+            }
+            else if (d == 2)
+            {
+              const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0);
+              const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1);
+
+              for (size_t a = 0; a < trialScalarCount; ++a)
+              {
+                const auto g = trTabS.getGradient(qp, a);
+                const ScalarType gx = g[0], gy = g[1];
+                GtrS[a][0] = a00 * gx + a10 * gy;
+                GtrS[a][1] = a01 * gx + a11 * gy;
+              }
+              for (size_t b = 0; b < testScalarCount; ++b)
+              {
+                const auto g = teTabS.getGradient(qp, b);
+                const ScalarType gx = g[0], gy = g[1];
+                GteS[b][0] = a00 * gx + a10 * gy;
+                GteS[b][1] = a01 * gx + a11 * gy;
+              }
+            }
+            else if (d == 1)
+            {
+              const ScalarType a00 = Jinv(0, 0);
+              for (size_t a = 0; a < trialScalarCount; ++a)
+              {
+                const auto g = trTabS.getGradient(qp, a);
+                GtrS[a][0] = a00 * g[0];
+              }
+              for (size_t b = 0; b < testScalarCount; ++b)
+              {
+                const auto g = teTabS.getGradient(qp, b);
+                GteS[b][0] = a00 * g[0];
+              }
+            }
+            else
+            {
+              assert(false);
+            }
+
+            // Assemble: for each component c, add the same scalar matrix into block (c,c)
+            // Local DOF mapping is exactly your convention: dof = scalarIndex*vdim + c.
+            if (symmetric)
+            {
+              // lower triangle in vector-dof space corresponds to scalar lower + component blocks
+              for (size_t ib = 0; ib < testScalarCount; ++ib)
+              {
+                const auto& gb = GteS[ib];
+
+                for (size_t ia = 0; ia <= ib; ++ia)
+                {
+                  const ScalarType kij = wdet * Math::dot(gb, GtrS[ia]);
+                  if (kij == ScalarType(0))
+                    continue;
+
+                  for (size_t c = 0; c < vdim; ++c)
+                  {
+                    const size_t row = ib * vdim + c;
+                    const size_t col = ia * vdim + c;
+                    A[row * ntr + col] += kij;
+                  }
+                }
+              }
+            }
+            else
+            {
+              for (size_t ib = 0; ib < testScalarCount; ++ib)
+              {
+                const auto& gb = GteS[ib];
+
+                for (size_t ia = 0; ia < trialScalarCount; ++ia)
+                {
+                  const ScalarType kij = wdet * Math::dot(gb, GtrS[ia]);
+                  if (kij == ScalarType(0))
+                    continue;
+
+                  for (size_t c = 0; c < vdim; ++c)
+                  {
+                    const size_t row = ib * vdim + c;
+                    const size_t col = ia * vdim + c;
+                    A[row * ntr + col] += kij;
+                  }
+                }
+              }
+            }
+          }
+
           if (symmetric)
           {
-            // lower triangle in vector-dof space corresponds to scalar lower + component blocks
-            for (size_t ib = 0; ib < testScalarCount; ++ib)
-            {
-              const auto& gb = GteS[ib];
-
-              for (size_t ia = 0; ia <= ib; ++ia)
-              {
-                const ScalarType kij = wdet * Math::dot(gb, GtrS[ia]);
-                if (kij == ScalarType(0))
-                  continue;
-
-                for (size_t c = 0; c < vdim; ++c)
-                {
-                  const size_t row = ib * vdim + c;
-                  const size_t col = ia * vdim + c;
-                  A[row * ntr + col] += kij;
-                }
-              }
-            }
+            m_mat.template triangularView<Eigen::Upper>() =
+              m_mat.transpose().template triangularView<Eigen::Upper>();
           }
-          else
-          {
-            for (size_t ib = 0; ib < testScalarCount; ++ib)
-            {
-              const auto& gb = GteS[ib];
 
-              for (size_t ia = 0; ia < trialScalarCount; ++ia)
-              {
-                const ScalarType kij = wdet * Math::dot(gb, GtrS[ia]);
-                if (kij == ScalarType(0))
-                  continue;
-
-                for (size_t c = 0; c < vdim; ++c)
-                {
-                  const size_t row = ib * vdim + c;
-                  const size_t col = ia * vdim + c;
-                  A[row * ntr + col] += kij;
-                }
-              }
-            }
-          }
+          return *this;
         }
 
-        if (symmetric)
+        /// @brief Returns an entry of the element matrix.
+        inline ScalarType integrate(size_t tr, size_t te) final override
         {
-          m_mat.template triangularView<Eigen::Upper>() =
-            m_mat.transpose().template triangularView<Eigen::Upper>();
+          return m_mat(te, tr);
         }
 
-        return *this;
-      }
+        /// @brief Returns the integration region.
+        virtual Geometry::Region getRegion() const override = 0;
+        virtual QuadratureRule* copy() const noexcept override = 0;
 
-      inline ScalarType integrate(size_t tr, size_t te) final override
-      {
-        return m_mat(te, tr);
-      }
+      private:
+        std::unique_ptr<IntegrandType> m_integrand;
 
-      virtual Geometry::Region getRegion() const override = 0;
-      virtual QuadratureRule* copy() const noexcept override = 0;
+        const QF::QuadratureFormulaBase* m_qf;
+        const Geometry::PolytopeQuadrature* m_quadrature;
 
-    private:
-      std::unique_ptr<IntegrandType> m_integrand;
+        const Geometry::Polytope* m_polytope;
+        bool m_set;
+        size_t m_order;
+        Geometry::Polytope::Type m_geometry;
 
-      const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+        Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
+    };
 
-      const Geometry::Polytope* m_polytope;
-      bool m_set;
-      size_t m_order;
-      Geometry::Polytope::Type m_geometry;
-
-      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
-  };
-
-  // CTAD helper
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    // CTAD helper
+    /// @brief Deduction guide for @c QuadratureRule.
+    template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
+      class Scalar, class Mesh>
+    QuadratureRule(const Dot<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                 H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                               H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
         Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
         H1<KTest, Scalar, Mesh>, TestSpace>>&)
-  -> QuadratureRule<
-       Dot<
-         ShapeFunctionBase<
-           Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-           H1<KTrial, Scalar, Mesh>, TrialSpace>,
-         ShapeFunctionBase<
-           Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-           H1<KTest, Scalar, Mesh>, TestSpace>>>;
+      -> QuadratureRule<
+        Dot<ShapeFunctionBase<
+              Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+              H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+            H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  /**
+    /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int (\mathbf{J}\,u \cdot f) \cdot v \ dx@f$ with H1 trial and test shape functions.
    *
@@ -3256,298 +3339,292 @@ namespace Rodin::Variational
    * Implements the linearized convection term for Navier-Stokes using
    * multi-point quadrature appropriate for the polynomial degree.
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          FunctionBase<CoefficientDerived>>,
+    template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+      class RHSDerived, class Scalar, class Mesh>
+    class QuadratureRule<Dot<
+      ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                 H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                               H1<KTrial, Scalar, Mesh>, TrialSpace>,
+                          FunctionBase<CoefficientDerived>>,
         H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
         H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                ShapeFunctionBase<
-                  Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                  H1<KTrial, Scalar, Mesh>, TrialSpace>,
-                FunctionBase<CoefficientDerived>>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
-  {
-    public:
-      /// @brief Reports this handler as an optimized specialization.
-      static constexpr bool Specialized = true;
+      : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Dot<
+          ShapeFunctionBase<
+            Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                     H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                   H1<KTrial, Scalar, Mesh>, TrialSpace>,
+              FunctionBase<CoefficientDerived>>,
+            H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+            H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+    {
+      public:
+        /// @brief Reports this handler as an optimized specialization.
+        static constexpr bool Specialized = true;
 
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType  = H1<KTest, Scalar, Mesh>;
+        /// @brief Trial finite element space type.
+        using TrialFESType = H1<KTrial, Scalar, Mesh>;
+        /// @brief Test finite element space type.
+        using TestFESType = H1<KTest, Scalar, Mesh>;
 
-      using TrialSFType =
-        ShapeFunctionBase<
-          Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
-          TrialFESType, TrialSpace>;
+        /// @brief Trial shape function type.
+        using TrialSFType =
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
+            TrialFESType, TrialSpace>;
 
-      using CoefficientType = FunctionBase<CoefficientDerived>;
+        /// @brief Coefficient type appearing in the integrand.
+        using CoefficientType = FunctionBase<CoefficientDerived>;
 
-      /// @brief Left-hand side operand type.
-      using LHSType =
-        ShapeFunctionBase<
-          Mult<TrialSFType, CoefficientType>,
-          TrialFESType, TrialSpace>;
+        /// @brief Left-hand side operand type.
+        using LHSType =
+          ShapeFunctionBase<Mult<TrialSFType, CoefficientType>, TrialFESType, TrialSpace>;
 
-      /// @brief Right-hand side operand type.
-      using RHSType =
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, TestFESType, TestSpace>,
-          TestFESType, TestSpace>;
+        /// @brief Right-hand side operand type.
+        using RHSType =
+          ShapeFunctionBase<ShapeFunction<RHSDerived, TestFESType, TestSpace>,
+            TestFESType, TestSpace>;
 
-      /// @brief Integrand expression type.
-      using IntegrandType = Dot<LHSType, RHSType>;
-      /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
-      /// @brief Parent class type.
-      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+        /// @brief Integrand expression type.
+        using IntegrandType = Dot<LHSType, RHSType>;
+        /// @brief Scalar value type.
+        using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+        /// @brief Parent class type.
+        using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      QuadratureRule(const IntegrandType& integrand)
-        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy()),
-          m_qf(nullptr), m_quadrature(nullptr), m_polytope(nullptr),
-          m_set(false), m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
-      {}
+        /// @brief Constructs the integrator for the given integrand.
+        QuadratureRule(const IntegrandType& integrand)
+          : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+            m_integrand(integrand.copy()),
+            m_qf(nullptr),
+            m_quadrature(nullptr),
+            m_polytope(nullptr),
+            m_set(false),
+            m_order(0),
+            m_geometry(Geometry::Polytope::Type::Point)
+        {}
 
-      QuadratureRule(const QuadratureRule& other)
-        : Parent(other),
-          m_integrand(other.m_integrand->copy()),
-          m_qf(nullptr), m_quadrature(nullptr), m_polytope(nullptr),
-          m_set(false), m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
-      {}
+        /// @brief Copy constructor.
+        QuadratureRule(const QuadratureRule& other)
+          : Parent(other),
+            m_integrand(other.m_integrand->copy()),
+            m_qf(nullptr),
+            m_quadrature(nullptr),
+            m_polytope(nullptr),
+            m_set(false),
+            m_order(0),
+            m_geometry(Geometry::Polytope::Type::Point)
+        {}
 
-      QuadratureRule(QuadratureRule&& other)
-        : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand)),
-          m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
-          m_polytope(std::exchange(other.m_polytope, nullptr)),
-          m_set(std::exchange(other.m_set, false)),
-          m_order(std::exchange(other.m_order, 0)),
-          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_mat(std::move(other.m_mat))
-      {}
+        /// @brief Move constructor.
+        QuadratureRule(QuadratureRule&& other)
+          : Parent(std::move(other)),
+            m_integrand(std::move(other.m_integrand)),
+            m_qf(std::exchange(other.m_qf, nullptr)),
+            m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+            m_polytope(std::exchange(other.m_polytope, nullptr)),
+            m_set(std::exchange(other.m_set, false)),
+            m_order(std::exchange(other.m_order, 0)),
+            m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
+            m_mat(std::move(other.m_mat))
+        {}
 
-      const Geometry::Polytope& getPolytope() const final override
-      {
-        assert(m_polytope);
-        return *m_polytope;
-      }
-
-      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
-      {
-        m_polytope = &polytope;
-
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
-
-        auto& integrand = *m_integrand;
-        const auto& lhs = integrand.getLHS();
-        const auto& rhs = integrand.getRHS();
-
-        const auto& trialfes = lhs.getFiniteElementSpace();
-        const auto& testfes  = rhs.getFiniteElementSpace();
-
-        // The coefficient is the RHS of the Mult node
-        const auto& coeff = lhs.getDerived().getRHS();
-
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe  = testfes .getFiniteElement(d, idx);
-
-        const size_t k_tr = trialfe.getOrder();
-        const size_t k_te = testfe .getOrder();
-        // Gradient of trial (k_tr - 1) times value of test (k_te)
-        const size_t order =
-          this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
-            ((k_tr == 0) ? k_te : (k_tr + k_te - 1))));
-
-        const auto geometry = polytope.getGeometry();
-        const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
-
-        if (recomputeQf)
+        /// @brief Returns the polytope the integrator is bound to.
+        const Geometry::Polytope& getPolytope() const final override
         {
-          m_set      = true;
-          m_order    = order;
-          m_geometry = geometry;
-
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          assert(m_polytope);
+          return *m_polytope;
         }
 
-        assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
-
-        const size_t ntr = lhs.getDOFs(polytope);
-        const size_t nte = rhs.getDOFs(polytope);
-
-        const H1Element<KTrial, ScalarType> trialScalarFE(geometry);
-        const H1Element<KTest,  ScalarType> testScalarFE(geometry);
-        const size_t trialScalarCount = trialScalarFE.getCount();
-        const size_t testScalarCount  = testScalarFE.getCount();
-
-        assert(trialScalarCount > 0 && ntr % trialScalarCount == 0);
-        assert(testScalarCount  > 0 && nte % testScalarCount  == 0);
-        const size_t vdim = ntr / trialScalarCount;
-        assert(vdim == nte / testScalarCount);
-
-        const auto& trTab = trialScalarFE.getTabulation(*m_qf);
-        const auto& teTab = testScalarFE .getTabulation(*m_qf);
-
-        m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
-        m_mat.setZero();
-        ScalarType* A = m_mat.data();
-
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
-        if (GtrS.size() < trialScalarCount) GtrS.resize(trialScalarCount);
-        for (size_t a = 0; a < trialScalarCount; ++a)
-          GtrS[a].resize(static_cast<std::uint8_t>(d));
-
-        assert(m_quadrature);
-        const auto& q = *m_quadrature;
-        for (size_t qp = 0; qp < q.getSize(); ++qp)
+        /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+        QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
         {
-          const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
-          const ScalarType wdet =
-            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+          m_polytope = &polytope;
 
-          const auto Jinv = p.getJacobianInverse();
+          const size_t d = polytope.getDimension();
+          const Index idx = polytope.getIndex();
 
-          // Map scalar reference gradients to physical gradients
-          if (d == 3)
+          auto& integrand = *m_integrand;
+          const auto& lhs = integrand.getLHS();
+          const auto& rhs = integrand.getRHS();
+
+          const auto& trialfes = lhs.getFiniteElementSpace();
+          const auto& testfes = rhs.getFiniteElementSpace();
+
+          // The coefficient is the RHS of the Mult node
+          const auto& coeff = lhs.getDerived().getRHS();
+
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
+
+          const size_t k_tr = trialfe.getOrder();
+          const size_t k_te = testfe.getOrder();
+          // Gradient of trial (k_tr - 1) times value of test (k_te)
+          const size_t order =
+            this->getOrder(polytope).value_or(integrand.getOrder(polytope).value_or(
+              ((k_tr == 0) ? k_te : (k_tr + k_te - 1))));
+
+          const auto geometry = polytope.getGeometry();
+          const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
+
+          if (recomputeQf)
           {
-            const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0), a20 = Jinv(2,0);
-            const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
-            const ScalarType a02 = Jinv(0,2), a12 = Jinv(1,2), a22 = Jinv(2,2);
+            m_set = true;
+            m_order = order;
+            m_geometry = geometry;
 
-            for (size_t a = 0; a < trialScalarCount; ++a)
+            m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          }
+
+          assert(m_qf);
+          m_quadrature = &polytope.getQuadrature(*m_qf);
+
+          const size_t ntr = lhs.getDOFs(polytope);
+          const size_t nte = rhs.getDOFs(polytope);
+
+          const H1Element<KTrial, ScalarType> trialScalarFE(geometry);
+          const H1Element<KTest, ScalarType> testScalarFE(geometry);
+          const size_t trialScalarCount = trialScalarFE.getCount();
+          const size_t testScalarCount = testScalarFE.getCount();
+
+          assert(trialScalarCount > 0 && ntr % trialScalarCount == 0);
+          assert(testScalarCount > 0 && nte % testScalarCount == 0);
+          const size_t vdim = ntr / trialScalarCount;
+          assert(vdim == nte / testScalarCount);
+
+          const auto& trTab = trialScalarFE.getTabulation(*m_qf);
+          const auto& teTab = testScalarFE.getTabulation(*m_qf);
+
+          m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+          m_mat.setZero();
+          ScalarType* A = m_mat.data();
+
+          static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
+          if (GtrS.size() < trialScalarCount)
+            GtrS.resize(trialScalarCount);
+          for (size_t a = 0; a < trialScalarCount; ++a)
+            GtrS[a].resize(static_cast<std::uint8_t>(d));
+
+          assert(m_quadrature);
+          const auto& q = *m_quadrature;
+          for (size_t qp = 0; qp < q.getSize(); ++qp)
+          {
+            const auto& p = q.getPoint(qp);
+            const IntegrationPoint ip(p, m_qf, qp);
+            const ScalarType wdet =
+              static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+
+            const auto Jinv = p.getJacobianInverse();
+
+            // Map scalar reference gradients to physical gradients
+            if (d == 3)
             {
-              const auto g = trTab.getGradient(qp, a);
-              const ScalarType gx = g[0], gy = g[1], gz = g[2];
-              GtrS[a][0] = a00*gx + a10*gy + a20*gz;
-              GtrS[a][1] = a01*gx + a11*gy + a21*gz;
-              GtrS[a][2] = a02*gx + a12*gy + a22*gz;
+              const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0), a20 = Jinv(2, 0);
+              const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1), a21 = Jinv(2, 1);
+              const ScalarType a02 = Jinv(0, 2), a12 = Jinv(1, 2), a22 = Jinv(2, 2);
+
+              for (size_t a = 0; a < trialScalarCount; ++a)
+              {
+                const auto g = trTab.getGradient(qp, a);
+                const ScalarType gx = g[0], gy = g[1], gz = g[2];
+                GtrS[a][0] = a00 * gx + a10 * gy + a20 * gz;
+                GtrS[a][1] = a01 * gx + a11 * gy + a21 * gz;
+                GtrS[a][2] = a02 * gx + a12 * gy + a22 * gz;
+              }
+            }
+            else if (d == 2)
+            {
+              const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0);
+              const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1);
+
+              for (size_t a = 0; a < trialScalarCount; ++a)
+              {
+                const auto g = trTab.getGradient(qp, a);
+                const ScalarType gx = g[0], gy = g[1];
+                GtrS[a][0] = a00 * gx + a10 * gy;
+                GtrS[a][1] = a01 * gx + a11 * gy;
+              }
+            }
+            else if (d == 1)
+            {
+              const ScalarType a00 = Jinv(0, 0);
+              for (size_t a = 0; a < trialScalarCount; ++a)
+              {
+                const auto g = trTab.getGradient(qp, a);
+                GtrS[a][0] = a00 * g[0];
+              }
+            }
+            else
+            {
+              assert(false);
+            }
+
+            // Evaluate coefficient at this quadrature point
+            const auto fval = coeff.getValue(ip);
+
+            // Assemble: K(b*vdim+c, a*vdim+c) += wdet * (\nablaφ_a \cdot f) * ψ_b
+            for (size_t ib = 0; ib < testScalarCount; ++ib)
+            {
+              const ScalarType phi_te = teTab.getBasis(qp, ib);
+              for (size_t ia = 0; ia < trialScalarCount; ++ia)
+              {
+                const ScalarType gradDotF = Math::dot(GtrS[ia], fval);
+                const ScalarType kij = wdet * gradDotF * phi_te;
+                if (kij == ScalarType(0))
+                  continue;
+                for (size_t c = 0; c < vdim; ++c)
+                  A[(ib * vdim + c) * ntr + (ia * vdim + c)] += kij;
+              }
             }
           }
-          else if (d == 2)
-          {
-            const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0);
-            const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1);
 
-            for (size_t a = 0; a < trialScalarCount; ++a)
-            {
-              const auto g = trTab.getGradient(qp, a);
-              const ScalarType gx = g[0], gy = g[1];
-              GtrS[a][0] = a00*gx + a10*gy;
-              GtrS[a][1] = a01*gx + a11*gy;
-            }
-          }
-          else if (d == 1)
-          {
-            const ScalarType a00 = Jinv(0,0);
-            for (size_t a = 0; a < trialScalarCount; ++a)
-            {
-              const auto g = trTab.getGradient(qp, a);
-              GtrS[a][0] = a00 * g[0];
-            }
-          }
-          else
-          {
-            assert(false);
-          }
-
-          // Evaluate coefficient at this quadrature point
-          const auto fval = coeff.getValue(ip);
-
-          // Assemble: K(b*vdim+c, a*vdim+c) += wdet * (\nablaφ_a \cdot f) * ψ_b
-          for (size_t ib = 0; ib < testScalarCount; ++ib)
-          {
-            const ScalarType phi_te = teTab.getBasis(qp, ib);
-            for (size_t ia = 0; ia < trialScalarCount; ++ia)
-            {
-              const ScalarType gradDotF = Math::dot(GtrS[ia], fval);
-              const ScalarType kij = wdet * gradDotF * phi_te;
-              if (kij == ScalarType(0))
-                continue;
-              for (size_t c = 0; c < vdim; ++c)
-                A[(ib * vdim + c) * ntr + (ia * vdim + c)] += kij;
-            }
-          }
+          return *this;
         }
 
-        return *this;
-      }
+        /// @brief Returns an entry of the element matrix.
+        inline ScalarType integrate(size_t tr, size_t te) final override
+        {
+          return m_mat(te, tr);
+        }
 
-      inline ScalarType integrate(size_t tr, size_t te) final override
-      {
-        return m_mat(te, tr);
-      }
+        /// @brief Returns the integration region.
+        virtual Geometry::Region getRegion() const override = 0;
+        virtual QuadratureRule* copy() const noexcept override = 0;
 
-      virtual Geometry::Region getRegion() const override = 0;
-      virtual QuadratureRule* copy() const noexcept override = 0;
+      private:
+        std::unique_ptr<IntegrandType> m_integrand;
 
-    private:
-      std::unique_ptr<IntegrandType> m_integrand;
+        const QF::QuadratureFormulaBase* m_qf;
+        const Geometry::PolytopeQuadrature* m_quadrature;
 
-      const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+        const Geometry::Polytope* m_polytope;
+        bool m_set;
+        size_t m_order;
+        Geometry::Polytope::Type m_geometry;
 
-      const Geometry::Polytope* m_polytope;
-      bool m_set;
-      size_t m_order;
-      Geometry::Polytope::Type m_geometry;
-
-      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
-  };
+        Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
+    };
 
   // CTAD helper
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Mult<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          FunctionBase<CoefficientDerived>>,
+    template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+      class RHSDerived, class Scalar, class Mesh>
+    /// @brief Deduction guide for @c QuadratureRule.
+    QuadratureRule(const Dot<
+      ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                 H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                               H1<KTrial, Scalar, Mesh>, TrialSpace>,
+                          FunctionBase<CoefficientDerived>>,
         H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
         H1<KTest, Scalar, Mesh>, TestSpace>>&)
-    -> QuadratureRule<
-         Dot<
-           ShapeFunctionBase<
-             Mult<
-               ShapeFunctionBase<
-                 Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                 H1<KTrial, Scalar, Mesh>, TrialSpace>,
-               FunctionBase<CoefficientDerived>>,
-             H1<KTrial, Scalar, Mesh>, TrialSpace>,
-           ShapeFunctionBase<
-             ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-             H1<KTest, Scalar, Mesh>, TestSpace>>>;
-  /// @endcond
+      -> QuadratureRule<Dot<
+        ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                   H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                                 H1<KTrial, Scalar, Mesh>, TrialSpace>,
+                            FunctionBase<CoefficientDerived>>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>;
 }
 
 #endif

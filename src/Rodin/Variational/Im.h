@@ -15,7 +15,6 @@
 #include "ForwardDecls.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -96,6 +95,7 @@ namespace Rodin::Variational
         return getOperand().getValue(p).imag();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -122,5 +122,4 @@ namespace Rodin::Variational
 
 }
 
-/// @endcond
 #endif

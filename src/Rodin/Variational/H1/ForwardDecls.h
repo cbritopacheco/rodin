@@ -17,7 +17,6 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -149,9 +148,9 @@ namespace Rodin::Variational
   template <size_t K>
   class VandermondeTriangle;
 
+  /// @brief Vandermonde matrix of the modal basis on the reference tetrahedron.
   template <size_t K>
   class VandermondeTetrahedron;
 }
 
-/// @endcond
 #endif

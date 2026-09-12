@@ -17,9 +17,9 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
+  /// @brief Raised when the trace of a function is taken without a determined domain.
   template <class T, class FuncName>
   class UndeterminedTraceDomainException : public Alert::MemberFunctionException<T, FuncName>
   {
@@ -27,6 +27,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Alert::MemberFunctionException<T, FuncName>;
 
+      /// @brief Constructs the exception for the offending call site.
       template <class Iterator>
       UndeterminedTraceDomainException(const T& cls, const FuncName& funcName,
           const std::pair<size_t, Index>& p, Iterator begin, Iterator end)
@@ -41,11 +42,11 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c UndeterminedTraceDomainException.
   template <class T, class FuncName, class Iterator>
   UndeterminedTraceDomainException(const T&, const FuncName&, const std::pair<size_t, Index>&, Iterator, Iterator)
     -> UndeterminedTraceDomainException<T, FuncName>;
 
 }
 
-/// @endcond
 #endif

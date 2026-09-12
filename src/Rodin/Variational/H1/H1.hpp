@@ -16,7 +16,6 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Utility/ForConstexpr.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -90,6 +89,7 @@ namespace Rodin::Variational
 
       /** @} */
 
+      /// @brief Number of entries.
       static constexpr size_t Count =
         []()
         {
@@ -731,6 +731,9 @@ namespace Rodin::Variational
       }
   };
 
+  // The definitions below are the out-of-line bodies of members declared and
+  // documented in H1.h; Doxygen reads the declarations, not these.
+  /// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
   template <size_t K, class Scalar>
   void H1<K, Scalar, Geometry::Mesh<Context::Local>>::getClosure(size_t d, Index idx)
   {
@@ -2594,7 +2597,7 @@ namespace Rodin::Variational
       }
     }
   }
+  /// @endcond
 }
 
-/// @endcond
 #endif // RODIN_VARIATIONAL_H1_H1_HPP

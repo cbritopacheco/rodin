@@ -31,41 +31,41 @@ namespace Rodin::Solid
       /// @brief Parameters controlling the local active-fiber law.
       struct Parameters
       {
-        /// @brief Initial active extension, stiffness, and stress data.
+          /// @brief Initial active extension, stiffness, and stress data.
           struct Initial
           {
-          /// @brief Initial active extension.
+              /// @brief Initial active extension.
               Real extension = 0.0;
-          /// @brief Initial active branch stiffness.
+              /// @brief Initial active branch stiffness.
               Real stiffness = 0.0;
-          /// @brief Initial active branch stress.
+              /// @brief Initial active branch stress.
               Real stress = 0.0;
           };
 
-        /// @brief Passive serial stiffness in the active branch.
+          /// @brief Passive serial stiffness in the active branch.
           Real stiffness = 1.0;
-        /// @brief Viscous damping coefficient for dynamic active extension.
+          /// @brief Viscous damping coefficient for dynamic active extension.
           Real damping = 0.0;
-        /// @brief Cross-bridge destruction rate.
+          /// @brief Cross-bridge destruction rate.
           Real destructionRate = 0.0;
-        /// @brief Cross-bridge stiffness coefficient.
+          /// @brief Cross-bridge stiffness coefficient.
           Real crossBridgeStiffness = 0.0;
-        /// @brief Activation-dependent contractility coefficient.
+          /// @brief Activation-dependent contractility coefficient.
           Real contractility = 0.0;
 
-        /// @brief Initial active branch state parameters.
+          /// @brief Initial active branch state parameters.
           Initial initial;
       };
 
       /// @brief Internal active-fiber state.
       struct State
       {
-        /// @brief Square-root stiffness-like internal variable.
+          /// @brief Square-root stiffness-like internal variable.
           Real gamma = 0.0;
-        /// @brief Stress-like internal variable.
+          /// @brief Stress-like internal variable.
           Real beta = 0.0;
 
-        /// @brief Returns the active stress @f$\gamma\beta@f$.
+          /// @brief Returns the active stress @f$\gamma\beta@f$.
           Real activeStress() const
           {
             return gamma * beta;
@@ -75,9 +75,9 @@ namespace Rodin::Solid
       /// @brief Local response and tangent data for a fiber update.
       struct Response
       {
-        /// @brief Active fiber stress.
+          /// @brief Active fiber stress.
           Real stress = 0.0;
-        /// @brief Partial derivative of stress with respect to fiber strain.
+          /// @brief Partial derivative of stress with respect to fiber strain.
           Real dStressDe = 0.0;
           /// @brief Partial derivative of stress with respect to active extension.
           Real dStressDc = 0.0;

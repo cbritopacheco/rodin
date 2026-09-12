@@ -45,14 +45,13 @@
 #include "ForwardDecls.h"
 #include "ProblemBody.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /// @brief Form-language traits for a problem base.
   template <class LinearSystem>
   struct Traits<Variational::ProblemBase<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 
@@ -60,7 +59,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem, class TrialFunction, class TestFunction>
   struct Traits<Variational::Problem<TrialFunction, TestFunction, LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
       /// @brief Trial function type.
       using TrialFunctionType = TrialFunction;
@@ -73,7 +72,7 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @defgroup RodinVariational Variational Module
+   * @defgroup RodinVariational Variational module
    * @brief Variational formulations and finite element problem definitions.
    *
    * The Variational module provides the infrastructure for defining and solving
@@ -227,9 +226,11 @@ namespace Rodin::Variational
   class ProblemUVBase : public ProblemBase<LinearSystem>
   {
     public:
+      /// @brief Trial function type.
       using TrialFunctionType =
         U;
 
+      /// @brief Test function type.
       using TestFunctionType =
         V;
 
@@ -237,6 +238,7 @@ namespace Rodin::Variational
       using LinearSystemType =
         LinearSystem;
 
+      /// @brief Solver base class type.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystem>;
 
@@ -244,9 +246,11 @@ namespace Rodin::Variational
       using SolutionType =
         typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
 
+      /// @brief Trial finite element space type.
       using TrialFESType =
         typename FormLanguage::Traits<U>::FESType;
 
+      /// @brief Test finite element space type.
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
@@ -262,9 +266,11 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Scalar value type of the trial space.
       using TrialFESScalarType =
         typename FormLanguage::Traits<TrialFESType>::ScalarType;
 
+      /// @brief Scalar value type of the test space.
       using TestFESScalarType =
         typename FormLanguage::Traits<TestFESType>::ScalarType;
 
@@ -272,6 +278,7 @@ namespace Rodin::Variational
       using LinearFormIntegratorBaseType =
         LinearFormIntegratorBase<TestFESScalarType>;
 
+      /// @brief Problem body type.
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
@@ -351,6 +358,7 @@ namespace Rodin::Variational
 
       virtual ProblemUVBase& assemble() override = 0;
 
+      /// @brief Solves the assembled problem with the given solver.
       virtual void solve(SolverBaseType& solver) override = 0;
 
       virtual ProblemUVBase& operator=(const ProblemBodyType& rhs) override = 0;
@@ -907,6 +915,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles the requested part of the linear system.
       virtual ProblemUsBase& assemble(AssemblyTarget target) override
       {
         auto& axb = getLinearSystem();
@@ -977,6 +986,7 @@ namespace Rodin::Variational
             });
       }
 
+      /// @brief Copy assignment.
       ProblemUsBase& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -984,11 +994,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the offsets of the trial degrees of freedom.
       const auto& getTrialOffsets() const
       {
         return m_trialOffsets;
       }
 
+      /// @brief Gets the offsets of the test degrees of freedom.
       const auto& getTestOffsets() const
       {
         return m_testOffsets;
@@ -1022,6 +1034,7 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
+  /// @brief Variational problem in three or more unknown fields.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class Problem<LinearSystem, U1, U2, U3, Us...>
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>
@@ -1042,26 +1055,31 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Problem body type.
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Parent class type.
       using Parent = ProblemUsBase<LinearSystem, U1, U2, U3, Us...>;
 
+      /// @brief Constructs the problem over the given unknown fields.
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)
         : Parent(u1, u2, u3, us...)
       {}
 
+      /// @brief Copy constructor.
       Problem(const Problem& other)
         : Parent(other),
           m_axb(other.m_axb)
       {}
 
+      /// @brief Move constructor.
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_axb(std::move(other.m_axb))
       {}
 
+      /// @brief Copy assignment.
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -1072,6 +1090,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -1107,6 +1126,7 @@ namespace Rodin::Variational
       LinearSystemType m_axb;
   };
 
+  /// @brief Deduction guide for @c Problem.
   template <class U1, class U2, class U3, class ... Us>
   Problem(U1& u1, U2& u2, U3& u3, Us&... us)
     -> Problem<
@@ -1120,5 +1140,4 @@ namespace Rodin::Variational
         U1, U2, U3, Us...>;
 }
 
-/// @endcond
 #endif

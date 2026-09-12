@@ -13,7 +13,6 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/QF/QuadratureFormula.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -35,6 +34,7 @@ namespace Rodin::Variational
   class IntegrationPoint
   {
     public:
+      /// @brief Constructs an integration point from a geometric point.
       IntegrationPoint(const Geometry::Point& p)
         : m_p(p),
           m_qf(nullptr),
@@ -89,5 +89,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

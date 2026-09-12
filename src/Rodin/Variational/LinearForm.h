@@ -28,22 +28,24 @@
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c LinearFormBase: exposes the vector type.
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
   };
 
+  /// @brief Type traits for @c LinearForm: exposes the finite element space and the
+  /// vector type.
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
   };
 }
@@ -253,6 +255,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Replaces the integrators of the form.
       constexpr
       LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
@@ -327,15 +330,19 @@ namespace Rodin::Variational
       using VectorType =
         Math::Vector<ScalarType>;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<VectorType, LinearForm>;
 
+      /// @brief Assembly backend type.
       using AssemblyType =
         DefaultAssemblyType;
 
@@ -343,6 +350,7 @@ namespace Rodin::Variational
       using Parent =
         LinearFormBase<VectorType>;
 
+      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;
@@ -359,6 +367,7 @@ namespace Rodin::Variational
         : m_v(v)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
@@ -367,6 +376,7 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /// @brief Move constructor.
       constexpr
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
@@ -375,6 +385,7 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /// @brief Copy assignment.
       LinearForm& operator=(const LinearForm& other)
       {
         if (this != &other)
@@ -387,6 +398,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       LinearForm& operator=(LinearForm&& other) noexcept
       {
         if (this != &other)
@@ -420,11 +432,13 @@ namespace Rodin::Variational
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
+      /// @brief Gets the assembled vector.
       VectorType& getVector() override
       {
         return m_vector;
       }
 
+      /// @brief Gets the assembled vector.
       const VectorType& getVector() const override
       {
         return m_vector;
@@ -460,5 +474,4 @@ namespace Rodin::Variational
     -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 }
 
-/// @endcond
 #endif

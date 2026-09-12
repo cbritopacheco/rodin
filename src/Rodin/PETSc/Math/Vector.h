@@ -51,7 +51,7 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<::Vec>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = PetscScalar;
   };
 }

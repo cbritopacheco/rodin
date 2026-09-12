@@ -60,9 +60,10 @@
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <
     class Derived,
     class FES,
@@ -75,13 +76,14 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
       VectorField, Step, BoundaryPolicy>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType =
         Variational::TestSpace;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType =
         Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
   };
@@ -268,6 +270,7 @@ namespace Rodin::Variational
           m_p(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Flow(const Flow& other)
         : Parent(other),
           m_maxZeroHops(other.m_maxZeroHops),
@@ -290,6 +293,7 @@ namespace Rodin::Variational
           m_p(other.m_p)
       {}
 
+      /// @brief Move constructor.
       Flow(Flow&& other)
         : Parent(std::move(other)),
           m_maxZeroHops(std::move(other.m_maxZeroHops)),
@@ -1079,6 +1083,7 @@ namespace Rodin::Variational
         return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
@@ -1259,6 +1264,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope&) const
       {
         return {};
@@ -1291,6 +1297,7 @@ namespace Rodin::Variational
       const Geometry::Point* m_p;
   };
 
+  /// @brief Deduction guide for @c Flow.
   template <class Derived, class Velocity>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&)
     -> Flow<
@@ -1299,6 +1306,7 @@ namespace Rodin::Variational
          Math::RungeKutta::RK4,
          DefaultBoundaryPolicy>;
 
+  /// @brief Deduction guide for @c Flow.
   template <class Derived, class Velocity, class Step>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
     -> Flow<
@@ -1307,10 +1315,10 @@ namespace Rodin::Variational
          Step,
          DefaultBoundaryPolicy>;
 
+  /// @brief Deduction guide for @c Flow.
   template <class Derived, class Velocity, class Step, class BBP>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&)
     -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
-/// @endcond
 #endif

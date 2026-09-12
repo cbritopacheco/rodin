@@ -39,30 +39,34 @@
 #include "Rodin/Variational/Mult.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+  /// space and the operand type.
   template <class Range, class Data, class Mesh>
   struct Traits<
     Variational::Jacobian<
       Variational::GridFunction<
         Variational::P1<Range, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
@@ -106,6 +110,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
@@ -114,23 +119,28 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       Jacobian(const OperandType& u)
         : Parent(u)
       {}
 
+      /// @brief Copy constructor.
       Jacobian(const Jacobian& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Interpolates at an integration point.
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -239,6 +249,7 @@ namespace Rodin::Variational
         out = G * p.getJacobianInverse();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -246,6 +257,7 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
+      /// @brief Creates a polymorphic copy.
       Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
@@ -273,6 +285,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
@@ -281,6 +294,7 @@ namespace Rodin::Variational
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
@@ -289,74 +303,106 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Jacobian<OperandType>, FESType, SpaceType>;
 
+      /// @brief Per-cell tabulation cache.
       struct Cache
       {
-        struct CellKey
-        {
-          const void* mesh = nullptr;
-          size_t d = 0;
-          Index i = 0;
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          int transOrder = 1;
-          size_t vdim = 0;
-          bool valid = false;
-
-          explicit operator bool() const noexcept { return valid; }
-
-          bool operator==(const CellKey& o) const noexcept
+          /// @brief Key identifying the cell a tabulation was computed for.
+          struct CellKey
           {
-            if (!valid || !o.valid) return false;
-            return mesh == o.mesh && d == o.d && i == o.i
-                && geom == o.geom && transOrder == o.transOrder && vdim == o.vdim;
-          }
+              /// @brief Mesh the cached tabulation belongs to.
+              const void* mesh = nullptr;
+              /// @brief Topological dimension of the cached polytope.
+              size_t d = 0;
+              /// @brief Index of the cached polytope.
+              Index i = 0;
+              /// @brief Geometry of the cached polytope.
+              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              /// @brief Order of the geometric transformation.
+              int transOrder = 1;
+              /// @brief Vector dimension of the finite element space.
+              size_t vdim = 0;
+              /// @brief Whether the key holds a cached entry.
+              bool valid = false;
 
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            mesh = nullptr;
-            d = 0;
-            i = 0;
-            geom = Geometry::Polytope::Type::Point;
-            transOrder = 1;
-            vdim = 0;
-          }
+              /// @brief Tests whether the key holds a cached entry.
+              explicit operator bool() const noexcept
+              {
+                return valid;
+              }
+
+              /// @brief Equality comparison.
+              bool operator==(const CellKey& o) const noexcept
+              {
+                if (!valid || !o.valid)
+                  return false;
+                return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
+                  transOrder == o.transOrder && vdim == o.vdim;
+              }
+
+              /// @brief Resets the key, invalidating the cached entry.
+              void operator=(std::initializer_list<int>) noexcept
+              {
+                valid = false;
+                mesh = nullptr;
+                d = 0;
+                i = 0;
+                geom = Geometry::Polytope::Type::Point;
+                transOrder = 1;
+                vdim = 0;
+              }
         };
 
+        /// @brief Key identifying the quadrature point a tabulation was computed for.
         struct QpKey
         {
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = 0;
-          bool valid = false;
+            /// @brief Quadrature formula the cached tabulation belongs to.
+            const QF::QuadratureFormulaBase* qf = nullptr;
+            /// @brief Index of the quadrature point.
+            size_t qp = 0;
+            /// @brief Whether the key holds a cached entry.
+            bool valid = false;
 
-          explicit operator bool() const noexcept { return valid; }
+            /// @brief Tests whether the key holds a cached entry.
+            explicit operator bool() const noexcept
+            {
+              return valid;
+            }
 
-          bool operator==(const QpKey& o) const noexcept
-          {
-            if (!valid || !o.valid) return false;
-            return qf == o.qf && qp == o.qp;
-          }
+            /// @brief Equality comparison.
+            bool operator==(const QpKey& o) const noexcept
+            {
+              if (!valid || !o.valid)
+                return false;
+              return qf == o.qf && qp == o.qp;
+            }
 
-          void operator=(std::initializer_list<int>) noexcept
-          {
-            valid = false;
-            qf = nullptr;
-            qp = 0;
-          }
+            /// @brief Resets the key, invalidating the cached entry.
+            void operator=(std::initializer_list<int>) noexcept
+            {
+              valid = false;
+              qf = nullptr;
+              qp = 0;
+            }
         };
 
         // Cached physical Jacobians, one per vector DOF: size = vdim * nvertices
+        /// @brief Cached Jacobian values.
         std::vector<SpatialMatrixType> jac;
 
+        /// @brief Key of the cached cell tabulation.
         CellKey cellKey;
+        /// @brief Key of the cached quadrature-point tabulation.
         QpKey qpKey;
       };
 
+      /// @brief Constructs the expression from its operand.
       Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u),
@@ -364,6 +410,7 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
+      /// @brief Move constructor.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -371,30 +418,35 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Gets the finite element space.
       constexpr
       const FESType& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -402,6 +454,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Tests whether a polytope geometry is a tensor-product one.
       static constexpr bool isTensorGeom(Geometry::Polytope::Type g) noexcept
       {
         return g == Geometry::Polytope::Type::Quadrilateral
@@ -409,6 +462,7 @@ namespace Rodin::Variational
             || g == Geometry::Polytope::Type::Hexahedron;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -528,6 +582,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       const SpatialMatrixType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
@@ -535,6 +590,7 @@ namespace Rodin::Variational
         return m_cache.jac[local];
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -555,10 +611,10 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
+  /// @brief Deduction guide for @c Jacobian.
   template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
   Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

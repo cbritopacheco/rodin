@@ -20,28 +20,31 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Component over a shape function: exposes the finite
+  /// element space, the shape function space, the operand type, the scalar type and the
+  /// range type.
   template <class OperandDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Component<Variational::ShapeFunctionBase<OperandDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType =
         Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
 
-    /// @brief Range type of the operand.
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
   };
 }
@@ -92,6 +95,7 @@ namespace Rodin::Variational
         : m_fn(fn.copy()), m_idx(component)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Component(const Component& other)
         : Parent(other),
@@ -99,6 +103,7 @@ namespace Rodin::Variational
           m_idx(other.m_idx)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
@@ -139,6 +144,7 @@ namespace Rodin::Variational
         return this->getOperand().getValue(p)(m_idx);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -203,6 +209,7 @@ namespace Rodin::Variational
         : m_fn(fn.copy()), m_i(i), m_j(j)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Component(const Component& other)
         : Parent(other),
@@ -211,6 +218,7 @@ namespace Rodin::Variational
           m_j(other.m_j)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
@@ -242,6 +250,7 @@ namespace Rodin::Variational
         return this->getOperand().getValue(p)(m_i, m_j);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -305,6 +314,7 @@ namespace Rodin::Variational
         : m_u(u), m_idx(component)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Component(const Component& other)
         : Parent(other),
@@ -312,6 +322,7 @@ namespace Rodin::Variational
           m_idx(other.m_idx)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
@@ -351,6 +362,7 @@ namespace Rodin::Variational
         return m_u.get().getValue(p)(m_idx);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -390,6 +402,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr const ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -420,12 +433,14 @@ namespace Rodin::Variational
           m_idx(component)
       {}
 
+      /// @brief Copy constructor.
       Component(const Component& other)
         : Parent(other),
           m_u(other.m_u->copy()),
           m_idx(other.m_idx)
       {}
 
+      /// @brief Move constructor.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -485,6 +500,7 @@ namespace Rodin::Variational
         return m_u->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Component& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_u->setIntegrationPoint(ip);
@@ -503,6 +519,7 @@ namespace Rodin::Variational
         return basis(m_idx);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -527,5 +544,4 @@ namespace Rodin::Variational
     -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

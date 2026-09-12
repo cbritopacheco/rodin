@@ -59,7 +59,6 @@
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -79,6 +78,7 @@ namespace Rodin::Variational
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Parent class type.
@@ -98,24 +98,28 @@ namespace Rodin::Variational
         assert(m_sdim > 0);
       }
 
+      /// @brief Copy constructor.
       BoundaryNormal(const BoundaryNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim),
           m_mesh(other.m_mesh)
       {}
 
+      /// @brief Move constructor.
       BoundaryNormal(BoundaryNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim)),
           m_mesh(std::move(other.m_mesh))
       {}
 
+      /// @brief Gets the topological dimension.
       constexpr
       size_t getDimension() const
       {
         return m_sdim;
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
       {
         Math::SpatialVector<ScalarType> out;
@@ -123,6 +127,7 @@ namespace Rodin::Variational
         res = out.getData().head(m_sdim);
       }
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(Math::SpatialVector<ScalarType>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -245,6 +250,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       RangeType getValue(const Geometry::Point& p) const
       {
         SpatialVectorType res;
@@ -283,6 +289,7 @@ namespace Rodin::Variational
         return res;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -300,5 +307,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

@@ -19,7 +19,6 @@
 
 #include "ScalarFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -104,6 +103,7 @@ namespace Rodin::Variational
       virtual ComplexFunctionBase* copy() const noexcept override = 0;
   };
 
+  /// @brief Complex-valued constant function built from an integer.
   template <>
   class ComplexFunction<Integer> final
     : public ComplexFunctionBase<ComplexFunction<Integer>>
@@ -168,6 +168,7 @@ namespace Rodin::Variational
   /// @brief Deduction guide for integer constants.
   ComplexFunction(Integer) -> ComplexFunction<Integer>;
 
+  /// @brief Complex-valued constant function built from a real.
   template <>
   class ComplexFunction<Real> final
     : public ComplexFunctionBase<ComplexFunction<Real>>
@@ -657,5 +658,4 @@ namespace Rodin::Variational
   ComplexFunction(const FReal&, const FImag&) -> ComplexFunction<FReal, FImag>;
 }
 
-/// @endcond
 #endif

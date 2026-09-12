@@ -37,7 +37,7 @@ namespace Rodin::FormLanguage
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
-    /// @brief Assembled operator type.
+      /// @brief Assembled operator type.
       using OperatorType = Operator;
   };
 
@@ -45,13 +45,13 @@ namespace Rodin::FormLanguage
   template <class Solution, class TrialFES, class TestFES, class Operator>
   struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
   {
-    /// @brief Solution vector type.
+      /// @brief Solution vector type.
       using SolutionType = Solution;
-    /// @brief Trial finite element space type.
+      /// @brief Trial finite element space type.
       using TrialFESType = TrialFES;
-    /// @brief Test finite element space type.
+      /// @brief Test finite element space type.
       using TestFESType = TestFES;
-    /// @brief Assembled operator type.
+      /// @brief Assembled operator type.
       using OperatorType = Operator;
   };
 }

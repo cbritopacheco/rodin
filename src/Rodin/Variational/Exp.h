@@ -18,7 +18,6 @@
 #include "Function.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -113,6 +112,7 @@ namespace Rodin::Variational
         return Math::exp(this->getOperand().getValue(p));
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         // Exponential of a polynomial is not a polynomial unless operand is constant.
@@ -138,16 +138,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
+  /// @brief Deduction guide for @c Exp.
   template <class NestedDerived>
   Exp(const FunctionBase<NestedDerived>&) -> Exp<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
   constexpr auto
+  /// @brief Builds the pointwise exponential of a function expression.
   exp(const FunctionBase<NestedDerived>& op)
   {
     return Exp(op);
   }
 }
 
-/// @endcond
 #endif

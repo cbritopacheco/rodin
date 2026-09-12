@@ -15,26 +15,29 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Division over a shape function: exposes the finite element
+  /// space, the shape function space, the left-hand side operand, the right-hand side
+  /// operand and the range type.
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Division<
       Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::FunctionBase<RHSDerived>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<RHSDerived>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<LHSType>::RangeType;
   };
 }
@@ -160,6 +163,7 @@ namespace Rodin::Variational
         return lhs / rhs;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -233,6 +237,7 @@ namespace Rodin::Variational
     return Division(RealFunction(lhs), rhs);
   }
 
+  /// @brief Quotient of a shape function.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   class Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
     : public ShapeFunctionBase<
@@ -243,6 +248,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Left-hand side operand type.
@@ -254,62 +260,73 @@ namespace Rodin::Variational
       using Parent =
         ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Division(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()),
           m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       Division(const Division& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
           m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       Division(Division&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the operand in the shape function expression.
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
       }
 
+      /// @brief Gets the finite element space.
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
+      /// @brief Gets the left-hand side operand.
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_lhs->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const auto& ip = getIntegrationPoint();
@@ -318,6 +335,7 @@ namespace Rodin::Variational
         return lhs / rhs;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -339,12 +357,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c Division.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   Division(
       const ShapeFunctionBase<LHSDerived, FES, Space>&,
       const FunctionBase<RHSDerived>&)
     -> Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
+  /// @brief Quotient of two shape function expressions.
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   auto operator/(
       const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
@@ -353,5 +373,4 @@ namespace Rodin::Variational
     return Division(lhs, rhs);
   }
 }
-/// @endcond
 #endif

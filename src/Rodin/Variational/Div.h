@@ -36,7 +36,6 @@
 #include "TrialFunction.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -211,6 +210,7 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /// @brief Interpolates at an integration point.
       constexpr
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
@@ -220,6 +220,7 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
@@ -238,5 +239,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

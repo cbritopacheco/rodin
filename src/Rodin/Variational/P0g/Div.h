@@ -26,31 +26,35 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Div over a grid function: exposes the finite element
+  /// space, the scalar type and the operand type.
   template <class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Div over a shape function: exposes the finite element
+  /// space, the shape function space, the scalar type and the operand type.
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
       Variational::ShapeFunction<NestedDerived, Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
@@ -81,14 +85,17 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Div(const OperandType& u)
         : Parent(u)
       {}
 
+      /// @brief Copy constructor.
       Div(const Div& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Div(Div&& other)
         : Parent(std::move(other))
       {}
@@ -101,12 +108,14 @@ namespace Rodin::Variational
         out = ScalarType(0);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;
       }
 
+      /// @brief Creates a polymorphic copy.
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -127,6 +136,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
@@ -138,6 +148,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
@@ -145,6 +156,7 @@ namespace Rodin::Variational
           m_zero(ScalarType(0))
       {}
 
+      /// @brief Copy constructor.
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u),
@@ -152,6 +164,7 @@ namespace Rodin::Variational
           m_zero(other.m_zero)
       {}
 
+      /// @brief Move constructor.
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -159,18 +172,21 @@ namespace Rodin::Variational
           m_zero(std::exchange(other.m_zero, ScalarType(0)))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -178,6 +194,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // keep operand aligned
@@ -198,6 +215,7 @@ namespace Rodin::Variational
         return m_zero;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -223,10 +241,10 @@ namespace Rodin::Variational
   Div(const GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>&)
     -> Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
+  /// @brief Deduction guide for @c Div.
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   Div(const ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
     -> Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

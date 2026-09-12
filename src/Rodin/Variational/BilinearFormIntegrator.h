@@ -27,7 +27,6 @@
 #include "ShapeFunction.h"
 #include "Integrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -170,6 +169,8 @@ namespace Rodin::Variational
       std::unique_ptr<FormLanguage::Base> m_v;
   };
 
+  /// @brief Base class for bilinear form integrators whose trial and test functions live
+  /// on the same polytope.
   template <class Number>
   class LocalBilinearFormIntegratorBase
     : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
@@ -221,6 +222,7 @@ namespace Rodin::Variational
         return over(FlatSet<Geometry::Attribute>{attr});
       }
 
+      /// @brief Restricts integration to the given mesh attributes.
       template <class A1, class A2, class ... As>
       LocalBilinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
@@ -241,12 +243,16 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the polytope the expression is bound to.
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
+      /// @brief Binds the expression to a polytope.
       virtual LocalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
+      /// @brief Returns an entry of the element matrix.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const = 0;
 
       virtual
@@ -256,6 +262,8 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_attrs;
   };
 
+  /// @brief Base class for bilinear form integrators coupling a trial and a test polytope
+  /// across the mesh.
   template <class Number>
   class GlobalBilinearFormIntegratorBase
     : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>
@@ -269,6 +277,7 @@ namespace Rodin::Variational
 
       using Parent::Parent;
 
+      /// @brief Copy constructor.
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
@@ -330,13 +339,17 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Binds the expression to a polytope.
       virtual
       GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
+      /// @brief Returns an entry of the element matrix.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
+      /// @brief Returns the region the trial function is integrated over.
       virtual Geometry::Region getTrialRegion() const = 0;
 
+      /// @brief Returns the region the test function is integrated over.
       virtual Geometry::Region getTestRegion() const = 0;
 
       virtual
@@ -348,5 +361,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

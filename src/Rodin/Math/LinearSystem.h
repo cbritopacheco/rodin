@@ -21,13 +21,13 @@ namespace Rodin::FormLanguage
   template <class Operator, class Vector>
   struct Traits<Math::LinearSystem<Operator, Vector>>
   {
-    /// @brief Assembled operator type.
+      /// @brief Assembled operator type.
       using OperatorType = Operator;
 
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename Traits<OperatorType>::ScalarType;
   };
 }
@@ -830,7 +830,7 @@ namespace std
   template <class Matrix, class Vector>
   struct tuple_element<0, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-    /// @brief Type of element 0 (the operator matrix).
+      /// @brief Type of element 0 (the operator matrix).
       using type = Matrix;
   };
 
@@ -838,7 +838,7 @@ namespace std
   template <class Matrix, class Vector>
   struct tuple_element<1, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-    /// @brief Type of element 1 (the solution vector).
+      /// @brief Type of element 1 (the solution vector).
       using type = Vector;
   };
 
