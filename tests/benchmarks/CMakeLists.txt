@@ -2,6 +2,7 @@ set(RodinBenchmarks_SRCS
   GridFunction.cpp
   P1.cpp
   Poisson.cpp
+  NamedForms.cpp
   MeshIO.cpp
   UniformGrid.cpp
   Connectivity.cpp
