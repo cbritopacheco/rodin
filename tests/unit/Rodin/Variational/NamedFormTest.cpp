@@ -54,6 +54,33 @@ namespace Rodin::Tests::Unit
       return mesh;
     }
 
+    /// @brief Unit square as two triangles, split along one diagonal or the other.
+    ///
+    /// The two meshes have the same vertices, the same vertex count, the same
+    /// cell count and the same number of matrix nonzeros; only the diagonal
+    /// differs. That makes them indistinguishable by size alone, which is what
+    /// the scatter map's fingerprint has to catch.
+    LocalMesh flippedSquare(bool flipped)
+    {
+      LocalMesh::Builder builder;
+      builder.initialize(2).nodes(4).vertex({0, 0}).vertex({1, 0}).vertex({0, 1}).vertex(
+        {1, 1});
+      if (flipped)
+      {
+        builder.polytope(Polytope::Type::Triangle, {{0, 1, 3}})
+          .polytope(Polytope::Type::Triangle, {{0, 3, 2}});
+      }
+      else
+      {
+        builder.polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+          .polytope(Polytope::Type::Triangle, {{1, 3, 2}});
+      }
+      LocalMesh mesh = builder.finalize();
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+      return mesh;
+    }
+
     template <class Actual, class Expected>
     void expectNear(const Actual& actual, const Expected& expected)
     {
@@ -285,6 +312,89 @@ namespace Rodin::Tests::Unit
     openMP.execute(openMPOperator, mass);
     expectNear(openMPOperator, mass.getOperator());
 #endif
+  }
+
+  /// @brief Verifies an edge flip invalidates the cached scatter map.
+  ///
+  /// The flipped mesh matches the original in every count the validity check
+  /// looks at, so a pattern keyed on shape alone would be reused and would
+  /// scatter each cell matrix into the wrong entries.
+  TEST(Rodin_Variational_NamedForm, EdgeFlipInvalidatesScatterMap)
+  {
+    auto mesh = flippedSquare(false);
+    auto flipped = flippedSquare(true);
+    P1 fes(mesh);
+    P1 flippedFES(flipped);
+
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    TrialFunction flippedU(flippedFES);
+    TestFunction flippedV(flippedFES);
+
+    MassForm mass(u, v);
+    MassForm flippedMass(flippedU, flippedV);
+
+    // The premise: the two states agree on everything but the DOF maps.
+    ASSERT_EQ(fes.getSize(), flippedFES.getSize());
+    ASSERT_EQ(mesh.getCellCount(), flipped.getCellCount());
+    ASSERT_EQ(mass.getOperator().nonZeros(), flippedMass.getOperator().nonZeros());
+
+    BilinearForm expected(flippedU, flippedV);
+    expected = Integral(flippedU, flippedV);
+    expected.assemble();
+
+    // One assembly object, both meshes: the second call must rebuild.
+    using Form = decltype(mass);
+    typename Form::OperatorType op;
+    Assembly::Sequential<typename Form::OperatorType, Form> sequential;
+    sequential.execute(op, mass);
+    expectNear(op, mass.getOperator());
+    sequential.execute(op, flippedMass);
+    expectNear(op, expected.getOperator());
+
+#ifdef RODIN_USE_OPENMP
+    typename Form::OperatorType openMPOperator;
+    Assembly::OpenMP<typename Form::OperatorType, Form> openMP;
+    openMP.execute(openMPOperator, mass);
+    expectNear(openMPOperator, mass.getOperator());
+    openMP.execute(openMPOperator, flippedMass);
+    expectNear(openMPOperator, expected.getOperator());
+#endif
+  }
+
+  /// @brief Verifies the flip is also caught for a space with cached DOF maps.
+  ///
+  /// P1 rebuilds its map from the connectivity on every call; H1 order 2 hands
+  /// back a stored array. The fingerprint has to see through both.
+  TEST(Rodin_Variational_NamedForm, EdgeFlipInvalidatesScatterMapH1P2)
+  {
+    auto mesh = flippedSquare(false);
+    auto flipped = flippedSquare(true);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    H1 flippedFES(std::integral_constant<size_t, 2>{}, flipped);
+
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    TrialFunction flippedU(flippedFES);
+    TestFunction flippedV(flippedFES);
+
+    DiffusionForm diffusion(u, v);
+    DiffusionForm flippedDiffusion(flippedU, flippedV);
+
+    ASSERT_EQ(fes.getSize(), flippedFES.getSize());
+    ASSERT_EQ(
+      diffusion.getOperator().nonZeros(), flippedDiffusion.getOperator().nonZeros());
+
+    BilinearForm expected(flippedU, flippedV);
+    expected = Integral(Grad(flippedU), Grad(flippedV));
+    expected.assemble();
+
+    using Form = decltype(diffusion);
+    typename Form::OperatorType op;
+    Assembly::Sequential<typename Form::OperatorType, Form> sequential;
+    sequential.execute(op, diffusion);
+    sequential.execute(op, flippedDiffusion);
+    expectNear(op, expected.getOperator());
   }
 
   /// @brief Verifies a named form sums with an Integral inside a Problem.
