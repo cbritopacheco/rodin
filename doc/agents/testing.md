@@ -4,29 +4,33 @@
 
 ```
 tests/unit/Rodin/<Module>/...      GoogleTest, mirrors src/Rodin exactly
-tests/manufactured/Rodin/...       Convergence + targeted regressions
+tests/manufactured/Rodin/...       Manufactured solutions + fixed-mesh regressions
+tests/convergence/{h,p,hp,...}/... Multi-resolution convergence-rate validation
 tests/benchmarks/                  Google Benchmark (target RodinBenchmarks)
 tests/installation/                Install-tree consumption checks
 src/Rodin/Test/                    Library-side helpers (Random functions, Utility)
 ```
 
 - ctest **is** wired up: suites register through `gtest_discover_tests` with
-  the labels `unit`, `manufactured`, `slow`, `distributed` and `petsc` — the
-  same selectors CI uses. Scope a run to what changed:
+  the labels `unit`, `manufactured`, `convergence`, `slow`, `distributed` and
+  `petsc`. Scope a run to what changed:
   `ctest --test-dir build/tests -L unit -LE "slow|distributed"
   --output-on-failure`, or `-R <pattern>` for one suite. Running a gtest
   executable directly still works when you want its raw output
   (`--gtest_filter`, `--gtest_list_tests`).
 - Build type is part of correctness here: unit tests may run `Debug`
-  (assertions, sanitizers), but manufactured tests solve PDEs and verify
-  convergence rates, so they run `Release`/`RelWithDebInfo` — `Debug` is
-  impractically slow.
+  (assertions, sanitizers), but manufactured and convergence tests solve PDEs,
+  so they run `Release`/`RelWithDebInfo` — `Debug` is impractically slow.
 - Manufactured tests are organized by space and cross-space combination
   (`H1/`, `P0/`, `P1/`, `P0_P1/`, `P1_H1/`, `PreassembledMixed/`,
   `Assembly/`, `Solver/`, `Models/`, `MPI/`, `PETSc/`) — the place for
   "does this converge at the right rate" and backend-contract regressions
   (e.g. `PETSc/TargetedAssemblyTest.cpp` pins sparsity-pattern reuse:
   0 mallocs on reuse, structural zeros preserved).
+- Convergence tests are organized by refinement mechanism (`h/`, `p/`, `hp/`,
+  `isoparametric/`). They use enough discretizations to establish the stated
+  rate interval, integrate error norms independently of the solved field, and
+  assert every observed rate.
 
 ## Required coverage
 
