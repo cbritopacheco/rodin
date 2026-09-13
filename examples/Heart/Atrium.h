@@ -251,6 +251,22 @@ namespace Rodin::Examples::Heart
           ThrombosisParameters thrombosis;
           /// @brief Codina crosswind constant. 0 disables it.
           Real crosswindC = 0.7;
+
+          /// @brief Scale of the Temam correction of the species transport.
+          /// @details The species are advected in non-conservative form. With
+          ///          the equal-order pair div(u) is only weakly zero, so
+          ///          d/dt int c = -int_G c (u.n) + int c div(u): the residual
+          ///          divergence acts as a distributed source and the molar
+          ///          balance between fibrinogen and fibrin drifts. Adding
+          ///          (1/2) (div u) c v restores the skew symmetry of the
+          ///          advection operator, since with v = c
+          ///
+          ///            int (u.grad c) c + (1/2) int (div u) c^2
+          ///              = (1/2) int div(u c^2) = (1/2) int_G (u.n) c^2,
+          ///
+          ///          leaving only the boundary flux. 1 is the standard value,
+          ///          0 recovers the plain non-conservative form.
+          Real speciesTemamScale = 1.0;
           bool solveKinetics = true;
 
           /// @brief Divergence guard on max|u| (m/s).

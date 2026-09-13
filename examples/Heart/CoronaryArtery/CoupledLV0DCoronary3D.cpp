@@ -1389,11 +1389,10 @@ namespace Rodin::Examples::Heart
         /*
          * Backflow stabilization tangent.
          *
-         * inletBeta activates when inlet behaves as an outlet:
-         *   uOld · n > 0
-         *
-         * outletBeta activates when outlet behaves as an inlet:
-         *   uOld · n < 0
+         * Both betas are max(-uOld.n, 0) and arm on entering flow, uOld.n < 0.
+         * At an outlet that is reversed flow; at the pressure inlet it is the
+         * intended inflow, so the term acts there as a quadratic entrance
+         * resistance 0.5 rho |uOld.n| and not only as a backflow guard.
          *
          * Since beta is lagged with m_uOld, the tangent is simply beta * du.
          */

@@ -29,8 +29,9 @@
  *   Multiplies the outlet damping term <0.5 rho max(-(u_old.n), 0) u, v>.
  *   0 disables it.
  * - `-coronary_inlet_backflow_stabilization <value>`
- *   Multiplies the inlet damping term <0.5 rho max(u_old.n, 0) u, v>. The
- *   intended pressure-driven inflow has u_old.n < 0 and is not damped.
+ *   Multiplies the inlet damping term <0.5 rho max(-(u_old.n), 0) u, v>. It
+ *   arms on entering flow, so at the pressure inlet it acts on the intended
+ *   inflow as a quadratic entrance resistance 0.5 rho |u_old.n|; 0 disables it.
  * - `-coronary_operating_pra <Pa>`
  *   Right atrial pressure seen by the running outlets, with the calibration
  *   left at the healthy baseline (venous-hypertension scenarios).

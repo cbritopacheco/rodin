@@ -4,7 +4,9 @@
 //   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
 //
 // Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
-//          -atrium_species_cycles, -atrium_pin.
+//          -atrium_species_cycles, -atrium_pin, -atrium_output_every,
+//          -atrium_vms_scale, -atrium_graddiv_scale, -atrium_pspg_scale,
+//          -atrium_species_temam, -atrium_vms, -atrium_kinetics.
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -574,6 +576,7 @@ namespace Rodin::Examples::Heart
     const Real Dfg = m_cfg.thrombosis.diffusivityFibrinogen;
     const Real Dfn = m_cfg.thrombosis.diffusivityFibrin;
     const Real keff = m_cfg.thrombosis.reactionRate;
+    const Real temam = 0.5 * m_cfg.speciesTemamScale;
     const Real scale = m_cfg.thrombosis.stabilizationScale;
     const Real dt = m_cfg.dt;
     const Real fg0 =
@@ -622,19 +625,28 @@ namespace Rodin::Examples::Heart
     const auto pFg = Dot(m_uOld, Grad(m_vfg));
     const auto pFn = Dot(m_uOld, Grad(m_vfn));
 
+    // Temam correction of the transport, one per species. It is a discrete
+    // correction and not part of the strong residual, so it stays out of the
+    // SUPG and crosswind residuals below, exactly as the momentum equation
+    // keeps its own Temam term out of the VMS residual.
+    const auto divU = Div(m_uOld);
+
     m_species =
         (1.0 / dt) * Integral(m_th, m_vth) - (1.0 / dt) * Integral(m_thCur, m_vth)
       + Dth * Integral(Grad(m_th), Grad(m_vth))
       + Integral(Dot(m_uOld, Grad(m_th)), m_vth)
+      + temam * Integral(divU * m_th, m_vth)
 
       + (1.0 / dt) * Integral(m_fg, m_vfg) - (1.0 / dt) * Integral(m_fgCur, m_vfg)
       + Dfg * Integral(Grad(m_fg), Grad(m_vfg))
       + Integral(Dot(m_uOld, Grad(m_fg)), m_vfg)
+      + temam * Integral(divU * m_fg, m_vfg)
       + keff * Integral(m_thCur * m_fg, m_vfg)
 
       + (1.0 / dt) * Integral(m_fn, m_vfn) - (1.0 / dt) * Integral(m_fnCur, m_vfn)
       + Dfn * Integral(Grad(m_fn), Grad(m_vfn))
       + Integral(Dot(m_uOld, Grad(m_fn)), m_vfn)
+      + temam * Integral(divU * m_fn, m_vfn)
       - keff * Integral(m_thCur * m_fg, m_vfn)
 
       // Endothelial thrombin flux: a surface flux, armed by the cycle indices.
@@ -1274,6 +1286,12 @@ int main(int argc, char** argv)
         &real, &got);
       if (got)
         cfg.pspgScale = real;
+
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_species_temam",
+        &real, &got);
+      if (got)
+        cfg.speciesTemamScale = real;
 
       PetscBool flag = PETSC_FALSE;
       got = PETSC_FALSE;
