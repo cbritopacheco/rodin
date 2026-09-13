@@ -401,7 +401,9 @@ namespace Rodin::IO
           Grid& clear();
 
         private:
+          /// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
           friend class XDMF;
+          /// @endcond
 
           Grid(XDMF& owner, size_t index) noexcept;
 
