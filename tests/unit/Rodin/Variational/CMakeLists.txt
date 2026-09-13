@@ -124,6 +124,18 @@ gtest_discover_tests(RodinVariationalNamedFormTest
     LABELS unit
 )
 
+add_executable(RodinVariationalNamedFormConsistencyTest NamedFormConsistencyTest.cpp)
+target_link_libraries(RodinVariationalNamedFormConsistencyTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational
+  Rodin::Solid)
+gtest_discover_tests(RodinVariationalNamedFormConsistencyTest
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinVariationalRealFunctionTest RealFunctionTest.cpp)
 target_link_libraries(RodinVariationalRealFunctionTest
   PUBLIC

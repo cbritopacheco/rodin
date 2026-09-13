@@ -9,6 +9,7 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Tuple.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Input.h"
@@ -72,72 +73,31 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @brief Base class for the assembly of a Variational::MassForm.
+   * @brief Base class for the assembly of a named bilinear form.
    *
-   * Unlike the generic bilinear form, a named form carries its own cell
+   * Unlike the generic bilinear form, a named form carries its own local
    * kernel, so the assembly is handed the form itself rather than a
-   * BilinearFormAssemblyInput: it needs @c MassForm::KernelType.
+   * BilinearFormAssemblyInput: it needs the kernel, the region and the
+   * attributes the form integrates over.
    *
    * @tparam OperatorType Matrix type for the assembled operator.
-   * @tparam Solution Solution variable type.
-   * @tparam TrialFES Trial finite element space type.
-   * @tparam TestFES Test finite element space type.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
    */
-  template <class OperatorType, class Solution, class TrialFES, class TestFES>
-  class AssemblyBase<OperatorType,
-    Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>>
-    : public FormLanguage::Base
+  template <class OperatorType, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class AssemblyBase<OperatorType, Form> : public FormLanguage::Base
   {
     public:
-      /// @brief Input data type for the assembly, the mass form itself.
-      using InputType = Variational::MassForm<Solution, TrialFES, TestFES, OperatorType>;
+      /// @brief Input data type for the assembly, the named form itself.
+      using InputType = Form;
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
       /**
        * @brief Executes the assembly operation.
-       * @param[in,out] out Matrix receiving the assembled mass form.
-       * @param[in] input Form supplying the two spaces and the cell kernel.
-       */
-      virtual void execute(OperatorType& out, const InputType& input) const = 0;
-
-      /**
-       * @brief Creates a polymorphic copy of this assembly object.
-       * @returns Pointer to a new copy of this object.
-       */
-      virtual AssemblyBase* copy() const noexcept = 0;
-  };
-
-  /**
-   * @brief Base class for the assembly of a Variational::DiffusionForm.
-   *
-   * Unlike the generic bilinear form, a named form carries its own cell
-   * kernel, so the assembly is handed the form itself rather than a
-   * BilinearFormAssemblyInput: it needs @c DiffusionForm::KernelType.
-   *
-   * @tparam OperatorType Matrix type for the assembled operator.
-   * @tparam Solution Solution variable type.
-   * @tparam TrialFES Trial finite element space type.
-   * @tparam TestFES Test finite element space type.
-   */
-  template <class OperatorType, class Solution, class TrialFES, class TestFES>
-  class AssemblyBase<OperatorType,
-    Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>>
-    : public FormLanguage::Base
-  {
-    public:
-      /// @brief Input data type for the assembly, the diffusion form itself.
-      using InputType =
-        Variational::DiffusionForm<Solution, TrialFES, TestFES, OperatorType>;
-
-      /// @brief Virtual destructor.
-      virtual ~AssemblyBase() = default;
-
-      /**
-       * @brief Executes the assembly operation.
-       * @param[in,out] out Matrix receiving the assembled diffusion form.
-       * @param[in] input Form supplying the two spaces and the cell kernel.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
        */
       virtual void execute(OperatorType& out, const InputType& input) const = 0;
 

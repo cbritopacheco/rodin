@@ -32,6 +32,7 @@
 #define RODIN_FORMLANGUAGE_TRAITS_H
 
 #include <type_traits>
+#include <utility>
 #include <boost/type_index.hpp>
 
 #include <Eigen/Core>
@@ -81,6 +82,48 @@ namespace Rodin::FormLanguage
    */
   template <class T, class Enable = void>
   struct Traits;
+
+  /**
+   * @brief Derived type @c D of the Variational::FunctionBase<D> that @c T
+   * inherits from.
+   *
+   * Function expressions do not name themselves as their FunctionBase
+   * parameter: a RealFunction, for one, derives from a FunctionBase over a
+   * ScalarFunctionBase. Anything that stores a function through its
+   * FunctionBase, the way the form language's own operators do, needs this
+   * type rather than the function's.
+   */
+  template <class T>
+  struct FunctionDerived
+  {
+    private:
+      template <class D>
+      static D deduce(const Variational::FunctionBase<D>&);
+
+    public:
+      /// @brief The FunctionBase parameter of @c T.
+      using Type = decltype(deduce(std::declval<const T&>()));
+  };
+
+  /**
+   * @brief Type trait: whether @c T is a named bilinear form.
+   *
+   * A named form names its integrand instead of building it through the form
+   * language and brings its own local kernel, which lets it be assembled
+   * through Assembly::ScatterMap. Each named form specializes this trait next
+   * to its declaration.
+   *
+   * The trait is matched on the form's template rather than detected from
+   * its members because the assembly is selected while the form's own class
+   * definition is still being instantiated, when none of its members can be
+   * looked up yet.
+   */
+  template <class T>
+  struct IsNamedForm : std::false_type
+  {
+      /// @brief False for types that are not named forms.
+      static constexpr bool Value = false;
+  };
 }
 
 #endif

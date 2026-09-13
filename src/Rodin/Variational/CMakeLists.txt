@@ -10,6 +10,7 @@ set(RodinVariational_HEADERS
   BilinearForm.h
   MassForm.h
   DiffusionForm.h
+  HelmholtzForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
   Derivative.h
