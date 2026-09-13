@@ -49,6 +49,8 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
+#include <atomic>
+#include <cstdint>
 #include <utility>
 #include <fstream>
 #include <functional>
@@ -351,7 +353,8 @@ namespace Rodin::Variational
        */
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
-          m_fes(std::cref(fes))
+          m_fes(std::cref(fes)),
+          m_identity(getNextIdentity())
       {}
 
       /**
@@ -361,7 +364,8 @@ namespace Rodin::Variational
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(other.m_name),
-          m_fes(other.m_fes)
+          m_fes(other.m_fes),
+          m_identity(getNextIdentity())
       {}
 
       /**
@@ -371,7 +375,8 @@ namespace Rodin::Variational
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(std::move(other.m_name)),
-          m_fes(std::move(other.m_fes))
+          m_fes(std::move(other.m_fes)),
+          m_identity(getNextIdentity())
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -1125,18 +1130,29 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Per-thread cache of the DOFs and basis values of the polytope
+       * last evaluated.
+       *
+       * The cache outlives the grid functions that fill it, so it cannot be
+       * keyed on their address: a grid function destroyed and another built
+       * in the same storage, as happens to any local in a loop or in
+       * consecutive scopes, would find the previous one's entry and read
+       * DOFs of a different mesh. It is keyed instead on an identity no two
+       * grid functions ever share.
+       */
       struct EvaluationCache
       {
-        const GridFunctionBase* owner = nullptr;
-        const FES* fes = nullptr;
-        size_t d = static_cast<size_t>(-1);
-        Index i = static_cast<Index>(-1);
-        std::vector<Index> dofs;
+          std::uint64_t owner = 0;
+          const FES* fes = nullptr;
+          size_t d = static_cast<size_t>(-1);
+          Index i = static_cast<Index>(-1);
+          std::vector<Index> dofs;
 
-        bool hasBasisValues = false;
-        const QF::QuadratureFormulaBase* qf = nullptr;
-        size_t qp = static_cast<size_t>(-1);
-        std::vector<RangeType> basisValues;
+          bool hasBasisValues = false;
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = static_cast<size_t>(-1);
+          std::vector<RangeType> basisValues;
       };
 
       static EvaluationCache& getEvaluationCache()
@@ -1149,10 +1165,10 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
-        if (cache.owner != this || cache.fes != fes || cache.d != d || cache.i != i)
+        if (cache.owner != m_identity || cache.fes != fes || cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
-          cache.owner = this;
+          cache.owner = m_identity;
           cache.fes = fes;
           cache.d = d;
           cache.i = i;
@@ -1169,7 +1185,7 @@ namespace Rodin::Variational
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
-        if (!cache.hasBasisValues || cache.owner != this || cache.d != d ||
+        if (!cache.hasBasisValues || cache.owner != m_identity || cache.d != d ||
           cache.i != i || cache.qf != ip.getQuadratureFormula() ||
           cache.qp != ip.getIndex())
         {
@@ -1178,7 +1194,7 @@ namespace Rodin::Variational
           const size_t count = fe.getCount();
           const auto& p = ip.getPoint();
 
-          cache.owner = this;
+          cache.owner = m_identity;
           cache.fes = fes;
           cache.d = d;
           cache.i = i;
@@ -1195,9 +1211,16 @@ namespace Rodin::Variational
         return cache.basisValues;
       }
 
+      /// @brief Draws an identity for the evaluation cache, never reused.
+      static std::uint64_t getNextIdentity()
+      {
+        static std::atomic<std::uint64_t> s_next{1};
+        return s_next.fetch_add(1, std::memory_order_relaxed);
+      }
+
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
-
+      std::uint64_t m_identity;
   };
 
   /**
