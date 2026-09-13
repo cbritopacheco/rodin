@@ -81,7 +81,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md428">Workflow</a></li>
+            <li><a href="#autotoc_md517">Workflow</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code>PETSc::Solver::CG</code> (and <code>PETSc::Solver::GMRES</code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed through the PETSc-backed <code>Integral</code> path. For MPI grid functions this evaluates a distributed <code>LinearForm</code>, so PETSc performs the communicator-wide reduction internally.</p><section id="autotoc_md428"><h4><a href="#autotoc_md428">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;PETSc::Math::LinearSystem, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The PETSc-backed <code>Integral</code> path returns the communicator-wide L² error, which is checked against the manufactured tolerance.</li></ol></section>
+<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code>PETSc::Solver::CG</code> (and <code>PETSc::Solver::GMRES</code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed through the PETSc-backed <code>Integral</code> path. For MPI grid functions this evaluates a distributed <code>LinearForm</code>, so PETSc performs the communicator-wide reduction internally.</p><section id="autotoc_md517"><h4><a href="#autotoc_md517">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;PETSc::Math::LinearSystem, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The PETSc-backed <code>Integral</code> path returns the communicator-wide L² error, which is checked against the manufactured tolerance.</li></ol></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -108,8 +108,8 @@
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt id="a3c04138a5bfe5d72780bb7e82a18e627">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3c04138a5bfe5d72780bb7e82a18e627" class="m-doc-self">main</a>(</span><span class="m-doc-wrap">int argc,
-              char** argv) -&gt; int</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c04138a5bfe5d72780bb7e82a18e627" class="m-doc-self">main</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> argc,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>** argv) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a></span>
             </dt>
             <dd>Initializes the parallel test runtime and runs the GoogleTest suite.</dd>
           </dl>

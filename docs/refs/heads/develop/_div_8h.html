@@ -81,11 +81,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md310">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md311">Applications</a></li>
+            <li><a href="#autotoc_md321">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md322">Applications</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
           </ul>
         </nav>
-<p>This file defines the Div class, which computes the divergence of vector-valued functions in variational formulations. The divergence is a fundamental differential operator that measures the &quot;outflow&quot; of a vector field.</p><section id="autotoc_md310"><h3><a href="#autotoc_md310">Mathematical Foundation</a></h3><p>For a vector field <svg class="m-math" style="width: 9.046em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 86.838027 10.340659">
+<p>This file defines the Div class, which computes the divergence of vector-valued functions in variational formulations. The divergence is a fundamental differential operator that measures the &quot;outflow&quot; of a vector field.</p><section id="autotoc_md321"><h3><a href="#autotoc_md321">Mathematical Foundation</a></h3><p>For a vector field <svg class="m-math" style="width: 9.046em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 86.838027 10.340659">
 <title>
 $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d $
 </title>
@@ -147,7 +154,7 @@ $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d $
 <use x='223.207904' y='-6.831742' xlink:href='#eq2-g4-120'/>
 <use x='229.859991' y='-5.038479' xlink:href='#eq2-g3-105'/>
 </g>
-</svg></div></section><section id="autotoc_md311"><h3><a href="#autotoc_md311">Applications</a></h3><ul><li>Incompressibility constraint: <svg class="m-math" style="width: 4.965em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 47.668168 8.169354">
+</svg></div></section><section id="autotoc_md322"><h3><a href="#autotoc_md322">Applications</a></h3><ul><li>Incompressibility constraint: <svg class="m-math" style="width: 4.965em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 47.668168 8.169354">
 <title>
 $ \nabla \cdot \mathbf{u} = 0 $
 </title>
@@ -184,6 +191,25 @@ $ \nabla \cdot \mathbf{F} = 0 $
 <use x='42.797608' y='0' xlink:href='#eq4-g2-48'/>
 </g>
 </svg></li><li>Mixed formulations for elliptic problems</li></ul></section>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">Rodin::Variational::DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>
+            </dt>
+            <dd>Divergence of a P1 GridFunction.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

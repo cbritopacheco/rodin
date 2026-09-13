@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_line_segment2_d_8h.html">&lt;Rodin/Geometry/Euclidean/LineSegment2D.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a>::<wbr/></span>LineSegment2D <span class="m-thin">class</span>
         </h1>
         <p>Line segment in 2D Euclidean space.</p>
@@ -99,7 +99,6 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -243,27 +242,22 @@ $ t $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base&lt;LineSegment2D&lt;T&gt;, T&gt;</a>
             </dt>
             <dd>Base class for Euclidean geometric objects using CRTP.</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7fc690109aca79bafbe9d54287f10515" class="m-doc">LineSegment2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start,
-              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a line segment from two points.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af5f2e2157ff557c3cb913f0c18aaa83c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const T&amp; t) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7fc690109aca79bafbe9d54287f10515" class="m-doc">LineSegment2D</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a line segment from two points.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5f2e2157ff557c3cb913f0c18aaa83c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; t) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the parametric representation at parameter <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
 <title>
@@ -277,35 +271,35 @@ $ t $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8ff364dd2e1d4e0fd9ef084d9299797b" class="m-doc">length</a>(</span><span class="m-doc-wrap">) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ff364dd2e1d4e0fd9ef084d9299797b" class="m-doc">length</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the length of the segment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0f81b98e48174d5cfdb15b3b9246e70b" class="m-doc">direction</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::Vector2&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0f81b98e48174d5cfdb15b3b9246e70b" class="m-doc">direction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Eigen::Vector2&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the unit direction vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2c531e1bbffa27bc8aff136ae813667b" class="m-doc">start</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c531e1bbffa27bc8aff136ae813667b" class="m-doc">start</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the start point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9702562c2eb4d4c875dde96f808a431a" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9702562c2eb4d4c875dde96f808a431a" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the end point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac141b4c1d9744b0f5dd02b9d176600f2" class="m-doc">setStart</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start) -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac141b4c1d9744b0f5dd02b9d176600f2" class="m-doc">setStart</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets the start point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5ae6d1ccab84950216aa3d600a1c9dc2" class="m-doc">setEnd</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5ae6d1ccab84950216aa3d600a1c9dc2" class="m-doc">setEnd</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets the end point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a924c8fba3353bbc81b9884b74a26504d" class="m-doc">reverse</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a924c8fba3353bbc81b9884b74a26504d" class="m-doc">reverse</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the reversed segment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7075e94d4f2ccfd54f7e31640b2cc0a3" class="m-doc">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7075e94d4f2ccfd54f7e31640b2cc0a3" class="m-doc">intersect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the intersection point with another segment.</dd>
           </dl>
@@ -315,10 +309,10 @@ $ t $
           <section class="m-doc-details" id="a7fc690109aca79bafbe9d54287f10515"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fc690109aca79bafbe9d54287f10515" class="m-doc-self">LineSegment2D</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start,
-              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fc690109aca79bafbe9d54287f10515" class="m-doc-self">LineSegment2D</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a line segment from two points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -382,9 +376,9 @@ $ (x_1, y_1) $
           <section class="m-doc-details" id="af5f2e2157ff557c3cb913f0c18aaa83c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f2e2157ff557c3cb913f0c18aaa83c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const T&amp; t) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f2e2157ff557c3cb913f0c18aaa83c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; t) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the parametric representation at parameter <svg class="m-math" style="width: 0.440em; height: 0.766em; vertical-align: -0.000em;" viewBox="0 -7.353395 4.22716 7.353395">
 <title>
@@ -606,9 +600,9 @@ $ t \in [0, 1] $
           <section class="m-doc-details" id="a8ff364dd2e1d4e0fd9ef084d9299797b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff364dd2e1d4e0fd9ef084d9299797b" class="m-doc-self">length</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff364dd2e1d4e0fd9ef084d9299797b" class="m-doc-self">length</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the length of the segment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -657,9 +651,9 @@ $ \|(x_1, y_1) - (x_0, y_0)\| $
           <section class="m-doc-details" id="a0f81b98e48174d5cfdb15b3b9246e70b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Eigen::Vector2&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f81b98e48174d5cfdb15b3b9246e70b" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Eigen::Vector2&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f81b98e48174d5cfdb15b3b9246e70b" class="m-doc-self">direction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the unit direction vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -727,9 +721,9 @@ $ \|(x_1, y_1) - (x_0, y_0)\| $
           <section class="m-doc-details" id="a2c531e1bbffa27bc8aff136ae813667b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c531e1bbffa27bc8aff136ae813667b" class="m-doc-self">start</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c531e1bbffa27bc8aff136ae813667b" class="m-doc-self">start</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the start point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -765,9 +759,9 @@ $ (x_0, y_0) $
           <section class="m-doc-details" id="a9702562c2eb4d4c875dde96f808a431a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9702562c2eb4d4c875dde96f808a431a" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9702562c2eb4d4c875dde96f808a431a" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the end point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -803,9 +797,9 @@ $ (x_1, y_1) $
           <section class="m-doc-details" id="ac141b4c1d9744b0f5dd02b9d176600f2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac141b4c1d9744b0f5dd02b9d176600f2" class="m-doc-self">setStart</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac141b4c1d9744b0f5dd02b9d176600f2" class="m-doc-self">setStart</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; start) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets the start point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -829,9 +823,9 @@ $ (x_1, y_1) $
           <section class="m-doc-details" id="a5ae6d1ccab84950216aa3d600a1c9dc2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ae6d1ccab84950216aa3d600a1c9dc2" class="m-doc-self">setEnd</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ae6d1ccab84950216aa3d600a1c9dc2" class="m-doc-self">setEnd</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; end) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets the end point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -855,9 +849,9 @@ $ (x_1, y_1) $
           <section class="m-doc-details" id="a924c8fba3353bbc81b9884b74a26504d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a924c8fba3353bbc81b9884b74a26504d" class="m-doc-self">reverse</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a924c8fba3353bbc81b9884b74a26504d" class="m-doc-self">reverse</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the reversed segment.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -872,9 +866,9 @@ $ (x_1, y_1) $
           <section class="m-doc-details" id="a7075e94d4f2ccfd54f7e31640b2cc0a3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7075e94d4f2ccfd54f7e31640b2cc0a3" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />LineSegment2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7075e94d4f2ccfd54f7e31640b2cc0a3" class="m-doc-self">intersect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the intersection point with another segment.</p>
             <table class="m-table m-fullwidth m-flat">

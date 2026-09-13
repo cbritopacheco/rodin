@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rectangle_8h.html">&lt;Rodin/Geometry/Euclidean/Rectangle.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a>::<wbr/></span>Rectangle <span class="m-thin">class</span>
         </h1>
         <p>Axis-aligned rectangle in 2D Euclidean space.</p>
@@ -99,7 +99,6 @@
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -236,43 +235,38 @@ $ (x, y) $
             <dd>Corner enumeration for rectangle corners.</dd>
           </dl>
         </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab95ae2e9b8a169682ec944e82d0d6cb5" class="m-doc">Rectangle</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; bottomLeft,
-              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; topRight) <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a rectangle from two opposite corners.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae8bfa60f991489d8c78a41c21f77ba36" class="m-doc">contains</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab95ae2e9b8a169682ec944e82d0d6cb5" class="m-doc">Rectangle</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; bottomLeft,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; topRight) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a rectangle from two opposite corners.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae8bfa60f991489d8c78a41c21f77ba36" class="m-doc">contains</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Tests if a point is contained in the rectangle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f578d90f661e5ae9b71e2ac6c0715a6" class="m-doc">contains</a>(</span><span class="m-doc-wrap">const T&amp; x,
-              const T&amp; y) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f578d90f661e5ae9b71e2ac6c0715a6" class="m-doc">contains</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; x,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; y) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Tests if a point is contained in the rectangle.</dd>
             <dt>
               <div class="m-doc-template">template&lt;<a href="#aa292af1848104b3be6cc0c966b5317b6" class="m-doc">Corner</a> c&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a874ae2323a4553d9cb05c6391622ec59" class="m-doc">getCorner</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a874ae2323a4553d9cb05c6391622ec59" class="m-doc">getCorner</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets a specific corner of the rectangle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a08b066a73313cbf814e14b97ece36554" class="m-doc">height</a>(</span><span class="m-doc-wrap">) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a08b066a73313cbf814e14b97ece36554" class="m-doc">height</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the height of the rectangle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa13ac65c1584b80888681af7427ec903" class="m-doc">width</a>(</span><span class="m-doc-wrap">) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa13ac65c1584b80888681af7427ec903" class="m-doc">width</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the width of the rectangle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6af04d5e40f26b568dfa95b6a6e70987" class="m-doc">area</a>(</span><span class="m-doc-wrap">) const -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6af04d5e40f26b568dfa95b6a6e70987" class="m-doc">area</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the area of the rectangle.</dd>
           </dl>
@@ -282,7 +276,7 @@ $ (x, y) $
           <section class="m-doc-details" id="aa292af1848104b3be6cc0c966b5317b6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
               enum Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /><a href="#aa292af1848104b3be6cc0c966b5317b6" class="m-doc-self">Corner</a>
             </h3>
@@ -435,10 +429,10 @@ $ (x_{\max}, y_{\max}) $
           <section class="m-doc-details" id="ab95ae2e9b8a169682ec944e82d0d6cb5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab95ae2e9b8a169682ec944e82d0d6cb5" class="m-doc-self">Rectangle</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; bottomLeft,
-              const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; topRight) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab95ae2e9b8a169682ec944e82d0d6cb5" class="m-doc-self">Rectangle</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; bottomLeft,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; topRight) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a rectangle from two opposite corners.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -514,9 +508,9 @@ $ (x_{\max}, y_{\max}) $
           <section class="m-doc-details" id="ae8bfa60f991489d8c78a41c21f77ba36"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8bfa60f991489d8c78a41c21f77ba36" class="m-doc-self">contains</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8bfa60f991489d8c78a41c21f77ba36" class="m-doc-self">contains</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt;&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Tests if a point is contained in the rectangle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -605,10 +599,10 @@ $ (x, y) $
           <section class="m-doc-details" id="a7f578d90f661e5ae9b71e2ac6c0715a6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f578d90f661e5ae9b71e2ac6c0715a6" class="m-doc-self">contains</a>(</span><span class="m-doc-wrap">const T&amp; x,
-              const T&amp; y) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f578d90f661e5ae9b71e2ac6c0715a6" class="m-doc-self">contains</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; x,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; y) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Tests if a point is contained in the rectangle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -654,10 +648,10 @@ $ (x, y) $
           <section class="m-doc-details" id="a874ae2323a4553d9cb05c6391622ec59"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
                 template&lt;<a href="#aa292af1848104b3be6cc0c966b5317b6" class="m-doc">Corner</a> c&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a874ae2323a4553d9cb05c6391622ec59" class="m-doc-self">getCorner</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&lt;T&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a874ae2323a4553d9cb05c6391622ec59" class="m-doc-self">getCorner</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets a specific corner of the rectangle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -681,9 +675,9 @@ $ (x, y) $
           <section class="m-doc-details" id="a08b066a73313cbf814e14b97ece36554"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a08b066a73313cbf814e14b97ece36554" class="m-doc-self">height</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a08b066a73313cbf814e14b97ece36554" class="m-doc-self">height</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the height of the rectangle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -722,9 +716,9 @@ $ y_{\max} - y_{\min} $
           <section class="m-doc-details" id="aa13ac65c1584b80888681af7427ec903"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa13ac65c1584b80888681af7427ec903" class="m-doc-self">width</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa13ac65c1584b80888681af7427ec903" class="m-doc-self">width</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the width of the rectangle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -763,9 +757,9 @@ $ x_{\max} - x_{\min} $
           <section class="m-doc-details" id="a6af04d5e40f26b568dfa95b6a6e70987"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6af04d5e40f26b568dfa95b6a6e70987" class="m-doc-self">area</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> T Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Rectangle&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6af04d5e40f26b568dfa95b6a6e70987" class="m-doc-self">area</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the area of the rectangle.</p>
             <table class="m-table m-fullwidth m-flat">

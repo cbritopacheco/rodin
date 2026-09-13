@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_follower_pressure_8h.html">&lt;Rodin/Solid/Integrators/FollowerPressure.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class StateFES, class State&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">StateFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid_1_1_internal.html">Internal</a>::<wbr/></span>FaceKinematics <span class="m-thin">struct</span>
         </h1>
         <nav class="m-block m-default">
@@ -96,20 +96,20 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="ab2b9697f8b55c6f6be37985858f3a1b8">
-              <span class="m-doc-wrap-bumper">void <a href="#ab2b9697f8b55c6f6be37985858f3a1b8" class="m-doc-self">setFace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab2b9697f8b55c6f6be37985858f3a1b8" class="m-doc-self">setFace</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Initializes the geometric data associated with a boundary face.</dd>
             <dt id="a420ce22afc0e34c21d43a8b999a0f313">
-              <span class="m-doc-wrap-bumper">auto <a href="#a420ce22afc0e34c21d43a8b999a0f313" class="m-doc-self">nodal</a>(</span><span class="m-doc-wrap">const StateFES&amp; fes,
-              const State&amp; d,
-              size_t a,
-              size_t c) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a420ce22afc0e34c21d43a8b999a0f313" class="m-doc-self">nodal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">StateFES</a>&amp; fes,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> State&amp; d,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> a,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> c) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Nodal displacement of face vertex a, component c.</dd>
             <dt id="a14faedf7588e5ed2436072bc3eb76f81">
-              <span class="m-doc-wrap-bumper">void <a href="#a14faedf7588e5ed2436072bc3eb76f81" class="m-doc-self">deformedTangents</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xjac,
-              const StateFES&amp; fes,
-              const State&amp; d) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a14faedf7588e5ed2436072bc3eb76f81" class="m-doc-self">deformedTangents</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xjac,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">StateFES</a>&amp; fes,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> State&amp; d) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Deformed tangents at this face (P1: constant over the face).</dd>
           </dl>
@@ -118,15 +118,15 @@
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
             <dt id="a9d5c48137ad6d9908c64b1508270f480">
-              size_t <a href="#a9d5c48137ad6d9908c64b1508270f480" class="m-doc-self">sdim</a>
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a9d5c48137ad6d9908c64b1508270f480" class="m-doc-self">sdim</a>
             </dt>
             <dd>Space dimension.</dd>
             <dt id="a3eab34d94d4ac9d761f21d0a755ac757">
-              size_t <a href="#a3eab34d94d4ac9d761f21d0a755ac757" class="m-doc-self">faceDim</a>
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a3eab34d94d4ac9d761f21d0a755ac757" class="m-doc-self">faceDim</a>
             </dt>
             <dd>Reference face dimension.</dd>
             <dt id="afefc9f0ef05de6807eb7ca83756bdfcb">
-              size_t <a href="#afefc9f0ef05de6807eb7ca83756bdfcb" class="m-doc-self">nv</a>
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#afefc9f0ef05de6807eb7ca83756bdfcb" class="m-doc-self">nv</a>
             </dt>
             <dd>Number of face vertices.</dd>
             <dt id="a8fde966e1c01c53b1b8537e86a8f4401">

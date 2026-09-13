@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_i_o_2_h_d_f5_8h.html">&lt;Rodin/PETSc/IO/HDF5.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FES&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionLoader&lt;FileFormat::HDF5, FES, ::Vec&gt; <span class="m-thin">class</span>
         </h1>
         <p>HDF5 loader for PETSc-backed grid functions.</p>
@@ -100,7 +100,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase&lt;FES, ::Vec&gt;</a>
             </dt>
             <dd>Base class for concrete grid function loaders.</dd>
@@ -110,11 +110,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
-              using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
+              using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
             </dt>
             <dd>PETSc vector data type (<code>Vec</code>).</dd>
             <dt id="a87ab5050b41f14d97440bab3534e33ae">
-              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
+              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being loaded.</dd>
             <dt id="aedc90d504ba347a2d069c6c004614f5d">
@@ -136,11 +136,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Stream-based overload — not supported for HDF5.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> boost::filesystem::path&amp; filename) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads grid function data from an HDF5 file.</dd>
           </dl>
@@ -150,9 +150,9 @@
           <section class="m-doc-details" id="a8546f878fca73682edd9c742edd7f2a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Stream-based overload — not supported for HDF5.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -170,9 +170,9 @@
           <section class="m-doc-details" id="aaf8f2181bfec879c94a4de41ae30b55c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads grid function data from an HDF5 file.</p>
             <table class="m-table m-fullwidth m-flat">

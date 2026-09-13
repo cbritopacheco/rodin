@@ -81,8 +81,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md487">Design</a></li>
-            <li><a href="#autotoc_md488">Key classes</a></li>
+            <li><a href="#autotoc_md576">Design</a></li>
+            <li><a href="#autotoc_md577">Key classes</a></li>
             <li>
               Reference
               <ul>
@@ -102,7 +102,7 @@ $ \phi $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg>, while preserving element quality.</p><section id="autotoc_md487"><h3><a href="#autotoc_md487">Design</a></h3><p>The module follows a strict separation of concerns:</p><ul><li>The <strong>level set</strong> <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
+</svg>, while preserving element quality.</p><section id="autotoc_md576"><h3><a href="#autotoc_md576">Design</a></h3><p>The module follows a strict separation of concerns:</p><ul><li>The <strong>level set</strong> <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
 $ \phi $
 </title>
@@ -150,17 +150,17 @@ $ \phi $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-30'/>
 </g>
-</svg> into discrete cell attributes (see <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> utilities such as the min s-t cut classifier).</li><li><strong>Geometry fitting</strong> (WNGIR) moves and curves the mesh. It never decides topology.</li></ul><p>The WNGIR step solves a metric-preconditioned (natural-gradient) problem built entirely in the variational form language: a surface force (the Welsch first variation, assembled on interface facets) balanced against bulk, observation, and admissibility metrics. Hard admissibility (element validity) is enforced by a nonlinear line search.</p></section><section id="autotoc_md488"><h3><a href="#autotoc_md488">Key classes</a></h3><ul><li>WNGIRParameters — solve configuration (budgets, tolerances, weights)</li><li>WNGIRReport — per-solve diagnostics</li><li>WNGIRSolver — backend-independent solver driver</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Interface-fitting constraints are formulated as smooth penalties; the module deliberately avoids hard geometric projections inside the solve, which break line-search continuity.</p></aside></section>
+</svg> into discrete cell attributes (see <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> utilities such as the min s-t cut classifier).</li><li><strong>Geometry fitting</strong> (WNGIR) moves and curves the mesh. It never decides topology.</li></ul><p>The WNGIR step solves a metric-preconditioned (natural-gradient) problem built entirely in the variational form language: a surface force (the Welsch first variation, assembled on interface facets) balanced against bulk, observation, and admissibility metrics. Hard admissibility (element validity) is enforced by a nonlinear line search.</p></section><section id="autotoc_md577"><h3><a href="#autotoc_md577">Key classes</a></h3><ul><li>WNGIRParameters — solve configuration (budgets, tolerances, weights)</li><li>WNGIRReport — per-solve diagnostics</li><li>WNGIRSolver — backend-independent solver driver</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Interface-fitting constraints are formulated as smooth penalties; the module deliberately avoids hard geometric projections inside the solve, which break line-search continuity.</p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> F&gt;</div>
               class <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>
             </dt>
             <dd>Matrix-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialMatrix&lt;Real&gt;</code>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> F&gt;</div>
               class <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>
             </dt>
             <dd>Vector-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialVector&lt;Real&gt;</code>.</dd>
@@ -169,7 +169,7 @@ $ \phi $
             </dt>
             <dd>Per-cell geometry cache for the 2D triangular affine prototype.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> TrialFunctionType, <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> TestFunctionType&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType&gt;</div>
               class <a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a>
             </dt>
             <dd>Backend-independent WNGIR mesh-fitting solver.</dd>
@@ -179,7 +179,7 @@ $ \phi $
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a913379be076c1f4ec6d9f75b73152513" class="m-doc">precomputeCellGeometry</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::pair&lt;std::vector&lt;<a href="struct_rodin_1_1_adaptation_1_1_cell_geom_cache.html" class="m-doc">CellGeomCache</a>&gt;, std::unordered_map&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">size_<wbr />t</a>&gt;&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a913379be076c1f4ec6d9f75b73152513" class="m-doc">precomputeCellGeometry</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::pair&lt;std::vector&lt;<a href="struct_rodin_1_1_adaptation_1_1_cell_geom_cache.html" class="m-doc">CellGeomCache</a>&gt;, std::unordered_map&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&gt;</span>
             </dt>
             <dd>Build a <code>CellGeomCache</code> per cell, in mesh-iteration order.</dd>
           </dl>
@@ -188,7 +188,7 @@ $ \phi $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a913379be076c1f4ec6d9f75b73152513"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::pair&lt;std::vector&lt;<a href="struct_rodin_1_1_adaptation_1_1_cell_geom_cache.html" class="m-doc">CellGeomCache</a>&gt;, std::unordered_map&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">size_<wbr />t</a>&gt;&gt; Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a913379be076c1f4ec6d9f75b73152513" class="m-doc-self">precomputeCellGeometry</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper">std::pair&lt;std::vector&lt;<a href="struct_rodin_1_1_adaptation_1_1_cell_geom_cache.html" class="m-doc">CellGeomCache</a>&gt;, std::unordered_map&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&gt; Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a913379be076c1f4ec6d9f75b73152513" class="m-doc-self">precomputeCellGeometry</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;&amp; mesh)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_cell_geom_cache_8h.html">&lt;Rodin/Adaptation/CellGeomCache.h&gt;</a></div>
             </h3>
             <p>Build a <code>CellGeomCache</code> per cell, in mesh-iteration order.</p>

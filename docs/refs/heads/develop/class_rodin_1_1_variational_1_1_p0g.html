@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_p0g_2_forward_decls_8h.html">&lt;Rodin/Variational/P0g/ForwardDecls.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0g <span class="m-thin">class</span>
         </h1>
         <p>Forward declaration of global constant finite element spaces.</p>
@@ -86,16 +86,12 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">Range</td>
-              <td>Value range of the finite element space.</td>
-            </tr>
-            <tr>
-              <td>Mesh</td>
+              <td style="width: 1%">Mesh</td>
               <td>Mesh type on which the space is defined.</td>
             </tr>
           </tbody>
         </table>
-<table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g&lt;Real, Mesh&lt;Context::<wbr />Local&gt;&gt;</a></td><td>Scalar global constant space on a local mesh with one degree of freedom.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g&lt;Math::<wbr />SpatialVector&lt;Real&gt;, Mesh&lt;Context::<wbr />Local&gt;&gt;</a></td><td>Vector-valued global constant space on a local mesh with one degree of freedom per component.</td></tr></tbody></table>
+<p>Global constant (P0g) finite element space.</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g&lt;Real, Mesh&lt;Context::<wbr />Local&gt;&gt;</a></td><td>Scalar global constant space on a local mesh with one degree of freedom.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g&lt;Math::<wbr />SpatialVector&lt;Real&gt;, Mesh&lt;Context::<wbr />Local&gt;&gt;</a></td><td>Vector-valued global constant space on a local mesh with one degree of freedom per component.</td></tr></tbody></table><ul><li>Scalar-valued: 1 DOF total (span{1})</li><li>Vector-valued: vdim DOFs total (span{e_0,...,e_{vdim-1}})</li></ul><p>This is the global analogue of P0 (which is elementwise constant).</p>
       </div>
     </div>
   </div>

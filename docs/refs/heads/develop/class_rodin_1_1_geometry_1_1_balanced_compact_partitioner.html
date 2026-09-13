@@ -116,7 +116,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af4fed389d62dee86ca79e3bbf3eb169b" class="m-doc">BalancedCompactPartitioner</a>(</span><span class="m-doc-wrap">const <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af4fed389d62dee86ca79e3bbf3eb169b" class="m-doc">BalancedCompactPartitioner</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs a partitioner for the given mesh.</dd>
             <dt id="af6cba289b901bf2ca3827cb768c09c19">
@@ -129,24 +129,24 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a638c45c253983ca10bd05eefb530f8a7" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a638c45c253983ca10bd05eefb530f8a7" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the mesh being partitioned.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aeb33e1e43173176ea21df08bcd372402" class="m-doc">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize,
-              size_t d) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeb33e1e43173176ea21df08bcd372402" class="m-doc">partition</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxPartitionSize,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Partitions the mesh polytopes of dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af6311da7ad1c9653aecaf9b8d39a4643" class="m-doc">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af6311da7ad1c9653aecaf9b8d39a4643" class="m-doc">partition</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxPartitionSize) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Partitions the mesh cells.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9c4424742927ef57655d348302bd4195" class="m-doc">getPartition</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c4424742927ef57655d348302bd4195" class="m-doc">getPartition</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the partition index for a given polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abb85506e676b292ae799e68a858b8823" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abb85506e676b292ae799e68a858b8823" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the total number of partitions.</dd>
           </dl>
@@ -155,7 +155,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="af4fed389d62dee86ca79e3bbf3eb169b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4fed389d62dee86ca79e3bbf3eb169b" class="m-doc-self">BalancedCompactPartitioner</a>(</span><span class="m-doc-wrap">const <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4fed389d62dee86ca79e3bbf3eb169b" class="m-doc-self">BalancedCompactPartitioner</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a partitioner for the given mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -172,7 +172,7 @@
           </div></section>
           <section class="m-doc-details" id="a638c45c253983ca10bd05eefb530f8a7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a638c45c253983ca10bd05eefb530f8a7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a181dde6239853c251f9172505d535dcd" class="m-doc">MeshType</a>&amp; Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a638c45c253983ca10bd05eefb530f8a7" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the mesh being partitioned.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -186,8 +186,8 @@
           </div></section>
           <section class="m-doc-details" id="aeb33e1e43173176ea21df08bcd372402"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb33e1e43173176ea21df08bcd372402" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize,
-              size_t d) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb33e1e43173176ea21df08bcd372402" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxPartitionSize,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Partitions the mesh polytopes of dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -209,7 +209,7 @@
           </div></section>
           <section class="m-doc-details" id="af6311da7ad1c9653aecaf9b8d39a4643"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6311da7ad1c9653aecaf9b8d39a4643" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6311da7ad1c9653aecaf9b8d39a4643" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxPartitionSize)</span></span>
             </h3>
             <p>Partitions the mesh cells.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -227,7 +227,7 @@
           </div></section>
           <section class="m-doc-details" id="a9c4424742927ef57655d348302bd4195"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c4424742927ef57655d348302bd4195" class="m-doc-self">getPartition</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c4424742927ef57655d348302bd4195" class="m-doc-self">getPartition</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the partition index for a given polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -250,7 +250,7 @@
           </div></section>
           <section class="m-doc-details" id="abb85506e676b292ae799e68a858b8823"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb85506e676b292ae799e68a858b8823" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />BalancedCompactPartitioner::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb85506e676b292ae799e68a858b8823" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the total number of partitions.</p>
             <table class="m-table m-fullwidth m-flat">

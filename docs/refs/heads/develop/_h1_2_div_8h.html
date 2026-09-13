@@ -78,6 +78,18 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_4bca0b286e0f4e2445f6f25378ef63e0.html">H1</a>/</span>Div.h <span class="m-thin">file</span>
         </h1>
         <p>Divergence operator specialization for H1 vector functions.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This file provides specialized implementations of the divergence operator for H1 vector-valued GridFunctions and ShapeFunctions.</p><p>For H1&lt;K&gt; elements, the divergence is computed as:</p><div class="m-math"><svg style="width: 13.265em; height: 3.736em;" viewBox="130.000885 -37.060973 127.345696 35.865459">
 <title>
 \[
@@ -168,6 +180,50 @@ $ u_{i,j} $
 <use x='11.897903' y='1.793263' xlink:href='#eq3-g0-106'/>
 </g>
 </svg> are DOF values.</p><p>For H1&lt;K&gt; functions, the divergence is polynomial of degree K-1 on each element.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_fundbf696e04de1b0e503c3df67a51c928b.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a grid function: exposes the finite element space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fubf96c33b90993c114e74bbf685e48f4a.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a shape function: exposes the finite element space, the shape function space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_h1_3_01_k_00_01_math_1_1_spatial_vec3409b1c173dff61afec1204cac00e36d.html" class="m-doc">Rodin::Variational::Div&lt;GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Divergence of an H1 vector GridFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_k_00_0096672f02f53b5766e74450d20e3afb0.html" class="m-doc">Rodin::Variational::Div&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::SpatialVector&lt;Number&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Divergence of an H1 vector ShapeFunction.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_div_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_k_00_2dade1a0e1dc16399767ef5779cd98c6.html" class="m-doc">Rodin::Variational::Div&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::SpatialVector&lt;Number&gt;, Mesh&gt;, Space&gt;&gt;::Cache</a>
+            </dt>
+            <dd>Per-cell tabulation cache.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_div_3_01_shape_function_3_01_nested_derived_00_01_h1_3_01_k_00_9841b8b479e031b3a01ebe1d937af8b8.html" class="m-doc">Rodin::Variational::Div&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::SpatialVector&lt;Number&gt;, Mesh&gt;, Space&gt;&gt;::Cache::Key</a>
+            </dt>
+            <dd>Key identifying a cached tabulation.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

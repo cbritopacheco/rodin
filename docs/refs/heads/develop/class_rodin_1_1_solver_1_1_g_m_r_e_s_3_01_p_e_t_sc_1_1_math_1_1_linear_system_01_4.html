@@ -108,15 +108,15 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a032f029f468e1154761b88b10b9baaf4">
-              using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = ::Mat
+              using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Mat</a>
             </dt>
             <dd>PETSc matrix type (<code>Mat</code>) for the system operator.</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
-              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
             </dt>
             <dd>PETSc vector type (<code>Vec</code>) for the RHS and solution.</dd>
             <dt id="a11ddd836b07135509382a92fbcc504bb">
-              using <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc-self">ScalarType</a> = PetscScalar
+              using <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscScalar</a>
             </dt>
             <dd>Scalar type (<code>PetscScalar</code>).</dd>
             <dt id="a0e2ed914b272429dbc177e1882a866f1">
@@ -154,7 +154,7 @@ $ \mathbf{x} $
 </g>
 </svg>.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Base problem type that provides the linear system.</dd>
             <dt id="aaa1f19b66d8e7cb44bf307207b1035e7">
@@ -171,7 +171,7 @@ $ \mathbf{x} $
             </dt>
             <dd>Construct a GMRES solver and set the PETSc type to KSPGMRES.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -188,7 +188,7 @@ $ \mathbf{x} $
             </dt>
             <dd>Creates a heap-allocated copy of this GMRES solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
@@ -246,7 +246,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -303,7 +303,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />GMRES&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>

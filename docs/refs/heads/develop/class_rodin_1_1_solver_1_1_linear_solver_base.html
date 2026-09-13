@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>LinearSolverBase <span class="m-thin">class</span>
         </h1>
         <p>Abstract base class for linear system solvers.</p>
@@ -168,19 +168,19 @@ $ b $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ad7f4cd2e2ba5d742d7cdde80ad2d1928">
-              using <a href="#ad7f4cd2e2ba5d742d7cdde80ad2d1928" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::ScalarType
+              using <a href="#ad7f4cd2e2ba5d742d7cdde80ad2d1928" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::ScalarType
             </dt>
             <dd>Scalar type used in the linear system.</dd>
             <dt id="ae8be2197728bd066c5c0ea45fca4e9e8">
-              using <a href="#ae8be2197728bd066c5c0ea45fca4e9e8" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::VectorType
+              using <a href="#ae8be2197728bd066c5c0ea45fca4e9e8" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::VectorType
             </dt>
             <dd>Vector type for solution and right-hand side.</dd>
             <dt id="aee5a4327c58e97b0101be6de1a91eb88">
-              using <a href="#aee5a4327c58e97b0101be6de1a91eb88" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::OperatorType
+              using <a href="#aee5a4327c58e97b0101be6de1a91eb88" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::OperatorType
             </dt>
             <dd>Operator (matrix) type for the linear system.</dd>
             <dt id="aa9bd934a5a01bcb3204dfd44538a575e">
-              using <a href="#aa9bd934a5a01bcb3204dfd44538a575e" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;LinearSystem&gt;
+              using <a href="#aa9bd934a5a01bcb3204dfd44538a575e" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;LinearSystem&gt;
             </dt>
             <dd>Base problem type.</dd>
             <dt id="af6093da9130ce0c2021ab8ab28c727d5">
@@ -201,7 +201,7 @@ $ b $
             </dt>
             <dd>Constructs a solver for the given problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a866633484f9f5b8cb1e6097ddb1f9188" class="m-doc">LinearSolverBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a866633484f9f5b8cb1e6097ddb1f9188" class="m-doc">LinearSolverBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -218,15 +218,15 @@ $ b $
             </dt>
             <dd>Returns the associated problem.</dd>
             <dt id="a4d980ca73cf6a9091c8da13f2fa53076">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4d980ca73cf6a9091c8da13f2fa53076" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa9bd934a5a01bcb3204dfd44538a575e" class="m-doc">ProblemBaseType</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d980ca73cf6a9091c8da13f2fa53076" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aa9bd934a5a01bcb3204dfd44538a575e" class="m-doc">ProblemBaseType</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the associated problem (const).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Solves the associated problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the linear system.</dd>
           </dl>
@@ -236,7 +236,7 @@ $ b $
           <section class="m-doc-details" id="ae28253f47bbc22b7e87643fd51631637"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae28253f47bbc22b7e87643fd51631637" class="m-doc-self">LinearSolverBase</a>(</span><span class="m-doc-wrap"><a href="#aa9bd934a5a01bcb3204dfd44538a575e" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
             </h3>
@@ -256,9 +256,9 @@ $ b $
           <section class="m-doc-details" id="a866633484f9f5b8cb1e6097ddb1f9188"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a866633484f9f5b8cb1e6097ddb1f9188" class="m-doc-self">LinearSolverBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a866633484f9f5b8cb1e6097ddb1f9188" class="m-doc-self">LinearSolverBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -276,7 +276,7 @@ $ b $
           <section class="m-doc-details" id="a3e295c0addcd61a4debc3624f8d1c271"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e295c0addcd61a4debc3624f8d1c271" class="m-doc-self">LinearSolverBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&amp;&amp; other)</span></span>
             </h3>
@@ -296,9 +296,9 @@ $ b $
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the associated problem.</p>
 <p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
@@ -306,9 +306,9 @@ $ b $
           <section class="m-doc-details" id="a9b645b21287f5ab7536bf8af83a9778c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LinearSystem&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />LinearSolverBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solves the linear system.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -116,7 +116,7 @@
             </dt>
             <dd>Polytope index mapping structure.</dd>
             <dt id="a5d3d19539a5f05df6f6f329b5d0aebae">
-              using <a href="#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc-self">Ancestor</a> = std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&gt;
+              using <a href="#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc-self">Ancestor</a> = std::reference_wrapper&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&gt;
             </dt>
             <dd>Type alias for ancestor mesh references.</dd>
           </dl>
@@ -125,23 +125,23 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0515ce4cfde190fde4ca7e3d46c01d56" class="m-doc">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0515ce4cfde190fde4ca7e3d46c01d56" class="m-doc">restriction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Restricts a point from parent mesh to submesh coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7d48e539fe6f66d98e95031d30b24b4b" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d48e539fe6f66d98e95031d30b24b4b" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the immediate parent mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a372c956d64676e18b4e64c62d62ff8fc" class="m-doc">getAncestors</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a372c956d64676e18b4e64c62d62ff8fc" class="m-doc">getAncestors</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets all ancestor meshes.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2074410d89cecb7001dadb8b498ffebf" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2074410d89cecb7001dadb8b498ffebf" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the polytope index mapping for a dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a11fb74405b66316e7163c6d1289f8724" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11fb74405b66316e7163c6d1289f8724" class="m-doc">operator==</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality comparison.</dd>
           </dl>
@@ -150,7 +150,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a0515ce4cfde190fde4ca7e3d46c01d56"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0515ce4cfde190fde4ca7e3d46c01d56" class="m-doc-self">restriction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0515ce4cfde190fde4ca7e3d46c01d56" class="m-doc-self">restriction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Restricts a point from parent mesh to submesh coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -212,7 +212,7 @@ $ \mathcal{S} \subset \mathcal{T}_h $
           </div></section>
           <section class="m-doc-details" id="a7d48e539fe6f66d98e95031d30b24b4b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d48e539fe6f66d98e95031d30b24b4b" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d48e539fe6f66d98e95031d30b24b4b" class="m-doc-self">getParent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the immediate parent mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -226,7 +226,7 @@ $ \mathcal{S} \subset \mathcal{T}_h $
           </div></section>
           <section class="m-doc-details" id="a372c956d64676e18b4e64c62d62ff8fc"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a372c956d64676e18b4e64c62d62ff8fc" class="m-doc-self">getAncestors</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a672da592edc3a0551b41b89d3ac37f50" class="m-doc">Deque</a>&lt;<a href="#a5d3d19539a5f05df6f6f329b5d0aebae" class="m-doc">Ancestor</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a372c956d64676e18b4e64c62d62ff8fc" class="m-doc-self">getAncestors</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets all ancestor meshes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -241,7 +241,7 @@ $ \mathcal{S} \subset \mathcal{T}_h $
           </div></section>
           <section class="m-doc-details" id="a2074410d89cecb7001dadb8b498ffebf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2074410d89cecb7001dadb8b498ffebf" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_geometry_1_1_sub_mesh_base_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2074410d89cecb7001dadb8b498ffebf" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the polytope index mapping for a dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -264,7 +264,7 @@ $ \mathcal{S} \subset \mathcal{T}_h $
           </div></section>
           <section class="m-doc-details" id="a11fb74405b66316e7163c6d1289f8724"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11fb74405b66316e7163c6d1289f8724" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />SubMeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11fb74405b66316e7163c6d1289f8724" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Equality comparison.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWork.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Law, class State&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWork <span class="m-thin">class</span>
         </h1>
         <p>Façade for the internal virtual work nonlinear form.</p>
@@ -86,11 +86,7 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">Law</td>
-              <td>The hyperelastic constitutive law type</td>
-            </tr>
-            <tr>
-              <td>State</td>
+              <td style="width: 1%">State</td>
               <td>The displacement grid-function type</td>
             </tr>
           </tbody>
@@ -114,7 +110,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_non_linear_form_integrator.html" class="m-doc">NonLinearFormIntegrator&lt;InternalVirtualWork&lt;Law, State&gt;&gt;</a>
             </dt>
             <dd>CRTP mixin for nonlinear form integrators.</dd>
@@ -124,7 +120,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a6698ec580d2b50ca24b3739888a13422">
-              using <a href="#a6698ec580d2b50ca24b3739888a13422" class="m-doc-self">LawType</a> = Law
+              using <a href="#a6698ec580d2b50ca24b3739888a13422" class="m-doc-self">LawType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a>
             </dt>
             <dd>Constitutive law type.</dd>
             <dt id="acf75bce94d355bdf512b62e8d71b73fb">
@@ -132,7 +128,7 @@
             </dt>
             <dd>Current displacement state type.</dd>
             <dt id="a4e885a930b4a0bfc8aab5b123ca6bdea">
-              using <a href="#a4e885a930b4a0bfc8aab5b123ca6bdea" class="m-doc-self">CacheType</a> = typename Law::Cache
+              using <a href="#a4e885a930b4a0bfc8aab5b123ca6bdea" class="m-doc-self">CacheType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Law::Cache
             </dt>
             <dd>The law&#x27;s cache type, handed to the output by <code>commit()</code>.</dd>
             <dt id="a9d0db17369f7540de337eb0fc16f66d8">
@@ -145,8 +141,8 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0a63edff00fae8cae740a2416f440779" class="m-doc">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp; law,
-              const State&amp; displacement)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a0a63edff00fae8cae740a2416f440779" class="m-doc">InternalVirtualWork</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a>&amp; law,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> State&amp; displacement)</span>
             </dt>
             <dd>Constructs the internal virtual work object.</dd>
           </dl>
@@ -155,11 +151,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="aafda776174679a317da333e7cf83afc0">
-              <span class="m-doc-wrap-bumper">auto <a href="#aafda776174679a317da333e7cf83afc0" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const State&amp; displacement) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aafda776174679a317da333e7cf83afc0" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> State&amp; displacement) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp;</span>
             </dt>
             <dd>Rebinds the current displacement state.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a836b6d26af8a1986719414e9456b9b1e" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a836b6d26af8a1986719414e9456b9b1e" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp;</span>
             </dt>
             <dd>Sets the quadrature order for both residual and tangent.</dd>
             <dt>
@@ -171,22 +167,22 @@
             </dt>
             <dd>Sets the output invoked at each quadrature point by <code>commit()</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#afce99a75399ac776b73cdcaf2fee2373" class="m-doc">commit</a>(</span><span class="m-doc-wrap">) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afce99a75399ac776b73cdcaf2fee2373" class="m-doc">commit</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Evaluates the law at every quadrature point and invokes the output. Performs no assembly.</dd>
             <dt id="a385b6bcc53b128188bb512fa39dbde11">
-              <span class="m-doc-wrap-bumper">auto <a href="#a385b6bcc53b128188bb512fa39dbde11" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const Law&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a385b6bcc53b128188bb512fa39dbde11" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Test&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a72592c9e644325bd383350ddbd4aa628" class="m-doc">Residual</a>(</span><span class="m-doc-wrap">const Test&amp; v) const -&gt; auto</span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Test&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a72592c9e644325bd383350ddbd4aa628" class="m-doc">Residual</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Test&amp; v) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
             </dt>
             <dd>Returns the residual integrator (linear form contribution).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Trial, class Test&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad107c02609fdd30913c0f45023556cd1" class="m-doc">Tangent</a>(</span><span class="m-doc-wrap">const Trial&amp; u,
-              const Test&amp; v) const -&gt; auto</span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Trial, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Test&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad107c02609fdd30913c0f45023556cd1" class="m-doc">Tangent</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Trial&amp; u,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Test&amp; v) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
             </dt>
             <dd>Returns the tangent integrator (bilinear form contribution).</dd>
           </dl>
@@ -196,10 +192,10 @@
           <section class="m-doc-details" id="a0a63edff00fae8cae740a2416f440779"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a63edff00fae8cae740a2416f440779" class="m-doc-self">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp; law,
-              const State&amp; displacement)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a63edff00fae8cae740a2416f440779" class="m-doc-self">InternalVirtualWork</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a>&amp; law,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> State&amp; displacement)</span></span>
             </h3>
             <p>Constructs the internal virtual work object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -221,9 +217,9 @@
           <section class="m-doc-details" id="a836b6d26af8a1986719414e9456b9b1e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a836b6d26af8a1986719414e9456b9b1e" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a836b6d26af8a1986719414e9456b9b1e" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> order)</span></span>
             </h3>
             <p>Sets the quadrature order for both residual and tangent.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -241,9 +237,9 @@
           <section class="m-doc-details" id="a6c68c5f158517f4eb058b1b596334ba9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c68c5f158517f4eb058b1b596334ba9" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c68c5f158517f4eb058b1b596334ba9" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
             </h3>
             <p>Sets the auxiliary input for both residual and tangent.</p>
 <p>The input is propagated to every quadrature point in both <code>Residual()</code> and <code>Tangent()</code> integrators, ensuring they see the same fiber directions, activation parameters, etc.</p>
@@ -251,9 +247,9 @@
           <section class="m-doc-details" id="aebb5128780947f285e8eee6c6cc356cd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebb5128780947f285e8eee6c6cc356cd" class="m-doc-self">setOutput</a>(</span><span class="m-doc-wrap"><a href="#a9d0db17369f7540de337eb0fc16f66d8" class="m-doc">OutputFunctionType</a> output)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebb5128780947f285e8eee6c6cc356cd" class="m-doc-self">setOutput</a>(</span><span class="m-doc-wrap"><a href="#a9d0db17369f7540de337eb0fc16f66d8" class="m-doc">OutputFunctionType</a> output)</span></span>
             </h3>
             <p>Sets the output invoked at each quadrature point by <code>commit()</code>.</p>
 <p>The output is the dual of <code>setInput()</code>: it reads the law&#x27;s cache after evaluation, and is the extraction site for committed internal variables, recovered stresses or diagnostics. It is invoked only by <code>commit()</code>, never during assembly, so a caller controls exactly when derived quantities are taken.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_output.html">Solid::<wbr />Output</a></p></aside>
@@ -261,9 +257,9 @@
           <section class="m-doc-details" id="afce99a75399ac776b73cdcaf2fee2373"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afce99a75399ac776b73cdcaf2fee2373" class="m-doc-self">commit</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afce99a75399ac776b73cdcaf2fee2373" class="m-doc-self">commit</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Evaluates the law at every quadrature point and invokes the output. Performs no assembly.</p>
 <p>Sweeps the cells of the displacement&#x27;s mesh, reproducing the constitutive evaluation of <code>Residual()</code> and <code>Tangent()</code> at the current displacement &ndash; the same kinematics, the same <code>ConstitutivePoint</code>, the same <code>Input</code> &ndash; and hands each resulting cache to the output. Callers use this to commit internal variables once a nonlinear solve has converged, without recomputing the kinematics themselves.</p><p>The quadrature rule is the one set by <code>setQuadratureOrder()</code>, or <svg class="m-math" style="width: 1.578em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 15.151487 8.700714">
@@ -283,10 +279,10 @@ $ 2 \times $
           <section class="m-doc-details" id="a72592c9e644325bd383350ddbd4aa628"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
-                template&lt;class Test&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Test&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72592c9e644325bd383350ddbd4aa628" class="m-doc-self">Residual</a>(</span><span class="m-doc-wrap">const Test&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72592c9e644325bd383350ddbd4aa628" class="m-doc-self">Residual</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Test&amp; v) const</span></span>
             </h3>
             <p>Returns the residual integrator (linear form contribution).</p>
 <p>Produces:</p><div class="m-math"><svg style="width: 16.159em; height: 2.935em;" viewBox="116.707154 -28.172399 155.128698 28.172399">
@@ -346,11 +342,11 @@ $ 2 \times $
           <section class="m-doc-details" id="ad107c02609fdd30913c0f45023556cd1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Law, class State&gt;
-                template&lt;class Trial, class Test&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Law</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> State&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Trial, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Test&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad107c02609fdd30913c0f45023556cd1" class="m-doc-self">Tangent</a>(</span><span class="m-doc-wrap">const Trial&amp; u,
-              const Test&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;_1, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad107c02609fdd30913c0f45023556cd1" class="m-doc-self">Tangent</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Trial&amp; u,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Test&amp; v) const</span></span>
             </h3>
             <p>Returns the tangent integrator (bilinear form contribution).</p>
 <p>Produces:</p><div class="m-math"><svg style="width: 24.783em; height: 2.935em;" viewBox="75.314555 -28.172399 237.913907 28.172399">

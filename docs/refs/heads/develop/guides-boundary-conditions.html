@@ -185,7 +185,7 @@ $ \partial u / \partial n = 0 $
 @section guides-bc-dirichlet Dirichlet Boundary Conditions
 
 Dirichlet conditions specify the value of the solution on the boundary:
-\iline 48 \iline 49  \_form#1471@_fakenl@_fakenl
+\iline 48 \iline 49  \_form#1984@_fakenl@_fakenl
 
 @subsection guides-bc-dirichlet-homogeneous Homogeneous Dirichlet (@f$ g = 0 @f$)
 
@@ -250,7 +250,7 @@ DirichletBC(u, prescribed).on(GammaD)
 
 Neumann conditions prescribe the normal derivative (or flux) on the
 boundary:
-\iline 115 \iline 116  \_form#1472@_fakenl@_fakenl
+\iline 115 \iline 116  \_form#1985@_fakenl@_fakenl
 
 These arise naturally from integration by parts in the weak formulation
 and appear as &lt;strong&gt;boundary integrals&lt;/strong&gt;:
@@ -277,14 +277,14 @@ problem = Integral(Grad(u), Grad(v))
 
 @subsection guides-bc-neumann-natural Homogeneous Neumann (Natural)
 
-Homogeneous Neumann conditions ( \_form#1470) are
+Homogeneous Neumann conditions ( \_form#1983) are
 the &quot;default&quot; — they are automatically satisfied when no boundary integral
 is added and no Dirichlet condition is imposed on that part of the boundary.
 
 @subsection guides-bc-neumann-vector Vector Neumann (Traction)
 
 In elasticity, a Neumann condition corresponds to an applied traction
-(force per unit area). The traction vector \_form#1473 is
+(force per unit area). The traction vector \_form#1986 is
 prescribed on the loaded boundary:
 
 @code{.cpp} 
@@ -302,7 +302,7 @@ Periodic conditions enforce that the solution on one boundary equals the
 solution on the opposite boundary. They are used for problems on domains
 that tile (e.g. unit cells in homogenization):
 
-\iline 169 \iline 170 \iline 171  \_form#1474@_fakenl@_fakenl@_fakenl
+\iline 169 \iline 170 \iline 171  \_form#1987@_fakenl@_fakenl@_fakenl
 
 In Rodin, periodic conditions are imposed by building an &lt;tt&gt;IndexMap&lt;/tt&gt; that
 pairs the DOF indices on opposite boundaries, then passing it to

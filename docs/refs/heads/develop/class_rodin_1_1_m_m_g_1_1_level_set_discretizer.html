@@ -228,7 +228,7 @@ $\phi = \mathrm{ls}$
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc">surface</a>(</span><span class="m-doc-wrap">bool meshTheSurface = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc">surface</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> meshTheSurface = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">true</a>) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Selects whether to discretize the surface or a subdomain volume.</dd>
             <dt>
@@ -236,7 +236,7 @@ $\phi = \mathrm{ls}$
             </dt>
             <dd>Specifies the level set to discretize.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a78828aef917eadb1fa07401b8b022b0f" class="m-doc">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a78828aef917eadb1fa07401b8b022b0f" class="m-doc">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-5) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Specifies the removal of small parasitic components.</dd>
             <dt>
@@ -244,11 +244,11 @@ $\phi = \mathrm{ls}$
             </dt>
             <dd>Restricts level-set splitting to one base material.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4d3b9a047891512167798bd00e76506f" class="m-doc">setBaseReferences</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d3b9a047891512167798bd00e76506f" class="m-doc">setBaseReferences</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Restricts level-set splitting to a set of base materials.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc">setBoundaryReference</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Sets the material reference for the discretized boundary <svg class="m-math" style="width: 1.592em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 15.284187 8.302191">
 <title>
@@ -264,24 +264,24 @@ $ \partial \Omega $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Specifies how to split the materials into an interior and exterior domains.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7362e0e4ccd19098ff25aa639825f6a2" class="m-doc">split</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
-              const <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7362e0e4ccd19098ff25aa639825f6a2" class="m-doc">split</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Indicates that a material reference should be split.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc">noSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc">noSplit</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Indicates that a material reference should not be split.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
             <dd>Discretizes and optimizes an implicitly defined surface defined by a level set function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a98aa82f90b48db2a73518a7bd4182053" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool enable = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a98aa82f90b48db2a73518a7bd4182053" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> enable = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">true</a>) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Enables/disables ridge angle detection.</dd>
             <dt>
@@ -301,7 +301,7 @@ $ \partial \Omega $
             </dt>
             <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc">getSplitMap</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc">getSplitMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp;</span>
             </dt>
             <dd>Gets the configured material split map.</dd>
           </dl>
@@ -310,7 +310,7 @@ $ \partial \Omega $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a036c115db34db9f781c9694d4b564f95"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc-self">surface</a>(</span><span class="m-doc-wrap">bool meshTheSurface = true)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc-self">surface</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> meshTheSurface = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">true</a>)</span></span>
             </h3>
             <p>Selects whether to discretize the surface or a subdomain volume.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -357,7 +357,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a78828aef917eadb1fa07401b8b022b0f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78828aef917eadb1fa07401b8b022b0f" class="m-doc-self">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78828aef917eadb1fa07401b8b022b0f" class="m-doc-self">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-5)</span></span>
             </h3>
             <p>Specifies the removal of small parasitic components.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -403,7 +403,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a4d3b9a047891512167798bd00e76506f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d3b9a047891512167798bd00e76506f" class="m-doc-self">setBaseReferences</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d3b9a047891512167798bd00e76506f" class="m-doc-self">setBaseReferences</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs)</span></span>
             </h3>
             <p>Restricts level-set splitting to a set of base materials.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -426,7 +426,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="ae06c5c2b72b0e432c897a7a093759d0c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc-self">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc-self">setBoundaryReference</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
             </h3>
             <p>Sets the material reference for the discretized boundary <svg class="m-math" style="width: 1.592em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 15.284187 8.302191">
 <title>
@@ -474,7 +474,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a53e38d7a8b5e750f61d6cd0f17f1132d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split)</span></span>
             </h3>
             <p>Specifies how to split the materials into an interior and exterior domains.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -498,8 +498,8 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a7362e0e4ccd19098ff25aa639825f6a2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7362e0e4ccd19098ff25aa639825f6a2" class="m-doc-self">split</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
-              const <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7362e0e4ccd19098ff25aa639825f6a2" class="m-doc-self">split</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s)</span></span>
             </h3>
             <p>Indicates that a material reference should be split.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -526,7 +526,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a81c6ed00a0f1c80f2889a750fde03c0b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc-self">noSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc-self">noSplit</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
             </h3>
             <p>Indicates that a material reference should not be split.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -550,7 +550,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a82f47c875e92ce44fb1edf0530cc2c03"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
             </h3>
             <p>Discretizes and optimizes an implicitly defined surface defined by a level set function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -574,7 +574,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a98aa82f90b48db2a73518a7bd4182053"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98aa82f90b48db2a73518a7bd4182053" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool enable = true)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98aa82f90b48db2a73518a7bd4182053" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> enable = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">true</a>)</span></span>
             </h3>
             <p>Enables/disables ridge angle detection.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -689,7 +689,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="ac61e13611f13b842d41ad0498cc6621a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc-self">getSplitMap</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc-self">getSplitMap</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the configured material split map.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -100,12 +100,12 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase&lt;PETSc::Math::LinearSystem&gt;</a>
             </dt>
             <dd>Abstract base class for linear system solvers.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Handle&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Handle&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Object&lt;::KSP&gt;</a>
             </dt>
             <dd>RAII base class for wrappers around PETSc opaque handles.</dd>
@@ -134,15 +134,15 @@
             </dt>
             <dd>Handle type for the raw PETSc <code>KSP</code> context pointer.</dd>
             <dt id="a11ddd836b07135509382a92fbcc504bb">
-              using <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc-self">ScalarType</a> = PetscScalar
+              using <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscScalar</a>
             </dt>
             <dd>Scalar type (<code>PetscScalar</code>) used for residual norms and tolerances.</dd>
             <dt id="a032f029f468e1154761b88b10b9baaf4">
-              using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = ::Mat
+              using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Mat</a>
             </dt>
             <dd>PETSc matrix type (<code>Mat</code>) for the system operator and preconditioner.</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
-              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
             </dt>
             <dd>PETSc vector type (<code>Vec</code>) for the right-hand side and solution.</dd>
             <dt id="a0e2ed914b272429dbc177e1882a866f1">
@@ -180,7 +180,7 @@ $ \mathbf{x} $
 </g>
 </svg>.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Base problem type that provides the linear system to solve.</dd>
             <dt id="a85385c6607a397925a213e9098256fdc">
@@ -193,19 +193,19 @@ $ \mathbf{x} $
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="ae1fe9518a5217a23202ad95992aa57f1">
-              static PetscReal <a href="#ae1fe9518a5217a23202ad95992aa57f1" class="m-doc-self">DEFAULT_RTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> <a href="#ae1fe9518a5217a23202ad95992aa57f1" class="m-doc-self">DEFAULT_RTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default relative residual tolerance.</dd>
             <dt id="ad68ba7f176ce7034cfa1d0b9cff67b88">
-              static PetscReal <a href="#ad68ba7f176ce7034cfa1d0b9cff67b88" class="m-doc-self">DEFAULT_ABSTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> <a href="#ad68ba7f176ce7034cfa1d0b9cff67b88" class="m-doc-self">DEFAULT_ABSTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default absolute residual tolerance.</dd>
             <dt id="a44698ba0678d8a304fde7bb7c0eb9e19">
-              static PetscReal <a href="#a44698ba0678d8a304fde7bb7c0eb9e19" class="m-doc-self">DEFAULT_DTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> <a href="#a44698ba0678d8a304fde7bb7c0eb9e19" class="m-doc-self">DEFAULT_DTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default divergence tolerance.</dd>
             <dt id="a30096bf3a2cb9f682c5ca3bd0ad227c7">
-              static PetscInt <a href="#a30096bf3a2cb9f682c5ca3bd0ad227c7" class="m-doc-self">DEFAULT_MAXIT</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> <a href="#a30096bf3a2cb9f682c5ca3bd0ad227c7" class="m-doc-self">DEFAULT_MAXIT</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default maximum number of Krylov iterations.</dd>
           </dl>
@@ -223,7 +223,7 @@ $ \mathbf{x} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
@@ -253,14 +253,14 @@ $ x $
 </g>
 </svg> if null.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a71cb4327c908a1a302cfd3f7a6a6b7ae" class="m-doc">setType</a>(</span><span class="m-doc-wrap">::KSPType type) -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a71cb4327c908a1a302cfd3f7a6a6b7ae" class="m-doc">setType</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />KSPType</a> type) -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Selects the Krylov subspace method.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a57bea8848cf396b0823a7f6d6ea0daa5" class="m-doc">setTolerances</a>(</span><span class="m-doc-wrap">PetscReal rtol,
-              PetscReal abstol,
-              PetscReal dtol,
-              PetscInt maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a57bea8848cf396b0823a7f6d6ea0daa5" class="m-doc">setTolerances</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> rtol,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> abstol,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> dtol,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets convergence tolerances and maximum iteration count.</dd>
             <dt>
@@ -268,7 +268,7 @@ $ x $
             </dt>
             <dd>Sets an explicit preconditioner matrix.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aec0cc9fe51d97449d3c7730794a45991" class="m-doc">setPrefix</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::string&gt;&amp; prefix) -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aec0cc9fe51d97449d3c7730794a45991" class="m-doc">setPrefix</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::string&gt;&amp; prefix) -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets the PETSc options prefix used by this KSP object.</dd>
             <dt>
@@ -276,7 +276,7 @@ $ x $
             </dt>
             <dd>Returns a mutable reference to the underlying PETSc KSP handle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae97b544c6b2d908e53d9f1587704134a" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a66b4e4a0f292f40b0b5119a1a7b84247" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae97b544c6b2d908e53d9f1587704134a" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a66b4e4a0f292f40b0b5119a1a7b84247" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a read-only reference to the underlying PETSc KSP handle.</dd>
             <dt>
@@ -284,11 +284,11 @@ $ x $
             </dt>
             <dd>Creates a heap-allocated copy of this solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Solves the associated problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the linear system.</dd>
           </dl>
@@ -315,7 +315,7 @@ $ x $
           </div></section>
           <section class="m-doc-details" id="a15e7896618ae50e8f86a2bdb8ca2e2e7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solve <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
@@ -359,7 +359,7 @@ $ x $
           </div></section>
           <section class="m-doc-details" id="a71cb4327c908a1a302cfd3f7a6a6b7ae"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71cb4327c908a1a302cfd3f7a6a6b7ae" class="m-doc-self">setType</a>(</span><span class="m-doc-wrap">::KSPType type) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71cb4327c908a1a302cfd3f7a6a6b7ae" class="m-doc-self">setType</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />KSPType</a> type) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Selects the Krylov subspace method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -382,10 +382,10 @@ $ x $
           </div></section>
           <section class="m-doc-details" id="a57bea8848cf396b0823a7f6d6ea0daa5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57bea8848cf396b0823a7f6d6ea0daa5" class="m-doc-self">setTolerances</a>(</span><span class="m-doc-wrap">PetscReal rtol,
-              PetscReal abstol,
-              PetscReal dtol,
-              PetscInt maxIt) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57bea8848cf396b0823a7f6d6ea0daa5" class="m-doc-self">setTolerances</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> rtol,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> abstol,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> dtol,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> maxIt) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets convergence tolerances and maximum iteration count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -443,7 +443,7 @@ $ x $
           </div></section>
           <section class="m-doc-details" id="aec0cc9fe51d97449d3c7730794a45991"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0cc9fe51d97449d3c7730794a45991" class="m-doc-self">setPrefix</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::string&gt;&amp; prefix) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0cc9fe51d97449d3c7730794a45991" class="m-doc-self">setPrefix</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::string&gt;&amp; prefix) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the PETSc options prefix used by this KSP object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -480,7 +480,7 @@ $ x $
           </div></section>
           <section class="m-doc-details" id="ae97b544c6b2d908e53d9f1587704134a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a66b4e4a0f292f40b0b5119a1a7b84247" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae97b544c6b2d908e53d9f1587704134a" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a66b4e4a0f292f40b0b5119a1a7b84247" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae97b544c6b2d908e53d9f1587704134a" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a read-only reference to the underlying PETSc KSP handle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -508,14 +508,14 @@ $ x $
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the associated problem.</p>
 <p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
           </div></section>
           <section class="m-doc-details" id="a9b645b21287f5ab7536bf8af83a9778c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solves the linear system.</p>
             <table class="m-table m-fullwidth m-flat">

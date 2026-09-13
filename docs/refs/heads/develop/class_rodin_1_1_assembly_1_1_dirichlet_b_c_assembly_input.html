@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class Value&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Value&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>DirichletBCAssemblyInput <span class="m-thin">class</span>
         </h1>
         <p>Input data for Dirichlet boundary condition assembly.</p>
@@ -88,10 +88,6 @@
             <tr>
               <td style="width: 1%">Scalar</td>
               <td>Scalar type for assembled boundary values</td>
-            </tr>
-            <tr>
-              <td>Solution</td>
-              <td>Solution variable type</td>
             </tr>
             <tr>
               <td>FES</td>
@@ -151,11 +147,11 @@ $ \Gamma_D $
             </dt>
             <dd>Boundary value function type.</dd>
             <dt id="a0f7dd11ba239b3e151d891bc7bdf7997">
-              using <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc-self">OperandType</a> = Variational::TrialFunction&lt;Solution, FES&gt;
+              using <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, FES&gt;
             </dt>
             <dd>Trial function type.</dd>
             <dt id="a3f4e5aa9305c166599fe7e3db5f72207">
-              using <a href="#a3f4e5aa9305c166599fe7e3db5f72207" class="m-doc-self">DirichletBCType</a> = Variational::DirichletBC&lt;<a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>, <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&gt;
+              using <a href="#a3f4e5aa9305c166599fe7e3db5f72207" class="m-doc-self">DirichletBCType</a> = <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">Variational::<wbr />DirichletBC</a>&lt;<a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>, <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&gt;
             </dt>
             <dd>Dirichlet boundary condition type.</dd>
           </dl>
@@ -164,9 +160,9 @@ $ \Gamma_D $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a93840bc683812985707e247f743f2149" class="m-doc">DirichletBCAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; u,
-              const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; value,
-              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a93840bc683812985707e247f743f2149" class="m-doc">DirichletBCAssemblyInput</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; u,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; value,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span>
             </dt>
             <dd>Constructs Dirichlet BC assembly input.</dd>
           </dl>
@@ -175,15 +171,15 @@ $ \Gamma_D $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the trial function operand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a58394f435d1f6b082cb1335876cd501a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a58394f435d1f6b082cb1335876cd501a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp;</span>
             </dt>
             <dd>Gets the boundary value function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
             </dt>
             <dd>Gets the essential boundary attributes.</dd>
           </dl>
@@ -193,11 +189,11 @@ $ \Gamma_D $
           <section class="m-doc-details" id="a93840bc683812985707e247f743f2149"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Value&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93840bc683812985707e247f743f2149" class="m-doc-self">DirichletBCAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; u,
-              const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; value,
-              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, _2, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93840bc683812985707e247f743f2149" class="m-doc-self">DirichletBCAssemblyInput</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; u,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; value,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span></span>
             </h3>
             <p>Constructs Dirichlet BC assembly input.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -245,9 +241,9 @@ $ \Gamma_D $
           <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Value&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0f7dd11ba239b3e151d891bc7bdf7997" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, _2, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial function operand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -262,9 +258,9 @@ $ \Gamma_D $
           <section class="m-doc-details" id="a58394f435d1f6b082cb1335876cd501a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Value&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58394f435d1f6b082cb1335876cd501a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad64d9d5e20b8530be950bc33918a2010" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, _2, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a58394f435d1f6b082cb1335876cd501a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the boundary value function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -279,9 +275,9 @@ $ \Gamma_D $
           <section class="m-doc-details" id="aebcc7cb36480775d8bb4c133533030f1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Solution, class FES, class Value&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Value&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, Solution, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc-self">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCAssemblyInput&lt;Scalar, _2, FES, Value&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc-self">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the essential boundary attributes.</p>
             <table class="m-table m-fullwidth m-flat">

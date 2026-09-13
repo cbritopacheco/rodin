@@ -88,7 +88,6 @@
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -99,7 +98,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;std::size_t Index&gt;</div>
-              using <a href="#a24f7c550c759d16cbae9116dfd00b6e0" class="m-doc">Type</a> = void
+              using <a href="#a24f7c550c759d16cbae9116dfd00b6e0" class="m-doc">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>
             </dt>
             <dd>Dummy type alias for the empty tuple.</dd>
             <dt id="ac1c71152d52ce2c96131a18e7b73bfc9">
@@ -112,58 +111,53 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a879ad9933a419e4e04c8a59cc19a34fe">
-              static size_t <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>The number of elements in the tuple (always 0).</dd>
-          </dl>
-        </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt id="a94abdc953c5d97e5eb39a57e3577f945">
-              <span class="m-doc-wrap-bumper"><a href="#a94abdc953c5d97e5eb39a57e3577f945" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Default constructor.</dd>
-            <dt id="a9c1b53768472d4e109e51bbf2ddecbe2">
-              <span class="m-doc-wrap-bumper"><a href="#a9c1b53768472d4e109e51bbf2ddecbe2" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="a5a6fd36237c0c381e305ec7998c49490">
-              <span class="m-doc-wrap-bumper"><a href="#a5a6fd36237c0c381e305ec7998c49490" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a94abdc953c5d97e5eb39a57e3577f945">
+              <span class="m-doc-wrap-bumper">auto <a href="#a94abdc953c5d97e5eb39a57e3577f945" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="a9c1b53768472d4e109e51bbf2ddecbe2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c1b53768472d4e109e51bbf2ddecbe2" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a5a6fd36237c0c381e305ec7998c49490">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a6fd36237c0c381e305ec7998c49490" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1936c94919450d4b3ddc4b76b043441f" class="m-doc">product</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp;) -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1936c94919450d4b3ddc4b76b043441f" class="m-doc">product</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the Cartesian product of two empty tuples.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename ... Gs&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af5114747c31a1ec3ff5f77b19c221a92" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> ... Gs&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5114747c31a1ec3ff5f77b19c221a92" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Concatenates this empty tuple with another tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;template&lt;class&gt; class Predicate&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acac3a690f282a6e5157840b704c2a9c6" class="m-doc">filter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acac3a690f282a6e5157840b704c2a9c6" class="m-doc">filter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Filters the empty tuple based on a predicate.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Function&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a17a22306a636c8043e95578045458ecc" class="m-doc">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a17a22306a636c8043e95578045458ecc" class="m-doc">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Applies a function to each element of the tuple.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the size of the tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#aa5b3dd8336182f751ebec27167c22415" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp;,
-              const unsigned int)</span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5b3dd8336182f751ebec27167c22415" class="m-doc">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp;,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Serializes the empty tuple.</dd>
           </dl>
@@ -176,7 +170,7 @@
                 template&lt;&gt;
                 template&lt;std::size_t Index&gt;
               </div>
-              using Rodin::<wbr />Tuple&lt;&gt;::<wbr /><a href="#a24f7c550c759d16cbae9116dfd00b6e0" class="m-doc-self">Type</a> = void
+              using Rodin::<wbr />Tuple&lt;&gt;::<wbr /><a href="#a24f7c550c759d16cbae9116dfd00b6e0" class="m-doc-self">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>
             </h3>
             <p>Dummy type alias for the empty tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -199,7 +193,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1936c94919450d4b3ddc4b76b043441f" class="m-doc-self">product</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp;) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1936c94919450d4b3ddc4b76b043441f" class="m-doc-self">product</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp;) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the Cartesian product of two empty tuples.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -216,9 +210,9 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;typename ... Gs&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> ... Gs&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt; Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5114747c31a1ec3ff5f77b19c221a92" class="m-doc-self">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt; Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5114747c31a1ec3ff5f77b19c221a92" class="m-doc-self">concatenate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Concatenates this empty tuple with another tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -252,9 +246,9 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;template&lt;class&gt; class Predicate&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acac3a690f282a6e5157840b704c2a9c6" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acac3a690f282a6e5157840b704c2a9c6" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Filters the empty tuple based on a predicate.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -279,9 +273,9 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;typename Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17a22306a636c8043e95578045458ecc" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17a22306a636c8043e95578045458ecc" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Applies a function to each element of the tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -310,7 +304,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the size of the tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -326,23 +320,12 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;class Archive&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5b3dd8336182f751ebec27167c22415" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp;,
-              const unsigned int)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5b3dd8336182f751ebec27167c22415" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp;,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>)</span></span>
             </h3>
             <p>Serializes the empty tuple.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Archive</td>
-                  <td>Serialization archive type.</td>
-                </tr>
-              </tbody>
-            </table>
 <p>The archive and version arguments are ignored because an empty tuple has no state.</p>
           </div></section>
         </section>

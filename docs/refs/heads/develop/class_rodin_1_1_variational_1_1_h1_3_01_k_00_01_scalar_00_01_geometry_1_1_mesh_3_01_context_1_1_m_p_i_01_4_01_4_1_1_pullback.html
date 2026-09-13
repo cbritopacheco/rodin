@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_h1_2_h1_8h.html">&lt;Rodin/MPI/Variational/H1/H1.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Callable&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html">H1&lt;K, Scalar, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>::<wbr/></span>Pullback <span class="m-thin">class</span>
         </h1>
         <p>Pullback of a callable (or FunctionBase) to the reference polytope.</p>
@@ -86,6 +86,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -93,11 +94,21 @@
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pullback_base.html" class="m-doc">FiniteElementSpacePullbackBase&lt;Pullback&lt;Callable&gt;&gt;</a>
+            </dt>
+            <dd>Base class for mappings taking functions defined on physical elements to reference elements.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ada5aed13792807883984b706fe9766f5">
-              using <a href="#ada5aed13792807883984b706fe9766f5" class="m-doc-self">CallableType</a> = Callable
+              using <a href="#ada5aed13792807883984b706fe9766f5" class="m-doc-self">CallableType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>
             </dt>
             <dd>Callable type evaluated on physical points.</dd>
           </dl>
@@ -106,13 +117,13 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Function&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
-              Function&amp;&amp; v)</span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc">Pullback</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span>
             </dt>
             <dd>Constructs a pullback on a physical polytope.</dd>
             <dt id="a30b641c729f814959c3902ff1e1466be">
-              <span class="m-doc-wrap-bumper"><a href="#a30b641c729f814959c3902ff1e1466be" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const Pullback&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a30b641c729f814959c3902ff1e1466be" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Pullback&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -121,13 +132,13 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afbebcdb38df25a4beba150033fcdea5f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afbebcdb38df25a4beba150033fcdea5f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
             </dt>
             <dd>Evaluates the pulled-back callable.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a2cb787683a6b9932b05e11e84b3a7f61" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
-              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; auto</span>
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
             </dt>
             <dd>Evaluates the pulled-back callable into storage.</dd>
           </dl>
@@ -137,29 +148,20 @@
           <section class="m-doc-details" id="a643fd0f55b729ad94f17ce76d3421a5d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Callable&gt;
-                template&lt;class Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a> _1&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
-              Function&amp;&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span></span>
             </h3>
             <p>Constructs a pullback on a physical polytope.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Function</td>
-                  <td>Callable type accepted by the wrapper.</td>
-                </tr>
-              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>polytope</td>
+                  <td style="width: 1%">polytope</td>
                   <td>Physical polytope.</td>
                 </tr>
                 <tr>
@@ -172,9 +174,9 @@
           <section class="m-doc-details" id="afbebcdb38df25a4beba150033fcdea5f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Callable&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbebcdb38df25a4beba150033fcdea5f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbebcdb38df25a4beba150033fcdea5f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
             </h3>
             <p>Evaluates the pulled-back callable.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -198,11 +200,11 @@
           <section class="m-doc-details" id="a2cb787683a6b9932b05e11e84b3a7f61"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Callable&gt;
-                template&lt;class T&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a> _1&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2cb787683a6b9932b05e11e84b3a7f61" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
-              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2cb787683a6b9932b05e11e84b3a7f61" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
             </h3>
             <p>Evaluates the pulled-back callable into storage.</p>
             <table class="m-table m-fullwidth m-flat">

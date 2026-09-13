@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_tuple_8h.html">&lt;Rodin/Tuple.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Tuple&lt;T, Ts...&gt; <span class="m-thin">class</span>
         </h1>
         <p>A tuple class that extends std::tuple with additional functionality.</p>
@@ -114,7 +114,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;std::size_t Index&gt;</div>
-              using <a href="#a24874c1400a8967bf9d1a10f78889190" class="m-doc">Type</a> = typename <a href="class_rodin_1_1_utility_1_1_parameter_pack.html" class="m-doc">Utility::<wbr />ParameterPack</a>&lt;T, Ts...&gt;::template At&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+              using <a href="#a24874c1400a8967bf9d1a10f78889190" class="m-doc">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_utility_1_1_parameter_pack.html" class="m-doc">Utility::<wbr />ParameterPack</a>&lt;T, Ts...&gt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />template</a> At&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
             </dt>
             <dd>Type alias for the element at a given index.</dd>
             <dt id="ae211ccdc8fcc97729dc322db2e2ad7bc">
@@ -127,7 +127,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a879ad9933a419e4e04c8a59cc19a34fe">
-              static size_t <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>The number of elements in the tuple.</dd>
           </dl>
@@ -136,7 +136,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af87e49633aaa06bb108d912dff1f4608" class="m-doc">Tuple</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af87e49633aaa06bb108d912dff1f4608" class="m-doc">Tuple</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -149,102 +149,102 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acd29db9043e554993948f9159e6e6526" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other) -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd29db9043e554993948f9159e6e6526" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acef03614ac13cd2a2d1746bb67947c58" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acef03614ac13cd2a2d1746bb67947c58" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the size of the tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Function&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8a3ab9ac8bad412ffa0c876163c004f7" class="m-doc">reduce</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a3ab9ac8bad412ffa0c876163c004f7" class="m-doc">reduce</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Reduces the tuple elements using a binary function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2126bae2623bcbb7d4572c5d59e4c5ad" class="m-doc">product</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2126bae2623bcbb7d4572c5d59e4c5ad" class="m-doc">product</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the Cartesian product with an empty tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class G, class ... Gs&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a59ceea438383a1445879bc3943224a9c" class="m-doc">product</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> G, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a59ceea438383a1445879bc3943224a9c" class="m-doc">product</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the Cartesian product with another tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Function, class G, class ... Gs&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> G, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ac720a008f79e78af512d2798285cef08" class="m-doc">product</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func,
-              const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the Cartesian product with another tuple using a custom function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ... Gs&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad4d15cdda5986e750617328078fd4809" class="m-doc">zip</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4d15cdda5986e750617328078fd4809" class="m-doc">zip</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Zips this tuple with another tuple using a default pairing function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Function, class ... Gs, class ... Os&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Os&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a2912b501e2f10cc1b6c38609bdd968e2" class="m-doc">zip</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func,
-              const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; t,
-              const Os&amp;... other) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; t,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Os</a>&amp;... other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Zips this tuple with one or more other tuples using a custom function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Function&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6a2da73c49d5a87f0cb551cd8ea400d" class="m-doc">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6a2da73c49d5a87f0cb551cd8ea400d" class="m-doc">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Applies a function to each element of the tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Function&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#abf0480df6fa0d366898a3b7871b4d8c3" class="m-doc">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const -&gt; const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf0480df6fa0d366898a3b7871b4d8c3" class="m-doc">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Applies a function to each element of the tuple (const version).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Function&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aff987221871b339fd1245d1fdfda5eb2" class="m-doc">iapply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aff987221871b339fd1245d1fdfda5eb2" class="m-doc">iapply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Applies a function to each element of the tuple along with its index.</dd>
             <dt>
               <div class="m-doc-template">template&lt;std::size_t Index&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6968f8d9f954d435a79ea45ca8269ad3" class="m-doc">get</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6968f8d9f954d435a79ea45ca8269ad3" class="m-doc">get</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a reference to the element at the given index.</dd>
             <dt>
               <div class="m-doc-template">template&lt;std::size_t Index&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a70ea473859039894508c99f6a464f643" class="m-doc">get</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a70ea473859039894508c99f6a464f643" class="m-doc">get</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a const reference to the element at the given index.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;template&lt;class&gt; class Predicate&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab47012c43d6e43e60b41c8d11497a1ad" class="m-doc">filter</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab47012c43d6e43e60b41c8d11497a1ad" class="m-doc">filter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Filters the tuple based on a predicate.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Function&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8dd0a74d64fa06ae79a24902dd7c0f3c" class="m-doc">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8dd0a74d64fa06ae79a24902dd7c0f3c" class="m-doc">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Transforms each element of the tuple using a function (const version).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Function&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0a9ec69c68d0d26b93c8dc7218044f9e" class="m-doc">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0a9ec69c68d0d26b93c8dc7218044f9e" class="m-doc">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Transforms each element of the tuple using a function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abac1a136d747aabdce60fd22a08dd177" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abac1a136d747aabdce60fd22a08dd177" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Concatenates this tuple with an empty tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename ... Gs&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a09a7e63899626fe2d0e5e243e2de66c0" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;T, Ts..., Gs...&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> ... Gs&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a09a7e63899626fe2d0e5e243e2de66c0" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;T, Ts..., Gs...&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Concatenates this tuple with another tuple.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int version)</span>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Serializes each tuple element.</dd>
           </dl>
@@ -254,10 +254,10 @@
           <section class="m-doc-details" id="a24874c1400a8967bf9d1a10f78889190"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
                 template&lt;std::size_t Index&gt;
               </div>
-              using Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /><a href="#a24874c1400a8967bf9d1a10f78889190" class="m-doc-self">Type</a> = typename <a href="class_rodin_1_1_utility_1_1_parameter_pack.html" class="m-doc">Utility::<wbr />ParameterPack</a>&lt;T, Ts...&gt;::template At&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
+              using Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /><a href="#a24874c1400a8967bf9d1a10f78889190" class="m-doc-self">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_utility_1_1_parameter_pack.html" class="m-doc">Utility::<wbr />ParameterPack</a>&lt;T, Ts...&gt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />template</a> At&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;
             </h3>
             <p>Type alias for the element at a given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,9 +278,9 @@
           <section class="m-doc-details" id="af87e49633aaa06bb108d912dff1f4608"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af87e49633aaa06bb108d912dff1f4608" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af87e49633aaa06bb108d912dff1f4608" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -298,7 +298,7 @@
           <section class="m-doc-details" id="ab8350a642ace4d83991351fe71d9be49"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8350a642ace4d83991351fe71d9be49" class="m-doc-self">Tuple</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp; other)</span></span>
             </h3>
@@ -318,9 +318,9 @@
           <section class="m-doc-details" id="acd29db9043e554993948f9159e6e6526"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd29db9043e554993948f9159e6e6526" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd29db9043e554993948f9159e6e6526" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -344,9 +344,9 @@
           <section class="m-doc-details" id="acef03614ac13cd2a2d1746bb67947c58"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acef03614ac13cd2a2d1746bb67947c58" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acef03614ac13cd2a2d1746bb67947c58" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -370,9 +370,9 @@
           <section class="m-doc-details" id="aae4c3867dcd57153f1148c9f097bbc9b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the size of the tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -387,10 +387,10 @@
           <section class="m-doc-details" id="a8a3ab9ac8bad412ffa0c876163c004f7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a3ab9ac8bad412ffa0c876163c004f7" class="m-doc-self">reduce</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a3ab9ac8bad412ffa0c876163c004f7" class="m-doc-self">reduce</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Reduces the tuple elements using a binary function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -424,9 +424,9 @@
           <section class="m-doc-details" id="a2126bae2623bcbb7d4572c5d59e4c5ad"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2126bae2623bcbb7d4572c5d59e4c5ad" class="m-doc-self">product</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2126bae2623bcbb7d4572c5d59e4c5ad" class="m-doc-self">product</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the Cartesian product with an empty tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -450,10 +450,10 @@
           <section class="m-doc-details" id="a59ceea438383a1445879bc3943224a9c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class G, class ... Gs&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> G, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a59ceea438383a1445879bc3943224a9c" class="m-doc-self">product</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a59ceea438383a1445879bc3943224a9c" class="m-doc-self">product</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the Cartesian product with another tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -490,11 +490,11 @@
           <section class="m-doc-details" id="ac720a008f79e78af512d2798285cef08"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Function, class G, class ... Gs&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> G, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac720a008f79e78af512d2798285cef08" class="m-doc-self">product</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func,
-              const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac720a008f79e78af512d2798285cef08" class="m-doc-self">product</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;G, Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the Cartesian product with another tuple using a custom function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -539,10 +539,10 @@
           <section class="m-doc-details" id="ad4d15cdda5986e750617328078fd4809"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class ... Gs&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4d15cdda5986e750617328078fd4809" class="m-doc-self">zip</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4d15cdda5986e750617328078fd4809" class="m-doc-self">zip</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Zips this tuple with another tuple using a default pairing function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -575,12 +575,12 @@
           <section class="m-doc-details" id="a2912b501e2f10cc1b6c38609bdd968e2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Function, class ... Gs, class ... Os&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Os&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2912b501e2f10cc1b6c38609bdd968e2" class="m-doc-self">zip</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func,
-              const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; t,
-              const Os&amp;... other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2912b501e2f10cc1b6c38609bdd968e2" class="m-doc-self">zip</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; t,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Os</a>&amp;... other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Zips this tuple with one or more other tuples using a custom function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -629,10 +629,10 @@
           <section class="m-doc-details" id="ad6a2da73c49d5a87f0cb551cd8ea400d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6a2da73c49d5a87f0cb551cd8ea400d" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6a2da73c49d5a87f0cb551cd8ea400d" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Applies a function to each element of the tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -665,10 +665,10 @@
           <section class="m-doc-details" id="abf0480df6fa0d366898a3b7871b4d8c3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf0480df6fa0d366898a3b7871b4d8c3" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf0480df6fa0d366898a3b7871b4d8c3" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Applies a function to each element of the tuple (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -701,10 +701,10 @@
           <section class="m-doc-details" id="aff987221871b339fd1245d1fdfda5eb2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff987221871b339fd1245d1fdfda5eb2" class="m-doc-self">iapply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff987221871b339fd1245d1fdfda5eb2" class="m-doc-self">iapply</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Applies a function to each element of the tuple along with its index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -737,10 +737,10 @@
           <section class="m-doc-details" id="a6968f8d9f954d435a79ea45ca8269ad3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
                 template&lt;std::size_t Index&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6968f8d9f954d435a79ea45ca8269ad3" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6968f8d9f954d435a79ea45ca8269ad3" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns a reference to the element at the given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -764,10 +764,10 @@
           <section class="m-doc-details" id="a70ea473859039894508c99f6a464f643"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
                 template&lt;std::size_t Index&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70ea473859039894508c99f6a464f643" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70ea473859039894508c99f6a464f643" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns a const reference to the element at the given index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -791,10 +791,10 @@
           <section class="m-doc-details" id="ab47012c43d6e43e60b41c8d11497a1ad"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;template&lt;class&gt; class Predicate&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47012c43d6e43e60b41c8d11497a1ad" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47012c43d6e43e60b41c8d11497a1ad" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Filters the tuple based on a predicate.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -818,10 +818,10 @@
           <section class="m-doc-details" id="a8dd0a74d64fa06ae79a24902dd7c0f3c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;typename Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dd0a74d64fa06ae79a24902dd7c0f3c" class="m-doc-self">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dd0a74d64fa06ae79a24902dd7c0f3c" class="m-doc-self">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Transforms each element of the tuple using a function (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -854,10 +854,10 @@
           <section class="m-doc-details" id="a0a9ec69c68d0d26b93c8dc7218044f9e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;typename Function&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Function&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a9ec69c68d0d26b93c8dc7218044f9e" class="m-doc-self">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a9ec69c68d0d26b93c8dc7218044f9e" class="m-doc-self">map</a>(</span><span class="m-doc-wrap">Function&amp;&amp; func) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Transforms each element of the tuple using a function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -890,9 +890,9 @@
           <section class="m-doc-details" id="abac1a136d747aabdce60fd22a08dd177"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abac1a136d747aabdce60fd22a08dd177" class="m-doc-self">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abac1a136d747aabdce60fd22a08dd177" class="m-doc-self">concatenate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Concatenates this tuple with an empty tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -916,10 +916,10 @@
           <section class="m-doc-details" id="a09a7e63899626fe2d0e5e243e2de66c0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;typename ... Gs&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> ... Gs&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;T, Ts..., Gs...&gt; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09a7e63899626fe2d0e5e243e2de66c0" class="m-doc-self">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;T, Ts..., Gs...&gt; Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09a7e63899626fe2d0e5e243e2de66c0" class="m-doc-self">concatenate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Concatenates this tuple with another tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -952,29 +952,20 @@
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class T, class ... Ts&gt;
-                template&lt;class Archive&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int version)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version)</span></span>
             </h3>
             <p>Serializes each tuple element.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Archive</td>
-                  <td>Serialization archive type.</td>
-                </tr>
-              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>ar</td>
+                  <td style="width: 1%">ar</td>
                   <td>Archive used for serialization.</td>
                 </tr>
                 <tr>

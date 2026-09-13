@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Initial, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorField</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Step</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_advection.html">Advection</a>::<wbr/></span>Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt; <span class="m-thin">class</span>
         </h1>
         <p>Lagrangian advection specialization for trial/test function formulation.</p>
@@ -96,14 +96,6 @@
             <tr>
               <td>Initial</td>
               <td>Type of initial condition</td>
-            </tr>
-            <tr>
-              <td>VectorField</td>
-              <td>Type of velocity field</td>
-            </tr>
-            <tr>
-              <td>Step</td>
-              <td>Type of time-stepping scheme (default: RK4)</td>
             </tr>
           </tbody>
         </table>
@@ -136,23 +128,23 @@
             </dt>
             <dd>Type of the initial condition.</dd>
             <dt id="a944fcfd398d1e05c4ccb478c8d2b8813">
-              using <a href="#a944fcfd398d1e05c4ccb478c8d2b8813" class="m-doc-self">VectorFieldType</a> = VectorField
+              using <a href="#a944fcfd398d1e05c4ccb478c8d2b8813" class="m-doc-self">VectorFieldType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorField</a>
             </dt>
             <dd>Type of the velocity field.</dd>
             <dt id="af64c5a2aace3ee109b0b08713933ec73">
-              using <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc-self">StepType</a> = Step
+              using <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc-self">StepType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Step</a>
             </dt>
             <dd>Type of the time-stepping scheme.</dd>
             <dt id="a8861b08a5b1de525582a3f26705c9ad8">
-              using <a href="#a8861b08a5b1de525582a3f26705c9ad8" class="m-doc-self">SolutionType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;
+              using <a href="#a8861b08a5b1de525582a3f26705c9ad8" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;
             </dt>
             <dd>Solution type: grid function holding the advected field.</dd>
             <dt id="a93f1359d04cd3f2b35b3277350a4a2aa">
-              using <a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc-self">TrialFunctionType</a> = Variational::TrialFunction&lt;<a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;
+              using <a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc-self">TrialFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;
             </dt>
             <dd>Trial function type for variational formulation.</dd>
             <dt id="a473b98a93bed175048946215edcc6a61">
-              using <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc-self">TestFunctionType</a> = Variational::TestFunction&lt;FES&gt;
+              using <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc-self">TestFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;
             </dt>
             <dd>Test function type for variational formulation.</dd>
           </dl>
@@ -161,11 +153,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class U0, class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U0</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
               <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc">TestFunctionType</a>&amp; v,
-              U0&amp;&amp; u0,
-              VVel&amp;&amp; vel,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U0</a>&amp;&amp; u0,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>&amp;&amp; vel,
               S&amp;&amp; st = S{})</span>
             </dt>
             <dd>Constructs a Lagrangian advection solver.</dd>
@@ -175,7 +167,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7d88e8792ffeba2ce921ba374e2ac73e" class="m-doc">step</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dt)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d88e8792ffeba2ce921ba374e2ac73e" class="m-doc">step</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dt) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Advances the solution by one time step.</dd>
           </dl>
@@ -185,13 +177,13 @@
           <section class="m-doc-details" id="a796f39d712dc8b329cde9c0abbee057c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;
-                template&lt;class U0, class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Initial, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorField</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Step</a> _5&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U0</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, _4, _5&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
               <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc">TestFunctionType</a>&amp; v,
-              U0&amp;&amp; u0,
-              VVel&amp;&amp; vel,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U0</a>&amp;&amp; u0,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>&amp;&amp; vel,
               S&amp;&amp; st = S{})</span></span>
             </h3>
             <p>Constructs a Lagrangian advection solver.</p>
@@ -201,15 +193,7 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">U0</td>
-                  <td>Type of initial condition (deduced)</td>
-                </tr>
-                <tr>
-                  <td>VVel</td>
-                  <td>Type of velocity field (deduced)</td>
-                </tr>
-                <tr>
-                  <td>S</td>
+                  <td style="width: 1%">S</td>
                   <td>Type of time-stepping scheme (deduced, default: RK4)</td>
                 </tr>
               </tbody>
@@ -243,9 +227,9 @@
           <section class="m-doc-details" id="a7d88e8792ffeba2ce921ba374e2ac73e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Initial, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorField</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Step</a> _5&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d88e8792ffeba2ce921ba374e2ac73e" class="m-doc-self">step</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dt)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, _4, _5&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d88e8792ffeba2ce921ba374e2ac73e" class="m-doc-self">step</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dt)</span></span>
             </h3>
             <p>Advances the solution by one time step.</p>
             <table class="m-table m-fullwidth m-flat">

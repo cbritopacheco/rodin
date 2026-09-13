@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt; <span class="m-thin">class</span>
         </h1>
         <p>Input data for mixed problem assembly with several trial/test functions.</p>
@@ -100,12 +100,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a746ecf02e317061f07cb4703900a35ff" class="m-doc">ProblemAssemblyInput</a>(</span><span class="m-doc-wrap">ProblemBodyType&amp; body,
               TrialFunctionTuple&amp; us,
               TestFunctionTuple&amp; vs,
-              std::array&lt;size_t, TrialFunctionTuple::Size&gt;&amp; trialOffsets,
-              std::array&lt;size_t, TestFunctionTuple::Size&gt;&amp; testOffsets,
-              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, size_t&gt;&amp; trialUUIDMap,
-              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, size_t&gt;&amp; testUUIDMap,
-              size_t totalTrial,
-              size_t totalTest)</span>
+              std::array&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, TrialFunctionTuple::Size&gt;&amp; trialOffsets,
+              std::array&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, TestFunctionTuple::Size&gt;&amp; testOffsets,
+              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&amp; trialUUIDMap,
+              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&amp; testUUIDMap,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> totalTrial,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> totalTest)</span>
             </dt>
             <dd>Constructs mixed problem assembly input.</dd>
           </dl>
@@ -126,27 +126,27 @@
             </dt>
             <dd>Gets the test function tuple.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa3920d3938959ce5b13b976e26a25889" class="m-doc">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; auto&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa3920d3938959ce5b13b976e26a25889" class="m-doc">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
             </dt>
             <dd>Gets trial block offsets.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5130e028709de3cf1e00e46a69eaae2c" class="m-doc">getTestOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; auto&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5130e028709de3cf1e00e46a69eaae2c" class="m-doc">getTestOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
             </dt>
             <dd>Gets test block offsets.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae373c5ad13abcb56b9e791f15d376e2f" class="m-doc">getTrialUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; auto&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae373c5ad13abcb56b9e791f15d376e2f" class="m-doc">getTrialUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
             </dt>
             <dd>Gets the trial UUID-to-block map.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a40d2e6eb94ac9358f88a1bb16e420c19" class="m-doc">getTestUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; auto&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a40d2e6eb94ac9358f88a1bb16e420c19" class="m-doc">getTestUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
             </dt>
             <dd>Gets the test UUID-to-block map.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae21d17f33770dcc88df3550a80e6218a" class="m-doc">getTotalTrialSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae21d17f33770dcc88df3550a80e6218a" class="m-doc">getTotalTrialSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
             </dt>
             <dd>Gets the total number of trial DOFs.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7b4579de3c212773fa418c364807ef27" class="m-doc">getTotalTestSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b4579de3c212773fa418c364807ef27" class="m-doc">getTotalTestSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
             </dt>
             <dd>Gets the total number of test DOFs.</dd>
           </dl>
@@ -156,17 +156,17 @@
           <section class="m-doc-details" id="a746ecf02e317061f07cb4703900a35ff"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a746ecf02e317061f07cb4703900a35ff" class="m-doc-self">ProblemAssemblyInput</a>(</span><span class="m-doc-wrap">ProblemBodyType&amp; body,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a746ecf02e317061f07cb4703900a35ff" class="m-doc-self">ProblemAssemblyInput</a>(</span><span class="m-doc-wrap">ProblemBodyType&amp; body,
               TrialFunctionTuple&amp; us,
               TestFunctionTuple&amp; vs,
-              std::array&lt;size_t, TrialFunctionTuple::Size&gt;&amp; trialOffsets,
-              std::array&lt;size_t, TestFunctionTuple::Size&gt;&amp; testOffsets,
-              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, size_t&gt;&amp; trialUUIDMap,
-              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, size_t&gt;&amp; testUUIDMap,
-              size_t totalTrial,
-              size_t totalTest)</span></span>
+              std::array&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, TrialFunctionTuple::Size&gt;&amp; trialOffsets,
+              std::array&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, TestFunctionTuple::Size&gt;&amp; testOffsets,
+              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&amp; trialUUIDMap,
+              boost::bimap&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Base::<wbr />UUID</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&amp; testUUIDMap,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> totalTrial,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> totalTest)</span></span>
             </h3>
             <p>Constructs mixed problem assembly input.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -216,9 +216,9 @@
           <section class="m-doc-details" id="ae7d27e443a777bcf1b71702c99327931"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">ProblemBodyType&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7d27e443a777bcf1b71702c99327931" class="m-doc-self">getProblemBody</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">ProblemBodyType&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7d27e443a777bcf1b71702c99327931" class="m-doc-self">getProblemBody</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the problem body.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -233,9 +233,9 @@
           <section class="m-doc-details" id="ae60f4eaa1e17468c8fdb6447229d21c5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">TrialFunctionTuple&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae60f4eaa1e17468c8fdb6447229d21c5" class="m-doc-self">getTrialFunctions</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">TrialFunctionTuple&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae60f4eaa1e17468c8fdb6447229d21c5" class="m-doc-self">getTrialFunctions</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial function tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -250,9 +250,9 @@
           <section class="m-doc-details" id="ae2decdea252fafb0cfd313bd2ee0e072"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">TestFunctionTuple&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2decdea252fafb0cfd313bd2ee0e072" class="m-doc-self">getTestFunctions</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">TestFunctionTuple&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2decdea252fafb0cfd313bd2ee0e072" class="m-doc-self">getTestFunctions</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the test function tuple.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -267,9 +267,9 @@
           <section class="m-doc-details" id="aa3920d3938959ce5b13b976e26a25889"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa3920d3938959ce5b13b976e26a25889" class="m-doc-self">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa3920d3938959ce5b13b976e26a25889" class="m-doc-self">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets trial block offsets.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -284,9 +284,9 @@
           <section class="m-doc-details" id="a5130e028709de3cf1e00e46a69eaae2c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5130e028709de3cf1e00e46a69eaae2c" class="m-doc-self">getTestOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5130e028709de3cf1e00e46a69eaae2c" class="m-doc-self">getTestOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets test block offsets.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -301,9 +301,9 @@
           <section class="m-doc-details" id="ae373c5ad13abcb56b9e791f15d376e2f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae373c5ad13abcb56b9e791f15d376e2f" class="m-doc-self">getTrialUUIDMap</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae373c5ad13abcb56b9e791f15d376e2f" class="m-doc-self">getTrialUUIDMap</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial UUID-to-block map.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -318,9 +318,9 @@
           <section class="m-doc-details" id="a40d2e6eb94ac9358f88a1bb16e420c19"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a40d2e6eb94ac9358f88a1bb16e420c19" class="m-doc-self">getTestUUIDMap</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a40d2e6eb94ac9358f88a1bb16e420c19" class="m-doc-self">getTestUUIDMap</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the test UUID-to-block map.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -335,9 +335,9 @@
           <section class="m-doc-details" id="ae21d17f33770dcc88df3550a80e6218a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae21d17f33770dcc88df3550a80e6218a" class="m-doc-self">getTotalTrialSize</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae21d17f33770dcc88df3550a80e6218a" class="m-doc-self">getTotalTrialSize</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the total number of trial DOFs.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -352,9 +352,9 @@
           <section class="m-doc-details" id="a7b4579de3c212773fa418c364807ef27"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class ProblemBody, class U1, class U2, class U3, class ... Us&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b4579de3c212773fa418c364807ef27" class="m-doc-self">getTotalTestSize</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, U1, U2, U3, Us...&gt;&lt;ProblemBody, _2, _3, _4, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b4579de3c212773fa418c364807ef27" class="m-doc-self">getTotalTestSize</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the total number of test DOFs.</p>
             <table class="m-table m-fullwidth m-flat">

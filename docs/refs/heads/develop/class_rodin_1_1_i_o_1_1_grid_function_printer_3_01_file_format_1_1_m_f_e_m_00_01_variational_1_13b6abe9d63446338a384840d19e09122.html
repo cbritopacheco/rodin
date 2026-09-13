@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_i_o_2_m_f_e_m_8h.html">&lt;Rodin/PETSc/IO/MFEM.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;size_t K, class Range, class Ctx&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Ctx</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionPrinter&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Ctx&gt;&gt;, ::Vec&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>MFEM printer for PETSc-backed H1 (order <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
@@ -99,14 +99,6 @@ $ K $
               <td style="width: 1%">K</td>
               <td>Polynomial order.</td>
             </tr>
-            <tr>
-              <td>Range</td>
-              <td>Scalar or vector range type.</td>
-            </tr>
-            <tr>
-              <td>Ctx</td>
-              <td>Mesh context type (Local or MPI).</td>
-            </tr>
           </tbody>
         </table>
         <nav class="m-block m-default">
@@ -128,7 +120,7 @@ $ K $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Ctx&gt;&gt;, ::Vec&gt;</a>
             </dt>
             <dd>Base class for concrete grid function printers.</dd>
@@ -138,15 +130,15 @@ $ K $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a3f6b020c9d77b1609ed7d414cf63af22">
-              using <a href="#a3f6b020c9d77b1609ed7d414cf63af22" class="m-doc-self">FESType</a> = Variational::H1&lt;K, Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Ctx&gt;&gt;
+              using <a href="#a3f6b020c9d77b1609ed7d414cf63af22" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Ctx</a>&gt;&gt;
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
-              using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
+              using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
             </dt>
             <dd>PETSc vector data type (<code>Vec</code>).</dd>
             <dt id="ae90cfd8753b1d4f2541968ee8541b04b">
-              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#a3f6b020c9d77b1609ed7d414cf63af22" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
+              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#a3f6b020c9d77b1609ed7d414cf63af22" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being printed.</dd>
             <dt id="a093314a6411298f0f74dede080ed8b30">
@@ -154,7 +146,7 @@ $ K $
             </dt>
             <dd>Parent printer base class.</dd>
             <dt id="a707fcf9a5b0601453725205cb3894ee9">
-              using <a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Range&gt;::ScalarType
+              using <a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type underlying the range.</dd>
           </dl>
@@ -163,7 +155,7 @@ $ K $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc">GridFunctionPrinter</a>(</span><span class="m-doc-wrap">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc">GridFunctionPrinter</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span>
             </dt>
             <dd>Constructs a PETSc-backed H1 MFEM printer.</dd>
           </dl>
@@ -172,7 +164,7 @@ $ K $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Writes high-order H1 coefficients in MFEM node ordering.</dd>
           </dl>
@@ -182,9 +174,9 @@ $ K $
           <section class="m-doc-details" id="a0a8311d43e66ddc5a8e681495d56aa56"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;size_t K, class Range, class Ctx&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Ctx</a> _3&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Ctx&gt;&gt;, ::<wbr />Vec&gt;&lt;K, Range, Ctx&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc-self">GridFunctionPrinter</a>(</span><span class="m-doc-wrap">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Ctx&gt;&gt;, ::<wbr />Vec&gt;&lt;K, _2, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc-self">GridFunctionPrinter</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
             </h3>
             <p>Constructs a PETSc-backed H1 MFEM printer.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -202,9 +194,9 @@ $ K $
           <section class="m-doc-details" id="a19f24c6c7621a42c693c4c0b616ab387"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;size_t K, class Range, class Ctx&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Ctx</a> _3&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Ctx&gt;&gt;, ::<wbr />Vec&gt;&lt;K, Range, Ctx&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Ctx&gt;&gt;, ::<wbr />Vec&gt;&lt;K, _2, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Writes high-order H1 coefficients in MFEM node ordering.</p>
             <table class="m-table m-fullwidth m-flat">

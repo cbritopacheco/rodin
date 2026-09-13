@@ -85,6 +85,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -93,15 +94,25 @@
           </ul>
         </nav>
 <p>Bridges the Numerics::DynamicSystem assembler into the Rodin::Variational::ProblemBase interface expected by the Newton solver.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase&lt;DenseLinearSystem&gt;</a>
+            </dt>
+            <dd>Base class for variational problem objects.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aab10e799acaa1bbb330a87aff20ec5bb">
-              using <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc-self">Parent</a> = Variational::ProblemBase&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;
+              using <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a3f2ebebbd7f1b5c84c32748c1ef66c1d">
-              using <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc-self">ProblemBodyType</a> = typename Parent::ProblemBodyType
+              using <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc-self">ProblemBodyType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_variational_1_1_problem_base.html#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">Parent::<wbr />ProblemBodyType</a>
             </dt>
             <dd>Problem body type accepted by the variational interface.</dd>
           </dl>
@@ -110,7 +121,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a2ffdd560408b865ae8b0add98f0c81f9" class="m-doc">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc">Input</a>&amp; in) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a2ffdd560408b865ae8b0add98f0c81f9" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc">Input</a>&amp; in) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs the problem adapter from model inputs.</dd>
           </dl>
@@ -119,7 +130,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="ad9c4b08e63e3e94e4e8c252ac40ca95b">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad9c4b08e63e3e94e4e8c252ac40ca95b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc">ProblemBodyType</a>&amp;) -&gt; <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc">Parent</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad9c4b08e63e3e94e4e8c252ac40ca95b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc">ProblemBodyType</a>&amp;) -&gt; <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc">Parent</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Problem bodies are not assigned into this specialized problem.</dd>
             <dt id="ade273f2556fd4951a4e7b8dad8006d5f">
@@ -127,7 +138,7 @@
             </dt>
             <dd>Assembles the dense linear system for one step.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af6ec3bed9497b40a1611c0d8126a6ecc" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">::<wbr />Rodin::<wbr />Solver::<wbr />LinearSolverBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af6ec3bed9497b40a1611c0d8126a6ecc" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">::<wbr />Rodin::<wbr />Solver::<wbr />LinearSolverBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;&amp; solver) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the assembled dense linear system.</dd>
             <dt id="a08a1b9524ed4988504ef7c9f088eed97">
@@ -135,7 +146,7 @@
             </dt>
             <dd>Gets the mutable linear system.</dd>
             <dt id="a713567d6c4922035c98041fd5e25d4a8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a713567d6c4922035c98041fd5e25d4a8" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a713567d6c4922035c98041fd5e25d4a8" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the linear system.</dd>
             <dt id="ad2429ffd7600bef5051f4fab1a8eb0a5">
@@ -143,13 +154,13 @@
             </dt>
             <dd>Polymorphically copies this stepper problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a95739f2c6cb22f55e613c9ddef784dd3" class="m-doc">setCurrent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; xCurrent)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a95739f2c6cb22f55e613c9ddef784dd3" class="m-doc">setCurrent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; xCurrent) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Sets the current nonlinear unknown vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#abfe48b1ef9cc1faee9c3b8d3d87f2eeb" class="m-doc">setStepData</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; history,
+              <span class="m-doc-wrap-bumper">auto <a href="#abfe48b1ef9cc1faee9c3b8d3d87f2eeb" class="m-doc">setStepData</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; history,
               <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> time,
-              <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> dt)</span>
+              <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> dt) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Sets state history and time-step data for assembly.</dd>
           </dl>
@@ -158,7 +169,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a2ffdd560408b865ae8b0add98f0c81f9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ffdd560408b865ae8b0add98f0c81f9" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc">Input</a>&amp; in) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ffdd560408b865ae8b0add98f0c81f9" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc">Input</a>&amp; in) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs the problem adapter from model inputs.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -175,7 +186,7 @@
           </div></section>
           <section class="m-doc-details" id="af6ec3bed9497b40a1611c0d8126a6ecc"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6ec3bed9497b40a1611c0d8126a6ecc" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">::<wbr />Rodin::<wbr />Solver::<wbr />LinearSolverBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;&amp; solver) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6ec3bed9497b40a1611c0d8126a6ecc" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">::<wbr />Rodin::<wbr />Solver::<wbr />LinearSolverBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;&amp; solver) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the assembled dense linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -192,7 +203,7 @@
           </div></section>
           <section class="m-doc-details" id="a95739f2c6cb22f55e613c9ddef784dd3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95739f2c6cb22f55e613c9ddef784dd3" class="m-doc-self">setCurrent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; xCurrent)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95739f2c6cb22f55e613c9ddef784dd3" class="m-doc-self">setCurrent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; xCurrent)</span></span>
             </h3>
             <p>Sets the current nonlinear unknown vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -209,7 +220,7 @@
           </div></section>
           <section class="m-doc-details" id="abfe48b1ef9cc1faee9c3b8d3d87f2eeb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfe48b1ef9cc1faee9c3b8d3d87f2eeb" class="m-doc-self">setStepData</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; history,
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfe48b1ef9cc1faee9c3b8d3d87f2eeb" class="m-doc-self">setStepData</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; history,
               <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> time,
               <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> dt)</span></span>
             </h3>

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_cauchy_stress_8h.html">&lt;Rodin/Solid/Fields/CauchyStress.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class LawDerived&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>CauchyStress <span class="m-thin">class</span>
         </h1>
         <p>Computes the Cauchy stress from a constitutive law.</p>
@@ -107,11 +107,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a642521cadb1a8ac3a99efed89bc5cb0d">
-              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
+              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a>
             </dt>
             <dd>Constitutive law type.</dd>
             <dt id="ae66c074f434a5e00e2bd00da759fb252">
-              using <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc-self">CacheType</a> = typename LawType::Cache
+              using <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc-self">CacheType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> LawType::Cache
             </dt>
             <dd>Cache type used by the constitutive law.</dd>
           </dl>
@@ -120,11 +120,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span>
             </dt>
             <dd>Constructs the Cauchy stress evaluator.</dd>
             <dt id="ab32b81861b7874571cda2c1fb3a45752">
-              <span class="m-doc-wrap-bumper"><a href="#ab32b81861b7874571cda2c1fb3a45752" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab32b81861b7874571cda2c1fb3a45752" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="ae28c50b611faadb0a28abe1878742015">
@@ -137,9 +137,9 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a5f9063aa930d67204b82ce797ca80e7a" class="m-doc">getCauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
-              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f9063aa930d67204b82ce797ca80e7a" class="m-doc">getCauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
             </dt>
             <dd>Computes <svg class="m-math" style="width: 5.823em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 55.90278 13.96606">
 <title>
@@ -166,7 +166,7 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
 </g>
 </svg>.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -176,9 +176,9 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
           <section class="m-doc-details" id="ac12334c779cf3c82f411512644d85211"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LawDerived&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span></span>
             </h3>
             <p>Constructs the Cauchy stress evaluator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -196,11 +196,11 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
           <section class="m-doc-details" id="a5f9063aa930d67204b82ce797ca80e7a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class LawDerived&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a> _1&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f9063aa930d67204b82ce797ca80e7a" class="m-doc-self">getCauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
-              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f9063aa930d67204b82ce797ca80e7a" class="m-doc-self">getCauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
             </h3>
             <p>Computes <svg class="m-math" style="width: 5.823em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 55.90278 13.96606">
 <title>

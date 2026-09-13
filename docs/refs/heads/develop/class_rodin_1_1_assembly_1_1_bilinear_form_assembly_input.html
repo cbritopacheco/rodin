@@ -76,25 +76,10 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>BilinearFormAssemblyInput <span class="m-thin">class</span>
         </h1>
         <p>Input data for bilinear form assembly.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">TrialFES</td>
-              <td>Trial finite element space type</td>
-            </tr>
-            <tr>
-              <td>TestFES</td>
-              <td>Test finite element space type</td>
-            </tr>
-          </tbody>
-        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -184,27 +169,27 @@ $ K $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ab434360b238d9ad16db489326c99b48e">
-              using <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc-self">TrialFESType</a> = TrialFES
+              using <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc-self">TrialFESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>
             </dt>
             <dd>Trial finite element space type.</dd>
             <dt id="afa321364ce6063856f52da8fcfb00814">
-              using <a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc-self">TestFESType</a> = TestFES
+              using <a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc-self">TestFESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>
             </dt>
             <dd>Test finite element space type.</dd>
             <dt id="a533e71ea74d387d1140361ecea5de21b">
-              using <a href="#a533e71ea74d387d1140361ecea5de21b" class="m-doc-self">TrialFESScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">::<wbr />ScalarType</a>
+              using <a href="#a533e71ea74d387d1140361ecea5de21b" class="m-doc-self">TrialFESScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>&gt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">::<wbr />ScalarType</a>
             </dt>
             <dd>Scalar type for trial space.</dd>
             <dt id="a830bc63f4648b3d0132082865724810a">
-              using <a href="#a830bc63f4648b3d0132082865724810a" class="m-doc-self">TestFESScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">::<wbr />ScalarType</a>
+              using <a href="#a830bc63f4648b3d0132082865724810a" class="m-doc-self">TestFESScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>&gt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">::<wbr />ScalarType</a>
             </dt>
             <dd>Scalar type for test space.</dd>
             <dt id="a7c05a5538c984b20ce15fea8fcc8227c">
-              using <a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc-self">ScalarType</a> = decltype(std::declval&lt;<a href="#a533e71ea74d387d1140361ecea5de21b" class="m-doc">TrialFESScalarType</a>&gt;()*std::declval&lt;<a href="#a830bc63f4648b3d0132082865724810a" class="m-doc">TestFESScalarType</a>&gt;())
+              using <a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">decltype</a>(std::declval&lt;<a href="#a533e71ea74d387d1140361ecea5de21b" class="m-doc">TrialFESScalarType</a>&gt;()*std::declval&lt;<a href="#a830bc63f4648b3d0132082865724810a" class="m-doc">TestFESScalarType</a>&gt;())
             </dt>
             <dd>Resulting scalar type for assembled operator.</dd>
             <dt id="a41367851d8caefe154f8d74e18cce12a">
-              using <a href="#a41367851d8caefe154f8d74e18cce12a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = Variational::LocalBilinearFormIntegratorBase&lt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a41367851d8caefe154f8d74e18cce12a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Type for local bilinear form integrators.</dd>
             <dt id="ad2dc4e1413cf38bdd451405b67782566">
@@ -212,7 +197,7 @@ $ K $
             </dt>
             <dd>List type for local integrators.</dd>
             <dt id="a47ee43e37dc1bfd025361456958ff949">
-              using <a href="#a47ee43e37dc1bfd025361456958ff949" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = Variational::GlobalBilinearFormIntegratorBase&lt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a47ee43e37dc1bfd025361456958ff949" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="#a7c05a5538c984b20ce15fea8fcc8227c" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Type for global bilinear form integrators.</dd>
             <dt id="ad4f06355ceae3b303c6af033b93d257c">
@@ -225,8 +210,8 @@ $ K $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a251e8743887899151cb8dfe4fc2eb50a" class="m-doc">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp; trialFES,
-              const TestFES&amp; testFES,
+              <span class="m-doc-wrap-bumper"><a href="#a251e8743887899151cb8dfe4fc2eb50a" class="m-doc">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>&amp; trialFES,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&amp; testFES,
               <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; lbfis,
               <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; gbfis)</span>
             </dt>
@@ -237,11 +222,11 @@ $ K $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3a966c62072dd61f23a1aba3570de748" class="m-doc">getTrialFES</a>(</span><span class="m-doc-wrap">) const -&gt; const TrialFES&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3a966c62072dd61f23a1aba3570de748" class="m-doc">getTrialFES</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>&amp;</span>
             </dt>
             <dd>Gets the trial finite element space.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae7a9a442955d0da1df0d2a4cbebda7e2" class="m-doc">getTestFES</a>(</span><span class="m-doc-wrap">) const -&gt; const TestFES&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7a9a442955d0da1df0d2a4cbebda7e2" class="m-doc">getTestFES</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&amp;</span>
             </dt>
             <dd>Gets the test finite element space.</dd>
             <dt>
@@ -259,10 +244,10 @@ $ K $
           <section class="m-doc-details" id="a251e8743887899151cb8dfe4fc2eb50a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _2&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a251e8743887899151cb8dfe4fc2eb50a" class="m-doc-self">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp; trialFES,
-              const TestFES&amp; testFES,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a251e8743887899151cb8dfe4fc2eb50a" class="m-doc-self">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>&amp; trialFES,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&amp; testFES,
               <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; lbfis,
               <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; gbfis)</span></span>
             </h3>
@@ -294,9 +279,9 @@ $ K $
           <section class="m-doc-details" id="a3a966c62072dd61f23a1aba3570de748"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _2&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const TrialFES&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a966c62072dd61f23a1aba3570de748" class="m-doc-self">getTrialFES</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a966c62072dd61f23a1aba3570de748" class="m-doc-self">getTrialFES</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -311,9 +296,9 @@ $ K $
           <section class="m-doc-details" id="ae7a9a442955d0da1df0d2a4cbebda7e2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _2&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const TestFES&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7a9a442955d0da1df0d2a4cbebda7e2" class="m-doc-self">getTestFES</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7a9a442955d0da1df0d2a4cbebda7e2" class="m-doc-self">getTestFES</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the test finite element space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -328,9 +313,9 @@ $ K $
           <section class="m-doc-details" id="afa0a823803c378cdd39a9c9bf7904a94"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _2&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa0a823803c378cdd39a9c9bf7904a94" class="m-doc-self">getLocalBFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa0a823803c378cdd39a9c9bf7904a94" class="m-doc-self">getLocalBFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the list of local bilinear form integrators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -345,9 +330,9 @@ $ K $
           <section class="m-doc-details" id="a609d9b46bf0c8c40f4c896fd1fcf6c1a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFES, class TestFES&gt;
+                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _2&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609d9b46bf0c8c40f4c896fd1fcf6c1a" class="m-doc-self">getGlobalBFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Assembly::<wbr />BilinearFormAssemblyInput&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609d9b46bf0c8c40f4c896fd1fcf6c1a" class="m-doc-self">getGlobalBFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the list of global bilinear form integrators.</p>
             <table class="m-table m-fullwidth m-flat">

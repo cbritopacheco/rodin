@@ -85,43 +85,37 @@
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>ConstIterator provides forward iteration over const list elements, ensuring read-only access to the contained objects.</p>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab22bfa9e92715c322f73a29eb938f3e7" class="m-doc">ConstIterator</a>(</span><span class="m-doc-wrap">InternalConstIterator it) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a const iterator from an internal const iterator.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae8ad94e2dbc567b011c9ffd6e768a8ca" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab22bfa9e92715c322f73a29eb938f3e7" class="m-doc">ConstIterator</a>(</span><span class="m-doc-wrap">InternalConstIterator it) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a const iterator from an internal const iterator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae8ad94e2dbc567b011c9ffd6e768a8ca" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Pre-increment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa89501c5117f0475baf1b214231c03d5" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">int) -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa89501c5117f0475baf1b214231c03d5" class="m-doc">operator++</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Post-increment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac0e6e8d73764a580aaccf04b50e88d09" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac0e6e8d73764a580aaccf04b50e88d09" class="m-doc">operator==</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality comparison operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a26fd59d04b6dff104f98c4dc58011195" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a26fd59d04b6dff104f98c4dc58011195" class="m-doc">operator!=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality comparison operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa5ef970c77a029860ddafeefe1e48c4f" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_form_language_1_1_list.html#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5ef970c77a029860ddafeefe1e48c4f" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Dereference operator.</dd>
           </dl>
@@ -130,7 +124,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ab22bfa9e92715c322f73a29eb938f3e7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab22bfa9e92715c322f73a29eb938f3e7" class="m-doc-self">ConstIterator</a>(</span><span class="m-doc-wrap">InternalConstIterator it) <span class="m-label m-info">explicit</span>  <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab22bfa9e92715c322f73a29eb938f3e7" class="m-doc-self">ConstIterator</a>(</span><span class="m-doc-wrap">InternalConstIterator it) <span class="m-label m-info">explicit</span>  <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a const iterator from an internal const iterator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -147,7 +141,7 @@
           </div></section>
           <section class="m-doc-details" id="ae8ad94e2dbc567b011c9ffd6e768a8ca"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8ad94e2dbc567b011c9ffd6e768a8ca" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8ad94e2dbc567b011c9ffd6e768a8ca" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Pre-increment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -161,7 +155,7 @@
           </div></section>
           <section class="m-doc-details" id="aa89501c5117f0475baf1b214231c03d5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa89501c5117f0475baf1b214231c03d5" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">int) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa89501c5117f0475baf1b214231c03d5" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Post-increment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -175,7 +169,7 @@
           </div></section>
           <section class="m-doc-details" id="ac0e6e8d73764a580aaccf04b50e88d09"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac0e6e8d73764a580aaccf04b50e88d09" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac0e6e8d73764a580aaccf04b50e88d09" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Equality comparison operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -198,7 +192,7 @@
           </div></section>
           <section class="m-doc-details" id="a26fd59d04b6dff104f98c4dc58011195"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26fd59d04b6dff104f98c4dc58011195" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26fd59d04b6dff104f98c4dc58011195" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Inequality comparison operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -221,7 +215,7 @@
           </div></section>
           <section class="m-doc-details" id="aa5ef970c77a029860ddafeefe1e48c4f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5ef970c77a029860ddafeefe1e48c4f" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> Rodin::<wbr />FormLanguage::<wbr />List::<wbr />ConstIterator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5ef970c77a029860ddafeefe1e48c4f" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Dereference operator.</p>
             <table class="m-table m-fullwidth m-flat">
