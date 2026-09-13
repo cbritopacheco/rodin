@@ -217,7 +217,7 @@ namespace Rodin::Examples::Heart
       {
           /// @brief The FLATTENED mesh, produced by LA2D/make_la2d_mesh.py.
           std::string meshPath =
-            "../resources/examples/Heart/output.mesh";
+            "../resources/examples/Heart/LA2D_rectLAA_2D.mesh";
           /// @brief Pulmonary venous pressure, imposed on the four PV ostia.
           std::string inletPressurePath =
             "../resources/examples/Heart/presion_PV_SR.dat";

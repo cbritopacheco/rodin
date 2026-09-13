@@ -334,11 +334,22 @@ namespace Rodin::Examples::Heart
 
   LeftAtrium2D::Real LeftAtrium2D::vmsTauAt(const Point& p) const
   {
+    // useVMS has to be answered HERE, not only where the projections are
+    // computed. The four VMS integrators are part of the form and are
+    // assembled on every step; skipping the projections merely freezes
+    // Pi[(grad u)u], u' and Pi[sqrt(tau_C) div u] at zero, which turns the
+    // orthogonal-subscale method into a plain (non-orthogonal) SUPG/grad-div
+    // one instead of removing it. Returning tau = 0 is what actually empties
+    // the integrators.
+    if (!m_cfg.useVMS)
+      return 0.0;
     return m_cfg.vmsScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
   }
 
   LeftAtrium2D::Real LeftAtrium2D::sqrtTauCAt(const Point& p) const
   {
+    if (!m_cfg.useVMS)
+      return 0.0;
     const Real h = cellSize(p);
     return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
   }
@@ -448,6 +459,40 @@ namespace Rodin::Examples::Heart
     m_pOut = m_outletWave(0.0) + m_cfg.pressureOffset;
     m_outletPressure = m_pOut;
 
+    // The velocity scale the forcing can account for. With rigid walls, no body
+    // force and both ends on prescribed pressure, sqrt(2 max|dp| / rho) is the
+    // whole budget: a peak far above it has no source in the data, and says the
+    // scheme is making energy rather than that the atrium is doing something
+    // interesting. Printed next to the divergence guard so the two can be read
+    // against each other.
+    {
+      Real maxDp = 0.0;
+      const int samples = 2000;
+      for (int i = 0; i <= samples; ++i)
+      {
+        const Real t = m_cfg.period * static_cast<Real>(i) / samples;
+        maxDp = std::max<Real>(maxDp, std::abs(m_inletWave(t) - m_outletWave(t)));
+      }
+      m_velocityScale = std::sqrt(2.0 * maxDp / m_cfg.rho);
+
+      if (isRoot())
+      {
+        Alert::Info() << "[scale] max|dp| = " << maxDp
+                      << " Pa  ->  sqrt(2 dp/rho) = " << m_velocityScale
+                      << " m/s; mean inlet velocity at that head ~ "
+                      << (m_velocityScale * m_outletMeasure / m_inletMeasure)
+                      << " m/s. Divergence guard at " << m_cfg.maxVelocity
+                      << " m/s = " << (m_cfg.maxVelocity / m_velocityScale)
+                      << "x the scale." << Alert::Raise;
+
+        if (m_cfg.maxVelocity > 5.0 * m_velocityScale)
+          Alert::Warning() << "[scale] the guard sits more than five times "
+                              "above the velocity the forcing can account for, "
+                              "so a blow-up will run a long way before it trips."
+                           << Alert::Raise;
+      }
+    }
+
     if (isRoot())
       Alert::Info() << "[boundary] MV length = " << m_outletMeasure
                     << " m  PV length = " << m_inletMeasure
@@ -488,12 +533,39 @@ namespace Rodin::Examples::Heart
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
 
-    // Reverse-flow stabilisation. At a pressure inlet the dangerous case is
-    // fluid leaving (u.n > 0), at the outlet fluid entering (u.n < 0): in both
-    // the convective boundary flux 0.5 rho |u|^2 (u.n) feeds energy in, and
-    // these terms remove exactly that.
+    // Incoming-kinetic-energy stabilisation, on EVERY pressure boundary and on
+    // the same branch, max(-u.n, 0).
+    //
+    // Take v = u in the convective pair above. Integrating by parts,
+    //
+    //   rho (u^n.grad u, u) + (rho/2)((div u^n) u, u) = (rho/2) int_G (u^n.n)|u|^2,
+    //
+    // so the discrete energy balance reads
+    //
+    //   rho/(2 dt) d||u||^2 + 2 mu ||eps||^2
+    //       = -(rho/2) int_G (u^n.n)|u|^2 - int_G p_ext (u.n).
+    //
+    // The normal is OUTWARD -- the run confirms it: with dp > 0 filling the
+    // atrium, computeFluxes() reports qIn < 0. Wherever fluid ENTERS, u.n < 0
+    // and the first term on the right is a POSITIVE, cubic, unbounded energy
+    // source. That is the term that has to be cancelled, and
+    // + (rho beta/2) int max(-u^n.n, 0)(u.v) is what cancels it.
+    //
+    // Reading max(+u^n.n, 0) at the inlets, as Atrium does, arms the branch
+    // that is already dissipative and leaves the dangerous one untouched: over
+    // the whole filling phase that term is identically zero. Atrium survives it
+    // because its inletImpedance = 1e3 Pa s/m supplies a bound of its own;
+    // setting that to 0 here, which the 30 Pa driving head demanded, removed
+    // the only thing holding the inlet jets down.
+    //
+    // beta = 1 is the directional do-nothing condition and is what makes the
+    // estimate unconditional. It also reinterprets the prescribed p: the
+    // boundary now carries p + rho|u_n|^2/2, i.e. a total pressure rather than
+    // a static one. Here that is not a detail -- at the target 0.24 m/s the
+    // dynamic head is 30 Pa, the same size as the driving head -- so beta is
+    // left exposed. See Config.
     const auto inletBackflow = 0.5 * rho * m_cfg.inletBackflowStabilization *
-      Max(Dot(m_uOld, normal), 0.0);
+      Max(-Dot(m_uOld, normal), 0.0);
     const auto outletBackflow = 0.5 * rho * m_cfg.outletBackflowStabilization *
       Max(-Dot(m_uOld, normal), 0.0);
 
@@ -835,7 +907,37 @@ namespace Rodin::Examples::Heart
 
     m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
-    m_wss.setData(m_wssTrial.getSolution().getData());
+
+    // Keep only the wall. tau_w is an L2 projection, not a nodal quantity, and
+    // the operator is (M_wall + reg M_vol). ON the wall the boundary mass
+    // dominates by reg*h ~ 5e-7, so the recovered traction there is exact --
+    // that part is sound. OFF the wall the only equation a node has is
+    // reg M x = 0, and for a consistent P1 mass matrix that forces
+    // x_i = -(1/M_ii) sum_j M_ij x_j with every M_ij > 0: the tail ALTERNATES
+    // IN SIGN from node to node, decaying by about a quarter per layer. A
+    // sign-alternating field is exactly what renders as dots rather than as a
+    // field, and it is what put a 0/0 inside OSI. It is not a solver failure:
+    // after Jacobi the operator has a condition number of about 3.
+    //
+    // Zeroing it leaves the wall untouched, makes the two cycle accumulators
+    // identically zero off the wall, and costs one nodal pass.
+    const size_t dim = m_mesh.getSpaceDimension();
+    const size_t faceDim = m_mesh.getDimension() - 1;
+    const auto onWall = [this, faceDim](const Polytope& facet) {
+      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
+      return a && m_wallSet.count(*a);
+    };
+
+    const auto& wssSol = m_wssTrial.getSolution();
+    m_wss = Math::SpatialVector<Real>{{0.0, 0.0}};
+    m_wss.project(Region::Boundary, VectorFunction(dim,
+      [&wssSol, dim](const Point& p) -> Math::SpatialVector<Real> {
+        const auto w = wssSol.getValue(p);
+        Math::SpatialVector<Real> out(dim);
+        for (Index c = 0; c < static_cast<Index>(dim); ++c)
+          out(c) = w(c);
+        return out;
+      }), onWall);
 
     // Cycle accumulators. Two are needed and they are not interchangeable: the
     // vector integral measures how much net direction survives, the scalar one
@@ -859,17 +961,42 @@ namespace Rodin::Examples::Heart
     if (elapsed <= 0.0)
       return;
 
-    // TAWSS = (1/T) int |tau_w| dt. An exact scaling of the accumulator: no
-    // projection, no interpolation, no way to change its sign.
-    PetscErrorCode ierr = VecCopy(m_absShear.getData(), m_tawss.getData());
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecScale(m_tawss.getData(), 1.0 / elapsed);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGhostUpdateBegin(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGhostUpdateEnd(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
+    // The three indices live ON THE WALL and nowhere else.
+    //
+    // They used to be projected over the whole domain, which is not merely
+    // untidy: off the wall tau_w decays to zero, so TAWSS -> 0, the logistic
+    // SATURATES at its maximum 1/(1+exp(-tau_a/w)) = 0.935, and OSI becomes
+    // |int tau dt| / int |tau| dt with both accumulators vanishing -- a 0/0
+    // that drifts to 1/2. The product is 0.935 * 1 = 0.933, and that is
+    // exactly the number the run reported as maxActivation, with maxOSI =
+    // 0.499 beside it. The field maximum was sitting in the middle of the
+    // cavity, where there is no endothelium at all, and the picture was of
+    // the interior rather than of the wall.
+    //
+    // The wall flux itself was never affected -- BoundaryIntegral(...) over
+    // the wall only ever reads wall nodes, whose TAWSS and OSI are genuine --
+    // so this changes the diagnostics and the XDMF fields, not the physics of
+    // any run already completed. What it does change is the reported maxima,
+    // which were interior artefacts and are now wall values.
+    const size_t faceDim = m_mesh.getDimension() - 1;
+    const auto onWall = [this, faceDim](const Polytope& facet) {
+      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
+      return a && m_wallSet.count(*a);
+    };
+
+    // Zeroed first, so a node that is not on the wall carries 0 rather than
+    // whatever the previous cycle left there.
+    m_tawss = Real(0);
+    m_osi = Real(0);
+    m_activation = Real(0);
+
+    // TAWSS = (1/T) int |tau_w| dt. Still an exact scaling of the accumulator,
+    // node by node: evaluating a P1 field at its own node returns the nodal
+    // value, so nothing here can change its sign.
+    m_tawss.project(Region::Boundary,
+      RealFunction([this, elapsed](const Point& p) -> Real {
+        return m_absShear.getValue(p) / elapsed;
+      }), onWall);
 
     // OSI = (1/2)[1 - |int tau_w dt| / int |tau_w| dt]. Both accumulators are
     // built from the same nodal values, so the triangle inequality holds node
@@ -877,26 +1004,29 @@ namespace Rodin::Examples::Heart
     // Evaluated at the nodes: a ratio of two fields taken through quadrature
     // is not the ratio of the two nodal fields, and it is not bounded by 1/2
     // either.
-    m_osi.project(RealFunction([this](const Point& p) -> Real {
-      const Real abs = m_absShear.getValue(p);
-      if (abs <= 0.0)
-        return 0.0;
-      const auto net = m_netShear.getValue(p);
-      const Real mag = std::sqrt(Math::dot(net, net));
-      return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
-    }));
+    m_osi.project(Region::Boundary,
+      RealFunction([this](const Point& p) -> Real {
+        const Real abs = m_absShear.getValue(p);
+        if (abs <= 0.0)
+          return 0.0;
+        const auto net = m_netShear.getValue(p);
+        const Real mag = std::sqrt(Math::dot(net, net));
+        return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
+      }), onWall);
 
     // Smooth, bounded activation: a logistic in the measured shear threshold
     // times the oscillatory index mapped onto [0,1]. Clamped to [0,1] so the
     // endothelial thrombin flux can never turn into a sink -- a negative
     // activation is what drives thrombin, and with it fibrin, negative.
+    // Reads the two fields written just above, so it must come last.
     const Real tauA = m_cfg.thrombosis.activationShearStress;
     const Real width = std::max<Real>(m_cfg.thrombosis.activationShearWidth, 1e-12);
-    m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
-      const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
-      const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
-      return std::clamp<Real>(low * osi, 0.0, 1.0);
-    }));
+    m_activation.project(Region::Boundary,
+      RealFunction([this, tauA, width](const Point& p) -> Real {
+        const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
+        const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
+        return std::clamp<Real>(low * osi, 0.0, 1.0);
+      }), onWall);
 
     // The ghost entries must be zeroed too, or the next accumulation reads a
     // stale halo.
@@ -953,6 +1083,14 @@ namespace Rodin::Examples::Heart
     m_flux.assemble();
     m_qIn = m_flux(m_one);
 
+    for (size_t i = 0; i < m_cfg.labels.inlets.size(); ++i)
+    {
+      m_flux =
+        BoundaryIntegral(Dot(uSol, normal), m_qFlux).over(m_cfg.labels.inlets[i]);
+      m_flux.assemble();
+      m_qInPatch[i] = m_flux(m_one);
+    }
+
     m_flux = BoundaryIntegral(Dot(uSol, normal), m_qFlux).over(m_cfg.labels.outlet);
     m_flux.assemble();
     m_qOut = m_flux(m_one);
@@ -964,7 +1102,10 @@ namespace Rodin::Examples::Heart
 
   void LeftAtrium2D::writeCSVHeader()
   {
-    m_csv << "t,cycle,pPV,pMV,dp,qIn,qOut,pOutletMean,maxU,"
+    m_csv << "t,cycle,pPV,pMV,dp,qIn,qOut,";
+    for (const auto tag : m_cfg.labels.inlets)
+      m_csv << "qIn" << tag << ',';
+    m_csv << "pOutletMean,maxU,uScale,"
           << "maxTAWSS,maxOSI,maxActivation,maxThrombin,minFibrinogen,maxFibrin\n";
   }
 
@@ -983,9 +1124,12 @@ namespace Rodin::Examples::Heart
       return;
 
     m_csv << m_t << ',' << cycle << ',' << m_pIn << ',' << m_pOut << ','
-          << (m_pIn - m_pOut) << ',' << m_qIn << ',' << m_qOut << ','
-          << m_outletPressure << ',' << m_speed << ',' << tawss << ',' << osi
-          << ',' << activation << ',' << th << ',' << fg << ',' << fn << '\n';
+          << (m_pIn - m_pOut) << ',' << m_qIn << ',' << m_qOut << ',';
+    for (const auto q : m_qInPatch)
+      m_csv << q << ',';
+    m_csv << m_outletPressure << ',' << m_speed << ',' << m_velocityScale << ','
+          << tawss << ',' << osi << ',' << activation << ',' << th << ','
+          << fg << ',' << fn << '\n';
     m_csv.flush();
   }
 
@@ -1028,7 +1172,13 @@ namespace Rodin::Examples::Heart
       if (!solveFlow())
       {
         Alert::Exception() << "[flow] diverged at step " << (step + 1)
-                           << ": max|u| = " << m_speed << " m/s" << Alert::Raise;
+                           << ": max|u| = " << m_speed << " m/s = "
+                           << (m_speed / m_velocityScale)
+                           << "x sqrt(2 max|dp|/rho), i.e. a dynamic head of "
+                           << (0.5 * m_cfg.rho * m_speed * m_speed)
+                           << " Pa against a driving head of at most "
+                           << (0.5 * m_cfg.rho * m_velocityScale * m_velocityScale)
+                           << " Pa" << Alert::Raise;
         return 1;
       }
 
@@ -1089,10 +1239,18 @@ namespace Rodin::Examples::Heart
                       << (cycle < m_cfg.flowCycles ? "  (warm-up)" : "")
                       << Alert::Raise;
 
-        Alert::Info() << "[2D] max|u|=" << m_speed << " m/s  p_pv=" << m_pIn
-                      << " Pa  p_mv=" << m_pOut << " Pa  dp="
+        Alert::Info() << "[2D] max|u|=" << m_speed << " m/s ("
+                      << (m_speed / m_velocityScale) << "x scale)  p_pv="
+                      << m_pIn << " Pa  p_mv=" << m_pOut << " Pa  dp="
                       << (m_pIn - m_pOut) << " Pa  qIn=" << m_qIn
                       << "  qOut=" << m_qOut << " m^2/s" << Alert::Raise;
+
+        Alert::Info() << "[PV] per ostium (m^2/s): "
+                      << m_cfg.labels.inlets[0] << "=" << m_qInPatch[0] << "  "
+                      << m_cfg.labels.inlets[1] << "=" << m_qInPatch[1] << "  "
+                      << m_cfg.labels.inlets[2] << "=" << m_qInPatch[2] << "  "
+                      << m_cfg.labels.inlets[3] << "=" << m_qInPatch[3]
+                      << Alert::Raise;
 
         Alert::Info() << "[timing] vms=" << m_timing.vms
                       << "  asm=" << m_timing.assembly
