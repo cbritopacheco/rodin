@@ -4,6 +4,7 @@ resources/examples/BoundaryOptimization/EMM.medit.mesh filter=lfs diff=lfs merge
 resources/examples/BoundaryOptimization/WaterTankVolume.medit.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Geometry/skinning.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/Atrium/Coarse.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/CoronaryArtery/Coronary3D.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/CoronaryArtery/FSIFluid.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/CoronaryArtery/FSISolid.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/CoronaryArtery/MergedFSI.mesh filter=lfs diff=lfs merge=lfs -text
@@ -12,6 +13,11 @@ resources/examples/Heart/CoronaryArtery/Prismatic80.mesh filter=lfs diff=lfs mer
 resources/examples/Heart/CoronaryArtery/Solid.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/CoronaryArtery/Stenosis80.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/LeftAtrium2D/MitralValvePressureSR.dat filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/LeftAtrium2D/PulmonaryVeinPressureSR.dat filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/LeftAtrium2D/RectLAA.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/LeftAtrium2D/RectLAA2D.mesh filter=lfs diff=lfs merge=lfs -text
+resources/examples/Heart/LeftAtrium2D/RectLAAFine.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/Heart/ProteinTest.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh filter=lfs diff=lfs merge=lfs -text
 resources/examples/SurfaceEvolution/FirePropagation/GroundPlane.mfem.mesh filter=lfs diff=lfs merge=lfs -text
