@@ -134,22 +134,6 @@ namespace Rodin::Tests::Unit
         << where << ": the reference operator is zero";
     }
 
-    /// @brief Views a function through its FunctionBase.
-    ///
-    /// LinearElasticityIntegral's value overload is an exact match for any
-    /// concrete function type and so hides its FunctionBase overload; handing
-    /// it the FunctionBase directly is the only way to reach the latter. That
-    /// overload in turn only builds when both parameters have the same type,
-    /// because the P1 specialization of the integrator lists its coefficient
-    /// parameters in the opposite order to its declaration, so the reference
-    /// cases below keep lambda and mu of one type.
-    template <class F>
-    const FunctionBase<typename FormLanguage::FunctionDerived<F>::Type>& asFunction(
-      const F& f)
-    {
-      return f;
-    }
-
     /// @brief Name of a geometry for failure messages.
     std::string name(Polytope::Type geometry)
     {
@@ -330,7 +314,7 @@ namespace Rodin::Tests::Unit
       gfMu.project(smooth(3));
       LinearElasticityForm actual(gf, gfMu, u, v);
       BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(asFunction(gf), asFunction(gfMu));
+      expected = LinearElasticityIntegral(u, v)(gf, gfMu);
       expected.assemble();
       expectNear(actual.getOperator(), expected.getOperator(), where + " grid functions");
     }
@@ -338,9 +322,43 @@ namespace Rodin::Tests::Unit
       const auto mu = smooth(3);
       LinearElasticityForm actual(f, mu, u, v);
       BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(asFunction(f), asFunction(mu));
+      expected = LinearElasticityIntegral(u, v)(f, mu);
       expected.assemble();
       expectNear(actual.getOperator(), expected.getOperator(), where + " callables");
+    }
+    // Lambda and mu of different types, and a function next to a constant:
+    // each deduces its own coefficient slot of the integrator.
+    {
+      LinearElasticityForm actual(gf, f, u, v);
+      BilinearForm expected(u, v);
+      expected = LinearElasticityIntegral(u, v)(gf, f);
+      expected.assemble();
+      expectNear(actual.getOperator(), expected.getOperator(),
+        where + " grid function and callable");
+    }
+    {
+      LinearElasticityForm actual(f, gf, u, v);
+      BilinearForm expected(u, v);
+      expected = LinearElasticityIntegral(u, v)(f, gf);
+      expected.assemble();
+      expectNear(actual.getOperator(), expected.getOperator(),
+        where + " callable and grid function");
+    }
+    {
+      LinearElasticityForm actual(gf, Real(0.5), u, v);
+      BilinearForm expected(u, v);
+      expected = LinearElasticityIntegral(u, v)(gf, Real(0.5));
+      expected.assemble();
+      expectNear(actual.getOperator(), expected.getOperator(),
+        where + " grid function and constant");
+    }
+    {
+      LinearElasticityForm actual(Real(1.5), f, u, v);
+      BilinearForm expected(u, v);
+      expected = LinearElasticityIntegral(u, v)(Real(1.5), f);
+      expected.assemble();
+      expectNear(
+        actual.getOperator(), expected.getOperator(), where + " constant and callable");
     }
   }
 
@@ -455,8 +473,7 @@ namespace Rodin::Tests::Unit
       {
         actual.over(attribute);
         BilinearForm expected(w, z);
-        expected =
-          LinearElasticityIntegral(w, z)(asFunction(f), asFunction(mu)).over(attribute);
+        expected = LinearElasticityIntegral(w, z)(f, mu).over(attribute);
         expected.assemble();
         expectNear(actual.getOperator(), expected.getOperator(),
           "elasticity over " + std::to_string(attribute));

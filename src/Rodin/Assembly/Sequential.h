@@ -26,8 +26,6 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
-#include "Rodin/Variational/Integral.h"
-#include "Rodin/Variational/Grad.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
