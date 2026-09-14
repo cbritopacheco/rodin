@@ -6,52 +6,60 @@
  */
 /**
  * @file CoronaryArtery.cpp
- * @brief Driver for the coupled LV-0D / coronary 3D flow example.
+ * @brief Driver of the coupled 0D left ventricle / 3D coronary flow example.
  *
- * This executable configures and runs `CoupledLV0DCoronary3D` with default
- * paths for the example mesh and output files:
- * - Mesh: `../resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh`
- * - XDMF basename: `CoronaryArtery`
- * - CSV output: `CoronaryArtery.csv`
+ * Configures and runs CoupledLV0DCoronary3D. The mesh, the output basename
+ * and every physical default are taken from CoupledLV0DCoronary3D::Config and
+ * may be overridden through the PETSc option database:
  *
- * The driver accepts the following Rodin-specific PETSc option:
  * - `-coronary_flow_mode <newton|oseen>`
- *   Selects the 3D Navier-Stokes linearization strategy. The default is
- *   `oseen`, which assembles one lagged linear Oseen/Picard system per time
- *   step and solves it directly with PETSc KSP, without SNES nonlinear
- *   iterations. `newton` assembles the full Newton Jacobian for the convective
- *   term and Carreau-Yasuda viscosity and solves it with PETSc SNES.
- * - `-coronary_outlet_backflow_stabilization <value>`
- *   Multiplies the outlet backflow damping term
- *   `<0.5 rho max(-(u_old.n), 0) u, v>`. The default is `1`; use `0` to
- *   disable this stabilization for diagnostics.
- * - `-coronary_inlet_backflow_stabilization <value>`
- *   Multiplies the inlet reversed-flow damping term
- *   `<0.5 rho max(u_old.n, 0) u, v>`. The default is `1`; the intended
- *   pressure-driven inflow has `u_old.n < 0` and is not damped by this term.
+ *   3D linearization. `oseen` (default) assembles one lagged linear
+ *   Oseen/Picard system per time step and solves it with PETSc KSP; `newton`
+ *   assembles the full Jacobian of the convective term and of the
+ *   Carreau-Yasuda viscosity and solves it with PETSc SNES.
  * - `-coronary_dt <seconds>`
- *   Sets the nominal physical time step. The default is `1e-3`.
+ *   Nominal physical time step.
  * - `-coronary_nsteps <count>`
- *   Sets the number of accepted coupled time steps. The default is `2550`.
- * - `-coronary_time_adaptivity_reduction_factor <value>`
- *   Sets the factor applied to the 3D solver time step after a failed KSP/SNES
- *   solve. The default is `0.5`.
+ *   Number of accepted coupled time steps.
+ * - `-coronary_time_adaptivity_reduction_factor <value>` in (0, 1)
+ *   Factor applied to the 3D time step after a failed KSP/SNES solve.
  * - `-coronary_time_adaptivity_max_levels <count>`
- *   Sets the maximum number of reductions attempted for one accepted time
- *   step. The default is `8`.
+ *   Maximum number of reductions attempted for one accepted step.
+ * - `-coronary_outlet_backflow_stabilization <value>`
+ *   Multiplies the outlet damping term <0.5 rho max(-(u_old.n), 0) u, v>.
+ *   0 disables it.
+ * - `-coronary_inlet_backflow_stabilization <value>`
+ *   Multiplies the inlet damping term <0.5 rho max(-(u_old.n), 0) u, v>. It
+ *   arms on entering flow, so at the pressure inlet it acts on the intended
+ *   inflow as a quadratic entrance resistance 0.5 rho |u_old.n|; 0 disables it.
+ * - `-coronary_operating_pra <Pa>`
+ *   Right atrial pressure seen by the running outlets, with the calibration
+ *   left at the healthy baseline (venous-hypertension scenarios).
+ * - `-coronary_alpha_im <value>` in [0, 1]
+ *   Intramyocardial transmission fraction, p_im = alpha p_LV.
+ * - `-coronary_compliance_total <m^3/Pa>`
+ *   Total microvascular compliance, split across outlets by the Murray weight.
+ * - `-coronary_constant_outlet <bool>`
+ *   Freezes the reduced outlet closure at its high-shear plateau, giving a
+ *   constant outlet resistance while the 3D field stays non-Newtonian.
+ * - `-coronary_output_prefix <dir>`
+ *   Writes <dir>/CoronaryArtery.{xdmf,csv}.
  *
- * Unless the user overrides them on the command line, the executable installs
- * the following PETSc defaults:
- * - `-ksp_type preonly`
- * - `-pc_type lu`
- * - `-pc_factor_mat_solver_type mumps`
- * - `-mat_mumps_icntl_20 0`
- * - `-mat_mumps_icntl_21 0`
+ * Unless overridden on the command line, the executable installs the PETSc
+ * defaults `-ksp_type preonly`, `-pc_type lu`,
+ * `-pc_factor_mat_solver_type mumps`, `-mat_mumps_icntl_20 0` and
+ * `-mat_mumps_icntl_21 0`.
+ *
+ * The 3D solve uses local time-step adaptivity: on a failed KSP/SNES solve
+ * the 3D state is restored and retried with a reduced dt, and the step grows
+ * back to the nominal value once solves are accepted again. Failures of the
+ * 0D Newton are not retried by this mechanism.
  *
  * The simulation defaults inherited from `CoupledLV0DCoronary3D::Config`
  * include `dt = 1e-3 s`, `nsteps = 2550`, `rho = 1060 kg/m^3`,
- * `eps = 1e-12`, `meshScale = 1e-2`, inlet/outlet backflow stabilization `1`,
- * wall attribute `2`, inlet attribute `3`, outlet attributes `4..9`.
+ * `eps = 1e-12`, `meshScale = 1e-3`, inlet/outlet backflow stabilization `1`,
+ * wall attribute `2`, inlet attribute `4`, outlet attributes
+ * `7, 8, 9, 10, 14, 15`.
  * Each outlet is a Starling resistor in an intramyocardial bed with a single
  * state, the microvascular transmural pressure `p_tm = p_c - p_im`; its three
  * lumped constants `(R_a, R_v, C)` are produced by the calibration from
@@ -66,7 +74,7 @@
  * Newton failures are not retried by this mechanism.
  * The default Carreau-Yasuda blood model is
  * `(mu0, muInf, lambda, n, yasuda, gammaReg) =
- * (0.04868, 0.003605, 3.39, 0.198, 1.235, 1e-3)`.
+ * (0.346, 0.0053, 17.41, 0.22, 0.69, 1e-3)`.
  * The non-Newtonian outlet update evaluates the WRMS closure through the
  * universal apparent-viscosity table `mu_ap(tau_w) = tau_w^4 / (4 I(tau_w))`,
  * built once at calibration; its bounds, node count and the outlet Newton
@@ -78,13 +86,11 @@
  * atrial pressure waveform are stored in `Config::lv`, `Config::activation`,
  * and `Config::atrialPressure`.
  *
- * VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
- * > mpirun -n 8 ./examples/Heart/CoronaryArtery \
- * >   -snes_atol 1e-8 \
- * >   -snes_rtol 1e-8 \
- * >   -snes_stol 1e-10 \
- * >   -mat_mumps_icntl_7 7 \
- * >   -ksp_converged_reason -snes_monitor -snes_converged_reason -ksp_monitor
+ *   VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+ *   mpirun -n 8 ./examples/Heart/CoronaryArtery \
+ *     -snes_atol 1e-8 -snes_rtol 1e-8 -snes_stol 1e-10 \
+ *     -mat_mumps_icntl_7 7 \
+ *     -ksp_converged_reason -snes_monitor -snes_converged_reason -ksp_monitor
  */
 #include <cassert>
 #include <algorithm>
@@ -130,7 +136,7 @@ int main(int argc, char** argv)
 
     {
       Rodin::Examples::Heart::CoupledLV0DCoronary3D::Config cfg;
-      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery/Output3D.mesh";
+      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery/Coronary3D.mesh";
       cfg.xdmfBasename = "hyp2/CoronaryArtery";
       cfg.csvPath = "hyp2/CoronaryArtery.csv";
 
@@ -236,7 +242,7 @@ int main(int argc, char** argv)
         cfg.timeAdaptivityMaxLevels = maxAdaptivityLevels;
       }
 
-      // ---- Pathological-scenario knobs -----------------------------------
+      // ---- Scenario parameters -------------------------------------------
       // Venous hypertension: runtime drainage pressure of the outlets, with
       // the calibration left at the healthy baseline (frozen bed geometry).
       PetscReal operatingPra = cfg.operatingRightAtrialPressure;
@@ -251,8 +257,8 @@ int main(int argc, char** argv)
         cfg.operatingRightAtrialPressure = operatingPra;
       }
 
-      // Pressure-overload / subendocardial territory: transmission fraction
-      // p_im = alpha p_LV. Baseline 0.7; subendocardium up to ~0.9.
+      // Pressure overload or subendocardial territory: transmission fraction
+      // p_im = alpha p_LV. Baseline 0.7, subendocardium up to ~0.9.
       PetscReal alphaIm = cfg.intramyocardialFraction;
       PetscBool alphaImSet = PETSC_FALSE;
       ierr = PetscOptionsGetReal(
@@ -265,8 +271,8 @@ int main(int argc, char** argv)
         cfg.intramyocardialFraction = alphaIm;
       }
 
-      // Sensitivity knob: total microvascular compliance (m^3/Pa). Changes the
-      // retrograde spike, hardly the mean flow; identified range 1e-10..3e-9.
+      // Total microvascular compliance (m^3/Pa). Moves the retrograde spike
+      // and hardly the mean flow; identified range 1e-10 to 3e-9.
       PetscReal complianceTotal = cfg.coronaryComplianceTotal;
       PetscBool complianceTotalSet = PETSC_FALSE;
       ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
@@ -283,8 +289,8 @@ int main(int argc, char** argv)
       }
 
       // Constant-resistance outlet closure (the mu_inf comparison run): the
-      // reduced outlets lose their shear dependence while the 3D Carreau-Yasuda
-      // field is left untouched, so the pair of runs isolates the closure.
+      // reduced outlets lose their shear dependence while the 3D field is left
+      // untouched, so the pair of runs isolates the closure.
       PetscBool constantOutlet = PETSC_FALSE;
       PetscBool constantOutletSet = PETSC_FALSE;
       ierr = PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
