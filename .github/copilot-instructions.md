@@ -378,7 +378,7 @@ This avoids spending time rebuilding and running tests that cannot possibly be a
 1. Update submodules if needed:
    ```bash
    git submodule update --init --recursive
-   git lfs pull  # only when examples/full resources are needed
+   git lfs pull  # required when resources are needed
    ```
 2. Configure an out-of-source **Release** build (default for manufactured tests):
    ```bash
@@ -408,18 +408,18 @@ This avoids spending time rebuilding and running tests that cannot possibly be a
 
 ### Git LFS resources
 
-Large example/demo meshes and bulky files under `resources/` are tracked with
-Git LFS. Small unit-test and benchmark fixtures stay in regular Git so CI can
-run with `lfs: false` and without `git lfs pull`.
+Every file under `resources/` is tracked with Git LFS, including unit-test and
+benchmark fixtures. Resource-dependent CI jobs must hydrate the files they
+consume; library-only jobs may keep LFS disabled.
 
 Before adding or replacing a resource file:
 
 - Check the intended storage with `git check-attr filter -- <path>`.
-- For a large example/demo payload, run `git lfs track <path>` and commit the
-  `.gitattributes` change with the resource update.
+- For a new resource, verify that `git check-attr filter -- <path>` reports
+  `filter: lfs` before committing it.
 - Verify `git lfs status` before pushing.
-- Do not add broad LFS globs that sweep test fixtures into LFS unless CI is
-  updated deliberately.
+- Keep the repository-wide `resources/**` LFS rule in place when adding new
+  resource formats.
 
 ### CI-derived hints (actual workflows)
 

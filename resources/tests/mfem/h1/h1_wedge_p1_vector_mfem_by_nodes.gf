@@ -1,29 +1,3 @@
-FiniteElementSpace
-FiniteElementCollection: H1_3D_P1
-VDim: 3
-Ordering: 0
-
-1
-4
--1.75
-2.25
-0.75
-3.3500000000000001
--1.8
-1.8
--2
--1
-2.5
-3.5
--3
--1
-1.5
-3.5
-3
-3.25
-3
-2.25
-4
-4.25
-4
-3.25
+version https://git-lfs.github.com/spec/v1
+oid sha256:f6c4462b0b9f2da58c5209c6ba446689b666328f1e20258ff0e44b9bbcb887a3
+size 178
