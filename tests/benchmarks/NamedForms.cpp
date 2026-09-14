@@ -95,6 +95,62 @@ namespace Rodin::Tests::Benchmarks
         benchmark::DoNotOptimize(form.getOperator().nonZeros());
       }
     }
+
+    template <class FES>
+    void integralMassFirst(benchmark::State& state, FES& fes)
+    {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+
+      for (auto _ : state)
+      {
+        BilinearForm form(u, v);
+        form = Integral(u, v);
+        form.assemble();
+        benchmark::DoNotOptimize(form.getOperator().nonZeros());
+      }
+    }
+
+    template <class FES>
+    void namedMassFirst(benchmark::State& state, FES& fes)
+    {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+
+      for (auto _ : state)
+      {
+        MassForm form(u, v);
+        benchmark::DoNotOptimize(form.getOperator().nonZeros());
+      }
+    }
+
+    template <class FES>
+    void integralDiffusionFirst(benchmark::State& state, FES& fes)
+    {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+
+      for (auto _ : state)
+      {
+        BilinearForm form(u, v);
+        form = Integral(Grad(u), Grad(v));
+        form.assemble();
+        benchmark::DoNotOptimize(form.getOperator().nonZeros());
+      }
+    }
+
+    template <class FES>
+    void namedDiffusionFirst(benchmark::State& state, FES& fes)
+    {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+
+      for (auto _ : state)
+      {
+        DiffusionForm form(u, v);
+        benchmark::DoNotOptimize(form.getOperator().nonZeros());
+      }
+    }
   }
 
   /// @brief Measures 2D reassembly of the P1 mass form built through Integral.
@@ -256,4 +312,594 @@ namespace Rodin::Tests::Benchmarks
   }
   /// @brief Registers the H1P2NamedDiffusion3D benchmark.
   BENCHMARK(H1P2NamedDiffusion3D);
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 mass form built through Integral.
+  static void P1IntegralMassFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(128);
+    P1 fes(mesh);
+    integralMassFirst(state, fes);
+  }
+  /// @brief Registers the P1IntegralMassFirst benchmark.
+  BENCHMARK(P1IntegralMassFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 mass named form.
+  static void P1NamedMassFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(128);
+    P1 fes(mesh);
+    namedMassFirst(state, fes);
+  }
+  /// @brief Registers the P1NamedMassFirst benchmark.
+  BENCHMARK(P1NamedMassFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 diffusion form built through Integral.
+  static void P1IntegralDiffusionFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(128);
+    P1 fes(mesh);
+    integralDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the P1IntegralDiffusionFirst benchmark.
+  BENCHMARK(P1IntegralDiffusionFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 diffusion named form.
+  static void P1NamedDiffusionFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(128);
+    P1 fes(mesh);
+    namedDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the P1NamedDiffusionFirst benchmark.
+  BENCHMARK(P1NamedDiffusionFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 mass form built through Integral.
+  static void H1P2IntegralMassFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(32);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    integralMassFirst(state, fes);
+  }
+  /// @brief Registers the H1P2IntegralMassFirst benchmark.
+  BENCHMARK(H1P2IntegralMassFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 mass named form.
+  static void H1P2NamedMassFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(32);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    namedMassFirst(state, fes);
+  }
+  /// @brief Registers the H1P2NamedMassFirst benchmark.
+  BENCHMARK(H1P2NamedMassFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 diffusion form built through Integral.
+  static void H1P2IntegralDiffusionFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(32);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    integralDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the H1P2IntegralDiffusionFirst benchmark.
+  BENCHMARK(H1P2IntegralDiffusionFirst);
+
+  /// @brief Measures 2D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 diffusion named form.
+  static void H1P2NamedDiffusionFirst(benchmark::State& state)
+  {
+    auto mesh = unitSquare(32);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    namedDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the H1P2NamedDiffusionFirst benchmark.
+  BENCHMARK(H1P2NamedDiffusionFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 mass form built through Integral.
+  static void P1IntegralMass3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(24);
+    P1 fes(mesh);
+    integralMassFirst(state, fes);
+  }
+  /// @brief Registers the P1IntegralMass3DFirst benchmark.
+  BENCHMARK(P1IntegralMass3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 mass named form.
+  static void P1NamedMass3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(24);
+    P1 fes(mesh);
+    namedMassFirst(state, fes);
+  }
+  /// @brief Registers the P1NamedMass3DFirst benchmark.
+  BENCHMARK(P1NamedMass3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 diffusion form built through Integral.
+  static void P1IntegralDiffusion3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(24);
+    P1 fes(mesh);
+    integralDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the P1IntegralDiffusion3DFirst benchmark.
+  BENCHMARK(P1IntegralDiffusion3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the P1 diffusion named form.
+  static void P1NamedDiffusion3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(24);
+    P1 fes(mesh);
+    namedDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the P1NamedDiffusion3DFirst benchmark.
+  BENCHMARK(P1NamedDiffusion3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 mass form built through Integral.
+  static void H1P2IntegralMass3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(10);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    integralMassFirst(state, fes);
+  }
+  /// @brief Registers the H1P2IntegralMass3DFirst benchmark.
+  BENCHMARK(H1P2IntegralMass3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 mass named form.
+  static void H1P2NamedMass3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(10);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    namedMassFirst(state, fes);
+  }
+  /// @brief Registers the H1P2NamedMass3DFirst benchmark.
+  BENCHMARK(H1P2NamedMass3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 diffusion form built through Integral.
+  static void H1P2IntegralDiffusion3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(10);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    integralDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the H1P2IntegralDiffusion3DFirst benchmark.
+  BENCHMARK(H1P2IntegralDiffusion3DFirst);
+
+  /// @brief Measures 3D construction and first assembly, on a mesh whose quadrature cache is already warm, of the H1 order 2 diffusion named form.
+  static void H1P2NamedDiffusion3DFirst(benchmark::State& state)
+  {
+    auto mesh = unitCube(10);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    namedDiffusionFirst(state, fes);
+  }
+  /// @brief Registers the H1P2NamedDiffusion3DFirst benchmark.
+  BENCHMARK(H1P2NamedDiffusion3DFirst);
+  /// @brief Measures 2D construction and first assembly of the P1 mass form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1IntegralMassCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(128);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(u, v);
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1IntegralMassCold benchmark.
+  BENCHMARK(P1IntegralMassCold);
+
+  /// @brief Measures 2D construction and first assembly of the P1 mass named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1NamedMassCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(128);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          MassForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1NamedMassCold benchmark.
+  BENCHMARK(P1NamedMassCold);
+
+  /// @brief Measures 2D construction and first assembly of the P1 diffusion form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1IntegralDiffusionCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(128);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(Grad(u), Grad(v));
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1IntegralDiffusionCold benchmark.
+  BENCHMARK(P1IntegralDiffusionCold);
+
+  /// @brief Measures 2D construction and first assembly of the P1 diffusion named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1NamedDiffusionCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(128);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          DiffusionForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1NamedDiffusionCold benchmark.
+  BENCHMARK(P1NamedDiffusionCold);
+
+  /// @brief Measures 2D construction and first assembly of the H1 order 2 mass form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2IntegralMassCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(32);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(u, v);
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2IntegralMassCold benchmark.
+  BENCHMARK(H1P2IntegralMassCold);
+
+  /// @brief Measures 2D construction and first assembly of the H1 order 2 mass named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2NamedMassCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(32);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          MassForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2NamedMassCold benchmark.
+  BENCHMARK(H1P2NamedMassCold);
+
+  /// @brief Measures 2D construction and first assembly of the H1 order 2 diffusion form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2IntegralDiffusionCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(32);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(Grad(u), Grad(v));
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2IntegralDiffusionCold benchmark.
+  BENCHMARK(H1P2IntegralDiffusionCold);
+
+  /// @brief Measures 2D construction and first assembly of the H1 order 2 diffusion named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2NamedDiffusionCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitSquare(32);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          DiffusionForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2NamedDiffusionCold benchmark.
+  BENCHMARK(H1P2NamedDiffusionCold);
+
+  /// @brief Measures 3D construction and first assembly of the P1 mass form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1IntegralMass3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(24);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(u, v);
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1IntegralMass3DCold benchmark.
+  BENCHMARK(P1IntegralMass3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the P1 mass named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1NamedMass3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(24);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          MassForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1NamedMass3DCold benchmark.
+  BENCHMARK(P1NamedMass3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the P1 diffusion form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1IntegralDiffusion3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(24);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(Grad(u), Grad(v));
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1IntegralDiffusion3DCold benchmark.
+  BENCHMARK(P1IntegralDiffusion3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the P1 diffusion named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void P1NamedDiffusion3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(24);
+        P1 fes(mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          DiffusionForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the P1NamedDiffusion3DCold benchmark.
+  BENCHMARK(P1NamedDiffusion3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the H1 order 2 mass form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2IntegralMass3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(10);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(u, v);
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2IntegralMass3DCold benchmark.
+  BENCHMARK(H1P2IntegralMass3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the H1 order 2 mass named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2NamedMass3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(10);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          MassForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2NamedMass3DCold benchmark.
+  BENCHMARK(H1P2NamedMass3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the H1 order 2 diffusion form built through Integral
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2IntegralDiffusion3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(10);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          BilinearForm form(u, v);
+          form = Integral(Grad(u), Grad(v));
+          form.assemble();
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2IntegralDiffusion3DCold benchmark.
+  BENCHMARK(H1P2IntegralDiffusion3DCold);
+
+  /// @brief Measures 3D construction and first assembly of the H1 order 2 diffusion named form
+  /// on a fresh mesh, so that every polytope's quadrature is mapped during the
+  /// measurement; building the mesh and the space is not timed.
+  static void H1P2NamedDiffusion3DCold(benchmark::State& state)
+  {
+    for (auto _ : state)
+    {
+      state.PauseTiming();
+      {
+        auto mesh = unitCube(10);
+        H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+        TrialFunction u(fes);
+        TestFunction v(fes);
+        state.ResumeTiming();
+        {
+          DiffusionForm form(u, v);
+          benchmark::DoNotOptimize(form.getOperator().nonZeros());
+        }
+        state.PauseTiming();
+      }
+      state.ResumeTiming();
+    }
+  }
+  /// @brief Registers the H1P2NamedDiffusion3DCold benchmark.
+  BENCHMARK(H1P2NamedDiffusion3DCold);
 }
