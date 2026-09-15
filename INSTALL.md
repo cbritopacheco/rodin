@@ -18,8 +18,7 @@ This guide provides instructions for building and installing the Rodin finite el
 - **C++20 compatible compiler** - GCC 10+, Clang 10+, or MSVC 2019+
 - **Boost 1.74+** - Required components: `filesystem`, `serialization`
 - **Eigen3 3.4+** - Linear algebra library
-- **Git LFS** - Required only when cloning or installing the large
-  example/resource meshes
+- **Git LFS** - Required when cloning or installing resources
 
 ### Optional Dependencies
 
@@ -40,8 +39,8 @@ cd rodin
 ```
 
 **Important:** Use `--recursive` to initialize git submodules (eigen, googletest, etc.).
-Large example/resource meshes are Git LFS objects. If you need those resources,
-install Git LFS and hydrate them after cloning:
+All files under `resources/` are Git LFS objects. Install Git LFS and hydrate
+them after cloning when building or installing resources:
 
 ```bash
 git lfs install
@@ -106,7 +105,7 @@ This will install:
 - **CMake config files** to `${CMAKE_INSTALL_PREFIX}/lib/cmake/Rodin`
 - **Resources** to `${CMAKE_INSTALL_PREFIX}/share/Rodin/resources`
 
-Large resource meshes are stored with Git LFS. Run `git lfs pull` before
+All resource files are stored with Git LFS. Run `git lfs pull` before
 installing the full resource tree, or configure with
 `-DRODIN_INSTALL_RESOURCES=OFF` for a library-only install.
 
@@ -303,7 +302,7 @@ git submodule update --init --recursive
 
 ### Git LFS Resources
 
-Large example meshes and other bulky resource payloads are stored with Git LFS.
+All example, test, and other resource payloads are stored with Git LFS.
 If these files are missing or examples fail while reading meshes, install Git
 LFS and hydrate the resources:
 
