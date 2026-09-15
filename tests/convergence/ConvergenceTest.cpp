@@ -51,4 +51,37 @@ namespace Rodin::Tests::Convergence
     EXPECT_DOUBLE_EQ(rates.getL2(), 2);
     EXPECT_DOUBLE_EQ(rates.getH1Seminorm(), 1);
   }
+
+  /** @brief Verifies geometry-independent unit-box boundary partitioning. */
+  TEST(UnitBoxBoundaryTest, LabelsCoordinateSidesAndRemainder)
+  {
+    UniformGrid grid(Geometry::Polytope::Type::Triangle);
+    auto mesh = grid.makeMesh(4);
+    constexpr Geometry::Attribute lower = 11;
+    constexpr Geometry::Attribute upper = 12;
+    constexpr Geometry::Attribute remainder = 13;
+    UnitBoxBoundary::labelCoordinatePartition(
+      mesh, 0, lower, upper, remainder);
+
+    size_t lowerCount = 0;
+    size_t upperCount = 0;
+    size_t remainderCount = 0;
+    for (auto boundary = mesh.getBoundary(); boundary; ++boundary)
+    {
+      const auto attribute = boundary->getAttribute();
+      ASSERT_TRUE(attribute.has_value());
+      if (*attribute == lower)
+        ++lowerCount;
+      else if (*attribute == upper)
+        ++upperCount;
+      else if (*attribute == remainder)
+        ++remainderCount;
+      else
+        FAIL() << "Unexpected boundary attribute " << *attribute;
+    }
+
+    EXPECT_GT(lowerCount, 0);
+    EXPECT_GT(upperCount, 0);
+    EXPECT_GT(remainderCount, 0);
+  }
 }

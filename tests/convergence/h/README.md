@@ -21,9 +21,18 @@ exercise reference-to-physical mappings and geometry-specific quadrature.
 The parent `tests/convergence/Convergence.h` supplies `UniformGrid`, `ErrorNorm`,
 `ErrorHistory`, `ErrorNorms`, and `Rates` for both h- and p-convergence suites.
 
-The `Poisson` suite verifies real P1 convergence, including exact affine
-reproduction and homogeneous or nonhomogeneous Dirichlet data. The `Helmholtz`
-suite verifies complex plane-wave convergence with both P1 and P2 elements.
+The `Poisson` suite verifies real P1, P2, and P3 convergence, including exact
+affine reproduction, essential data, natural fluxes, Robin terms, and the
+mean-constrained pure-Neumann problem. The `Helmholtz` suite verifies complex
+plane-wave convergence with both P1 and P2 elements.
+
+The `LinearElasticity` suite verifies vector P1 and P2 approximation, affine
+patch exactness, full displacement and mixed traction boundaries, and a
+divergence-free nearly incompressible regime.
+
+The `Stokes` suite validates the mixed Taylor--Hood velocity-pressure pair,
+including the pressure gauge, saddle-point coupling, and discrete
+incompressibility.
 
 Equation-specific suites should supply only the manufactured fields, assemble
 and solve their weak formulation, then use these classes for measurement.

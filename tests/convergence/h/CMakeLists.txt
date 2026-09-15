@@ -10,3 +10,5 @@ target_link_libraries(RodinConvergenceH
 
 add_subdirectory(Poisson)
 add_subdirectory(Helmholtz)
+add_subdirectory(LinearElasticity)
+add_subdirectory(Stokes)

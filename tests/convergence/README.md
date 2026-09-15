@@ -24,6 +24,7 @@ Configure with `-DRODIN_BUILD_CONVERGENCE_TESTS=ON` and run with
 `ctest --test-dir build/tests -L convergence --output-on-failure`.
 
 `Convergence.h` contains the refinement-independent layer shared by these
-modules: unit-box grid construction, direct L2/H1 error integration, error
-histories, and algebraic or exponential rate calculation. Refinement-specific
-directories add only the machinery unique to their refinement axis.
+modules: unit-box grid construction and boundary partitioning, direct L2/H1
+error integration, error histories, and algebraic or exponential rate
+calculation. Refinement-specific directories add only the machinery unique to
+their refinement axis.

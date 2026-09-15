@@ -7,21 +7,22 @@
 
 /**
  * @file
- * @brief P1 h-convergence validation for the Poisson equation.
+ * @brief Degree-one through degree-three h-convergence validation for Poisson.
  *
  * On a shape-regular mesh family and for a smooth exact solution, the
- * conforming P1 Galerkin approximation satisfies
+ * conforming degree-@f$K@f$ Galerkin approximation satisfies
  * @f[
- *   \lVert u-u_h\rVert_{H^1(\Omega)}=O(h), \qquad
- *   \lVert u-u_h\rVert_{L^2(\Omega)}=O(h^2).
+ *   \lVert u-u_h\rVert_{H^1(\Omega)}=O(h^K), \qquad
+ *   \lVert u-u_h\rVert_{L^2(\Omega)}=O(h^{K+1}).
  * @f]
- * The tests below measure both errors by independent order-eight quadrature,
+ * The tests below measure both errors by independent high-order quadrature,
  * require strict error reduction, and bound every observed refinement rate.
  * They cover every positive-dimensional cell geometry supported by
  * Geometry::Mesh::UniformGrid.
  */
 
 #include <cstdint>
+#include <initializer_list>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -37,7 +38,38 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::H::Poisson
 {
-  template <class Exact, class Forcing, class ExactGradient>
+  template <size_t K, class FES, class Exact, class Forcing,
+    class ExactGradient>
+  ErrorNorms solveProblem(
+    const LocalMesh& mesh,
+    FES& vh,
+    const Exact& exact,
+    const Forcing& forcing,
+    const ExactGradient& exactGradient)
+  {
+    TrialFunction u(vh);
+    TestFunction v(vh);
+
+    auto load = Integral(forcing, v);
+    load.setOrder(K == 1 ? 8 : 12);
+    auto stiffness = Integral(Grad(u), Grad(v));
+    if constexpr (K > 1)
+      stiffness.setOrder(12);
+
+    Problem poisson(u, v);
+    poisson = stiffness
+            - load
+            + DirichletBC(u, exact);
+
+    CG solver(poisson);
+    solver.setTolerance(1e-13).setMaxIterations(20000).solve();
+    EXPECT_TRUE(solver.success());
+
+    return ErrorNorm::compute(
+      mesh, u.getSolution(), exact, exactGradient, K == 1 ? 8 : 12);
+  }
+
+  template <size_t K, class Exact, class Forcing, class ExactGradient>
   ErrorNorms solve(
     const UniformGridHierarchy& hierarchy,
     size_t pointsPerAxis,
@@ -46,23 +78,16 @@ namespace Rodin::Tests::Convergence::H::Poisson
     const ExactGradient& exactGradient)
   {
     auto mesh = hierarchy.makeMesh(pointsPerAxis);
-    P1 vh(mesh);
-    TrialFunction u(vh);
-    TestFunction v(vh);
-
-    auto load = Integral(forcing, v);
-    load.setOrder(8);
-
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - load
-            + DirichletBC(u, exact);
-
-    CG solver(poisson);
-    solver.setTolerance(1e-13).setMaxIterations(20000).solve();
-    EXPECT_TRUE(solver.success());
-
-    return ErrorNorm::compute(mesh, u.getSolution(), exact, exactGradient);
+    if constexpr (K == 1)
+    {
+      P1 vh(mesh);
+      return solveProblem<K>(mesh, vh, exact, forcing, exactGradient);
+    }
+    else
+    {
+      H1 vh(std::integral_constant<size_t, K>{}, mesh);
+      return solveProblem<K>(mesh, vh, exact, forcing, exactGradient);
+    }
   }
 
   void expectRate(
@@ -130,7 +155,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
         return value;
       });
 
-    const auto error = solve(hierarchy, dim < 3 ? 9 : 5,
+    const auto error = solve<1>(hierarchy, dim < 3 ? 9 : 5,
       exact, forcing, exactGradient);
     EXPECT_LT(error.getL2(), 1e-10);
     EXPECT_LT(error.getH1Seminorm(), 1e-10);
@@ -179,7 +204,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
       history.append(hierarchy.getMeshSize(level),
-        solve(hierarchy, level, exact, forcing, exactGradient));
+        solve<1>(hierarchy, level, exact, forcing, exactGradient));
 
     expectRate(history, 1.65, 2.35, 0.75, 1.25);
   }
@@ -224,9 +249,81 @@ namespace Rodin::Tests::Convergence::H::Poisson
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
       history.append(hierarchy.getMeshSize(level),
-        solve(hierarchy, level, exact, forcing, exactGradient));
+        solve<1>(hierarchy, level, exact, forcing, exactGradient));
 
     expectRate(history, 1.65, 2.35, 0.75, 1.25);
+  }
+
+  template <size_t K>
+  void testSmoothHomogeneousSolution(
+    Polytope::Type geometry,
+    std::initializer_list<size_t> levels,
+    Real minimumL2Rate,
+    Real maximumL2Rate,
+    Real minimumH1Rate,
+    Real maximumH1Rate)
+  {
+    const UniformGridHierarchy hierarchy(geometry, levels);
+    const size_t dim = hierarchy.getDimension();
+    const Real pi = Math::Constants::pi();
+    const RealFunction exact([dim, pi](const Point& p)
+      {
+        Real value = 1;
+        for (size_t i = 0; i < dim; ++i)
+          value *= std::sin(pi * p(i));
+        return value;
+      });
+    const RealFunction forcing([dim, pi](const Point& p)
+      {
+        Real value = Real(dim) * pi * pi;
+        for (size_t i = 0; i < dim; ++i)
+          value *= std::sin(pi * p(i));
+        return value;
+      });
+    const VectorFunction exactGradient(dim, [dim, pi](const Point& p)
+      {
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        for (size_t i = 0; i < dim; ++i)
+        {
+          value(i) = pi * std::cos(pi * p(i));
+          for (size_t j = 0; j < dim; ++j)
+            if (j != i)
+              value(i) *= std::sin(pi * p(j));
+        }
+        return value;
+      });
+
+    ErrorHistory history;
+    for (const size_t level : hierarchy.getLevels())
+      history.append(hierarchy.getMeshSize(level),
+        solve<K>(hierarchy, level, exact, forcing, exactGradient));
+
+    expectRate(history,
+      minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
+  }
+
+  /**
+   * @brief Verifies the optimal P2 rates on every UniformGrid geometry.
+   *
+   * For the smooth sine-product solution, quadratic conforming elements have
+   * third-order L2 error and second-order H1-seminorm error.
+   */
+  TEST_P(PoissonHConvergenceTest, HomogeneousDirichletHasOptimalP2Rates)
+  {
+    testSmoothHomogeneousSolution<2>(
+      GetParam(), {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
+  }
+
+  /**
+   * @brief Verifies the optimal P3 rates on every UniformGrid geometry.
+   *
+   * For the smooth sine-product solution, cubic conforming elements have
+   * fourth-order L2 error and third-order H1-seminorm error.
+   */
+  TEST_P(PoissonHConvergenceTest, HomogeneousDirichletHasOptimalP3Rates)
+  {
+    testSmoothHomogeneousSolution<3>(
+      GetParam(), {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
   }
 
   std::string geometryName(
