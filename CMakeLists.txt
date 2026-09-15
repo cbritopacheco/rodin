@@ -60,6 +60,7 @@ option(RODIN_BUILD_SRC                "Build the Rodin source code"             
 option(RODIN_BUILD_EXAMPLES           "Build the Rodin examples"                  ON)
 option(RODIN_BUILD_UNIT_TESTS         "Build Rodin unit tests"                    OFF)
 option(RODIN_BUILD_MANUFACTURED_TESTS "Build Rodin manufactured solution tests"   OFF)
+option(RODIN_BUILD_CONVERGENCE_TESTS  "Build Rodin numerical convergence tests"    OFF)
 option(RODIN_BUILD_BENCHMARKS         "Build Rodin benchmarks"                    OFF)
 option(RODIN_BUILD_DOC                "Build the Rodin documentation"             OFF)
 option(RODIN_BUILD_TIDY               "Configure the clang-tidy aggregate target" OFF)
@@ -329,7 +330,7 @@ if (RODIN_BUILD_SRC)
   endif()
 
   if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS OR
-      RODIN_BUILD_MANUFACTURED_TESTS)
+      RODIN_BUILD_MANUFACTURED_TESTS OR RODIN_BUILD_CONVERGENCE_TESTS)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
