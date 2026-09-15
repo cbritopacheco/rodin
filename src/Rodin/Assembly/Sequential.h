@@ -15,6 +15,7 @@
 
 #include "Rodin/Math/Common.h"
 #include "Rodin/Tuple.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Vector.h"
@@ -33,6 +34,7 @@
 #include "Rodin/Assembly/ConstraintMap.h"
 
 #include "ForwardDecls.h"
+#include "ScatterMap.h"
 
 namespace Rodin::Assembly
 {
@@ -95,6 +97,63 @@ namespace Rodin::Assembly
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief Assembly of a named bilinear form into a sparse matrix over a single
+   * thread.
+   *
+   * Runs the form's own local kernel over the polytopes of the form's region
+   * and attributes and scatters the local matrices through a ScatterMap, so
+   * that every assembly after the first reuses the sparsity pattern of the
+   * operator.
+   *
+   * @tparam Scalar Scalar value type of the operator.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
+   */
+  template <class Scalar, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class Sequential<Math::SparseMatrix<Scalar>, Form> final
+    : public AssemblyBase<Math::SparseMatrix<Scalar>, Form>
+  {
+    public:
+      /// @brief Assembled operator type.
+      using OperatorType = Math::SparseMatrix<Scalar>;
+
+      /// @brief Named form type being assembled.
+      using FormType = Form;
+
+      /// @brief Parent assembly base class.
+      using Parent = AssemblyBase<OperatorType, FormType>;
+
+      /// @brief Input data type for the assembly pipeline.
+      using InputType = typename Parent::InputType;
+
+      /**
+       * @brief Assembles the named form into @p out.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
+       */
+      void execute(OperatorType& out, const InputType& input) const override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        SequentialIteration seq(trialFES.getMesh(), input.getRegion());
+        m_scatterMap.assemble(
+          out, input.getKernel(), trialFES, testFES, seq, input.getAttributes());
+      }
+
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new copy.
+       */
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+
+    private:
+      mutable ScatterMap<Scalar> m_scatterMap;
+  };
+
   /**
    * @brief Sequential assembly implementation for linear forms.
    *
