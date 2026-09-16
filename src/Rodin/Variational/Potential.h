@@ -59,7 +59,6 @@
 #include "LinearFormIntegrator.h"
 #include "Rodin/Math/Traits.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -72,24 +71,25 @@ namespace Rodin::FormLanguage
   template <class LHS, class RHSDerived>
   struct Traits<Variational::Potential<LHS, Variational::FunctionBase<RHSDerived>>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType = Variational::FunctionBase<Variational::FunctionBase<RHSDerived>>;
 
+      /// @brief Cell kernel type.
       using KernelType = LHSType;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = RHSType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = std::conditional_t<
       // If
         std::is_same_v<RHSRangeType, ScalarType>,
@@ -104,7 +104,7 @@ namespace Rodin::FormLanguage
         // Else
           void>>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = RHSRangeType;
   };
 
@@ -118,30 +118,32 @@ namespace Rodin::FormLanguage
       LHS,
       Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    /// @brief Left-hand side operand type.
+      /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
-    /// @brief Right-hand side operand type.
+      /// @brief Right-hand side operand type.
       using RHSType =
         Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>,
           FES, Space>;
 
+      /// @brief Cell kernel type.
       using KernelType = LHS;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = RHSType;
 
-    /// @brief Range type of the right-hand side operand.
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    /// @brief Range type of the left-hand side operand.
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = std::conditional_t<
       // If
         std::is_same_v<RHSRangeType, ScalarType>,
@@ -156,7 +158,7 @@ namespace Rodin::FormLanguage
         // Else
           void>>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = RHSRangeType;
   };
 }
@@ -166,10 +168,16 @@ namespace Rodin::Variational
   /**
    * @defgroup PotentialSpecializations Potential Template Specializations
    * @brief Template specializations of the Potential class.
-   * @see Potential
+   * @see @ref Potential
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Potential "Potential<LHS, FunctionBase<RHSDerived>>" | Nonlocal potential operator applied to a function expression. |
+   * | @ref Potential "Potential<LHS, ShapeFunctionBase<RHSDerived, FES, Space>>" | Nonlocal potential operator applied to a test or trial shape-function expression. |
    */
 
   /**
+   * @brief Potential of a function expression against a kernel.
    * @ingroup PotentialSpecializations
    */
   template <class LHS, class RHSDerived>
@@ -183,6 +191,7 @@ namespace Rodin::Variational
       /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
+      /// @brief Cell kernel type.
       using KernelType = LHSType;
 
       /// @brief Right-hand side operand type.
@@ -213,33 +222,39 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<Potential<LHSType, RHSType>>;
 
+      /// @brief Constructs the potential of an operand against a kernel.
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u.copy())
       {}
 
+      /// @brief Copy constructor.
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel),
           m_u(other.m_u->copy())
       {}
 
+      /// @brief Move constructor.
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)),
           m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the kernel of the potential.
       const auto& getKernel() const
       {
         return m_kernel.get();
       }
 
+      /// @brief Gets the operand function.
       const auto& getOperand() const
       {
         assert(m_u);
         return *m_u;
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
@@ -315,6 +330,7 @@ namespace Rodin::Variational
       //   }
       // }
 
+      /// @brief Gets the quadrature formula of the potential.
       const auto& getQuadratureFormula() const
       {
         return m_qf;
@@ -365,6 +381,7 @@ namespace Rodin::Variational
 
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar value type.
@@ -373,6 +390,7 @@ namespace Rodin::Variational
       /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
+      /// @brief Cell kernel type.
       using KernelType = LHS;
 
       /// @brief Right-hand side operand type.
@@ -400,30 +418,36 @@ namespace Rodin::Variational
           // Else
           void>>;
 
+      /// @brief Constructs the potential of an operand against a kernel.
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u)
       {}
 
+      /// @brief Copy constructor.
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel), m_u(other.m_u)
       {}
 
+      /// @brief Move constructor.
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the kernel of the potential.
       const KernelType& getKernel() const
       {
         return m_kernel;
       }
 
+      /// @brief Gets the operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
@@ -446,6 +470,7 @@ namespace Rodin::Variational
   Potential(const LHSType&, const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>&)
     -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
 
+  /// @brief Integral of a potential tested against a shape function.
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   class Integral<
     Dot<
@@ -457,6 +482,7 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
+      /// @brief Cell kernel type.
       using KernelType = Kernel;
 
       /// @brief Left-hand side operand type.
@@ -481,33 +507,40 @@ namespace Rodin::Variational
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       Integral(const LHSType& lhs, const RHSType& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
+      /// @brief Copy constructor.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Returns the region the test function is integrated over.
       Geometry::Region getTestRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Creates a polymorphic copy.
       Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(
       const Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
@@ -517,6 +550,7 @@ namespace Rodin::Variational
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c Integral.
   template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(
       const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
@@ -527,5 +561,4 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 }
 
-/// @endcond
 #endif

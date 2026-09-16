@@ -21,7 +21,7 @@
  * - **Specialized solvers**: Least-squares and problem-specific algorithms
  * - **External library solvers**: High-performance solvers from SuiteSparse
  *
- * @see Rodin::Solver namespace for all solver classes
+ * @see <a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a> namespace for all solver classes
  */
 
 #include "Solver/LinearSolver.h"

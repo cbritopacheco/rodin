@@ -29,7 +29,7 @@ namespace Rodin::Geometry
   /**
    * @brief Template container indexed by polytope geometry types.
    * @tparam T Type of values to store
-   * @see GeometryIndexed.h
+   * @see <a href="_geometry_indexed_8h.html">GeometryIndexed.h</a>
    */
   template <class T>
   class GeometryIndexed;
@@ -37,34 +37,34 @@ namespace Rodin::Geometry
   /**
    * @brief Index generator that wraps a container's iterators.
    * @tparam T Container type
-   * @see IndexGenerator.h
+   * @see <a href="_index_generator_8h.html">IndexGenerator.h</a>
    */
   template <class T>
   class ContainerIndexGenerator;
 
   /**
    * @brief Enumeration of polytope geometries (forward declaration).
-   * @see Polytope::Type
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7">Polytope::Type</a>
    */
   enum class Type;
 
   /**
    * @brief Base class for polytope transformations.
-   * @see PolytopeTransformation.h
+   * @see <a href="_polytope_transformation_8h.html">PolytopeTransformation.h</a>
    */
   class PolytopeTransformation;
 
   /**
    * @brief Template for finite-element parametric transformations.
    * @tparam FE Finite element type
-   * @see ParametricTransformation.h
+   * @see <a href="_parametric_transformation_8h.html">ParametricTransformation.h</a>
    */
   template <class FE>
   class ParametricTransformation;
 
   /**
    * @brief Represents a geometric polytope in a mesh.
-   * @see Polytope.h
+   * @see <a href="_polytope_8h.html">Polytope.h</a>
    */
   class Polytope;
 
@@ -72,55 +72,55 @@ namespace Rodin::Geometry
 
   /**
    * @brief Represents a mesh cell (polytope of maximal dimension).
-   * @see Polytope.h
+   * @see <a href="_polytope_8h.html">Polytope.h</a>
    */
   class Cell;
 
   /**
    * @brief Represents a mesh face (polytope of dimension d-1).
-   * @see Polytope.h
+   * @see <a href="_polytope_8h.html">Polytope.h</a>
    */
   class Face;
 
   /**
    * @brief Represents a mesh vertex (0-dimensional polytope).
-   * @see Polytope.h
+   * @see <a href="_polytope_8h.html">Polytope.h</a>
    */
   class Vertex;
 
   /**
    * @brief Represents a point on a mesh polytope.
-   * @see Point.h
+   * @see <a href="_point_8h.html">Point.h</a>
    */
   class Point;
 
   /**
    * @brief Iterator over polytopes.
-   * @see PolytopeIterator.h
+   * @see <a href="_polytope_iterator_8h.html">PolytopeIterator.h</a>
    */
   class PolytopeIterator;
 
   /**
    * @brief Iterator over mesh cells.
-   * @see PolytopeIterator.h
+   * @see <a href="_polytope_iterator_8h.html">PolytopeIterator.h</a>
    */
   class CellIterator;
 
   /**
    * @brief Iterator over mesh faces.
-   * @see PolytopeIterator.h
+   * @see <a href="_polytope_iterator_8h.html">PolytopeIterator.h</a>
    */
   class FaceIterator;
 
   /**
    * @brief Iterator over mesh vertices.
-   * @see PolytopeIterator.h
+   * @see <a href="_polytope_iterator_8h.html">PolytopeIterator.h</a>
    */
   class VertexIterator;
 
   /**
    * @brief Base class for mesh representations.
-   * @see Mesh.h
+   * @see <a href="_geometry_2_mesh_8h.html">Mesh.h</a>
    */
   class MeshBase;
 
@@ -128,8 +128,14 @@ namespace Rodin::Geometry
 
   /**
    * @brief Template for connectivity information.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Connectivity "Connectivity<Context::Local>" | Sequential connectivity table storing all requested incidence relations for a local mesh. |
+   * | @ref Connectivity "Connectivity<Context::MPI>" | Distributed connectivity facade for rank-local @ref Rodin::Geometry::Shard "shard" topology and MPI mesh operations. |
+   *
    * @tparam ContextType Context type (Local, MPI, etc.)
-   * @see Connectivity.h
+   * @see <a href="_connectivity_8h.html">Connectivity.h</a>
    */
   template <class ContextType>
   class Connectivity;
@@ -148,19 +154,23 @@ namespace Rodin::Geometry
    * - Thread-safe operations (context-dependent)
    *
    * # Context Types
-   * The template parameter @p ContextType determines the execution model:
-   * - Context::Local for sequential execution
-   * - Context::MPI for distributed parallel execution
+   * The template parameter @p ContextType determines the execution model.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | [Mesh<Context::Local>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html) | Sequential mesh storing the full incidence complex and geometry in a single process. |
+   * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local @ref Rodin::Geometry::Shard "shard", global/local index maps, and MPI context for parallel assembly. |
    *
    * @tparam ContextType Execution context (default: Context::Local)
-   * @see MeshBase, Mesh.h
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
+   * @see <a href="_geometry_2_mesh_8h.html">Mesh.h</a>
    */
   template <class ContextType = Context::Local>
   class Mesh;
 
   /**
    * @brief Base class for SubMesh functionality.
-   * @see SubMesh.h
+   * @see <a href="_geometry_2_sub_mesh_8h.html">SubMesh.h</a>
    */
   class SubMeshBase;
 
@@ -196,22 +206,28 @@ namespace Rodin::Geometry
    * - Interface problem formulation
    * - Region-specific operations
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | [SubMesh<Context::Local>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html) | Sequential submesh view extracted from a local parent mesh. |
+   * | [SubMesh<Context::MPI>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed submesh view extracted from an MPI parent mesh and its rank-local @ref Rodin::Geometry::Shard "shards". |
+   *
    * @tparam Context Execution context type
-   * @see SubMeshBase, SubMesh.h
+   * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a>
+   * @see <a href="_geometry_2_sub_mesh_8h.html">SubMesh.h</a>
    */
   template <class Context>
   class SubMesh;
 
   /**
    * @brief Sequential SubMesh specialization.
-   * @see SubMesh.h
+   * @see <a href="_geometry_2_sub_mesh_8h.html">SubMesh.h</a>
    */
   template <>
   class SubMesh<Context::Local>;
 
   /**
    * @brief Distributed MPI SubMesh specialization.
-   * @see Rodin/MPI/Geometry/SubMesh.h
+   * @see <a href="_m_p_i_2_geometry_2_sub_mesh_8h.html">Rodin/MPI/Geometry/SubMesh.h</a>
    */
 #ifdef RODIN_USE_MPI
   template <>
@@ -221,7 +237,7 @@ namespace Rodin::Geometry
   /**
    * @brief Builder for constructing SubMesh objects.
    * @tparam Context Execution context type
-   * @see SubMesh.h
+   * @see <a href="_geometry_2_sub_mesh_8h.html">SubMesh.h</a>
    */
   template <class Context>
   class SubMeshBuilder;

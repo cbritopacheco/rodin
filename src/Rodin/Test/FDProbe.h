@@ -26,15 +26,15 @@ namespace Rodin::Test
    */
   struct FDProbeReport
   {
-    /// @brief Central-difference step used by the probe.
+      /// @brief Central-difference step used by the probe.
       Real epsilon = 0.0;
-    /// @brief Norm of the tangent-minus-finite-difference error.
+      /// @brief Norm of the tangent-minus-finite-difference error.
       Real absoluteError = 0.0;
-    /// @brief Absolute error scaled by the larger of the compared norms.
+      /// @brief Absolute error scaled by the larger of the compared norms.
       Real relativeError = 0.0;
-    /// @brief Norm of the tangent action @f$ A(u)w @f$.
+      /// @brief Norm of the tangent action @f$ A(u)w @f$.
       Real tangentNorm = 0.0;
-    /// @brief Norm of the central finite difference.
+      /// @brief Norm of the central finite difference.
       Real finiteDifferenceNorm = 0.0;
   };
 
@@ -54,6 +54,11 @@ namespace Rodin::Test
    * constrained DOFs are zero.
    *
    * @tparam ProblemType Rodin variational problem type.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref FDProbe "FDProbe<ProblemType>" | Nonlinear problem probe comparing assembled tangent actions against central finite differences. |
+   * | @ref FDProbe "FDProbe<Math::LinearSystem<Operator, Vector>>" | Linear-system probe comparing @f$Aw@f$ against finite differences of @f$Ax-b@f$. |
    */
   template <class ProblemType>
   class FDProbe

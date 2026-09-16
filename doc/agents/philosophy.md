@@ -215,7 +215,14 @@ rather than extended:
   deleted or omitted.
 - Doxygen with real mathematics: `@f$ ... @f$` formulas, a "Mathematical
   Foundation"/usage section, `@defgroup <Name>Specializations` per
-  specialization family. Documentation states the formula the code computes.
+  specialization family. When a class page documents a family with multiple
+  supported specializations, its description includes a table with exactly
+  `Specialization` and `Description` columns; every specialization entry links
+  to that specialization, and the table lists the complete supported set.
+  `@see` blocks and prose lists link public classes, templates, specialization
+  groups, and generated file pages explicitly with `@ref` or HTML links instead
+  of bare comma-separated names. Documentation states the formula the code
+  computes.
 - Infrastructure classes that implement a multi-stage algorithm or data
   structure need an explicit `Architecture` overview in the class Doxygen.
   State the mathematical query or object first, then the stages and their

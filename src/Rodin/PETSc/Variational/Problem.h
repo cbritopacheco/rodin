@@ -24,10 +24,10 @@
  * Both specializations support `Context::Local` (sequential) and
  * `Context::MPI` (distributed) mesh contexts.
  *
- * @see Rodin::PETSc::Variational::TrialFunction,
- *      Rodin::PETSc::Variational::TestFunction,
- *      Rodin::PETSc::Math::LinearSystem,
- *      Rodin::Solver::KSP
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html">Rodin::PETSc::Variational::TrialFunction</a>
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
+ * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a>
+ * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
  */
 
 #include <mpi.h>
@@ -68,8 +68,8 @@ namespace Rodin::Variational
    *           `TrialFunction<GridFunction<P1<…>>, P1<…>>`).
    * @tparam V Test function type (e.g. `TestFunction<P1<…>>`).
    *
-   * @see Rodin::PETSc::Variational::Problem (convenience alias),
-   *      Rodin::Solver::KSP
+   * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::PETSc::Variational::Problem</a> convenience alias
+   * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
    */
   template <class U, class V>
   class Problem<PETSc::Math::LinearSystem, U, V>
@@ -353,8 +353,8 @@ namespace Rodin::Variational
    * @tparam U3  Third function type.
    * @tparam Us  Additional function types.
    *
-   * @see Rodin::PETSc::Variational::Problem (convenience alias),
-   *      Rodin::PETSc::Math::LinearSystem::FieldSplits
+   * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html">Rodin::PETSc::Variational::Problem</a> convenience alias
+   * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html">Rodin::PETSc::Math::LinearSystem::FieldSplits</a>
    */
   template <class U1, class U2, class U3, class... Us>
   class Problem<PETSc::Math::LinearSystem, U1, U2, U3, Us...>

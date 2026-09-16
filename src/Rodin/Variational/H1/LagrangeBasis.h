@@ -14,7 +14,6 @@
 #include "Rodin/Math/Vector.h"
 #include "GLL.h" // GLL<K>, GLL01<K>
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   //==========================================================================
@@ -116,11 +115,13 @@ namespace Rodin::Variational
   class LagrangeBasisPoint
   {
     public:
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis()
       {
         return 1.0;
       }
 
+      /// @brief Gets the derivative of the basis function.
       static constexpr Real getDerivative()
       {
         return 0.0;
@@ -149,6 +150,7 @@ namespace Rodin::Variational
   {
     public:
       // Node index i, 0 <= i <= K, x in [0,1]
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -167,6 +169,7 @@ namespace Rodin::Variational
         return result;
       }
 
+      /// @brief Gets the derivative of the basis function.
       static constexpr Real getDerivative(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -213,6 +216,7 @@ namespace Rodin::Variational
   {
     public:
       // Node identified by (i,j) with i+j <= K.
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
@@ -242,7 +246,9 @@ namespace Rodin::Variational
 
       // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
       static constexpr
-      Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
+      /// @brief Gets the derivative of the basis function.
+        Real
+        getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
         const Real lambda[3] = { 1.0 - x - y, x, y };
 
@@ -327,6 +333,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j,k) with i+j+k <= K.
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(
         size_t i, size_t j, size_t k, Real x, Real y, Real z)
       {
@@ -355,6 +362,7 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
+      /// @brief Gets the derivative of the basis function.
       static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)
@@ -455,6 +463,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j), 0 ≤ i,j ≤ K, φ_{i,j}(x,y) = L_i^K(x) L_j^K(y)
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -487,6 +496,7 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
+      /// @brief Gets the derivative of the basis function.
       static constexpr Real getDerivative(
           size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
@@ -603,6 +613,7 @@ namespace Rodin::Variational
   {
     public:
       // Node (i,j,k): triangle indices (i,j) with i+j ≤ K, segment index k.
+      /// @brief Gets the basis function of a local degree of freedom.
       static constexpr Real getBasis(
         size_t i, size_t j, size_t k,
         Real x, Real y, Real z)
@@ -645,6 +656,7 @@ namespace Rodin::Variational
       }
 
       // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
+      /// @brief Gets the derivative of the basis function.
       static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)
@@ -780,5 +792,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

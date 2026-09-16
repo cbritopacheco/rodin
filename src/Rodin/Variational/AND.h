@@ -15,7 +15,6 @@
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -120,6 +119,7 @@ namespace Rodin::Variational
         return getLHS().getValue(p) && getRHS().getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -190,5 +190,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

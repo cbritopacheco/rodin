@@ -47,13 +47,22 @@
 #include "MatrixFunction.h"
 #include "IntegrationPoint.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup JacobianSpecializations Jacobian Template Specializations
    * @brief Template specializations of the Jacobian class.
-   * @see Jacobian
+   * @see @ref Jacobian
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref JacobianBase "JacobianBase<GridFunction<FES, Data>, Derived>" | Generic Jacobian base for vector-valued grid functions. |
+   * | @ref Jacobian "Jacobian<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Jacobian of a discontinuous P0g grid function. |
+   * | @ref Jacobian "Jacobian<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Jacobian of a P0g shape-function expression. |
+   * | @ref Jacobian "Jacobian<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Jacobian of an H1 grid function. |
+   * | @ref Jacobian "Jacobian<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Jacobian of an H1 shape-function expression. |
+   * | @ref Jacobian "Jacobian<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Jacobian of a P1 grid function. |
+   * | @ref Jacobian "Jacobian<P1<Range, Mesh>, ShapeFunction<NestedDerived, P1<Range, Mesh>, Space>>" | Jacobian of a P1 shape-function expression. |
    */
 
   /**
@@ -88,6 +97,7 @@ namespace Rodin::Variational
       /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
@@ -260,6 +270,7 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -280,5 +291,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

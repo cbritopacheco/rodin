@@ -195,7 +195,9 @@ namespace Rodin::Geometry
    * Connectivity objects are not thread-safe during construction. Once
    * finalized, read-only access is thread-safe.
    *
-   * @see ConnectivityBase, Mesh, Mode
+   * @see <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html">ConnectivityBase</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_connectivity.html">Connectivity</a>
    */
   template <>
   class Connectivity<Context::Local> final : public ConnectivityBase

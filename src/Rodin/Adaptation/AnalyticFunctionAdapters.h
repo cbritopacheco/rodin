@@ -58,7 +58,7 @@ namespace Rodin::Adaptation
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
-      /// @brief Spatial vector value type returned by the callable.
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
       /// @brief Range (evaluation value) type.
       using RangeType = SpatialVectorType;
@@ -129,7 +129,7 @@ namespace Rodin::Adaptation
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
-      /// @brief Spatial matrix value type returned by the callable.
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
       /// @brief Range (evaluation value) type.
       using RangeType = SpatialMatrixType;

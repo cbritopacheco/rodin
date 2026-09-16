@@ -47,7 +47,6 @@
 
 #include "Problem.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class ... Parameters>
@@ -75,6 +74,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c SparseProblem.
    * @ingroup RodinCTAD
    */
   template <class U, class V>
@@ -90,5 +90,4 @@ namespace Rodin::Variational
           U, V>;
 }
 
-/// @endcond
 #endif

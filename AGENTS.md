@@ -39,7 +39,7 @@ faster than grep.
 
 ```sh
 git submodule update --init --recursive   # first time only
-git lfs pull                              # if examples/full resources are needed
+  git lfs pull                              # required when resources are needed
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j
 ```
@@ -108,12 +108,10 @@ assembly/solver changes, the relevant manufactured tests pass too.
 
 - Example runs dump `*.h5` / `*.xdmf` / `*.log` output into the CWD. Run
   examples from a scratch directory, and never commit these artifacts.
-- Large meshes and bulky files under `resources/` are stored in Git LFS. Small
-  test/benchmark fixtures stay in regular Git. Before committing a new or
-  updated resource, check its attributes with `git check-attr filter -- <path>`;
-  use `git lfs track <path>` and commit the `.gitattributes` update when the
-  file is a large example/demo payload. Verify with `git lfs status` before
-  pushing.
+- Every file under `resources/` is stored in Git LFS. Before committing a new
+  or updated resource, check its attributes with
+  `git check-attr filter -- <path>` and verify with `git lfs status` before
+  pushing. Resource-dependent builds and tests need hydrated LFS files.
 - Branches: `master` is the default; active development happens on
   `module/*`, `model/*` topic branches off `develop`. Do not commit or push
   unless asked.

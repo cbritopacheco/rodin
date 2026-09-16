@@ -19,7 +19,7 @@
  * - **Sequential**: Single-threaded assembly (always available)
  * - **OpenMP**: Multi-threaded parallel assembly (requires RODIN_USE_OPENMP)
  *
- * @see Rodin::Assembly
+ * @see <a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a>
  */
 
 #include "Assembly/Sequential.h"

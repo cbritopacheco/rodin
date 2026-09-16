@@ -19,7 +19,6 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -96,6 +95,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -108,8 +108,10 @@ namespace Rodin::Variational
       /**
        * @brief Sets the trace domain for the function.
        *
+       * The arguments specify the trace domain; they are forwarded to the
+       * derived class.
+       *
        * @tparam Args Variadic template for trace domain specification
-       * @param[in] args Arguments specifying the trace domain
        * @returns Reference to derived object (for method chaining)
        */
       template <class ... Args>
@@ -127,6 +129,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Boolean-valued constant function.
    * @ingroup BooleanFunctionSpecializations
    */
   template <>
@@ -137,26 +140,31 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
+      /// @brief Constructs the constant boolean function.
       BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
+      /// @brief Copy constructor.
       BooleanFunction(const BooleanFunction& other)
         : Parent(other),
           m_v(other.m_v)
       {}
 
+      /// @brief Move constructor.
       BooleanFunction(BooleanFunction&& other)
         : Parent(std::move(other)),
           m_v(other.m_v)
       {}
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
       }
 
+      /// @brief Restricts the trace of the expression to a mesh attribute.
       template <class ... Args>
       constexpr
       BooleanFunction& traceOf(const Args& ... args)
@@ -173,8 +181,8 @@ namespace Rodin::Variational
       const Boolean m_v;
   };
 
+  /// @brief Deduction guide for @c BooleanFunction.
   BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 
-/// @endcond
 #endif

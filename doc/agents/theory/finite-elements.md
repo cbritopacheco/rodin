@@ -89,6 +89,9 @@ at $K\ge1$ for non-polynomial data; if you need the $L^2$-orthogonal
 projection, write the mass-matrix problem
 `Integral(u, v) - Integral(f, v)` and solve it.
 
+The operational checklist for this distinction lives in
+[../numerical-contracts.md](../numerical-contracts.md).
+
 ## Quadrature
 
 Element integrals are approximated by rules on $K$:

@@ -16,7 +16,7 @@
  * These types are built on top of the Eigen library for high-performance
  * linear algebra operations.
  *
- * @see Rodin::Math
+ * @see <a href="namespace_rodin_1_1_math.html">Rodin::Math</a>
  */
 
 #include "Math/ForwardDecls.h"

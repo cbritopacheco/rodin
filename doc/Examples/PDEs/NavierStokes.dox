@@ -119,8 +119,8 @@
   The older semi-implicit examples now use Oseen names to reflect that they
   freeze the transport velocity and solve one linearized problem per step:
 
-  - `examples/PETSc/PDEs/Seq_OseenFlow.cpp`
-  - `examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp`
+  - [Seq_OseenFlow.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenFlow.cpp)
+  - [Seq_OseenLidDrivenCavity.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp)
 
   @section examples-pdes-navierstokes-see-also See Also
 

@@ -44,7 +44,8 @@
  * u.save("solution.vtu");
  * ```
  *
- * @see TrialFunction, FiniteElementSpace
+ * @see <a href="_variational_2_trial_function_8h.html">TrialFunction</a>
+ * @see <a href="_variational_2_finite_element_space_8h.html">FiniteElementSpace</a>
  */
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
@@ -81,9 +82,9 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Coefficient data storage type.
+      /// @brief Coefficient data storage type.
       using DataType = Data;
   };
 
@@ -91,9 +92,9 @@ namespace Rodin::FormLanguage
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Coefficient data storage type.
+      /// @brief Coefficient data storage type.
       using DataType = Data;
   };
 }
@@ -103,7 +104,12 @@ namespace Rodin::Variational
   /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.
-   * @see GridFunction
+   * @see <a href="_variational_2_grid_function_8h.html">GridFunction</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GridFunction "GridFunction<FES, Math::Vector<Scalar>>" | Grid function backed by a dense local vector. |
+   * | @ref GridFunction "GridFunction<FES, Vec>" | Grid function backed by a PETSc vector for distributed assembly. |
    */
 
   /**
@@ -132,7 +138,6 @@ namespace Rodin::Variational
    * - **Space Association**: Strong association with underlying finite element space
    */
 
-  /// @cond RODIN_DOXYGEN_INTERNAL
   template <class Derived>
   class GridFunctionBaseReference
     : public FunctionBase<GridFunctionBaseReference<Derived>>
@@ -183,42 +188,49 @@ namespace Rodin::Variational
 
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
+      /// @brief Evaluates at a geometric point.
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
+      /// @brief Evaluates at an integration point.
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
+      /// @brief Gets the first component.
       constexpr
       auto x() const
       {
         return m_ref.get().x();
       }
 
+      /// @brief Gets the second component.
       constexpr
       auto y() const
       {
         return m_ref.get().y();
       }
 
+      /// @brief Gets the third component.
       constexpr
       auto z() const
       {
@@ -226,8 +238,8 @@ namespace Rodin::Variational
       }
 
       template <class DataType>
-      constexpr
-      decltype(auto) setData(const DataType& data, size_t offset = 0)
+      /// @brief Sets the degree-of-freedom data.
+      constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
       }
@@ -241,23 +253,27 @@ namespace Rodin::Variational
         return m_ref.get().getData();
       }
 
+      /// @brief Gets the finite element space.
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return m_ref.get().getFiniteElementSpace();
       }
 
+      /// @brief Gets the number of degrees of freedom.
       constexpr
       size_t getSize() const
       {
         return m_ref.get().getSize();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
         return m_ref.get().getOrder(geom);
       }
 
+      /// @brief Creates a polymorphic copy.
       GridFunctionBaseReference* copy() const noexcept final override
       {
         return new GridFunctionBaseReference(*this);
@@ -266,7 +282,6 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const Derived> m_ref;
   };
-  /// @endcond
 
   /**
    * @brief Abstract base class for GridFunction objects.
@@ -294,7 +309,8 @@ namespace Rodin::Variational
    *
    * @par Coefficients vs values
    * For nodal spaces of degree one (@ref P1 "P1") the coefficient vector
-   * holds vertex values. For higher-order spaces (`H1\<K\>`,
+   * holds vertex values. For higher-order spaces
+   * (<a href="_variational_2_h1_8h.html">H1&lt;K&gt;</a>,
    * @f$ K \ge 2 @f$) the underlying basis is not plain nodal Lagrange, and
    * @b coefficients @b are @b not @b nodal @b values: always evaluate
    * through getValue() (or the element basis) instead of reading the data

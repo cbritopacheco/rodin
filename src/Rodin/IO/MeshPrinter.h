@@ -36,7 +36,8 @@ namespace Rodin::IO
    * printer.print(file);
    * ```
    *
-   * @see Printer, MeshLoader
+   * @see <a href="class_rodin_1_1_i_o_1_1_printer.html">Printer</a>
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
    */
   template <class Context>
   class MeshPrinterBase : public IO::Printer<Geometry::Mesh<Context>>
@@ -79,4 +80,3 @@ namespace Rodin::IO
 }
 
 #endif
-

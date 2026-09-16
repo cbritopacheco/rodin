@@ -15,7 +15,7 @@
  * the domain-specific language (DSL) used to express variational formulations
  * in Rodin. This includes expression templates and lazy evaluation mechanisms.
  *
- * @see Rodin::FormLanguage
+ * @see <a href="namespace_rodin_1_1_form_language.html">Rodin::FormLanguage</a>
  */
 
 #include "FormLanguage/Base.h"

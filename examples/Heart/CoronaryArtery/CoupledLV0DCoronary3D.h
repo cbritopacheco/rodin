@@ -125,41 +125,41 @@ namespace Rodin::Examples::Heart
        */
       struct RCR
       {
-    /// @brief Microvascular transmural pressure p_tm = p_c - p_im. THE state.
+          /// @brief Microvascular transmural pressure p_tm = p_c - p_im. THE state.
           Real ptm = 0.0;
-    /// @brief Diagnostic: microvascular pressure, p_c = p_tm + p_im.
+          /// @brief Diagnostic: microvascular pressure, p_c = p_tm + p_im.
           Real pc = 0.0;
-    /// @brief Outlet pressure applied to the 3D model (the p_c + p_im part;
-    ///        the R_a Q part is assembled implicitly, see Ra below).
+          /// @brief Outlet pressure applied to the 3D model (the p_c + p_im part;
+          ///        the R_a Q part is assembled implicitly, see Ra below).
           Real pout = 0.0;
-    /// @brief Flow leaving the microvascular compartment towards the right
-    ///        atrium through the Starling throat.
+          /// @brief Flow leaving the microvascular compartment towards the right
+          ///        atrium through the Starling throat.
           Real qd = 0.0;
-    /// @brief Intramyocardial (tissue) pressure, p_im = alpha p_LV.
+          /// @brief Intramyocardial (tissue) pressure, p_im = alpha p_LV.
           Real pim = 0.0;
-    /// @brief Arteriolar (dominant) lumped resistance at the reference
-    ///        viscosity. Assembled implicitly on the outlet boundary, so it is
-    ///        never exposed to the one-step lag.
+          /// @brief Arteriolar (dominant) lumped resistance at the reference
+          ///        viscosity. Assembled implicitly on the outlet boundary, so it is
+          ///        never exposed to the one-step lag.
           Real Ra = 0.0;
-    /// @brief Venular lumped resistance at the reference viscosity.
+          /// @brief Venular lumped resistance at the reference viscosity.
           Real Rv = 0.0;
-    /// @brief Microvascular compliance, C_tot weighted by the Murray split.
+          /// @brief Microvascular compliance, C_tot weighted by the Murray split.
           Real C = 0.0;
-    /// @brief Measured outlet area. Only used to scale the implicit
-    ///        resistance term, R_a A (u.n)(v.n).
+          /// @brief Measured outlet area. Only used to scale the implicit
+          ///        resistance term, R_a A (u.n)(v.n).
           Real area = 0.0;
-    /// @brief Calibrated branch flow, reference point of the rheological
-    ///        modulation Phi(q).
+          /// @brief Calibrated branch flow, reference point of the rheological
+          ///        modulation Phi(q).
           Real q0 = 0.0;
-    /// @brief Derived resting wall shear rate of the arteriolar limb (1/s).
-    /// @details g_a = r_a dP_a / (2 mu_N L_a). Not an input: it follows from
-    ///          the calibre, the path length and the pressure budget.
+          /// @brief Derived resting wall shear rate of the arteriolar limb (1/s).
+          /// @details g_a = r_a dP_a / (2 mu_N L_a). Not an input: it follows from
+          ///          the calibre, the path length and the pressure budget.
           Real gammaA = 0.0;
-    /// @brief Derived resting wall shear rate of the venular limb (1/s).
+          /// @brief Derived resting wall shear rate of the venular limb (1/s).
           Real gammaV = 0.0;
-    /// @brief Predicted arteriolar bed multiplicity, N_a. Diagnostic.
+          /// @brief Predicted arteriolar bed multiplicity, N_a. Diagnostic.
           Real Na = 0.0;
-    /// @brief Predicted venular bed multiplicity, N_v. Diagnostic.
+          /// @brief Predicted venular bed multiplicity, N_v. Diagnostic.
           Real Nv = 0.0;
           /// @brief Diagnostic: apparent-viscosity multiplier of the arteriolar limb.
           Real muA = 1.0;

@@ -19,6 +19,11 @@
   - Naturally incorporates certain boundary conditions
   - Leads to a well-posed problem suitable for discretization
 
+  Rodin writes assembled `Problem` objects as residual equations with all terms
+  moved to the left-hand side. See
+  @ref guides-numerical-contracts "Numerical contracts" for the sign convention,
+  structural constraints, quadrature exactness, and nonlinear tangent checks.
+
   @section guides-weak-procedure Derivation Procedure
 
   Consider a general second-order PDE on a domain @f$ \Omega @f$:
@@ -261,7 +266,9 @@
   solver.solve(u);  // updates u in place
   @endcode
 
-  See @ref Rodin::Solid "Solid module" for the full API.
+  See @ref Rodin::Solid "Solid module" for the full API, and
+  @ref guides-numerical-contracts "Numerical contracts" for residual/tangent
+  consistency checks.
 
   @section guides-weak-general General Structure
 

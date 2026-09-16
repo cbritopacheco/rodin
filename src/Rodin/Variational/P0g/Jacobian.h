@@ -25,30 +25,34 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+  /// space and the operand type.
   template <class Range, class Data, class Mesh>
   struct Traits<
     Variational::Jacobian<
       Variational::GridFunction<
         Variational::P0g<Range, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P0g<Range, Mesh>;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::P0g<Range, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P0g<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
@@ -71,6 +75,7 @@ namespace Rodin::Variational
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
@@ -78,14 +83,17 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       Jacobian(const OperandType& u)
         : Parent(u)
       {}
 
+      /// @brief Copy constructor.
       Jacobian(const Jacobian& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
@@ -110,6 +118,7 @@ namespace Rodin::Variational
         out.setZero();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -117,6 +126,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Creates a polymorphic copy.
       Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
@@ -140,10 +150,12 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Small spatial matrix value type.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       /// @brief Operand type.
@@ -156,36 +168,42 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
+      /// @brief Constructs the expression from its operand.
       explicit Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u),
           m_ip(nullptr)
       {}
 
+      /// @brief Move constructor.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_ip(std::exchange(other.m_ip, nullptr))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -193,6 +211,7 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // keep operand aligned
@@ -224,6 +243,7 @@ namespace Rodin::Variational
         return m_zero;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -249,10 +269,10 @@ namespace Rodin::Variational
   Jacobian(const GridFunction<P0g<Range, Mesh>, Data>&)
     -> Jacobian<GridFunction<P0g<Range, Mesh>, Data>>;
 
+  /// @brief Deduction guide for @c Jacobian.
   template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   Jacobian(const ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

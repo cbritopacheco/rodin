@@ -2,7 +2,10 @@
 
 The largest module (~127 headers). Read philosophy.md first for the
 underlying algebra (typed expression trees, grading); this doc is the
-concrete inventory and the contracts.
+concrete inventory and the contracts. For extension work, keep
+[workflows.md](workflows.md) and [numerical-contracts.md](numerical-contracts.md)
+open beside this file: the first gives the checklist, the second states the
+cross-module numerical rules this module must preserve.
 
 ## FormLanguage substrate
 
@@ -95,8 +98,11 @@ Families:
 - Data access: `getData()`/`setData()` (Math::Vector), `getValue(Point)` /
   `getValue(IntegrationPoint)` for FES-agnostic evaluation (this is the
   sanctioned way — works at any order/basis).
-- `operator=` from any FunctionBase expression **projects** onto the space
-  (interpolation at DOF functionals); `projectOnBoundary` variants exist.
+- `operator=` from any FunctionBase expression interpolates into the space by
+  applying DOF functionals; `projectOnBoundary` variants exist. This is not an
+  `L2` projection; when the distinction matters, assemble a mass-matrix
+  `Problem` as described in
+  [numerical-contracts.md](numerical-contracts.md).
 - Components `.x()/.y()/.z()` return component views.
 - I/O: `load`/`save` in MFEM/MEDIT formats; XDMF/HDF5 via IO module.
 - `GridFunctionBaseReference` / LazyEvaluator wraps a GridFunction for use

@@ -16,13 +16,17 @@
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup TransposeSpecializations Transpose Template Specializations
    * @brief Template specializations of the Transpose class.
-   * @see Transpose
+   * @see @ref Transpose
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Transpose "Transpose<FunctionBase<NestedDerived>>" | Pointwise transpose of a matrix-valued function expression. |
+   * | @ref Transpose "Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>" | Transpose of a matrix-valued test or trial shape-function expression. |
    */
 
   /**
@@ -60,12 +64,14 @@ namespace Rodin::Variational
         : m_operand(m.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
@@ -99,6 +105,7 @@ namespace Rodin::Variational
           return v.transpose();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);
@@ -154,12 +161,14 @@ namespace Rodin::Variational
           m_operand(op.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
@@ -207,6 +216,7 @@ namespace Rodin::Variational
         return m_operand->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Transpose& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
@@ -238,6 +248,7 @@ namespace Rodin::Variational
         return m_operand->getFiniteElementSpace();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);
@@ -260,5 +271,4 @@ namespace Rodin::Variational
     -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

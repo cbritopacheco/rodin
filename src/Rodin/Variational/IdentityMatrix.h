@@ -15,7 +15,6 @@
 #include "MatrixFunction.h"
 #include "Rodin/Geometry/Polytope.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -99,6 +98,7 @@ namespace Rodin::Variational
         return Math::SpatialMatrix<Real>::Identity(m_n, m_n);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -119,5 +119,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

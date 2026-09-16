@@ -18,7 +18,6 @@
 #define RODIN_VARIATIONAL_H1_GLL_TAYLOR_TERMS 14
 #define RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS 25
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -40,6 +39,7 @@ namespace Rodin::Variational
   class GLL
   {
     public:
+      /// @brief Number of entries.
       static constexpr size_t Count = K + 1;
 
       /// Number of GLL nodes (K + 1).
@@ -194,5 +194,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

@@ -26,7 +26,8 @@ namespace Rodin::Geometry
    * @note This is particularly useful for parallel computing where
    * minimizing communication between processors is important.
    *
-   * @see Partitioner, GreedyPartitioner
+   * @see <a href="class_rodin_1_1_geometry_1_1_partitioner.html">Partitioner</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html">GreedyPartitioner</a>
    */
   class BalancedCompactPartitioner : public Partitioner
   {

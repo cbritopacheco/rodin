@@ -19,7 +19,7 @@
   - **C++20 compatible compiler** - GCC 12+, Clang 14+, or AppleClang
   - **Boost 1.74+** - C++ libraries collection
   - **Eigen3** - Linear algebra library
-  - **Git LFS** - Required only for the large example/resource meshes
+  - **Git LFS** - Required when building or installing resources
 
   @subsection guides-getting-started-installation-optional Optional Dependencies
 
@@ -40,7 +40,7 @@
   @code{.bash}
   sudo apt-get update
   sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
-  sudo apt-get install git-lfs  # needed for large example/resource meshes
+  sudo apt-get install git-lfs  # needed for resources
   @endcode
 
   For optional dependencies:
@@ -55,7 +55,7 @@
 
   @code{.bash}
   brew install cmake boost eigen libomp
-  brew install git-lfs  # needed for large example/resource meshes
+  brew install git-lfs  # needed for resources
   @endcode
 
   For optional dependencies:
@@ -79,8 +79,8 @@
   included as git submodules. If you forgot this flag, run:
   `git submodule update --init --recursive`
 
-  Large example meshes and bulky resource payloads are stored with Git LFS. If
-  you need those resources, hydrate them after cloning:
+  All files under @c resources/ are stored with Git LFS. If you need those
+  resources, hydrate them after cloning:
 
   @code{.bash}
   git lfs install

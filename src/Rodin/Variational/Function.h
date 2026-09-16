@@ -33,13 +33,13 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::FunctionBase<Derived>>
   {
-    /// @brief Result type of the evaluation.
+      /// @brief Result type of the evaluation.
       using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
 
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 }
@@ -136,7 +136,7 @@ namespace Rodin::Variational
        *
        * @param[in] i Component index
        * @returns Component function object
-       * @see Component
+       * @see <a href="_component_8h.html">Component</a>
        */
       auto operator()(size_t i) const
       {
@@ -149,7 +149,7 @@ namespace Rodin::Variational
        * @param[in] i Row index
        * @param[in] j Column index
        * @returns Component function object
-       * @see Component
+       * @see <a href="_component_8h.html">Component</a>
        */
       auto operator()(size_t i, size_t j) const
       {
@@ -192,7 +192,7 @@ namespace Rodin::Variational
        * For matrix-valued functions @f$ A(x) @f$, returns @f$ A^T(x) @f$.
        *
        * @returns Transposed function object
-       * @see Transpose
+       * @see <a href="_transpose_8h.html">Transpose</a>
        */
       constexpr
       auto T() const
@@ -209,7 +209,7 @@ namespace Rodin::Variational
        *
        * @param[in] attr Mesh attribute defining the trace domain
        * @returns Reference to self (for method chaining)
-       * @see getTraceDomain
+       * @see getTraceDomain()
        */
       constexpr
       Derived& traceOf(const Geometry::Attribute& attr)
@@ -220,9 +220,8 @@ namespace Rodin::Variational
       /**
        * @brief Sets multiple attributes as the trace domain.
        *
-       * @param[in] a1 First attribute
-       * @param[in] a2 Second attribute
-       * @param[in] as Additional attributes (variadic)
+       * The attributes are collected into the trace domain of the function.
+       *
        * @returns Reference to self (for method chaining)
        */
       template <class A1, class A2, class ... As>
@@ -241,7 +240,7 @@ namespace Rodin::Variational
        *
        * @param[in] attr Set of mesh attributes defining the trace domain
        * @returns Reference to self (for method chaining)
-       * @see getTraceDomain
+       * @see getTraceDomain()
        */
       constexpr
       Derived& traceOf(const FlatSet<Geometry::Attribute>& attr)

@@ -34,7 +34,7 @@
  * solver.solve();
  * ```
  *
- * @see LDLT for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html">LDLT</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_LDLT_H
 #define RODIN_SOLVER_LDLT_H
@@ -55,7 +55,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::LDLT<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -65,7 +65,7 @@ namespace Rodin::Solver
   /**
    * @defgroup LDLTSpecializations LDLT Template Specializations
    * @brief Template specializations of the LDLT class.
-   * @see LDLT
+   * @see @ref LDLT
    */
 
   /**

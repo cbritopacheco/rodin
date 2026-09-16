@@ -37,7 +37,9 @@
  * - 2D: Triangle (vertices at (0,0), (1,0), (0,1)) or quadrilateral [0,1]²
  * - 3D: Tetrahedron, hexahedron, prism, pyramid
  *
- * @see P0, P1, FiniteElementSpace
+ * @see <a href="class_rodin_1_1_variational_1_1_p0.html">P0</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
+ * @see <a href="_variational_2_finite_element_space_8h.html">FiniteElementSpace</a>
  */
 #ifndef RODIN_VARIATIONAL_FINITEELEMENT_H
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
