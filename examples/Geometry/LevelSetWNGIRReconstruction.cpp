@@ -480,8 +480,7 @@ int main(int argc, char** argv)
             << " unit-square mesh\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase
-            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -692,8 +691,8 @@ int main(int argc, char** argv)
     }
 
     const std::string_view exit(exitReason);
-    const bool residualConverged = exit.starts_with("numerical-") ||
-      exit.starts_with("geometric-");
+    const bool residualConverged =
+      exit.starts_with("numerical-") || exit.starts_with("geometric-");
     const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
     if (converged)
       ++framesConverged;
@@ -752,13 +751,12 @@ int main(int argc, char** argv)
 
     std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
-              << "  step=" << acceptedStep << "  min_j=" << minJ
-              << "  max_j=" << maxJ << "  max_qrel=" << maxQRel
-              << "  active_rms=" << activeRMS
+              << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
+              << "  max_qrel=" << maxQRel << "  active_rms=" << activeRMS
               << "  active_rms_hg="
               << (h * levelSetGradientScale > Real(0)
-                    ? activeRMS / (h * levelSetGradientScale)
-                    : Real(0))
+                     ? activeRMS / (h * levelSetGradientScale)
+                     : Real(0))
               << "  act_frac=" << activeFraction << "  cR=" << rigidModeCoercivity
               << "  rej_j=" << jacobianRejections << "  rej_q=" << distortionRejections
               << "  rej_e=" << energyRejections

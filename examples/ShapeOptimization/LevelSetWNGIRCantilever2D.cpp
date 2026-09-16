@@ -605,8 +605,7 @@ int main(int argc, char** argv)
             << "\n  domain [0," << L << "]x[0," << H << "]"
             << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
-            << "\n  WNGIR: kappaBulk=" << wp.kappaBulk
-            << " rDiv=" << wp.rDiv
+            << "\n  WNGIR: kappaBulk=" << wp.kappaBulk << " rDiv=" << wp.rDiv
             << " rmsTol=" << wp.tauRms << " supTol=" << wp.tauInf
             << " steps=" << wp.maxIterations << "  classify=" << classifyEvery
             << "  redistance=" << redistanceMode << "/" << redistanceEvery

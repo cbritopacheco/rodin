@@ -3326,183 +3326,171 @@ namespace Rodin::Variational
    * element tabulation; unlike the P1 case, they are evaluated at every
    * quadrature point because they vary for polynomial degrees greater than one.
    */
-  template <size_t KTrial, size_t KTest, class CoeffDerived, class LHSDerived,
-    class RHSDerived, class Scalar, class Mesh>
-  class QuadratureRule<
-    Dot<ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
-                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
-                                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                              H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-          H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
-                          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived,
-                                              H1<KTest, Scalar, Mesh>, TestSpace>>,
-                            H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<FunctionBase<CoeffDerived>>::ScalarType>
-  {
-    public:
-      using TrialFESType = H1<KTrial, Scalar, Mesh>;
-      using TestFESType = H1<KTest, Scalar, Mesh>;
-      using CoefficientType = FunctionBase<CoeffDerived>;
-      using ScalarType = typename FormLanguage::Traits<CoefficientType>::ScalarType;
+    template <size_t KTrial, size_t KTest, class CoeffDerived, class LHSDerived,
+      class RHSDerived, class Scalar, class Mesh>
+    class QuadratureRule<
+      Dot<ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
+                              ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+            H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived,
+                                                H1<KTest, Scalar, Mesh>, TestSpace>>,
+                              H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>
+      : public LocalBilinearFormIntegratorBase<
+          typename FormLanguage::Traits<FunctionBase<CoeffDerived>>::ScalarType>
+    {
+      public:
+        /// @brief Trial finite element space type.
+        using TrialFESType = H1<KTrial, Scalar, Mesh>;
+        /// @brief Test finite element space type.
+        using TestFESType = H1<KTest, Scalar, Mesh>;
+        /// @brief Scalar coefficient expression type.
+        using CoefficientType = FunctionBase<CoeffDerived>;
+        /// @brief Scalar type of the coefficient expression.
+        using ScalarType = typename FormLanguage::Traits<CoefficientType>::ScalarType;
 
-      using LHSType = ShapeFunctionBase<
-        Dot<CoefficientType,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
-            TrialFESType, TrialSpace>>,
-        TrialFESType, TrialSpace>;
+        /// @brief Left-hand shape-function expression type.
+        using LHSType = ShapeFunctionBase<
+          Dot<CoefficientType,
+            ShapeFunctionBase<
+              Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>, TrialFESType,
+              TrialSpace>>,
+          TrialFESType, TrialSpace>;
 
-      using RHSType = ShapeFunctionBase<
-        Dot<CoefficientType,
-          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
-            TestFESType, TestSpace>>,
-        TestFESType, TestSpace>;
+        /// @brief Right-hand shape-function expression type.
+        using RHSType = ShapeFunctionBase<
+          Dot<CoefficientType,
+            ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
+              TestFESType, TestSpace>>,
+          TestFESType, TestSpace>;
 
-      using IntegrandType = Dot<LHSType, RHSType>;
-      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+        /// @brief Rank-one Jacobian integrand type.
+        using IntegrandType = Dot<LHSType, RHSType>;
+        /// @brief Base local bilinear-form integrator type.
+        using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Marks this specialization for compile-time selection tests.
-      static constexpr bool IsRankOneJacobianForm = true;
+        /// @brief Marks this specialization for compile-time selection tests.
+        static constexpr bool IsRankOneJacobianForm = true;
 
-      QuadratureRule(const IntegrandType& integrand)
-        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
-          m_integrand(integrand.copy()),
-          m_qf(nullptr),
-          m_quadrature(nullptr),
-          m_polytope(nullptr),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
-      {}
+        /// @brief Constructs an integrator for @p integrand.
+        QuadratureRule(const IntegrandType& integrand)
+          : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+            m_integrand(integrand.copy()),
+            m_qf(nullptr),
+            m_quadrature(nullptr),
+            m_polytope(nullptr),
+            m_set(false),
+            m_order(0),
+            m_geometry(Geometry::Polytope::Type::Point)
+        {}
 
-      QuadratureRule(const QuadratureRule& other)
-        : Parent(other),
-          m_integrand(other.m_integrand->copy()),
-          m_qf(nullptr),
-          m_quadrature(nullptr),
-          m_polytope(nullptr),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
-      {}
+        /// @brief Copy-constructs the integrator from @p other.
+        QuadratureRule(const QuadratureRule& other)
+          : Parent(other),
+            m_integrand(other.m_integrand->copy()),
+            m_qf(nullptr),
+            m_quadrature(nullptr),
+            m_polytope(nullptr),
+            m_set(false),
+            m_order(0),
+            m_geometry(Geometry::Polytope::Type::Point)
+        {}
 
-      QuadratureRule(QuadratureRule&& other)
-        : Parent(std::move(other)),
-          m_integrand(std::move(other.m_integrand)),
-          m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
-          m_polytope(std::exchange(other.m_polytope, nullptr)),
-          m_set(std::exchange(other.m_set, false)),
-          m_order(std::exchange(other.m_order, 0)),
-          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_trialAction(std::move(other.m_trialAction)),
-          m_testAction(std::move(other.m_testAction)),
-          m_matrix(std::move(other.m_matrix))
-      {}
+        /// @brief Move-constructs the integrator from @p other.
+        QuadratureRule(QuadratureRule&& other)
+          : Parent(std::move(other)),
+            m_integrand(std::move(other.m_integrand)),
+            m_qf(std::exchange(other.m_qf, nullptr)),
+            m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+            m_polytope(std::exchange(other.m_polytope, nullptr)),
+            m_set(std::exchange(other.m_set, false)),
+            m_order(std::exchange(other.m_order, 0)),
+            m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
+            m_trialAction(std::move(other.m_trialAction)),
+            m_testAction(std::move(other.m_testAction)),
+            m_matrix(std::move(other.m_matrix))
+        {}
 
-      const Geometry::Polytope& getPolytope() const final override
-      {
-        assert(m_polytope);
-        return *m_polytope;
-      }
-
-      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
-      {
-        m_polytope = &polytope;
-
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
-        const auto& integrand = *m_integrand;
-        const auto& lhs = integrand.getLHS();
-        const auto& rhs = integrand.getRHS();
-        const auto& coefficient = lhs.getDerived().getLHS();
-        const auto& trialfes = lhs.getFiniteElementSpace();
-        const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe = testfes.getFiniteElement(d, idx);
-
-        const size_t kTrial = trialfe.getOrder();
-        const size_t kTest = testfe.getOrder();
-        const size_t order = this->getOrder(polytope).value_or(
-          (kTrial == 0 || kTest == 0) ? 0 : (kTrial + kTest - 2));
-
-        const auto geometry = polytope.getGeometry();
-        if (!m_set || m_order != order || m_geometry != geometry)
+        const Geometry::Polytope& getPolytope() const final override
         {
-          m_set = true;
-          m_order = order;
-          m_geometry = geometry;
-          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+          assert(m_polytope);
+          return *m_polytope;
         }
 
-        assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
-
-        const H1Element<KTrial, ScalarType> trialScalarElement(geometry);
-        const H1Element<KTest, ScalarType> testScalarElement(geometry);
-        const size_t trialScalarCount = trialScalarElement.getCount();
-        const size_t testScalarCount = testScalarElement.getCount();
-        const size_t trialVdim = trialfes.getVectorDimension();
-        const size_t testVdim = testfes.getVectorDimension();
-
-        assert(trialVdim == testVdim);
-        assert(trialfe.getCount() == trialScalarCount * trialVdim);
-        assert(testfe.getCount() == testScalarCount * testVdim);
-
-        const size_t nTrial = trialfe.getCount();
-        const size_t nTest = testfe.getCount();
-        m_trialAction.resize(nTrial);
-        m_testAction.resize(nTest);
-        m_matrix.resize(
-          static_cast<Eigen::Index>(nTest), static_cast<Eigen::Index>(nTrial));
-        m_matrix.setZero();
-
-        const auto& trialTabulation = trialScalarElement.getTabulation(*m_qf);
-        const auto& testTabulation = testScalarElement.getTabulation(*m_qf);
-        assert(m_quadrature);
-        const auto& quadrature = *m_quadrature;
-
-        for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+        QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
         {
-          const auto& point = quadrature.getPoint(qp);
-          const IntegrationPoint ip(point, m_qf, qp);
-          const ScalarType weight =
-            static_cast<ScalarType>(m_qf->getWeight(qp) * point.getDistortion());
-          const auto Jinv = point.getJacobianInverse();
-          const auto A = coefficient.getValue(ip);
+          m_polytope = &polytope;
 
-          for (size_t node = 0; node < trialScalarCount; ++node)
+          const size_t d = polytope.getDimension();
+          const Index idx = polytope.getIndex();
+          const auto& integrand = *m_integrand;
+          const auto& lhs = integrand.getLHS();
+          const auto& rhs = integrand.getRHS();
+          const auto& coefficient = lhs.getDerived().getLHS();
+          const auto& trialfes = lhs.getFiniteElementSpace();
+          const auto& testfes = rhs.getFiniteElementSpace();
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
+
+          const size_t kTrial = trialfe.getOrder();
+          const size_t kTest = testfe.getOrder();
+          const size_t order = this->getOrder(polytope).value_or(
+            (kTrial == 0 || kTest == 0) ? 0 : (kTrial + kTest - 2));
+
+          const auto geometry = polytope.getGeometry();
+          if (!m_set || m_order != order || m_geometry != geometry)
           {
-            const auto gradient = trialTabulation.getGradient(qp, node);
-            for (size_t component = 0; component < trialVdim; ++component)
-            {
-              const size_t local = node * trialVdim + component;
-              ScalarType action = 0;
-              for (size_t j = 0; j < d; ++j)
-              {
-                ScalarType physicalDerivative = 0;
-                for (size_t r = 0; r < d; ++r)
-                  physicalDerivative += gradient[r] * Jinv(r, j);
-                action += A(component, j) * physicalDerivative;
-              }
-              m_trialAction[local] = action;
-            }
+            m_set = true;
+            m_order = order;
+            m_geometry = geometry;
+            m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
           }
 
-          if (trialfes == testfes)
+          assert(m_qf);
+          m_quadrature = &polytope.getQuadrature(*m_qf);
+
+          const H1Element<KTrial, ScalarType> trialScalarElement(geometry);
+          const H1Element<KTest, ScalarType> testScalarElement(geometry);
+          const size_t trialScalarCount = trialScalarElement.getCount();
+          const size_t testScalarCount = testScalarElement.getCount();
+          const size_t trialVdim = trialfes.getVectorDimension();
+          const size_t testVdim = testfes.getVectorDimension();
+
+          assert(trialVdim == testVdim);
+          assert(trialfe.getCount() == trialScalarCount * trialVdim);
+          assert(testfe.getCount() == testScalarCount * testVdim);
+
+          const size_t nTrial = trialfe.getCount();
+          const size_t nTest = testfe.getCount();
+          m_trialAction.resize(nTrial);
+          m_testAction.resize(nTest);
+          m_matrix.resize(
+            static_cast<Eigen::Index>(nTest), static_cast<Eigen::Index>(nTrial));
+          m_matrix.setZero();
+
+          const auto& trialTabulation = trialScalarElement.getTabulation(*m_qf);
+          const auto& testTabulation = testScalarElement.getTabulation(*m_qf);
+          assert(m_quadrature);
+          const auto& quadrature = *m_quadrature;
+
+          for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
-            m_testAction = m_trialAction;
-          }
-          else
-          {
-            for (size_t node = 0; node < testScalarCount; ++node)
+            const auto& point = quadrature.getPoint(qp);
+            const IntegrationPoint ip(point, m_qf, qp);
+            const ScalarType weight =
+              static_cast<ScalarType>(m_qf->getWeight(qp) * point.getDistortion());
+            const auto Jinv = point.getJacobianInverse();
+            const auto A = coefficient.getValue(ip);
+
+            for (size_t node = 0; node < trialScalarCount; ++node)
             {
-              const auto gradient = testTabulation.getGradient(qp, node);
-              for (size_t component = 0; component < testVdim; ++component)
+              const auto gradient = trialTabulation.getGradient(qp, node);
+              for (size_t component = 0; component < trialVdim; ++component)
               {
-                const size_t local = node * testVdim + component;
+                const size_t local = node * trialVdim + component;
                 ScalarType action = 0;
                 for (size_t j = 0; j < d; ++j)
                 {
@@ -3511,62 +3499,87 @@ namespace Rodin::Variational
                     physicalDerivative += gradient[r] * Jinv(r, j);
                   action += A(component, j) * physicalDerivative;
                 }
-                m_testAction[local] = action;
+                m_trialAction[local] = action;
+              }
+            }
+
+            if (trialfes == testfes)
+            {
+              m_testAction = m_trialAction;
+            }
+            else
+            {
+              for (size_t node = 0; node < testScalarCount; ++node)
+              {
+                const auto gradient = testTabulation.getGradient(qp, node);
+                for (size_t component = 0; component < testVdim; ++component)
+                {
+                  const size_t local = node * testVdim + component;
+                  ScalarType action = 0;
+                  for (size_t j = 0; j < d; ++j)
+                  {
+                    ScalarType physicalDerivative = 0;
+                    for (size_t r = 0; r < d; ++r)
+                      physicalDerivative += gradient[r] * Jinv(r, j);
+                    action += A(component, j) * physicalDerivative;
+                  }
+                  m_testAction[local] = action;
+                }
+              }
+            }
+
+            if (trialfes == testfes)
+            {
+              for (size_t test = 0; test < nTest; ++test)
+              {
+                const ScalarType scaledTest = weight * m_trialAction[test];
+                for (size_t trial = 0; trial <= test; ++trial)
+                  m_matrix(test, trial) += scaledTest * m_trialAction[trial];
+              }
+            }
+            else
+            {
+              for (size_t test = 0; test < nTest; ++test)
+              {
+                const ScalarType scaledTest = weight * m_testAction[test];
+                for (size_t trial = 0; trial < nTrial; ++trial)
+                  m_matrix(test, trial) += scaledTest * m_trialAction[trial];
               }
             }
           }
 
           if (trialfes == testfes)
           {
-            for (size_t test = 0; test < nTest; ++test)
-            {
-              const ScalarType scaledTest = weight * m_trialAction[test];
-              for (size_t trial = 0; trial <= test; ++trial)
-                m_matrix(test, trial) += scaledTest * m_trialAction[trial];
-            }
+            m_matrix.template triangularView<Eigen::Upper>() =
+              m_matrix.transpose().template triangularView<Eigen::Upper>();
           }
-          else
-          {
-            for (size_t test = 0; test < nTest; ++test)
-            {
-              const ScalarType scaledTest = weight * m_testAction[test];
-              for (size_t trial = 0; trial < nTrial; ++trial)
-                m_matrix(test, trial) += scaledTest * m_trialAction[trial];
-            }
-          }
+
+          return *this;
         }
 
-        if (trialfes == testfes)
+        ScalarType integrate(size_t trial, size_t test) final override
         {
-          m_matrix.template triangularView<Eigen::Upper>() =
-            m_matrix.transpose().template triangularView<Eigen::Upper>();
+          return m_matrix(test, trial);
         }
 
-        return *this;
-      }
+        virtual Geometry::Region getRegion() const override = 0;
+        virtual QuadratureRule* copy() const noexcept override = 0;
 
-      ScalarType integrate(size_t trial, size_t test) final override
-      {
-        return m_matrix(test, trial);
-      }
+      private:
+        std::unique_ptr<IntegrandType> m_integrand;
+        const QF::QuadratureFormulaBase* m_qf;
+        const Geometry::PolytopeQuadrature* m_quadrature;
+        const Geometry::Polytope* m_polytope;
+        bool m_set;
+        size_t m_order;
+        Geometry::Polytope::Type m_geometry;
+        std::vector<ScalarType> m_trialAction;
+        std::vector<ScalarType> m_testAction;
+        Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+          m_matrix;
+    };
 
-      virtual Geometry::Region getRegion() const override = 0;
-      virtual QuadratureRule* copy() const noexcept override = 0;
-
-    private:
-      std::unique_ptr<IntegrandType> m_integrand;
-      const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
-      const Geometry::Polytope* m_polytope;
-      bool m_set;
-      size_t m_order;
-      Geometry::Polytope::Type m_geometry;
-      std::vector<ScalarType> m_trialAction;
-      std::vector<ScalarType> m_testAction;
-      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_matrix;
-  };
-
-  /**
+    /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int (\mathbf{J}\,u \cdot f) \cdot v \ dx@f$ with H1 trial and test shape functions.
    *

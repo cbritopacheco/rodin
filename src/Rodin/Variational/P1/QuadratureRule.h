@@ -2957,31 +2957,40 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FunctionBase<CoeffDerived>>::ScalarType>
   {
     public:
+      /// @brief Left-hand finite element space type.
       using LHSFESType = P1<LHSRange, LHSMesh>;
+      /// @brief Right-hand finite element space type.
       using RHSFESType = P1<RHSRange, RHSMesh>;
+      /// @brief Scalar coefficient expression type.
       using CoefficientType = FunctionBase<CoeffDerived>;
 
+      /// @brief Scalar type of the coefficient expression.
       using ScalarType = typename FormLanguage::Traits<CoefficientType>::ScalarType;
 
+      /// @brief Left-hand shape-function expression type.
       using LHSType = ShapeFunctionBase<
         Dot<CoefficientType,
           ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>,
             LHSFESType, TrialSpace>>,
         LHSFESType, TrialSpace>;
 
+      /// @brief Right-hand shape-function expression type.
       using RHSType = ShapeFunctionBase<
         Dot<CoefficientType,
           ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>,
             RHSFESType, TestSpace>>,
         RHSFESType, TestSpace>;
 
+      /// @brief Rank-one Jacobian integrand type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Base local bilinear-form integrator type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-        /// @brief Marks this specialization, for tests that assert it is chosen.
+      /// @brief Marks this specialization for compile-time selection tests.
       static constexpr bool IsRankOneJacobianForm = true;
 
+      /// @brief Constructs an integrator for @p integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2992,6 +3001,7 @@ namespace Rodin::Variational
           m_order(0)
       {}
 
+      /// @brief Copy-constructs the integrator from @p other.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -3002,6 +3012,7 @@ namespace Rodin::Variational
           m_order(0)
       {}
 
+      /// @brief Move-constructs the integrator from @p other.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -3016,6 +3027,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Returns the stored integrand.
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -3038,7 +3050,7 @@ namespace Rodin::Variational
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-          // The coefficient is shared by both sides of the outer product.
+        // The coefficient is shared by both sides of the outer product.
         const auto& coeff = lhs.getDerived().getLHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();

@@ -437,8 +437,7 @@ int main(int argc, char** argv)
   std::cout << "Lobed-sphere WNGIR sweep on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
-            << "  orbit R=" << orbitR
-            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  orbit R=" << orbitR << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;

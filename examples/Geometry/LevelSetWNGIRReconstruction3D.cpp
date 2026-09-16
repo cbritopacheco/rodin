@@ -448,8 +448,7 @@ int main(int argc, char** argv)
             << " tetrahedral unit-cube mesh\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes << "  center=("
             << cx << ", " << cy << ", " << cz << ")"
-            << "  phase=" << phase
-            << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
 
   clearXDMFRegionAttributes(mesh);
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
@@ -624,8 +623,8 @@ int main(int argc, char** argv)
   }
 
   const std::string_view exit(exitReason);
-  const bool residualConverged = exit.starts_with("numerical-") ||
-    exit.starts_with("geometric-");
+  const bool residualConverged =
+    exit.starts_with("numerical-") || exit.starts_with("geometric-");
   const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
 
   const std::size_t D = mesh.getDimension();
@@ -705,8 +704,8 @@ int main(int argc, char** argv)
             << "  max_qrel=" << maxQRel << "  act_frac=" << activeFraction
             << "  active_rms=" << activeRMS << "  active_rms_hg="
             << (h * levelSetGradientScale > Real(0)
-                  ? activeRMS / (h * levelSetGradientScale)
-                  : Real(0))
+                   ? activeRMS / (h * levelSetGradientScale)
+                   : Real(0))
             << "  cR=" << rigidModeCoercivity << "  rej_j=" << jacobianRejections
             << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections
             << "  converged=" << (converged ? "yes" : "best-effort")

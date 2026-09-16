@@ -218,8 +218,7 @@ namespace Rodin::Adaptation
         const Real h = p.h;
         const Real acceptedJacobianFloor = std::max(p.jLineSearchRatio, p.jSafe);
         const Real bulkDeviatoricCoefficient = h * p.kappaBulk;
-        const Real bulkDivergenceCoefficient =
-          bulkDeviatoricCoefficient * p.rDiv;
+        const Real bulkDivergenceCoefficient = bulkDeviatoricCoefficient * p.rDiv;
         const Real stepTol = p.stepTol > Real(0) ? p.stepTol : Real(1e-4) * h;
         using Clock = std::chrono::steady_clock;
         auto secondsSince = [](Clock::time_point t0) -> Real {
@@ -251,10 +250,8 @@ namespace Rodin::Adaptation
         // The dimensional floors are raised to the resolution of the classified
         // skeleton itself, so the iteration does not pursue an error finer than
         // the kink between adjacent facets.
-        const Real tauRmsH =
-          std::max(floorRMS, p.tauJumpRms * rep.normalJumpRMS);
-        const Real tauInfH =
-          std::max(floorSup, p.tauJumpInf * rep.normalJumpMax);
+        const Real tauRmsH = std::max(floorRMS, p.tauJumpRms * rep.normalJumpRMS);
+        const Real tauInfH = std::max(floorSup, p.tauJumpInf * rep.normalJumpMax);
         rep.effectiveTauRmsH = tauRmsH;
         rep.effectiveTauInfH = tauInfH;
 
@@ -287,10 +284,8 @@ namespace Rodin::Adaptation
         const Real levelSetMeshScale = h * robustScale.gradientScale;
         const Real dataNormalization =
           Real(1) / (robustScale.gradientScale * robustScale.gradientScale);
-        const Real tauRms =
-          p.tauRms > Real(0) ? p.tauRms : Real(4) * levelSetMeshScale;
-        const Real tauInf =
-          p.tauInf > Real(0) ? p.tauInf : Real(10) * levelSetMeshScale;
+        const Real tauRms = p.tauRms > Real(0) ? p.tauRms : Real(4) * levelSetMeshScale;
+        const Real tauInf = p.tauInf > Real(0) ? p.tauInf : Real(10) * levelSetMeshScale;
         rep.effectiveTauRms = tauRms;
         rep.effectiveTauInf = tauInf;
         const WNGIRLoss loss(sigma);
@@ -451,9 +446,8 @@ namespace Rodin::Adaptation
 
           {
             const Real modelDecrease = Real(0.5) * predictorAction;
-            const Real barrierCoefficient = domainMeasure > Real(0)
-              ? p.muHat * modelDecrease / domainMeasure
-              : Real(0);
+            const Real barrierCoefficient =
+              domainMeasure > Real(0) ? p.muHat * modelDecrease / domainMeasure : Real(0);
             rep.primalBarrierCoefficient = barrierCoefficient;
 
             uTrial *= Real(0);
@@ -525,8 +519,8 @@ namespace Rodin::Adaptation
                   break;
               }
               rep.primalBarrierConverged = innerConverged;
-              if (solveOk &&
-                p.primalBarrierRelativeTolerance > Real(0) && !innerConverged)
+              if (solveOk && p.primalBarrierRelativeTolerance > Real(0) &&
+                !innerConverged)
               {
                 rep.exitReason = "primal-barrier-inner-not-converged";
                 solveOk = false;
@@ -658,8 +652,7 @@ namespace Rodin::Adaptation
           FastAdm acceptedAdm = adm;
           SurfaceState acceptedSurf =
             trialSurfaceEvaluated ? trialSurface : surfaceState(u);
-          Real acceptedEnergy =
-            std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
+          Real acceptedEnergy = std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
 
           rep.lastAlpha = alpha;
           {
@@ -702,14 +695,14 @@ namespace Rodin::Adaptation
                       << "  muEff=" << rep.primalBarrierCoefficient
                       << "  pbIt=" << rep.lastPrimalBarrierIterations
                       << "  pbRel=" << rep.primalBarrierRelativeCorrection
-                      << "  stat=" << rep.stationarityNorm << "  desc=" << rep.descentRatio
+                      << "  stat=" << rep.stationarityNorm
+                      << "  desc=" << rep.descentRatio
                       << "  dirNorm=" << rep.directionNormRatio
                       << "  ared/pred=" << rep.actualPredictedDecrease
                       << "  bt=" << backtracks << "  rejJ=" << rep.jacobianRejections
                       << "  rejQ=" << rep.distortionRejections
                       << "  rejE=" << rep.energyRejections << "  min_j=" << rep.minJ
-                      << "  max_j=" << rep.maxJ
-                      << "  max_Q=" << rep.maxQRel
+                      << "  max_j=" << rep.maxJ << "  max_Q=" << rep.maxQRel
                       << "  rotFrac=" << rep.rigidRotationFraction
                       << "  traFrac=" << rep.rigidTranslationFraction << '\n';
 
@@ -886,10 +879,10 @@ namespace Rodin::Adaptation
         {
           for (std::size_t b = a + 1; b < dimension; ++b)
           {
-            gradients[mode](static_cast<Eigen::Index>(a),
-              static_cast<Eigen::Index>(b)) = Real(-1);
-            gradients[mode](static_cast<Eigen::Index>(b),
-              static_cast<Eigen::Index>(a)) = Real(1);
+            gradients[mode](static_cast<Eigen::Index>(a), static_cast<Eigen::Index>(b)) =
+              Real(-1);
+            gradients[mode](static_cast<Eigen::Index>(b), static_cast<Eigen::Index>(a)) =
+              Real(1);
             ++mode;
           }
         }
@@ -928,7 +921,8 @@ namespace Rodin::Adaptation
               for (std::size_t j = 0; j < count; ++j)
               {
                 hGram(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(j)) +=
-                  weight * (values[i].dot(values[j]) +
+                  weight *
+                  (values[i].dot(values[j]) +
                     (gradients[i].array() * gradients[j].array()).sum());
               }
             }
@@ -980,8 +974,7 @@ namespace Rodin::Adaptation
         const Displacement& inner, const Displacement& increment,
         std::size_t dimension) const
       {
-        const Real tau =
-          std::clamp(m_parameters.thetaBoundary, Real(0), Real(0.999));
+        const Real tau = std::clamp(m_parameters.thetaBoundary, Real(0), Real(0.999));
         if constexpr (requires { current.acquire(); })
           current.acquire();
         if constexpr (requires { inner.acquire(); })
@@ -1355,8 +1348,8 @@ namespace Rodin::Adaptation
 
       void ensureRigidModeBasis(std::size_t dimension)
       {
-        const auto size = static_cast<Eigen::Index>(
-          m_duStep.getFiniteElementSpace().getSize());
+        const auto size =
+          static_cast<Eigen::Index>(m_duStep.getFiniteElementSpace().getSize());
         if (m_rigidModeSize == size && m_rigidModeDimension == dimension)
           return;
 
@@ -1392,16 +1385,13 @@ namespace Rodin::Adaptation
             addMode([a, b, dimension](const Geometry::Point& point) {
               const auto& x = point.getCoordinates();
               SpatialVec value = SpatialVec::Zero(dimension);
-              value(static_cast<Eigen::Index>(a)) =
-                -x(static_cast<Eigen::Index>(b));
-              value(static_cast<Eigen::Index>(b)) =
-                x(static_cast<Eigen::Index>(a));
+              value(static_cast<Eigen::Index>(a)) = -x(static_cast<Eigen::Index>(b));
+              value(static_cast<Eigen::Index>(b)) = x(static_cast<Eigen::Index>(a));
               return value;
             });
           }
         }
       }
-
 
       /// @brief Fractions of @p vector carried by translation and by rotation.
       std::pair<Real, Real> rigidContent(const Math::Vector<Real>& vector) const
@@ -1422,7 +1412,6 @@ namespace Rodin::Adaptation
         return {std::sqrt(tra) / norm, std::sqrt(rot) / norm};
       }
 
-
       struct RigidStabilisation
       {
           std::vector<Math::Vector<Real>> modes;
@@ -1437,8 +1426,7 @@ namespace Rodin::Adaptation
        * to a fixed fraction @f$\rho@f$ of the stiffest one. This avoids a
        * basis-dependent diagonal correction while retaining all rigid modes.
        */
-      RigidStabilisation getRigidStabilisation(
-        const Math::SparseMatrix<Real>& A) const
+      RigidStabilisation getRigidStabilisation(const Math::SparseMatrix<Real>& A) const
       {
         RigidStabilisation result;
         const Real rho = m_parameters.rigidStabilisationLevel;
@@ -1454,16 +1442,14 @@ namespace Rodin::Adaptation
         {
           for (Eigen::Index j = i; j < n; ++j)
           {
-            const Real value =
-              m_rigidModeBasis[static_cast<std::size_t>(i)].dot(
-                images[static_cast<std::size_t>(j)]);
+            const Real value = m_rigidModeBasis[static_cast<std::size_t>(i)].dot(
+              images[static_cast<std::size_t>(j)]);
             restriction(i, j) = value;
             restriction(j, i) = value;
           }
         }
 
-        Eigen::SelfAdjointEigenSolver<
-          Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>>
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>>
           eig(restriction);
         if (eig.info() != Eigen::Success)
           return result;
@@ -1483,8 +1469,8 @@ namespace Rodin::Adaptation
           Math::Vector<Real> mode =
             Math::Vector<Real>::Zero(m_rigidModeBasis.front().size());
           for (Eigen::Index j = 0; j < n; ++j)
-            mode += eig.eigenvectors()(j, i) *
-              m_rigidModeBasis[static_cast<std::size_t>(j)];
+            mode +=
+              eig.eigenvectors()(j, i) * m_rigidModeBasis[static_cast<std::size_t>(j)];
           const Real norm = mode.norm();
           if (norm > Real(0))
           {
@@ -1575,13 +1561,13 @@ namespace Rodin::Adaptation
         return std::isfinite(error) && error <= std::max(relativeTolerance, Real(1e-6));
       }
 
-
       // Solves the currently-assembled step problem with CG and copies the
       // backend-matched solution GridFunction into @p out.
       bool solveStep(Displacement& out, std::size_t& iterations, Real& error)
       {
         auto& axb = m_stepProblem.getLinearSystem();
-        using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+        using OperatorType =
+          typename FormLanguage::Traits<LinearSystemType>::OperatorType;
         using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
         if constexpr (std::is_same_v<OperatorType, Math::SparseMatrix<Real>> &&
           std::is_same_v<VectorType, Math::Vector<Real>>)
@@ -1596,9 +1582,9 @@ namespace Rodin::Adaptation
           const auto stabilisation = getRigidStabilisation(axb.getOperator());
           Math::Vector<Real> solution =
             (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());
-          const bool ok = stabilisedConjugateGradient(axb.getOperator(), stabilisation,
-            rhs, solution, maxIterations, m_parameters.cgRelativeTolerance, iterations,
-            error);
+          const bool ok =
+            stabilisedConjugateGradient(axb.getOperator(), stabilisation, rhs, solution,
+              maxIterations, m_parameters.cgRelativeTolerance, iterations, error);
           axb.getSolution() = solution;
           m_duStep.getSolution().setData(solution);
           out = m_duStep.getSolution();

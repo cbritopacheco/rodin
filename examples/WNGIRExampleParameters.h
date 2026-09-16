@@ -118,12 +118,12 @@ namespace Rodin::Examples
   {
     if (!boolOption(argc, argv, "initial-mmg", false))
       return;
-    const Real hmin = realOption(argc, argv, "initial-mmg-hmin",
-      realOption(argc, argv, "hmin", Real(0.1) * h));
+    const Real hmin = realOption(
+      argc, argv, "initial-mmg-hmin", realOption(argc, argv, "hmin", Real(0.1) * h));
     const Real hmax = realOption(argc, argv, "initial-mmg-hmax", h);
     const Real hausd = realOption(argc, argv, "initial-mmg-hausd", Real(0.05) * h);
     if (!(std::isfinite(hmin) && std::isfinite(hmax) && std::isfinite(hausd) &&
-        hmin > 0 && hmax >= hmin && hausd > 0))
+          hmin > 0 && hmax >= hmin && hausd > 0))
     {
       try
       {
@@ -135,8 +135,8 @@ namespace Rodin::Examples
         std::exit(EXIT_FAILURE);
       }
     }
-    std::cout << "  initial MMG remesh: h=" << h << " hmin=" << hmin
-              << " hmax=" << hmax << " hausd=" << hausd << '\n';
+    std::cout << "  initial MMG remesh: h=" << h << " hmin=" << hmin << " hmax=" << hmax
+              << " hausd=" << hausd << '\n';
     MMG::Mesh mmgMesh(std::move(mesh));
     MMG::Optimizer optimizer;
     // Preserve the corners and ridges of the computational box.
@@ -151,10 +151,9 @@ namespace Rodin::Examples
     Adaptation::WNGIRParameters p;
     p.h = h;
 
-    p.kappaBulk =
-      realOption(argc, argv, "wngir-kappa-bulk", defaults.kappaBulk);
-    p.rDiv = realOption(
-      argc, argv, "wngir-r-div", "wngir-divergence-ratio", defaults.rDiv);
+    p.kappaBulk = realOption(argc, argv, "wngir-kappa-bulk", defaults.kappaBulk);
+    p.rDiv =
+      realOption(argc, argv, "wngir-r-div", "wngir-divergence-ratio", defaults.rDiv);
 
     p.kappaObs = realOption(argc, argv, "wngir-kappa-obs", Real(1));
     p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
@@ -168,10 +167,9 @@ namespace Rodin::Examples
         argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
     p.primalBarrierRelativeTolerance = realOption(
       argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
-    p.muHat =
-      realOption(argc, argv, "wngir-mu-hat", "wngir-primal-barrier-mu", p.muHat);
-    p.thetaBoundary = realOption(argc, argv, "wngir-theta-boundary",
-      "wngir-fraction-to-boundary", p.thetaBoundary);
+    p.muHat = realOption(argc, argv, "wngir-mu-hat", "wngir-primal-barrier-mu", p.muHat);
+    p.thetaBoundary = realOption(
+      argc, argv, "wngir-theta-boundary", "wngir-fraction-to-boundary", p.thetaBoundary);
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
     p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
@@ -181,14 +179,12 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-direction-norm-factor", p.directionNormFactor);
 
     p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
-    p.jLineSearchRatio = realOption(
-      argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
+    p.jLineSearchRatio =
+      realOption(argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
     p.tauRmsHFloor = realOption(argc, argv, "wngir-rms-floor", defaults.tauRmsHFloor);
     p.tauInfHFloor = realOption(argc, argv, "wngir-sup-floor", defaults.tauInfHFloor);
-    p.tauJumpRms =
-      realOption(argc, argv, "wngir-rms-normal-jump-factor", p.tauJumpRms);
-    p.tauJumpInf =
-      realOption(argc, argv, "wngir-sup-normal-jump-factor", p.tauJumpInf);
+    p.tauJumpRms = realOption(argc, argv, "wngir-rms-normal-jump-factor", p.tauJumpRms);
+    p.tauJumpInf = realOption(argc, argv, "wngir-sup-normal-jump-factor", p.tauJumpInf);
     // Zero delegates the physical tolerance to WNGIR, where the sampled
     // level-set gradient converts mesh length to field units.
     p.tauRms = realOption(argc, argv, "wngir-rms-tol", p.tauRms);
@@ -203,8 +199,8 @@ namespace Rodin::Examples
     if (defaults.parseLegacyMaxIterations)
       p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
 
-    p.rigidStabilisationLevel = realOption(
-      argc, argv, "wngir-rigid-stabilisation", p.rigidStabilisationLevel);
+    p.rigidStabilisationLevel =
+      realOption(argc, argv, "wngir-rigid-stabilisation", p.rigidStabilisationLevel);
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);

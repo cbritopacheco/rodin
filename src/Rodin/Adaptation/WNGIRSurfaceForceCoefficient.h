@@ -34,8 +34,8 @@ namespace Rodin::Adaptation::Detail
 
       /// @brief Constructs the WNGIR surface force coefficient.
       WNGIRSurfaceForceCoefficient(const PhiType& phi, const GradType& grad,
-        const Displacement& current, const LocatorType& locator,
-        Real sigma2, Real normalization, std::size_t dimension)
+        const Displacement& current, const LocatorType& locator, Real sigma2,
+        Real normalization, std::size_t dimension)
         : m_phi(phi.copy()),
           m_grad(grad.copy()),
           m_deformation(current, locator),
