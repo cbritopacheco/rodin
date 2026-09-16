@@ -101,6 +101,35 @@ TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
   }
 }
 
+TEST(Location_AABB, RejectsSingularNewtonSystem)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0.0, 0.0})
+                .vertex({1.0, 0.0})
+                .vertex({0.0, 1.0})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+
+  const Polytope::Type type = Polytope::Type::Triangle;
+  Variational::RealH1Element<2> element(type);
+  Geometry::PointCloud nodes(2, element.getCount());
+  const Real center = Polytope::Traits(type).getCentroid()[1];
+  for (size_t a = 0; a < element.getCount(); ++a)
+  {
+    const Real y = element.getNode(a)[1] - center;
+    nodes(0, a) = 0;
+    nodes(1, a) = y * y;
+  }
+  mesh.setPolytopeTransformation({2, 0},
+    new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+      std::move(nodes), element));
+
+  AABB locator(mesh);
+  EXPECT_FALSE(locator.locate(point({0.0, 0.05})).has_value());
+}
+
 TEST(Location_AABB, Locates1DSegment)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()

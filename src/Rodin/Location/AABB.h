@@ -912,11 +912,19 @@ namespace Rodin::Location
             return false;
 
           if (rdim == pdim)
+          {
+            const Real determinant = jac.determinant();
+            if (!std::isfinite(determinant) || determinant == Real(0))
+              return false;
             step = jac.solve(residual);
+          }
           else
           {
             const Math::SpatialMatrix<Real> normal = jac.transpose() * jac;
             const Math::SpatialPoint rhs = jac.transpose() * residual;
+            const Real determinant = normal.determinant();
+            if (!std::isfinite(determinant) || determinant == Real(0))
+              return false;
             step = normal.solve(rhs);
           }
           if (!isFinite(step))
