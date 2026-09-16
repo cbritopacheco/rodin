@@ -45,9 +45,9 @@ namespace Rodin::Adaptation
       Real directionNormFactor =
         Real(10); ///< Maximum coefficient norm relative to the predictor.
       Real jMinRatio = 1e-8; ///< @f$j_{\min}@f$, hard inadmissibility floor.
-      Real jLineSearchRatio =
-        1e-2; ///< @f$j_{\mathrm{ls}}@f$, Jacobian floor ratio enforced by
-      ///< line search.
+      /// @brief Jacobian floor ratio @f$j_{\mathrm{ls}}@f$ enforced by line
+      /// search.
+      Real jLineSearchRatio = 1e-2;
       /// @brief Absolute RMS tolerance @f$\tau_{\mathrm{rms}}@f$; zero selects
       /// four times the level-set mesh scale.
       Real tauRms = 1e-12;
