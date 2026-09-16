@@ -334,6 +334,73 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Vector-valued assignment on one P1 space copies every coefficient.
+  TEST(Rodin_Variational_Vector_P1_GridFunction, AssignmentOnTheSameSpaceCopies)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+    P1 fes(mesh, 2);
+    GridFunction source(fes);
+    GridFunction target(fes);
+    for (Index i = 0; i < static_cast<Index>(source.getSize()); ++i)
+      source[i] = Real(0.125) * i - Real(0.75);
+
+    source.setName("source");
+    target.setName("target");
+    target = source;
+
+    EXPECT_EQ(target.getName(), "target");
+    EXPECT_EQ(&target.getFiniteElementSpace(), &fes);
+    ASSERT_EQ(target.getSize(), source.getSize());
+    for (Index i = 0; i < static_cast<Index>(source.getSize()); ++i)
+      EXPECT_NEAR(target[i], source[i], RODIN_FUZZY_CONSTANT);
+  }
+
+  /// @brief Vector-valued assignment on one quadratic H1 space copies all coefficients.
+  TEST(Rodin_Variational_Vector_H1_GridFunction, AssignmentOnTheSameSpaceCopies)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, 2);
+    GridFunction source(fes);
+    GridFunction target(fes);
+    for (Index i = 0; i < static_cast<Index>(source.getSize()); ++i)
+      source[i] = Real(-0.2) + Real(0.075) * i;
+
+    target = source;
+
+    EXPECT_EQ(&target.getFiniteElementSpace(), &fes);
+    ASSERT_EQ(target.getSize(), source.getSize());
+    for (Index i = 0; i < static_cast<Index>(source.getSize()); ++i)
+      EXPECT_NEAR(target[i], source[i], RODIN_FUZZY_CONSTANT);
+  }
+
+  /// @brief Quadratic vector fields are interpolated when the H1 spaces differ.
+  TEST(Rodin_Variational_Vector_H1_GridFunction, AssignmentBetweenSpacesInterpolates)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    H1 sourceFES(std::integral_constant<size_t, 2>{}, mesh, 2);
+    H1 targetFES(std::integral_constant<size_t, 2>{}, mesh, 2);
+    ASSERT_NE(&sourceFES, &targetFES);
+
+    GridFunction source(sourceFES);
+    source =
+      VectorFunction{[](const Point& p) { return Real(1) + p.x() * p.x() - p.y(); },
+        [](const Point& p) { return Real(-2) + p.x() + p.y() * p.y(); }};
+
+    GridFunction target(targetFES);
+    target = source;
+
+    EXPECT_EQ(&target.getFiniteElementSpace(), &targetFES);
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.25, 0.25});
+    const auto value = target(p);
+    EXPECT_NEAR(value(0), Real(1) + p.x() * p.x() - p.y(), 1e-12);
+    EXPECT_NEAR(value(1), Real(-2) + p.x() + p.y() * p.y(), 1e-12);
+  }
+
   /// @brief Verifies project vector function for variational vector P1 grid function by checking grid-function projection.
   TEST(Rodin_Variational_Vector_P1_GridFunction, ProjectVectorFunction)
   {

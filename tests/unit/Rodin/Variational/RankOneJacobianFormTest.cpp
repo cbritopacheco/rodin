@@ -15,6 +15,45 @@ namespace Rodin::Tests::Unit
 {
   namespace
   {
+    class ScaledIdentityMatrix final
+      : public MatrixFunctionBase<Real, ScaledIdentityMatrix>
+    {
+      public:
+        ScaledIdentityMatrix(size_t dimension, Real scale)
+          : m_dimension(dimension),
+            m_scale(scale)
+        {}
+
+        size_t getRows() const
+        {
+          return m_dimension;
+        }
+
+        size_t getColumns() const
+        {
+          return m_dimension;
+        }
+
+        Math::SpatialMatrix<Real> getValue(const Point&) const
+        {
+          return m_scale * Math::SpatialMatrix<Real>::Identity(m_dimension, m_dimension);
+        }
+
+        Optional<size_t> getOrder(const Polytope&) const noexcept
+        {
+          return 0;
+        }
+
+        ScaledIdentityMatrix* copy() const noexcept override
+        {
+          return new ScaledIdentityMatrix(*this);
+        }
+
+      private:
+        size_t m_dimension;
+        Real m_scale;
+    };
+
     LocalMesh unitSquare(size_t n)
     {
       LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
@@ -65,6 +104,32 @@ namespace Rodin::Tests::Unit
       for (Eigen::Index i = 0; i < actual.rows(); ++i)
         for (Eigen::Index j = 0; j < actual.cols(); ++j)
           EXPECT_NEAR(actual(i, j), expected(i, j), 1e-12)
+            << "entry (" << i << ", " << j << ")";
+    }
+
+    template <class FES>
+    void expectDistinctCoefficientsUseBothSides(FES& fes, size_t dimension)
+    {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+      const ScaledIdentityMatrix A(dimension, 1);
+      const ScaledIdentityMatrix B(dimension, 2);
+
+      BilinearForm rankOne(u, v);
+      rankOne = Integral(Dot(Dot(A, Jacobian(u)), Dot(B, Jacobian(v))));
+      rankOne.assemble();
+
+      BilinearForm divergence(u, v);
+      divergence = Integral(Div(u), Div(v));
+      divergence.assemble();
+
+      const Math::Matrix<Real> actual = rankOne.getOperator();
+      const Math::Matrix<Real> expected = divergence.getOperator();
+      ASSERT_EQ(actual.rows(), expected.rows());
+      ASSERT_EQ(actual.cols(), expected.cols());
+      for (Eigen::Index i = 0; i < actual.rows(); ++i)
+        for (Eigen::Index j = 0; j < actual.cols(); ++j)
+          EXPECT_NEAR(actual(i, j), Real(2) * expected(i, j), 1e-12)
             << "entry (" << i << ", " << j << ")";
     }
   }
@@ -125,6 +190,22 @@ namespace Rodin::Tests::Unit
     auto mesh = unitSquare(3);
     P1 fes(mesh, 2);
     expectIdentityCoefficientEqualsDivergence(fes, 2);
+  }
+
+  /// @brief Distinct same-typed P1 coefficients are evaluated on their respective sides.
+  TEST(Rodin_Variational_RankOneJacobianForm, P1DistinctCoefficientsUseBothSides)
+  {
+    auto mesh = unitSquare(3);
+    P1 fes(mesh, 2);
+    expectDistinctCoefficientsUseBothSides(fes, 2);
+  }
+
+  /// @brief Distinct same-typed H1 coefficients are evaluated on their respective sides.
+  TEST(Rodin_Variational_RankOneJacobianForm, H1DistinctCoefficientsUseBothSides)
+  {
+    auto mesh = unitSquare(2);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, 2);
+    expectDistinctCoefficientsUseBothSides(fes, 2);
   }
 
   /// @brief H1<2> tabulated gradients produce the divergence form in 2D.
@@ -206,7 +287,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(m(i, j), m(j, i), 1e-12);
     }
 
-      // x^T M x = sum over quadrature of (A : J u_x)^2 >= 0.
+    // x^T M x = sum over quadrature of (A : J u_x)^2 >= 0.
     Math::Vector<Real> x(m.rows());
     for (Eigen::Index i = 0; i < m.rows(); ++i)
       x(i) = std::sin(Real(i) * Real(0.7)) + Real(0.3);

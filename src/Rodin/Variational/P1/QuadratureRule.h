@@ -2928,10 +2928,10 @@ namespace Rodin::Variational
    *
    * Assembles
    * @f[
-   *   \int_K (A : \mathbf{J}\,u)\,(A : \mathbf{J}\,v)\ dx,
+   *   \int_K (A : \mathbf{J}\,u)\,(B : \mathbf{J}\,v)\ dx,
    * @f]
-   * the outer product of a single Frobenius contraction of a matrix
-   * coefficient @f$A@f$ against the Jacobians of the trial and test functions.
+   * the outer product of Frobenius contractions of matrix coefficients @f$A@f$
+   * and @f$B@f$ against the Jacobians of the trial and test functions.
    * Barrier and hinge metrics take this shape: the constraint gradient of a
    * scalar margin @f$m(F)@f$ is @f$\partial_F m : \nabla v@f$, so its
    * Gauss-Newton Hessian is the square of that contraction.
@@ -3050,8 +3050,10 @@ namespace Rodin::Variational
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
-        // The coefficient is shared by both sides of the outer product.
-        const auto& coeff = lhs.getDerived().getLHS();
+        const auto& trialCoefficient = lhs.getDerived().getLHS();
+        const auto& testCoefficient = rhs.getDerived().getLHS();
+        const bool sharedCoefficient =
+          trialCoefficient.getUUID() == testCoefficient.getUUID();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
@@ -3123,8 +3125,8 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
           const auto& Jinv = p.getJacobianInverse();
 
-          // Hoisted: one coefficient evaluation for the whole basis pair loop.
-          const auto A = coeff.getValue(ip);
+          // Hoisted: one coefficient evaluation for each side of the basis-pair loop.
+          const auto A = trialCoefficient.getValue(ip);
 
           for (size_t tr = 0; tr < ntr; ++tr)
           {
@@ -3142,12 +3144,13 @@ namespace Rodin::Variational
             }
             m_trialAction[tr] = action;
           }
-          if (trialfes == testfes)
+          if (trialfes == testfes && sharedCoefficient)
           {
             m_testAction = m_trialAction;
           }
           else
           {
+            const auto B = testCoefficient.getValue(ip);
             for (size_t te = 0; te < nte; ++te)
             {
               ScalarType action = 0;
@@ -3159,14 +3162,14 @@ namespace Rodin::Variational
                   ScalarType physicalDerivative = 0;
                   for (size_t r = 0; r < d; ++r)
                     physicalDerivative += Jref(i, r) * Jinv(r, j);
-                  action += A(i, j) * physicalDerivative;
+                  action += B(i, j) * physicalDerivative;
                 }
               }
               m_testAction[te] = action;
             }
           }
 
-          if (trialfes == testfes)
+          if (trialfes == testfes && sharedCoefficient)
           {
             for (size_t te = 0; te < nte; ++te)
             {
@@ -3186,7 +3189,7 @@ namespace Rodin::Variational
           }
         }
 
-        if (trialfes == testfes)
+        if (trialfes == testfes && sharedCoefficient)
         {
           m_matrix.template triangularView<Eigen::Upper>() =
             m_matrix.transpose().template triangularView<Eigen::Upper>();

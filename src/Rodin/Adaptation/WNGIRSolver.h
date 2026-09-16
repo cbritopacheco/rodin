@@ -1496,7 +1496,9 @@ namespace Rodin::Adaptation
           const auto* const outer = A.outerIndexPtr();
           const auto* const inner = A.innerIndexPtr();
           const auto* const values = A.valuePtr();
+#ifdef RODIN_USE_OPENMP
 #pragma omp parallel for schedule(static)
+#endif
           for (Eigen::Index k = 0; k < A.outerSize(); ++k)
           {
             Real sum = 0;

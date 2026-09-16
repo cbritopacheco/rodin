@@ -3319,9 +3319,9 @@ namespace Rodin::Variational
    *
    * Assembles
    * @f[
-   *   \int_K (A : \mathbf{J}\,u)\,(A : \mathbf{J}\,v)\,dx.
+   *   \int_K (A : \mathbf{J}\,u)\,(B : \mathbf{J}\,v)\,dx.
    * @f]
-   * The coefficient @f$A@f$ is evaluated once per quadrature point. The
+   * Each coefficient is evaluated once per quadrature point. The
    * reference gradients of the scalar H1 basis are obtained from the shared
    * element tabulation; unlike the P1 case, they are evaluated at every
    * quadrature point because they vary for polynomial degrees greater than one.
@@ -3429,7 +3429,10 @@ namespace Rodin::Variational
           const auto& integrand = *m_integrand;
           const auto& lhs = integrand.getLHS();
           const auto& rhs = integrand.getRHS();
-          const auto& coefficient = lhs.getDerived().getLHS();
+          const auto& trialCoefficient = lhs.getDerived().getLHS();
+          const auto& testCoefficient = rhs.getDerived().getLHS();
+          const bool sharedCoefficient =
+            trialCoefficient.getUUID() == testCoefficient.getUUID();
           const auto& trialfes = lhs.getFiniteElementSpace();
           const auto& testfes = rhs.getFiniteElementSpace();
           const auto& trialfe = trialfes.getFiniteElement(d, idx);
@@ -3483,7 +3486,7 @@ namespace Rodin::Variational
             const ScalarType weight =
               static_cast<ScalarType>(m_qf->getWeight(qp) * point.getDistortion());
             const auto Jinv = point.getJacobianInverse();
-            const auto A = coefficient.getValue(ip);
+            const auto A = trialCoefficient.getValue(ip);
 
             for (size_t node = 0; node < trialScalarCount; ++node)
             {
@@ -3503,12 +3506,13 @@ namespace Rodin::Variational
               }
             }
 
-            if (trialfes == testfes)
+            if (trialfes == testfes && sharedCoefficient)
             {
               m_testAction = m_trialAction;
             }
             else
             {
+              const auto B = testCoefficient.getValue(ip);
               for (size_t node = 0; node < testScalarCount; ++node)
               {
                 const auto gradient = testTabulation.getGradient(qp, node);
@@ -3521,14 +3525,14 @@ namespace Rodin::Variational
                     ScalarType physicalDerivative = 0;
                     for (size_t r = 0; r < d; ++r)
                       physicalDerivative += gradient[r] * Jinv(r, j);
-                    action += A(component, j) * physicalDerivative;
+                    action += B(component, j) * physicalDerivative;
                   }
                   m_testAction[local] = action;
                 }
               }
             }
 
-            if (trialfes == testfes)
+            if (trialfes == testfes && sharedCoefficient)
             {
               for (size_t test = 0; test < nTest; ++test)
               {
@@ -3548,7 +3552,7 @@ namespace Rodin::Variational
             }
           }
 
-          if (trialfes == testfes)
+          if (trialfes == testfes && sharedCoefficient)
           {
             m_matrix.template triangularView<Eigen::Upper>() =
               m_matrix.transpose().template triangularView<Eigen::Upper>();
