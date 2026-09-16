@@ -114,15 +114,15 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="ae38dd5b1c2002f72d9362eed9be00ec1">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> <a href="#ae38dd5b1c2002f72d9362eed9be00ec1" class="m-doc-self">Inside</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static int <a href="#ae38dd5b1c2002f72d9362eed9be00ec1" class="m-doc-self">Inside</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Label value for cells inside the level set.</dd>
             <dt id="a9f33b9196c9d5679941f016db01d54af">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> <a href="#a9f33b9196c9d5679941f016db01d54af" class="m-doc-self">Outside</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static int <a href="#a9f33b9196c9d5679941f016db01d54af" class="m-doc-self">Outside</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Label value for cells outside the level set.</dd>
             <dt id="ab5fa519ab84b05a9668826bf1cc2ae7f">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#ab5fa519ab84b05a9668826bf1cc2ae7f" class="m-doc-self">InvalidIndex</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#ab5fa519ab84b05a9668826bf1cc2ae7f" class="m-doc-self">InvalidIndex</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Sentinel index denoting an absent edge/index.</dd>
           </dl>
@@ -146,22 +146,22 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a0d6afd9b185bf28a03e6d497f1303d4d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d6afd9b185bf28a03e6d497f1303d4d" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d6afd9b185bf28a03e6d497f1303d4d" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
+              const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
+              const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
             </dt>
             <dd>Classifies cells into Inside/Outside via a Potts min s-t cut built from per-cell volumes and moments.</dd>
             <dt id="ab97533f395564ba639f92ce3e5b599eb">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab97533f395564ba639f92ce3e5b599eb" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a>&amp; options) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab97533f395564ba639f92ce3e5b599eb" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
+              const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
+              const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges,
+              const <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a>&amp; options) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
             </dt>
             <dd>Classifies cells with additional <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a> (narrow-band restriction, far-field pinning, per-edge weighting).</dd>
             <dt id="a82cb7900dfa397b390ceec6ee20e85d2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a82cb7900dfa397b390ceec6ee20e85d2" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; insideCosts,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; outsideCosts,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82cb7900dfa397b390ceec6ee20e85d2" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; insideCosts,
+              const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; outsideCosts,
+              const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
             </dt>
             <dd>Solves the s-t min cut directly from precomputed unary costs and edges.</dd>
           </dl>

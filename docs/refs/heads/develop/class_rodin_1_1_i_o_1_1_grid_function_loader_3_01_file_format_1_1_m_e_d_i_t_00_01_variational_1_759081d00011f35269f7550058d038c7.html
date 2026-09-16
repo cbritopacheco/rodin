@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Range&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionLoader&lt;FileFormat::MEDIT, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>MEDIT grid-function loader for local P1 finite element spaces.</p>
@@ -97,7 +97,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase&lt;Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
             </dt>
             <dd>Base class for concrete grid function loaders.</dd>
@@ -107,11 +107,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aa0e1fb39c0134f6ab598e79a91a98940">
-              using <a href="#aa0e1fb39c0134f6ab598e79a91a98940" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+              using <a href="#aa0e1fb39c0134f6ab598e79a91a98940" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a707fcf9a5b0601453725205cb3894ee9">
-              using <a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;::ScalarType
+              using <a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Range&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a55b94d86d349da371369ff297ccd4268">
@@ -141,7 +141,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads object from an input stream.</dd>
             <dt id="a765791207d61c8b95a052eeac98aea22">
@@ -154,15 +154,15 @@
             </dt>
             <dd>Skips blank lines and returns the first nonblank line.</dd>
             <dt id="ac5a0239882d20a2848c28f9b5fc7f51e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac5a0239882d20a2848c28f9b5fc7f51e" class="m-doc-self">readVersion</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ac5a0239882d20a2848c28f9b5fc7f51e" class="m-doc-self">readVersion</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
             </dt>
             <dd>Reads the MEDIT solution-file version section.</dd>
             <dt id="a650875bc7b3c274a32e1927cad78c194">
-              <span class="m-doc-wrap-bumper">auto <a href="#a650875bc7b3c274a32e1927cad78c194" class="m-doc-self">readDimension</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a650875bc7b3c274a32e1927cad78c194" class="m-doc-self">readDimension</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
             </dt>
             <dd>Reads the MEDIT solution-file dimension section.</dd>
             <dt id="ab8db0e4cce3f4a23cae1208c507cddda">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab8db0e4cce3f4a23cae1208c507cddda" class="m-doc-self">readData</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab8db0e4cce3f4a23cae1208c507cddda" class="m-doc-self">readData</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
             </dt>
             <dd>Reads the MEDIT SolAtVertices data section.</dd>
           </dl>
@@ -172,9 +172,9 @@
           <section class="m-doc-details" id="ae7b902ee10ffb33450ac1ca58df202f6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _1&gt;
+                template&lt;class Range&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MEDIT, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc-self">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MEDIT, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc-self">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
             </h3>
             <p>Constructs a MEDIT P1 grid-function loader.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -192,9 +192,9 @@
           <section class="m-doc-details" id="a69a36ae58eeb6d0819e38eea87d59767"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _1&gt;
+                template&lt;class Range&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MEDIT, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MEDIT, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads object from an input stream.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_variational_2_linear_form_8h.html">&lt;Rodin/PETSc/Variational/LinearForm.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearForm&lt;FES, ::Vec&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Linear form specialization that assembles into a PETSc vector.</p>
@@ -120,7 +120,7 @@ $ \mathbf{b} $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Vector&gt;</div>
+              <div class="m-doc-template">template&lt;class Vector&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase&lt;::Vec&gt;</a>
             </dt>
             <dd>Base class for linear form objects.</dd>
@@ -134,15 +134,15 @@ $ \mathbf{b} $
             </dt>
             <dd>Finite element space type of the associated test function.</dd>
             <dt id="af9f9ef5d4081fd438cba6ccaa30a0547">
-              using <a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc-self">FESMeshType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::MeshType
+              using <a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc-self">FESMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::MeshType
             </dt>
             <dd>Mesh type underlying the finite element space.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type of the DOF coefficients (<code>PetscScalar</code>).</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
-              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
             <dd>PETSc vector type (<code>Vec</code>) used to store the load vector <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
 <title>
@@ -156,11 +156,11 @@ $ \mathbf{b} $
 </g>
 </svg>.</dd>
             <dt id="a9d08587955be4b07a7ce131b0d0dfdf1">
-              using <a href="#a9d08587955be4b07a7ce131b0d0dfdf1" class="m-doc-self">ContextType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc">FESMeshType</a>&gt;::ContextType
+              using <a href="#a9d08587955be4b07a7ce131b0d0dfdf1" class="m-doc-self">ContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc">FESMeshType</a>&gt;::ContextType
             </dt>
             <dd>Context type (either <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a> or <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>) determined by the mesh.</dd>
             <dt id="a55dcff9e631d86b1f4f668bc67691f86">
-              using <a href="#a55dcff9e631d86b1f4f668bc67691f86" class="m-doc-self">DefaultAssembly</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#a9d08587955be4b07a7ce131b0d0dfdf1" class="m-doc">ContextType</a>&gt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />template</a> Type&lt;<a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>, <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&gt;
+              using <a href="#a55dcff9e631d86b1f4f668bc67691f86" class="m-doc-self">DefaultAssembly</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#a9d08587955be4b07a7ce131b0d0dfdf1" class="m-doc">ContextType</a>&gt;::template Type&lt;<a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>, <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&gt;
             </dt>
             <dd>Default assembly strategy deduced from the context type. Sequential assembly for local contexts, MPI assembly for distributed contexts.</dd>
             <dt id="a837afd5c10a055b5966c0e4159aa7f8a">
@@ -173,11 +173,11 @@ $ \mathbf{b} $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a05b497feb86636f40f7af26adf3246b4" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a05b497feb86636f40f7af26adf3246b4" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v)</span>
             </dt>
             <dd>Constructs a linear form associated with the given test function, initialising an empty PETSc vector.</dd>
             <dt id="a085a9660e629f688585a548241c019e8">
-              <span class="m-doc-wrap-bumper"><a href="#a085a9660e629f688585a548241c019e8" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a085a9660e629f688585a548241c019e8" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor (deep-copies the PETSc vector).</dd>
             <dt id="ae6700d19eff1e62e7b6433c90f12d0fa">
@@ -194,7 +194,7 @@ $ \mathbf{b} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad4e4f91c3878c8fd468bd03f159a5671" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4e4f91c3878c8fd468bd03f159a5671" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
@@ -202,7 +202,7 @@ $ \mathbf{b} $
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8eb6d985645a21a01f40ee89a8ef5249" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>&gt;&amp; u) const -&gt; <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8eb6d985645a21a01f40ee89a8ef5249" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, ::Vec&gt;&amp; u) const -&gt; <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a></span>
             </dt>
             <dd>Evaluates the linear form at a grid function <svg class="m-math" style="width: 1.202em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 11.542349 6.940636">
 <title>
@@ -218,7 +218,7 @@ $ u_h $
 </g>
 </svg>.</dd>
             <dt id="a1995c774d971ab0041610829222607a5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the linear form into the owned PETSc vector using the <a href="#a55dcff9e631d86b1f4f668bc67691f86" class="m-doc">DefaultAssembly</a> strategy.</dd>
             <dt id="a9e12399a6cb0b6095d828dc3a495f08b">
@@ -236,7 +236,7 @@ $ \mathbf{b} $
 </g>
 </svg>.</dd>
             <dt id="acd8efc09d628f3f00aa6b6dc7395f1ee">
-              <span class="m-doc-wrap-bumper">auto <a href="#acd8efc09d628f3f00aa6b6dc7395f1ee" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd8efc09d628f3f00aa6b6dc7395f1ee" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns a read-only reference to the assembled PETSc load vector <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
 <title>
@@ -250,7 +250,7 @@ $ \mathbf{b} $
 </g>
 </svg>.</dd>
             <dt id="a61d624622b12bdf442d3a73f49712e37">
-              <span class="m-doc-wrap-bumper">auto <a href="#a61d624622b12bdf442d3a73f49712e37" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a61d624622b12bdf442d3a73f49712e37" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns a reference to the associated test function.</dd>
             <dt id="a98af4418f38b06b768f5b750f4e80e22">
@@ -258,11 +258,11 @@ $ \mathbf{b} $
             </dt>
             <dd>Creates a heap-allocated copy of this linear form.</dd>
             <dt id="a9aecc7a193ea6ad37d6a8c0bea85f67e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9aecc7a193ea6ad37d6a8c0bea85f67e" class="m-doc-self">destroy</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a9aecc7a193ea6ad37d6a8c0bea85f67e" class="m-doc-self">destroy</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Destroys the owned PETSc vector, releasing resources.</dd>
             <dt id="ab7934b9b67b0dd13b8d5fc35d70d3c07">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7934b9b67b0dd13b8d5fc35d70d3c07" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7934b9b67b0dd13b8d5fc35d70d3c07" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp;</span>
             </dt>
             <dd>Replaces the integrators of the form.</dd>
             <dt id="a20a24a87f7195138fe992875d33fbbaf">
@@ -270,27 +270,27 @@ $ \mathbf{b} $
             </dt>
             <dd>Replaces the integrators of the form.</dd>
             <dt id="a7a174b64238c5fbf4944c1128dc89744">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7a174b64238c5fbf4944c1128dc89744" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7a174b64238c5fbf4944c1128dc89744" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Replaces the integrators of the form.</dd>
             <dt id="ac912720da21668a88284d586f82dbdf0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac912720da21668a88284d586f82dbdf0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac912720da21668a88284d586f82dbdf0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Replaces the integrators of the form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acba44f03d84a260906d72e9920feb1d8" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acba44f03d84a260906d72e9920feb1d8" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Adds an integrator to this linear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a70cb8d145e071c37e3e7650526f85832" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a70cb8d145e071c37e3e7650526f85832" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Adds a list of integrators to this linear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2b8bd9c2e3e632327af24a72becddffc" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b8bd9c2e3e632327af24a72becddffc" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Subtracts an integrator from this linear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0053b2c804f9c9feb30205f965ff28a8" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0053b2c804f9c9feb30205f965ff28a8" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Subtracts a list of integrators from this linear form.</dd>
           </dl>
@@ -300,9 +300,9 @@ $ \mathbf{b} $
           <section class="m-doc-details" id="a05b497feb86636f40f7af26adf3246b4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05b497feb86636f40f7af26adf3246b4" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05b497feb86636f40f7af26adf3246b4" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v)</span></span>
             </h3>
             <p>Constructs a linear form associated with the given test function, initialising an empty PETSc vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -321,9 +321,9 @@ $ \mathbf{b} $
           <section class="m-doc-details" id="ad4e4f91c3878c8fd468bd03f159a5671"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4e4f91c3878c8fd468bd03f159a5671" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4e4f91c3878c8fd468bd03f159a5671" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -347,7 +347,7 @@ $ \mathbf{b} $
           <section class="m-doc-details" id="adb0fd42e13dce45508dd8c03b8f12a64"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb0fd42e13dce45508dd8c03b8f12a64" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
@@ -373,9 +373,9 @@ $ \mathbf{b} $
           <section class="m-doc-details" id="a8eb6d985645a21a01f40ee89a8ef5249"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8eb6d985645a21a01f40ee89a8ef5249" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>&gt;&amp; u) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8eb6d985645a21a01f40ee89a8ef5249" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, ::Vec&gt;&amp; u) const</span></span>
             </h3>
             <p>Evaluates the linear form at a grid function <svg class="m-math" style="width: 1.202em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 11.542349 6.940636">
 <title>
@@ -468,9 +468,9 @@ $ L(u_h) = \mathbf{b}^\top \mathbf{u} $
           <section class="m-doc-details" id="acba44f03d84a260906d72e9920feb1d8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acba44f03d84a260906d72e9920feb1d8" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acba44f03d84a260906d72e9920feb1d8" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Adds an integrator to this linear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -550,9 +550,9 @@ $ l(v) = l_1(v) + l_2(v) + \ldots $
           <section class="m-doc-details" id="a70cb8d145e071c37e3e7650526f85832"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70cb8d145e071c37e3e7650526f85832" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70cb8d145e071c37e3e7650526f85832" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Adds a list of integrators to this linear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -576,9 +576,9 @@ $ l(v) = l_1(v) + l_2(v) + \ldots $
           <section class="m-doc-details" id="a2b8bd9c2e3e632327af24a72becddffc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b8bd9c2e3e632327af24a72becddffc" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b8bd9c2e3e632327af24a72becddffc" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Subtracts an integrator from this linear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -633,9 +633,9 @@ $ l(v) = l(v) - l_i(v) $
           <section class="m-doc-details" id="a0053b2c804f9c9feb30205f965ff28a8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0053b2c804f9c9feb30205f965ff28a8" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0053b2c804f9c9feb30205f965ff28a8" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_base.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Subtracts a list of integrators from this linear form.</p>
             <table class="m-table m-fullwidth m-flat">

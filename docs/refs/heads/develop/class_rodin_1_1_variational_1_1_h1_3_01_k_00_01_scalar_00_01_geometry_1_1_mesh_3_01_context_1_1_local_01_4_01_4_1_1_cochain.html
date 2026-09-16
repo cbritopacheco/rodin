@@ -108,7 +108,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="afadd0793c70597a3536b4cb6d6153706">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#afadd0793c70597a3536b4cb6d6153706" class="m-doc-self">Count</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#afadd0793c70597a3536b4cb6d6153706" class="m-doc-self">Count</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of entries.</dd>
           </dl>
@@ -117,10 +117,10 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Domain, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Codomain</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a582171886a1cce82e189b002bfb180ff" class="m-doc">map</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Codomain</a>&amp; codomain,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Domain&amp; domain) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Domain, class Codomain&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a582171886a1cce82e189b002bfb180ff" class="m-doc">map</a>(</span><span class="m-doc-wrap">size_t local,
+              Codomain&amp; codomain,
+              const Domain&amp; domain) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Injects boundary DOFs into the DOFs of the polytope <code>G</code>.</dd>
           </dl>
@@ -130,35 +130,35 @@
 <p>These constants describe how many nodal DOFs are attached to each reference polytope for the degree <code>K</code> H¹ element.</p>
           <dl class="m-doc">
             <dt id="ac1c6d4af0653f985460c1ae32e30da94">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#ac1c6d4af0653f985460c1ae32e30da94" class="m-doc-self">PointCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#ac1c6d4af0653f985460c1ae32e30da94" class="m-doc-self">PointCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference point (single vertex).</dd>
             <dt id="a749be9d8b84cd0ca91467ee0823df2bc">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a749be9d8b84cd0ca91467ee0823df2bc" class="m-doc-self">SegmentCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a749be9d8b84cd0ca91467ee0823df2bc" class="m-doc-self">SegmentCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference segment (K+1 GLL nodes).</dd>
             <dt id="a9dc85c0e2703b623abea3a6a1efce8a0">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a9dc85c0e2703b623abea3a6a1efce8a0" class="m-doc-self">TriangleCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a9dc85c0e2703b623abea3a6a1efce8a0" class="m-doc-self">TriangleCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference triangle (FeketeTriangle&lt;K&gt;).</dd>
             <dt id="a6e94ec558254b8348a3b686625a34c67">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a6e94ec558254b8348a3b686625a34c67" class="m-doc-self">TetrahedronCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a6e94ec558254b8348a3b686625a34c67" class="m-doc-self">TetrahedronCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference tetrahedron (FeketeTetrahedron&lt;K&gt;).</dd>
             <dt id="adbbe845b9942d3e066722f9498de96c3">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#adbbe845b9942d3e066722f9498de96c3" class="m-doc-self">QuadrilateralCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#adbbe845b9942d3e066722f9498de96c3" class="m-doc-self">QuadrilateralCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference quadrilateral ((K+1)×(K+1) GLL grid).</dd>
             <dt id="a30e816d722b8d685995778297619ee42">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a30e816d722b8d685995778297619ee42" class="m-doc-self">WedgeCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a30e816d722b8d685995778297619ee42" class="m-doc-self">WedgeCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference wedge ((triangle) × (K+1) in z).</dd>
             <dt id="ad8c8673798186264c1934ce9a16109ab">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#ad8c8673798186264c1934ce9a16109ab" class="m-doc-self">PyramidCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#ad8c8673798186264c1934ce9a16109ab" class="m-doc-self">PyramidCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference pyramid.</dd>
             <dt id="a38846aaefb03bbc6a725db2c50c2257a">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a38846aaefb03bbc6a725db2c50c2257a" class="m-doc-self">HexahedronCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a38846aaefb03bbc6a725db2c50c2257a" class="m-doc-self">HexahedronCount</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of nodal DOFs on a reference hexahedron ((K+1)³ tensor GLL grid).</dd>
           </dl>
@@ -169,11 +169,11 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> G&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Domain, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Codomain</a>&gt;
+                template&lt;class Domain, class Codomain&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Cochain&lt;G&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a582171886a1cce82e189b002bfb180ff" class="m-doc-self">map</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Codomain</a>&amp; codomain,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Domain&amp; domain) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Variational::<wbr />H1&lt;K, Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Cochain&lt;G&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a582171886a1cce82e189b002bfb180ff" class="m-doc-self">map</a>(</span><span class="m-doc-wrap">size_t local,
+              Codomain&amp; codomain,
+              const Domain&amp; domain) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Injects boundary DOFs into the DOFs of the polytope <code>G</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -184,6 +184,10 @@
                 <tr>
                   <td style="width: 1%">Domain</td>
                   <td>Container type for the boundary DOFs (e.g. IndexArray).</td>
+                </tr>
+                <tr>
+                  <td>Codomain</td>
+                  <td>Container type for the element DOFs (e.g. IndexArray).</td>
                 </tr>
               </tbody>
               <thead>

@@ -95,20 +95,20 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="af003fbb62840505b57ffdf2274f848e7">
-              <span class="m-doc-wrap-bumper">auto <a href="#af003fbb62840505b57ffdf2274f848e7" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> qp,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> a) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Scalar&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af003fbb62840505b57ffdf2274f848e7" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t qp,
+              size_t a) const -&gt; const Scalar&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
             <dt id="a4b0dbe4087b83479edbe6daa30e79420">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4b0dbe4087b83479edbe6daa30e79420" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> qp,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Scalar&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4b0dbe4087b83479edbe6daa30e79420" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t qp,
+              size_t a,
+              size_t i) const -&gt; const Scalar&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
             <dt id="a45b5636a7cabb4431d77a20490baea28">
-              <span class="m-doc-wrap-bumper">auto <a href="#a45b5636a7cabb4431d77a20490baea28" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> qp,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> a) const -&gt; std::span&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45b5636a7cabb4431d77a20490baea28" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap">size_t qp,
+              size_t a) const -&gt; std::span&lt;const Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the gradient of the basis function.</dd>
           </dl>
@@ -117,15 +117,15 @@
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
             <dt id="a523e32a77525883defa9a4f8cdb2248c">
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a523e32a77525883defa9a4f8cdb2248c" class="m-doc-self">nqp</a>
+              size_t <a href="#a523e32a77525883defa9a4f8cdb2248c" class="m-doc-self">nqp</a>
             </dt>
             <dd>Number of quadrature points tabulated.</dd>
             <dt id="aa412684fc4321800364785a473d0940a">
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#aa412684fc4321800364785a473d0940a" class="m-doc-self">ndof</a>
+              size_t <a href="#aa412684fc4321800364785a473d0940a" class="m-doc-self">ndof</a>
             </dt>
             <dd>Number of degrees of freedom tabulated.</dd>
             <dt id="a226055b65c95a957d221674051683344">
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a226055b65c95a957d221674051683344" class="m-doc-self">dim</a>
+              size_t <a href="#a226055b65c95a957d221674051683344" class="m-doc-self">dim</a>
             </dt>
             <dd>Spatial dimension.</dd>
             <dt id="a58c76f58158770bd9bb8744a798ccded">

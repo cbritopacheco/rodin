@@ -97,7 +97,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pushforward_base.html" class="m-doc">FiniteElementSpacePushforwardBase&lt;Pushforward&lt;Callable&gt;&gt;</a>
             </dt>
             <dd>Base class for inverse mappings taking functions defined on reference elements to physical elements.</dd>
@@ -107,7 +107,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ada5aed13792807883984b706fe9766f5">
-              using <a href="#ada5aed13792807883984b706fe9766f5" class="m-doc-self">CallableType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>
+              using <a href="#ada5aed13792807883984b706fe9766f5" class="m-doc-self">CallableType</a> = Callable
             </dt>
             <dd>Callable type evaluated on physical points.</dd>
           </dl>
@@ -116,12 +116,12 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a106456d8e0f07e03ad80d1ca2e72df4a" class="m-doc">Pushforward</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span>
             </dt>
             <dd></dd>
             <dt id="ad90b7f59c65494321fa117429d2b7d4a">
-              <span class="m-doc-wrap-bumper"><a href="#ad90b7f59c65494321fa117429d2b7d4a" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Pushforward&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad90b7f59c65494321fa117429d2b7d4a" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap">const Pushforward&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -130,7 +130,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a7c866cf8be951c464aceeb788579b29a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates at a geometric point.</dd>
           </dl>
@@ -141,7 +141,7 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;
+                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Pushforward::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a106456d8e0f07e03ad80d1ca2e72df4a" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span></span>
             </h3>

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_jump_8h.html">&lt;Rodin/Variational/Jump.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Jump of a FunctionBase instance across an interface.</p>
@@ -90,6 +90,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -275,7 +276,7 @@ $ \Gamma_h $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for function objects which can be evaluated over a mesh.</dd>
@@ -285,44 +286,49 @@ $ \Gamma_h $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ad21ec0105a62c182ed6e5e1d8f7c6817">
-              using <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a>&gt;
+              using <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;
             </dt>
             <dd>Type of the operand function.</dd>
             <dt id="a242f51960048cbf05116be7a435b6a13">
-              using <a href="#a242f51960048cbf05116be7a435b6a13" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a>&gt;&gt;&gt;
+              using <a href="#a242f51960048cbf05116be7a435b6a13" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;FunctionDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">const <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a jump operator for the given function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a jump operator for the given function.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc">Jump</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the jump at a point on an interface.</dd>
             <dt id="ab7bb9b63358cd9e481d0f8b135298bb0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the expression at an integration point.</dd>
             <dt id="a9fa1cc25cfbf42375a55404252133298">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -336,9 +342,9 @@ $ \Gamma_h $
           <section class="m-doc-details" id="a1ed2f2b035ce4b6c731b8ff7bbba4f92"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a> _1&gt;
+                template&lt;class FunctionDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="#ad21ec0105a62c182ed6e5e1d8f7c6817" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a jump operator for the given function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -356,9 +362,9 @@ $ \Gamma_h $
           <section class="m-doc-details" id="a5293ff47ee54e64cffae9e91abcaa531"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a> _1&gt;
+                template&lt;class FunctionDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -376,9 +382,9 @@ $ \Gamma_h $
           <section class="m-doc-details" id="ac55433d8d1237b1238d48f4a76489317"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a> _1&gt;
+                template&lt;class FunctionDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -396,9 +402,9 @@ $ \Gamma_h $
           <section class="m-doc-details" id="a1ab30419cd40172cfa127ab16519cd8a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a> _1&gt;
+                template&lt;class FunctionDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ab30419cd40172cfa127ab16519cd8a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -413,9 +419,9 @@ $ \Gamma_h $
           <section class="m-doc-details" id="aa99abe0e3bf589a8b7e1d9e7c7f6bea9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a> _1&gt;
+                template&lt;class FunctionDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the jump at a point on an interface.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -466,9 +472,9 @@ $ u^+(p) - u^-(p) $
           <section class="m-doc-details" id="a959056b7544a77015a9059227c19f33b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FunctionDerived</a> _1&gt;
+                template&lt;class FunctionDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>* Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a959056b7544a77015a9059227c19f33b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>* Rodin::<wbr />Variational::<wbr />Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a959056b7544a77015a9059227c19f33b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this jump operator.</p>
             <table class="m-table m-fullwidth m-flat">

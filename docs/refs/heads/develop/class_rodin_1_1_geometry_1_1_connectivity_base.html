@@ -106,30 +106,30 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac2a574f3f0ad9634fdbbc820cb7fee72" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2a574f3f0ad9634fdbbc820cb7fee72" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the geometry type of a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a109480fe4c7a6b13c35e8092dfd44680" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a109480fe4c7a6b13c35e8092dfd44680" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the vertex indices defining a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab3a30530dc4724d558f254f044afa158" class="m-doc">getCount</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dim) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab3a30530dc4724d558f254f044afa158" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">size_t dim) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the count of polytopes in a dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a880767b98276469d1b8776f68ecde624" class="m-doc">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a880767b98276469d1b8776f68ecde624" class="m-doc">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the count of polytopes of a specific geometry.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the topological dimension of the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a755088e67ab39f1da8f3497fc95e1506" class="m-doc">getIncidence</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dp) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a755088e67ab39f1da8f3497fc95e1506" class="m-doc">getIncidence</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp) const -&gt; const <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the full incidence relation <svg class="m-math" style="width: 3.444em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 33.059191 8.76629">
 <title>
@@ -148,8 +148,8 @@ $ d \rightarrow d&#x27; $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af854f9f91cb32c7e92ee78b0123b6b0b" class="m-doc">getIncidence</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; p,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af854f9f91cb32c7e92ee78b0123b6b0b" class="m-doc">getIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt; p,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets incident polytopes for a specific polytope.</dd>
           </dl>
@@ -158,7 +158,7 @@ $ d \rightarrow d&#x27; $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ac2a574f3f0ad9634fdbbc820cb7fee72"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2a574f3f0ad9634fdbbc820cb7fee72" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2a574f3f0ad9634fdbbc820cb7fee72" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the geometry type of a polytope.</p>
@@ -186,7 +186,7 @@ $ d \rightarrow d&#x27; $
           </div></section>
           <section class="m-doc-details" id="a109480fe4c7a6b13c35e8092dfd44680"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a109480fe4c7a6b13c35e8092dfd44680" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a109480fe4c7a6b13c35e8092dfd44680" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the vertex indices defining a polytope.</p>
@@ -214,7 +214,7 @@ $ d \rightarrow d&#x27; $
           </div></section>
           <section class="m-doc-details" id="ab3a30530dc4724d558f254f044afa158"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3a30530dc4724d558f254f044afa158" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dim) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3a30530dc4724d558f254f044afa158" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">size_t dim) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the count of polytopes in a dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -237,7 +237,7 @@ $ d \rightarrow d&#x27; $
           </div></section>
           <section class="m-doc-details" id="a880767b98276469d1b8776f68ecde624"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a880767b98276469d1b8776f68ecde624" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a880767b98276469d1b8776f68ecde624" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the count of polytopes of a specific geometry.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,7 +260,7 @@ $ d \rightarrow d&#x27; $
           </div></section>
           <section class="m-doc-details" id="aecbab974d66ff87d16610de96cf16878"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the topological dimension of the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -284,8 +284,8 @@ $ D $
           </div></section>
           <section class="m-doc-details" id="a755088e67ab39f1da8f3497fc95e1506"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp; Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a755088e67ab39f1da8f3497fc95e1506" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dp) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_geometry.html#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a>&amp; Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a755088e67ab39f1da8f3497fc95e1506" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the full incidence relation <svg class="m-math" style="width: 3.444em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 33.059191 8.76629">
 <title>
@@ -327,7 +327,7 @@ $ d \rightarrow d&#x27; $
           </div></section>
           <section class="m-doc-details" id="af854f9f91cb32c7e92ee78b0123b6b0b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af854f9f91cb32c7e92ee78b0123b6b0b" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; p,
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; Rodin::<wbr />Geometry::<wbr />ConnectivityBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af854f9f91cb32c7e92ee78b0123b6b0b" class="m-doc-self">getIncidence</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, size_t&gt; p,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets incident polytopes for a specific polytope.</p>

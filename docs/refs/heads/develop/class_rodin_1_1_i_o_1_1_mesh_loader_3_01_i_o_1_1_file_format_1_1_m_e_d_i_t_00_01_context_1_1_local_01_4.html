@@ -99,7 +99,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Context&gt;</div>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase&lt;Context::Local&gt;</a>
             </dt>
             <dd>Base class for loading meshes from files or streams.</dd>
@@ -140,7 +140,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads a local mesh from a MEDIT input stream.</dd>
             <dt id="a765791207d61c8b95a052eeac98aea22">
@@ -153,23 +153,23 @@
             </dt>
             <dd>Skips blank lines and returns the next non-empty line.</dd>
             <dt id="ac5a0239882d20a2848c28f9b5fc7f51e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac5a0239882d20a2848c28f9b5fc7f51e" class="m-doc-self">readVersion</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ac5a0239882d20a2848c28f9b5fc7f51e" class="m-doc-self">readVersion</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
             </dt>
             <dd>Reads and validates the MEDIT version section.</dd>
             <dt id="a650875bc7b3c274a32e1927cad78c194">
-              <span class="m-doc-wrap-bumper">auto <a href="#a650875bc7b3c274a32e1927cad78c194" class="m-doc-self">readDimension</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a650875bc7b3c274a32e1927cad78c194" class="m-doc-self">readDimension</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
             </dt>
             <dd>Reads and validates the MEDIT dimension section.</dd>
             <dt id="ab6d32101a701150c5a6ecfa0ac8af5f1">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab6d32101a701150c5a6ecfa0ac8af5f1" class="m-doc-self">readEntities</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab6d32101a701150c5a6ecfa0ac8af5f1" class="m-doc-self">readEntities</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
             </dt>
             <dd>Reads vertex and element entities from the MEDIT stream.</dd>
             <dt id="a549feab362bfeac8228df6bebeb46c18">
-              <span class="m-doc-wrap-bumper">auto <a href="#a549feab362bfeac8228df6bebeb46c18" class="m-doc-self">getCountMap</a>(</span><span class="m-doc-wrap">) -&gt; std::unordered_map&lt;MEDIT::Keyword, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a549feab362bfeac8228df6bebeb46c18" class="m-doc-self">getCountMap</a>(</span><span class="m-doc-wrap">) -&gt; std::unordered_map&lt;MEDIT::Keyword, size_t&gt;&amp;</span>
             </dt>
             <dd>Returns mutable counts collected for each MEDIT keyword.</dd>
             <dt id="aa12ddee14d7b3ea68d5f2cf16feb883a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa12ddee14d7b3ea68d5f2cf16feb883a" class="m-doc-self">getCountMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::unordered_map&lt;MEDIT::Keyword, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa12ddee14d7b3ea68d5f2cf16feb883a" class="m-doc-self">getCountMap</a>(</span><span class="m-doc-wrap">) const -&gt; const std::unordered_map&lt;MEDIT::Keyword, size_t&gt;&amp;</span>
             </dt>
             <dd>Returns counts collected for each MEDIT keyword.</dd>
             <dt id="af0d606b880f3a37af034184eef859901">
@@ -177,7 +177,7 @@
             </dt>
             <dd>Returns mutable stream positions for parsed MEDIT sections.</dd>
             <dt id="a582c4804a0467ce501f2bee765e0e94f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a582c4804a0467ce501f2bee765e0e94f" class="m-doc-self">getPositionMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::unordered_map&lt;MEDIT::Keyword, std::istream::pos_type&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a582c4804a0467ce501f2bee765e0e94f" class="m-doc-self">getPositionMap</a>(</span><span class="m-doc-wrap">) const -&gt; const std::unordered_map&lt;MEDIT::Keyword, std::istream::pos_type&gt;&amp;</span>
             </dt>
             <dd>Returns stream positions for parsed MEDIT sections.</dd>
           </dl>
@@ -209,7 +209,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />MeshLoader&lt;IO::<wbr />FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;IO::<wbr />FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads a local mesh from a MEDIT input stream.</p>
             <table class="m-table m-fullwidth m-flat">

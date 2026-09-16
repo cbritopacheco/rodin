@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_variational_2_problem_8h.html">&lt;Rodin/PETSc/Variational/Problem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>, class... Us&gt;</div>
+          <div class="m-doc-template">template&lt;class U1, class U2, class U3, class... Us&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt; <span class="m-thin">class</span>
         </h1>
         <p>PETSc variational problem for multiple coupled trial / test functions.</p>
@@ -212,7 +212,7 @@ $ O_1 = 0 $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase&lt;PETSc::Math::LinearSystem&gt;</a>
             </dt>
             <dd>Base class for variational problem objects.</dd>
@@ -226,15 +226,15 @@ $ O_1 = 0 $
             </dt>
             <dd>Type of the PETSc linear system.</dd>
             <dt id="a3f02c76806f998a41174a54479486d51">
-              using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+              using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::OperatorType
             </dt>
             <dd>PETSc matrix operator type.</dd>
             <dt id="a8d4666f2edbd3de42a6bfbdbec15e536">
-              using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::VectorType
+              using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::VectorType
             </dt>
             <dd>PETSc vector type.</dd>
             <dt id="a5584bb04cdb3914f8da2f4904a179ef0">
-              using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::ScalarType
+              using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::ScalarType
             </dt>
             <dd>PETSc scalar type.</dd>
             <dt id="a8459167869c8f59ee2695e0852f0b72d">
@@ -246,7 +246,7 @@ $ O_1 = 0 $
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a42b52a332740bd7ef10193c7f55c679f">
-              using <a href="#a42b52a332740bd7ef10193c7f55c679f" class="m-doc-self">AssemblyType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;U1FESMeshContextType, U2FESMeshContextType&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />template</a> Type&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&gt;
+              using <a href="#a42b52a332740bd7ef10193c7f55c679f" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;U1FESMeshContextType, U2FESMeshContextType&gt; ::template Type&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&gt;
             </dt>
             <dd>Assembly type for this problem.</dd>
             <dt id="a42202ed1db5760067e78140c3583f06d">
@@ -254,7 +254,7 @@ $ O_1 = 0 $
             </dt>
             <dd>Base solver type for this problem.</dd>
             <dt id="aa5e7451a1475d43adc4a1d1e220dc9bb">
-              using <a href="#aa5e7451a1475d43adc4a1d1e220dc9bb" class="m-doc-self">AssemblyInput</a> = <a href="class_rodin_1_1_assembly_1_1_problem_assembly_input.html" class="m-doc">Assembly::<wbr />ProblemAssemblyInput</a>&lt;<a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>, Us...&gt;
+              using <a href="#aa5e7451a1475d43adc4a1d1e220dc9bb" class="m-doc-self">AssemblyInput</a> = <a href="class_rodin_1_1_assembly_1_1_problem_assembly_input.html" class="m-doc">Assembly::<wbr />ProblemAssemblyInput</a>&lt;<a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>, U1, U2, U3, Us...&gt;
             </dt>
             <dd>Input data structure for the assembly pipeline.</dd>
           </dl>
@@ -263,14 +263,14 @@ $ O_1 = 0 $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>&amp; u1,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>&amp; u2,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>&amp; u3,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Us</a>&amp;... us)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>(</span><span class="m-doc-wrap">U1&amp; u1,
+              U2&amp; u2,
+              U3&amp; u3,
+              Us&amp;... us)</span>
             </dt>
             <dd>Constructs a multi-field problem from trial and test functions.</dd>
             <dt id="adf8cbfaaf9c8721a90b05bcab435530f">
-              <span class="m-doc-wrap-bumper"><a href="#adf8cbfaaf9c8721a90b05bcab435530f" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#adf8cbfaaf9c8721a90b05bcab435530f" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="adedd280d1c7bf912f4395eeeded30132">
@@ -283,7 +283,7 @@ $ O_1 = 0 $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
@@ -291,7 +291,7 @@ $ O_1 = 0 $
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body (bilinear and linear forms).</dd>
             <dt>
@@ -303,7 +303,7 @@ $ O_1 = 0 $
             </dt>
             <dd>Assembles only the requested target into the block linear system.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles if stale, solves the block linear system, and scatters sub-solutions into their trial functions.</dd>
             <dt id="a9087a471c7bafaa7b766ab09fb62af93">
@@ -311,31 +311,31 @@ $ O_1 = 0 $
             </dt>
             <dd>Returns a mutable reference to the linear system.</dd>
             <dt id="ad7f921c9514ca42c35720eb504e7a479">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns a read-only reference to the linear system.</dd>
             <dt id="a7125711204e361371134b655d1ff6762">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7125711204e361371134b655d1ff6762" class="m-doc-self">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7125711204e361371134b655d1ff6762" class="m-doc-self">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the DOF offset array for trial fields.</dd>
             <dt id="afc618e9a4c3e3509eb5be784adf5c31d">
-              <span class="m-doc-wrap-bumper">auto <a href="#afc618e9a4c3e3509eb5be784adf5c31d" class="m-doc-self">getTestOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afc618e9a4c3e3509eb5be784adf5c31d" class="m-doc-self">getTestOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the DOF offset array for test fields.</dd>
             <dt id="ae21d17f33770dcc88df3550a80e6218a">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae21d17f33770dcc88df3550a80e6218a" class="m-doc-self">getTotalTrialSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae21d17f33770dcc88df3550a80e6218a" class="m-doc-self">getTotalTrialSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the total number of trial DOFs across all fields.</dd>
             <dt id="a7b4579de3c212773fa418c364807ef27">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7b4579de3c212773fa418c364807ef27" class="m-doc-self">getTotalTestSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b4579de3c212773fa418c364807ef27" class="m-doc-self">getTotalTestSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the total number of test DOFs across all fields.</dd>
             <dt id="a2406b684dcf3f98de018a9f88cbeb1e2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2406b684dcf3f98de018a9f88cbeb1e2" class="m-doc-self">getTrialUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2406b684dcf3f98de018a9f88cbeb1e2" class="m-doc-self">getTrialUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the UUID-to-index map for trial functions.</dd>
             <dt id="a93adc2ece7f4b994e4472c64f96afcfc">
-              <span class="m-doc-wrap-bumper">auto <a href="#a93adc2ece7f4b994e4472c64f96afcfc" class="m-doc-self">getTestUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a93adc2ece7f4b994e4472c64f96afcfc" class="m-doc-self">getTestUUIDMap</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the UUID-to-index map for test functions.</dd>
             <dt id="ad2429ffd7600bef5051f4fab1a8eb0a5">
@@ -343,7 +343,7 @@ $ O_1 = 0 $
             </dt>
             <dd>Creates a heap-allocated copy of this problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8e215188d9a565862378069515709696" class="m-doc">setFieldSplits</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a8e215188d9a565862378069515709696" class="m-doc">setFieldSplits</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Configures PETSc field-split index sets for block preconditioning.</dd>
           </dl>
@@ -353,12 +353,12 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="a4cd269bcb12bd569b6fd6ecd6dde4c1b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>&amp; u1,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>&amp; u2,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>&amp; u3,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Us</a>&amp;... us)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">U1&amp; u1,
+              U2&amp; u2,
+              U3&amp; u3,
+              Us&amp;... us)</span></span>
             </h3>
             <p>Constructs a multi-field problem from trial and test functions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -388,9 +388,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="a24f33cae29d53dfaa37b1732bcb0190d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -414,9 +414,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="ab01eb0b6bcc53cd8b697a29a141b3b50"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -440,9 +440,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="a7f4dd7112c20d7855433d59d50032694"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assigns a problem body (bilinear and linear forms).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -466,9 +466,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="ade273f2556fd4951a4e7b8dad8006d5f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the block-structured variational formulation and establishes the initial guess.</p>
 <p>After assembly, the linear system&#x27;s solution vector holds the trial function data, gathered at the trial offsets, as the initial guess: on entry to a linear solver the solution vector is the guess, on exit it is the solution.</p>
@@ -476,9 +476,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="a52c9cb6ad3a86b473eb82a1be6dcae6f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52c9cb6ad3a86b473eb82a1be6dcae6f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">AssemblyTarget</a> target) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52c9cb6ad3a86b473eb82a1be6dcae6f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">AssemblyTarget</a> target) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles only the requested target into the block linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -502,9 +502,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="a242286126958bec41dec8f80d88b0d54"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles if stale, solves the block linear system, and scatters sub-solutions into their trial functions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -523,9 +523,9 @@ $ O_1 = 0 $
           <section class="m-doc-details" id="a8e215188d9a565862378069515709696"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, class... Us&gt;
+                template&lt;class U1, class U2, class U3, class... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e215188d9a565862378069515709696" class="m-doc-self">setFieldSplits</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e215188d9a565862378069515709696" class="m-doc-self">setFieldSplits</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Configures PETSc field-split index sets for block preconditioning.</p>
 <p>Must be called after assemble(). Creates one <code>IS</code> per trial field using the computed DOF offsets.</p>

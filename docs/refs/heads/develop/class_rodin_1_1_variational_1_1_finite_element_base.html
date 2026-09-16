@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_finite_element_8h.html">&lt;Rodin/Variational/FiniteElement.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FiniteElementBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for finite elements.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Derived</td>
+              <td>Concrete finite element type implementing the CRTP interface.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -99,7 +110,7 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
             </dt>
             <dd>Degree 1 Lagrange element.</dd>
@@ -109,7 +120,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              using <a href="#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;::ScalarType
+              using <a href="#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::ScalarType
             </dt>
             <dd>Scalar type associated with the finite element.</dd>
           </dl>
@@ -117,6 +128,22 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ada6303488d8c2961508382b5d25cc579" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a finite element base with a given reference geometry.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#af4c17c91bbf62b7fb9d812f5236461d7" class="m-doc">~FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
@@ -127,60 +154,44 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Default constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ada6303488d8c2961508382b5d25cc579" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a finite element base with a given reference geometry.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the reference geometry of the finite element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of degrees of freedom in the finite element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">decltype</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the i-th basis function of the finite element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&amp;&amp; coefficient,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Range, class Coefficient&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">Range&amp; out,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates a local finite element expansion on the reference element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">decltype</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the i-th linear functional (degree of freedom) on the element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a characteristic polynomial order of the finite element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serializes the finite element base (Boost.Serialization).</dd>
           </dl>
@@ -190,9 +201,9 @@
           <section class="m-doc-details" id="a5af7351b2dbf910b0d7f78fbfbec5d6d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /><a href="#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;::ScalarType
+              using Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /><a href="#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::ScalarType
             </h3>
             <p>Scalar type associated with the finite element.</p>
 <p>This type is obtained from the <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a> specialization of the Derived finite element. It corresponds to the scalar field underlying the finite element (e.g. <code>Real</code>, <code>Complex&lt;Real&gt;</code>, etc.).</p>
@@ -200,22 +211,12 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af4c17c91bbf62b7fb9d812f5236461d7"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4c17c91bbf62b7fb9d812f5236461d7" class="m-doc-self">~FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">virtual</span> <span class="m-label m-info">defaulted</span></span></span>
-            </h3>
-            <p>Virtual destructor.</p>
-<p>Provided to allow polymorphic destruction through a base-class pointer (e.g. when storing different finite elements in a common container).</p>
-          </div></section>
           <section class="m-doc-details" id="a53c40b18e8f77c35307ebd37bf12b8a6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53c40b18e8f77c35307ebd37bf12b8a6" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Default constructor.</p>
 <p>Initializes the finite element with a Point geometry. This is mainly provided for default-constructibility and is typically overridden by Derived classes that expose more specific constructors.</p>
@@ -223,9 +224,9 @@
           <section class="m-doc-details" id="ada6303488d8c2961508382b5d25cc579"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada6303488d8c2961508382b5d25cc579" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada6303488d8c2961508382b5d25cc579" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a finite element base with a given reference geometry.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -244,9 +245,9 @@
           <section class="m-doc-details" id="aade62daa06b3fa006fb9e65f55c356b9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aade62daa06b3fa006fb9e65f55c356b9" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -265,9 +266,9 @@
           <section class="m-doc-details" id="a44907db2d06dffd00ac33696c69755e1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44907db2d06dffd00ac33696c69755e1" class="m-doc-self">FiniteElementBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -283,12 +284,22 @@
             </table>
 <p>Moves the reference geometry from another base object.</p>
           </div></section>
+          <section class="m-doc-details" id="af4c17c91bbf62b7fb9d812f5236461d7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4c17c91bbf62b7fb9d812f5236461d7" class="m-doc-self">~FiniteElementBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">virtual</span> <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Virtual destructor.</p>
+<p>Provided to allow polymorphic destruction through a base-class pointer (e.g. when storing different finite elements in a common container).</p>
+          </div></section>
           <section class="m-doc-details" id="a4341aa8c71a1769aa8e88ec085c0078c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4341aa8c71a1769aa8e88ec085c0078c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -313,9 +324,9 @@
           <section class="m-doc-details" id="ab703e9eec08b5fa84a539aedad7dd52f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab703e9eec08b5fa84a539aedad7dd52f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -340,9 +351,9 @@
           <section class="m-doc-details" id="a31877fd761e82217b0cafe1757d2dab0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the reference geometry of the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -368,9 +379,9 @@ $ K $
           <section class="m-doc-details" id="a44d43c17930cfe700de763b67a32fb7b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of degrees of freedom in the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -386,9 +397,9 @@ $ K $
           <section class="m-doc-details" id="a8c93953f1a596d6abf47a11b177dc64a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">decltype</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the i-th basis function of the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -471,21 +482,34 @@ $ x_j $
           <section class="m-doc-details" id="aca686e68d6d96e0f0813fac17af8ee23"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&gt;
+                template&lt;class Derived&gt;
+                template&lt;class Range, class Coefficient&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&amp;&amp; coefficient,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca686e68d6d96e0f0813fac17af8ee23" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">Range&amp; out,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates a local finite element expansion on the reference element.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Range</td>
+                  <td>Range type of the finite element expansion.</td>
+                </tr>
+                <tr>
+                  <td>Coefficient</td>
+                  <td>Callable returning the local coefficient of a basis.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">out&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>out&nbsp;<span class="m-label m-flat m-warning">out</span></td>
                   <td>Value of the expansion.</td>
                 </tr>
                 <tr>
@@ -567,9 +591,9 @@ $ \varphi_i $
           <section class="m-doc-details" id="a5672b0ba04c02bed94a6352f2ea8e234"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">decltype</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the i-th linear functional (degree of freedom) on the element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -614,9 +638,9 @@ $ v $
           <section class="m-doc-details" id="a15b23d5374f96033b06313f150a05b96"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns a characteristic polynomial order of the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -656,20 +680,29 @@ $ \mathbb{Q}_k $
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;
+                template&lt;class Derived&gt;
+                template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />FiniteElementBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serializes the finite element base (Boost.Serialization).</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Boost.Serialization archive type.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">ar</td>
+                  <td>ar</td>
                   <td>Archive to serialize to or from.</td>
                 </tr>
                 <tr>

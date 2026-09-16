@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_unary_minus_8h.html">&lt;Rodin/Variational/UnaryMinus.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+          <div class="m-doc-template">template&lt;class Number&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>UnaryMinus&lt;LinearFormIntegratorBase&lt;Number&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Negation of a linear form integrator.</p>
@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;Number&gt;</a>
             </dt>
             <dd>Base class for linear form integrators.</dd>
@@ -125,11 +125,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a63886bf4e7360d56678449141042428b">
-              <span class="m-doc-wrap-bumper"><a href="#a63886bf4e7360d56678449141042428b" class="m-doc-self">UnaryMinus</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae97644a4b10fd58fddc2ac2872964d7a" class="m-doc">OperandType</a>&amp; op)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a63886bf4e7360d56678449141042428b" class="m-doc-self">UnaryMinus</a>(</span><span class="m-doc-wrap">const <a href="#ae97644a4b10fd58fddc2ac2872964d7a" class="m-doc">OperandType</a>&amp; op)</span>
             </dt>
             <dd>Constructs the expression from its operand.</dd>
             <dt id="a8019fcce14f5d72069340267ed222d6e">
-              <span class="m-doc-wrap-bumper"><a href="#a8019fcce14f5d72069340267ed222d6e" class="m-doc-self">UnaryMinus</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8019fcce14f5d72069340267ed222d6e" class="m-doc-self">UnaryMinus</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a7e9c65d46fa1462e8d916ea17473414d">
@@ -142,7 +142,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a167036e7e1cfcff01c5f031ea96d3fed">
-              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae97644a4b10fd58fddc2ac2872964d7a" class="m-doc">OperandType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae97644a4b10fd58fddc2ac2872964d7a" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
             <dt id="aa5d79cb88973b769fdd1665729c03952">
@@ -150,15 +150,15 @@
             </dt>
             <dd>Returns the integration region.</dd>
             <dt id="adbfdd734d436c5a1bbee19714721e493">
-              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the polytope the expression is bound to.</dd>
             <dt id="a02f16fc5ef25037247d0d05e5a48435b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a02f16fc5ef25037247d0d05e5a48435b" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a02f16fc5ef25037247d0d05e5a48435b" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Binds the expression to a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) -&gt; <a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t local) -&gt; <a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Integrates the negated linear form.</dd>
             <dt>
@@ -172,9 +172,9 @@
           <section class="m-doc-details" id="a80b1dd43ad79c7d8b9655c92d75552b3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />UnaryMinus&lt;LinearFormIntegratorBase&lt;Number&gt;&gt;&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />UnaryMinus&lt;LinearFormIntegratorBase&lt;Number&gt;&gt;&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80b1dd43ad79c7d8b9655c92d75552b3" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t local) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Integrates the negated linear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -198,7 +198,7 @@
           <section class="m-doc-details" id="aa98bdf80ce33fd0b66f16e77b54c7433"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_unary_minus.html" class="m-doc">UnaryMinus</a>* Rodin::<wbr />Variational::<wbr />UnaryMinus&lt;LinearFormIntegratorBase&lt;Number&gt;&gt;&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa98bdf80ce33fd0b66f16e77b54c7433" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>

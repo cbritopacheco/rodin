@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_problem_8h.html">&lt;Rodin/Variational/Problem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LinearSystem, class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>, class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;LinearSystem, TrialFunction, TestFunction&gt; <span class="m-thin">class</span>
         </h1>
         <p>Two-field variational problem.</p>
@@ -88,6 +88,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -97,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">V</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U, class V&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase&lt;LinearSystem, TrialFunction, TestFunction&gt;</a>
             </dt>
             <dd>General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</dd>
@@ -115,15 +116,15 @@
             </dt>
             <dd>Linear solver base type.</dd>
             <dt id="aee5a4327c58e97b0101be6de1a91eb88">
-              using <a href="#aee5a4327c58e97b0101be6de1a91eb88" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::OperatorType
+              using <a href="#aee5a4327c58e97b0101be6de1a91eb88" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::OperatorType
             </dt>
             <dd>Assembled operator type.</dd>
             <dt id="ae8be2197728bd066c5c0ea45fca4e9e8">
-              using <a href="#ae8be2197728bd066c5c0ea45fca4e9e8" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::VectorType
+              using <a href="#ae8be2197728bd066c5c0ea45fca4e9e8" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::VectorType
             </dt>
             <dd>Vector type of the linear system.</dd>
             <dt id="ad7f4cd2e2ba5d742d7cdde80ad2d1928">
-              using <a href="#ad7f4cd2e2ba5d742d7cdde80ad2d1928" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::ScalarType
+              using <a href="#ad7f4cd2e2ba5d742d7cdde80ad2d1928" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a8459167869c8f59ee2695e0852f0b72d">
@@ -131,15 +132,15 @@
             </dt>
             <dd>Problem body type.</dd>
             <dt id="ab49846dd94d56f9ec67fb4402be9f401">
-              using <a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc-self">TrialFESMeshContextType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFESMeshType&gt;::ContextType
+              using <a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc-self">TrialFESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFESMeshType&gt;::ContextType
             </dt>
             <dd>Trial finite element mesh context type.</dd>
             <dt id="ac4bc1a3f31bd1062c9aee1d256ef4b65">
-              using <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc-self">TestFESMeshContextType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFESMeshType&gt;::ContextType
+              using <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc-self">TestFESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFESMeshType&gt;::ContextType
             </dt>
             <dd>Test finite element mesh context type.</dd>
             <dt id="ab81c57c69ad0afeeb371d2f6ff625eba">
-              using <a href="#ab81c57c69ad0afeeb371d2f6ff625eba" class="m-doc-self">AssemblyType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc">TrialFESMeshContextType</a>, <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc">TestFESMeshContextType</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />template</a> Type&lt;LinearSystem, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&gt;
+              using <a href="#ab81c57c69ad0afeeb371d2f6ff625eba" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc">TrialFESMeshContextType</a>, <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc">TestFESMeshContextType</a>&gt; ::template Type&lt;LinearSystem, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&gt;
             </dt>
             <dd>Assembly strategy type.</dd>
             <dt id="a1b68d53fcb8a54fb8b08792fe20deadc">
@@ -148,24 +149,29 @@
             <dd>Parent class type.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a339597c8eeb146f909d8e8dae7016730">
-              <span class="m-doc-wrap-bumper">auto <a href="#a339597c8eeb146f909d8e8dae7016730" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&amp; u,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; v) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a339597c8eeb146f909d8e8dae7016730" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a two-field problem from trial and test functions.</dd>
             <dt id="ab2b65141b453fe957a35a8eaf0cab162">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab2b65141b453fe957a35a8eaf0cab162" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab2b65141b453fe957a35a8eaf0cab162" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a87d558d57dd62754889d267c9ec61189">
-              <span class="m-doc-wrap-bumper">auto <a href="#a87d558d57dd62754889d267c9ec61189" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a87d558d57dd62754889d267c9ec61189" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt id="a24f33cae29d53dfaa37b1732bcb0190d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt id="ab01eb0b6bcc53cd8b697a29a141b3b50">
@@ -181,11 +187,11 @@
             </dt>
             <dd>Assembles only the requested target of the linear system.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles if stale, solves the linear system, and writes the result to the trial function solution.</dd>
             <dt id="a7f4dd7112c20d7855433d59d50032694">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body and marks the assembly stale.</dd>
             <dt id="a9087a471c7bafaa7b766ab09fb62af93">
@@ -193,7 +199,7 @@
             </dt>
             <dd>Returns the assembled linear system.</dd>
             <dt id="ad7f921c9514ca42c35720eb504e7a479">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the assembled linear system.</dd>
             <dt id="ad2429ffd7600bef5051f4fab1a8eb0a5">
@@ -207,7 +213,7 @@
           <section class="m-doc-details" id="ade273f2556fd4951a4e7b8dad8006d5f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> _3&gt;
+                template&lt;class LinearSystem, class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> _2, class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> _3&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;&lt;LinearSystem, _2, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
@@ -217,9 +223,9 @@
           <section class="m-doc-details" id="a242286126958bec41dec8f80d88b0d54"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> _3&gt;
+                template&lt;class LinearSystem, class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> _2, class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a> _3&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;&lt;LinearSystem, _2, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;&lt;LinearSystem, _2, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles if stale, solves the linear system, and writes the result to the trial function solution.</p>
 <p>Assigning a new problem body with operator=() marks the current assembly stale. If that happens, or if assemble() has not been called yet, this function calls assemble() before invoking the linear solver.</p>

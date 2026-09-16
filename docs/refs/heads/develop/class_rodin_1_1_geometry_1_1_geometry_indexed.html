@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_indexed_8h.html">&lt;Rodin/Geometry/GeometryIndexed.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+          <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>GeometryIndexed <span class="m-thin">class</span>
         </h1>
         <p>Template container indexed by polytope geometry types.</p>
@@ -127,7 +127,7 @@
             </dt>
             <dd>Constructs from an initializer list of polytope type-value pairs.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1fc67e81909bb794d4965b4524f56362" class="m-doc">GeometryIndexed</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1fc67e81909bb794d4965b4524f56362" class="m-doc">GeometryIndexed</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -144,7 +144,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aba7aacc987f4c2ae9897614ea1f56c94" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba7aacc987f4c2ae9897614ea1f56c94" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
@@ -156,17 +156,17 @@
             </dt>
             <dd>Access operator for mutable access to data by polytope type.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a97d7a056c4cf0c00337e438efb3a38cc" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> type) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97d7a056c4cf0c00337e438efb3a38cc" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> type) const -&gt; const T&amp;</span>
             </dt>
             <dd>Access operator for const access to data by polytope type.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of polytope types (always constant).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serialization method for Boost.Serialization.</dd>
           </dl>
@@ -176,7 +176,7 @@
           <section class="m-doc-details" id="aba377fb60e62725c67f0bfe5c01db230"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba377fb60e62725c67f0bfe5c01db230" class="m-doc-self">GeometryIndexed</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;std::pair&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a>, T&gt;&gt; l)</span></span>
             </h3>
@@ -197,9 +197,9 @@
           <section class="m-doc-details" id="a1fc67e81909bb794d4965b4524f56362"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1fc67e81909bb794d4965b4524f56362" class="m-doc-self">GeometryIndexed</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1fc67e81909bb794d4965b4524f56362" class="m-doc-self">GeometryIndexed</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -217,7 +217,7 @@
           <section class="m-doc-details" id="a829ec88a42727f836edbbef881c7eff7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a829ec88a42727f836edbbef881c7eff7" class="m-doc-self">GeometryIndexed</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp;&amp; other) <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
@@ -237,9 +237,9 @@
           <section class="m-doc-details" id="aba7aacc987f4c2ae9897614ea1f56c94"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba7aacc987f4c2ae9897614ea1f56c94" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other) <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba7aacc987f4c2ae9897614ea1f56c94" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; other) <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -263,7 +263,7 @@
           <section class="m-doc-details" id="ab8162e8196948c8817a23c7dc94bdba4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp; Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8162e8196948c8817a23c7dc94bdba4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>&amp;&amp; other) <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
@@ -289,7 +289,7 @@
           <section class="m-doc-details" id="a9b073a8523f6dea94ed52c51ef66778b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper">T&amp; Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b073a8523f6dea94ed52c51ef66778b" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> type)</span></span>
             </h3>
@@ -315,9 +315,9 @@
           <section class="m-doc-details" id="a97d7a056c4cf0c00337e438efb3a38cc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97d7a056c4cf0c00337e438efb3a38cc" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> type) const</span></span>
+              <span class="m-doc-wrap-bumper">const T&amp; Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97d7a056c4cf0c00337e438efb3a38cc" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> type) const</span></span>
             </h3>
             <p>Access operator for const access to data by polytope type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -341,9 +341,9 @@
           <section class="m-doc-details" id="aae4c3867dcd57153f1148c9f097bbc9b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of polytope types (always constant).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -358,20 +358,29 @@
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;
+                template&lt;class T&gt;
+                template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />GeometryIndexed&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serialization method for Boost.Serialization.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Archive type for serialization</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">ar</td>
+                  <td>ar</td>
                   <td>Archive object</td>
                 </tr>
                 <tr>

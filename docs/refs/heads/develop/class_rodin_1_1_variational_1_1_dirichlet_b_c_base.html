@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_8h.html">&lt;Rodin/Variational/DirichletBC.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBCBase <span class="m-thin">class</span>
         </h1>
         <p>Abstract base class for a Dirichlet boundary condition.</p>
@@ -441,23 +441,23 @@ $ v $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the Dirichlet boundary condition.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ab2a613baef734f447c08acbde518997e" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab2a613baef734f447c08acbde518997e" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the map of constrained DOFs.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aee4fb29ce64463cb27daabdd6c94fce9" class="m-doc">isComponent</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aee4fb29ce64463cb27daabdd6c94fce9" class="m-doc">isComponent</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Checks if this is a component-wise boundary condition.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abc32c3c7f43b45bf2d8383e7eda960e5" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abc32c3c7f43b45bf2d8383e7eda960e5" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the operand (trial function) of the BC.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23bfce2b353eaaf41aa2458024018bf8" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23bfce2b353eaaf41aa2458024018bf8" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the prescribed boundary value.</dd>
             <dt>
@@ -475,7 +475,7 @@ $ v $
 </g>
 </svg>&#x27;s leaf trial function for an identification BC, or <code>nullopt</code> for a value-prescribing BC.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6f3f1cd4254acb1296162d9a4443ef5b" class="m-doc">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f3f1cd4254acb1296162d9a4443ef5b" class="m-doc">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Returns optional defects for affine identification BCs.</dd>
             <dt>
@@ -489,7 +489,7 @@ $ v $
           <section class="m-doc-details" id="af23bb45dde010a1e6dd411dcbcd847d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc-self">ValueDOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
             </h3>
@@ -517,7 +517,7 @@ $ g(x_i) $
           <section class="m-doc-details" id="af39b693c6c459b4722a0080122bfb789"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc-self">IdentifiedDOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
             </h3>
@@ -608,7 +608,7 @@ $ u_s = \sum_j C_{sj}\, v_j $
           <section class="m-doc-details" id="a4860c8b2c9fa43bf5d5c57a3fb5aeebf"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc-self">IdentificationValues</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
             </h3>
@@ -680,7 +680,7 @@ $ d_s = 0 $
           <section class="m-doc-details" id="ab2a613baef734f447c08acbde518997e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#ab2a613baef734f447c08acbde518997e" class="m-doc-self">DOFs</a> = std::variant&lt;<a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a>, <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a>&gt;
             </h3>
@@ -693,9 +693,9 @@ $ d_s = 0 $
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the Dirichlet boundary condition.</p>
 <p>Either fills the <a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a> alternative (for value-prescribing BCs) or the <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a> alternative (for identification BCs).</p>
@@ -703,9 +703,9 @@ $ d_s = 0 $
           <section class="m-doc-details" id="a2b01263c63728dde2f8acc22444e59c7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ab2a613baef734f447c08acbde518997e" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#ab2a613baef734f447c08acbde518997e" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b01263c63728dde2f8acc22444e59c7" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the map of constrained DOFs.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -720,9 +720,9 @@ $ d_s = 0 $
           <section class="m-doc-details" id="aee4fb29ce64463cb27daabdd6c94fce9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee4fb29ce64463cb27daabdd6c94fce9" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee4fb29ce64463cb27daabdd6c94fce9" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Checks if this is a component-wise boundary condition.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -737,9 +737,9 @@ $ d_s = 0 $
           <section class="m-doc-details" id="abc32c3c7f43b45bf2d8383e7eda960e5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc32c3c7f43b45bf2d8383e7eda960e5" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc32c3c7f43b45bf2d8383e7eda960e5" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the operand (trial function) of the BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -754,9 +754,9 @@ $ d_s = 0 $
           <section class="m-doc-details" id="a23bfce2b353eaaf41aa2458024018bf8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23bfce2b353eaaf41aa2458024018bf8" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23bfce2b353eaaf41aa2458024018bf8" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the prescribed boundary value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -771,7 +771,7 @@ $ d_s = 0 $
           <section class="m-doc-details" id="a9e923ee9fd7dfa7d2f4dbfe34ba31212"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Identifiable::<wbr />UUID</a>&gt; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e923ee9fd7dfa7d2f4dbfe34ba31212" class="m-doc-self">getValueUUID</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
@@ -801,9 +801,9 @@ $ v $
           <section class="m-doc-details" id="a6f3f1cd4254acb1296162d9a4443ef5b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f3f1cd4254acb1296162d9a4443ef5b" class="m-doc-self">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f3f1cd4254acb1296162d9a4443ef5b" class="m-doc-self">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Returns optional defects for affine identification BCs.</p>
 <p>Value-prescribing BCs and homogeneous identification BCs return an empty map. Affine identification BCs override this to provide the known additive defect value for each slave row.</p>
@@ -811,7 +811,7 @@ $ v $
           <section class="m-doc-details" id="a00c956a9ff24f89c4e3894319a47f70f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>* Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00c956a9ff24f89c4e3894319a47f70f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>

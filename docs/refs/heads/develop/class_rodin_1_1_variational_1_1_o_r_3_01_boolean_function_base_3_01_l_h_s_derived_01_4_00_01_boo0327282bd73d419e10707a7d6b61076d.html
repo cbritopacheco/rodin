@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_o_r_8h.html">&lt;Rodin/Variational/OR.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Logical OR operator between two instances of BooleanFunctionBase.</p>
@@ -88,6 +88,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -97,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase&lt;OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for boolean-valued functions.</dd>
@@ -107,11 +108,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a7c3eb6c1002ff803ad258c6d13f23f4b">
-              using <a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;
+              using <a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;LHSDerived&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a75a4f30fc0daf7eb596df1df82e84a2f">
-              using <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;
+              using <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;RHSDerived&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a213f004cc56514e464aef9c1b36b19ca">
@@ -120,36 +121,41 @@
             <dd>Parent class type.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a63be733c8fbe300851193b7b594fde98">
-              <span class="m-doc-wrap-bumper">auto <a href="#a63be733c8fbe300851193b7b594fde98" class="m-doc-self">OR</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc">LHSType</a>&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc">RHSType</a>&amp; rhs) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a63be733c8fbe300851193b7b594fde98" class="m-doc-self">OR</a>(</span><span class="m-doc-wrap">const <a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
             <dt id="ab7b8ea0a3088027504bd583d190339e5">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7b8ea0a3088027504bd583d190339e5" class="m-doc-self">OR</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab7b8ea0a3088027504bd583d190339e5" class="m-doc-self">OR</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="ac5be331e658bee191fb7331555e13e19">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac5be331e658bee191fb7331555e13e19" class="m-doc-self">OR</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac5be331e658bee191fb7331555e13e19" class="m-doc-self">OR</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt id="a78988da19f2a7a0de0eee6e8b15c5699">
-              <span class="m-doc-wrap-bumper">auto <a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the left-hand side operand.</dd>
             <dt id="a3328065b74dcf7cefdaa1ff5c723b7a0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the right-hand side operand.</dd>
             <dt id="af5f065ebe0b3b1c58b0c2402a50fc9e3">
-              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the expression at a geometric point.</dd>
             <dt id="aa249459e67c36e2343e940d08970970a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the expression at an integration point.</dd>
             <dt>
@@ -163,9 +169,9 @@
           <section class="m-doc-details" id="a01d80a036aed5fd4b58979fb8db498da"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>* Rodin::<wbr />Variational::<wbr />OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01d80a036aed5fd4b58979fb8db498da" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_o_r.html" class="m-doc">OR</a>* Rodin::<wbr />Variational::<wbr />OR&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01d80a036aed5fd4b58979fb8db498da" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">

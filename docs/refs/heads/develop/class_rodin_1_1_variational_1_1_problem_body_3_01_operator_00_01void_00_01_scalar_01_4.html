@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_problem_body_8h.html">&lt;Rodin/Variational/ProblemBody.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Operator, class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ProblemBody&lt;Operator, void, Scalar&gt; <span class="m-thin">class</span>
         </h1>
         <p>Problem body containing operator terms only.</p>
@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase&lt;Scalar&gt;</a>
             </dt>
             <dd>Base class representing the body of a variational problem.</dd>
@@ -108,11 +108,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a87b353c8b857eb96ad6f07a3c63bceb9">
-              using <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a>
+              using <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc-self">OperatorType</a> = Operator
             </dt>
             <dd>Assembled operator type.</dd>
             <dt id="a867f717a0cd50cd2265d843075f1cc70">
-              using <a href="#a867f717a0cd50cd2265d843075f1cc70" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;::ScalarType
+              using <a href="#a867f717a0cd50cd2265d843075f1cc70" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a62eb9dcb871bdac2b903510381a0f293">
@@ -137,7 +137,7 @@
             </dt>
             <dd>Default constructor.</dd>
             <dt id="a87788f27f2e8e31f5670cf902b12be02">
-              <span class="m-doc-wrap-bumper"><a href="#a87788f27f2e8e31f5670cf902b12be02" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a87788f27f2e8e31f5670cf902b12be02" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a13ace72d2d0325cd9b42d27f77927497">
@@ -150,7 +150,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="aaa9f3d51e83acedebaf26a7bcbed2019">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaa9f3d51e83acedebaf26a7bcbed2019" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa9f3d51e83acedebaf26a7bcbed2019" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt id="a2823b82525b2af39fdbf39b7df9c1b88">
@@ -162,7 +162,7 @@
             </dt>
             <dd>Returns bilinear forms.</dd>
             <dt id="ad6e949508e9ad253bb618c68bebe0838">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6e949508e9ad253bb618c68bebe0838" class="m-doc-self">getBFs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6e949508e9ad253bb618c68bebe0838" class="m-doc-self">getBFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp;</span>
             </dt>
             <dd>Returns bilinear forms.</dd>
             <dt id="ab7ae128e05b47c88bf2a569023cf3f77">

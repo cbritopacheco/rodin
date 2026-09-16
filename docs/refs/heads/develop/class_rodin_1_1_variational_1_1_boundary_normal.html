@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Real, BoundaryNormal&gt;</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
@@ -129,11 +129,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a069854a0c4077f7c380d4719aa6c7a22">
-              <span class="m-doc-wrap-bumper"><a href="#a069854a0c4077f7c380d4719aa6c7a22" class="m-doc-self">BoundaryNormal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a069854a0c4077f7c380d4719aa6c7a22" class="m-doc-self">BoundaryNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs the outward unit normal.</dd>
             <dt id="a2066f4e8b4732b2d8cdbcbe416d88ab6">
-              <span class="m-doc-wrap-bumper"><a href="#a2066f4e8b4732b2d8cdbcbe416d88ab6" class="m-doc-self">BoundaryNormal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_boundary_normal.html" class="m-doc">BoundaryNormal</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a2066f4e8b4732b2d8cdbcbe416d88ab6" class="m-doc-self">BoundaryNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_boundary_normal.html" class="m-doc">BoundaryNormal</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a7a1f273c719f7780e985883da5cd1a2a">
@@ -146,25 +146,25 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="aad8f738241426a32d95c3696395698d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the topological dimension.</dd>
             <dt id="aba40d885535b6ab44abfaf6fb0f6d70c">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba40d885535b6ab44abfaf6fb0f6d70c" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aba40d885535b6ab44abfaf6fb0f6d70c" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&amp; res,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates at a geometric point.</dd>
             <dt id="a558a5734a1a868c1d48eb46cbe26734d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a558a5734a1a868c1d48eb46cbe26734d" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a558a5734a1a868c1d48eb46cbe26734d" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&amp; res,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates at a geometric point.</dd>
             <dt id="af0e2923caa24f35613d3cc8427bdc6bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates the expression at a geometric point.</dd>
             <dt id="a050a84d717e56cf813ce6be3e4ae8aa7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt id="a21011e4e3a0f4f331655d70b97ae884b">

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Momentum residual (pure displacement formulation).</p>
@@ -148,7 +148,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;Real&gt;</a>
             </dt>
             <dd>Base class for linear form integrators.</dd>
@@ -166,7 +166,7 @@
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a642521cadb1a8ac3a99efed89bc5cb0d">
-              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a>
+              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
             </dt>
             <dd>Constitutive law type.</dd>
             <dt id="afad784a376132f122234cf9dcdde118c">
@@ -174,15 +174,15 @@
             </dt>
             <dd>Test function type.</dd>
             <dt id="ac445b442c21ea71c53c90f799b23ae3c">
-              using <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc-self">StateType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a>
+              using <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc-self">StateType</a> = DisplacementType
             </dt>
             <dd>Current displacement state type.</dd>
             <dt id="a265d5d1fa6112b86444b719cf45f5aa1">
-              using <a href="#a265d5d1fa6112b86444b719cf45f5aa1" class="m-doc-self">TestFESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&gt;::FESType
+              using <a href="#a265d5d1fa6112b86444b719cf45f5aa1" class="m-doc-self">TestFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&gt;::FESType
             </dt>
             <dd>Test finite element space type.</dd>
             <dt id="ae6311ea478e5e374583b826ab0607d73">
-              using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
+              using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
             </dt>
             <dd>State finite element space type.</dd>
           </dl>
@@ -191,13 +191,13 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a8ff892e6a97e2cd1f444502705c77b5f" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a>&amp; law,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8ff892e6a97e2cd1f444502705c77b5f" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
             <dd>Constructs the pure-displacement momentum residual integrator.</dd>
             <dt id="afd8a13590d46ad921f2ee16a9b0910b3">
-              <span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -206,11 +206,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Rebinds the displacement linearization point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Sets the quadrature order.</dd>
             <dt>
@@ -218,15 +218,15 @@
             </dt>
             <dd>Sets an auxiliary constitutive input callback.</dd>
             <dt id="a683931e0bacbe29e7e4948b74bd68618">
-              <span class="m-doc-wrap-bumper">auto <a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Sets the current polytope and assembles the element residual.</dd>
             <dt id="a804c6a07f8876572c654f955d09a107c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the current element residual vector.</dd>
             <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the current polytope.</dd>
             <dt id="aba6371885ea424dd84df03d85fcb0706">
@@ -238,7 +238,7 @@
             </dt>
             <dd>Polymorphically copies this residual integrator.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Returns the stored constitutive law.</dd>
           </dl>
@@ -248,11 +248,11 @@
           <section class="m-doc-details" id="a8ff892e6a97e2cd1f444502705c77b5f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _3&gt;
+                template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;_1, TestFunctionType, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff892e6a97e2cd1f444502705c77b5f" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a>&amp; law,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff892e6a97e2cd1f444502705c77b5f" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
             </h3>
             <p>Constructs the pure-displacement momentum residual integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,9 +278,9 @@
           <section class="m-doc-details" id="a36cda0db261dd8cc77beb36ea7205c24"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _3&gt;
+                template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;_1, TestFunctionType, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
             </h3>
             <p>Rebinds the displacement linearization point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -304,9 +304,9 @@
           <section class="m-doc-details" id="a2bc18acb1094021b8f3ffdd2edc92963"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _3&gt;
+                template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;_1, TestFunctionType, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> order)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bc18acb1094021b8f3ffdd2edc92963" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
             </h3>
             <p>Sets the quadrature order.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -330,9 +330,9 @@
           <section class="m-doc-details" id="aec0dbba8d91464eb39f789a780a50dce"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LawDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _3&gt;
+                template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;_1, TestFunctionType, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
             </h3>
             <p>Sets an auxiliary constitutive input callback.</p>
             <table class="m-table m-fullwidth m-flat">

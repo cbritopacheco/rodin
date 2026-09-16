@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Variational::Sum&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Type traits for <code>Sum</code> over a function expression: exposes the left-hand side operand and the right-hand side operand.</p>
@@ -95,11 +95,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a248bffb63539dd043d9dd79930d88e50">
-              using <a href="#a248bffb63539dd043d9dd79930d88e50" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;
+              using <a href="#a248bffb63539dd043d9dd79930d88e50" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;LHSDerived&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="abdff5fe9b769a1c40e39184fe36e369a">
-              using <a href="#abdff5fe9b769a1c40e39184fe36e369a" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;
+              using <a href="#abdff5fe9b769a1c40e39184fe36e369a" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;RHSDerived&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
           </dl>

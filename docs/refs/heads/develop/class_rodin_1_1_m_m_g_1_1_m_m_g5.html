@@ -117,7 +117,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="ae6667ed0cdc09787425be26a540172de">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> <a href="#ae6667ed0cdc09787425be26a540172de" class="m-doc-self">sMeshVersionFormatted</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static int <a href="#ae6667ed0cdc09787425be26a540172de" class="m-doc-self">sMeshVersionFormatted</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>MMG mesh version tag used in generated MMG mesh objects.</dd>
           </dl>
@@ -126,61 +126,61 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ab9bb517cd6d646592ab60cf5b7d450d4" class="m-doc">createMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> version,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dim,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; spaceDim = {}) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ab9bb517cd6d646592ab60cf5b7d450d4" class="m-doc">createMesh</a>(</span><span class="m-doc-wrap">size_t version,
+              size_t dim,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; spaceDim = {}) -&gt; MMG5_pMesh</span>
             </dt>
             <dd>Allocates and initializes an MMG mesh object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a0954c0dbf0d744cf8d3be5641173c185" class="m-doc">copyMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> src,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> dst) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#a0954c0dbf0d744cf8d3be5641173c185" class="m-doc">copyMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src,
+              MMG5_pMesh dst)</span>
             </dt>
             <dd>Copies source mesh to a destination mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a378ed49847c971e53116e33195f3a42c" class="m-doc">isSurfaceMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a378ed49847c971e53116e33195f3a42c" class="m-doc">isSurfaceMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh mesh) -&gt; bool</span>
             </dt>
             <dd>Determines if a mesh is surface or not.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a5bded16ea18dc87c86cb1b1c1bc3fdc5" class="m-doc">destroyMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#a5bded16ea18dc87c86cb1b1c1bc3fdc5" class="m-doc">destroyMesh</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh)</span>
             </dt>
             <dd>Destroys the mesh object and frees the allocated memory.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc">rodinToMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc">rodinToMesh</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src) -&gt; MMG5_pMesh</span>
             </dt>
             <dd>Converts a Rodin local mesh to a native MMG mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">meshToRodin</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> src) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
             <dd>Converts a native MMG mesh to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a06cb29d3f77dc8acda9887609000476b" class="m-doc">createSolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a06cb29d3f77dc8acda9887609000476b" class="m-doc">createSolution</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh,
+              size_t vdim) -&gt; MMG5_pSol</span>
             </dt>
             <dd>Constructs a solution and allocates space for it.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a1ef51aa345e4d15c90c74c01a5250c8a" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> src,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> dst) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#a1ef51aa345e4d15c90c74c01a5250c8a" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap">const MMG5_pSol src,
+              MMG5_pSol dst)</span>
             </dt>
             <dd>Deep-copies an MMG solution.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a36251842eb23f4ecc46dc1d1114ce55f" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> src,
-              <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;&amp; dst) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a36251842eb23f4ecc46dc1d1114ce55f" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap">const MMG5_pSol src,
+              <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; dst)</span>
             </dt>
             <dd>Copies values from MMG solution to Rodin MMG grid function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a4aa91925305a7555c662ae9a5197469e" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;&amp; src,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> dst) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a4aa91925305a7555c662ae9a5197469e" class="m-doc">copySolution</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; src,
+              MMG5_pSol dst)</span>
             </dt>
             <dd>Copies values from Rodin MMG grid function to MMG solution.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#adc10b88a081a86571f71c3ee0433c791" class="m-doc">swapSolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> b) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#adc10b88a081a86571f71c3ee0433c791" class="m-doc">swapSolution</a>(</span><span class="m-doc-wrap">MMG5_pSol a,
+              MMG5_pSol b)</span>
             </dt>
             <dd>Swaps the data between two instances of type MMG5_pSol.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#aba26af6c43d3b4638aa99e6e65ded72c" class="m-doc">destroySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> sol) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#aba26af6c43d3b4638aa99e6e65ded72c" class="m-doc">destroySolution</a>(</span><span class="m-doc-wrap">MMG5_pSol sol)</span>
             </dt>
             <dd>Destroys and frees the allocated memory for a MMG5_pSol object.</dd>
           </dl>
@@ -198,7 +198,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a91380c28afae44b1263659237621b60c" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> b = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">true</a>) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a91380c28afae44b1263659237621b60c" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
             <dd>Enables/disables ridge angle detection.</dd>
             <dt>
@@ -223,7 +223,7 @@
           <h2><a href="#pro-methods">Protected functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afb5c3ccd7f6e8748cd36345967656fdf" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afb5c3ccd7f6e8748cd36345967656fdf" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
             <dd>Applies configured remeshing parameters to an MMG mesh.</dd>
           </dl>
@@ -232,9 +232,9 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ab9bb517cd6d646592ab60cf5b7d450d4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bb517cd6d646592ab60cf5b7d450d4" class="m-doc-self">createMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> version,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dim,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; spaceDim = {})</span></span>
+              <span class="m-doc-wrap-bumper">static MMG5_pMesh Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bb517cd6d646592ab60cf5b7d450d4" class="m-doc-self">createMesh</a>(</span><span class="m-doc-wrap">size_t version,
+              size_t dim,
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; spaceDim = {})</span></span>
             </h3>
             <p>Allocates and initializes an MMG mesh object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -265,8 +265,8 @@
           </div></section>
           <section class="m-doc-details" id="a0954c0dbf0d744cf8d3be5641173c185"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0954c0dbf0d744cf8d3be5641173c185" class="m-doc-self">copyMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> src,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> dst)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0954c0dbf0d744cf8d3be5641173c185" class="m-doc-self">copyMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src,
+              MMG5_pMesh dst)</span></span>
             </h3>
             <p>Copies source mesh to a destination mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -288,7 +288,7 @@
           </div></section>
           <section class="m-doc-details" id="a378ed49847c971e53116e33195f3a42c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a378ed49847c971e53116e33195f3a42c" class="m-doc-self">isSurfaceMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh)</span></span>
+              <span class="m-doc-wrap-bumper">static bool Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a378ed49847c971e53116e33195f3a42c" class="m-doc-self">isSurfaceMesh</a>(</span><span class="m-doc-wrap">const MMG5_pMesh mesh)</span></span>
             </h3>
             <p>Determines if a mesh is surface or not.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -311,7 +311,7 @@
           </div></section>
           <section class="m-doc-details" id="a5bded16ea18dc87c86cb1b1c1bc3fdc5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bded16ea18dc87c86cb1b1c1bc3fdc5" class="m-doc-self">destroyMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bded16ea18dc87c86cb1b1c1bc3fdc5" class="m-doc-self">destroyMesh</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh)</span></span>
             </h3>
             <p>Destroys the mesh object and frees the allocated memory.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -328,7 +328,7 @@
           </div></section>
           <section class="m-doc-details" id="ab9bd883b7f95228226fd6f267d044287"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc-self">rodinToMesh</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src)</span></span>
+              <span class="m-doc-wrap-bumper">static MMG5_pMesh Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc-self">rodinToMesh</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src)</span></span>
             </h3>
             <p>Converts a Rodin local mesh to a native MMG mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -352,7 +352,7 @@
           </div></section>
           <section class="m-doc-details" id="a417246fbd6a72f45ccc4274a5e6f981c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc-self">meshToRodin</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> src)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc-self">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src)</span></span>
             </h3>
             <p>Converts a native MMG mesh to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -375,8 +375,8 @@
           </div></section>
           <section class="m-doc-details" id="a06cb29d3f77dc8acda9887609000476b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06cb29d3f77dc8acda9887609000476b" class="m-doc-self">createSolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim)</span></span>
+              <span class="m-doc-wrap-bumper">static MMG5_pSol Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06cb29d3f77dc8acda9887609000476b" class="m-doc-self">createSolution</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh,
+              size_t vdim)</span></span>
             </h3>
             <p>Constructs a solution and allocates space for it.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -403,8 +403,8 @@
           </div></section>
           <section class="m-doc-details" id="a1ef51aa345e4d15c90c74c01a5250c8a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ef51aa345e4d15c90c74c01a5250c8a" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> src,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> dst)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ef51aa345e4d15c90c74c01a5250c8a" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap">const MMG5_pSol src,
+              MMG5_pSol dst)</span></span>
             </h3>
             <p>Deep-copies an MMG solution.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -426,19 +426,28 @@
           <section class="m-doc-details" id="a36251842eb23f4ecc46dc1d1114ce55f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;
+                template&lt;class Range&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36251842eb23f4ecc46dc1d1114ce55f" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> src,
-              <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;&amp; dst)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36251842eb23f4ecc46dc1d1114ce55f" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap">const MMG5_pSol src,
+              <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; dst)</span></span>
             </h3>
             <p>Copies values from MMG solution to Rodin MMG grid function.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Range</td>
+                  <td>Grid function range type (<code>Real</code> or <code>Math::Vector&lt;Real&gt;</code>).</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">src&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>src&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Source MMG solution.</td>
                 </tr>
                 <tr>
@@ -452,19 +461,28 @@
           <section class="m-doc-details" id="a4aa91925305a7555c662ae9a5197469e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;
+                template&lt;class Range&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4aa91925305a7555c662ae9a5197469e" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>&gt;&amp; src,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> dst)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4aa91925305a7555c662ae9a5197469e" class="m-doc-self">copySolution</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">MMG::<wbr />GridFunction</a>&lt;Range&gt;&amp; src,
+              MMG5_pSol dst)</span></span>
             </h3>
             <p>Copies values from Rodin MMG grid function to MMG solution.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Range</td>
+                  <td>Grid function range type (<code>Real</code> or <code>Math::Vector&lt;Real&gt;</code>).</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">src&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>src&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Source grid function.</td>
                 </tr>
                 <tr>
@@ -477,8 +495,8 @@
           </div></section>
           <section class="m-doc-details" id="adc10b88a081a86571f71c3ee0433c791"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc10b88a081a86571f71c3ee0433c791" class="m-doc-self">swapSolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> b)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc10b88a081a86571f71c3ee0433c791" class="m-doc-self">swapSolution</a>(</span><span class="m-doc-wrap">MMG5_pSol a,
+              MMG5_pSol b)</span></span>
             </h3>
             <p>Swaps the data between two instances of type MMG5_pSol.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -499,7 +517,7 @@
           </div></section>
           <section class="m-doc-details" id="aba26af6c43d3b4638aa99e6e65ded72c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba26af6c43d3b4638aa99e6e65ded72c" class="m-doc-self">destroySolution</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pSol</a> sol)</span></span>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba26af6c43d3b4638aa99e6e65ded72c" class="m-doc-self">destroySolution</a>(</span><span class="m-doc-wrap">MMG5_pSol sol)</span></span>
             </h3>
             <p>Destroys and frees the allocated memory for a MMG5_pSol object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -516,7 +534,7 @@
           </div></section>
           <section class="m-doc-details" id="a91380c28afae44b1263659237621b60c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91380c28afae44b1263659237621b60c" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> b = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">true</a>)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91380c28afae44b1263659237621b60c" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
             </h3>
             <p>Enables/disables ridge angle detection.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -701,7 +719,7 @@ $ e_2 $
           </div></section>
           <section class="m-doc-details" id="afb5c3ccd7f6e8748cd36345967656fdf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb5c3ccd7f6e8748cd36345967656fdf" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MMG5_<wbr />pMesh</a> mesh) <span class="m-label m-warning">protected</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb5c3ccd7f6e8748cd36345967656fdf" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh) <span class="m-label m-warning">protected</span></span></span>
             </h3>
             <p>Applies configured remeshing parameters to an MMG mesh.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -95,8 +95,8 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Object&gt;</div>
-              using <a href="#abd1e4ffc99a08805a7cc60692fd0576c" class="m-doc">Type</a> = MPI&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, Object&gt;
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Object&gt;</div>
+              using <a href="#abd1e4ffc99a08805a7cc60692fd0576c" class="m-doc">Type</a> = MPI&lt;LinearAlgebraType, Object&gt;
             </dt>
             <dd>Assembly-backend selector for fully MPI-distributed assembly.</dd>
           </dl>
@@ -107,9 +107,9 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Object&gt;
+                template&lt;class LinearAlgebraType, class Object&gt;
               </div>
-              using Rodin::<wbr />Assembly::<wbr />Default&lt;Context::<wbr />MPI, Context::<wbr />MPI&gt;::<wbr /><a href="#abd1e4ffc99a08805a7cc60692fd0576c" class="m-doc-self">Type</a> = MPI&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, Object&gt;
+              using Rodin::<wbr />Assembly::<wbr />Default&lt;Context::<wbr />MPI, Context::<wbr />MPI&gt;::<wbr /><a href="#abd1e4ffc99a08805a7cc60692fd0576c" class="m-doc-self">Type</a> = MPI&lt;LinearAlgebraType, Object&gt;
             </h3>
             <p>Assembly-backend selector for fully MPI-distributed assembly.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -118,7 +118,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">Object</td>
+                  <td style="width: 1%">LinearAlgebraType</td>
+                  <td>Backend linear-algebra container type.</td>
+                </tr>
+                <tr>
+                  <td>Object</td>
                   <td>Assembly operand type.</td>
                 </tr>
               </tbody>

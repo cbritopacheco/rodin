@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_random_integer_8h.html">&lt;Rodin/Test/Random/RandomInteger.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+          <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_test.html">Test</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_test_1_1_random.html">Random</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_test_1_1_random_1_1detail.html">detail</a>::<wbr/></span>UniformIntDistType <span class="m-thin">struct</span>
         </h1>
         <p>Maps integral types to a distribution-compatible type.</p>
@@ -106,7 +106,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a63e88619806b29e39d24841e153cc581">
-              using <a href="#a63e88619806b29e39d24841e153cc581" class="m-doc-self">type</a> = std::conditional_t&lt;std::is_same_v&lt;T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>&gt;||std::is_same_v&lt;T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">signed</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>&gt;||std::is_same_v&lt;T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>&gt;, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>, T&gt;
+              using <a href="#a63e88619806b29e39d24841e153cc581" class="m-doc-self">type</a> = std::conditional_t&lt;std::is_same_v&lt;T, char&gt;||std::is_same_v&lt;T, signed char&gt;||std::is_same_v&lt;T, unsigned char&gt;, int, T&gt;
             </dt>
             <dd>Integral type accepted by std::uniform_int_distribution.</dd>
           </dl>

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_newton_raphson_8h.html">&lt;Rodin/Math/RootFinding/NewtonRaphson.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math_1_1_root_finding.html">RootFinding</a>::<wbr/></span>NewtonRaphson <span class="m-thin">class</span>
         </h1>
         <p>Newton-Raphson method for finding roots of scalar equations.</p>
@@ -281,9 +281,9 @@ $ |b - a| &lt; \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad1d7dd252ccdeb8f73ad816ae3aa9115" class="m-doc">NewtonRaphson</a>(</span><span class="m-doc-wrap">Scalar absTTol = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-12,
-              Scalar relTTol = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-9,
-              Scalar absGTol = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-12,
+              <span class="m-doc-wrap-bumper"><a href="#ad1d7dd252ccdeb8f73ad816ae3aa9115" class="m-doc">NewtonRaphson</a>(</span><span class="m-doc-wrap">Scalar absTTol = 1e-12,
+              Scalar relTTol = 1e-9,
+              Scalar absGTol = 1e-12,
               std::size_t maxIter = 25)</span>
             </dt>
             <dd>Constructs a Newton-Raphson solver with specified tolerances.</dd>
@@ -293,8 +293,8 @@ $ |b - a| &lt; \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> F&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6fcb93dc515c33a059e12922af0352ac" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> F&amp; f,
+              <div class="m-doc-template">template&lt;class F&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6fcb93dc515c33a059e12922af0352ac" class="m-doc">solve</a>(</span><span class="m-doc-wrap">const F&amp; f,
               Scalar t0,
               Scalar lo,
               Scalar hi) const -&gt; std::optional&lt;Scalar&gt;</span>
@@ -307,11 +307,11 @@ $ |b - a| &lt; \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| $
           <section class="m-doc-details" id="ad1d7dd252ccdeb8f73ad816ae3aa9115"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />RootFinding::<wbr />NewtonRaphson&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1d7dd252ccdeb8f73ad816ae3aa9115" class="m-doc-self">NewtonRaphson</a>(</span><span class="m-doc-wrap">Scalar absTTol = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-12,
-              Scalar relTTol = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-9,
-              Scalar absGTol = 1<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">e</a>-12,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />RootFinding::<wbr />NewtonRaphson&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1d7dd252ccdeb8f73ad816ae3aa9115" class="m-doc-self">NewtonRaphson</a>(</span><span class="m-doc-wrap">Scalar absTTol = 1e-12,
+              Scalar relTTol = 1e-9,
+              Scalar absGTol = 1e-12,
               std::size_t maxIter = 25)</span></span>
             </h3>
             <p>Constructs a Newton-Raphson solver with specified tolerances.</p>
@@ -394,10 +394,10 @@ $ 10^{-12} $
           <section class="m-doc-details" id="a6fcb93dc515c33a059e12922af0352ac"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> F&gt;
+                template&lt;class Scalar&gt;
+                template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::optional&lt;Scalar&gt; Rodin::<wbr />Math::<wbr />RootFinding::<wbr />NewtonRaphson&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6fcb93dc515c33a059e12922af0352ac" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> F&amp; f,
+              <span class="m-doc-wrap-bumper">std::optional&lt;Scalar&gt; Rodin::<wbr />Math::<wbr />RootFinding::<wbr />NewtonRaphson&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6fcb93dc515c33a059e12922af0352ac" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">const F&amp; f,
               Scalar t0,
               Scalar lo,
               Scalar hi) const</span></span>

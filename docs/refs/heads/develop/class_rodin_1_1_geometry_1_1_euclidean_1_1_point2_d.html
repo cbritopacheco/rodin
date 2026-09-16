@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_point2_d_8h.html">&lt;Rodin/Geometry/Euclidean/Point2D.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+          <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a>::<wbr/></span>Point2D <span class="m-thin">class</span>
         </h1>
         <p>Point in 2D Euclidean space.</p>
@@ -131,7 +131,7 @@ $ p = (x, y) $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base&lt;Point2D&lt;T&gt;, T&gt;</a>
             </dt>
             <dd>Base class for Euclidean geometric objects using CRTP.</dd>
@@ -145,19 +145,19 @@ $ p = (x, y) $
             </dt>
             <dd>Gets mutable reference to underlying Eigen vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e12ca94f3c804502eeae742c3bad362" class="m-doc">asVector</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Eigen::Vector2&lt;T&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e12ca94f3c804502eeae742c3bad362" class="m-doc">asVector</a>(</span><span class="m-doc-wrap">) const -&gt; const Eigen::Vector2&lt;T&gt;&amp;</span>
             </dt>
             <dd>Gets const reference to underlying Eigen vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a69fec826303dedfdc0ac65f761eb836f" class="m-doc">connect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a69fec826303dedfdc0ac65f761eb836f" class="m-doc">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the line segment connecting this point to another.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6e53d842cdf87dd080b619f111ae9db" class="m-doc">connect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6e53d842cdf87dd080b619f111ae9db" class="m-doc">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the line segment connecting this point to nearest point on a line.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad68a72db7eadee8b4ab13d5cfbb47856" class="m-doc">connect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad68a72db7eadee8b4ab13d5cfbb47856" class="m-doc">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Computes the line segment connecting this point to nearest point on a circle.</dd>
           </dl>
@@ -167,7 +167,7 @@ $ p = (x, y) $
           <section class="m-doc-details" id="a1c0f1ff0adf04989ac31283b5519df1d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper">Eigen::Vector2&lt;T&gt;&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c0f1ff0adf04989ac31283b5519df1d" class="m-doc-self">asVector</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
@@ -184,9 +184,9 @@ $ p = (x, y) $
           <section class="m-doc-details" id="a3e12ca94f3c804502eeae742c3bad362"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Eigen::Vector2&lt;T&gt;&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e12ca94f3c804502eeae742c3bad362" class="m-doc-self">asVector</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const Eigen::Vector2&lt;T&gt;&amp; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e12ca94f3c804502eeae742c3bad362" class="m-doc-self">asVector</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets const reference to underlying Eigen vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,9 +201,9 @@ $ p = (x, y) $
           <section class="m-doc-details" id="a69fec826303dedfdc0ac65f761eb836f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69fec826303dedfdc0ac65f761eb836f" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69fec826303dedfdc0ac65f761eb836f" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the line segment connecting this point to another.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -238,9 +238,9 @@ $ p = (x, y) $
           <section class="m-doc-details" id="ad6e53d842cdf87dd080b619f111ae9db"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6e53d842cdf87dd080b619f111ae9db" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6e53d842cdf87dd080b619f111ae9db" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the line segment connecting this point to nearest point on a line.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -275,9 +275,9 @@ $ p = (x, y) $
           <section class="m-doc-details" id="ad68a72db7eadee8b4ab13d5cfbb47856"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad68a72db7eadee8b4ab13d5cfbb47856" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a>&lt;T&gt;&gt; Rodin::<wbr />Geometry::<wbr />Euclidean::<wbr />Point2D&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad68a72db7eadee8b4ab13d5cfbb47856" class="m-doc-self">connect</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>&lt;T&gt;&amp; other) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Computes the line segment connecting this point to nearest point on a circle.</p>
             <table class="m-table m-fullwidth m-flat">

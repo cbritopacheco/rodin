@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_bilinear_form_8h.html">&lt;Rodin/Variational/BilinearForm.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Operator&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BilinearFormBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for bilinear form representations.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Operator</td>
+              <td>Matrix type for the discrete representation</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,6 +101,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -365,11 +377,11 @@ $ U_h $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a87b353c8b857eb96ad6f07a3c63bceb9">
-              using <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a>
+              using <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc-self">OperatorType</a> = Operator
             </dt>
             <dd>Matrix operator type for the discrete representation.</dd>
             <dt id="a867f717a0cd50cd2265d843075f1cc70">
-              using <a href="#a867f717a0cd50cd2265d843075f1cc70" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;::ScalarType
+              using <a href="#a867f717a0cd50cd2265d843075f1cc70" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type for matrix entries.</dd>
             <dt id="a02f58f805c9cd09c1326a38fcb96f441">
@@ -394,83 +406,88 @@ $ U_h $
             <dd>List of global bilinear form integrators.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a880ffe4823080118f27e64ee4d14acd1" class="m-doc">BilinearFormBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Default constructor creating an empty bilinear form.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a75c0fcb8eae4ebe44f38f0ef91de63ec" class="m-doc">BilinearFormBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#accf50b49d4a08b53de25865b91b658c7" class="m-doc">BilinearFormBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a880ffe4823080118f27e64ee4d14acd1" class="m-doc">BilinearFormBase</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Default constructor creating an empty bilinear form.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a75c0fcb8eae4ebe44f38f0ef91de63ec" class="m-doc">BilinearFormBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#accf50b49d4a08b53de25865b91b658c7" class="m-doc">BilinearFormBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aca06332b1b02d20959c72780b2bf13dc" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca06332b1b02d20959c72780b2bf13dc" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3f280312550cd5355849fdbc7648c960" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f280312550cd5355849fdbc7648c960" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f42efd80a3cd60078ed0ad4e007bf77" class="m-doc">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f42efd80a3cd60078ed0ad4e007bf77" class="m-doc">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the list of local integrators.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5e4fad8a99524a0ca4e3849994c0d751" class="m-doc">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5e4fad8a99524a0ca4e3849994c0d751" class="m-doc">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the list of local integrators (const version).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a73d2eb65615f3a38bab79ce66191af11" class="m-doc">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a73d2eb65615f3a38bab79ce66191af11" class="m-doc">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the list of global integrators.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a55b436df62c240fe1802dbf6926d3a8a" class="m-doc">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55b436df62c240fe1802dbf6926d3a8a" class="m-doc">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the list of global integrators (const version).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aedcb5797489b052a022f7db68e412545" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aedcb5797489b052a022f7db68e412545" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Builds the bilinear form the given bilinear integrator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adb8bef35df22bf5170e5d18ab000163e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adb8bef35df22bf5170e5d18ab000163e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Replaces the local integrator list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f7813aa8c85c1778e4282c2143b2994" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f7813aa8c85c1778e4282c2143b2994" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Adds a bilinear integrator to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aeaf14c35ddabd6be3d4c5da3de4747c2" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeaf14c35ddabd6be3d4c5da3de4747c2" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Adds local bilinear integrators to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a04a44e88932b2d4369ef0671686fe599" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a04a44e88932b2d4369ef0671686fe599" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Adds a bilinear integrator to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a21a5eb361998b2b14409911e0cab42aa" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a21a5eb361998b2b14409911e0cab42aa" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Adds global bilinear integrators to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a41cd1fc80c71c3d9b76d02a64fa5d95a" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a41cd1fc80c71c3d9b76d02a64fa5d95a" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Adds a bilinear integrator to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad2d8b6b54fd3ffce4d485ab03bf9a043" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2d8b6b54fd3ffce4d485ab03bf9a043" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Subtracts local bilinear integrators from the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae04fe93a37824415faeae24ba548e43a" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae04fe93a37824415faeae24ba548e43a" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Adds a bilinear integrator to the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8e22f6e7bc9f90fd1fbfdcc9210619d3" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8e22f6e7bc9f90fd1fbfdcc9210619d3" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;</span>
             </dt>
             <dd>Subtracts global bilinear integrators from the bilinear form.</dd>
             <dt id="adba37aefa6b3599b36f6ee13093e4e98">
@@ -478,19 +495,19 @@ $ U_h $
             </dt>
             <dd>Gets the reference to the associated operator of the bilinear form.</dd>
             <dt id="af207030cc7d8c2fb84fe9deff6cf88b2">
-              <span class="m-doc-wrap-bumper">auto <a href="#af207030cc7d8c2fb84fe9deff6cf88b2" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af207030cc7d8c2fb84fe9deff6cf88b2" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets a constant reference to the associated operator of the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9ecdec85d47f06f7905e256139d3f72c" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ecdec85d47f06f7905e256139d3f72c" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the associated TrialFunction object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the associated TestFunction object.</dd>
             <dt>
@@ -504,9 +521,9 @@ $ U_h $
           <section class="m-doc-details" id="a880ffe4823080118f27e64ee4d14acd1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a880ffe4823080118f27e64ee4d14acd1" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a880ffe4823080118f27e64ee4d14acd1" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Default constructor creating an empty bilinear form.</p>
 <p>Constructs a bilinear form with no integrators. Integrators must be added separately to define the bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
@@ -534,9 +551,9 @@ $ a(u,v) $
           <section class="m-doc-details" id="a75c0fcb8eae4ebe44f38f0ef91de63ec"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75c0fcb8eae4ebe44f38f0ef91de63ec" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75c0fcb8eae4ebe44f38f0ef91de63ec" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -555,9 +572,9 @@ $ a(u,v) $
           <section class="m-doc-details" id="accf50b49d4a08b53de25865b91b658c7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#accf50b49d4a08b53de25865b91b658c7" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#accf50b49d4a08b53de25865b91b658c7" class="m-doc-self">BilinearFormBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -575,9 +592,9 @@ $ a(u,v) $
           <section class="m-doc-details" id="aca06332b1b02d20959c72780b2bf13dc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca06332b1b02d20959c72780b2bf13dc" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca06332b1b02d20959c72780b2bf13dc" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -601,9 +618,9 @@ $ a(u,v) $
           <section class="m-doc-details" id="a3f280312550cd5355849fdbc7648c960"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f280312550cd5355849fdbc7648c960" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f280312550cd5355849fdbc7648c960" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -627,9 +644,9 @@ $ a(u,v) $
           <section class="m-doc-details" id="a4f42efd80a3cd60078ed0ad4e007bf77"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f42efd80a3cd60078ed0ad4e007bf77" class="m-doc-self">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f42efd80a3cd60078ed0ad4e007bf77" class="m-doc-self">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the list of local integrators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -699,9 +716,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a5e4fad8a99524a0ca4e3849994c0d751"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e4fad8a99524a0ca4e3849994c0d751" class="m-doc-self">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e4fad8a99524a0ca4e3849994c0d751" class="m-doc-self">getLocalIntegrators</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the list of local integrators (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -716,9 +733,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a73d2eb65615f3a38bab79ce66191af11"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d2eb65615f3a38bab79ce66191af11" class="m-doc-self">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d2eb65615f3a38bab79ce66191af11" class="m-doc-self">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the list of global integrators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -734,9 +751,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a55b436df62c240fe1802dbf6926d3a8a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55b436df62c240fe1802dbf6926d3a8a" class="m-doc-self">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55b436df62c240fe1802dbf6926d3a8a" class="m-doc-self">getGlobalIntegrators</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the list of global integrators (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -751,9 +768,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="aedcb5797489b052a022f7db68e412545"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedcb5797489b052a022f7db68e412545" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedcb5797489b052a022f7db68e412545" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
             </h3>
             <p>Builds the bilinear form the given bilinear integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -777,9 +794,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="adb8bef35df22bf5170e5d18ab000163e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb8bef35df22bf5170e5d18ab000163e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb8bef35df22bf5170e5d18ab000163e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfi)</span></span>
             </h3>
             <p>Replaces the local integrator list.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -803,9 +820,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a4f7813aa8c85c1778e4282c2143b2994"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f7813aa8c85c1778e4282c2143b2994" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f7813aa8c85c1778e4282c2143b2994" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
             </h3>
             <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -820,9 +837,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="aeaf14c35ddabd6be3d4c5da3de4747c2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeaf14c35ddabd6be3d4c5da3de4747c2" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeaf14c35ddabd6be3d4c5da3de4747c2" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
             </h3>
             <p>Adds local bilinear integrators to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -846,9 +863,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a04a44e88932b2d4369ef0671686fe599"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04a44e88932b2d4369ef0671686fe599" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04a44e88932b2d4369ef0671686fe599" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
             </h3>
             <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -863,9 +880,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a21a5eb361998b2b14409911e0cab42aa"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21a5eb361998b2b14409911e0cab42aa" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21a5eb361998b2b14409911e0cab42aa" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
             </h3>
             <p>Adds global bilinear integrators to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -889,9 +906,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a41cd1fc80c71c3d9b76d02a64fa5d95a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41cd1fc80c71c3d9b76d02a64fa5d95a" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41cd1fc80c71c3d9b76d02a64fa5d95a" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5de9e76969c60ae98bcf9a7e92a58c33" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
             </h3>
             <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -906,9 +923,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="ad2d8b6b54fd3ffce4d485ab03bf9a043"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2d8b6b54fd3ffce4d485ab03bf9a043" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2d8b6b54fd3ffce4d485ab03bf9a043" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
             </h3>
             <p>Subtracts local bilinear integrators from the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -932,9 +949,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="ae04fe93a37824415faeae24ba548e43a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae04fe93a37824415faeae24ba548e43a" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae04fe93a37824415faeae24ba548e43a" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a9340eebd2961165969a383d28518c22b" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&amp; bfi)</span></span>
             </h3>
             <p>Adds a bilinear integrator to the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -949,9 +966,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a8e22f6e7bc9f90fd1fbfdcc9210619d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e22f6e7bc9f90fd1fbfdcc9210619d3" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e22f6e7bc9f90fd1fbfdcc9210619d3" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a>&amp; bfis)</span></span>
             </h3>
             <p>Subtracts global bilinear integrators from the bilinear form.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -975,9 +992,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the bilinear form.</p>
 <p>This method will assemble the underlying sparse matrix associated the bilinear form.</p><aside class="m-note m-default"><h4>See also</h4><p>getMatrix()</p></aside>
@@ -985,9 +1002,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a9ecdec85d47f06f7905e256139d3f72c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ecdec85d47f06f7905e256139d3f72c" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ecdec85d47f06f7905e256139d3f72c" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the reference to the associated TrialFunction object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1002,9 +1019,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="a3baa34c2dcc5e7ab4b1403d051a41b16"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the reference to the associated TestFunction object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1019,9 +1036,9 @@ $ A^K_{ij} = \int_K \text{integrand}(\phi_j, \psi_i) \, dx $
           <section class="m-doc-details" id="acd8ed87ef4efe52bc3071888c96ef2eb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Operator</a> _1&gt;
+                template&lt;class Operator&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd8ed87ef4efe52bc3071888c96ef2eb" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">BilinearFormBase</a>* Rodin::<wbr />Variational::<wbr />BilinearFormBase&lt;Operator&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd8ed87ef4efe52bc3071888c96ef2eb" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">

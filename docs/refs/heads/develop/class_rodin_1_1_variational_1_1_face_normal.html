@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Real, FaceNormal&gt;</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
@@ -129,11 +129,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc">FaceNormal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc">FaceNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs a face normal field on the given mesh.</dd>
             <dt id="a97322751da5f6260be773cb1c85e4a23">
-              <span class="m-doc-wrap-bumper"><a href="#a97322751da5f6260be773cb1c85e4a23" class="m-doc-self">FaceNormal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a97322751da5f6260be773cb1c85e4a23" class="m-doc-self">FaceNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a2ca008640021f308d583f7991b0b6462">
@@ -146,15 +146,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="aad8f738241426a32d95c3696395698d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the topological dimension.</dd>
             <dt id="af0e2923caa24f35613d3cc8427bdc6bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates the expression at a geometric point.</dd>
             <dt id="a050a84d717e56cf813ce6be3e4ae8aa7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt id="ae5f5b443e9f62be955639af23c8c2a0d">
@@ -167,7 +167,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="af86adaf4b84a67a4da54af6b21fe302c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FaceNormal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc-self">FaceNormal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FaceNormal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc-self">FaceNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a face normal field on the given mesh.</p>
             <table class="m-table m-fullwidth m-flat">

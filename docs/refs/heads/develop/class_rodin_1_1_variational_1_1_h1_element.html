@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1Element <span class="m-thin">class</span>
         </h1>
         <p>Degree k H1-conforming Lagrange element.</p>
@@ -391,7 +391,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;H1Element&lt;K, Scalar&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
@@ -430,7 +430,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a423ce505bd641d876992fd87242c6870" class="m-doc">getNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a423ce505bd641d876992fd87242c6870" class="m-doc">getNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; const std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;&amp;</span>
             </dt>
             <dd>Builds the high-order stable nodes for the element geometry.</dd>
           </dl>
@@ -446,55 +446,55 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
               <span class="m-doc-wrap-bumper"><a href="#acf54a44527db53b909aed772408e200b" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span>
             </dt>
             <dd>Constructs an H1 element for the specified geometry.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac35a35920d925f8e9fdea8ccd04d16cb" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a826350d81c53807eafab3f772428dd6e" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="ae76020b85c9b0040fe17e1a0255f6b09">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae76020b85c9b0040fe17e1a0255f6b09" class="m-doc-self">getTabulation</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_variational_1_1_h1_element_1_1_tabulation.html" class="m-doc">Tabulation</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae76020b85c9b0040fe17e1a0255f6b09" class="m-doc-self">getTabulation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const -&gt; const <a href="struct_rodin_1_1_variational_1_1_h1_element_1_1_tabulation.html" class="m-doc">Tabulation</a>&amp;</span>
             </dt>
             <dd>Tabulates the basis on a quadrature formula.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac35a35920d925f8e9fdea8ccd04d16cb" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a826350d81c53807eafab3f772428dd6e" class="m-doc">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1afcb3f7c592184e678d91c8a11d4588" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1afcb3f7c592184e678d91c8a11d4588" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a83acd376325dc2a868d0cb33daf3a53c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a83acd376325dc2a868d0cb33daf3a53c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of degrees of freedom in the finite element.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc">getNode</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc">getNode</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the spatial coordinates of the i-th Lagrange node.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acb564d84df1a6c5f029e33900c58b7bc" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acb564d84df1a6c5f029e33900c58b7bc" class="m-doc">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
             </dt>
             <dd>Gets the linear form (evaluation functional) for the i-th DOF.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac1960e06062772a20ff19201baaf0299" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac1960e06062772a20ff19201baaf0299" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;</span>
             </dt>
             <dd>Gets the i-th basis function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the total maximum polynomial order of the element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serializes the element (for boost::serialization).</dd>
           </dl>
@@ -504,9 +504,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a423ce505bd641d876992fd87242c6870"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a423ce505bd641d876992fd87242c6870" class="m-doc-self">getNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
+              <span class="m-doc-wrap-bumper">static const std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a423ce505bd641d876992fd87242c6870" class="m-doc-self">getNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
             </h3>
             <p>Builds the high-order stable nodes for the element geometry.</p>
 <p>Constructs the positions of DOF nodes based on the geometry type and polynomial degree. Uses:</p><ul><li>Segment: Gauss-Lobatto-Legendre (GLL) nodes on [0,1]</li><li>Quadrilateral: Tensor product of 1D GLL nodes</li><li>Triangle: Fekete nodes on reference triangle</li><li>Tetrahedron: Fekete nodes on reference tetrahedron</li><li>Wedge: Tensor product of triangle Fekete nodes with 1D GLL nodes</li></ul>
@@ -514,7 +514,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="acf54a44527db53b909aed772408e200b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf54a44527db53b909aed772408e200b" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span></span>
             </h3>
@@ -535,9 +535,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="ac35a35920d925f8e9fdea8ccd04d16cb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac35a35920d925f8e9fdea8ccd04d16cb" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac35a35920d925f8e9fdea8ccd04d16cb" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -555,9 +555,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a826350d81c53807eafab3f772428dd6e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a826350d81c53807eafab3f772428dd6e" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a826350d81c53807eafab3f772428dd6e" class="m-doc-self">H1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -575,9 +575,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a1afcb3f7c592184e678d91c8a11d4588"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1afcb3f7c592184e678d91c8a11d4588" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1afcb3f7c592184e678d91c8a11d4588" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -601,9 +601,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a83acd376325dc2a868d0cb33daf3a53c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83acd376325dc2a868d0cb33daf3a53c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83acd376325dc2a868d0cb33daf3a53c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -627,9 +627,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a44d43c17930cfe700de763b67a32fb7b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of degrees of freedom in the finite element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -645,9 +645,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a7802959bcdde2b8600942b7dfb450178"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the spatial coordinates of the i-th Lagrange node.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -672,9 +672,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="acb564d84df1a6c5f029e33900c58b7bc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb564d84df1a6c5f029e33900c58b7bc" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb564d84df1a6c5f029e33900c58b7bc" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Gets the linear form (evaluation functional) for the i-th DOF.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -698,9 +698,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="ac1960e06062772a20ff19201baaf0299"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1960e06062772a20ff19201baaf0299" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1960e06062772a20ff19201baaf0299" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Gets the i-th basis function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -725,9 +725,9 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a15b23d5374f96033b06313f150a05b96"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;size_t K, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the total maximum polynomial order of the element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -742,11 +742,11 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;
+                template&lt;size_t K, class Scalar&gt;
+                template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serializes the element (for boost::serialization).</p>
             <table class="m-table m-fullwidth m-flat">

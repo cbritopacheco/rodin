@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P1&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Vector-valued continuous piecewise linear Lagrange finite element space.</p>
@@ -269,7 +269,7 @@ $ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::Local&gt;, P1&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;&gt;</a>
             </dt>
             <dd>Represernts a finite element space.</dd>
@@ -279,12 +279,12 @@ $ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_f5dbbab1956c03f58d69a4e493fdcacb.html" class="m-doc">Pullback</a>
             </dt>
             <dd>Pullback of a vector-valued P1 function to the reference element.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_9dd71931b5eca0f35db8d3475956a8a9.html" class="m-doc">Pushforward</a>
             </dt>
             <dd>Pushforward of a vector-valued P1 function to the physical element.</dd>
@@ -318,12 +318,12 @@ $ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a7d4bbf3884916362f7dd9e4ed0926bd7">
-              <span class="m-doc-wrap-bumper"><a href="#a7d4bbf3884916362f7dd9e4ed0926bd7" class="m-doc-self">P1</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;&amp; mesh,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7d4bbf3884916362f7dd9e4ed0926bd7" class="m-doc-self">P1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;&amp; mesh,
+              size_t vdim)</span>
             </dt>
             <dd>Constructs the P1 from the given arguments.</dd>
             <dt id="ac799ba712893982e07099445c2ccb488">
-              <span class="m-doc-wrap-bumper"><a href="#ac799ba712893982e07099445c2ccb488" class="m-doc-self">P1</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac799ba712893982e07099445c2ccb488" class="m-doc-self">P1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="af55ccee7b0e8f6e10511169375fe7c94">
@@ -340,33 +340,33 @@ $ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j $
             </dt>
             <dd>Move assignment.</dd>
             <dt id="a1785079f91ec3a7cab97c249c26abb73">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1785079f91ec3a7cab97c249c26abb73" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1785079f91ec3a7cab97c249c26abb73" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&amp;</span>
             </dt>
             <dd>Copy assignment.</dd>
             <dt id="ae158db2d2017a069f2ede653e5110753">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a8182e341a289bdacff349b22551195ae" class="m-doc">ElementType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a8182e341a289bdacff349b22551195ae" class="m-doc">ElementType</a>&amp;</span>
             </dt>
             <dd>Gets the finite element attached to a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the total number of degrees of freedom.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the dimension of the range space, i.e. the number of components of each basis function.</dd>
             <dt id="a023a4642b6e40a2d6ea68a6bdbb096bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the underlying mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the global DOF indices attached to a given mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc">getGlobalIndex</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto <a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the global index for the local degree of freedom on the <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
@@ -389,23 +389,23 @@ $ (d, i) $
 </g>
 </svg>-polytope.</dd>
             <dt id="aa4c6deb5102cf131a1c5ede7203ac033">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&amp;&amp; v) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa4c6deb5102cf131a1c5ede7203ac033" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Gets the pullback of a callable on a polytope.</dd>
             <dt id="ade4ab4e2158c4401d86b57b14fced78f">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ade4ab4e2158c4401d86b57b14fced78f" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&amp;&amp; v) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade4ab4e2158c4401d86b57b14fced78f" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
+              Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Gets the pushforward of a callable on a polytope.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a75ab5d281112de8a83f589b883867ac3" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&amp;&amp; coefficient,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Coefficient&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a75ab5d281112de8a83f589b883867ac3" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
+              const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the vector expansion directly at reference coordinates.</dd>
           </dl>
@@ -415,9 +415,9 @@ $ (d, i) $
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the total number of degrees of freedom.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -432,9 +432,9 @@ $ (d, i) $
           <section class="m-doc-details" id="a1c88fa53fe90dcf92c359274842445e9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the dimension of the range space, i.e. the number of components of each basis function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -449,9 +449,9 @@ $ (d, i) $
           <section class="m-doc-details" id="adba1954ca59742b5304d71dcc0854c65"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Returns the global DOF indices attached to a given mesh entity.</p>
@@ -573,9 +573,9 @@ $ (d,i) $
           <section class="m-doc-details" id="a23c5e849f8cac22f9578b2ee39c17d9a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23c5e849f8cac22f9578b2ee39c17d9a" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> local) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the global index for the local degree of freedom on the <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
@@ -634,13 +634,13 @@ $ (d, i) $
           <section class="m-doc-details" id="a75ab5d281112de8a83f589b883867ac3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&gt;
+                template&lt;class Scalar&gt;
+                template&lt;class Coefficient&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75ab5d281112de8a83f589b883867ac3" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&amp;&amp; coefficient,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />P1&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75ab5d281112de8a83f589b883867ac3" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
+              const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the vector expansion directly at reference coordinates.</p>
 <p>Vector P1 uses a componentwise Lagrange map and therefore requires no range transformation after the structured local contraction.</p>

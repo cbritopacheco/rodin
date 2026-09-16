@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSNumber</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSNumber</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LHSNumber, class RHSNumber&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Variational::Sum&lt;Variational::LinearFormIntegratorBase&lt;LHSNumber&gt;, Variational::LinearFormIntegratorBase&lt;RHSNumber&gt;&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Type traits for <code>Sum</code> over linear form integrators: exposes the left-hand side operand, the right-hand side operand and the scalar type.</p>
@@ -95,11 +95,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a64392b269d5363a8c12a52e34f54018a">
-              using <a href="#a64392b269d5363a8c12a52e34f54018a" class="m-doc-self">LHSScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSNumber</a>
+              using <a href="#a64392b269d5363a8c12a52e34f54018a" class="m-doc-self">LHSScalarType</a> = LHSNumber
             </dt>
             <dd>Scalar type of the left-hand side operand.</dd>
             <dt id="a2cb39b7a17d9b6e427f1d62f3905f27b">
-              using <a href="#a2cb39b7a17d9b6e427f1d62f3905f27b" class="m-doc-self">RHSScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSNumber</a>
+              using <a href="#a2cb39b7a17d9b6e427f1d62f3905f27b" class="m-doc-self">RHSScalarType</a> = RHSNumber
             </dt>
             <dd>Scalar type of the right-hand side operand.</dd>
             <dt id="ac4cbb17db2e83c59d3517c104f2532e3">
@@ -111,7 +111,7 @@
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="adfd1710ae13547b5551e1168593c948a">
-              using <a href="#adfd1710ae13547b5551e1168593c948a" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">FormLanguage::<wbr />Sum</a>&lt;<a href="#a64392b269d5363a8c12a52e34f54018a" class="m-doc">LHSScalarType</a>, <a href="#a2cb39b7a17d9b6e427f1d62f3905f27b" class="m-doc">RHSScalarType</a>&gt;::Type
+              using <a href="#adfd1710ae13547b5551e1168593c948a" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">FormLanguage::<wbr />Sum</a>&lt;<a href="#a64392b269d5363a8c12a52e34f54018a" class="m-doc">LHSScalarType</a>, <a href="#a2cb39b7a17d9b6e427f1d62f3905f27b" class="m-doc">RHSScalarType</a>&gt;::Type
             </dt>
             <dd>Scalar value type.</dd>
           </dl>

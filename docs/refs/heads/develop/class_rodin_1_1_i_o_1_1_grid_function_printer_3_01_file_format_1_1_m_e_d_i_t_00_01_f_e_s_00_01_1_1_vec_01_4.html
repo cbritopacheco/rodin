@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_i_o_2_m_e_d_i_t_8h.html">&lt;Rodin/PETSc/IO/MEDIT.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionPrinter&lt;FileFormat::MEDIT, FES, ::Vec&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>MEDIT printer for PETSc-backed grid functions.</p>
@@ -109,7 +109,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MEDIT, FES, ::Vec&gt;</a>
             </dt>
             <dd>Base class for concrete grid function printers.</dd>
@@ -123,7 +123,7 @@
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
-              using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
+              using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
             </dt>
             <dd>PETSc vector data type (<code>Vec</code>).</dd>
             <dt id="a2839800c87bf3d6b2c3845d48bf9bb40">
@@ -131,19 +131,19 @@
             </dt>
             <dd>Parent printer base class.</dd>
             <dt id="a5c7fc1cee1343f294d68ab9388bbfe78">
-              using <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc-self">RangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::RangeType
+              using <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc-self">RangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the finite element space (scalar or vector).</dd>
             <dt id="ade2110a8617286e223033b2ec69b555f">
-              using <a href="#ade2110a8617286e223033b2ec69b555f" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&gt;::ScalarType
+              using <a href="#ade2110a8617286e223033b2ec69b555f" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type underlying the range (<code>PetscScalar</code>).</dd>
             <dt id="aa7cd28871381dd21a7b37b499ceaab39">
-              using <a href="#aa7cd28871381dd21a7b37b499ceaab39" class="m-doc-self">MeshType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::MeshType
+              using <a href="#aa7cd28871381dd21a7b37b499ceaab39" class="m-doc-self">MeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::MeshType
             </dt>
             <dd>Mesh type associated with the finite element space.</dd>
             <dt id="ac2191d2e396891cd7fe4bfbc88ce1b45">
-              using <a href="#ac2191d2e396891cd7fe4bfbc88ce1b45" class="m-doc-self">MeshContextType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa7cd28871381dd21a7b37b499ceaab39" class="m-doc">MeshType</a>&gt;::ContextType
+              using <a href="#ac2191d2e396891cd7fe4bfbc88ce1b45" class="m-doc-self">MeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa7cd28871381dd21a7b37b499ceaab39" class="m-doc">MeshType</a>&gt;::ContextType
             </dt>
             <dd>Context type (Local or MPI) of the mesh.</dd>
           </dl>
@@ -152,7 +152,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Writes PETSc-backed grid function coefficients in MEDIT order.</dd>
           </dl>
@@ -162,9 +162,9 @@
           <section class="m-doc-details" id="a19f24c6c7621a42c693c4c0b616ab387"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MEDIT, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MEDIT, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Writes PETSc-backed grid function coefficients in MEDIT order.</p>
             <table class="m-table m-fullwidth m-flat">

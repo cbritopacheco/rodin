@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_2_div_8h.html">&lt;Rodin/Variational/P0g/Div.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Type traits for <code>Div</code> over a shape function: exposes the finite element space, the shape function space, the scalar type and the operand type.</p>
@@ -104,7 +104,7 @@
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a07c119e496a9e6a80166f26a494667f8">
-              using <a href="#a07c119e496a9e6a80166f26a494667f8" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">Variational::<wbr />ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="#abe21d6b99a8a16ee741762f0dc5e8eb0" class="m-doc">FESType</a>, Space&gt;
+              using <a href="#a07c119e496a9e6a80166f26a494667f8" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">Variational::<wbr />ShapeFunction</a>&lt;NestedDerived, <a href="#abe21d6b99a8a16ee741762f0dc5e8eb0" class="m-doc">FESType</a>, Space&gt;
             </dt>
             <dd>Operand type.</dd>
           </dl>
@@ -113,7 +113,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="aa44c909b74459bc81764d827d3671ab2">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> <a href="#aa44c909b74459bc81764d827d3671ab2" class="m-doc-self">SpaceType</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> <a href="#aa44c909b74459bc81764d827d3671ab2" class="m-doc-self">SpaceType</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Shape function space the expression belongs to, trial or test.</dd>
           </dl>

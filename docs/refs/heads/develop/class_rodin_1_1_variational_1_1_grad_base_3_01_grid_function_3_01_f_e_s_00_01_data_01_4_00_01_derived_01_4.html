@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grad_8h.html">&lt;Rodin/Variational/Grad.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class FES, class Data, class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt; <span class="m-thin">class</span>
         </h1>
         <p>Gradient operator for grid functions.</p>
@@ -273,7 +273,7 @@ $ u_h = \sum_i u_i \phi_i $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;FormLanguage::Traits&lt;FES&gt;::ScalarType, GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&gt;</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
@@ -287,11 +287,11 @@ $ u_h = \sum_i u_i \phi_i $
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="ac404d01cfb7dd958afde5f42c1dcd72d">
-              using <a href="#ac404d01cfb7dd958afde5f42c1dcd72d" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">::<wbr />ScalarType</a>&gt;
+              using <a href="#ac404d01cfb7dd958afde5f42c1dcd72d" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">::<wbr />ScalarType</a>&gt;
             </dt>
             <dd>Type of the output range.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type for computations.</dd>
             <dt id="ae0445970d2d5087741c6518a1a7238d2">
@@ -303,7 +303,7 @@ $ u_h = \sum_i u_i \phi_i $
             </dt>
             <dd>Type of the operand (grid function)</dd>
             <dt id="a5aebcdb34a7273ec5648a3570a3cf387">
-              using <a href="#a5aebcdb34a7273ec5648a3570a3cf387" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;&gt;
+              using <a href="#a5aebcdb34a7273ec5648a3570a3cf387" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -312,11 +312,11 @@ $ u_h = \sum_i u_i \phi_i $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the gradient operator for a grid function.</dd>
             <dt id="a71792a7e938a0aaeb329c790c4fcc78e">
-              <span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="aebe31933f205e813f0c27741c4ffd8cd">
@@ -329,33 +329,33 @@ $ u_h = \sum_i u_i \phi_i $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the spatial dimension of the gradient.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a675b2ccd03bcb79217afc5d1c82becaa" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a675b2ccd03bcb79217afc5d1c82becaa" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a></span>
             </dt>
             <dd>Evaluates the gradient at a Point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab6be6544d9c0013a4c9fa68f31ac83a6" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab6be6544d9c0013a4c9fa68f31ac83a6" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a></span>
             </dt>
             <dd>Evaluates the gradient at an IntegrationPoint.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab37332aeb50920470a90d892d6a7e7e2" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab37332aeb50920470a90d892d6a7e7e2" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates the gradient at a point (to be overridden in derived class).</dd>
             <dt id="a366837fed872f0a5f04ddfe745ee5268">
-              <span class="m-doc-wrap-bumper">auto <a href="#a366837fed872f0a5f04ddfe745ee5268" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a366837fed872f0a5f04ddfe745ee5268" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand grid function.</dd>
             <dt id="a4349bdb4e5088cb0ef3b17f34f72958c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt id="a7e1bd519c3b0d0970378343f0fa5d10c">
@@ -369,9 +369,9 @@ $ u_h = \sum_i u_i \phi_i $
           <section class="m-doc-details" id="a7cf7b0c71702a67dc64cebf6d848787e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
             <p>Constructs the gradient operator for a grid function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -390,9 +390,9 @@ $ u_h = \sum_i u_i \phi_i $
           <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the spatial dimension of the gradient.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -436,9 +436,9 @@ $ \nabla u \in \mathbb{R}^d $
           <section class="m-doc-details" id="a675b2ccd03bcb79217afc5d1c82becaa"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a675b2ccd03bcb79217afc5d1c82becaa" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a675b2ccd03bcb79217afc5d1c82becaa" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the gradient at a Point.</p>
 <p>Resolves mesh ownership and dispatches to the derived class&#x27;s <code>interpolate</code>. Falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
@@ -446,9 +446,9 @@ $ \nabla u \in \mathbb{R}^d $
           <section class="m-doc-details" id="ab6be6544d9c0013a4c9fa68f31ac83a6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6be6544d9c0013a4c9fa68f31ac83a6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6be6544d9c0013a4c9fa68f31ac83a6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the gradient at an IntegrationPoint.</p>
 <p>If the polytope is owned by the FES mesh, dispatches to <code>interpolate(out, ip)</code>. Otherwise falls back to inclusion / submesh restriction.</p>
@@ -456,10 +456,10 @@ $ \nabla u \in \mathbb{R}^d $
           <section class="m-doc-details" id="ab37332aeb50920470a90d892d6a7e7e2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab37332aeb50920470a90d892d6a7e7e2" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab37332aeb50920470a90d892d6a7e7e2" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Interpolates the gradient at a point (to be overridden in derived class).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -482,9 +482,9 @@ $ \nabla u \in \mathbb{R}^d $
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand grid function.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_solver_2_c_g_8h.html">&lt;Rodin/Solver/CG.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>CG&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Conjugate gradient solver for symmetric positive definite dense systems.</p>
@@ -110,7 +110,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LinearSystem&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
             <dd>Abstract base class for linear system solvers.</dd>
@@ -153,7 +153,7 @@
             </dt>
             <dd>Constructs a CG solver with default parameters.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae00a62b09d5d5a690c5796008775ffd6" class="m-doc">CG</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae00a62b09d5d5a690c5796008775ffd6" class="m-doc">CG</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a28f33baa73b7d70828676493a2c2ae6b">
@@ -166,31 +166,39 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ada0462712983435f43fed51eee529acf" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ada0462712983435f43fed51eee529acf" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
             </dt>
             <dd>Sets the convergence tolerance.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a472bed550c867e376289e26549cf2b67" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a472bed550c867e376289e26549cf2b67" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp;</span>
             </dt>
             <dd>Sets the maximum number of iterations.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the linear system using the conjugate gradient method.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
             </dt>
             <dd>Checks if the solver converged successfully.</dd>
+            <dt id="aaeefc8a5f2ecf0a47f975af9bfa39ff2">
+              <span class="m-doc-wrap-bumper">auto <a href="#aaeefc8a5f2ecf0a47f975af9bfa39ff2" class="m-doc-self">getIterationNumber</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the iteration count from the most recent solve.</dd>
+            <dt id="a7300e7d0367728f293f23cb1951a6d64">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7300e7d0367728f293f23cb1951a6d64" class="m-doc-self">getError</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Returns the estimated relative error from the most recent solve.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afc6bebc168854f735ee03d14f1230da9" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Solves the associated problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the linear system.</dd>
           </dl>
@@ -200,7 +208,7 @@
           <section class="m-doc-details" id="aa38554907e2bc2dd75c6e4fdbe44ca2d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa38554907e2bc2dd75c6e4fdbe44ca2d" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap"><a href="#abfbbce3f7193e667cb7c039db97cb504" class="m-doc">ProblemType</a>&amp; pb)</span></span>
             </h3>
@@ -220,9 +228,9 @@
           <section class="m-doc-details" id="ae00a62b09d5d5a690c5796008775ffd6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae00a62b09d5d5a690c5796008775ffd6" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae00a62b09d5d5a690c5796008775ffd6" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -240,9 +248,9 @@
           <section class="m-doc-details" id="ada0462712983435f43fed51eee529acf"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada0462712983435f43fed51eee529acf" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada0462712983435f43fed51eee529acf" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol)</span></span>
             </h3>
             <p>Sets the convergence tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -266,9 +274,9 @@
           <section class="m-doc-details" id="a472bed550c867e376289e26549cf2b67"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a472bed550c867e376289e26549cf2b67" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxIt)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a472bed550c867e376289e26549cf2b67" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt)</span></span>
             </h3>
             <p>Sets the maximum number of iterations.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,9 +300,9 @@
           <section class="m-doc-details" id="a3c28e3be8d6ee14eb1c5e01d884f0cd9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the linear system using the conjugate gradient method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -312,7 +320,7 @@
           <section class="m-doc-details" id="a7bd8b39d7964b40a7a4dcb0a1ff594b7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
@@ -329,7 +337,7 @@
           <section class="m-doc-details" id="afc6bebc168854f735ee03d14f1230da9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>* Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc6bebc168854f735ee03d14f1230da9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
@@ -346,9 +354,9 @@
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the associated problem.</p>
 <p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
@@ -356,9 +364,9 @@
           <section class="m-doc-details" id="a9b645b21287f5ab7536bf8af83a9778c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />CG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b645b21287f5ab7536bf8af83a9778c" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">LinearSystem&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solves the linear system.</p>
             <table class="m-table m-fullwidth m-flat">

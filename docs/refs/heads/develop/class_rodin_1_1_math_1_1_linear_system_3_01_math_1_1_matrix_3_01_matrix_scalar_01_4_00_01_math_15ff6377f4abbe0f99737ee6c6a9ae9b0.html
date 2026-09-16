@@ -75,10 +75,25 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MatrixScalar</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorScalar</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class MatrixScalar, class VectorScalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span>LinearSystem&lt;Math::Matrix&lt;MatrixScalar&gt;, Math::Vector&lt;VectorScalar&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Linear system specialization for dense matrices.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">MatrixScalar</td>
+              <td>Scalar type for matrix elements</td>
+            </tr>
+            <tr>
+              <td>VectorScalar</td>
+              <td>Scalar type for vector elements</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -124,7 +139,7 @@ $ A $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, class <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>, class Derived&gt;</div>
               class <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase&lt;Math::Matrix&lt;MatrixScalar&gt;, Math::Vector&lt;VectorScalar&gt;, LinearSystem&lt;MatrixScalar, VectorScalar&gt;&gt;</a>
             </dt>
             <dd>Base class for linear systems of the form <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
@@ -150,15 +165,15 @@ $ Ax = b $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a86510defe2a817c1ba6a49a6ae804a37">
-              using <a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc-self">MatrixType</a> = <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MatrixScalar</a>&gt;
+              using <a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc-self">MatrixType</a> = <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;MatrixScalar&gt;
             </dt>
             <dd>Dense matrix type for the linear operator<br /></dd>
             <dt id="a7fbbc97c94de9593265ef7bb770bb2e9">
-              using <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorScalar</a>&gt;
+              using <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;VectorScalar&gt;
             </dt>
             <dd>Vector type for solution and right-hand side.</dd>
             <dt id="aeee056763bc975c3939d652c45f3944b">
-              using <a href="#aeee056763bc975c3939d652c45f3944b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>&lt;<a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc">MatrixType</a>, <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>, <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MatrixScalar</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorScalar</a>&gt;&gt;
+              using <a href="#aeee056763bc975c3939d652c45f3944b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>&lt;<a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc">MatrixType</a>, <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>, <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;MatrixScalar, VectorScalar&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -166,6 +181,18 @@ $ Ax = b $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt id="a2850820e01b07ba2d7b572aecb1a2657">
+              <span class="m-doc-wrap-bumper"><a href="#a2850820e01b07ba2d7b572aecb1a2657" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="a20a4a4afe824bb7ec023bf7452387678">
+              <span class="m-doc-wrap-bumper"><a href="#a20a4a4afe824bb7ec023bf7452387678" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="aa11c068fbabc8adfbaa143cf43630843">
+              <span class="m-doc-wrap-bumper"><a href="#aa11c068fbabc8adfbaa143cf43630843" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor<br /></dd>
             <dt id="a0f99721dce99a863ff1eb554df4876dc">
               <span class="m-doc-wrap-bumper"><a href="#a0f99721dce99a863ff1eb554df4876dc" class="m-doc-self">~LinearSystem</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
@@ -175,40 +202,28 @@ $ Ax = b $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a2850820e01b07ba2d7b572aecb1a2657">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2850820e01b07ba2d7b572aecb1a2657" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Default constructor.</dd>
-            <dt id="a20a4a4afe824bb7ec023bf7452387678">
-              <span class="m-doc-wrap-bumper">auto <a href="#a20a4a4afe824bb7ec023bf7452387678" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="aa11c068fbabc8adfbaa143cf43630843">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa11c068fbabc8adfbaa143cf43630843" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Move constructor<br /></dd>
             <dt id="a373df077d0e3acde36647e0c66752c2b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a373df077d0e3acde36647e0c66752c2b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a373df077d0e3acde36647e0c66752c2b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt id="aa2b07c6e291f8a71567d568d4e08b1ae">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa2b07c6e291f8a71567d568d4e08b1ae" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa2b07c6e291f8a71567d568d4e08b1ae" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc">eliminate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class DOFScalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc">eliminate</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;DOFScalar&gt;&amp; dofs,
+              size_t offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
             </dt>
             <dd>Eliminates degrees of freedom from the dense linear system.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a81670eaacdb2386bd17c7ca28347379a" class="m-doc">merge</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&gt;&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class DOFScalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a81670eaacdb2386bd17c7ca28347379a" class="m-doc">merge</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;DOFScalar&gt;&gt;&gt;&amp; dofs,
+              size_t offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
             </dt>
             <dd>Merges dependent degrees of freedom in the dense linear system.</dd>
             <dt id="a9e20e44c06b337d2ef13487e204fcc79">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9e20e44c06b337d2ef13487e204fcc79" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9e20e44c06b337d2ef13487e204fcc79" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the system operator matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -222,7 +237,7 @@ $ A $
 </g>
 </svg>.</dd>
             <dt id="a7d2521c01adce1c05fbf90a30b8bb9cb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7d2521c01adce1c05fbf90a30b8bb9cb" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d2521c01adce1c05fbf90a30b8bb9cb" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a86510defe2a817c1ba6a49a6ae804a37" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the system operator matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -236,7 +251,7 @@ $ A $
 </g>
 </svg>.</dd>
             <dt id="aafa67427a960a3d78957cfb357d287e0">
-              <span class="m-doc-wrap-bumper">auto <a href="#aafa67427a960a3d78957cfb357d287e0" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aafa67427a960a3d78957cfb357d287e0" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the right-hand side vector <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
 <title>
@@ -250,7 +265,7 @@ $ b $
 </g>
 </svg>.</dd>
             <dt id="abd686cb44803f355d2236c5034b6dc5e">
-              <span class="m-doc-wrap-bumper">auto <a href="#abd686cb44803f355d2236c5034b6dc5e" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd686cb44803f355d2236c5034b6dc5e" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the right-hand side vector <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
 <title>
@@ -264,7 +279,7 @@ $ b $
 </g>
 </svg>.</dd>
             <dt id="a368be4a999cbfb5d9040d527c4d00e2b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a368be4a999cbfb5d9040d527c4d00e2b" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a368be4a999cbfb5d9040d527c4d00e2b" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the solution vector <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
@@ -278,7 +293,7 @@ $ x $
 </g>
 </svg>.</dd>
             <dt id="ae4461b12361a8c0975aa0bec9b71278c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4461b12361a8c0975aa0bec9b71278c" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4461b12361a8c0975aa0bec9b71278c" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a7fbbc97c94de9593265ef7bb770bb2e9" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the solution vector <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
@@ -298,20 +313,29 @@ $ x $
           <section class="m-doc-details" id="a3b3aef42a30ae8139a291e8ea184560d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MatrixScalar</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorScalar</a> _2&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;
+                template&lt;class MatrixScalar, class VectorScalar&gt;
+                template&lt;class DOFScalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;MatrixScalar&gt;, Math::<wbr />Vector&lt;VectorScalar&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc-self">eliminate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;MatrixScalar&gt;, Math::<wbr />Vector&lt;VectorScalar&gt;&gt;&lt;MatrixScalar, VectorScalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc-self">eliminate</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;DOFScalar&gt;&amp; dofs,
+              size_t offset = 0)</span></span>
             </h3>
             <p>Eliminates degrees of freedom from the dense linear system.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">DOFScalar</td>
+                  <td>Scalar type for DOF values</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">dofs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>dofs&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Map from DOF index to prescribed value</td>
                 </tr>
                 <tr>
@@ -349,20 +373,29 @@ $ *this $
           <section class="m-doc-details" id="a81670eaacdb2386bd17c7ca28347379a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MatrixScalar</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorScalar</a> _2&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;
+                template&lt;class MatrixScalar, class VectorScalar&gt;
+                template&lt;class DOFScalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;MatrixScalar&gt;, Math::<wbr />Vector&lt;VectorScalar&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81670eaacdb2386bd17c7ca28347379a" class="m-doc-self">merge</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&gt;&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;MatrixScalar&gt;, Math::<wbr />Vector&lt;VectorScalar&gt;&gt;&lt;MatrixScalar, VectorScalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81670eaacdb2386bd17c7ca28347379a" class="m-doc-self">merge</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;DOFScalar&gt;&gt;&gt;&amp; dofs,
+              size_t offset = 0)</span></span>
             </h3>
             <p>Merges dependent degrees of freedom in the dense linear system.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">DOFScalar</td>
+                  <td>Scalar type for DOF values</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">dofs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>dofs&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Map from DOF index to (dependent indices, coefficients) pairs</td>
                 </tr>
                 <tr>

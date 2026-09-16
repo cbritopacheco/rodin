@@ -276,12 +276,12 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Params&gt;</div>
+              <div class="m-doc-template">template&lt;class ... Params&gt;</div>
               class <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a>
             </dt>
             <dd>Lagrangian variational advection for scalar fields.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Initial, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VectorField</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Step</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;</div>
               class <a href="class_rodin_1_1_advection_1_1_lagrangian_3_01_variational_1_1_trial_function_3_01_variational_1_d583934ca23bcf0e53b8bc01d63ff1e2.html" class="m-doc">Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;</a>
             </dt>
             <dd>Lagrangian advection specialization for trial/test function formulation.</dd>
@@ -290,7 +290,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
             </dt>
             <dd>Boundary policy for characteristic tracing: stop-at-boundary with inward offset.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Field</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Field&gt;</div>
               class <a href="class_rodin_1_1_advection_1_1_taylor_boundary_shift_policy.html" class="m-doc">TaylorBoundaryShiftPolicy</a>
             </dt>
             <dd>First-order boundary-hit handler for semi-Lagrangian tracing with an inward shift.</dd>
@@ -304,7 +304,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
               <span class="m-doc-wrap-bumper"><a href="#af92d1df078b3f681f17d8f4c54a8667a" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
               <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
               Initial&amp;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span>
+              VVel&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span>
             </dt>
             <dd>Deduction guide for Lagrangian with default RK4 stepper.</dd>
             <dt>
@@ -312,8 +312,8 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
               <span class="m-doc-wrap-bumper"><a href="#a33656188db35e8c971f9773cfe937298" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
               <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
               Initial&amp;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>&amp;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SStep</a>&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span>
+              VVel&amp;&amp;,
+              SStep&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span>
             </dt>
             <dd>Deduction guide for Lagrangian with custom stepper.</dd>
           </dl>
@@ -329,7 +329,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af92d1df078b3f681f17d8f4c54a8667a" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
               <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
               Initial&amp;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span></span>
+              VVel&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span></span>
             </h3>
             <p>Deduction guide for Lagrangian with default RK4 stepper.</p>
 <p>Allows construction without explicitly specifying the Step template parameter.</p>
@@ -343,8 +343,8 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33656188db35e8c971f9773cfe937298" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
               <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
               Initial&amp;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">VVel</a>&amp;&amp;,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SStep</a>&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span></span>
+              VVel&amp;&amp;,
+              SStep&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span></span>
             </h3>
             <p>Deduction guide for Lagrangian with custom stepper.</p>
 <p>Allows construction with explicit time-stepping scheme specification.</p>

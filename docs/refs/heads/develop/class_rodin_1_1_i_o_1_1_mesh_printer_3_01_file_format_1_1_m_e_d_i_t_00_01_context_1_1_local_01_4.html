@@ -97,7 +97,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Context&gt;</div>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase&lt;Context::Local&gt;</a>
             </dt>
             <dd>Base class for printing meshes to streams or files.</dd>
@@ -124,7 +124,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs a MEDIT mesh printer.</dd>
           </dl>
@@ -133,28 +133,28 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Prints object to an output stream.</dd>
             <dt id="aca7d64d4fe07ed051a2fcae642fbd687">
-              <span class="m-doc-wrap-bumper">auto <a href="#aca7d64d4fe07ed051a2fcae642fbd687" class="m-doc-self">printMesh</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> printEnd) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aca7d64d4fe07ed051a2fcae642fbd687" class="m-doc-self">printMesh</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              bool printEnd)</span>
             </dt>
             <dd>Prints the full MEDIT mesh body.</dd>
             <dt id="ab9ee43de699e00d10e6d6f9fc80d7f94">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab9ee43de699e00d10e6d6f9fc80d7f94" class="m-doc-self">printVersion</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab9ee43de699e00d10e6d6f9fc80d7f94" class="m-doc-self">printVersion</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints the MEDIT file version section.</dd>
             <dt id="aa7b872c4d77be4df20c0ed3ed6d2c798">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa7b872c4d77be4df20c0ed3ed6d2c798" class="m-doc-self">printDimension</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aa7b872c4d77be4df20c0ed3ed6d2c798" class="m-doc-self">printDimension</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints the MEDIT dimension section.</dd>
             <dt id="a605200a94fa89606ff3cc4a58b82f795">
-              <span class="m-doc-wrap-bumper">auto <a href="#a605200a94fa89606ff3cc4a58b82f795" class="m-doc-self">printEntities</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a605200a94fa89606ff3cc4a58b82f795" class="m-doc-self">printEntities</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints all supported mesh entity sections.</dd>
             <dt id="ad489b63a84be0b036c655daeccc07e6a">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad489b63a84be0b036c655daeccc07e6a" class="m-doc-self">printEnd</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ad489b63a84be0b036c655daeccc07e6a" class="m-doc-self">printEnd</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints the MEDIT end marker.</dd>
           </dl>
@@ -166,7 +166,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a MEDIT mesh printer.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -186,7 +186,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Prints object to an output stream.</p>
             <table class="m-table m-fullwidth m-flat">

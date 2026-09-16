@@ -76,10 +76,25 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_max_8h.html">&lt;Rodin/Variational/Max.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Represents the maximum operation between two functions.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">LHSDerived</td>
+              <td>Type of the left operand function</td>
+            </tr>
+            <tr>
+              <td>RHSDerived</td>
+              <td>Type of the right operand function</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -172,7 +187,7 @@ $ \max(f, 0) $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for function objects which can be evaluated over a mesh.</dd>
@@ -182,15 +197,15 @@ $ \max(f, 0) $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a0aec3a766f588e1204ae9a566695f373">
-              using <a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;
+              using <a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a0bfdbbbc23626e1ff4450c7d872d8b98">
-              using <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;
+              using <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="adda940f41b0b216737e1acc10a09e971">
-              using <a href="#adda940f41b0b216737e1acc10a09e971" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;, <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;&gt;&gt;
+              using <a href="#adda940f41b0b216737e1acc10a09e971" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;, <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -199,12 +214,12 @@ $ \max(f, 0) $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae6f5a990f8cfd1fda598619e553233f2" class="m-doc">Max</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc">LHSType</a>&amp; a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&amp; b)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae6f5a990f8cfd1fda598619e553233f2" class="m-doc">Max</a>(</span><span class="m-doc-wrap">const <a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc">LHSType</a>&amp; a,
+              const <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&amp; b)</span>
             </dt>
             <dd>Constructs maximum operator for two functions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afe00fa5c5bb2e3289912be5ae9a5fff3" class="m-doc">Max</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afe00fa5c5bb2e3289912be5ae9a5fff3" class="m-doc">Max</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -217,25 +232,25 @@ $ \max(f, 0) $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac7de9733d266dcb453a5dae4e1f2b67d" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Args</a>&amp;... args) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac7de9733d266dcb453a5dae4e1f2b67d" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Restricts evaluation to specified mesh attributes.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates maximum at a point.</dd>
             <dt id="ac169e137dace382ec4a56a68c4b1177c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the left operand function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the right operand function.</dd>
             <dt>
@@ -249,10 +264,10 @@ $ \max(f, 0) $
           <section class="m-doc-details" id="ae6f5a990f8cfd1fda598619e553233f2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6f5a990f8cfd1fda598619e553233f2" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc">LHSType</a>&amp; a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&amp; b)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6f5a990f8cfd1fda598619e553233f2" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap">const <a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc">LHSType</a>&amp; a,
+              const <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&amp; b)</span></span>
             </h3>
             <p>Constructs maximum operator for two functions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -274,9 +289,9 @@ $ \max(f, 0) $
           <section class="m-doc-details" id="afe00fa5c5bb2e3289912be5ae9a5fff3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe00fa5c5bb2e3289912be5ae9a5fff3" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe00fa5c5bb2e3289912be5ae9a5fff3" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -294,9 +309,9 @@ $ \max(f, 0) $
           <section class="m-doc-details" id="ab4bf2551b90bb0cebc7941a950f703af"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4bf2551b90bb0cebc7941a950f703af" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4bf2551b90bb0cebc7941a950f703af" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -314,10 +329,10 @@ $ \max(f, 0) $
           <section class="m-doc-details" id="ac7de9733d266dcb453a5dae4e1f2b67d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Args&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
+                template&lt;class ... Args&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7de9733d266dcb453a5dae4e1f2b67d" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Args</a>&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7de9733d266dcb453a5dae4e1f2b67d" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Restricts evaluation to specified mesh attributes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -341,10 +356,10 @@ $ \max(f, 0) $
           <section class="m-doc-details" id="a3ea66bc47d99e4bdba4fbfde47a7ad0f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
+                template&lt;class Point&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates maximum at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -399,9 +414,9 @@ $ \max(f(p), g(p)) $
           <section class="m-doc-details" id="a78988da19f2a7a0de0eee6e8b15c5699"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the left operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -416,9 +431,9 @@ $ \max(f(p), g(p)) $
           <section class="m-doc-details" id="a3328065b74dcf7cefdaa1ff5c723b7a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the right operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -433,9 +448,9 @@ $ \max(f(p), g(p)) $
           <section class="m-doc-details" id="a06602b05c242650ca47dee7222bf3b9e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>* Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06602b05c242650ca47dee7222bf3b9e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>* Rodin::<wbr />Variational::<wbr />Max&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06602b05c242650ca47dee7222bf3b9e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">

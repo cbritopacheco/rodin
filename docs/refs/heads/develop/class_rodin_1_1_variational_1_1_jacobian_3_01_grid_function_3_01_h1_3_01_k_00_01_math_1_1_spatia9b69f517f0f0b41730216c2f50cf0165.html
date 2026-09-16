@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_2_jacobian_8h.html">&lt;Rodin/Variational/H1/Jacobian.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;</div>
+          <div class="m-doc-template">template&lt;size_t K, class Scalar, class Data, class Mesh&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Jacobian&lt;GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Jacobian of an H1 vector GridFunction.</p>
@@ -224,7 +224,7 @@ $ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase&lt;GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;, Jacobian&lt;GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for Jacobian matrix operator implementations.</dd>
@@ -250,7 +250,7 @@ $ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) $
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac4a865626104ba4e2310ec636501736f" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="ad59f4aea58801344076738c87e9279c9">
@@ -267,11 +267,11 @@ $ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="adc64a41bbbdfcf272835bb7e4084990e">
-              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#adc64a41bbbdfcf272835bb7e4084990e" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the expression from its operand.</dd>
             <dt id="af5ed1b34f29463acebfe868aa0b5c950">
-              <span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#af5ed1b34f29463acebfe868aa0b5c950" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a203725244ef8426f03aa88af63c568e6">
@@ -284,7 +284,7 @@ $ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a4349bdb4e5088cb0ef3b17f34f72958c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt id="a135391db6a7bb79f8223fe066364dcad">
@@ -292,13 +292,13 @@ $ \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{J} + \mathbf{J}^T) $
             </dt>
             <dd>Creates a polymorphic copy.</dd>
             <dt id="ab2ed6014f252f74b8da6fb7392f1dec7">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab2ed6014f252f74b8da6fb7392f1dec7" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab2ed6014f252f74b8da6fb7392f1dec7" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
             <dt id="ae9e9ff1cbc509a99ff9bbd30b93f3bca">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae9e9ff1cbc509a99ff9bbd30b93f3bca" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae9e9ff1cbc509a99ff9bbd30b93f3bca" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates at a geometric point.</dd>
           </dl>

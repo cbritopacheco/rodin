@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_jacobian_8h.html">&lt;Rodin/Variational/Jacobian.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class FES, class Data, class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt; <span class="m-thin">class</span>
         </h1>
         <p>Jacobian of a P1 GridFunction.</p>
@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase&lt;FormLanguage::Traits&lt;FES&gt;::ScalarType, JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&gt;</a>
             </dt>
             <dd>Base class for matrix-valued functions defined on a mesh.</dd>
@@ -112,7 +112,7 @@
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a9e6ed8cbf80765f7c226d640bf45c15c">
@@ -128,7 +128,7 @@
             </dt>
             <dd>Operand type.</dd>
             <dt id="af574f4ace4fa720da701936f93aabb81">
-              using <a href="#af574f4ace4fa720da701936f93aabb81" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;&gt;
+              using <a href="#af574f4ace4fa720da701936f93aabb81" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -137,11 +137,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#adb3f4e59e9d47412839488eb986509f3" class="m-doc">JacobianBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#adb3f4e59e9d47412839488eb986509f3" class="m-doc">JacobianBase</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the Jacobian of a P1 grid function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a41e8664e760ef716b5e32b13ee08465d" class="m-doc">JacobianBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a41e8664e760ef716b5e32b13ee08465d" class="m-doc">JacobianBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -154,37 +154,37 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af214d3dcff04e5bcc32eabbd1bfe91dc" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af214d3dcff04e5bcc32eabbd1bfe91dc" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of rows in the Jacobian matrix.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a01e0b68eda4ec49299cfb39378dd271b" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a01e0b68eda4ec49299cfb39378dd271b" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of columns in the Jacobian matrix.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a829606b3def8ed9a619ee96150c8bb85" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a829606b3def8ed9a619ee96150c8bb85" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a></span>
             </dt>
             <dd>Evaluates the Jacobian matrix at a Point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a92710f2dfdc2b08ee144e5449ad66d22" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a92710f2dfdc2b08ee144e5449ad66d22" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a></span>
             </dt>
             <dd>Evaluates the Jacobian matrix at an IntegrationPoint.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand grid function.</dd>
             <dt id="a11b32931fae3b0d3fe0b9bda19a99085">
-              <span class="m-doc-wrap-bumper">auto <a href="#a11b32931fae3b0d3fe0b9bda19a99085" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a11b32931fae3b0d3fe0b9bda19a99085" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates the Jacobian at a point (to be overridden in derived class).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7196c6802db8b8df80fe8666c6d5d261" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a7196c6802db8b8df80fe8666c6d5d261" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates the Jacobian at an integration point.</dd>
             <dt id="a4349bdb4e5088cb0ef3b17f34f72958c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -198,9 +198,9 @@
           <section class="m-doc-details" id="adb3f4e59e9d47412839488eb986509f3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb3f4e59e9d47412839488eb986509f3" class="m-doc-self">JacobianBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb3f4e59e9d47412839488eb986509f3" class="m-doc-self">JacobianBase</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
             <p>Constructs the Jacobian of a P1 grid function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -263,9 +263,9 @@ $ J_{ij} = \frac{\partial u_i}{\partial x_j} $
           <section class="m-doc-details" id="a41e8664e760ef716b5e32b13ee08465d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41e8664e760ef716b5e32b13ee08465d" class="m-doc-self">JacobianBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41e8664e760ef716b5e32b13ee08465d" class="m-doc-self">JacobianBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -283,9 +283,9 @@ $ J_{ij} = \frac{\partial u_i}{\partial x_j} $
           <section class="m-doc-details" id="a7cd9502577fb15404d33607dcbbae28b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd9502577fb15404d33607dcbbae28b" class="m-doc-self">JacobianBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd9502577fb15404d33607dcbbae28b" class="m-doc-self">JacobianBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -303,9 +303,9 @@ $ J_{ij} = \frac{\partial u_i}{\partial x_j} $
           <section class="m-doc-details" id="af214d3dcff04e5bcc32eabbd1bfe91dc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af214d3dcff04e5bcc32eabbd1bfe91dc" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af214d3dcff04e5bcc32eabbd1bfe91dc" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of rows in the Jacobian matrix.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -352,9 +352,9 @@ $ m $
           <section class="m-doc-details" id="a01e0b68eda4ec49299cfb39378dd271b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01e0b68eda4ec49299cfb39378dd271b" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01e0b68eda4ec49299cfb39378dd271b" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of columns in the Jacobian matrix.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -401,9 +401,9 @@ $ d $
           <section class="m-doc-details" id="a829606b3def8ed9a619ee96150c8bb85"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a829606b3def8ed9a619ee96150c8bb85" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a829606b3def8ed9a619ee96150c8bb85" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the Jacobian matrix at a Point.</p>
 <p>Resolves mesh ownership and dispatches to the derived class&#x27;s <code>interpolate</code>. Falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
@@ -411,9 +411,9 @@ $ d $
           <section class="m-doc-details" id="a92710f2dfdc2b08ee144e5449ad66d22"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92710f2dfdc2b08ee144e5449ad66d22" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92710f2dfdc2b08ee144e5449ad66d22" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the Jacobian matrix at an IntegrationPoint.</p>
 <p>If the polytope is owned by the FES mesh, dispatches to <code>interpolate(out, ip)</code>. Otherwise falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
@@ -421,9 +421,9 @@ $ d $
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand grid function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -438,10 +438,10 @@ $ d $
           <section class="m-doc-details" id="a7196c6802db8b8df80fe8666c6d5d261"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7196c6802db8b8df80fe8666c6d5d261" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7196c6802db8b8df80fe8666c6d5d261" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Interpolates the Jacobian at an integration point.</p>
 <p>Forwards to the derived class&#x27;s <code>interpolate(IntegrationPoint)</code> if it provides one; otherwise falls back to the Point overload via <code>ip.getPoint()</code>.</p>
@@ -449,9 +449,9 @@ $ d $
           <section class="m-doc-details" id="a23914e6af4e1f5106d74c454cc5aaeb4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _3&gt;
+                template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>* Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23914e6af4e1f5106d74c454cc5aaeb4" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>* Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23914e6af4e1f5106d74c454cc5aaeb4" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy (to be overridden in derived class).</p>
             <table class="m-table m-fullwidth m-flat">

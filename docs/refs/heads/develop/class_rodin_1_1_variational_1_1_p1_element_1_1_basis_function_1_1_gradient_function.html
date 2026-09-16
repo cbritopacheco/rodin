@@ -86,6 +86,7 @@
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -142,20 +143,25 @@ $ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/
             <dd>Gradient vector type.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a92a24e9f8594b22c09db404feea7f510" class="m-doc">GradientFunction</a>(</span><span class="m-doc-wrap">size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a gradient function.</dd>
+            <dt id="afbe34b7dff9e43a00804d8313151ae06">
+              <span class="m-doc-wrap-bumper"><a href="#afbe34b7dff9e43a00804d8313151ae06" class="m-doc-self">GradientFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a92a24e9f8594b22c09db404feea7f510" class="m-doc">GradientFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a gradient function.</dd>
-            <dt id="afbe34b7dff9e43a00804d8313151ae06">
-              <span class="m-doc-wrap-bumper">auto <a href="#afbe34b7dff9e43a00804d8313151ae06" class="m-doc-self">GradientFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a>&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a></span>
             </dt>
             <dd>Evaluates the gradient at a spatial point.</dd>
           </dl>
@@ -164,7 +170,7 @@ $ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a92a24e9f8594b22c09db404feea7f510"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr />GradientFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92a24e9f8594b22c09db404feea7f510" class="m-doc-self">GradientFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr />GradientFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92a24e9f8594b22c09db404feea7f510" class="m-doc-self">GradientFunction</a>(</span><span class="m-doc-wrap">size_t local,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a gradient function.</p>
@@ -186,7 +192,7 @@ $ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/
           </div></section>
           <section class="m-doc-details" id="a710d2d9e4418a9110096ed95161fbc59"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr />GradientFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr />GradientFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const</span></span>
             </h3>
             <p>Evaluates the gradient at a spatial point.</p>
             <table class="m-table m-fullwidth m-flat">

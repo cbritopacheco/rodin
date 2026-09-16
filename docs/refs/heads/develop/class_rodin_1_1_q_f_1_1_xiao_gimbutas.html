@@ -107,12 +107,12 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt id="ac7fecde2b592aa9b992f28f82c792ba4">
-              <span class="m-doc-wrap-bumper">static auto <a href="#ac7fecde2b592aa9b992f28f82c792ba4" class="m-doc-self">getMaxDegree</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ac7fecde2b592aa9b992f28f82c792ba4" class="m-doc-self">getMaxDegree</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; size_t</span>
             </dt>
             <dd>Highest tabulated degree for <code>g</code>, or zero if unsupported.</dd>
             <dt id="adf40e030823b66cb6cba5818d6b96e25">
-              <span class="m-doc-wrap-bumper">static auto <a href="#adf40e030823b66cb6cba5818d6b96e25" class="m-doc-self">isAvailable</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> degree,
-              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#adf40e030823b66cb6cba5818d6b96e25" class="m-doc-self">isAvailable</a>(</span><span class="m-doc-wrap">size_t degree,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; bool</span>
             </dt>
             <dd>Whether a rule of strength <code>degree</code> is tabulated for <code>g</code>.</dd>
           </dl>
@@ -121,12 +121,12 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a845142dd1eb45307de551681872ceb0e" class="m-doc">XiaoGimbutas</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> degree,
+              <span class="m-doc-wrap-bumper"><a href="#a845142dd1eb45307de551681872ceb0e" class="m-doc">XiaoGimbutas</a>(</span><span class="m-doc-wrap">size_t degree,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span>
             </dt>
             <dd>Constructs the rule of strength <code>degree</code> on <code>g</code>.</dd>
             <dt id="a4187885d32d70ce6a15abadea445079b">
-              <span class="m-doc-wrap-bumper"><a href="#a4187885d32d70ce6a15abadea445079b" class="m-doc-self">XiaoGimbutas</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html" class="m-doc">XiaoGimbutas</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a4187885d32d70ce6a15abadea445079b" class="m-doc-self">XiaoGimbutas</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html" class="m-doc">XiaoGimbutas</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copies a tabulated quadrature formula.</dd>
           </dl>
@@ -135,15 +135,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the number of quadrature points.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the weight associated with the i-th quadrature point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the coordinates of the i-th quadrature point.</dd>
             <dt id="aaef10ae0396553a4843747b73f44ff78">
@@ -160,7 +160,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a845142dd1eb45307de551681872ceb0e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a845142dd1eb45307de551681872ceb0e" class="m-doc-self">XiaoGimbutas</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> degree,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a845142dd1eb45307de551681872ceb0e" class="m-doc-self">XiaoGimbutas</a>(</span><span class="m-doc-wrap">size_t degree,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
             </h3>
             <p>Constructs the rule of strength <code>degree</code> on <code>g</code>.</p>
@@ -168,7 +168,7 @@
           </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the number of quadrature points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -182,7 +182,7 @@
           </div></section>
           <section class="m-doc-details" id="a56b74ff92cb5876bea3ef654457be465"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the weight associated with the i-th quadrature point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -217,7 +217,7 @@ $ w_i $
           </div></section>
           <section class="m-doc-details" id="a3d9ae6d6960698e83f7b4f81ad9c40e3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />QF::<wbr />XiaoGimbutas::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the coordinates of the i-th quadrature point.</p>
             <table class="m-table m-fullwidth m-flat">

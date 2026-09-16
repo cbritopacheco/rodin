@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_frobenius_8h.html">&lt;Rodin/Variational/Frobenius.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Frobenius norm of a function.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">NestedDerived</td>
+              <td>Type of the function to take the norm of</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -256,7 +267,7 @@ $ A \in \mathbb{R}^{m \times n} $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for real-valued functions defined on a mesh.</dd>
@@ -266,15 +277,15 @@ $ A \in \mathbb{R}^{m \times n} $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a16dc6738796f53f21660115e0d857df0">
-              using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;
+              using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Operand type.</dd>
             <dt id="a8bad4b2131344f91a9d97c61c25dbac4">
-              using <a href="#a8bad4b2131344f91a9d97c61c25dbac4" class="m-doc-self">OperandRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;::RangeType
+              using <a href="#a8bad4b2131344f91a9d97c61c25dbac4" class="m-doc-self">OperandRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the operand.</dd>
             <dt id="aea3b8cc71f5a4d284a2857dfb28e4057">
-              using <a href="#aea3b8cc71f5a4d284a2857dfb28e4057" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;::ScalarType
+              using <a href="#aea3b8cc71f5a4d284a2857dfb28e4057" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a997ad020a7176e0c384646335ac8bab9">
@@ -287,11 +298,11 @@ $ A \in \mathbb{R}^{m \times n} $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a285c357d51f6e8026b4c310a33c4d7fe" class="m-doc">Frobenius</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; v)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a285c357d51f6e8026b4c310a33c4d7fe" class="m-doc">Frobenius</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; v)</span>
             </dt>
             <dd>Constructs a Frobenius norm from a function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0974f66bab26d6b0422f05bb93ef023b" class="m-doc">Frobenius</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a0974f66bab26d6b0422f05bb93ef023b" class="m-doc">Frobenius</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -304,16 +315,16 @@ $ A \in \mathbb{R}^{m \times n} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7315c8e73a0f62b8a736de30c09151af" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7315c8e73a0f62b8a736de30c09151af" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the Frobenius norm at a point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
             <dt id="ac169e137dace382ec4a56a68c4b1177c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -327,9 +338,9 @@ $ A \in \mathbb{R}^{m \times n} $
           <section class="m-doc-details" id="a285c357d51f6e8026b4c310a33c4d7fe"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a285c357d51f6e8026b4c310a33c4d7fe" class="m-doc-self">Frobenius</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a285c357d51f6e8026b4c310a33c4d7fe" class="m-doc-self">Frobenius</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; v)</span></span>
             </h3>
             <p>Constructs a Frobenius norm from a function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -347,9 +358,9 @@ $ A \in \mathbb{R}^{m \times n} $
           <section class="m-doc-details" id="a0974f66bab26d6b0422f05bb93ef023b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0974f66bab26d6b0422f05bb93ef023b" class="m-doc-self">Frobenius</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0974f66bab26d6b0422f05bb93ef023b" class="m-doc-self">Frobenius</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -367,9 +378,9 @@ $ A \in \mathbb{R}^{m \times n} $
           <section class="m-doc-details" id="ad1d5429688fed104b986151bd29d02dc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1d5429688fed104b986151bd29d02dc" class="m-doc-self">Frobenius</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1d5429688fed104b986151bd29d02dc" class="m-doc-self">Frobenius</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -387,10 +398,10 @@ $ A \in \mathbb{R}^{m \times n} $
           <section class="m-doc-details" id="a7315c8e73a0f62b8a736de30c09151af"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;
+                template&lt;class NestedDerived&gt;
+                template&lt;class Point&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7315c8e73a0f62b8a736de30c09151af" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7315c8e73a0f62b8a736de30c09151af" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const</span></span>
             </h3>
             <p>Evaluates the Frobenius norm at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -443,9 +454,9 @@ $ x $
           <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -460,9 +471,9 @@ $ x $
           <section class="m-doc-details" id="ab5ba08bba0e3cc738d25a26b49d0300d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>* Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5ba08bba0e3cc738d25a26b49d0300d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a>* Rodin::<wbr />Variational::<wbr />Frobenius&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5ba08bba0e3cc738d25a26b49d0300d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of the Frobenius norm operation.</p>
             <table class="m-table m-fullwidth m-flat">

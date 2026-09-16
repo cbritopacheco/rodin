@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_list_8h.html">&lt;Rodin/FormLanguage/List.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+          <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>List <span class="m-thin">class</span>
         </h1>
         <p>Container for polymorphic form language objects.</p>
@@ -192,7 +192,7 @@ $ n $
             </dt>
             <dd>Reference type for list elements.</dd>
             <dt id="ac98a2432df95afe641c3847268f579e8">
-              using <a href="#ac98a2432df95afe641c3847268f579e8" class="m-doc-self">const_reference</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp;
+              using <a href="#ac98a2432df95afe641c3847268f579e8" class="m-doc-self">const_reference</a> = const T&amp;
             </dt>
             <dd>Const reference type for list elements.</dd>
           </dl>
@@ -200,6 +200,18 @@ $ n $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt id="a807361be9cf1e49256da498008466f5c">
+              <span class="m-doc-wrap-bumper"><a href="#a807361be9cf1e49256da498008466f5c" class="m-doc-self">List</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Default constructor creates an empty list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a50a0eb02801dc5cb8bb17bbacf2dc6b6" class="m-doc">List</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor performs deep copy of all elements.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a7ab2e8e9ca635e95dd2d58c883778c17" class="m-doc">List</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor transfers ownership of elements.</dd>
             <dt id="a169efc15b171dd57d2b5a3e2fdadc0f9">
               <span class="m-doc-wrap-bumper"><a href="#a169efc15b171dd57d2b5a3e2fdadc0f9" class="m-doc-self">~List</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
@@ -209,76 +221,64 @@ $ n $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a807361be9cf1e49256da498008466f5c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a807361be9cf1e49256da498008466f5c" class="m-doc-self">List</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Default constructor creates an empty list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a50a0eb02801dc5cb8bb17bbacf2dc6b6" class="m-doc">List</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor performs deep copy of all elements.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7ab2e8e9ca635e95dd2d58c883778c17" class="m-doc">List</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor transfers ownership of elements.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7923309006d38b9cae8a710220e69fae" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7923309006d38b9cae8a710220e69fae" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) -&gt; <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator performs deep copy.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae7500a70e6d32b15247a6cffb15d1157" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7500a70e6d32b15247a6cffb15d1157" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator transfers ownership.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8e67c7170162be7b113441f0886aaf69" class="m-doc">at</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a0c5a1541ecf7ad17925583cf6abd2c65" class="m-doc">reference</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8e67c7170162be7b113441f0886aaf69" class="m-doc">at</a>(</span><span class="m-doc-wrap">size_t i) -&gt; <a href="#a0c5a1541ecf7ad17925583cf6abd2c65" class="m-doc">reference</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Accesses element at specified index with bounds checking.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae257d91055dd39b5e2e11e04cdf154a0" class="m-doc">at</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae257d91055dd39b5e2e11e04cdf154a0" class="m-doc">at</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Accesses element at specified index with bounds checking (const version).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a926520ac0969e39be6ae7617ead72699" class="m-doc">add</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; v) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a926520ac0969e39be6ae7617ead72699" class="m-doc">add</a>(</span><span class="m-doc-wrap">const T&amp; v) -&gt; <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Adds a single element to the list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a45d5afe647057b51cc1a9823c9f03700" class="m-doc">add</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;T&gt;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45d5afe647057b51cc1a9823c9f03700" class="m-doc">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;T&gt;&amp; other) -&gt; <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Adds all elements from another list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e97a4e7fae04a3c5d435ea5386841fb" class="m-doc">clear</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e97a4e7fae04a3c5d435ea5386841fb" class="m-doc">clear</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Removes all elements from the list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the number of elements in the list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afaafdfc441c2433c70959e3dfe46fd97" class="m-doc">empty</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afaafdfc441c2433c70959e3dfe46fd97" class="m-doc">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Checks if the list is empty.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af30ba1cf26ea899b3bfd960bfc11c0d4" class="m-doc">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af30ba1cf26ea899b3bfd960bfc11c0d4" class="m-doc">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the beginning.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dad86c9a52d05118a41d7a6d6989a8e" class="m-doc">end</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0dad86c9a52d05118a41d7a6d6989a8e" class="m-doc">end</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the end.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2b83d058366f4b8051bb07acf629da4f" class="m-doc">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b83d058366f4b8051bb07acf629da4f" class="m-doc">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to the beginning.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab5749524e69f1da16f236727e82fc50b" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab5749524e69f1da16f236727e82fc50b" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to the end.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a5e4addf7138260666061deaa49fea5" class="m-doc">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a5e4addf7138260666061deaa49fea5" class="m-doc">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to the beginning.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a90b774e0ab1b61b10c282bcb10b77d82" class="m-doc">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a90b774e0ab1b61b10c282bcb10b77d82" class="m-doc">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to the end.</dd>
             <dt>
@@ -292,9 +292,9 @@ $ n $
           <section class="m-doc-details" id="a50a0eb02801dc5cb8bb17bbacf2dc6b6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50a0eb02801dc5cb8bb17bbacf2dc6b6" class="m-doc-self">List</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50a0eb02801dc5cb8bb17bbacf2dc6b6" class="m-doc-self">List</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor performs deep copy of all elements.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -313,9 +313,9 @@ $ n $
           <section class="m-doc-details" id="a7ab2e8e9ca635e95dd2d58c883778c17"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ab2e8e9ca635e95dd2d58c883778c17" class="m-doc-self">List</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ab2e8e9ca635e95dd2d58c883778c17" class="m-doc-self">List</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor transfers ownership of elements.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -333,9 +333,9 @@ $ n $
           <section class="m-doc-details" id="a7923309006d38b9cae8a710220e69fae"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7923309006d38b9cae8a710220e69fae" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7923309006d38b9cae8a710220e69fae" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator performs deep copy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -360,9 +360,9 @@ $ n $
           <section class="m-doc-details" id="ae7500a70e6d32b15247a6cffb15d1157"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7500a70e6d32b15247a6cffb15d1157" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7500a70e6d32b15247a6cffb15d1157" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator transfers ownership.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -386,9 +386,9 @@ $ n $
           <section class="m-doc-details" id="a8e67c7170162be7b113441f0886aaf69"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a0c5a1541ecf7ad17925583cf6abd2c65" class="m-doc">reference</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e67c7170162be7b113441f0886aaf69" class="m-doc-self">at</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a0c5a1541ecf7ad17925583cf6abd2c65" class="m-doc">reference</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e67c7170162be7b113441f0886aaf69" class="m-doc-self">at</a>(</span><span class="m-doc-wrap">size_t i) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Accesses element at specified index with bounds checking.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -421,9 +421,9 @@ $ n $
           <section class="m-doc-details" id="ae257d91055dd39b5e2e11e04cdf154a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae257d91055dd39b5e2e11e04cdf154a0" class="m-doc-self">at</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac98a2432df95afe641c3847268f579e8" class="m-doc">const_<wbr />reference</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae257d91055dd39b5e2e11e04cdf154a0" class="m-doc-self">at</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Accesses element at specified index with bounds checking (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -456,9 +456,9 @@ $ n $
           <section class="m-doc-details" id="a926520ac0969e39be6ae7617ead72699"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a926520ac0969e39be6ae7617ead72699" class="m-doc-self">add</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a926520ac0969e39be6ae7617ead72699" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const T&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Adds a single element to the list.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -483,9 +483,9 @@ $ n $
           <section class="m-doc-details" id="a45d5afe647057b51cc1a9823c9f03700"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45d5afe647057b51cc1a9823c9f03700" class="m-doc-self">add</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;T&gt;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45d5afe647057b51cc1a9823c9f03700" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;T&gt;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Adds all elements from another list.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -510,9 +510,9 @@ $ n $
           <section class="m-doc-details" id="a3e97a4e7fae04a3c5d435ea5386841fb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e97a4e7fae04a3c5d435ea5386841fb" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>&amp; Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e97a4e7fae04a3c5d435ea5386841fb" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Removes all elements from the list.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -527,9 +527,9 @@ $ n $
           <section class="m-doc-details" id="aae4c3867dcd57153f1148c9f097bbc9b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Returns the number of elements in the list.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -544,9 +544,9 @@ $ n $
           <section class="m-doc-details" id="afaafdfc441c2433c70959e3dfe46fd97"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afaafdfc441c2433c70959e3dfe46fd97" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afaafdfc441c2433c70959e3dfe46fd97" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Checks if the list is empty.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -561,9 +561,9 @@ $ n $
           <section class="m-doc-details" id="af30ba1cf26ea899b3bfd960bfc11c0d4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af30ba1cf26ea899b3bfd960bfc11c0d4" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af30ba1cf26ea899b3bfd960bfc11c0d4" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the beginning.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -578,9 +578,9 @@ $ n $
           <section class="m-doc-details" id="a0dad86c9a52d05118a41d7a6d6989a8e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dad86c9a52d05118a41d7a6d6989a8e" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dad86c9a52d05118a41d7a6d6989a8e" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the end.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -595,9 +595,9 @@ $ n $
           <section class="m-doc-details" id="a2b83d058366f4b8051bb07acf629da4f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b83d058366f4b8051bb07acf629da4f" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b83d058366f4b8051bb07acf629da4f" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to the beginning.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -612,9 +612,9 @@ $ n $
           <section class="m-doc-details" id="ab5749524e69f1da16f236727e82fc50b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5749524e69f1da16f236727e82fc50b" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5749524e69f1da16f236727e82fc50b" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to the end.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -629,9 +629,9 @@ $ n $
           <section class="m-doc-details" id="a5a5e4addf7138260666061deaa49fea5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a5e4addf7138260666061deaa49fea5" class="m-doc-self">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a5e4addf7138260666061deaa49fea5" class="m-doc-self">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to the beginning.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -646,9 +646,9 @@ $ n $
           <section class="m-doc-details" id="a90b774e0ab1b61b10c282bcb10b77d82"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a90b774e0ab1b61b10c282bcb10b77d82" class="m-doc-self">cend</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a> Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a90b774e0ab1b61b10c282bcb10b77d82" class="m-doc-self">cend</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to the end.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -663,7 +663,7 @@ $ n $
           <section class="m-doc-details" id="a14c77fd551eec7aae97831ef36e8aac7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>* Rodin::<wbr />FormLanguage::<wbr />List&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>

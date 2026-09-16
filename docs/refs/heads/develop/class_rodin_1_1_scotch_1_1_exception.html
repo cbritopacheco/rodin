@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_scotch.html">Scotch</a>::<wbr/></span>Exception <span class="m-thin">class</span>
         </h1>
         <p>Exception type for errors reported by Scotch wrappers.</p>
@@ -87,6 +87,10 @@
             <tr>
               <td style="width: 1%">T</td>
               <td>Type of the object that raised the exception.</td>
+            </tr>
+            <tr>
+              <td>FuncName</td>
+              <td>Type used to identify the member function.</td>
             </tr>
           </tbody>
         </table>
@@ -108,7 +112,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Rodin::Alert::MemberFunctionException&lt;T, FuncName&gt;</a>
             </dt>
             <dd>Exception type for errors occurring in member functions.</dd>
@@ -118,7 +122,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a6a65fb1f60a4a20fd13ee9f1222b9029">
-              using <a href="#a6a65fb1f60a4a20fd13ee9f1222b9029" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a>&lt;T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a>&gt;
+              using <a href="#a6a65fb1f60a4a20fd13ee9f1222b9029" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a>&lt;T, FuncName&gt;
             </dt>
             <dd>Alias for the parent exception class.</dd>
           </dl>
@@ -127,9 +131,9 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a82b8cc975e16ce7f6e77ad7010fc84bb" class="m-doc">Exception</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* msg,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; cls,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a>&amp; funcName)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a82b8cc975e16ce7f6e77ad7010fc84bb" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">const char* msg,
+              const T&amp; cls,
+              const FuncName&amp; funcName)</span>
             </dt>
             <dd>Constructs an UnsafeAccessException.</dd>
           </dl>
@@ -138,7 +142,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a550d4dd2d9f91cca41b9d5950a25d86d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a550d4dd2d9f91cca41b9d5950a25d86d" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a550d4dd2d9f91cca41b9d5950a25d86d" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Raises the exception.</dd>
           </dl>
@@ -148,11 +152,11 @@
           <section class="m-doc-details" id="a82b8cc975e16ce7f6e77ad7010fc84bb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a> _2&gt;
+                template&lt;class T, class FuncName&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Scotch::<wbr />Exception&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82b8cc975e16ce7f6e77ad7010fc84bb" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* msg,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; cls,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a>&amp; funcName)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Scotch::<wbr />Exception&lt;T, FuncName&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82b8cc975e16ce7f6e77ad7010fc84bb" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">const char* msg,
+              const T&amp; cls,
+              const FuncName&amp; funcName)</span></span>
             </h3>
             <p>Constructs an UnsafeAccessException.</p>
             <table class="m-table m-fullwidth m-flat">

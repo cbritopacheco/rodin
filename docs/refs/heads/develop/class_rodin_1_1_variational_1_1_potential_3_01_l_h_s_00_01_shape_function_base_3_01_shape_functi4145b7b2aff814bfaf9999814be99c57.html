@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_potential_8h.html">&lt;Rodin/Variational/Potential.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+          <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <nav class="m-block m-default">
@@ -282,7 +282,7 @@
             </dt>
             <dd>Cell kernel type.</dd>
             <dt id="afce56aa6fcddbcc9adc3ecbe68c4f1f7">
-              using <a href="#afce56aa6fcddbcc9adc3ecbe68c4f1f7" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, FES, SpaceType&gt;, FES, <a href="#afcf8d604d4a7332984f336178bc218c3" class="m-doc">Space</a>&gt;
+              using <a href="#afce56aa6fcddbcc9adc3ecbe68c4f1f7" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, FES, SpaceType&gt;, FES, <a href="#afcf8d604d4a7332984f336178bc218c3" class="m-doc">Space</a>&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ae010240968103862bcf4fa765c1dccfa">
@@ -290,11 +290,11 @@
             </dt>
             <dd>Operand type.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
-              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afce56aa6fcddbcc9adc3ecbe68c4f1f7" class="m-doc">RHSType</a>&gt;::RangeType
+              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afce56aa6fcddbcc9adc3ecbe68c4f1f7" class="m-doc">RHSType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
             <dt id="a445eec8df0727c551b208428b3bb251a">
-              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>&gt;&gt;
+              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
           </dl>
@@ -303,7 +303,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="afcf8d604d4a7332984f336178bc218c3">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#afcf8d604d4a7332984f336178bc218c3" class="m-doc-self">Space</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#afcf8d604d4a7332984f336178bc218c3" class="m-doc-self">Space</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Shape function space the expression belongs to, trial or test.</dd>
           </dl>
@@ -312,12 +312,12 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a6cd78d9e15dd074f03b6ad064ee2b505">
-              <span class="m-doc-wrap-bumper"><a href="#a6cd78d9e15dd074f03b6ad064ee2b505" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp; kernel,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a6cd78d9e15dd074f03b6ad064ee2b505" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap">const <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp; kernel,
+              const <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the potential of an operand against a kernel.</dd>
             <dt id="ab0340cc46cdc0a4a03e547204aaa4ea9">
-              <span class="m-doc-wrap-bumper"><a href="#ab0340cc46cdc0a4a03e547204aaa4ea9" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab0340cc46cdc0a4a03e547204aaa4ea9" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="adbe317fbff1ed0f11204efc8da59925c">
@@ -330,11 +330,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a83c64545e04c41400d76e46b8217608f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a83c64545e04c41400d76e46b8217608f" class="m-doc-self">getKernel</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a83c64545e04c41400d76e46b8217608f" class="m-doc-self">getKernel</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp;</span>
             </dt>
             <dd>Gets the kernel of the potential.</dd>
             <dt id="a167036e7e1cfcff01c5f031ea96d3fed">
-              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc">OperandType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
             <dt id="aceaf5428ec8fd37893fc3276d222204e">
@@ -352,9 +352,9 @@
           <section class="m-doc-details" id="ae3f888ef045bce80c82c08a1d2454fb8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+                template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a> _1, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>* Rodin::<wbr />Variational::<wbr />Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt;&lt;_1, _2, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3f888ef045bce80c82c08a1d2454fb8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>* Rodin::<wbr />Variational::<wbr />Potential&lt;LHS, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, FES, SpaceType&gt;, FES, SpaceType&gt;&gt;&lt;_1, RHSDerived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3f888ef045bce80c82c08a1d2454fb8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">

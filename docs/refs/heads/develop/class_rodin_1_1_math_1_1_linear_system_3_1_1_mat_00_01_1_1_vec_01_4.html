@@ -177,7 +177,7 @@ $ \mathbf{x} $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, class <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>, class Derived&gt;</div>
               class <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase&lt;::Mat, ::Vec, LinearSystem&lt;::Mat, ::Vec&gt;&gt;</a>
             </dt>
             <dd>Base class for linear systems of the form <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
@@ -208,7 +208,7 @@ $ Ax = b $
             </dt>
             <dd>Container for named PETSc index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</dd>
             <dt id="a7f53ceda8dec0c67b27793373b6b7e0d">
-              using <a href="#a7f53ceda8dec0c67b27793373b6b7e0d" class="m-doc-self">MatrixType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Mat</a>
+              using <a href="#a7f53ceda8dec0c67b27793373b6b7e0d" class="m-doc-self">MatrixType</a> = ::Mat
             </dt>
             <dd>PETSc matrix type (<code>Mat</code>) for the system operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -222,7 +222,7 @@ $ A $
 </g>
 </svg>.</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
-              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
             <dd>PETSc vector type (<code>Vec</code>) for <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
 <title>
@@ -255,11 +255,11 @@ $ \mathbf{x} $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa5e51a6eb3e263949c8005313a4b1da1" class="m-doc">LinearSystem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MPI_<wbr />Comm</a> comm)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aa5e51a6eb3e263949c8005313a4b1da1" class="m-doc">LinearSystem</a>(</span><span class="m-doc-wrap">MPI_Comm comm)</span>
             </dt>
             <dd>Constructs an empty linear system on the given communicator.</dd>
             <dt id="a91d29878a40532f709369c9c56010907">
-              <span class="m-doc-wrap-bumper"><a href="#a91d29878a40532f709369c9c56010907" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a91d29878a40532f709369c9c56010907" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor (increments PETSc handle reference counts).</dd>
             <dt id="a5b325fda1e2ff68cfecd6c8d938e3a29">
@@ -276,7 +276,7 @@ $ \mathbf{x} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a6726d08e03c4b0327e9ee2fb7f442624">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6726d08e03c4b0327e9ee2fb7f442624" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6726d08e03c4b0327e9ee2fb7f442624" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
             </dt>
             <dd>Copy-assignment operator.</dd>
             <dt id="a676a706c35a763dfc159425a9f7e2e16">
@@ -284,23 +284,23 @@ $ \mathbf{x} $
             </dt>
             <dd>Move-assignment operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc">eliminate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class DOFScalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc">eliminate</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;DOFScalar&gt;&amp; dofs,
+              size_t offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp;</span>
             </dt>
             <dd>Enforces Dirichlet boundary conditions by eliminating constrained DOFs from the linear system.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a76fffd53ae3e7d1d631cb2c4043b9a07" class="m-doc">merge</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&gt;&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class DOFScalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a76fffd53ae3e7d1d631cb2c4043b9a07" class="m-doc">merge</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;DOFScalar&gt;&gt;&gt;&amp; dofs,
+              size_t offset = 0) -&gt; <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>&amp;</span>
             </dt>
             <dd>Merges periodic DOF constraints into the linear system.</dd>
             <dt id="a813d79add484c05e97a199aeec2a65bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a813d79add484c05e97a199aeec2a65bb" class="m-doc-self">getCommunicator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MPI_<wbr />Comm</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a813d79add484c05e97a199aeec2a65bb" class="m-doc-self">getCommunicator</a>(</span><span class="m-doc-wrap">) const -&gt; MPI_Comm <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the MPI communicator of this linear system.</dd>
             <dt id="a9e20e44c06b337d2ef13487e204fcc79">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9e20e44c06b337d2ef13487e204fcc79" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a7f53ceda8dec0c67b27793373b6b7e0d" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9e20e44c06b337d2ef13487e204fcc79" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a7f53ceda8dec0c67b27793373b6b7e0d" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a mutable reference to the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -314,7 +314,7 @@ $ A $
 </g>
 </svg>.</dd>
             <dt id="a7d2521c01adce1c05fbf90a30b8bb9cb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7d2521c01adce1c05fbf90a30b8bb9cb" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a7f53ceda8dec0c67b27793373b6b7e0d" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d2521c01adce1c05fbf90a30b8bb9cb" class="m-doc-self">getOperator</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a7f53ceda8dec0c67b27793373b6b7e0d" class="m-doc">MatrixType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a read-only reference to the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -328,7 +328,7 @@ $ A $
 </g>
 </svg>.</dd>
             <dt id="aafa67427a960a3d78957cfb357d287e0">
-              <span class="m-doc-wrap-bumper">auto <a href="#aafa67427a960a3d78957cfb357d287e0" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aafa67427a960a3d78957cfb357d287e0" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a mutable reference to the right-hand side vector <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
 <title>
@@ -342,7 +342,7 @@ $ b $
 </g>
 </svg>.</dd>
             <dt id="abd686cb44803f355d2236c5034b6dc5e">
-              <span class="m-doc-wrap-bumper">auto <a href="#abd686cb44803f355d2236c5034b6dc5e" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd686cb44803f355d2236c5034b6dc5e" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a read-only reference to the right-hand side vector <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
 <title>
@@ -356,7 +356,7 @@ $ b $
 </g>
 </svg>.</dd>
             <dt id="a368be4a999cbfb5d9040d527c4d00e2b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a368be4a999cbfb5d9040d527c4d00e2b" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a368be4a999cbfb5d9040d527c4d00e2b" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a mutable reference to the solution vector <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
@@ -370,7 +370,7 @@ $ x $
 </g>
 </svg>.</dd>
             <dt id="ae4461b12361a8c0975aa0bec9b71278c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4461b12361a8c0975aa0bec9b71278c" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4461b12361a8c0975aa0bec9b71278c" class="m-doc-self">getSolution</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a read-only reference to the solution vector <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
@@ -388,7 +388,7 @@ $ x $
             </dt>
             <dd>Sets the field-split index sets for block preconditioners.</dd>
             <dt id="abcfd333a071c83f1763cf2c3d481806f">
-              <span class="m-doc-wrap-bumper">auto <a href="#abcfd333a071c83f1763cf2c3d481806f" class="m-doc-self">getFieldSplits</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> FieldSplits&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abcfd333a071c83f1763cf2c3d481806f" class="m-doc-self">getFieldSplits</a>(</span><span class="m-doc-wrap">) const -&gt; const FieldSplits&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the current field-split configuration.</dd>
           </dl>
@@ -400,7 +400,7 @@ $ x $
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5e51a6eb3e263949c8005313a4b1da1" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">MPI_<wbr />Comm</a> comm)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5e51a6eb3e263949c8005313a4b1da1" class="m-doc-self">LinearSystem</a>(</span><span class="m-doc-wrap">MPI_Comm comm)</span></span>
             </h3>
             <p>Constructs an empty linear system on the given communicator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -419,19 +419,28 @@ $ x $
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;
+                template&lt;class DOFScalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc-self">eliminate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3b3aef42a30ae8139a291e8ea184560d" class="m-doc-self">eliminate</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;DOFScalar&gt;&amp; dofs,
+              size_t offset = 0)</span></span>
             </h3>
             <p>Enforces Dirichlet boundary conditions by eliminating constrained DOFs from the linear system.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">DOFScalar</td>
+                  <td>Scalar type of the prescribed boundary values.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">dofs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>dofs&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Map from global DOF index to prescribed value <svg class="m-math" style="width: 0.994em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.545579 6.940636">
 <title>
 $ u_i $
@@ -548,10 +557,10 @@ $ x_i = u_i $
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;
+                template&lt;class DOFScalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76fffd53ae3e7d1d631cb2c4043b9a07" class="m-doc-self">merge</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DOFScalar</a>&gt;&gt;&gt;&amp; dofs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> offset = 0)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76fffd53ae3e7d1d631cb2c4043b9a07" class="m-doc-self">merge</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;DOFScalar&gt;&gt;&gt;&amp; dofs,
+              size_t offset = 0)</span></span>
             </h3>
             <p>Merges periodic DOF constraints into the linear system.</p>
 <aside class="m-note m-info"><h4>Note</h4><p>Currently unimplemented — throws at runtime.</p></aside>

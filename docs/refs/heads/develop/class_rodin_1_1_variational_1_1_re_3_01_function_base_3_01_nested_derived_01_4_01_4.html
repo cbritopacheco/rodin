@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_re_8h.html">&lt;Rodin/Variational/Re.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Re&lt;FunctionBase&lt;NestedDerived&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Specialization for FunctionBase operands.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">NestedDerived</td>
+              <td>Nested derived type</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -98,7 +109,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for real-valued functions defined on a mesh.</dd>
@@ -108,11 +119,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a16dc6738796f53f21660115e0d857df0">
-              using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;
+              using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Operand type.</dd>
             <dt id="a3e20d81d6a13bb5b5a793174d862adfa">
-              using <a href="#a3e20d81d6a13bb5b5a793174d862adfa" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;&gt;&gt;
+              using <a href="#a3e20d81d6a13bb5b5a793174d862adfa" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -121,11 +132,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a24eff9b5243c67f0cb1099f39e77282b" class="m-doc">Re</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; f)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a24eff9b5243c67f0cb1099f39e77282b" class="m-doc">Re</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; f)</span>
             </dt>
             <dd>Constructs Re from a complex function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a165086ade84b924c73147c78239e1983" class="m-doc">Re</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a165086ade84b924c73147c78239e1983" class="m-doc">Re</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -138,16 +149,16 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the real part at a point.</dd>
             <dt id="ac169e137dace382ec4a56a68c4b1177c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -161,9 +172,9 @@
           <section class="m-doc-details" id="a24eff9b5243c67f0cb1099f39e77282b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24eff9b5243c67f0cb1099f39e77282b" class="m-doc-self">Re</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; f)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24eff9b5243c67f0cb1099f39e77282b" class="m-doc-self">Re</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; f)</span></span>
             </h3>
             <p>Constructs Re from a complex function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -181,9 +192,9 @@
           <section class="m-doc-details" id="a165086ade84b924c73147c78239e1983"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a165086ade84b924c73147c78239e1983" class="m-doc-self">Re</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a165086ade84b924c73147c78239e1983" class="m-doc-self">Re</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,9 +212,9 @@
           <section class="m-doc-details" id="ab2ffcee7428bf6bcb5b8e271163e2096"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2ffcee7428bf6bcb5b8e271163e2096" class="m-doc-self">Re</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2ffcee7428bf6bcb5b8e271163e2096" class="m-doc-self">Re</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -221,9 +232,9 @@
           <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the operand function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -238,10 +249,10 @@
           <section class="m-doc-details" id="a3ea66bc47d99e4bdba4fbfde47a7ad0f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;
+                template&lt;class NestedDerived&gt;
+                template&lt;class Point&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the real part at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -313,9 +324,9 @@ $ f(p) = u(p) + iv(p) $
           <section class="m-doc-details" id="a1ebbdcd3f543a5732c13545e02741922"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>* Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ebbdcd3f543a5732c13545e02741922" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_re.html" class="m-doc">Re</a>* Rodin::<wbr />Variational::<wbr />Re&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ebbdcd3f543a5732c13545e02741922" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">

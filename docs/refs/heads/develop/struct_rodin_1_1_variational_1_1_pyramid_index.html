@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8hpp.html">&lt;Rodin/Variational/H1/H1Element.hpp&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K&gt;</div>
+          <div class="m-doc-template">template&lt;size_t K&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>PyramidIndex <span class="m-thin">struct</span>
         </h1>
         <p>Indexing of the tensor-product modes on the reference pyramid.</p>
@@ -106,7 +106,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="afadd0793c70597a3536b4cb6d6153706">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#afadd0793c70597a3536b4cb6d6153706" class="m-doc-self">Count</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#afadd0793c70597a3536b4cb6d6153706" class="m-doc-self">Count</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of entries.</dd>
           </dl>
@@ -115,29 +115,29 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt id="a00990ba2772728ed92e9ccd72f9bea6f">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a00990ba2772728ed92e9ccd72f9bea6f" class="m-doc-self">getLayerOffset</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> layer) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a00990ba2772728ed92e9ccd72f9bea6f" class="m-doc-self">getLayerOffset</a>(</span><span class="m-doc-wrap">size_t layer) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the index offset of a pyramid layer.</dd>
             <dt id="af6aad5abdb272be8e0a364aefc22c89e">
-              <span class="m-doc-wrap-bumper">static auto <a href="#af6aad5abdb272be8e0a364aefc22c89e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> j,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> k) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#af6aad5abdb272be8e0a364aefc22c89e" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j,
+              size_t k) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the linear index of a tensor-product mode.</dd>
             <dt id="a75a73695b45d04de3cedd3431292f321">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a75a73695b45d04de3cedd3431292f321" class="m-doc-self">decode</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> idx,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&amp; i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&amp; j,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&amp; k) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#a75a73695b45d04de3cedd3431292f321" class="m-doc-self">decode</a>(</span><span class="m-doc-wrap">size_t idx,
+              size_t&amp; i,
+              size_t&amp; j,
+              size_t&amp; k) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Decodes a linear index into its tensor-product indices.</dd>
             <dt id="a67d10510b647e0d534d2511e79225fcb">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a67d10510b647e0d534d2511e79225fcb" class="m-doc-self">getTriangleLattice</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> alpha) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="struct_rodin_1_1_variational_1_1_pyramid_index_1_1_i_j.html" class="m-doc">IJ</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a67d10510b647e0d534d2511e79225fcb" class="m-doc-self">getTriangleLattice</a>(</span><span class="m-doc-wrap">size_t alpha) -&gt; <a href="struct_rodin_1_1_variational_1_1_pyramid_index_1_1_i_j.html" class="m-doc">IJ</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of modes on a triangular lattice.</dd>
             <dt id="abf7a5de4046671f75b591213bbd24802">
-              <span class="m-doc-wrap-bumper">static auto <a href="#abf7a5de4046671f75b591213bbd24802" class="m-doc-self">getSideIndex</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> alpha) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#abf7a5de4046671f75b591213bbd24802" class="m-doc-self">getSideIndex</a>(</span><span class="m-doc-wrap">size_t local,
+              size_t alpha) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the index of a mode on a pyramid side.</dd>
           </dl>

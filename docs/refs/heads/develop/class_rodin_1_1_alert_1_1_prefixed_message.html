@@ -75,10 +75,21 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Prefix</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Prefix&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>PrefixedMessage <span class="m-thin">class</span>
         </h1>
         <p>Convenience message for custom Alert prefixes.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Prefix</td>
+              <td>Prefix type derived from MessagePrefix.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -97,7 +108,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Prefix</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;Prefix&gt;</a>
             </dt>
             <dd>Forward declaration of the Message template class.</dd>
@@ -107,7 +118,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aec820a3e2042896f7e838939adebce19">
-              using <a href="#aec820a3e2042896f7e838939adebce19" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Prefix</a>&gt;
+              using <a href="#aec820a3e2042896f7e838939adebce19" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&lt;Prefix&gt;
             </dt>
             <dd>Parent class type alias.</dd>
           </dl>
@@ -130,9 +141,9 @@
           <section class="m-doc-details" id="a1c8f330c363b2129232a1fae131d3b64"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Prefix</a> _1&gt;
+                template&lt;class Prefix&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />PrefixedMessage&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c8f330c363b2129232a1fae131d3b64" class="m-doc-self">PrefixedMessage</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />PrefixedMessage&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c8f330c363b2129232a1fae131d3b64" class="m-doc-self">PrefixedMessage</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Constructs a message that writes to the given output stream.</p>
             <table class="m-table m-fullwidth m-flat">

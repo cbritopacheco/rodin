@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_parameter_pack_8h.html">&lt;Rodin/Utility/ParameterPack.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">T1</a>&gt;</div>
+          <div class="m-doc-template">template&lt;template&lt;class&gt; class Predicate, class T1&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility_1_1_internal.html">Internal</a>::<wbr/></span>AllImpl&lt;Predicate, T1&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Base case for a single type.</p>
@@ -88,6 +88,10 @@
             <tr>
               <td style="width: 1%">Predicate</td>
               <td>The predicate to apply.</td>
+            </tr>
+            <tr>
+              <td>T1</td>
+              <td>The single type to check.</td>
             </tr>
           </tbody>
         </table>
@@ -106,7 +110,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="aed73e3f6e652e576fbf3acdd9f3a9acb">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <a href="#aed73e3f6e652e576fbf3acdd9f3a9acb" class="m-doc-self">Value</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static bool <a href="#aed73e3f6e652e576fbf3acdd9f3a9acb" class="m-doc-self">Value</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Result of applying the predicate to T1.</dd>
           </dl>

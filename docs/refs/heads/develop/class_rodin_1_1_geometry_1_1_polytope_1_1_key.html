@@ -126,7 +126,7 @@
             </dt>
             <dd>Reference to a vertex index.</dd>
             <dt id="ae0b9b86c7a1031d40f3da5daf9ab7a69">
-              using <a href="#ae0b9b86c7a1031d40f3da5daf9ab7a69" class="m-doc-self">const_reference</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;
+              using <a href="#ae0b9b86c7a1031d40f3da5daf9ab7a69" class="m-doc-self">const_reference</a> = const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;
             </dt>
             <dd>Const reference to a vertex index.</dd>
             <dt id="aee75483e46694f603087d1ac11cb045f">
@@ -139,12 +139,12 @@
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt id="a542233acc96a6a742beb57c73583b20c">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a542233acc96a6a742beb57c73583b20c" class="m-doc-self">sm64</a>(</span><span class="m-doc-wrap">std::uint64_t x) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> std::uint64_t <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a542233acc96a6a742beb57c73583b20c" class="m-doc-self">sm64</a>(</span><span class="m-doc-wrap">std::uint64_t x) -&gt; std::uint64_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>SplitMix64 bit-mixing hash of a 64-bit value.</dd>
             <dt id="aeecc8f7fa5ff390b5e63f6807fce2b4b">
-              <span class="m-doc-wrap-bumper">static auto <a href="#aeecc8f7fa5ff390b5e63f6807fce2b4b" class="m-doc-self">cswap</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; a,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; b) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">static void <a href="#aeecc8f7fa5ff390b5e63f6807fce2b4b" class="m-doc-self">cswap</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; a,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; b) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sorts <code>a</code> and <code>b</code> into non-decreasing order.</dd>
           </dl>
@@ -174,7 +174,7 @@
             </dt>
             <dd>Returns a reference to vertex index <code>i</code>.</dd>
             <dt id="aff3425bd8555bfc431e5074b110862ab">
-              <span class="m-doc-wrap-bumper">auto <a href="#aff3425bd8555bfc431e5074b110862ab" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aff3425bd8555bfc431e5074b110862ab" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
             </dt>
             <dd>Returns a const reference to vertex index <code>i</code>.</dd>
             <dt id="aa46eb493b87ce51e45db964d605addfb">
@@ -182,7 +182,7 @@
             </dt>
             <dd>Returns a reference to vertex index <code>i</code>.</dd>
             <dt id="a89d22b7341e63a2b6e52bcd5198ef53d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a89d22b7341e63a2b6e52bcd5198ef53d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a89d22b7341e63a2b6e52bcd5198ef53d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
             </dt>
             <dd>Returns a const reference to vertex index <code>i</code>.</dd>
             <dt id="a4943ca670cbf2546197e947970db156c">
@@ -194,7 +194,7 @@
             </dt>
             <dd>Returns the number of vertices.</dd>
             <dt id="afba173cbbb64c077ff36edbff38b4e7f">
-              <span class="m-doc-wrap-bumper">auto <a href="#afba173cbbb64c077ff36edbff38b4e7f" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc">Vertices</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afba173cbbb64c077ff36edbff38b4e7f" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc">Vertices</a>&amp;</span>
             </dt>
             <dd>Returns the underlying fixed-capacity vertex array.</dd>
             <dt id="a0a75fa91f74431a633d5801c541716b9">
@@ -214,9 +214,9 @@
             </dt>
             <dd>Returns a const iterator past the last vertex index.</dd>
             <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
             </dt>
             <dd>Serializes the key (for boost::serialization).</dd>
           </dl>

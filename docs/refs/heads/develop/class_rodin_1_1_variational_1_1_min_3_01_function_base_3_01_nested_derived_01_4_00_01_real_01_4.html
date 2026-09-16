@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_min_8h.html">&lt;Rodin/Variational/Min.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt; <span class="m-thin">class</span>
         </h1>
         <p>Pointwise minimum of a function expression.</p>
@@ -89,6 +89,7 @@
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -98,7 +99,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&gt;</a>
             </dt>
             <dd>Base class for real-valued functions defined on a mesh.</dd>
@@ -108,7 +109,7 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_min_3_01_real_00_01_function_base_3_01_nested_derived_01_4_01_4.html" class="m-doc">Min&lt;Real, FunctionBase&lt;NestedDerived&gt;&gt;</a>
             </dt>
             <dd>Pointwise minimum of a function expression.</dd>
@@ -118,7 +119,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a435665d42401d98ced37cacfb3fae679">
-              using <a href="#a435665d42401d98ced37cacfb3fae679" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;
+              using <a href="#a435665d42401d98ced37cacfb3fae679" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a515179486a633cd3bd8acc6d313ed50d">
@@ -130,46 +131,51 @@
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ac539e96f380b22a5373de6edbdfee3d7">
-              using <a href="#ac539e96f380b22a5373de6edbdfee3d7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;, <a href="#aba2951c64d21783c67211ad88fc7698f" class="m-doc">RHSType</a>&gt;&gt;
+              using <a href="#ac539e96f380b22a5373de6edbdfee3d7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;, <a href="#aba2951c64d21783c67211ad88fc7698f" class="m-doc">RHSType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a333440905c7240800306e0c7ca534431" class="m-doc">Min</a>(</span><span class="m-doc-wrap">const <a href="#a435665d42401d98ced37cacfb3fae679" class="m-doc">LHSType</a>&amp; a,
+              const <a href="#aba2951c64d21783c67211ad88fc7698f" class="m-doc">RHSType</a>&amp; b) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs minimum operator for function and scalar.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afddec6fd486d9b42dcd7299d2ec6e777" class="m-doc">Min</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afefb7ece36f73a86651547d72827693c" class="m-doc">Min</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a333440905c7240800306e0c7ca534431" class="m-doc">Min</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a435665d42401d98ced37cacfb3fae679" class="m-doc">LHSType</a>&amp; a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aba2951c64d21783c67211ad88fc7698f" class="m-doc">RHSType</a>&amp; b) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs minimum operator for function and scalar.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afddec6fd486d9b42dcd7299d2ec6e777" class="m-doc">Min</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afefb7ece36f73a86651547d72827693c" class="m-doc">Min</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a83eb8a1f7b63231214433f2911984936" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attrs) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a83eb8a1f7b63231214433f2911984936" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Restricts evaluation to specified mesh attributes.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates minimum at a point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the function operand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the scalar operand.</dd>
             <dt id="ac169e137dace382ec4a56a68c4b1177c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -183,10 +189,10 @@
           <section class="m-doc-details" id="a333440905c7240800306e0c7ca534431"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a333440905c7240800306e0c7ca534431" class="m-doc-self">Min</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a435665d42401d98ced37cacfb3fae679" class="m-doc">LHSType</a>&amp; a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aba2951c64d21783c67211ad88fc7698f" class="m-doc">RHSType</a>&amp; b) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a333440905c7240800306e0c7ca534431" class="m-doc-self">Min</a>(</span><span class="m-doc-wrap">const <a href="#a435665d42401d98ced37cacfb3fae679" class="m-doc">LHSType</a>&amp; a,
+              const <a href="#aba2951c64d21783c67211ad88fc7698f" class="m-doc">RHSType</a>&amp; b) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs minimum operator for function and scalar.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -208,9 +214,9 @@
           <section class="m-doc-details" id="afddec6fd486d9b42dcd7299d2ec6e777"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afddec6fd486d9b42dcd7299d2ec6e777" class="m-doc-self">Min</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afddec6fd486d9b42dcd7299d2ec6e777" class="m-doc-self">Min</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -228,9 +234,9 @@
           <section class="m-doc-details" id="afefb7ece36f73a86651547d72827693c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afefb7ece36f73a86651547d72827693c" class="m-doc-self">Min</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afefb7ece36f73a86651547d72827693c" class="m-doc-self">Min</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -248,9 +254,9 @@
           <section class="m-doc-details" id="a83eb8a1f7b63231214433f2911984936"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83eb8a1f7b63231214433f2911984936" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attrs) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>&amp; Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83eb8a1f7b63231214433f2911984936" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attrs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Restricts evaluation to specified mesh attributes.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -274,10 +280,10 @@
           <section class="m-doc-details" id="a3ea66bc47d99e4bdba4fbfde47a7ad0f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;
+                template&lt;class NestedDerived&gt;
+                template&lt;class Point&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates minimum at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -339,9 +345,9 @@ $ c $
           <section class="m-doc-details" id="a78988da19f2a7a0de0eee6e8b15c5699"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78988da19f2a7a0de0eee6e8b15c5699" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the function operand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -356,9 +362,9 @@ $ c $
           <section class="m-doc-details" id="a3328065b74dcf7cefdaa1ff5c723b7a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3328065b74dcf7cefdaa1ff5c723b7a0" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the scalar operand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -373,9 +379,9 @@ $ c $
           <section class="m-doc-details" id="a4f1ff2f1709c074654387bef8a69fcba"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>* Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f1ff2f1709c074654387bef8a69fcba" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_min.html" class="m-doc">Min</a>* Rodin::<wbr />Variational::<wbr />Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f1ff2f1709c074654387bef8a69fcba" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_8h.html">&lt;Rodin/Variational/DirichletBC.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a>, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;</div>
+          <div class="m-doc-template">template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Identification Dirichlet boundary condition, <svg class="m-math" style="width: 4.831em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.376967 11.955168">
@@ -1228,7 +1228,7 @@ $ u $
 <g id='eq54-page1'>
 <use x='0' y='0' xlink:href='#eq54-g0-117'/>
 </g>
-</svg>. The <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Component&lt;ShapeFunctionBase&lt;...&gt;&gt;</a> propagation projects the chosen component, so each slave depends only on the <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+</svg>. The Component&lt;ShapeFunctionBase&lt;...&gt;&gt; propagation projects the chosen component, so each slave depends only on the <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
 $ x $
 </title>
@@ -1573,7 +1573,7 @@ $ d_{g_s}=0 $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase&lt;FormLanguage::Traits&lt;FES1&gt;::ScalarType&gt;</a>
             </dt>
             <dd>Abstract base class for a Dirichlet boundary condition.</dd>
@@ -1583,7 +1583,7 @@ $ d_{g_s}=0 $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class DefectDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_c8aaaad395a16d8d4cad91fb44c279d5.html" class="m-doc">Defect</a>
             </dt>
             <dd>Defect a Dirichlet constraint imposes on the trial function.</dd>
@@ -1592,19 +1592,19 @@ $ d_{g_s}=0 $
             </dt>
             <dd>Type-erased base for the defect a Dirichlet constraint imposes.</dd>
             <dt id="ab177d53f73d6c934069965516fb70831">
-              using <a href="#ab177d53f73d6c934069965516fb70831" class="m-doc-self">FESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a>
+              using <a href="#ab177d53f73d6c934069965516fb70831" class="m-doc-self">FESType</a> = FES1
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="acf5dcbd34c4e6bef48e15b7919c595f4">
-              using <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;
+              using <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;
             </dt>
             <dd>Operand type (the slave trial function)</dd>
             <dt id="a31937da436fad653b28e0e752a434947">
-              using <a href="#a31937da436fad653b28e0e752a434947" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Sp</a>&gt;
+              using <a href="#a31937da436fad653b28e0e752a434947" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;Derived2, FES2, Sp&gt;
             </dt>
             <dd>Value type (the right-hand-side shape function expression)</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type.</dd>
             <dt id="ac06581e89a1f65a3e1c263c3f4ae1a2a">
@@ -1612,31 +1612,31 @@ $ d_{g_s}=0 $
             </dt>
             <dd>Parent class.</dd>
             <dt id="a4846b44876e547c56dc6b4a54565b273">
-              using <a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc-self">IdentifiedDOFs</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Parent::IdentifiedDOFs
+              using <a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc-self">IdentifiedDOFs</a> = typename <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#af39b693c6c459b4722a0080122bfb789" class="m-doc">Parent::<wbr />IdentifiedDOFs</a>
             </dt>
             <dd>Identified-DOFs alternative populated by this specialization.</dd>
             <dt id="a7071696930c93f1d0dcfa0e11754c645">
-              using <a href="#a7071696930c93f1d0dcfa0e11754c645" class="m-doc-self">IdentificationValues</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">Parent::<wbr />IdentificationValues</a>
+              using <a href="#a7071696930c93f1d0dcfa0e11754c645" class="m-doc-self">IdentificationValues</a> = typename <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">Parent::<wbr />IdentificationValues</a>
             </dt>
             <dd>Values identified by a periodic boundary condition.</dd>
             <dt id="a54230e7f255a442fdb943d1a4ddea97e">
-              using <a href="#a54230e7f255a442fdb943d1a4ddea97e" class="m-doc-self">DOFs</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#ab2a613baef734f447c08acbde518997e" class="m-doc">Parent::<wbr />DOFs</a>
+              using <a href="#a54230e7f255a442fdb943d1a4ddea97e" class="m-doc-self">DOFs</a> = typename <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#ab2a613baef734f447c08acbde518997e" class="m-doc">Parent::<wbr />DOFs</a>
             </dt>
             <dd>Variant DOFs type.</dd>
             <dt id="af9f9ef5d4081fd438cba6ccaa30a0547">
-              using <a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc-self">FESMeshType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;::MeshType
+              using <a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc-self">FESMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;::MeshType
             </dt>
             <dd>Mesh type of the finite element space.</dd>
             <dt id="affb7470c501da201aae700d4bca138f5">
-              using <a href="#affb7470c501da201aae700d4bca138f5" class="m-doc-self">FESRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;::RangeType
+              using <a href="#affb7470c501da201aae700d4bca138f5" class="m-doc-self">FESRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab177d53f73d6c934069965516fb70831" class="m-doc">FESType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the finite element space.</dd>
             <dt id="ad980588765c41e2644b1a45742605a38">
-              using <a href="#ad980588765c41e2644b1a45742605a38" class="m-doc-self">FESMeshContextType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc">FESMeshType</a>&gt;::ContextType
+              using <a href="#ad980588765c41e2644b1a45742605a38" class="m-doc-self">FESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc">FESMeshType</a>&gt;::ContextType
             </dt>
             <dd>Execution context of the finite element space mesh.</dd>
             <dt id="a356348fb4e6de63d0f70595575ebdf53">
-              using <a href="#a356348fb4e6de63d0f70595575ebdf53" class="m-doc-self">DefaultAssemblyType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ad980588765c41e2644b1a45742605a38" class="m-doc">FESMeshContextType</a>&gt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />template</a> Type&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;
+              using <a href="#a356348fb4e6de63d0f70595575ebdf53" class="m-doc-self">DefaultAssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ad980588765c41e2644b1a45742605a38" class="m-doc">FESMeshContextType</a>&gt;::template Type&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;
             </dt>
             <dd>Assembly backend chosen by default for this problem.</dd>
             <dt id="a118b130eca49442aa89065f12dbde36f">
@@ -1649,19 +1649,19 @@ $ d_{g_s}=0 $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
+              const <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v)</span>
             </dt>
             <dd>Constructs the homogeneous identification Dirichlet BC.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#af3d24ac00cef3def505f26fd2cc57747" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;&amp; defect)</span>
+              <div class="m-doc-template">template&lt;class DefectDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#af3d24ac00cef3def505f26fd2cc57747" class="m-doc">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
+              const <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;DefectDerived&gt;&amp; defect)</span>
             </dt>
             <dd>Constructs the affine identification Dirichlet BC.</dd>
             <dt id="a76e703df814d3a572a99ff8fce87ad93">
-              <span class="m-doc-wrap-bumper"><a href="#a76e703df814d3a572a99ff8fce87ad93" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a76e703df814d3a572a99ff8fce87ad93" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a062236cdab407bb61c86a72bd1c3b7d9">
@@ -1674,7 +1674,7 @@ $ d_{g_s}=0 $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets <svg class="m-math" style="width: 1.510em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 14.496773 9.962629">
 <title>
@@ -1690,10 +1690,10 @@ $ \Gamma_D $
 </g>
 </svg> to a single boundary attribute.</dd>
             <dt id="a18678b721c947ea5e3fe9c38b05d2df5">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A2</a>, class... As&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a18678b721c947ea5e3fe9c38b05d2df5" class="m-doc-self">on</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A1</a> a1,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A2</a> a2,
-              As... as) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class A1, class A2, class... As&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a18678b721c947ea5e3fe9c38b05d2df5" class="m-doc-self">on</a>(</span><span class="m-doc-wrap">A1 a1,
+              A2 a2,
+              As... as) -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets <svg class="m-math" style="width: 1.510em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 14.496773 9.962629">
 <title>
@@ -1709,7 +1709,7 @@ $ \Gamma_D $
 </g>
 </svg> to the union of multiple attributes.</dd>
             <dt id="afa0c912bce7d05baf70a34106ea15d9f">
-              <span class="m-doc-wrap-bumper">auto <a href="#afa0c912bce7d05baf70a34106ea15d9f" class="m-doc-self">on</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; bdrAttrs) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa0c912bce7d05baf70a34106ea15d9f" class="m-doc-self">on</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; bdrAttrs) -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets <svg class="m-math" style="width: 1.510em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 14.496773 9.962629">
 <title>
@@ -1725,11 +1725,11 @@ $ \Gamma_D $
 </g>
 </svg> to a precomputed attribute set.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac56cdb6df4cf0cbc1ecbe23e1a2666fc" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac56cdb6df4cf0cbc1ecbe23e1a2666fc" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1995c774d971ab0041610829222607a5" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1995c774d971ab0041610829222607a5" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Computes the constraint rows <svg class="m-math" style="width: 10.306em; height: 1.459em; vertical-align: -0.527em;" viewBox="0 -8.966452 98.94047 14.003198">
 <title>
@@ -1775,19 +1775,19 @@ $ \Gamma_D $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9ff62035ee29a2b3729e8cc8c662d787" class="m-doc">isComponent</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ff62035ee29a2b3729e8cc8c662d787" class="m-doc">isComponent</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Checks if this is a component-wise boundary condition.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3fbf416499e0e613293416eae056898e" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3fbf416499e0e613293416eae056898e" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a54230e7f255a442fdb943d1a4ddea97e" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a54230e7f255a442fdb943d1a4ddea97e" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd></dd>
             <dt>
@@ -1795,11 +1795,11 @@ $ \Gamma_D $
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7183418982bd29cd45e56ca117e9c42" class="m-doc">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a7071696930c93f1d0dcfa0e11754c645" class="m-doc">IdentificationValues</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7183418982bd29cd45e56ca117e9c42" class="m-doc">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a7071696930c93f1d0dcfa0e11754c645" class="m-doc">IdentificationValues</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns optional defects for affine identification BCs.</dd>
             <dt id="add9387fec6e5824259ced14e45d7b625">
-              <span class="m-doc-wrap-bumper">auto <a href="#add9387fec6e5824259ced14e45d7b625" class="m-doc-self">getAssembly</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#add9387fec6e5824259ced14e45d7b625" class="m-doc-self">getAssembly</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp;</span>
             </dt>
             <dd>Gets the assembly backend.</dd>
             <dt>
@@ -1813,10 +1813,10 @@ $ \Gamma_D $
           <section class="m-doc-details" id="a1ae3455a726a98546c9368add5bf8569"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae3455a726a98546c9368add5bf8569" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
+              const <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v)</span></span>
             </h3>
             <p>Constructs the homogeneous identification Dirichlet BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1854,12 +1854,12 @@ $ A(v) $
           <section class="m-doc-details" id="af3d24ac00cef3def505f26fd2cc57747"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class DefectDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3d24ac00cef3def505f26fd2cc57747" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;&amp; defect)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3d24ac00cef3def505f26fd2cc57747" class="m-doc-self">DirichletBC</a>(</span><span class="m-doc-wrap">const <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; u,
+              const <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; v,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;DefectDerived&gt;&amp; defect)</span></span>
             </h3>
             <p>Constructs the affine identification Dirichlet BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1991,9 +1991,9 @@ $ \delta u = A(\delta v) + d $
           <section class="m-doc-details" id="a2ce4f113b14abd08c862386b43957f01"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc-self">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ce4f113b14abd08c862386b43957f01" class="m-doc-self">on</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> bdrAtr) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets <svg class="m-math" style="width: 1.510em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 14.496773 9.962629">
 <title>
@@ -2033,9 +2033,9 @@ $ u=A(v) $
           <section class="m-doc-details" id="ac56cdb6df4cf0cbc1ecbe23e1a2666fc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac56cdb6df4cf0cbc1ecbe23e1a2666fc" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac56cdb6df4cf0cbc1ecbe23e1a2666fc" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -2061,9 +2061,9 @@ $ \Gamma_D $
           <section class="m-doc-details" id="a1995c774d971ab0041610829222607a5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Computes the constraint rows <svg class="m-math" style="width: 10.306em; height: 1.459em; vertical-align: -0.527em;" viewBox="0 -8.966452 98.94047 14.003198">
 <title>
@@ -2272,9 +2272,9 @@ $ C_{sj}\neq 0 $
           <section class="m-doc-details" id="a9ff62035ee29a2b3729e8cc8c662d787"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ff62035ee29a2b3729e8cc8c662d787" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ff62035ee29a2b3729e8cc8c662d787" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Checks if this is a component-wise boundary condition.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -2289,9 +2289,9 @@ $ C_{sj}\neq 0 $
           <section class="m-doc-details" id="ac2647027477ec8e2da66c72295909c08"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#acf5dcbd34c4e6bef48e15b7919c595f4" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -2315,9 +2315,9 @@ $ u $
           <section class="m-doc-details" id="a3fbf416499e0e613293416eae056898e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fbf416499e0e613293416eae056898e" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a31937da436fad653b28e0e752a434947" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fbf416499e0e613293416eae056898e" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -2347,9 +2347,9 @@ $ A(v) $
           <section class="m-doc-details" id="a6837fc382be4c12b783f0b6b6402e262"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a54230e7f255a442fdb943d1a4ddea97e" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a54230e7f255a442fdb943d1a4ddea97e" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -2363,9 +2363,9 @@ $ A(v) $
           <section class="m-doc-details" id="a067d7cfa30914b0fc8e1548f23b987dd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Identifiable::<wbr />UUID</a>&gt; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a067d7cfa30914b0fc8e1548f23b987dd" class="m-doc-self">getValueUUID</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d" class="m-doc">Identifiable::<wbr />UUID</a>&gt; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a067d7cfa30914b0fc8e1548f23b987dd" class="m-doc-self">getValueUUID</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -2399,9 +2399,9 @@ $ v $
           <section class="m-doc-details" id="ab7183418982bd29cd45e56ca117e9c42"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a7071696930c93f1d0dcfa0e11754c645" class="m-doc">IdentificationValues</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7183418982bd29cd45e56ca117e9c42" class="m-doc-self">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a7071696930c93f1d0dcfa0e11754c645" class="m-doc">IdentificationValues</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7183418982bd29cd45e56ca117e9c42" class="m-doc-self">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Returns optional defects for affine identification BCs.</p>
 <p>Value-prescribing BCs and homogeneous identification BCs return an empty map. Affine identification BCs override this to provide the known additive defect value for each slave row.</p>
@@ -2409,9 +2409,9 @@ $ v $
           <section class="m-doc-details" id="a4d78a76bfdf79b41e0e29e36dcf5045b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES1</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived2</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FES2</a> _4, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>* Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;_1, _2, _3, _4, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d78a76bfdf79b41e0e29e36dcf5045b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>* Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d78a76bfdf79b41e0e29e36dcf5045b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this BC.</p>
             <table class="m-table m-fullwidth m-flat">

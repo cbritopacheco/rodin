@@ -116,7 +116,7 @@
             </dt>
             <dd>Constructs from a vector of named splits.</dd>
             <dt id="a029ddd0412467005df9263b88c48812e">
-              <span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> FieldSplits&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span>
             </dt>
             <dd>Copy constructor (deep-copies PETSc index sets).</dd>
             <dt id="aaa76572f1b75ec734e99666e4f0946f8">
@@ -133,7 +133,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> FieldSplits&amp; other) -&gt; FieldSplits&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other) -&gt; FieldSplits&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
@@ -145,31 +145,31 @@
             </dt>
             <dd>Returns a mutable reference to the splits vector.</dd>
             <dt id="a9bfd38f18b0dd47e7965fa8b2e4e8e6f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9bfd38f18b0dd47e7965fa8b2e4e8e6f" class="m-doc-self">getSplits</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;Split&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9bfd38f18b0dd47e7965fa8b2e4e8e6f" class="m-doc-self">getSplits</a>(</span><span class="m-doc-wrap">) const -&gt; const std::vector&lt;Split&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a read-only reference to the splits vector.</dd>
             <dt id="a03bfacfaaba9195e4498375659f43531">
-              <span class="m-doc-wrap-bumper">auto <a href="#a03bfacfaaba9195e4498375659f43531" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a03bfacfaaba9195e4498375659f43531" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Destroys all owned PETSc index sets and clears the splits.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc">copyFrom</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> FieldSplits&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc">copyFrom</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span>
             </dt>
             <dd>Deep-copies splits from another FieldSplits object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) -&gt; Split&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">size_t i) -&gt; Split&amp;</span>
             </dt>
             <dd>Returns a mutable reference to the split at index <code>i</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a02f73d5fed5d1a8cc969ec36ddec726e" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Split&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a02f73d5fed5d1a8cc969ec36ddec726e" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const Split&amp;</span>
             </dt>
             <dd>Returns a read-only reference to the split at index <code>i</code>.</dd>
             <dt id="a3caedb145a667c26028740417dcf32c3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3caedb145a667c26028740417dcf32c3" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3caedb145a667c26028740417dcf32c3" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of splits.</dd>
             <dt id="a3f6fc5de06a318920d84f3c3742db07f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3f6fc5de06a318920d84f3c3742db07f" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f6fc5de06a318920d84f3c3742db07f" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if there are no splits.</dd>
           </dl>
@@ -201,7 +201,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">FieldSplits&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> FieldSplits&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper">FieldSplits&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e4f21b9f15221b46ddc793636e20bc3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -253,7 +253,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc-self">copyFrom</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> FieldSplits&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc-self">copyFrom</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span></span>
             </h3>
             <p>Deep-copies splits from another FieldSplits object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -273,7 +273,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Split&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i)</span></span>
+              <span class="m-doc-wrap-bumper">Split&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i)</span></span>
             </h3>
             <p>Returns a mutable reference to the split at index <code>i</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -299,7 +299,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Split&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02f73d5fed5d1a8cc969ec36ddec726e" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const</span></span>
+              <span class="m-doc-wrap-bumper">const Split&amp; Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02f73d5fed5d1a8cc969ec36ddec726e" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
             </h3>
             <p>Returns a read-only reference to the split at index <code>i</code>.</p>
             <table class="m-table m-fullwidth m-flat">

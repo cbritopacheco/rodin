@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_grad_8h.html">&lt;Rodin/Variational/P1/Grad.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Gradient of a P1 grid function.</p>
@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;, Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for gradient operator implementations.</dd>
@@ -116,7 +116,7 @@
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="ade2110a8617286e223033b2ec69b555f">
-              using <a href="#ade2110a8617286e223033b2ec69b555f" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a59e0b84f076a4b011aebb57a90a85a57" class="m-doc">RangeType</a>&gt;::ScalarType
+              using <a href="#ade2110a8617286e223033b2ec69b555f" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a59e0b84f076a4b011aebb57a90a85a57" class="m-doc">RangeType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="ae0445970d2d5087741c6518a1a7238d2">
@@ -137,7 +137,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the gradient of a P1 function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -151,7 +151,7 @@ $ u $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -164,17 +164,17 @@ $ u $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a1969bd6214db82fbfee0934e6f337378">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1969bd6214db82fbfee0934e6f337378" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1969bd6214db82fbfee0934e6f337378" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates the gradient at a given point.</dd>
             <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt id="a0380397dae890f140ce0a08f95bf5e75">
@@ -188,9 +188,9 @@ $ u $
           <section class="m-doc-details" id="a1a8a11e3409fa2de35f7f2d9cfee664e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;class Scalar, class Mesh, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
             <p>Constructs the gradient of a P1 function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -219,9 +219,9 @@ $ u $
           <section class="m-doc-details" id="ab709e7e5fc05ea0621ef821468875e5f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;class Scalar, class Mesh, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -239,7 +239,7 @@ $ u $
           <section class="m-doc-details" id="af13a14eb0844906b4cc9ff4b46525521"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;class Scalar, class Mesh, class Data&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp;&amp; other)</span></span>
             </h3>
@@ -259,10 +259,10 @@ $ u $
           <section class="m-doc-details" id="a1b4b7eaa334fe6aef66d7629ff427c14"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;class Scalar, class Mesh, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b4b7eaa334fe6aef66d7629ff427c14" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Interpolates the gradient at a given point.</p>
             <table class="m-table m-fullwidth m-flat">

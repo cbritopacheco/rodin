@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_non_linear_form_integrator_8h.html">&lt;Rodin/Variational/NonLinearFormIntegrator.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>NonLinearFormIntegrator <span class="m-thin">class</span>
         </h1>
         <p>CRTP mixin for nonlinear form integrators.</p>
@@ -101,9 +101,9 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <div class="m-doc-template">template&lt;class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
+              const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Returns both residual and tangent contributions as a ProblemBody.</dd>
           </dl>
@@ -113,11 +113,11 @@
           <section class="m-doc-details" id="a817680d8bb9b91737c5dbe931dd90ac4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;
+                template&lt;class Derived&gt;
+                template&lt;class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />NonLinearFormIntegrator&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />NonLinearFormIntegrator&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
+              const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const</span></span>
             </h3>
             <p>Returns both residual and tangent contributions as a ProblemBody.</p>
 <p>Equivalent to <code>Tangent(u, v) + Residual(v)</code>.</p>

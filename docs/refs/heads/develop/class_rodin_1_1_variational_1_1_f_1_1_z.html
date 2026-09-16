@@ -130,7 +130,7 @@ y, z) $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Z&gt;</a>
             </dt>
             <dd>Base class for real-valued functions defined on a mesh.</dd>
@@ -153,7 +153,7 @@ y, z) $
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a16df11563326791e7064d7d19aed8bbe" class="m-doc">Z</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_f_1_1_z.html" class="m-doc">Z</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a16df11563326791e7064d7d19aed8bbe" class="m-doc">Z</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_f_1_1_z.html" class="m-doc">Z</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -166,11 +166,11 @@ y, z) $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the z-coordinate at a point.</dd>
             <dt id="a350edea67dfa070881b66ed34db4c27c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -183,7 +183,7 @@ y, z) $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a16df11563326791e7064d7d19aed8bbe"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />F::<wbr />Z::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16df11563326791e7064d7d19aed8bbe" class="m-doc-self">Z</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_f_1_1_z.html" class="m-doc">Z</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />F::<wbr />Z::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16df11563326791e7064d7d19aed8bbe" class="m-doc-self">Z</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_f_1_1_z.html" class="m-doc">Z</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -217,7 +217,7 @@ y, z) $
           </div></section>
           <section class="m-doc-details" id="aa99abe0e3bf589a8b7e1d9e7c7f6bea9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />F::<wbr />Z::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />F::<wbr />Z::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the z-coordinate at a point.</p>
             <table class="m-table m-fullwidth m-flat">

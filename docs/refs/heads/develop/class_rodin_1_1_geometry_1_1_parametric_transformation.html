@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_parametric_transformation_8h.html">&lt;Rodin/Geometry/ParametricTransformation.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class FE&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>ParametricTransformation <span class="m-thin">class</span>
         </h1>
         <p>Template for finite-element parametric transformations.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">FE</td>
+              <td>Finite element type</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -177,26 +188,26 @@ $\phi_i$
           <dl class="m-doc">
             <dt id="a7a5f034359b7ec241b1a4c620b8bc67f">
               <span class="m-doc-wrap-bumper"><a href="#a7a5f034359b7ec241b1a4c620b8bc67f" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">Geometry::<wbr />PointCloud</a>&amp;&amp; pm,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a>&amp;&amp; fe)</span>
+              FE&amp;&amp; fe)</span>
             </dt>
             <dd>Constructs the transformation from a control-point cloud and a finite element (the control-point count must match the element&#x27;s node count).</dd>
             <dt id="a558898e34fe8a275f4b1e13827ecabc3">
-              <span class="m-doc-wrap-bumper"><a href="#a558898e34fe8a275f4b1e13827ecabc3" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">Geometry::<wbr />PointCloud</a>&amp; pm,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a>&amp; fe)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a558898e34fe8a275f4b1e13827ecabc3" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">Geometry::<wbr />PointCloud</a>&amp; pm,
+              const FE&amp; fe)</span>
             </dt>
             <dd>Constructs the transformation from a control-point cloud and a finite element.</dd>
             <dt id="a3f1885b604ee92173f04adeaf7072e7e">
               <span class="m-doc-wrap-bumper"><a href="#a3f1885b604ee92173f04adeaf7072e7e" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">Geometry::<wbr />PointCloud</a>&amp;&amp; pm,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a>&amp; fe)</span>
+              const FE&amp; fe)</span>
             </dt>
             <dd>Constructs the transformation from a control-point cloud and a finite element.</dd>
             <dt id="addd9d602e180c2621e787aa66f843e32">
-              <span class="m-doc-wrap-bumper"><a href="#addd9d602e180c2621e787aa66f843e32" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; pm,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a>&amp;&amp; fe)</span>
+              <span class="m-doc-wrap-bumper"><a href="#addd9d602e180c2621e787aa66f843e32" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; pm,
+              FE&amp;&amp; fe)</span>
             </dt>
             <dd>Constructs the transformation from a control-point cloud and a finite element.</dd>
             <dt id="a86358291f5e57d43e86f2b1323f70ebd">
-              <span class="m-doc-wrap-bumper"><a href="#a86358291f5e57d43e86f2b1323f70ebd" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a86358291f5e57d43e86f2b1323f70ebd" class="m-doc-self">ParametricTransformation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="acf533fcd03785ead0aff1a07086d0b27">
@@ -209,27 +220,27 @@ $\phi_i$
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa8f59ec4a5ec955e5f9b0dadc1973ef0" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa8f59ec4a5ec955e5f9b0dadc1973ef0" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the polynomial order of the transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae0895b6c6700d26833f04690f179e0aa" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae0895b6c6700d26833f04690f179e0aa" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Computes the physical coordinates from reference coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9c1f788c7113b46d6a1634af681e072f" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a9c1f788c7113b46d6a1634af681e072f" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Computes the Jacobian matrix of the transformation.</dd>
             <dt id="af7e4aaf30b07af605a3b637a9808d297">
-              <span class="m-doc-wrap-bumper">auto <a href="#af7e4aaf30b07af605a3b637a9808d297" class="m-doc-self">getPointMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af7e4aaf30b07af605a3b637a9808d297" class="m-doc-self">getPointMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;</span>
             </dt>
             <dd>Gets the control-point coordinate matrix.</dd>
             <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
             </dt>
             <dd>Serializes the transformation (for boost::serialization).</dd>
             <dt>
@@ -237,18 +248,18 @@ $\phi_i$
             </dt>
             <dd>Creates a polymorphic copy of this transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0f6ceffd6750d81f609b87800fcfb6e8" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a0f6ceffd6750d81f609b87800fcfb6e8" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the physical coordinates from reference coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aac692f4a9e35a899c5e488b806b04f2d" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aac692f4a9e35a899c5e488b806b04f2d" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the Jacobian matrix of the transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) const <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Computes the reference coordinates from physical coordinates.</dd>
           </dl>
@@ -258,9 +269,9 @@ $\phi_i$
           <section class="m-doc-details" id="aa8f59ec4a5ec955e5f9b0dadc1973ef0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8f59ec4a5ec955e5f9b0dadc1973ef0" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8f59ec4a5ec955e5f9b0dadc1973ef0" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the polynomial order of the transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -276,10 +287,10 @@ $\phi_i$
           <section class="m-doc-details" id="ae0895b6c6700d26833f04690f179e0aa"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0895b6c6700d26833f04690f179e0aa" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0895b6c6700d26833f04690f179e0aa" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Computes the physical coordinates from reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -361,10 +372,10 @@ $ s $
           <section class="m-doc-details" id="a9c1f788c7113b46d6a1634af681e072f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c1f788c7113b46d6a1634af681e072f" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c1f788c7113b46d6a1634af681e072f" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Computes the Jacobian matrix of the transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -559,9 +570,9 @@ $ s $
           <section class="m-doc-details" id="a7eb8fad3b975870d121030ed3392a7d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>* Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7eb8fad3b975870d121030ed3392a7d3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>* Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7eb8fad3b975870d121030ed3392a7d3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -577,10 +588,10 @@ $ s $
           <section class="m-doc-details" id="a0f6ceffd6750d81f609b87800fcfb6e8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f6ceffd6750d81f609b87800fcfb6e8" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f6ceffd6750d81f609b87800fcfb6e8" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the physical coordinates from reference coordinates.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -662,10 +673,10 @@ $ s $
           <section class="m-doc-details" id="aac692f4a9e35a899c5e488b806b04f2d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac692f4a9e35a899c5e488b806b04f2d" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac692f4a9e35a899c5e488b806b04f2d" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the Jacobian matrix of the transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -860,10 +871,10 @@ $ s $
           <section class="m-doc-details" id="ae4ab54f76d7dc9b08ca13f3f1eb1f95d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FE</a> _1&gt;
+                template&lt;class FE&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />ParametricTransformation&lt;FE&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Computes the reference coordinates from physical coordinates.</p>
             <table class="m-table m-fullwidth m-flat">

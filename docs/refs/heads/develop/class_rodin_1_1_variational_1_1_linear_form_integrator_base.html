@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_linear_form_integrator_8h.html">&lt;Rodin/Variational/LinearFormIntegrator.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+          <div class="m-doc-template">template&lt;class Number&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearFormIntegratorBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for linear form integrators.</p>
@@ -275,7 +275,7 @@ $ \int_K u_0 \cdot v \, dx $
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_unary_minus_3_01_linear_form_integrator_base_3_01_number_01_4_01_4.html" class="m-doc">UnaryMinus&lt;LinearFormIntegratorBase&lt;Number&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Negation of a linear form integrator.</dd>
@@ -298,17 +298,17 @@ $ \int_K u_0 \cdot v \, dx $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, std::enable_if_t&lt;<a href="struct_rodin_1_1_variational_1_1_is_test_function.html" class="m-doc">IsTestFunction</a>&lt;std::decay_t&lt;TestFunctionType&gt;&gt;::Value, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>&gt; = 0&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a7a3c26156d8b4b442895fcb0acc9ef93" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TestFunctionType&amp; v)</span>
+              <div class="m-doc-template">template&lt;class TestFunctionType, std::enable_if_t&lt;<a href="struct_rodin_1_1_variational_1_1_is_test_function.html" class="m-doc">IsTestFunction</a>&lt;std::decay_t&lt;TestFunctionType&gt;&gt;::Value, int&gt; = 0&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a7a3c26156d8b4b442895fcb0acc9ef93" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const TestFunctionType&amp; v)</span>
             </dt>
             <dd>Constructs a linear form integrator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad9bdd3e674a426d78db74efeb3bd31bf" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ad9bdd3e674a426d78db74efeb3bd31bf" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a6982ff8ddabfed49cc60cf02cf2f8f6f" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;&amp; other)</span>
+              <div class="m-doc-template">template&lt;class OtherNumber&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a6982ff8ddabfed49cc60cf02cf2f8f6f" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp; other)</span>
             </dt>
             <dd>Copy constructor from different scalar type.</dd>
             <dt>
@@ -316,8 +316,8 @@ $ \int_K u_0 \cdot v \, dx $
             </dt>
             <dd>Move constructor.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a302c7b045554c76c925afda810d1ef22" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;&amp;&amp; other)</span>
+              <div class="m-doc-template">template&lt;class OtherNumber&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a302c7b045554c76c925afda810d1ef22" class="m-doc">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor from different scalar type.</dd>
             <dt id="a5fedb4b8e268ae08a3926a8e9490b892">
@@ -330,26 +330,26 @@ $ \int_K u_0 \cdot v \, dx $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3319ca4dc61343f68e2f5ac7721b00ba" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3319ca4dc61343f68e2f5ac7721b00ba" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp;</span>
             </dt>
             <dd>Gets the test function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
             </dt>
             <dd>Gets the attributes of the integration domain.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acdd90257d932f2691107f8b8b036770e" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acdd90257d932f2691107f8b8b036770e" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
             </dt>
             <dd>Restricts integration to a specific mesh region.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... As&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f7512b0af46736dc5ed3d821a70f57c" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A1</a>&amp; a1,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A2</a>&amp; a2,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">As</a>&amp;... attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class A1, class A2, class ... As&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f7512b0af46736dc5ed3d821a70f57c" class="m-doc">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
             </dt>
             <dd>Restricts integration to multiple mesh regions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab51b392a98fc6705228e37ca8beac381" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab51b392a98fc6705228e37ca8beac381" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;</span>
             </dt>
             <dd>Restricts integration to a set of mesh regions.</dd>
             <dt id="a58d2c9eed0f2d47891079548f1a6d7d9">
@@ -357,15 +357,15 @@ $ \int_K u_0 \cdot v \, dx $
             </dt>
             <dd>Gets the integrator type.</dd>
             <dt id="a3e2cc56a785ee8329807d7407fd76401">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e2cc56a785ee8329807d7407fd76401" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e2cc56a785ee8329807d7407fd76401" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns the polytope the expression is bound to.</dd>
             <dt id="a22832b479c9c755896c4b79b8cf40730">
-              <span class="m-doc-wrap-bumper">auto <a href="#a22832b479c9c755896c4b79b8cf40730" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a22832b479c9c755896c4b79b8cf40730" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Binds the expression to a polytope.</dd>
             <dt id="a8679f07ef842cba7327119d748501eab">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8679f07ef842cba7327119d748501eab" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) -&gt; <a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8679f07ef842cba7327119d748501eab" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t local) -&gt; <a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns an entry of the element vector.</dd>
             <dt>
@@ -383,10 +383,10 @@ $ \int_K u_0 \cdot v \, dx $
           <section class="m-doc-details" id="a7a3c26156d8b4b442895fcb0acc9ef93"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType, std::enable_if_t&lt;<a href="struct_rodin_1_1_variational_1_1_is_test_function.html" class="m-doc">IsTestFunction</a>&lt;std::decay_t&lt;TestFunctionType&gt;&gt;::Value, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>&gt; = 0&gt;
+                template&lt;class Number&gt;
+                template&lt;class TestFunctionType, std::enable_if_t&lt;<a href="struct_rodin_1_1_variational_1_1_is_test_function.html" class="m-doc">IsTestFunction</a>&lt;std::decay_t&lt;TestFunctionType&gt;&gt;::Value, int&gt; = 0&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a3c26156d8b4b442895fcb0acc9ef93" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TestFunctionType&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a3c26156d8b4b442895fcb0acc9ef93" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const TestFunctionType&amp; v)</span></span>
             </h3>
             <p>Constructs a linear form integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -415,9 +415,9 @@ $ v $
           <section class="m-doc-details" id="ad9bdd3e674a426d78db74efeb3bd31bf"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9bdd3e674a426d78db74efeb3bd31bf" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9bdd3e674a426d78db74efeb3bd31bf" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -435,10 +435,10 @@ $ v $
           <section class="m-doc-details" id="a6982ff8ddabfed49cc60cf02cf2f8f6f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;
+                template&lt;class Number&gt;
+                template&lt;class OtherNumber&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6982ff8ddabfed49cc60cf02cf2f8f6f" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6982ff8ddabfed49cc60cf02cf2f8f6f" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp; other)</span></span>
             </h3>
             <p>Copy constructor from different scalar type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -456,7 +456,7 @@ $ v $
           <section class="m-doc-details" id="a2004a7b858580a9c2b2c7778397d7022"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2004a7b858580a9c2b2c7778397d7022" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp;&amp; other)</span></span>
             </h3>
@@ -476,10 +476,10 @@ $ v $
           <section class="m-doc-details" id="a302c7b045554c76c925afda810d1ef22"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;
+                template&lt;class Number&gt;
+                template&lt;class OtherNumber&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a302c7b045554c76c925afda810d1ef22" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OtherNumber</a>&gt;&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a302c7b045554c76c925afda810d1ef22" class="m-doc-self">LinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor from different scalar type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -497,9 +497,9 @@ $ v $
           <section class="m-doc-details" id="a3319ca4dc61343f68e2f5ac7721b00ba"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3319ca4dc61343f68e2f5ac7721b00ba" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3319ca4dc61343f68e2f5ac7721b00ba" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the test function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -514,9 +514,9 @@ $ v $
           <section class="m-doc-details" id="ac76cd4c95442baa6361dfa9a0e9ba4a9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the attributes of the integration domain.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -532,9 +532,9 @@ $ v $
           <section class="m-doc-details" id="acdd90257d932f2691107f8b8b036770e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acdd90257d932f2691107f8b8b036770e" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acdd90257d932f2691107f8b8b036770e" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr)</span></span>
             </h3>
             <p>Restricts integration to a specific mesh region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -559,12 +559,12 @@ $ v $
           <section class="m-doc-details" id="a4f7512b0af46736dc5ed3d821a70f57c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... As&gt;
+                template&lt;class Number&gt;
+                template&lt;class A1, class A2, class ... As&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f7512b0af46736dc5ed3d821a70f57c" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A1</a>&amp; a1,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">A2</a>&amp; a2,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">As</a>&amp;... attrs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f7512b0af46736dc5ed3d821a70f57c" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... attrs)</span></span>
             </h3>
             <p>Restricts integration to multiple mesh regions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -596,9 +596,9 @@ $ v $
           <section class="m-doc-details" id="ab51b392a98fc6705228e37ca8beac381"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab51b392a98fc6705228e37ca8beac381" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab51b392a98fc6705228e37ca8beac381" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
             </h3>
             <p>Restricts integration to a set of mesh regions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -623,7 +623,7 @@ $ v $
           <section class="m-doc-details" id="a15f41d8777010696597317c9083b7fc1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;
+                template&lt;class Number&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>* Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15f41d8777010696597317c9083b7fc1" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>

@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Solution, FES&gt;, Variational::FunctionBase&lt;ValueDerived&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>OpenMP value Dirichlet boundary condition assembly.</p>
@@ -97,7 +97,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_index_map_3_01_scalar_01_4_00_01_variational_1_121ca36dce59db69be9bbe6b43bfc8983.html" class="m-doc">AssemblyBase&lt;IndexMap&lt;Scalar&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Solution, FES&gt;, Variational::FunctionBase&lt;ValueDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for value Dirichlet boundary condition assembly.</dd>
@@ -111,11 +111,11 @@
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a1d8603dfe918f728c918edcac861465d">
-              using <a href="#a1d8603dfe918f728c918edcac861465d" class="m-doc-self">TrialFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, FES&gt;
+              using <a href="#a1d8603dfe918f728c918edcac861465d" class="m-doc-self">TrialFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;Solution, FES&gt;
             </dt>
             <dd>Trial function type constrained by the boundary condition.</dd>
             <dt id="ab9705657f0628b7cbbbb7116946f5312">
-              using <a href="#ab9705657f0628b7cbbbb7116946f5312" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a>&gt;
+              using <a href="#ab9705657f0628b7cbbbb7116946f5312" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;ValueDerived&gt;
             </dt>
             <dd>Boundary value function type.</dd>
             <dt id="ab5a915c8c7b8e07b4e6d38c6f6db437e">
@@ -127,11 +127,11 @@
             </dt>
             <dd>Parent class type.</dd>
             <dt id="affb7470c501da201aae700d4bca138f5">
-              using <a href="#affb7470c501da201aae700d4bca138f5" class="m-doc-self">FESRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::RangeType
+              using <a href="#affb7470c501da201aae700d4bca138f5" class="m-doc-self">FESRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the finite element space.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
-              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Parent::InputType
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
             </dt>
             <dd>Assembly input data type.</dd>
           </dl>
@@ -144,7 +144,7 @@
             </dt>
             <dd>Default constructor.</dd>
             <dt id="ae9ff110dd307a2e8d181728439fc88b0">
-              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> OpenMP&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="ab629819992d852fd6c2647d00eee90e6">
@@ -157,16 +157,16 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab0040ca64d7192631f74ffe5779b8ee4" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;Scalar&gt;&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab0040ca64d7192631f74ffe5779b8ee4" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;Scalar&gt;&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Executes value Dirichlet boundary condition assembly.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the effective thread count.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc">setThreadCount</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> threadCount) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc">setThreadCount</a>(</span><span class="m-doc-wrap">size_t threadCount) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets the thread count.</dd>
             <dt>
@@ -180,10 +180,10 @@
           <section class="m-doc-details" id="ab0040ca64d7192631f74ffe5779b8ee4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a> _4&gt;
+                template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, _2, FES, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0040ca64d7192631f74ffe5779b8ee4" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;Scalar&gt;&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0040ca64d7192631f74ffe5779b8ee4" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;Scalar&gt;&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Executes value Dirichlet boundary condition assembly.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -205,9 +205,9 @@
           <section class="m-doc-details" id="a2c80d9cf01a06038bc42cf79d1af63df"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a> _4&gt;
+                template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, _2, FES, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the effective thread count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -222,9 +222,9 @@
           <section class="m-doc-details" id="a055edffa61ed185af6a148b38f82144f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a> _4&gt;
+                template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, _2, FES, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> threadCount) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t threadCount) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the thread count.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -248,9 +248,9 @@
           <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">ValueDerived</a> _4&gt;
+                template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, _2, FES, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;Scalar&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Solution, FES&gt;, Variational::<wbr />FunctionBase&lt;ValueDerived&gt;&gt;&gt;&lt;Scalar, Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">

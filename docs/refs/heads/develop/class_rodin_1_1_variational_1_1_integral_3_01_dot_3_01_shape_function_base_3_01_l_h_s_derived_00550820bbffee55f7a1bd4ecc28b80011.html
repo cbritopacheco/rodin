@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_integral_8h.html">&lt;Rodin/Variational/Integral.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Integration of the dot product of a trial and test operators.</p>
@@ -204,7 +204,7 @@ $ V_h $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
             </dt>
             <dd>Local bilinear-form quadrature for the dot product of a trial and a test shape function.</dd>
@@ -214,11 +214,11 @@ $ V_h $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ae5b1950ddf04107632612563727b81aa">
-              using <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, TrialSpace&gt;
+              using <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, TrialFES, TrialSpace&gt;
             </dt>
             <dd>Type of the left operand of the dot product.</dd>
             <dt id="a9ae414697d3a4986c49f3b31e5b4c114">
-              using <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>, TestSpace&gt;
+              using <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, TestFES, TestSpace&gt;
             </dt>
             <dd>Type of the right operand of the dot product.</dd>
             <dt id="a17f4c13495b1edea562f9b757bc3ff76">
@@ -235,16 +235,16 @@ $ V_h $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc">Integral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span>
             </dt>
             <dd>Integral of the dot product of trial and test operators.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac338fa679f846f2bd97d94e7cbb6fdd7" class="m-doc">Integral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; prod)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac338fa679f846f2bd97d94e7cbb6fdd7" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; prod)</span>
             </dt>
             <dd>Integral of the dot product of trial and test operators.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc">Integral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -271,10 +271,10 @@ $ V_h $
           <section class="m-doc-details" id="a1c7d36abac12cb4eb98e2aa51f5a27f0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _4&gt;
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span></span>
             </h3>
             <p>Integral of the dot product of trial and test operators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -363,9 +363,9 @@ $ B(v) $
           <section class="m-doc-details" id="ac338fa679f846f2bd97d94e7cbb6fdd7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _4&gt;
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac338fa679f846f2bd97d94e7cbb6fdd7" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; prod)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac338fa679f846f2bd97d94e7cbb6fdd7" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; prod)</span></span>
             </h3>
             <p>Integral of the dot product of trial and test operators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -418,9 +418,9 @@ $ B(v) $
           <section class="m-doc-details" id="afe615834f41161ec55dbbaae0ecc21b5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _4&gt;
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -438,9 +438,9 @@ $ B(v) $
           <section class="m-doc-details" id="a15976049dc2524abebbe923a9c82badb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _4&gt;
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -458,9 +458,9 @@ $ B(v) $
           <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _4&gt;
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the integration region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -492,9 +492,9 @@ $ K \in \mathcal{T}_h $
           <section class="m-doc-details" id="a4a70b1d9fada649341a2a2cf97479b4f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _4&gt;
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this integral.</p>
             <table class="m-table m-fullwidth m-flat">

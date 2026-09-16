@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_iterator_8h.html">&lt;Rodin/Geometry/PolytopeIterator.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class T, class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PolytopeIteratorBase <span class="m-thin">class</span>
         </h1>
         <p>Base class template for polytope iterators.</p>
@@ -88,6 +88,10 @@
             <tr>
               <td style="width: 1%">T</td>
               <td>Type of polytope (Polytope, Cell, Face, or Vertex)</td>
+            </tr>
+            <tr>
+              <td>Derived</td>
+              <td>Derived iterator class</td>
             </tr>
           </tbody>
         </table>
@@ -119,13 +123,13 @@
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a28f662c0236f2e59cef33fa36c843bf6" class="m-doc">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dimension,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              <span class="m-doc-wrap-bumper"><a href="#a28f662c0236f2e59cef33fa36c843bf6" class="m-doc">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">size_t dimension,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
               <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span>
             </dt>
             <dd>Constructs an iterator for polytopes of given dimension.</dd>
             <dt id="ae2151725ef7c1982b4c4bba5249d0a3d">
-              <span class="m-doc-wrap-bumper"><a href="#ae2151725ef7c1982b4c4bba5249d0a3d" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae2151725ef7c1982b4c4bba5249d0a3d" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy constructor (deleted).</dd>
             <dt id="ac7770d49e20baef2b7d365f49a4eb90b">
@@ -146,19 +150,19 @@
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af729c6dc6f0946ed62d77f891bc2ccbf" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af729c6dc6f0946ed62d77f891bc2ccbf" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd>Checks if iterator has reached the end.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5dc20aa91709453024849d45351245bf" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5dc20aa91709453024849d45351245bf" class="m-doc">operator++</a>(</span><span class="m-doc-wrap">) -&gt; Derived&amp;</span>
             </dt>
             <dd>Pre-increment operator (advances to next polytope).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a64739e85c2e6880359a194b23ce0b5d0" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a64739e85c2e6880359a194b23ce0b5d0" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">) const -&gt; const T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Dereferences iterator to get current polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7e84d95ae6045721f4c97508a1050eb7" class="m-doc">operator-&gt;</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T* <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e84d95ae6045721f4c97508a1050eb7" class="m-doc">operator-&gt;</a>(</span><span class="m-doc-wrap">) const -&gt; const T* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Member access operator for current polytope.</dd>
             <dt>
@@ -166,15 +170,15 @@
             </dt>
             <dd>Releases ownership of current polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the dimension of polytopes being iterated.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Gets the mesh being iterated.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ee542e13c7ba9bc077c24b0d09d4c23" class="m-doc">getIndexGenerator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ee542e13c7ba9bc077c24b0d09d4c23" class="m-doc">getIndexGenerator</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;</span>
             </dt>
             <dd>Gets the index generator (const).</dd>
             <dt>
@@ -182,7 +186,7 @@
             </dt>
             <dd>Gets the index generator (mutable).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a801503528536ba647f223a30ea57ded2" class="m-doc">key</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a801503528536ba647f223a30ea57ded2" class="m-doc">key</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
             </dt>
             <dd>Gets the current polytope key.</dd>
             <dt>
@@ -196,10 +200,10 @@
           <section class="m-doc-details" id="a28f662c0236f2e59cef33fa36c843bf6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28f662c0236f2e59cef33fa36c843bf6" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> dimension,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28f662c0236f2e59cef33fa36c843bf6" class="m-doc-self">PolytopeIteratorBase</a>(</span><span class="m-doc-wrap">size_t dimension,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; mesh,
               <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp;&amp; gen)</span></span>
             </h3>
             <p>Constructs an iterator for polytopes of given dimension.</p>
@@ -226,9 +230,9 @@
           <section class="m-doc-details" id="a67b76affb3b5d35fa419ac234144038b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67b76affb3b5d35fa419ac234144038b" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67b76affb3b5d35fa419ac234144038b" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Conversion to bool (checks if iterator is valid).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -243,9 +247,9 @@
           <section class="m-doc-details" id="af729c6dc6f0946ed62d77f891bc2ccbf"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af729c6dc6f0946ed62d77f891bc2ccbf" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af729c6dc6f0946ed62d77f891bc2ccbf" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Checks if iterator has reached the end.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,9 +264,9 @@
           <section class="m-doc-details" id="a5dc20aa91709453024849d45351245bf"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc20aa91709453024849d45351245bf" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc20aa91709453024849d45351245bf" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Pre-increment operator (advances to next polytope).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -277,9 +281,9 @@
           <section class="m-doc-details" id="a64739e85c2e6880359a194b23ce0b5d0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64739e85c2e6880359a194b23ce0b5d0" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const T&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64739e85c2e6880359a194b23ce0b5d0" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Dereferences iterator to get current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -294,9 +298,9 @@
           <section class="m-doc-details" id="a7e84d95ae6045721f4c97508a1050eb7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e84d95ae6045721f4c97508a1050eb7" class="m-doc-self">operator-&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e84d95ae6045721f4c97508a1050eb7" class="m-doc-self">operator-&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Member access operator for current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -311,9 +315,9 @@
           <section class="m-doc-details" id="a16c2546e4e201592269d705be40207dc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16c2546e4e201592269d705be40207dc" class="m-doc-self">release</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16c2546e4e201592269d705be40207dc" class="m-doc-self">release</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Releases ownership of current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -329,9 +333,9 @@
           <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the dimension of polytopes being iterated.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -346,9 +350,9 @@
           <section class="m-doc-details" id="aec341f99d334fdd5540adacf3512cdae"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aec341f99d334fdd5540adacf3512cdae" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the mesh being iterated.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -363,9 +367,9 @@
           <section class="m-doc-details" id="a2ee542e13c7ba9bc077c24b0d09d4c23"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ee542e13c7ba9bc077c24b0d09d4c23" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ee542e13c7ba9bc077c24b0d09d4c23" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the index generator (const).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -380,9 +384,9 @@
           <section class="m-doc-details" id="a9652afd996a8792391afa62a91ea12eb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9652afd996a8792391afa62a91ea12eb" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_index_generator_base.html" class="m-doc">IndexGeneratorBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9652afd996a8792391afa62a91ea12eb" class="m-doc-self">getIndexGenerator</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Gets the index generator (mutable).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -397,9 +401,9 @@
           <section class="m-doc-details" id="a801503528536ba647f223a30ea57ded2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a801503528536ba647f223a30ea57ded2" class="m-doc-self">key</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a801503528536ba647f223a30ea57ded2" class="m-doc-self">key</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the current polytope key.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -414,9 +418,9 @@
           <section class="m-doc-details" id="a2816a4292d6f956fd99a10db236f895f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _2&gt;
+                template&lt;class T, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2816a4292d6f956fd99a10db236f895f" class="m-doc-self">generate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">T* Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2816a4292d6f956fd99a10db236f895f" class="m-doc-self">generate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Generates a polytope at the current iterator position.</p>
             <table class="m-table m-fullwidth m-flat">

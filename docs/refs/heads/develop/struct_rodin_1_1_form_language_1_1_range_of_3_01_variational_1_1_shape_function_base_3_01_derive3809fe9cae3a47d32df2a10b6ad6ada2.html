@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_traits_8h.html">&lt;Rodin/Variational/Traits.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>RangeOf&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Range type for ShapeFunctionBase.</p>
@@ -86,7 +86,11 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">FES</td>
+              <td style="width: 1%">Derived</td>
+              <td>Derived shape function class</td>
+            </tr>
+            <tr>
+              <td>FES</td>
               <td>Finite element space type</td>
             </tr>
             <tr>
@@ -111,11 +115,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ad1a91d8ae455afef29476fa06b185e1f">
-              using <a href="#ad1a91d8ae455afef29476fa06b185e1f" class="m-doc-self">ResultType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>, FES, Space&gt;&gt;<a href="#a2af78bbe8af1898906367ab4d5b947ad" class="m-doc">::<wbr />Type</a>
+              using <a href="#ad1a91d8ae455afef29476fa06b185e1f" class="m-doc-self">ResultType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;Derived, FES, Space&gt;&gt;<a href="#a2af78bbe8af1898906367ab4d5b947ad" class="m-doc">::<wbr />Type</a>
             </dt>
             <dd>Result type of the evaluation.</dd>
             <dt id="a2af78bbe8af1898906367ab4d5b947ad">
-              using <a href="#a2af78bbe8af1898906367ab4d5b947ad" class="m-doc-self">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">RangeOf</a>&lt;std::remove_cvref_t&lt;<a href="#ad1a91d8ae455afef29476fa06b185e1f" class="m-doc">ResultType</a>&gt;&gt;::Type
+              using <a href="#a2af78bbe8af1898906367ab4d5b947ad" class="m-doc-self">Type</a> = typename <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">RangeOf</a>&lt;std::remove_cvref_t&lt;<a href="#ad1a91d8ae455afef29476fa06b185e1f" class="m-doc">ResultType</a>&gt;&gt;::Type
             </dt>
             <dd>Deduced result type.</dd>
           </dl>

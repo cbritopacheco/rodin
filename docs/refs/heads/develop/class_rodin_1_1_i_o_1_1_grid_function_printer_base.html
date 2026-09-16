@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionPrinterBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for concrete grid function printers.</p>
@@ -99,7 +99,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
             </dt>
             <dd>Base template for printing objects to streams.</dd>
@@ -126,7 +126,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a4f4e3c513a000863d92c9bec174bd627">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> <a href="#a4f4e3c513a000863d92c9bec174bd627" class="m-doc-self">Format</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> <a href="#a4f4e3c513a000863d92c9bec174bd627" class="m-doc-self">Format</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>File format handled by this printer base.</dd>
           </dl>
@@ -135,7 +135,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span>
             </dt>
             <dd>Constructs a grid function printer base.</dd>
           </dl>
@@ -144,7 +144,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a11c4ca84d818b4c96f829e779509de85">
-              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the grid function bound to this printer.</dd>
           </dl>
@@ -154,9 +154,9 @@
           <section class="m-doc-details" id="a26001d196a781e52461e2679b1c20fd1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc-self">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc-self">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
             </h3>
             <p>Constructs a grid function printer base.</p>
             <table class="m-table m-fullwidth m-flat">

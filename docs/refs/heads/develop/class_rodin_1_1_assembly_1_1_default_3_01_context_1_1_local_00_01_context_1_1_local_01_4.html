@@ -96,8 +96,8 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Object&gt;</div>
-              using <a href="#a84bffd4aa4b581e7d535001dbbb9a53b" class="m-doc">Type</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, Object&gt;
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Object&gt;</div>
+              using <a href="#a84bffd4aa4b581e7d535001dbbb9a53b" class="m-doc">Type</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>&lt;LinearAlgebraType, Object&gt;
             </dt>
             <dd>Default assembly type for mixed local contexts (sequential).</dd>
           </dl>
@@ -108,9 +108,9 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Object&gt;
+                template&lt;class LinearAlgebraType, class Object&gt;
               </div>
-              using Rodin::<wbr />Assembly::<wbr />Default&lt;Context::<wbr />Local, Context::<wbr />Local&gt;::<wbr /><a href="#a84bffd4aa4b581e7d535001dbbb9a53b" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, Object&gt;
+              using Rodin::<wbr />Assembly::<wbr />Default&lt;Context::<wbr />Local, Context::<wbr />Local&gt;::<wbr /><a href="#a84bffd4aa4b581e7d535001dbbb9a53b" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>&lt;LinearAlgebraType, Object&gt;
             </h3>
             <p>Default assembly type for mixed local contexts (sequential).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -119,7 +119,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">Object</td>
+                  <td style="width: 1%">LinearAlgebraType</td>
+                  <td>Target linear algebra type</td>
+                </tr>
+                <tr>
+                  <td>Object</td>
                   <td>Variational form type to assemble</td>
                 </tr>
               </tbody>

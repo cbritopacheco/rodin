@@ -75,10 +75,21 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>NewtonSolver <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Newton solver for state-dependent tangential problems.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">LinearSolver</td>
+              <td>Type of the linear solver used at each Newton step. It must have a <code>FormLanguage::Traits</code> specialization exposing <code>LinearSystemType</code>.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -379,7 +390,7 @@ $ u $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase&lt;LinearSolver&gt;</a>
             </dt>
             <dd>Abstract base class for Newton-type nonlinear solvers.</dd>
@@ -408,27 +419,27 @@ $ u $
             </dt>
             <dd>Reason why the most recent solve terminated.</dd>
             <dt>
-              using <a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a> = std::function&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp;)&gt;
+              using <a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a> = std::function&lt;void(const <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp;)&gt;
             </dt>
             <dd>Type of the optional iteration monitor.</dd>
             <dt id="aaafc0c193d196706a9a9d7c3f7bc56e4">
-              using <a href="#aaafc0c193d196706a9a9d7c3f7bc56e4" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>&gt;
+              using <a href="#aaafc0c193d196706a9a9d7c3f7bc56e4" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase</a>&lt;LinearSolver&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="acc4336a31f05d8852517f8940c7a0a86">
-              using <a href="#acc4336a31f05d8852517f8940c7a0a86" class="m-doc-self">LinearSystemType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#ae73919e2e8a3996889a570b3a9ef6f4f" class="m-doc">Parent::<wbr />LinearSystemType</a>
+              using <a href="#acc4336a31f05d8852517f8940c7a0a86" class="m-doc-self">LinearSystemType</a> = typename <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#ae73919e2e8a3996889a570b3a9ef6f4f" class="m-doc">Parent::<wbr />LinearSystemType</a>
             </dt>
             <dd>Linear system type.</dd>
             <dt id="a206f094e040efc7dc7318d7da18a064f">
-              using <a href="#a206f094e040efc7dc7318d7da18a064f" class="m-doc-self">ProblemBaseType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#ab6098d508adace773204c1e42ece893a" class="m-doc">Parent::<wbr />ProblemBaseType</a>
+              using <a href="#a206f094e040efc7dc7318d7da18a064f" class="m-doc-self">ProblemBaseType</a> = typename <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#ab6098d508adace773204c1e42ece893a" class="m-doc">Parent::<wbr />ProblemBaseType</a>
             </dt>
             <dd>Associated problem base type.</dd>
             <dt id="a72e0ce4f951eac4c298095f6f982d48b">
-              using <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc-self">SolutionType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">Parent::<wbr />SolutionType</a>
+              using <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc-self">SolutionType</a> = typename <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">Parent::<wbr />SolutionType</a>
             </dt>
             <dd>Solution vector type.</dd>
             <dt id="a88c5ec3f403517358042a339d5296216">
-              using <a href="#a88c5ec3f403517358042a339d5296216" class="m-doc-self">LinearSolverType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>
+              using <a href="#a88c5ec3f403517358042a339d5296216" class="m-doc-self">LinearSolverType</a> = LinearSolver
             </dt>
             <dd>Linear solver type used by this Newton solver.</dd>
             <dt id="a0aee0d8bed7019d9b1fdecdb2d1a6b5c">
@@ -441,7 +452,7 @@ $ u $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a8d556e8ab6ba244a261f4060bcfe0545" class="m-doc">NewtonSolver</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>&amp; solver) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a8d556e8ab6ba244a261f4060bcfe0545" class="m-doc">NewtonSolver</a>(</span><span class="m-doc-wrap">LinearSolver&amp; solver) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs a Newton solver from a linear solver reference.</dd>
           </dl>
@@ -486,11 +497,11 @@ $ u $
             </dt>
             <dd>Gets the damping factor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a61fa49d443d46d3e79b1eb21abb0f618" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a61fa49d443d46d3e79b1eb21abb0f618" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp;</span>
             </dt>
             <dd>Sets the maximum number of Newton iterations.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afaa6d04a1e0dc652c710d5ba9922da97" class="m-doc">getMaxIterations</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afaa6d04a1e0dc652c710d5ba9922da97" class="m-doc">getMaxIterations</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the maximum number of Newton iterations.</dd>
             <dt>
@@ -498,7 +509,7 @@ $ u $
             </dt>
             <dd>Sets the optional iteration monitor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a946de55ddbf51d4a0576aeae309021c8" class="m-doc">getMonitor</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a946de55ddbf51d4a0576aeae309021c8" class="m-doc">getMonitor</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the optional iteration monitor.</dd>
             <dt>
@@ -506,28 +517,28 @@ $ u $
             </dt>
             <dd>Sets the optional custom step policy.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc">getStepPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc">getStepPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the optional custom step policy.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the report of the most recent solve.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a87fc7fd9cb0e48fe121cb31915e08b48" class="m-doc">converged</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87fc7fd9cb0e48fe121cb31915e08b48" class="m-doc">converged</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns whether the most recent solve converged.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2fe35f38ff66536b7a056d638cfca0e2" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a2fe35f38ff66536b7a056d638cfca0e2" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the nonlinear problem starting from <code>x</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> GridFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> = std::enable_if_t&lt;         std::is_same_v&lt;           <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&gt;&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&gt;&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span>
             </dt>
             <dd>Solve a nonlinear system using a GridFunction as the solution container.</dd>
           </dl>
@@ -537,9 +548,9 @@ $ u $
           <section class="m-doc-details" id="ab6f3733afe697ffa45ba5cd2b4059da4"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              enum class Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /><a href="#ab6f3733afe697ffa45ba5cd2b4059da4" class="m-doc-self">ConvergedReason</a>
+              enum class Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /><a href="#ab6f3733afe697ffa45ba5cd2b4059da4" class="m-doc-self">ConvergedReason</a>
             </h3>
             <p>Reason why the most recent solve terminated.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -598,9 +609,9 @@ $ u $
           <section class="m-doc-details" id="aa3236c14073e0248accb1b5ab0798c44"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              using Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /><a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc-self">Monitor</a> = std::function&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp;)&gt;
+              using Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /><a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc-self">Monitor</a> = std::function&lt;void(const <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp;)&gt;
             </h3>
             <p>Type of the optional iteration monitor.</p>
 <p>The monitor is called with the current <code>Report</code> after the residual has been evaluated and, when applicable, after the step norm has been computed.</p>
@@ -611,9 +622,9 @@ $ u $
           <section class="m-doc-details" id="a8d556e8ab6ba244a261f4060bcfe0545"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d556e8ab6ba244a261f4060bcfe0545" class="m-doc-self">NewtonSolver</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>&amp; solver) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d556e8ab6ba244a261f4060bcfe0545" class="m-doc-self">NewtonSolver</a>(</span><span class="m-doc-wrap">LinearSolver&amp; solver) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs a Newton solver from a linear solver reference.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -632,9 +643,9 @@ $ u $
           <section class="m-doc-details" id="aedc45bb41e7659a3efc8f61071ee3f93"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>* Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedc45bb41e7659a3efc8f61071ee3f93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>* Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedc45bb41e7659a3efc8f61071ee3f93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -650,9 +661,9 @@ $ u $
           <section class="m-doc-details" id="aa21e7ac937c3f44a2054b59a69778829"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa21e7ac937c3f44a2054b59a69778829" class="m-doc-self">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> atol)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa21e7ac937c3f44a2054b59a69778829" class="m-doc-self">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> atol)</span></span>
             </h3>
             <p>Sets the absolute residual tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -677,9 +688,9 @@ $ u $
           <section class="m-doc-details" id="ac924eb69a305be9bbaef851ded06504a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac924eb69a305be9bbaef851ded06504a" class="m-doc-self">getAbsoluteTolerance</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac924eb69a305be9bbaef851ded06504a" class="m-doc-self">getAbsoluteTolerance</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the absolute residual tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -695,9 +706,9 @@ $ u $
           <section class="m-doc-details" id="aed2c454c4dbc92230144d7f1882ef6fe"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed2c454c4dbc92230144d7f1882ef6fe" class="m-doc-self">setRelativeTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rtol)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed2c454c4dbc92230144d7f1882ef6fe" class="m-doc-self">setRelativeTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rtol)</span></span>
             </h3>
             <p>Sets the relative residual tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -722,9 +733,9 @@ $ u $
           <section class="m-doc-details" id="ab9b1177a6b384eb92fa69cc0111c7d96"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9b1177a6b384eb92fa69cc0111c7d96" class="m-doc-self">getRelativeTolerance</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9b1177a6b384eb92fa69cc0111c7d96" class="m-doc-self">getRelativeTolerance</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the relative residual tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -740,9 +751,9 @@ $ u $
           <section class="m-doc-details" id="ae098838ab06264886dd956b4f255de9b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae098838ab06264886dd956b4f255de9b" class="m-doc-self">setStepTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> stol)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae098838ab06264886dd956b4f255de9b" class="m-doc-self">setStepTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> stol)</span></span>
             </h3>
             <p>Sets the step tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -767,9 +778,9 @@ $ u $
           <section class="m-doc-details" id="ac94a1708c0cbb6807ea86a182bcaf0ab"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac94a1708c0cbb6807ea86a182bcaf0ab" class="m-doc-self">getStepTolerance</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac94a1708c0cbb6807ea86a182bcaf0ab" class="m-doc-self">getStepTolerance</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the step tolerance.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -785,9 +796,9 @@ $ u $
           <section class="m-doc-details" id="ae34baff1e8728f402d832cd215321caa"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae34baff1e8728f402d832cd215321caa" class="m-doc-self">setDampingFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae34baff1e8728f402d832cd215321caa" class="m-doc-self">setDampingFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha)</span></span>
             </h3>
             <p>Sets the constant damping factor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -812,9 +823,9 @@ $ u $
           <section class="m-doc-details" id="a692d914fda11c8d5ecc98086cc254f23"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a692d914fda11c8d5ecc98086cc254f23" class="m-doc-self">getDampingFactor</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a692d914fda11c8d5ecc98086cc254f23" class="m-doc-self">getDampingFactor</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the damping factor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -830,9 +841,9 @@ $ u $
           <section class="m-doc-details" id="a61fa49d443d46d3e79b1eb21abb0f618"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61fa49d443d46d3e79b1eb21abb0f618" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> maxIt)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61fa49d443d46d3e79b1eb21abb0f618" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt)</span></span>
             </h3>
             <p>Sets the maximum number of Newton iterations.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -857,9 +868,9 @@ $ u $
           <section class="m-doc-details" id="afaa6d04a1e0dc652c710d5ba9922da97"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afaa6d04a1e0dc652c710d5ba9922da97" class="m-doc-self">getMaxIterations</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afaa6d04a1e0dc652c710d5ba9922da97" class="m-doc-self">getMaxIterations</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the maximum number of Newton iterations.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -875,9 +886,9 @@ $ u $
           <section class="m-doc-details" id="a38e3e1eba9895de2375394ef5b2ddb81"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38e3e1eba9895de2375394ef5b2ddb81" class="m-doc-self">setMonitor</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a>&gt; monitor)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38e3e1eba9895de2375394ef5b2ddb81" class="m-doc-self">setMonitor</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a>&gt; monitor)</span></span>
             </h3>
             <p>Sets the optional iteration monitor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -902,9 +913,9 @@ $ u $
           <section class="m-doc-details" id="a946de55ddbf51d4a0576aeae309021c8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a946de55ddbf51d4a0576aeae309021c8" class="m-doc-self">getMonitor</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#aa3236c14073e0248accb1b5ab0798c44" class="m-doc">Monitor</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a946de55ddbf51d4a0576aeae309021c8" class="m-doc-self">getMonitor</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the optional iteration monitor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -919,9 +930,9 @@ $ u $
           <section class="m-doc-details" id="a5f2dd7838d77e697f14a20a84454a150"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f2dd7838d77e697f14a20a84454a150" class="m-doc-self">setStepPolicy</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt; policy)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f2dd7838d77e697f14a20a84454a150" class="m-doc-self">setStepPolicy</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt; policy)</span></span>
             </h3>
             <p>Sets the optional custom step policy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -945,9 +956,9 @@ $ u $
           <section class="m-doc-details" id="a0e07de0956f90da15501b44f819cfbfa"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc-self">getStepPolicy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc-self">getStepPolicy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the optional custom step policy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -962,9 +973,9 @@ $ u $
           <section class="m-doc-details" id="a66ae5398a8ac737f37f1595fcec9aa09"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the report of the most recent solve.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -979,9 +990,9 @@ $ u $
           <section class="m-doc-details" id="a87fc7fd9cb0e48fe121cb31915e08b48"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87fc7fd9cb0e48fe121cb31915e08b48" class="m-doc-self">converged</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87fc7fd9cb0e48fe121cb31915e08b48" class="m-doc-self">converged</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns whether the most recent solve converged.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -996,9 +1007,9 @@ $ u $
           <section class="m-doc-details" id="a2fe35f38ff66536b7a056d638cfca0e2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fe35f38ff66536b7a056d638cfca0e2" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fe35f38ff66536b7a056d638cfca0e2" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the nonlinear problem starting from <code>x</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1026,9 +1037,9 @@ $ u $
           <section class="m-doc-details" id="a3e02db55cedf48a5ba1545bc84dfceea"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
+                template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1046,10 +1057,10 @@ $ u $
           <section class="m-doc-details" id="af5a89e139d4f7ceddba01f8ed8a7e837"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> GridFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> = std::enable_if_t&lt;         std::is_same_v&lt;           <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&gt;&gt;&gt;
+                template&lt;class LinearSolver&gt;
+                template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&gt;&gt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span></span>
             </h3>
             <p>Solve a nonlinear system using a GridFunction as the solution container.</p>
             <table class="m-table m-fullwidth m-flat">

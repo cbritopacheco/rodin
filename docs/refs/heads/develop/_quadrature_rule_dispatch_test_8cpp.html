@@ -94,23 +94,23 @@
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4e9e6aa37bd2a9676772785bd7c72311" class="m-doc">TEST</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">QuadratureRuleDispatchTest</a>,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">P1ExpressionsSelectTheirSpecializations</a>)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a4e9e6aa37bd2a9676772785bd7c72311" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadratureRuleDispatchTest,
+              P1ExpressionsSelectTheirSpecializations)</span>
             </dt>
             <dd>Each P1 expression with a specialization selects it.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#af27efd33d4a1e5aa2a4b2e8d464642d1" class="m-doc">checkH1Dispatch</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#af27efd33d4a1e5aa2a4b2e8d464642d1" class="m-doc">checkH1Dispatch</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Each H1 expression with a specialization selects it, at every order.</dd>
             <dt id="a29b9330f91a6e750a5e81a32dd35a418">
-              <span class="m-doc-wrap-bumper"><a href="#a29b9330f91a6e750a5e81a32dd35a418" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">QuadratureRuleDispatchTest</a>,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">H1ExpressionsSelectTheirSpecializations</a>)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a29b9330f91a6e750a5e81a32dd35a418" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadratureRuleDispatchTest,
+              H1ExpressionsSelectTheirSpecializations)</span>
             </dt>
             <dd>Every H1 expression with a specialization selects it, at each order.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1e1acaa3725f9d36fed43f524854b292" class="m-doc">TEST</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">QuadratureRuleDispatchTest</a>,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">UnspecializedExpressionsReportGeneric</a>)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1e1acaa3725f9d36fed43f524854b292" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">QuadratureRuleDispatchTest,
+              UnspecializedExpressionsReportGeneric)</span>
             </dt>
             <dd>Expressions no handler specializes report themselves generic.</dd>
           </dl>
@@ -119,8 +119,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4e9e6aa37bd2a9676772785bd7c72311"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e9e6aa37bd2a9676772785bd7c72311" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">QuadratureRuleDispatchTest</a>,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">P1ExpressionsSelectTheirSpecializations</a>)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e9e6aa37bd2a9676772785bd7c72311" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadratureRuleDispatchTest,
+              P1ExpressionsSelectTheirSpecializations)</span></span>
             </h3>
             <p>Each P1 expression with a specialization selects it.</p>
 <p>The expressions mirror those benchmarked under Integrator/Kernel/P1, so a pattern that stops matching shows up here as a build failure rather than as a silent slowdown there.</p>
@@ -128,17 +128,17 @@
           <section class="m-doc-details" id="af27efd33d4a1e5aa2a4b2e8d464642d1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K&gt;
+                template&lt;size_t K&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27efd33d4a1e5aa2a4b2e8d464642d1" class="m-doc-self">checkH1Dispatch</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27efd33d4a1e5aa2a4b2e8d464642d1" class="m-doc-self">checkH1Dispatch</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Each H1 expression with a specialization selects it, at every order.</p>
 <p>The handlers are templated on the polynomial order, so one order passing does not establish the others: a specialization that accidentally required a particular degree would still match at that degree and silently fall through elsewhere. First, second and third are checked.</p><p>The element is not a variable here. No handler signature mentions a geometry, so which handler is selected cannot depend on one; the elements matter to what the handlers compute, which is checked separately.</p>
           </div></section>
           <section class="m-doc-details" id="a1e1acaa3725f9d36fed43f524854b292"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e1acaa3725f9d36fed43f524854b292" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">QuadratureRuleDispatchTest</a>,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">UnspecializedExpressionsReportGeneric</a>)</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e1acaa3725f9d36fed43f524854b292" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">QuadratureRuleDispatchTest,
+              UnspecializedExpressionsReportGeneric)</span></span>
             </h3>
             <p>Expressions no handler specializes report themselves generic.</p>
 <p>Without these the suite cannot tell &quot;the specialization fires&quot; from &quot;the

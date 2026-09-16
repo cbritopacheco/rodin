@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_quadrature_rule_8h.html">&lt;Rodin/Variational/P1/QuadratureRule.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">CoefficientDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSRange</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSRange</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSMesh</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSMesh</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Integration of the anisotropic Dot product of two instances of the P1 Grad of ShapeFunction.</p>
@@ -249,7 +249,7 @@ $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase&lt;FormLanguage::Traits&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt; ::ScalarType&gt;</a>
             </dt>
             <dd>Base class for bilinear form integrators whose trial and test functions live on the same polytope.</dd>
@@ -259,31 +259,31 @@ $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="adb3f4d377e4959c03c02626e2e52007c">
-              using <a href="#adb3f4d377e4959c03c02626e2e52007c" class="m-doc-self">LHSFESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSRange</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSMesh</a>&gt;
+              using <a href="#adb3f4d377e4959c03c02626e2e52007c" class="m-doc-self">LHSFESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;LHSRange, LHSMesh&gt;
             </dt>
             <dd>Finite element space type of the left-hand side operand.</dd>
             <dt id="ad6ea2943647287f1635d4bb4c93a219f">
-              using <a href="#ad6ea2943647287f1635d4bb4c93a219f" class="m-doc-self">RHSFESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSRange</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSMesh</a>&gt;
+              using <a href="#ad6ea2943647287f1635d4bb4c93a219f" class="m-doc-self">RHSFESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;RHSRange, RHSMesh&gt;
             </dt>
             <dd>Finite element space type of the right-hand side operand.</dd>
             <dt id="a8ac3d345bbc754d44339deb8af73d4af">
-              using <a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc-self">CoefficientType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">CoefficientDerived</a>&gt;
+              using <a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc-self">CoefficientType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;CoefficientDerived&gt;
             </dt>
             <dd>Coefficient type appearing in the integrand.</dd>
             <dt id="ad10989960b3f8de16dd8ce5897a5ed87">
-              using <a href="#ad10989960b3f8de16dd8ce5897a5ed87" class="m-doc-self">MultiplicandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="#adb3f4d377e4959c03c02626e2e52007c" class="m-doc">LHSFESType</a>, TrialSpace&gt;&gt;&gt;
+              using <a href="#ad10989960b3f8de16dd8ce5897a5ed87" class="m-doc-self">MultiplicandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="#adb3f4d377e4959c03c02626e2e52007c" class="m-doc">LHSFESType</a>, TrialSpace&gt;&gt;&gt;
             </dt>
             <dd>Type of the multiplicand in the integrand.</dd>
             <dt id="af336242013bfcb98442ad78cfb6a11f2">
-              using <a href="#af336242013bfcb98442ad78cfb6a11f2" class="m-doc-self">MultiplicandOperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="#adb3f4d377e4959c03c02626e2e52007c" class="m-doc">LHSFESType</a>, TrialSpace&gt;
+              using <a href="#af336242013bfcb98442ad78cfb6a11f2" class="m-doc-self">MultiplicandOperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="#adb3f4d377e4959c03c02626e2e52007c" class="m-doc">LHSFESType</a>, TrialSpace&gt;
             </dt>
             <dd>Type of the multiplicand operand.</dd>
             <dt id="ab581bec1e95dc8947ae3003853882029">
-              using <a href="#ab581bec1e95dc8947ae3003853882029" class="m-doc-self">CoefficientRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc">CoefficientType</a>&gt;::RangeType
+              using <a href="#ab581bec1e95dc8947ae3003853882029" class="m-doc-self">CoefficientRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc">CoefficientType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the coefficient.</dd>
             <dt id="ad6255d4a64e4d6d2b7eae9b6111fc856">
-              using <a href="#ad6255d4a64e4d6d2b7eae9b6111fc856" class="m-doc-self">MultiplicandRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ad10989960b3f8de16dd8ce5897a5ed87" class="m-doc">MultiplicandType</a>&gt;::RangeType
+              using <a href="#ad6255d4a64e4d6d2b7eae9b6111fc856" class="m-doc-self">MultiplicandRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ad10989960b3f8de16dd8ce5897a5ed87" class="m-doc">MultiplicandType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the multiplicand.</dd>
             <dt id="a192e759c2eec9ab138593a59fbabc2f8">
@@ -291,19 +291,19 @@ $
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a0b84286b9fc09feed02a081459e2b8ca">
-              using <a href="#a0b84286b9fc09feed02a081459e2b8ca" class="m-doc-self">MultiplicandOperandRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af336242013bfcb98442ad78cfb6a11f2" class="m-doc">MultiplicandOperandType</a>&gt;::RangeType
+              using <a href="#a0b84286b9fc09feed02a081459e2b8ca" class="m-doc-self">MultiplicandOperandRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af336242013bfcb98442ad78cfb6a11f2" class="m-doc">MultiplicandOperandType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the multiplicand operand.</dd>
             <dt id="a3df015d6a86430927ab5667286479de1">
-              using <a href="#a3df015d6a86430927ab5667286479de1" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="#ad6ea2943647287f1635d4bb4c93a219f" class="m-doc">RHSFESType</a>, TestSpace&gt;&gt;&gt;
+              using <a href="#a3df015d6a86430927ab5667286479de1" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="#ad6ea2943647287f1635d4bb4c93a219f" class="m-doc">RHSFESType</a>, TestSpace&gt;&gt;&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a0b98392a626f7d4a20f33efc31a11b6b">
-              using <a href="#a0b98392a626f7d4a20f33efc31a11b6b" class="m-doc-self">RHSOperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="#ad6ea2943647287f1635d4bb4c93a219f" class="m-doc">RHSFESType</a>, TestSpace&gt;
+              using <a href="#a0b98392a626f7d4a20f33efc31a11b6b" class="m-doc-self">RHSOperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="#ad6ea2943647287f1635d4bb4c93a219f" class="m-doc">RHSFESType</a>, TestSpace&gt;
             </dt>
             <dd>Type of the right-hand side operand.</dd>
             <dt id="af1bc035e66aee342909435d2aeb18446">
-              using <a href="#af1bc035e66aee342909435d2aeb18446" class="m-doc-self">RHSOperandRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0b98392a626f7d4a20f33efc31a11b6b" class="m-doc">RHSOperandType</a>&gt;::RangeType
+              using <a href="#af1bc035e66aee342909435d2aeb18446" class="m-doc-self">RHSOperandRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0b98392a626f7d4a20f33efc31a11b6b" class="m-doc">RHSOperandType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
             <dt id="a17f4c13495b1edea562f9b757bc3ff76">
@@ -311,7 +311,7 @@ $
             </dt>
             <dd>Integrand expression type.</dd>
             <dt id="ad1801848c78c6463c513626ff578a564">
-              using <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&gt;::ScalarType
+              using <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="aa29e69ee2366c2f0499324bb1d42082a">
@@ -324,7 +324,7 @@ $
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a74ca465e855bdc704df1f2357926c6b4">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <a href="#a74ca465e855bdc704df1f2357926c6b4" class="m-doc-self">Specialized</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static bool <a href="#a74ca465e855bdc704df1f2357926c6b4" class="m-doc-self">Specialized</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Reports this handler as an optimized specialization.</dd>
           </dl>
@@ -333,11 +333,11 @@ $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="ab41e10cbaede3e2da1428110e36094a4">
-              <span class="m-doc-wrap-bumper"><a href="#ab41e10cbaede3e2da1428110e36094a4" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab41e10cbaede3e2da1428110e36094a4" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span>
             </dt>
             <dd>Constructs the integrator for the given integrand.</dd>
             <dt id="a52e4d5082ffb29cb85f65b361289fd32">
-              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a93b375d25b4866b567393c99eb40e7a2">
@@ -350,20 +350,20 @@ $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a48340e1460d6b8b6eb354b431923fd3e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a48340e1460d6b8b6eb354b431923fd3e" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a48340e1460d6b8b6eb354b431923fd3e" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the integrand.</dd>
             <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the polytope the integrator is bound to.</dd>
             <dt id="ac590a72fff84d2498983cdfc71eb38d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Binds the integrator to a polytope and tabulates the quadrature on it.</dd>
             <dt id="af65301ad831f65b88eab3086cd8187cb">
-              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> tr,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> te) -&gt; <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) -&gt; <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the element matrix.</dd>
             <dt id="a237ca71ce9684827200e02f7ddb22d3d">
@@ -381,9 +381,9 @@ $
           <section class="m-doc-details" id="a97e8bbec3df10545ba877130c3be5b93"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">CoefficientDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSRange</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSRange</a> _5, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSMesh</a> _6, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSMesh</a> _7&gt;
+                template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;&lt;_1, _2, _3, _4, _5, _6, _7&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;&lt;CoefficientDerived, LHSDerived, RHSDerived, LHSRange, RHSRange, LHSMesh, RHSMesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this integrator.</p>
             <table class="m-table m-fullwidth m-flat">

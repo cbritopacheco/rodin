@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_2_grad_8h.html">&lt;Rodin/Variational/P0/Grad.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;</div>
+          <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Gradient of a P0 GridFunction.</p>
@@ -119,7 +119,7 @@ $ \nabla u|_K = 0 $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;, Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for gradient operator implementations.</dd>
@@ -129,7 +129,7 @@ $ \nabla u|_K = 0 $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aa02baea147b29ab8b662b66f60802c8c">
-              using <a href="#aa02baea147b29ab8b662b66f60802c8c" class="m-doc-self">RangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>
+              using <a href="#aa02baea147b29ab8b662b66f60802c8c" class="m-doc-self">RangeType</a> = Range
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="a5b1b67fa23d06ac07e68bc51a40c0700">
@@ -154,7 +154,7 @@ $ \nabla u|_K = 0 $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the gradient of a P0 function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -168,7 +168,7 @@ $ u $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -181,8 +181,8 @@ $ u $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a3d55c8bef0ccde7bd7ff9b26550405a8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3d55c8bef0ccde7bd7ff9b26550405a8" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a3d55c8bef0ccde7bd7ff9b26550405a8" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates at a geometric point.</dd>
             <dt id="a0380397dae890f140ce0a08f95bf5e75">
@@ -196,9 +196,9 @@ $ u $
           <section class="m-doc-details" id="a1a8a11e3409fa2de35f7f2d9cfee664e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;
+                template&lt;class Range, class Data, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;_1, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8a11e3409fa2de35f7f2d9cfee664e" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
             <p>Constructs the gradient of a P0 function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
@@ -227,9 +227,9 @@ $ u $
           <section class="m-doc-details" id="ab709e7e5fc05ea0621ef821468875e5f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;
+                template&lt;class Range, class Data, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;_1, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab709e7e5fc05ea0621ef821468875e5f" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -247,9 +247,9 @@ $ u $
           <section class="m-doc-details" id="af13a14eb0844906b4cc9ff4b46525521"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh&gt;
+                template&lt;class Range, class Data, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;_1, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af13a14eb0844906b4cc9ff4b46525521" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -94,17 +94,17 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>
             </dt>
             <dd>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>
             </dt>
             <dd>PETSc-aware test function wrapper.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>
             </dt>
             <dd>PETSc-aware trial function wrapper.</dd>
@@ -115,12 +115,12 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
-              using <a href="#a091e212ddada085841e767b220e34f15" class="m-doc">BilinearForm</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Mat</a>&gt;
+              using <a href="#a091e212ddada085841e767b220e34f15" class="m-doc">BilinearForm</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, ::Mat&gt;
             </dt>
             <dd>Convenient PETSc alias for Rodin::Variational::BilinearForm.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
-              using <a href="#ab4debdd239a8b51a3037389ede20e885" class="m-doc">LinearForm</a> = <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a>&lt;FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>&gt;
+              using <a href="#ab4debdd239a8b51a3037389ede20e885" class="m-doc">LinearForm</a> = <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a>&lt;FES, ::Vec&gt;
             </dt>
             <dd>Convenient PETSc alias for Rodin::Variational::LinearForm.</dd>
             <dt>
@@ -138,7 +138,7 @@
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES&gt;
               </div>
-              using Rodin::<wbr />PETSc::<wbr />Variational::<wbr /><a href="#a091e212ddada085841e767b220e34f15" class="m-doc-self">BilinearForm</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Mat</a>&gt;
+              using Rodin::<wbr />PETSc::<wbr />Variational::<wbr /><a href="#a091e212ddada085841e767b220e34f15" class="m-doc-self">BilinearForm</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, ::Mat&gt;
             </h3>
             <p>Convenient PETSc alias for Rodin::Variational::BilinearForm.</p>
           </div></section>
@@ -148,7 +148,7 @@
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              using Rodin::<wbr />PETSc::<wbr />Variational::<wbr /><a href="#ab4debdd239a8b51a3037389ede20e885" class="m-doc-self">LinearForm</a> = <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a>&lt;FES, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>&gt;
+              using Rodin::<wbr />PETSc::<wbr />Variational::<wbr /><a href="#ab4debdd239a8b51a3037389ede20e885" class="m-doc-self">LinearForm</a> = <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a>&lt;FES, ::Vec&gt;
             </h3>
             <p>Convenient PETSc alias for Rodin::Variational::LinearForm.</p>
           </div></section>

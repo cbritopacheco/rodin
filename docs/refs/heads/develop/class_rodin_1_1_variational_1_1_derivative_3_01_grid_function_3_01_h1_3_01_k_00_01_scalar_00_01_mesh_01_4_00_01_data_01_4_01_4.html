@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_2_derivative_8h.html">&lt;Rodin/Variational/H1/Derivative.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;</div>
+          <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Data&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Derivative&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Derivative of an H1&lt;K&gt; GridFunction.</p>
@@ -172,7 +172,7 @@ $ \nabla u $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_derivative_base.html" class="m-doc">DerivativeBase&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;, Derivative&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for directional derivative operators.</dd>
@@ -190,7 +190,7 @@ $ \nabla u $
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afe417e0cced992d188151d859836129f" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afe417e0cced992d188151d859836129f" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="ae0445970d2d5087741c6518a1a7238d2">
@@ -211,12 +211,12 @@ $ \nabla u $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#acc038abede69dec29803613ab14ac741" class="m-doc">Derivative</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#acc038abede69dec29803613ab14ac741" class="m-doc">Derivative</a>(</span><span class="m-doc-wrap">size_t i,
+              const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the partial derivative of an H1&lt;K&gt; function.</dd>
             <dt id="add052e41e354dda16d4d0492003d0c97">
-              <span class="m-doc-wrap-bumper"><a href="#add052e41e354dda16d4d0492003d0c97" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#add052e41e354dda16d4d0492003d0c97" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a354b635290749d985652aed71708b24d">
@@ -229,17 +229,17 @@ $ \nabla u $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="ae5ac80fba1f7da67cb9f0da562648ae0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae5ac80fba1f7da67cb9f0da562648ae0" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae5ac80fba1f7da67cb9f0da562648ae0" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates the partial derivative at a given point.</dd>
             <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt id="ad3ee0037987358de6b132ae4ea4f932d">
@@ -253,10 +253,10 @@ $ \nabla u $
           <section class="m-doc-details" id="acc038abede69dec29803613ab14ac741"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;size_t K, class Scalar, class Mesh, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&lt;K, Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc038abede69dec29803613ab14ac741" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&lt;K, Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc038abede69dec29803613ab14ac741" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">size_t i,
+              const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span></span>
             </h3>
             <p>Constructs the partial derivative of an H1&lt;K&gt; function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -278,10 +278,10 @@ $ \nabla u $
           <section class="m-doc-details" id="aa796d78a8d783df57f79a9770b251d54"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> K, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Mesh, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data&gt;
+                template&lt;size_t K, class Scalar, class Mesh, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&lt;K, Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&lt;K, Scalar, Mesh, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Interpolates the partial derivative at a given point.</p>
             <table class="m-table m-fullwidth m-flat">

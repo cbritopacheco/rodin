@@ -75,10 +75,23 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunctionType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunctionType&gt;</div>
+          <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>WNGIR <span class="m-thin">class</span>
         </h1>
         <p>Backend-independent WNGIR mesh-fitting solver.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>Fits the interface skeleton of a mesh to the zero level set of <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
 $\phi$
@@ -89,7 +102,80 @@ $\phi$
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg> by repeatedly solving a regularized first-derivative metric problem and line-searching the resulting displacement on the true geometry.</p><p>Constructed from backend-matched trial and test functions, the solver uses the ordinary Rodin form-language deduction path for the step <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>, the metric <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>, and <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a>. Every global quantity is a backend-matched GridFunction; only element-local geometry uses <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a> / <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>. WNGIR contains no backend-specific code.</p>
+</svg> by repeatedly solving a regularized first-derivative metric problem and line-searching the resulting displacement on the true geometry.</p><p>Constructed from backend-matched trial and test functions, the symmetric metric path uses the ordinary Rodin form-language deduction path for <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>, <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>, and <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a>.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_1_1_admissibility_state.html" class="m-doc">AdmissibilityState</a>
+            </dt>
+            <dd>Mesh-validity summary of a displacement.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_1_1_normal_jump.html" class="m-doc">NormalJump</a>
+            </dt>
+            <dd>Kink of the discrete interface across facet boundaries.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_1_1_rigid_mode_state.html" class="m-doc">RigidModeState</a>
+            </dt>
+            <dd>Observation coercivity restricted to rigid displacements.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_1_1_surface_state.html" class="m-doc">SurfaceState</a>
+            </dt>
+            <dd>Interface-fit summary of a displacement.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a2096478ca6b9d9a82586f0b90acb3b97">
+              <span class="m-doc-wrap-bumper"><a href="#a2096478ca6b9d9a82586f0b90acb3b97" class="m-doc-self">WNGIR</a>(</span><span class="m-doc-wrap">TrialFunctionType&amp; du,
+              TestFunctionType&amp; v)</span>
+            </dt>
+            <dd>Constructs the WNGIR solver from trial and test functions.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a4fcec58401f58a56aadc9a371b0d78d8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fcec58401f58a56aadc9a371b0d78d8" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters) -&gt; <a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a>&amp;</span>
+            </dt>
+            <dd>Sets WNGIR runtime parameters.</dd>
+            <dt id="a06bf1c04ab953a51fa7a07a11365e4c5">
+              <span class="m-doc-wrap-bumper">auto <a href="#a06bf1c04ab953a51fa7a07a11365e4c5" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp;</span>
+            </dt>
+            <dd>Returns the current WNGIR parameters.</dd>
+            <dt id="aefc36b1f796cc7a9be11a844e31f98a7">
+              <span class="m-doc-wrap-bumper">auto <a href="#aefc36b1f796cc7a9be11a844e31f98a7" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_report.html" class="m-doc">WNGIRReport</a>&amp;</span>
+            </dt>
+            <dd>Returns diagnostics from the most recent solve.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh, class PhiDerived, class GradDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f4074a481b535c0ca8785433fcf4e4f" class="m-doc">solve</a>(</span><span class="m-doc-wrap">const Mesh&amp; mesh,
+              const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Rodin::<wbr />Index</a>&gt;&amp; interfaceFacets,
+              const <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">Variational::<wbr />RealFunctionBase</a>&lt;PhiDerived&gt;&amp; phi,
+              const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, GradDerived&gt;&amp; grad) -&gt; <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_report.html" class="m-doc">WNGIRReport</a></span>
+            </dt>
+            <dd>Solves the WNGIR fitting problem on marked interface facets.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3f4074a481b535c0ca8785433fcf4e4f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType&gt;
+                template&lt;class Mesh, class PhiDerived, class GradDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_report.html" class="m-doc">WNGIRReport</a> Rodin::<wbr />Adaptation::<wbr />WNGIR&lt;TrialFunctionType, TestFunctionType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f4074a481b535c0ca8785433fcf4e4f" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">const Mesh&amp; mesh,
+              const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Rodin::<wbr />Index</a>&gt;&amp; interfaceFacets,
+              const <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">Variational::<wbr />RealFunctionBase</a>&lt;PhiDerived&gt;&amp; phi,
+              const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, GradDerived&gt;&amp; grad)</span></span>
+            </h3>
+            <p>Solves the WNGIR fitting problem on marked interface facets.</p>
+<p>The supplied sensitivity <code>grad</code> must equal the derivative of <code>phi</code> at the moved quadrature points for the assembled force to be the exact first variation of the line-search energy. An independently supplied sensitivity is supported, but then defines a pseudo-gradient.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

@@ -99,7 +99,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Context&gt;</div>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase&lt;Context::MPI&gt;</a>
             </dt>
             <dd>Base class for printing meshes to streams or files.</dd>
@@ -126,7 +126,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs a printer for the given distributed mesh.</dd>
           </dl>
@@ -135,11 +135,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Stream-based printing is not supported for HDF5 format.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc">print</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> boost::filesystem::path&amp; filename) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Saves the local mesh shard to the given HDF5 file.</dd>
           </dl>
@@ -151,7 +151,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a printer for the given distributed mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -171,7 +171,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Stream-based printing is not supported for HDF5 format.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -191,7 +191,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc-self">print</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Saves the local mesh shard to the given HDF5 file.</p>
             <table class="m-table m-fullwidth m-flat">

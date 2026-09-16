@@ -106,8 +106,8 @@
             </dt>
             <dd>Default constructor; creates an invalid handle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a080929a1a19fa1d493afeac3c5e9e9b3" class="m-doc">Handle</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">hid_<wbr />t</a> id,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">herr_<wbr />t</a>(*)(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">hid_<wbr />t</a>) closeFn)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a080929a1a19fa1d493afeac3c5e9e9b3" class="m-doc">Handle</a>(</span><span class="m-doc-wrap">hid_t id,
+              herr_t(*)(hid_t) closeFn)</span>
             </dt>
             <dd>Constructs a handle wrapping the given HDF5 identifier.</dd>
             <dt>
@@ -128,11 +128,11 @@
             </dt>
             <dd>Move assignment operator.</dd>
             <dt id="ad20897c5c8bd47f5d4005989bead0e55">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad20897c5c8bd47f5d4005989bead0e55" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ad20897c5c8bd47f5d4005989bead0e55" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Releases the managed identifier by calling its close function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad95067d593d9bacb31ca4de3dfadd0e3" class="m-doc">get</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">hid_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad95067d593d9bacb31ca4de3dfadd0e3" class="m-doc">get</a>(</span><span class="m-doc-wrap">) const -&gt; hid_t</span>
             </dt>
             <dd>Returns the raw HDF5 identifier.</dd>
           </dl>
@@ -141,8 +141,8 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a080929a1a19fa1d493afeac3c5e9e9b3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a080929a1a19fa1d493afeac3c5e9e9b3" class="m-doc-self">Handle</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">hid_<wbr />t</a> id,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">herr_<wbr />t</a>(*)(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">hid_<wbr />t</a>) closeFn)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a080929a1a19fa1d493afeac3c5e9e9b3" class="m-doc-self">Handle</a>(</span><span class="m-doc-wrap">hid_t id,
+              herr_t(*)(hid_t) closeFn)</span></span>
             </h3>
             <p>Constructs a handle wrapping the given HDF5 identifier.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -217,7 +217,7 @@
           </div></section>
           <section class="m-doc-details" id="ad95067d593d9bacb31ca4de3dfadd0e3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">hid_<wbr />t</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad95067d593d9bacb31ca4de3dfadd0e3" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad95067d593d9bacb31ca4de3dfadd0e3" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the raw HDF5 identifier.</p>
             <table class="m-table m-fullwidth m-flat">

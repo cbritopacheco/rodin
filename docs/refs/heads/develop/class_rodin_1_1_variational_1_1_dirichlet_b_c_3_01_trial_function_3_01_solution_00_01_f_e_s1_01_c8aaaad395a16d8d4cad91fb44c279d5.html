@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_8h.html">&lt;Rodin/Variational/DirichletBC.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class DefectDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_2b29f934879eff017b68e15e11bcb832.html">DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;</a>::<wbr/></span>Defect <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Defect a Dirichlet constraint imposes on the trial function.</p>
@@ -107,7 +107,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ac1ba68569c90b1c5e75c5d1e268f9966">
-              using <a href="#ac1ba68569c90b1c5e75c5d1e268f9966" class="m-doc-self">FunctionType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DefectDerived</a>&gt;
+              using <a href="#ac1ba68569c90b1c5e75c5d1e268f9966" class="m-doc-self">FunctionType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;DefectDerived&gt;
             </dt>
             <dd>Type of the prescribed value.</dd>
           </dl>
@@ -116,11 +116,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="ad20714571ceed35e79e06e8fec7cd7ce">
-              <span class="m-doc-wrap-bumper"><a href="#ad20714571ceed35e79e06e8fec7cd7ce" class="m-doc-self">Defect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac1ba68569c90b1c5e75c5d1e268f9966" class="m-doc">FunctionType</a>&amp; value) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#ad20714571ceed35e79e06e8fec7cd7ce" class="m-doc-self">Defect</a>(</span><span class="m-doc-wrap">const <a href="#ac1ba68569c90b1c5e75c5d1e268f9966" class="m-doc">FunctionType</a>&amp; value) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs the defect from the prescribed value.</dd>
             <dt id="a216ad22624d6367db7d82390f2398347">
-              <span class="m-doc-wrap-bumper"><a href="#a216ad22624d6367db7d82390f2398347" class="m-doc-self">Defect</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Defect&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a216ad22624d6367db7d82390f2398347" class="m-doc-self">Defect</a>(</span><span class="m-doc-wrap">const Defect&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -129,7 +129,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a0dce84152b1e71232c68975d67ee5a59">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dce84152b1e71232c68975d67ee5a59" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_2b29f934879eff017b68e15e11bcb832.html#affb7470c501da201aae700d4bca138f5" class="m-doc">FESRangeType</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0dce84152b1e71232c68975d67ee5a59" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_2b29f934879eff017b68e15e11bcb832.html#affb7470c501da201aae700d4bca138f5" class="m-doc">FESRangeType</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Evaluates the expression at a geometric point.</dd>
             <dt id="a09acc4cae3f9631f23d1bb2a93cd0530">

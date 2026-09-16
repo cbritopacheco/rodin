@@ -86,6 +86,7 @@
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -95,7 +96,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;</div>
+              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_42d934b7daffec7ba220fb785105ab17e.html" class="m-doc">DerivativeFunction</a>
             </dt>
             <dd>Represents a derivative function of a Pk vector element.</dd>
@@ -109,35 +110,40 @@
             <dd>Type returned by the callable.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a4e77a19275d340fde4cf5b708a9bc216">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4e77a19275d340fde4cf5b708a9bc216" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a4e77a19275d340fde4cf5b708a9bc216" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
+              size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the basis function of a local degree of freedom.</dd>
             <dt id="aa5ea57e5f061d84d30beb04af6dab6c9">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa5ea57e5f061d84d30beb04af6dab6c9" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> BasisFunction&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aa5ea57e5f061d84d30beb04af6dab6c9" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const BasisFunction&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a72c077af70f43babcdb92df6f1f8bafc">
-              <span class="m-doc-wrap-bumper">auto <a href="#a72c077af70f43babcdb92df6f1f8bafc" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">BasisFunction&amp;&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a72c077af70f43babcdb92df6f1f8bafc" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">BasisFunction&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt id="a3f0ae4ada14082e09f32a09ac829e62c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3f0ae4ada14082e09f32a09ac829e62c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f0ae4ada14082e09f32a09ac829e62c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
             <dt id="ab2522d6a00e6a7df9e7aacf532ce42b0">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab2522d6a00e6a7df9e7aacf532ce42b0" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> j) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> DerivativeFunction&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Order</a>&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab2522d6a00e6a7df9e7aacf532ce42b0" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const -&gt; DerivativeFunction&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
             <dt id="aea77e62adbe53092e04f048a1a6ca65d">
-              <span class="m-doc-wrap-bumper">auto <a href="#aea77e62adbe53092e04f048a1a6ca65d" class="m-doc-self">getJacobian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> JacobianFunction&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea77e62adbe53092e04f048a1a6ca65d" class="m-doc-self">getJacobian</a>(</span><span class="m-doc-wrap">) const -&gt; const JacobianFunction&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the Jacobian of the basis function.</dd>
           </dl>

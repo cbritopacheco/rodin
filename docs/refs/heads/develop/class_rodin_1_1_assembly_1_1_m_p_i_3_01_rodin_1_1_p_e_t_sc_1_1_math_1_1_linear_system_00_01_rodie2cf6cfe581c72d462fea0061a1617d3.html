@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_m_p_i_8h.html">&lt;Rodin/PETSc/Assembly/MPI.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;</div>
+          <div class="m-doc-template">template&lt;class U1, class U2, class U3, class ... Us&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>MPI&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>MPI-parallel assembly of a multi-variable PETSc problem.</p>
@@ -86,7 +86,19 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">Us</td>
+              <td style="width: 1%">U1</td>
+              <td>First trial/test function type.</td>
+            </tr>
+            <tr>
+              <td>U2</td>
+              <td>Second trial/test function type.</td>
+            </tr>
+            <tr>
+              <td>U3</td>
+              <td>Third trial/test function type.</td>
+            </tr>
+            <tr>
+              <td>Us</td>
               <td>Additional trial/test function types.</td>
             </tr>
           </tbody>
@@ -109,7 +121,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
             </dt>
             <dd>Base class template for assembly operations.</dd>
@@ -123,7 +135,7 @@
             </dt>
             <dd>PETSc linear system type.</dd>
             <dt id="a0d025582f547fb56891deb2d6387b224">
-              using <a href="#a0d025582f547fb56891deb2d6387b224" class="m-doc-self">ProblemType</a> = <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a>, Us...&gt;
+              using <a href="#a0d025582f547fb56891deb2d6387b224" class="m-doc-self">ProblemType</a> = <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>, U1, U2, U3, Us...&gt;
             </dt>
             <dd>Multi-field problem type being assembled.</dd>
             <dt id="a2f7b6029bea6dbc14676c5f525d90b1c">
@@ -131,15 +143,15 @@
             </dt>
             <dd>Parent assembly base class.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
-              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Parent::InputType
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
             </dt>
             <dd>Input data type for the assembly pipeline.</dd>
             <dt id="a53d5f889ed2244180136220dee3550e2">
-              using <a href="#a53d5f889ed2244180136220dee3550e2" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+              using <a href="#a53d5f889ed2244180136220dee3550e2" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::OperatorType
             </dt>
             <dd>PETSc matrix type (<code>Mat</code>) for the block system operator.</dd>
             <dt id="ad8c2ec8c3a8a389d4ee4d68d23752d71">
-              using <a href="#ad8c2ec8c3a8a389d4ee4d68d23752d71" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::VectorType
+              using <a href="#ad8c2ec8c3a8a389d4ee4d68d23752d71" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::VectorType
             </dt>
             <dd>PETSc vector type (<code>Vec</code>) for the block RHS and solution.</dd>
           </dl>
@@ -148,14 +160,14 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the full multi-field distributed PETSc linear system.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
-              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
+              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const</span>
             </dt>
             <dd>Assembles only the requested multi-field distributed target.</dd>
             <dt id="a17227756ce7234f252e0f0612ed7b2e8">
@@ -169,10 +181,10 @@
           <section class="m-doc-details" id="a7201bb98fc8affa5f0c97246acce8d68"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
+                template&lt;class U1, class U2, class U3, class ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Assembly::<wbr />MPI&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />MPI&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the full multi-field distributed PETSc linear system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -194,10 +206,10 @@
           <section class="m-doc-details" id="a7f571f4884a37874cd3c65f25656934e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U1</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U2</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U3</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Us&gt;
+                template&lt;class U1, class U2, class U3, class ... Us&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Assembly::<wbr />MPI&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;_1, _2, _3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />MPI&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
               <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const</span></span>
             </h3>
             <p>Assembles only the requested multi-field distributed target.</p>

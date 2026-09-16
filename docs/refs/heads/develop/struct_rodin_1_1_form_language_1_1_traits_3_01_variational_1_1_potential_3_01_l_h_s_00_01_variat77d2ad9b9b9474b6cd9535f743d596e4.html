@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_potential_8h.html">&lt;Rodin/Variational/Potential.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> LHS, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+          <div class="m-doc-template">template&lt;class LHS, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Variational::Potential&lt;LHS, Variational::ShapeFunctionBase&lt;Variational::ShapeFunction&lt;RHSDerived, FES, Space&gt;&gt;&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Traits for Potential.</p>
@@ -108,7 +108,7 @@
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="acfe87c9ee205467a5df1491438ef215b">
-              using <a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">Variational::<wbr />ShapeFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, FES, Space&gt;, FES, Space&gt;
+              using <a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">Variational::<wbr />ShapeFunction</a>&lt;RHSDerived, FES, Space&gt;, FES, Space&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ac15cfdf7f2ea6a1515977666f3b5f8a1">
@@ -120,11 +120,11 @@
             </dt>
             <dd>Operand type.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
-              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc">RHSType</a>&gt;<a href="#a619f58004de344eb0130ac4d87542b99" class="m-doc">::<wbr />RangeType</a>
+              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc">RHSType</a>&gt;<a href="#a619f58004de344eb0130ac4d87542b99" class="m-doc">::<wbr />RangeType</a>
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
             <dt id="a445eec8df0727c551b208428b3bb251a">
-              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>&gt;&gt;
+              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
             <dt id="a619f58004de344eb0130ac4d87542b99">
@@ -137,7 +137,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="aa44c909b74459bc81764d827d3671ab2">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> <a href="#aa44c909b74459bc81764d827d3671ab2" class="m-doc-self">SpaceType</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> <a href="#aa44c909b74459bc81764d827d3671ab2" class="m-doc-self">SpaceType</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Shape function space the expression belongs to, trial or test.</dd>
           </dl>

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_extract_8h.html">&lt;Rodin/Utility/Extract.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;</div>
+          <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>Extract&lt;Tuple&lt;T, Ts...&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Specialization of Extract for Tuple types.</p>
@@ -116,8 +116,8 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Extractor&gt;</div>
-              using <a href="#ac7d112eea3402ea8f167b258ade52d86" class="m-doc">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Extractor</a>&lt;T&gt;::Type, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Extractor</a>&lt;Ts&gt;::Type...&gt;
+              <div class="m-doc-template">template&lt;template&lt;class&gt; class Extractor&gt;</div>
+              using <a href="#ac7d112eea3402ea8f167b258ade52d86" class="m-doc">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;typename Extractor&lt;T&gt;::Type, typename Extractor&lt;Ts&gt;::Type...&gt;
             </dt>
             <dd>Applies an extractor metafunction to all tuple element types.</dd>
           </dl>
@@ -127,10 +127,10 @@
           <section class="m-doc-details" id="ac7d112eea3402ea8f167b258ade52d86"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Extractor&gt;
+                template&lt;class T, class ... Ts&gt;
+                template&lt;template&lt;class&gt; class Extractor&gt;
               </div>
-              using Rodin::<wbr />Utility::<wbr />Extract&lt;Tuple&lt;T, Ts...&gt;&gt;&lt;T, Ts&gt;::<wbr /><a href="#ac7d112eea3402ea8f167b258ade52d86" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Extractor</a>&lt;T&gt;::Type, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Extractor</a>&lt;Ts&gt;::Type...&gt;
+              using Rodin::<wbr />Utility::<wbr />Extract&lt;Tuple&lt;T, Ts...&gt;&gt;&lt;T, Ts&gt;::<wbr /><a href="#ac7d112eea3402ea8f167b258ade52d86" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;typename Extractor&lt;T&gt;::Type, typename Extractor&lt;Ts&gt;::Type...&gt;
             </h3>
             <p>Applies an extractor metafunction to all tuple element types.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sum_8h.html">&lt;Rodin/Variational/Sum.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSNumber</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSNumber</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class LHSNumber, class RHSNumber&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Sum&lt;LocalBilinearFormIntegratorBase&lt;LHSNumber&gt;, FormLanguage::List&lt;LocalBilinearFormIntegratorBase&lt;RHSNumber&gt;&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Sum of a bilinear form integrator and a list of them.</p>
@@ -97,7 +97,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List&lt;LocalBilinearFormIntegratorBase&lt;FormLanguage::Sum&lt;LHSNumber, RHSNumber&gt;::Type&gt;&gt;</a>
             </dt>
             <dd>Container for polymorphic form language objects.</dd>
@@ -107,11 +107,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a64392b269d5363a8c12a52e34f54018a">
-              using <a href="#a64392b269d5363a8c12a52e34f54018a" class="m-doc-self">LHSScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSNumber</a>
+              using <a href="#a64392b269d5363a8c12a52e34f54018a" class="m-doc-self">LHSScalarType</a> = LHSNumber
             </dt>
             <dd>Scalar type of the left-hand side operand.</dd>
             <dt id="a2cb39b7a17d9b6e427f1d62f3905f27b">
-              using <a href="#a2cb39b7a17d9b6e427f1d62f3905f27b" class="m-doc-self">RHSScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSNumber</a>
+              using <a href="#a2cb39b7a17d9b6e427f1d62f3905f27b" class="m-doc-self">RHSScalarType</a> = RHSNumber
             </dt>
             <dd>Scalar type of the right-hand side operand.</dd>
             <dt id="af3645c8c29b115f59d0bb4e8ffb27e3d">
@@ -119,11 +119,11 @@
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a3d9c92ab4a44d9a4040a0f6033d0f1f0">
-              using <a href="#a3d9c92ab4a44d9a4040a0f6033d0f1f0" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSNumber</a>&gt;&gt;
+              using <a href="#a3d9c92ab4a44d9a4040a0f6033d0f1f0" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;RHSNumber&gt;&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a7956d0a2c7d23e039770052b05d403fe">
-              using <a href="#a7956d0a2c7d23e039770052b05d403fe" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">FormLanguage::<wbr />Sum</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSNumber</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSNumber</a>&gt;::Type
+              using <a href="#a7956d0a2c7d23e039770052b05d403fe" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">FormLanguage::<wbr />Sum</a>&lt;LHSNumber, RHSNumber&gt;::Type
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="addf05ee365b067b30664dabea9ab90fb">
@@ -136,12 +136,12 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="ae50616ffdf2abee78b40f22934f4957e">
-              <span class="m-doc-wrap-bumper"><a href="#ae50616ffdf2abee78b40f22934f4957e" class="m-doc-self">Sum</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#af3645c8c29b115f59d0bb4e8ffb27e3d" class="m-doc">LHSType</a>&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a3d9c92ab4a44d9a4040a0f6033d0f1f0" class="m-doc">RHSType</a>&amp; rhs)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae50616ffdf2abee78b40f22934f4957e" class="m-doc-self">Sum</a>(</span><span class="m-doc-wrap">const <a href="#af3645c8c29b115f59d0bb4e8ffb27e3d" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a3d9c92ab4a44d9a4040a0f6033d0f1f0" class="m-doc">RHSType</a>&amp; rhs)</span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
             <dt id="ac76179cd06ff187a80a6cbfdf0b90fe3">
-              <span class="m-doc-wrap-bumper"><a href="#ac76179cd06ff187a80a6cbfdf0b90fe3" class="m-doc-self">Sum</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac76179cd06ff187a80a6cbfdf0b90fe3" class="m-doc-self">Sum</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_sum.html" class="m-doc">Sum</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="aa77b99b7850e4f5e2d58f5c4510b4805">

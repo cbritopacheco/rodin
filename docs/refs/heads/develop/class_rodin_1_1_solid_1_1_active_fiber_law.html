@@ -140,7 +140,7 @@ $e_c$
             </dt>
             <dd>Constructs the active law with default parameters.</dd>
             <dt id="afb8015a9688a01513b15b25a9744bb98">
-              <span class="m-doc-wrap-bumper"><a href="#afb8015a9688a01513b15b25a9744bb98" class="m-doc-self">ActiveFiberLaw</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#afb8015a9688a01513b15b25a9744bb98" class="m-doc-self">ActiveFiberLaw</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs the active law from parameters.</dd>
           </dl>
@@ -149,7 +149,7 @@ $e_c$
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a6637e48887cd69c114ea87ae902553fe">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp;</span>
             </dt>
             <dd>Returns the material parameters.</dd>
             <dt id="a2b90aff81fdeb8cd6b5612bd5201fcbf">
@@ -211,7 +211,7 @@ $\partial\sigma/\partial c$
             <dd>Evaluates the static active response.</dd>
             <dt id="a8b7ff064c7f9f0281a6775e1b329c941">
               <span class="m-doc-wrap-bumper">auto <a href="#a8b7ff064c7f9f0281a6775e1b329c941" class="m-doc-self">update</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activation) const -&gt; <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a></span>
@@ -219,8 +219,8 @@ $\partial\sigma/\partial c$
             <dd>Advances the internal active-fiber state.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afd6e4c8cab8a83178ae79289e4f20be2" class="m-doc">evaluateDynamic</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; newState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; newState,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> e,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension,
@@ -230,7 +230,7 @@ $\partial\sigma/\partial c$
             <dd>Evaluates the dynamic active response and condensed tangent.</dd>
             <dt id="a031d500ca67ddc2e9dfef499d209bfc1">
               <span class="m-doc-wrap-bumper">auto <a href="#a031d500ca67ddc2e9dfef499d209bfc1" class="m-doc-self">dActiveStressDc</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activation,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
@@ -243,8 +243,8 @@ $\partial\sigma/\partial c$
           <section class="m-doc-details" id="afd6e4c8cab8a83178ae79289e4f20be2"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_response.html" class="m-doc">Response</a> Rodin::<wbr />Solid::<wbr />ActiveFiberLaw::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd6e4c8cab8a83178ae79289e4f20be2" class="m-doc-self">evaluateDynamic</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; newState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; newState,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> e,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension,

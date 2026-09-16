@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_quadrature_rule_8h.html">&lt;Rodin/Variational/QuadratureRule.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Local linear-form quadrature for a test shape function expression.</p>
@@ -90,6 +90,7 @@
                 <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -124,7 +125,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;FormLanguage::Traits&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;::ScalarType&gt;</a>
             </dt>
             <dd>Base class for linear form integrators.</dd>
@@ -134,22 +135,22 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_boundary_integral_3_01_shape_function_base_3_01_nested_derived_0156b0991b1a107e3373eb0a417c4dcc2.html" class="m-doc">BoundaryIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Integration of a test operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_face_integral_3_01_shape_function_base_3_01_nested_derived_00_01ba6c1a7cf4cef12d1a5c5f827e21e49f.html" class="m-doc">FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Integration of a test operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_integral_3_01_shape_function_base_3_01_nested_derived_00_01_f_e_s_00_01_test_space_01_4_01_4.html" class="m-doc">Integral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Integration of a test operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_interface_integral_3_01_shape_function_base_3_01_nested_derived_0740aa23a8bbe751a8c3fab9254986b2.html" class="m-doc">InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Integration of a test operator.</dd>
@@ -163,11 +164,11 @@
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a31200f81698a7b50b3482657fde46a2b">
-              using <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, TestSpace&gt;
+              using <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;NestedDerived, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, TestSpace&gt;
             </dt>
             <dd>Integrand expression type.</dd>
             <dt id="ad1801848c78c6463c513626ff578a564">
-              using <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&gt;::ScalarType
+              using <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a93d059833842d2e1a3036b89a2e9eb37">
@@ -180,46 +181,51 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a74ca465e855bdc704df1f2357926c6b4">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <a href="#a74ca465e855bdc704df1f2357926c6b4" class="m-doc-self">Specialized</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static bool <a href="#a74ca465e855bdc704df1f2357926c6b4" class="m-doc-self">Specialized</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Reports this handler as generic, not optimized.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a09da5f957a2911c45b295ab4977eb37c" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, FES, TestSpace&gt;&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs from a function-times-test-function expression.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs from the full integrand expression.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a8e3f616f94ee3bbe59ea848cb2652657">
+              <span class="m-doc-wrap-bumper"><a href="#a8e3f616f94ee3bbe59ea848cb2652657" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a09da5f957a2911c45b295ab4977eb37c" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, FES, TestSpace&gt;&amp; rhs) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs from a function-times-test-function expression.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp; integrand) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs from the full integrand expression.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="a8e3f616f94ee3bbe59ea848cb2652657">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8e3f616f94ee3bbe59ea848cb2652657" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp;</span>
             </dt>
             <dd>Gets the integrand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the currently bound polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Binds the integrator to a concrete polytope and assembles the local vector.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a46a27d54632b7b6f41ee86b063a2e8dd" class="m-doc">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) -&gt; <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a46a27d54632b7b6f41ee86b063a2e8dd" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t local) -&gt; <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Gets one entry of the assembled local vector.</dd>
             <dt>
@@ -237,11 +243,11 @@
           <section class="m-doc-details" id="a09da5f957a2911c45b295ab4977eb37c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;
+                template&lt;class NestedDerived, class FES&gt;
+                template&lt;class LHSDerived, class RHSDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09da5f957a2911c45b295ab4977eb37c" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, FES, TestSpace&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09da5f957a2911c45b295ab4977eb37c" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, FES, TestSpace&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs from a function-times-test-function expression.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -263,9 +269,9 @@
           <section class="m-doc-details" id="ad9eb933f006615fb74f46030211d24bd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs from the full integrand expression.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -283,9 +289,9 @@
           <section class="m-doc-details" id="a1987408abf27604ac74b03633ac5b752"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
 <p>The bound polytope and mapped quadrature are not copied.</p>
@@ -293,9 +299,9 @@
           <section class="m-doc-details" id="a904cdee8f54bf04b92b4ebbd7f18ace8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a31200f81698a7b50b3482657fde46a2b" class="m-doc">IntegrandType</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the integrand.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -310,9 +316,9 @@
           <section class="m-doc-details" id="adbfdd734d436c5a1bbee19714721e493"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the currently bound polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -327,9 +333,9 @@
           <section class="m-doc-details" id="ac590a72fff84d2498983cdfc71eb38d3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Binds the integrator to a concrete polytope and assembles the local vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -353,9 +359,9 @@
           <section class="m-doc-details" id="a46a27d54632b7b6f41ee86b063a2e8dd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46a27d54632b7b6f41ee86b063a2e8dd" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46a27d54632b7b6f41ee86b063a2e8dd" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t local) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Gets one entry of the assembled local vector.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -379,9 +385,9 @@
           <section class="m-doc-details" id="a237ca71ce9684827200e02f7ddb22d3d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a237ca71ce9684827200e02f7ddb22d3d" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a237ca71ce9684827200e02f7ddb22d3d" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the geometric region supported by this integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -396,9 +402,9 @@
           <section class="m-doc-details" id="a97e8bbec3df10545ba877130c3be5b93"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">

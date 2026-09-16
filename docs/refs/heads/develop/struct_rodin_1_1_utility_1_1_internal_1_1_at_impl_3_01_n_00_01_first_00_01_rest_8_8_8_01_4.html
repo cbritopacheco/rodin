@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_parameter_pack_8h.html">&lt;Rodin/Utility/ParameterPack.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;std::size_t N, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">First</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Rest&gt;</div>
+          <div class="m-doc-template">template&lt;std::size_t N, class First, class ... Rest&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility_1_1_internal.html">Internal</a>::<wbr/></span>AtImpl&lt;N, First, Rest...&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Recursive case for index N &gt; 0.</p>
@@ -88,6 +88,10 @@
             <tr>
               <td style="width: 1%">N</td>
               <td>The index to access (N &gt; 0).</td>
+            </tr>
+            <tr>
+              <td>First</td>
+              <td>The first type in the parameter pack.</td>
             </tr>
             <tr>
               <td>Rest</td>
@@ -111,7 +115,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="ade5f9a7539bb4370838f2bdc68f365d8">
-              using <a href="#ade5f9a7539bb4370838f2bdc68f365d8" class="m-doc-self">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_utility_1_1_internal_1_1_at_impl.html" class="m-doc">AtImpl</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">N</a> - 1, Rest...&gt;::Type
+              using <a href="#ade5f9a7539bb4370838f2bdc68f365d8" class="m-doc-self">Type</a> = typename <a href="struct_rodin_1_1_utility_1_1_internal_1_1_at_impl.html" class="m-doc">AtImpl</a>&lt;N - 1, Rest...&gt;::Type
             </dt>
             <dd>The type at index N, obtained recursively.</dd>
           </dl>

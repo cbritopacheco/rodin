@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_unwrap_reference_8h.html">&lt;Rodin/Utility/UnwrapReference.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class U&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>UnwrapReference&lt;std::reference_wrapper&lt;U&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Specialization for std::reference_wrapper.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">U</td>
+              <td>The type wrapped by reference_wrapper.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -95,7 +106,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="afbb4d6e3d951c8438c246d31fe3abd92">
-              using <a href="#afbb4d6e3d951c8438c246d31fe3abd92" class="m-doc-self">Type</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">U</a>&amp;
+              using <a href="#afbb4d6e3d951c8438c246d31fe3abd92" class="m-doc-self">Type</a> = U&amp;
             </dt>
             <dd>Reference to the wrapped type.</dd>
           </dl>

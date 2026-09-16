@@ -338,7 +338,7 @@ $ d $
             </dt>
             <dd>Bidirectional correspondence between local shard and distributed indices.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>: <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">uint8_<wbr />t</a> { </span><span class="m-doc-wrap"><a href="#ae9c42c594bb848c81ace2ff29f64dc89aa6156ea9d66fef24e87e841fbabf7cca" class="m-doc">Shared</a> = 0,
+              <span class="m-doc-wrap-bumper">enum class <a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>: uint8_t { </span><span class="m-doc-wrap"><a href="#ae9c42c594bb848c81ace2ff29f64dc89aa6156ea9d66fef24e87e841fbabf7cca" class="m-doc">Shared</a> = 0,
               <a href="#ae9c42c594bb848c81ace2ff29f64dc89a60848c692f8ddb0363e500da44563bae" class="m-doc">Owned</a> = 1,
               <a href="#ae9c42c594bb848c81ace2ff29f64dc89a401357e57c765967393ba391a338e89b" class="m-doc">Ghost</a> = 2 }</span>
             </dt>
@@ -361,7 +361,7 @@ $ d $
             </dt>
             <dd>Default constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc">Shard</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc">Shard</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -378,61 +378,61 @@ $ d $
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc">isGhost</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc">isGhost</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
             <dd>Tests whether a local entity is ghost.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc">isOwned</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
             <dd>Tests whether a local entity is owned.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc">isShared</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc">isShared</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
             <dd>Tests whether a local entity is shared.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc">isLocal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc">isLocal</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
             <dd>Tests whether a local entity belongs to the local partition.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
             </dt>
             <dd>Returns the owner map for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) -&gt; <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
             </dt>
             <dd>Returns the owner map for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
             </dt>
             <dd>Returns the halo map for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) -&gt; <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
             </dt>
             <dd>Returns the halo map for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8513cd6e4768d4fd55bd0a3f434f2fd7" class="m-doc">getState</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8513cd6e4768d4fd55bd0a3f434f2fd7" class="m-doc">getState</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp;</span>
             </dt>
             <dd>Returns the local state array for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9d30bbd235b7b0a91505b6fd71989bf3" class="m-doc">getState</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) -&gt; std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9d30bbd235b7b0a91505b6fd71989bf3" class="m-doc">getState</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp;</span>
             </dt>
             <dd>Returns the local state array for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp;</span>
             </dt>
             <dd>Returns the local/distributed polytope map for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab291f8389aff199f9e101a278ee1df9e" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) -&gt; <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab291f8389aff199f9e101a278ee1df9e" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp;</span>
             </dt>
             <dd>Returns the local/distributed polytope map for dimension <code>d</code>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serialization method.</dd>
           </dl>
@@ -441,7 +441,7 @@ $ d $
           <h2>Enum documentation</h2>
           <section class="m-doc-details" id="ae9c42c594bb848c81ace2ff29f64dc89"><div>
             <h3>
-              enum class Rodin::<wbr />Geometry::<wbr />Shard::<wbr /><a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc-self">State</a>: <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">uint8_<wbr />t</a>
+              enum class Rodin::<wbr />Geometry::<wbr />Shard::<wbr /><a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc-self">State</a>: uint8_t
             </h3>
             <p>Local state of a shard entity.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -473,7 +473,7 @@ $ d $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a76da9eacf84736496ad72ba4ace4ef9e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc-self">Shard</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76da9eacf84736496ad72ba4ace4ef9e" class="m-doc-self">Shard</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -530,7 +530,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ad610077bb89c846adcc5ed154a86d320"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc-self">isGhost</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc-self">isGhost</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity is ghost.</p>
@@ -558,7 +558,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ac8f91f04e23a9546ac37b3cfdfd55f3c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc-self">isOwned</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc-self">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity is owned.</p>
@@ -586,7 +586,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="aaea8f348bbdd53ad3e7c01b855225844"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc-self">isShared</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc-self">isShared</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity is shared.</p>
@@ -614,7 +614,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ad40027b1b7d00875a8e570f9e5706636"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc-self">isLocal</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc-self">isLocal</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
             <p>Tests whether a local entity belongs to the local partition.</p>
@@ -642,7 +642,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a399242681d6f2f49901b9a0145b7ea2c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the owner map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -665,7 +665,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a5a057fe5fa1699c82af689c438ad1b83"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the owner map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -688,7 +688,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ab42ea7d224cce1587d7468b6743328ad"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the halo map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -711,7 +711,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a8526f79e1b614d4a4bd0d659c92ed104"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the halo map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -734,7 +734,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a8513cd6e4768d4fd55bd0a3f434f2fd7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8513cd6e4768d4fd55bd0a3f434f2fd7" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const</span></span>
+              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8513cd6e4768d4fd55bd0a3f434f2fd7" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the local state array for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -757,7 +757,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a9d30bbd235b7b0a91505b6fd71989bf3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d30bbd235b7b0a91505b6fd71989bf3" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d)</span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d30bbd235b7b0a91505b6fd71989bf3" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the local state array for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -780,7 +780,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="a9fd3bd8730c34b9a46474d5c992375ce"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
             <p>Returns the local/distributed polytope map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -803,7 +803,7 @@ $ d $
           </div></section>
           <section class="m-doc-details" id="ab291f8389aff199f9e101a278ee1df9e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab291f8389aff199f9e101a278ee1df9e" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab291f8389aff199f9e101a278ee1df9e" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the local/distributed polytope map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -827,19 +827,28 @@ $ d $
           <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;
+                template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> version)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serialization method.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Archive type.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object.</td>
                 </tr>
                 <tr>

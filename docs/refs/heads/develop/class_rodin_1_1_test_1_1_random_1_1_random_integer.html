@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_random_integer_8h.html">&lt;Rodin/Test/Random/RandomInteger.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class T = int&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_test.html">Test</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_test_1_1_random.html">Random</a>::<wbr/></span>RandomInteger <span class="m-thin">class</span>
         </h1>
         <p>Uniform random integer generator for tests.</p>
@@ -119,7 +119,7 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aabd9a4b70ab255633e2294f8101aa132" class="m-doc">RandomInteger</a>(</span><span class="m-doc-wrap">T a = std::numeric_limits&lt;T&gt;::min(),
               T b = std::numeric_limits&lt;T&gt;::max(),
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> seed = std::random_device()())</span>
+              unsigned int seed = std::random_device()())</span>
             </dt>
             <dd>Constructs a generator over an interval.</dd>
           </dl>
@@ -128,11 +128,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a282848000a075ffce7736f63377d3e52" class="m-doc">setSeed</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> seed) -&gt; <a href="class_rodin_1_1_test_1_1_random_1_1_random_integer.html" class="m-doc">RandomInteger</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a282848000a075ffce7736f63377d3e52" class="m-doc">setSeed</a>(</span><span class="m-doc-wrap">unsigned int seed) -&gt; <a href="class_rodin_1_1_test_1_1_random_1_1_random_integer.html" class="m-doc">RandomInteger</a>&amp;</span>
             </dt>
             <dd>Sets the generator seed.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3db7b2ef3d1db037c8ee72d03a76c42b" class="m-doc">getSeed</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3db7b2ef3d1db037c8ee72d03a76c42b" class="m-doc">getSeed</a>(</span><span class="m-doc-wrap">) const -&gt; unsigned int</span>
             </dt>
             <dd>Gets the current seed.</dd>
             <dt>
@@ -146,11 +146,11 @@
           <section class="m-doc-details" id="aabd9a4b70ab255633e2294f8101aa132"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Test::<wbr />Random::<wbr />RandomInteger&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabd9a4b70ab255633e2294f8101aa132" class="m-doc-self">RandomInteger</a>(</span><span class="m-doc-wrap">T a = std::numeric_limits&lt;T&gt;::min(),
               T b = std::numeric_limits&lt;T&gt;::max(),
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> seed = std::random_device()())</span></span>
+              unsigned int seed = std::random_device()())</span></span>
             </h3>
             <p>Constructs a generator over an interval.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -176,9 +176,9 @@
           <section class="m-doc-details" id="a282848000a075ffce7736f63377d3e52"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_test_1_1_random_1_1_random_integer.html" class="m-doc">RandomInteger</a>&amp; Rodin::<wbr />Test::<wbr />Random::<wbr />RandomInteger&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a282848000a075ffce7736f63377d3e52" class="m-doc-self">setSeed</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> seed)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_test_1_1_random_1_1_random_integer.html" class="m-doc">RandomInteger</a>&amp; Rodin::<wbr />Test::<wbr />Random::<wbr />RandomInteger&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a282848000a075ffce7736f63377d3e52" class="m-doc-self">setSeed</a>(</span><span class="m-doc-wrap">unsigned int seed)</span></span>
             </h3>
             <p>Sets the generator seed.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -202,9 +202,9 @@
           <section class="m-doc-details" id="a3db7b2ef3d1db037c8ee72d03a76c42b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> Rodin::<wbr />Test::<wbr />Random::<wbr />RandomInteger&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3db7b2ef3d1db037c8ee72d03a76c42b" class="m-doc-self">getSeed</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">unsigned int Rodin::<wbr />Test::<wbr />Random::<wbr />RandomInteger&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3db7b2ef3d1db037c8ee72d03a76c42b" class="m-doc-self">getSeed</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the current seed.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -219,7 +219,7 @@
           <section class="m-doc-details" id="aaba2db6079c528211c6b095cdb08fcf6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
               <span class="m-doc-wrap-bumper">T Rodin::<wbr />Test::<wbr />Random::<wbr />RandomInteger&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaba2db6079c528211c6b095cdb08fcf6" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>

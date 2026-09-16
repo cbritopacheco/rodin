@@ -119,12 +119,12 @@ $ F(x) = 0 $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Handle&gt;</div>
+              <div class="m-doc-template">template&lt;class Handle&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Object&lt;::SNES&gt;</a>
             </dt>
             <dd>RAII base class for wrappers around PETSc opaque handles.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearSolver</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase&lt;KSP&gt;</a>
             </dt>
             <dd>Abstract base class for Newton-type nonlinear solvers.</dd>
@@ -172,11 +172,11 @@ $ \mathbf{x} $
 </g>
 </svg>.</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
-              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
             <dd>PETSc vector type (<code>Vec</code>) for the nonlinear residual and solution.</dd>
             <dt>
-              using <a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc">StateUpdate</a> = std::function&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
+              using <a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc">StateUpdate</a> = std::function&lt;void(const <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
             </dt>
             <dd>Callback invoked before residual/Jacobian assembly to synchronize state-dependent Rodin fields from the current SNES iterate.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
@@ -197,23 +197,23 @@ $ \mathbf{x} $
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="ae1fe9518a5217a23202ad95992aa57f1">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> <a href="#ae1fe9518a5217a23202ad95992aa57f1" class="m-doc-self">DEFAULT_RTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static PetscReal <a href="#ae1fe9518a5217a23202ad95992aa57f1" class="m-doc-self">DEFAULT_RTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default nonlinear relative residual tolerance.</dd>
             <dt id="ad68ba7f176ce7034cfa1d0b9cff67b88">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> <a href="#ad68ba7f176ce7034cfa1d0b9cff67b88" class="m-doc-self">DEFAULT_ABSTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static PetscReal <a href="#ad68ba7f176ce7034cfa1d0b9cff67b88" class="m-doc-self">DEFAULT_ABSTOL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default nonlinear absolute residual tolerance.</dd>
             <dt id="adf554bf5aa1aa26a9d17c0b4c5f7dffe">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> <a href="#adf554bf5aa1aa26a9d17c0b4c5f7dffe" class="m-doc-self">DEFAULT_STOL</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static PetscReal <a href="#adf554bf5aa1aa26a9d17c0b4c5f7dffe" class="m-doc-self">DEFAULT_STOL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default step norm convergence tolerance.</dd>
             <dt id="a30096bf3a2cb9f682c5ca3bd0ad227c7">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> <a href="#a30096bf3a2cb9f682c5ca3bd0ad227c7" class="m-doc-self">DEFAULT_MAXIT</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static PetscInt <a href="#a30096bf3a2cb9f682c5ca3bd0ad227c7" class="m-doc-self">DEFAULT_MAXIT</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default maximum number of nonlinear iterations.</dd>
             <dt id="a1acfcc80c17063f650d073c8025c1585">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> <a href="#a1acfcc80c17063f650d073c8025c1585" class="m-doc-self">DEFAULT_MAXF</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static PetscInt <a href="#a1acfcc80c17063f650d073c8025c1585" class="m-doc-self">DEFAULT_MAXF</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Default maximum number of residual evaluations.</dd>
           </dl>
@@ -231,15 +231,15 @@ $ \mathbf{x} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aad9ff28fcbd28a8c155e4fc50b055429" class="m-doc">setType</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />SNESType</a> type) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad9ff28fcbd28a8c155e4fc50b055429" class="m-doc">setType</a>(</span><span class="m-doc-wrap">::SNESType type) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Selects the nonlinear solver algorithm.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a47285502db3f27b7dc401e97e7a02355" class="m-doc">setTolerances</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> abstol,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> rtol,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> stol,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> maxIt,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> maxF) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a47285502db3f27b7dc401e97e7a02355" class="m-doc">setTolerances</a>(</span><span class="m-doc-wrap">PetscReal abstol,
+              PetscReal rtol,
+              PetscReal stol,
+              PetscInt maxIt,
+              PetscInt maxF) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets nonlinear convergence tolerances and limits.</dd>
             <dt>
@@ -247,7 +247,7 @@ $ \mathbf{x} $
             </dt>
             <dd>Sets an optional callback invoked before residual/Jacobian assembly.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the nonlinear system <svg class="m-math" style="width: 4.850em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.559654 11.955168">
 <title>
@@ -271,19 +271,19 @@ $ F(x) = 0 $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Solves the nonlinear system using the linear system&#x27;s solution vector as both the initial guess and the solution storage.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aadcb750c27693e889490c65577fa55cf" class="m-doc">getIterationNumber</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aadcb750c27693e889490c65577fa55cf" class="m-doc">getIterationNumber</a>(</span><span class="m-doc-wrap">) const -&gt; PetscInt</span>
             </dt>
             <dd>Returns the number of SNES iterations from the most recent solve.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae221d434900cb3bb42af9998c301015f" class="m-doc">converged</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae221d434900cb3bb42af9998c301015f" class="m-doc">converged</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd>Returns <code>true</code> if the most recent <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a> converged.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a826af3ff33e4e6e1bf4a7e56bd5ad973" class="m-doc">getConvergedReason</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />SNESConvergedReason</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a826af3ff33e4e6e1bf4a7e56bd5ad973" class="m-doc">getConvergedReason</a>(</span><span class="m-doc-wrap">) const -&gt; ::SNESConvergedReason</span>
             </dt>
             <dd>Returns PETSc&#x27;s convergence reason from the most recent solve.</dd>
             <dt>
@@ -291,7 +291,7 @@ $ F(x) = 0 $
             </dt>
             <dd>Returns a mutable reference to the underlying PETSc SNES handle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a read-only reference to the underlying PETSc SNES handle.</dd>
             <dt>
@@ -304,7 +304,7 @@ $ F(x) = 0 $
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="aab2697409b7c024ecd30f6ab0be52159"><div>
             <h3>
-              using Rodin::<wbr />Solver::<wbr />SNES::<wbr /><a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc-self">StateUpdate</a> = std::function&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>(<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
+              using Rodin::<wbr />Solver::<wbr />SNES::<wbr /><a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc-self">StateUpdate</a> = std::function&lt;void(const <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
             </h3>
             <p>Callback invoked before residual/Jacobian assembly to synchronize state-dependent Rodin fields from the current SNES iterate.</p>
 <p>The argument is the current iterate expressed as a Rodin <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />Vector</a> (a PETSc <code>Vec</code>). Typical usage:</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -334,7 +334,7 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="aad9ff28fcbd28a8c155e4fc50b055429"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad9ff28fcbd28a8c155e4fc50b055429" class="m-doc-self">setType</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />SNESType</a> type) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad9ff28fcbd28a8c155e4fc50b055429" class="m-doc-self">setType</a>(</span><span class="m-doc-wrap">::SNESType type) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Selects the nonlinear solver algorithm.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -357,11 +357,11 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="a47285502db3f27b7dc401e97e7a02355"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47285502db3f27b7dc401e97e7a02355" class="m-doc-self">setTolerances</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> abstol,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> rtol,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscReal</a> stol,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> maxIt,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> maxF) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47285502db3f27b7dc401e97e7a02355" class="m-doc-self">setTolerances</a>(</span><span class="m-doc-wrap">PetscReal abstol,
+              PetscReal rtol,
+              PetscReal stol,
+              PetscInt maxIt,
+              PetscInt maxF) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets nonlinear convergence tolerances and limits.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -427,7 +427,7 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="ab7d0e5809cd6fa1903a32f917e38c96e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Solves the nonlinear system <svg class="m-math" style="width: 4.850em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.559654 11.955168">
 <title>
@@ -464,14 +464,14 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the nonlinear system using the linear system&#x27;s solution vector as both the initial guess and the solution storage.</p>
 <p>The solution vector is obtained directly from <code>ksp.getProblem()</code>.getLinearSystem().getSolution(), so no manual initial-guess packing is needed. A full <code>Problem::assemble()</code> seeds this vector from the trial function data, so the initial iterate is the trial functions&#x27; state — consistent with <code>NewtonSolverBase::solve(GridFunction&amp;)</code>. After the first solve the solution vector retains its value, providing a natural warm start for subsequent time steps.</p>
           </div></section>
           <section class="m-doc-details" id="aadcb750c27693e889490c65577fa55cf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PetscInt</a> Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadcb750c27693e889490c65577fa55cf" class="m-doc-self">getIterationNumber</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">PetscInt Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadcb750c27693e889490c65577fa55cf" class="m-doc-self">getIterationNumber</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the number of SNES iterations from the most recent solve.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -485,7 +485,7 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="ae221d434900cb3bb42af9998c301015f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae221d434900cb3bb42af9998c301015f" class="m-doc-self">converged</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae221d434900cb3bb42af9998c301015f" class="m-doc-self">converged</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns <code>true</code> if the most recent <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a> converged.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -500,7 +500,7 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="a826af3ff33e4e6e1bf4a7e56bd5ad973"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />SNESConvergedReason</a> Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a826af3ff33e4e6e1bf4a7e56bd5ad973" class="m-doc-self">getConvergedReason</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">::SNESConvergedReason Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a826af3ff33e4e6e1bf4a7e56bd5ad973" class="m-doc-self">getConvergedReason</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns PETSc&#x27;s convergence reason from the most recent solve.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -528,7 +528,7 @@ $ F(x) = 0 $
           </div></section>
           <section class="m-doc-details" id="ad4f4c6d41b1bb245426b426da552f6ca"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a read-only reference to the underlying PETSc SNES handle.</p>
             <table class="m-table m-fullwidth m-flat">

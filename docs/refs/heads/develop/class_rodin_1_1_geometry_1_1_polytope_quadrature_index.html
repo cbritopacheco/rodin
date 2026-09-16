@@ -107,7 +107,7 @@
             </dt>
             <dd>Destructor.</dd>
             <dt id="af3288d997588d5529f96688ac492b540">
-              <span class="m-doc-wrap-bumper"><a href="#af3288d997588d5529f96688ac492b540" class="m-doc-self">PolytopeQuadratureIndex</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#af3288d997588d5529f96688ac492b540" class="m-doc-self">PolytopeQuadratureIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy constructor (deleted).</dd>
             <dt id="a2fa8fa61166e12ea3e286ab7d96ef831">
@@ -120,7 +120,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="ab047f85191813389fd9b3401b7eac1a4">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab047f85191813389fd9b3401b7eac1a4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab047f85191813389fd9b3401b7eac1a4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment operator (deleted).</dd>
             <dt id="a3370b7a5970a63a29c150edc736dfe80">
@@ -128,28 +128,28 @@
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> meshDim) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span>
             </dt>
             <dd>Initializes the index for a mesh of given topological dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> count) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t count)</span>
             </dt>
             <dd>Resizes storage for polytopes of dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc">clear</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc">clear</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Clears all cached quadratures.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Factory</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad97703662d3f293a514e63db81f73f1e" class="m-doc">get</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> count,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Factory</a>&amp; factory) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class Factory&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad97703662d3f293a514e63db81f73f1e" class="m-doc">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf,
+              const Factory&amp; factory) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp;</span>
             </dt>
             <dd>Gets or creates a cached quadrature for a given polytope and formula.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a38d1df78f2175f8f38f74d4357ad6a35" class="m-doc">dimensions</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38d1df78f2175f8f38f74d4357ad6a35" class="m-doc">dimensions</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Gets the number of initialized dimension buckets.</dd>
           </dl>
@@ -158,7 +158,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a77a1d55dead131c3707395c06f7b0b2b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> meshDim)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span></span>
             </h3>
             <p>Initializes the index for a mesh of given topological dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -206,8 +206,8 @@ $ 0, \dots, \texttt{meshDim} $
           </div></section>
           <section class="m-doc-details" id="aacead788d9511da9aac886f19c4b966f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> count)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t count)</span></span>
             </h3>
             <p>Resizes storage for polytopes of dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -229,7 +229,7 @@ $ 0, \dots, \texttt{meshDim} $
           </div></section>
           <section class="m-doc-details" id="ac8bb3912a3ce86b15842e79d0b421204"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Clears all cached quadratures.</p>
 <p>Releases all cached quadratures in all dimensions. The index remains initialized, but contains no entries afterwards.</p>
@@ -237,21 +237,30 @@ $ 0, \dots, \texttt{meshDim} $
           <section class="m-doc-details" id="ad97703662d3f293a514e63db81f73f1e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Factory</a>&gt;
+                template&lt;class Factory&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad97703662d3f293a514e63db81f73f1e" class="m-doc-self">get</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> std::pair&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> count,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Factory</a>&amp; factory) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad97703662d3f293a514e63db81f73f1e" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf,
+              const Factory&amp; factory) const</span></span>
             </h3>
             <p>Gets or creates a cached quadrature for a given polytope and formula.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Factory</td>
+                  <td>Callable returning <code>std::unique_ptr&lt;PolytopeQuadrature&gt;</code></td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Pair <code>(dimension, index)</code> identifying the polytope</td>
                 </tr>
                 <tr>
@@ -287,7 +296,7 @@ $ 0, \dots, \texttt{meshDim} $
           </div></section>
           <section class="m-doc-details" id="a38d1df78f2175f8f38f74d4357ad6a35"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38d1df78f2175f8f38f74d4357ad6a35" class="m-doc-self">dimensions</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38d1df78f2175f8f38f74d4357ad6a35" class="m-doc-self">dimensions</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the number of initialized dimension buckets.</p>
             <table class="m-table m-fullwidth m-flat">

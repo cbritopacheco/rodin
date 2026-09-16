@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_element_8h.html">&lt;Rodin/Variational/P0g/P0gElement.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;</div>
+          <div class="m-doc-template">template&lt;size_t Order&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0g_element.html">P0gElement</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
         </h1>
         <p>Derivative of a P0g basis function, identically zero.</p>
@@ -86,20 +86,26 @@
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ac7ce97e868790a844a1b5a88b3051db4">
+              <span class="m-doc-wrap-bumper"><a href="#ac7ce97e868790a844a1b5a88b3051db4" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ac7ce97e868790a844a1b5a88b3051db4">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac7ce97e868790a844a1b5a88b3051db4" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
             <dt id="ad7d62e6aff8f37a9eff65903e4c99020">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7d62e6aff8f37a9eff65903e4c99020" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7d62e6aff8f37a9eff65903e4c99020" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
           </dl>

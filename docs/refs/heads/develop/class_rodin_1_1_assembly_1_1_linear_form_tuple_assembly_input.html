@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;</div>
+          <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>LinearFormTupleAssemblyInput <span class="m-thin">class</span>
         </h1>
         <p>Input data for tuple of linear forms assembly.</p>
@@ -161,7 +161,7 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a2ff71a64abfdb3d143b8f8e1e162cf08">
-              using <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc-self">Offsets</a> = std::array&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>, sizeof...(Ts)&gt;
+              using <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc-self">Offsets</a> = std::array&lt;size_t, sizeof...(Ts)&gt;
             </dt>
             <dd>Array type for block offsets.</dd>
           </dl>
@@ -170,7 +170,7 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a879ad9933a419e4e04c8a59cc19a34fe">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Number of blocks in the tuple.</dd>
           </dl>
@@ -179,9 +179,9 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a609e16bf634a249dde563adc6b742b49" class="m-doc">LinearFormTupleAssemblyInput</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> size,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; offsets,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; ins)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a609e16bf634a249dde563adc6b742b49" class="m-doc">LinearFormTupleAssemblyInput</a>(</span><span class="m-doc-wrap">size_t size,
+              const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; offsets,
+              const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; ins)</span>
             </dt>
             <dd>Constructs tuple assembly input.</dd>
           </dl>
@@ -190,15 +190,15 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Gets the total vector size.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a19bbc6286c3a4cb8de0da58740f63838" class="m-doc">getOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a19bbc6286c3a4cb8de0da58740f63838" class="m-doc">getOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp;</span>
             </dt>
             <dd>Gets the block offsets.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a213f7825536b3ce2c9a61b781f30576d" class="m-doc">getTuple</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a213f7825536b3ce2c9a61b781f30576d" class="m-doc">getTuple</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp;</span>
             </dt>
             <dd>Gets the tuple of input data.</dd>
           </dl>
@@ -208,11 +208,11 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <section class="m-doc-details" id="a609e16bf634a249dde563adc6b742b49"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;class ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609e16bf634a249dde563adc6b742b49" class="m-doc-self">LinearFormTupleAssemblyInput</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> size,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; offsets,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; ins)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a609e16bf634a249dde563adc6b742b49" class="m-doc-self">LinearFormTupleAssemblyInput</a>(</span><span class="m-doc-wrap">size_t size,
+              const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; offsets,
+              const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; ins)</span></span>
             </h3>
             <p>Constructs tuple assembly input.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -238,9 +238,9 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <section class="m-doc-details" id="a9be1e4285daa77fe397767c097fbdc66"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;class ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the total vector size.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -255,9 +255,9 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <section class="m-doc-details" id="a19bbc6286c3a4cb8de0da58740f63838"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;class ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19bbc6286c3a4cb8de0da58740f63838" class="m-doc-self">getOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a2ff71a64abfdb3d143b8f8e1e162cf08" class="m-doc">Offsets</a>&amp; Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19bbc6286c3a4cb8de0da58740f63838" class="m-doc-self">getOffsets</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the block offsets.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -272,9 +272,9 @@ $ W_h = W_{h,1} \times W_{h,2} $
           <section class="m-doc-details" id="a213f7825536b3ce2c9a61b781f30576d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;
+                template&lt;class ... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a213f7825536b3ce2c9a61b781f30576d" class="m-doc-self">getTuple</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Ts...&gt;&amp; Rodin::<wbr />Assembly::<wbr />LinearFormTupleAssemblyInput&lt;Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a213f7825536b3ce2c9a61b781f30576d" class="m-doc-self">getTuple</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the tuple of input data.</p>
             <table class="m-table m-fullwidth m-flat">

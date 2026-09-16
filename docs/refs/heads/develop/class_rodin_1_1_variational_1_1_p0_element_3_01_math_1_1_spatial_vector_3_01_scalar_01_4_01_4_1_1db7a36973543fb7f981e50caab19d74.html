@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;</div>
+          <div class="m-doc-template">template&lt;size_t Order&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html">P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
         </h1>
         <p>Represents a derivative of the vector P0 basis function (always zero).</p>
@@ -97,29 +97,35 @@
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>Since P0 elements are piecewise constant, all derivatives are zero for all components.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad60f2c218dd2967c32cb582d0273f8a0" class="m-doc">DerivativeFunction</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j,
+              size_t vdim,
+              size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a derivative function.</dd>
+            <dt id="ac7ce97e868790a844a1b5a88b3051db4">
+              <span class="m-doc-wrap-bumper"><a href="#ac7ce97e868790a844a1b5a88b3051db4" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">const DerivativeFunction&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad60f2c218dd2967c32cb582d0273f8a0" class="m-doc">DerivativeFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> j,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a derivative function.</dd>
-            <dt id="ac7ce97e868790a844a1b5a88b3051db4">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac7ce97e868790a844a1b5a88b3051db4" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> DerivativeFunction&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8b1c269480a89306cfaed64127656568" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b1c269480a89306cfaed64127656568" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the derivative (always returns 0).</dd>
           </dl>
@@ -129,12 +135,12 @@
           <section class="m-doc-details" id="ad60f2c218dd2967c32cb582d0273f8a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;
+                template&lt;size_t Order&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad60f2c218dd2967c32cb582d0273f8a0" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> j,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad60f2c218dd2967c32cb582d0273f8a0" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j,
+              size_t vdim,
+              size_t local,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a derivative function.</p>
@@ -169,9 +175,9 @@
           <section class="m-doc-details" id="a8b1c269480a89306cfaed64127656568"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Order&gt;
+                template&lt;size_t Order&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b1c269480a89306cfaed64127656568" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b1c269480a89306cfaed64127656568" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the derivative (always returns 0).</p>
             <table class="m-table m-fullwidth m-flat">

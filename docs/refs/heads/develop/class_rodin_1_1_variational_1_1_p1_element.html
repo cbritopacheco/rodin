@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_element_8h.html">&lt;Rodin/Variational/P1/P1Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P1Element <span class="m-thin">class</span>
         </h1>
         <p>Degree 1 Lagrange element.</p>
@@ -99,6 +99,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -195,7 +196,7 @@ $ -\Delta u = f $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P1Element&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
@@ -226,53 +227,58 @@ $ -\Delta u = f $
             <dd>Type of range.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="ae5deaf162020c51bc8872c7895f344c8">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae5deaf162020c51bc8872c7895f344c8" class="m-doc-self">P1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae5deaf162020c51bc8872c7895f344c8" class="m-doc-self">P1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the P1Element from the given arguments.</dd>
             <dt id="ae2cf3e4a03209fbdfe0895419ea0db2d">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae2cf3e4a03209fbdfe0895419ea0db2d" class="m-doc-self">P1Element</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae2cf3e4a03209fbdfe0895419ea0db2d" class="m-doc-self">P1Element</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="acdc8242ccf4d8bf3b3f6de3d89984e84">
-              <span class="m-doc-wrap-bumper">auto <a href="#acdc8242ccf4d8bf3b3f6de3d89984e84" class="m-doc-self">P1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#acdc8242ccf4d8bf3b3f6de3d89984e84" class="m-doc-self">P1Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt id="ad4c9860741c5c43f0ddabddaadb18bb9">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad4c9860741c5c43f0ddabddaadb18bb9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4c9860741c5c43f0ddabddaadb18bb9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment.</dd>
             <dt id="ae74facfbc80dad5b1a87698889e07e5e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae74facfbc80dad5b1a87698889e07e5e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae74facfbc80dad5b1a87698889e07e5e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of degrees of freedom in the finite element.</dd>
             <dt id="a7802959bcdde2b8600942b7dfb450178">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7802959bcdde2b8600942b7dfb450178" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the node of a local degree of freedom.</dd>
             <dt id="a1dab8d2bc357b5741c11ec86e1020035">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1dab8d2bc357b5741c11ec86e1020035" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1dab8d2bc357b5741c11ec86e1020035" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;</span>
             </dt>
             <dd>Gets the degree-of-freedom functional of a local degree of freedom.</dd>
             <dt id="a17cbeeb3b8eaf0ec049d00e4857e404c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a17cbeeb3b8eaf0ec049d00e4857e404c" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a17cbeeb3b8eaf0ec049d00e4857e404c" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;</span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
             <dt id="a8b2e891192b815b6ba651bdd94558892">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8b2e891192b815b6ba651bdd94558892" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b2e891192b815b6ba651bdd94558892" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the polynomial order.</dd>
             <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Archive</a>&amp; ar,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">unsigned</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
             </dt>
             <dd>Serializes the object through a Boost archive.</dd>
           </dl>
@@ -282,9 +288,9 @@ $ -\Delta u = f $
           <section class="m-doc-details" id="a44d43c17930cfe700de763b67a32fb7b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />P1Element&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P1Element&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the number of degrees of freedom in the finite element.</p>
             <table class="m-table m-fullwidth m-flat">

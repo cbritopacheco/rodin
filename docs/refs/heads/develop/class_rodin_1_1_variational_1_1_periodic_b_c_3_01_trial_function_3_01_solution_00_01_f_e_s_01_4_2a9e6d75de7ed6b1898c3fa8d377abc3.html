@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_periodic_b_c_8h.html">&lt;Rodin/Variational/PeriodicBC.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Represents a Peridodic boundary condition on a ShapeFunction object.</p>
@@ -109,7 +109,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase&lt;FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;</a>
             </dt>
             <dd>Abstract base class for a periodic boundary condition.</dd>
@@ -123,7 +123,7 @@
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="ac0f4c8c4e192b6f1f05835914421d472">
-              using <a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc-self">SolutionType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>
+              using <a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc-self">SolutionType</a> = Solution
             </dt>
             <dd>Solution vector type.</dd>
             <dt id="a6c11a1aedd8f894561ff9738d69889f2">
@@ -131,7 +131,7 @@
             </dt>
             <dd>Operand type.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="aa70396c5255eb4ec7eacd49900a99ad4">
@@ -148,17 +148,17 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a8e50776baf660a64047e16d2801a5afa">
-              <span class="m-doc-wrap-bumper"><a href="#a8e50776baf660a64047e16d2801a5afa" class="m-doc-self">PeriodicBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; adjacency)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8e50776baf660a64047e16d2801a5afa" class="m-doc-self">PeriodicBC</a>(</span><span class="m-doc-wrap">const <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; u,
+              const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; adjacency)</span>
             </dt>
             <dd>Constructs the periodic boundary condition from an identification map.</dd>
             <dt id="a036b9e9f61950cb5ed52466985811d9e">
-              <span class="m-doc-wrap-bumper"><a href="#a036b9e9f61950cb5ed52466985811d9e" class="m-doc-self">PeriodicBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"><a href="#a036b9e9f61950cb5ed52466985811d9e" class="m-doc-self">PeriodicBC</a>(</span><span class="m-doc-wrap">const <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; u,
               <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;&amp; adjacency)</span>
             </dt>
             <dd>Constructs the periodic boundary condition from an identification map.</dd>
             <dt id="aca1c7762e46bded92b9c3c2271939691">
-              <span class="m-doc-wrap-bumper"><a href="#aca1c7762e46bded92b9c3c2271939691" class="m-doc-self">PeriodicBC</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aca1c7762e46bded92b9c3c2271939691" class="m-doc-self">PeriodicBC</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a034047ee65c6e75af50be57f2cf02930">
@@ -171,19 +171,19 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a1995c774d971ab0041610829222607a5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a1995c774d971ab0041610829222607a5" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Computes the indices of the degrees of freedoms associated to the boundary region.</dd>
             <dt id="a692390cb4cc6ce7c9a233e279496f4e6">
-              <span class="m-doc-wrap-bumper">auto <a href="#a692390cb4cc6ce7c9a233e279496f4e6" class="m-doc-self">getAdjacency</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a692390cb4cc6ce7c9a233e279496f4e6" class="m-doc-self">getAdjacency</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
             </dt>
             <dd>Gets the degree-of-freedom identification map.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the operand (trial function) of the periodic BC.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc">DOFs</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the map of periodic DOF constraints.</dd>
             <dt>
@@ -201,9 +201,9 @@
           <section class="m-doc-details" id="ac2647027477ec8e2da66c72295909c08"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class Solution, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a6c11a1aedd8f894561ff9738d69889f2" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2647027477ec8e2da66c72295909c08" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the operand (trial function) of the periodic BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -218,9 +218,9 @@
           <section class="m-doc-details" id="a6837fc382be4c12b783f0b6b6402e262"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class Solution, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#aa70396c5255eb4ec7eacd49900a99ad4" class="m-doc">DOFs</a>&amp; Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6837fc382be4c12b783f0b6b6402e262" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the map of periodic DOF constraints.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -236,9 +236,9 @@
           <section class="m-doc-details" id="a7fc05315cc2f0a27ee53fdedd6ede20b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class Solution, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fc05315cc2f0a27ee53fdedd6ede20b" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7fc05315cc2f0a27ee53fdedd6ede20b" class="m-doc-self">isComponent</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Checks if this is a component-wise periodic BC.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -253,9 +253,9 @@
           <section class="m-doc-details" id="a5e0c1c98961e5b5727f351eb44303535"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class Solution, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>* Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e0c1c98961e5b5727f351eb44303535" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>* Rodin::<wbr />Variational::<wbr />PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e0c1c98961e5b5727f351eb44303535" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this periodic BC.</p>
             <table class="m-table m-fullwidth m-flat">

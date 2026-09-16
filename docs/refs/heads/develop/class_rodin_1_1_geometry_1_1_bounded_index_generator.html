@@ -86,6 +86,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -101,24 +102,29 @@
             <dd>Abstract base class for index generators.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2be9bd4e99ff34bd9cd165937f10d399" class="m-doc">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> start,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> end) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a generator for the range [start, end).</dd>
+            <dt id="a9498ab1c478b2dc78ddcbb549a7c0d54">
+              <span class="m-doc-wrap-bumper"><a href="#a9498ab1c478b2dc78ddcbb549a7c0d54" class="m-doc-self">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html" class="m-doc">BoundedIndexGenerator</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="ac3054d95e88e7100d7a097d16efec6a4">
+              <span class="m-doc-wrap-bumper"><a href="#ac3054d95e88e7100d7a097d16efec6a4" class="m-doc-self">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html" class="m-doc">BoundedIndexGenerator</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2be9bd4e99ff34bd9cd165937f10d399" class="m-doc">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> start,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> end) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a generator for the range [start, end).</dd>
-            <dt id="a9498ab1c478b2dc78ddcbb549a7c0d54">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9498ab1c478b2dc78ddcbb549a7c0d54" class="m-doc-self">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html" class="m-doc">BoundedIndexGenerator</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt id="ac3054d95e88e7100d7a097d16efec6a4">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac3054d95e88e7100d7a097d16efec6a4" class="m-doc-self">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_bounded_index_generator.html" class="m-doc">BoundedIndexGenerator</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9f02236632d0558ed138089402715d0c" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9f02236632d0558ed138089402715d0c" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Checks if at end of range.</dd>
             <dt>
@@ -143,7 +149,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a2be9bd4e99ff34bd9cd165937f10d399"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Geometry::<wbr />BoundedIndexGenerator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2be9bd4e99ff34bd9cd165937f10d399" class="m-doc-self">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> start,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />BoundedIndexGenerator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2be9bd4e99ff34bd9cd165937f10d399" class="m-doc-self">BoundedIndexGenerator</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> start,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> end) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a generator for the range [start, end).</p>
@@ -165,7 +171,7 @@
           </div></section>
           <section class="m-doc-details" id="a9f02236632d0558ed138089402715d0c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">bool</a> Rodin::<wbr />Geometry::<wbr />BoundedIndexGenerator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f02236632d0558ed138089402715d0c" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />BoundedIndexGenerator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f02236632d0558ed138089402715d0c" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Checks if at end of range.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -76,10 +76,29 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_m_p_i_8h.html">&lt;Rodin/PETSc/Assembly/MPI.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>MPI&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>MPI-parallel assembly of a PETSc matrix from a bilinear form.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Solution</td>
+              <td>Solution type.</td>
+            </tr>
+            <tr>
+              <td>TrialFES</td>
+              <td>Trial finite element space type.</td>
+            </tr>
+            <tr>
+              <td>TestFES</td>
+              <td>Test finite element space type.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -98,7 +117,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
             </dt>
             <dd>Base class template for assembly operations.</dd>
@@ -108,15 +127,15 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a707c12961ca23ea67cdf1796622b087a">
-              using <a href="#a707c12961ca23ea67cdf1796622b087a" class="m-doc-self">DotType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>&gt;::ScalarType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&gt;::ScalarType&gt;::Type
+              using <a href="#a707c12961ca23ea67cdf1796622b087a" class="m-doc-self">DotType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
             </dt>
             <dd>Scalar type resulting from the dot product of trial and test scalars.</dd>
             <dt id="a032f029f468e1154761b88b10b9baaf4">
-              using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Mat</a>
+              using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = ::Mat
             </dt>
             <dd>PETSc matrix type (<code>Mat</code>).</dd>
             <dt id="a2585442b962060e46edfeb15e5aac87a">
-              using <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>, <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&gt;
+              using <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&gt;
             </dt>
             <dd>Bilinear form type being assembled.</dd>
             <dt id="aac3bcbd70e6befccb25e723b6e3217af">
@@ -124,7 +143,7 @@
             </dt>
             <dd>Parent assembly base class.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
-              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Parent::InputType
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
             </dt>
             <dd>Input data type for the assembly pipeline.</dd>
           </dl>
@@ -133,8 +152,8 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the bilinear form into a distributed PETSc matrix.</dd>
             <dt id="a17227756ce7234f252e0f0612ed7b2e8">
@@ -148,10 +167,10 @@
           <section class="m-doc-details" id="ad7224a3ca1dc16a2d63578186884071a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _3&gt;
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Assembly::<wbr />MPI&lt;::<wbr />Mat, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, ::<wbr />Mat&gt;&gt;&lt;_1, _2, _3&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />MPI&lt;::<wbr />Mat, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, ::<wbr />Mat&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the bilinear form into a distributed PETSc matrix.</p>
             <table class="m-table m-fullwidth m-flat">

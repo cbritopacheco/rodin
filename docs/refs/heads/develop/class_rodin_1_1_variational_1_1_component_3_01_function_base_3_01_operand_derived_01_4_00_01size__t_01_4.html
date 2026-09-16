@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_component_8h.html">&lt;Rodin/Variational/Component.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class OperandDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Extracts a single component from a vector-valued function.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">OperandDerived</td>
+              <td>Type of the vector function</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -88,6 +99,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -177,7 +189,7 @@ $ i $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&gt;</a>
             </dt>
             <dd>Base class for real-valued functions defined on a mesh.</dd>
@@ -187,15 +199,15 @@ $ i $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a01b2863848b8bc3683b72a1ef80f79af">
-              using <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a>&gt;
+              using <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;
             </dt>
             <dd>Operand type.</dd>
             <dt id="a8bad4b2131344f91a9d97c61c25dbac4">
-              using <a href="#a8bad4b2131344f91a9d97c61c25dbac4" class="m-doc-self">OperandRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&gt;<a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc">::<wbr />RangeType</a>
+              using <a href="#a8bad4b2131344f91a9d97c61c25dbac4" class="m-doc-self">OperandRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&gt;<a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc">::<wbr />RangeType</a>
             </dt>
             <dd>Range type of the operand.</dd>
             <dt id="a4b4601a49c4eb2b5fab2fce8bbfae779">
-              using <a href="#a4b4601a49c4eb2b5fab2fce8bbfae779" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a8bad4b2131344f91a9d97c61c25dbac4" class="m-doc">OperandRangeType</a>&gt;::ScalarType
+              using <a href="#a4b4601a49c4eb2b5fab2fce8bbfae779" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a8bad4b2131344f91a9d97c61c25dbac4" class="m-doc">OperandRangeType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a56808c86c123d70341266761d0bc71d4">
@@ -203,42 +215,47 @@ $ i $
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="a69843443f0747b0159af4a958f70359f">
-              using <a href="#a69843443f0747b0159af4a958f70359f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a>&gt;, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt;&gt;
+              using <a href="#a69843443f0747b0159af4a958f70359f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;, size_t&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9de3d7527a1ca67f72decbf86a4a8070" class="m-doc">Component</a>(</span><span class="m-doc-wrap">const <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; fn,
+              size_t component) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs component extractor for vector function.</dd>
+            <dt id="a8aa1c71f650a21c496b953333cf29faa">
+              <span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a947125c9063b7fefd2776d43acffce42">
+              <span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9de3d7527a1ca67f72decbf86a4a8070" class="m-doc">Component</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; fn,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> component) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs component extractor for vector function.</dd>
-            <dt id="a8aa1c71f650a21c496b953333cf29faa">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="a947125c9063b7fefd2776d43acffce42">
-              <span class="m-doc-wrap-bumper">auto <a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab140ff331f7bdeb1ce78d512143d5986" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab140ff331f7bdeb1ce78d512143d5986" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the component index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the underlying vector function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the component at a point.</dd>
             <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -252,10 +269,10 @@ $ i $
           <section class="m-doc-details" id="a9de3d7527a1ca67f72decbf86a4a8070"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a> _1&gt;
+                template&lt;class OperandDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de3d7527a1ca67f72decbf86a4a8070" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; fn,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> component) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9de3d7527a1ca67f72decbf86a4a8070" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; fn,
+              size_t component) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs component extractor for vector function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -287,9 +304,9 @@ $ i $
           <section class="m-doc-details" id="ab140ff331f7bdeb1ce78d512143d5986"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a> _1&gt;
+                template&lt;class OperandDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab140ff331f7bdeb1ce78d512143d5986" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab140ff331f7bdeb1ce78d512143d5986" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the component index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -314,9 +331,9 @@ $ i $
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a> _1&gt;
+                template&lt;class OperandDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a01b2863848b8bc3683b72a1ef80f79af" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the underlying vector function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -331,10 +348,10 @@ $ i $
           <section class="m-doc-details" id="a3ea66bc47d99e4bdba4fbfde47a7ad0f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a> _1&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Point&gt;
+                template&lt;class OperandDerived&gt;
+                template&lt;class Point&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the component at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -376,9 +393,9 @@ $ f_i(p) $
           <section class="m-doc-details" id="a35c2f7b7677fadde216975422ee6755e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">OperandDerived</a> _1&gt;
+                template&lt;class OperandDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>* Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35c2f7b7677fadde216975422ee6755e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>* Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35c2f7b7677fadde216975422ee6755e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">

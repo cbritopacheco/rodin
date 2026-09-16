@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_max_8h.html">&lt;Rodin/Variational/Max.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Max&lt;Real, FunctionBase&lt;NestedDerived&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Pointwise maximum of a function expression.</p>
@@ -88,6 +88,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -97,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_max_3_01_function_base_3_01_nested_derived_01_4_00_01_real_01_4.html" class="m-doc">Max&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;</a>
             </dt>
             <dd>Pointwise maximum of a function expression and a real.</dd>
@@ -111,31 +112,36 @@
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="adc30ca9c22ccd83ee7faaa165f839d67">
-              using <a href="#adc30ca9c22ccd83ee7faaa165f839d67" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;
+              using <a href="#adc30ca9c22ccd83ee7faaa165f839d67" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ad9cfa55b7d23ba3d7ced778c826a7d7e">
-              using <a href="#ad9cfa55b7d23ba3d7ced778c826a7d7e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+              using <a href="#ad9cfa55b7d23ba3d7ced778c826a7d7e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="af09ded287d03781eadbf176cf162bfb4">
+              <span class="m-doc-wrap-bumper"><a href="#af09ded287d03781eadbf176cf162bfb4" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap">const <a href="#a011829288d138a6eb21d56bbc50d7933" class="m-doc">LHSType</a>&amp; a,
+              const <a href="#adc30ca9c22ccd83ee7faaa165f839d67" class="m-doc">RHSType</a>&amp; b) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs the expression from its left and right operands.</dd>
+            <dt id="a6881856effa0238f884c261e255466ba">
+              <span class="m-doc-wrap-bumper"><a href="#a6881856effa0238f884c261e255466ba" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a01fe26e2e00444d547fe817c4f5eb387">
+              <span class="m-doc-wrap-bumper"><a href="#a01fe26e2e00444d547fe817c4f5eb387" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af09ded287d03781eadbf176cf162bfb4">
-              <span class="m-doc-wrap-bumper">auto <a href="#af09ded287d03781eadbf176cf162bfb4" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a011829288d138a6eb21d56bbc50d7933" class="m-doc">LHSType</a>&amp; a,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#adc30ca9c22ccd83ee7faaa165f839d67" class="m-doc">RHSType</a>&amp; b) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs the expression from its left and right operands.</dd>
-            <dt id="a6881856effa0238f884c261e255466ba">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6881856effa0238f884c261e255466ba" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="a01fe26e2e00444d547fe817c4f5eb387">
-              <span class="m-doc-wrap-bumper">auto <a href="#a01fe26e2e00444d547fe817c4f5eb387" class="m-doc-self">Max</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
             <dt id="a06602b05c242650ca47dee7222bf3b9e">
               <span class="m-doc-wrap-bumper">auto <a href="#a06602b05c242650ca47dee7222bf3b9e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_max.html" class="m-doc">Max</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_zip_8h.html">&lt;Rodin/Utility/Zip.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;</div>
+          <div class="m-doc-template">template&lt;class ... Ts, class ... Gs&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>Zip&lt;Tuple&lt;Ts...&gt;, Tuple&lt;Gs...&gt;&gt; <span class="m-thin">struct</span>
         </h1>
         <p>Specialization for two Tuples.</p>
@@ -114,8 +114,8 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Pair&gt;</div>
-              using <a href="#a93d321c448cbad33036a8ab9941d7899" class="m-doc">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;Ts, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Gs</a>&gt;...&gt;
+              <div class="m-doc-template">template&lt;template&lt;class, class&gt; class Pair&gt;</div>
+              using <a href="#a93d321c448cbad33036a8ab9941d7899" class="m-doc">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;Ts, Gs&gt;...&gt;
             </dt>
             <dd>The resulting tuple of paired types.</dd>
           </dl>
@@ -125,10 +125,10 @@
           <section class="m-doc-details" id="a93d321c448cbad33036a8ab9941d7899"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Gs&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Pair&gt;
+                template&lt;class ... Ts, class ... Gs&gt;
+                template&lt;template&lt;class, class&gt; class Pair&gt;
               </div>
-              using Rodin::<wbr />Utility::<wbr />Zip&lt;Tuple&lt;Ts...&gt;, Tuple&lt;Gs...&gt;&gt;&lt;Ts, Gs&gt;::<wbr /><a href="#a93d321c448cbad33036a8ab9941d7899" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;Ts, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Gs</a>&gt;...&gt;
+              using Rodin::<wbr />Utility::<wbr />Zip&lt;Tuple&lt;Ts...&gt;, Tuple&lt;Gs...&gt;&gt;&lt;Ts, Gs&gt;::<wbr /><a href="#a93d321c448cbad33036a8ab9941d7899" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;Ts, Gs&gt;...&gt;
             </h3>
             <p>The resulting tuple of paired types.</p>
             <table class="m-table m-fullwidth m-flat">

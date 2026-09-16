@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_zero_8h.html">&lt;Rodin/Variational/Zero.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Zero&lt;Math::SpatialVector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Vector zero function.</p>
@@ -165,7 +165,7 @@ $ d $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Scalar, Zero&lt;Math::SpatialVector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
@@ -188,11 +188,11 @@ $ d $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae1396d7f244f16ffcf41689f55a91810" class="m-doc">Zero</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae1396d7f244f16ffcf41689f55a91810" class="m-doc">Zero</a>(</span><span class="m-doc-wrap">size_t d)</span>
             </dt>
             <dd>Constructor with dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a8f65ac658b217246b4e263a3e6d5f615" class="m-doc">Zero</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8f65ac658b217246b4e263a3e6d5f615" class="m-doc">Zero</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -205,11 +205,11 @@ $ d $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1db82b918c9e1c126ddd78432e61cffa" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const -&gt; <a href="#a6d8746e1c3868de99617539a1e6759f5" class="m-doc">VectorType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1db82b918c9e1c126ddd78432e61cffa" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const -&gt; <a href="#a6d8746e1c3868de99617539a1e6759f5" class="m-doc">VectorType</a></span>
             </dt>
             <dd>Evaluates the zero vector function at a point.</dd>
             <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -223,9 +223,9 @@ $ d $
           <section class="m-doc-details" id="ae1396d7f244f16ffcf41689f55a91810"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1396d7f244f16ffcf41689f55a91810" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> d)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1396d7f244f16ffcf41689f55a91810" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Constructor with dimension.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -243,9 +243,9 @@ $ d $
           <section class="m-doc-details" id="a8f65ac658b217246b4e263a3e6d5f615"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f65ac658b217246b4e263a3e6d5f615" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f65ac658b217246b4e263a3e6d5f615" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -263,7 +263,7 @@ $ d $
           <section class="m-doc-details" id="a7d0a8fe48bcbd0c5d64fe2d3956c7953"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d0a8fe48bcbd0c5d64fe2d3956c7953" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&amp;&amp; other)</span></span>
             </h3>
@@ -283,9 +283,9 @@ $ d $
           <section class="m-doc-details" id="a1db82b918c9e1c126ddd78432e61cffa"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a6d8746e1c3868de99617539a1e6759f5" class="m-doc">VectorType</a> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1db82b918c9e1c126ddd78432e61cffa" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a6d8746e1c3868de99617539a1e6759f5" class="m-doc">VectorType</a> Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1db82b918c9e1c126ddd78432e61cffa" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const</span></span>
             </h3>
             <p>Evaluates the zero vector function at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -300,7 +300,7 @@ $ d $
           <section class="m-doc-details" id="a3ee7449f5240988536012653bd7ac62d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>* Rodin::<wbr />Variational::<wbr />Zero&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ee7449f5240988536012653bd7ac62d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>

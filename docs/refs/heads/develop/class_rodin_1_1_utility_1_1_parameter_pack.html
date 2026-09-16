@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_parameter_pack_8h.html">&lt;Rodin/Utility/ParameterPack.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Params&gt;</div>
+          <div class="m-doc-template">template&lt;class ... Params&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>ParameterPack <span class="m-thin">class</span>
         </h1>
         <p>Template metaprogramming utilities for parameter packs.</p>
@@ -118,12 +118,12 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;std::size_t Index&gt;</div>
-              using <a href="#ae83b59d0f77a4ee937900a3f7abb4f09" class="m-doc">At</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_utility_1_1_internal_1_1_at_impl.html" class="m-doc">Internal::<wbr />AtImpl</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, Params...&gt;::Type
+              using <a href="#ae83b59d0f77a4ee937900a3f7abb4f09" class="m-doc">At</a> = typename <a href="struct_rodin_1_1_utility_1_1_internal_1_1_at_impl.html" class="m-doc">Internal::<wbr />AtImpl</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, Params...&gt;::Type
             </dt>
             <dd>Type alias for accessing the type at a specific index.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate&gt;</div>
-              using <a href="#a677037882e46d7a822b2802c2ce59ec7" class="m-doc">All</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_utility_1_1_internal_1_1_all_impl.html" class="m-doc">Internal::<wbr />AllImpl</a>&lt;Predicate, Params...&gt;
+              <div class="m-doc-template">template&lt;template&lt;class&gt; class Predicate&gt;</div>
+              using <a href="#a677037882e46d7a822b2802c2ce59ec7" class="m-doc">All</a> = typename <a href="struct_rodin_1_1_utility_1_1_internal_1_1_all_impl.html" class="m-doc">Internal::<wbr />AllImpl</a>&lt;Predicate, Params...&gt;
             </dt>
             <dd>Template alias for checking if all types satisfy a predicate.</dd>
           </dl>
@@ -132,7 +132,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="a879ad9933a419e4e04c8a59cc19a34fe">
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static size_t <a href="#a879ad9933a419e4e04c8a59cc19a34fe" class="m-doc-self">Size</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>The number of types in the parameter pack.</dd>
           </dl>
@@ -142,10 +142,10 @@
           <section class="m-doc-details" id="ae83b59d0f77a4ee937900a3f7abb4f09"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Params&gt;
+                template&lt;class ... Params&gt;
                 template&lt;std::size_t Index&gt;
               </div>
-              using Rodin::<wbr />Utility::<wbr />ParameterPack&lt;Params&gt;::<wbr /><a href="#ae83b59d0f77a4ee937900a3f7abb4f09" class="m-doc-self">At</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_utility_1_1_internal_1_1_at_impl.html" class="m-doc">Internal::<wbr />AtImpl</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, Params...&gt;::Type
+              using Rodin::<wbr />Utility::<wbr />ParameterPack&lt;Params&gt;::<wbr /><a href="#ae83b59d0f77a4ee937900a3f7abb4f09" class="m-doc-self">At</a> = typename <a href="struct_rodin_1_1_utility_1_1_internal_1_1_at_impl.html" class="m-doc">Internal::<wbr />AtImpl</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, Params...&gt;::Type
             </h3>
             <p>Type alias for accessing the type at a specific index.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -164,10 +164,10 @@
           <section class="m-doc-details" id="a677037882e46d7a822b2802c2ce59ec7"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Params&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">template</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a>&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Predicate&gt;
+                template&lt;class ... Params&gt;
+                template&lt;template&lt;class&gt; class Predicate&gt;
               </div>
-              using Rodin::<wbr />Utility::<wbr />ParameterPack&lt;Params&gt;::<wbr /><a href="#a677037882e46d7a822b2802c2ce59ec7" class="m-doc-self">All</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_utility_1_1_internal_1_1_all_impl.html" class="m-doc">Internal::<wbr />AllImpl</a>&lt;Predicate, Params...&gt;
+              using Rodin::<wbr />Utility::<wbr />ParameterPack&lt;Params&gt;::<wbr /><a href="#a677037882e46d7a822b2802c2ce59ec7" class="m-doc-self">All</a> = typename <a href="struct_rodin_1_1_utility_1_1_internal_1_1_all_impl.html" class="m-doc">Internal::<wbr />AllImpl</a>&lt;Predicate, Params...&gt;
             </h3>
             <p>Template alias for checking if all types satisfy a predicate.</p>
             <table class="m-table m-fullwidth m-flat">

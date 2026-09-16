@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestPressFunctionType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class TestPressFunctionType, class DisplacementType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWorkResidualP <span class="m-thin">class</span>
         </h1>
         <p>Incompressibility constraint residual of the mixed u-p formulation. Bound to the pressure test function <svg class="m-math" style="width: 0.585em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.61916 7.47198">
@@ -148,7 +148,7 @@ $ q $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Number&gt;</div>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;Real&gt;</a>
             </dt>
             <dd>Base class for linear form integrators.</dd>
@@ -166,19 +166,19 @@ $ q $
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a804595448b2950c77c0e81b5c23d92f6">
-              using <a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc-self">TestType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestPressFunctionType</a>
+              using <a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc-self">TestType</a> = TestPressFunctionType
             </dt>
             <dd>Pressure test function type.</dd>
             <dt id="ac445b442c21ea71c53c90f799b23ae3c">
-              using <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc-self">StateType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a>
+              using <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc-self">StateType</a> = DisplacementType
             </dt>
             <dd>Current displacement state type.</dd>
             <dt id="a265d5d1fa6112b86444b719cf45f5aa1">
-              using <a href="#a265d5d1fa6112b86444b719cf45f5aa1" class="m-doc-self">TestFESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc">TestType</a>&gt;::FESType
+              using <a href="#a265d5d1fa6112b86444b719cf45f5aa1" class="m-doc-self">TestFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc">TestType</a>&gt;::FESType
             </dt>
             <dd>Pressure test finite element space type.</dd>
             <dt id="ae6311ea478e5e374583b826ab0607d73">
-              using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
+              using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
             </dt>
             <dd>Displacement state finite element space type.</dd>
           </dl>
@@ -187,12 +187,12 @@ $ q $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a345f0496588278f75446dbcbbb63cde5" class="m-doc">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc">TestType</a>&amp; q,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a345f0496588278f75446dbcbbb63cde5" class="m-doc">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const <a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc">TestType</a>&amp; q,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
             <dd>Constructs the pressure residual for the incompressibility constraint.</dd>
             <dt id="a8b07aa7faaeee79313d1ec32ab7d3f00">
-              <span class="m-doc-wrap-bumper"><a href="#a8b07aa7faaeee79313d1ec32ab7d3f00" class="m-doc-self">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8b07aa7faaeee79313d1ec32ab7d3f00" class="m-doc-self">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -201,23 +201,23 @@ $ q $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac65c380c45ddcd76dc62588789356741" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac65c380c45ddcd76dc62588789356741" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp;</span>
             </dt>
             <dd>Rebinds the displacement linearization point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a463a564628eeeafb99c75f7197952a7b" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a463a564628eeeafb99c75f7197952a7b" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp;</span>
             </dt>
             <dd>Sets the quadrature order.</dd>
             <dt id="a1c3339e11cba922d66e8d8f43fe58392">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c3339e11cba922d66e8d8f43fe58392" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c3339e11cba922d66e8d8f43fe58392" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Sets the current polytope and assembles the element residual.</dd>
             <dt id="a804c6a07f8876572c654f955d09a107c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the current element residual vector.</dd>
             <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the current polytope.</dd>
             <dt id="aba6371885ea424dd84df03d85fcb0706">
@@ -235,10 +235,10 @@ $ q $
           <section class="m-doc-details" id="a345f0496588278f75446dbcbbb63cde5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestPressFunctionType</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _2&gt;
+                template&lt;class TestPressFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidualP&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a345f0496588278f75446dbcbbb63cde5" class="m-doc-self">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc">TestType</a>&amp; q,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidualP&lt;TestPressFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a345f0496588278f75446dbcbbb63cde5" class="m-doc-self">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const <a href="#a804595448b2950c77c0e81b5c23d92f6" class="m-doc">TestType</a>&amp; q,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
             </h3>
             <p>Constructs the pressure residual for the incompressibility constraint.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -260,9 +260,9 @@ $ q $
           <section class="m-doc-details" id="ac65c380c45ddcd76dc62588789356741"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestPressFunctionType</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _2&gt;
+                template&lt;class TestPressFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidualP&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac65c380c45ddcd76dc62588789356741" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidualP&lt;TestPressFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac65c380c45ddcd76dc62588789356741" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
             </h3>
             <p>Rebinds the displacement linearization point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -286,9 +286,9 @@ $ q $
           <section class="m-doc-details" id="a463a564628eeeafb99c75f7197952a7b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestPressFunctionType</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">DisplacementType</a> _2&gt;
+                template&lt;class TestPressFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidualP&lt;_1, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a463a564628eeeafb99c75f7197952a7b" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> order)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_p.html" class="m-doc">InternalVirtualWorkResidualP</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidualP&lt;TestPressFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a463a564628eeeafb99c75f7197952a7b" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
             </h3>
             <p>Sets the quadrature order.</p>
             <table class="m-table m-fullwidth m-flat">

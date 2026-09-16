@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_sequential_8h.html">&lt;Rodin/PETSc/Assembly/Sequential.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Sequential assembly of a PETSc vector from a linear form.</p>
@@ -109,7 +109,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LinearAlgebraType</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Operand&gt;</div>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt;</a>
             </dt>
             <dd>Base class template for assembly operations.</dd>
@@ -119,11 +119,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="abdba688d76c906b73a3a133ed4665425">
-              using <a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc-self">ScalarType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;FES&gt;::ScalarType
+              using <a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;FES&gt;::ScalarType
             </dt>
             <dd>Scalar type of the DOF coefficients (<code>PetscScalar</code>).</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
-              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">::<wbr />Vec</a>
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
             <dd>PETSc vector type (<code>Vec</code>).</dd>
             <dt id="a98f6fba4edecb637608d8f3cf6f4bdef">
@@ -135,7 +135,7 @@
             </dt>
             <dd>Parent assembly base class.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
-              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> Parent::InputType
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
             </dt>
             <dd>Input data type for the assembly pipeline.</dd>
           </dl>
@@ -144,8 +144,8 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the linear form into a PETSc vector.</dd>
             <dt id="a5cc5fe811e4bdc5e5e5fc0f748dc4e91">
@@ -159,10 +159,10 @@
           <section class="m-doc-details" id="a17f3d79a9feccadabf3a5592e96dc068"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Assembly::<wbr />Sequential&lt;::<wbr />Vec, Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; res,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />Sequential&lt;::<wbr />Vec, Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assembles the linear form into a PETSc vector.</p>
             <table class="m-table m-fullwidth m-flat">

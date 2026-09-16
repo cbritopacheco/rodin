@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_complex_function_8h.html">&lt;Rodin/Variational/ComplexFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>ComplexFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Complex function wrapper around a nested function.</p>
@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase&lt;ComplexFunction&lt;NestedDerived&gt;&gt;</a>
             </dt>
             <dd>Base class for complex-valued scalar functions.</dd>
@@ -112,7 +112,7 @@
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a6cbfc9df94bc321f321eadc388d3d465">
-              using <a href="#a6cbfc9df94bc321f321eadc388d3d465" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;&gt;
+              using <a href="#a6cbfc9df94bc321f321eadc388d3d465" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_complex_function_base.html" class="m-doc">ComplexFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&lt;NestedDerived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -121,11 +121,11 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a8802889a802b1865c91d218c6c77b712">
-              <span class="m-doc-wrap-bumper"><a href="#a8802889a802b1865c91d218c6c77b712" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>&gt;&amp; nested)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a8802889a802b1865c91d218c6c77b712" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;&amp; nested)</span>
             </dt>
             <dd>Constructs from a nested function.</dd>
             <dt id="aeb005fe739f02755010047c73afe63e7">
-              <span class="m-doc-wrap-bumper"><a href="#aeb005fe739f02755010047c73afe63e7" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aeb005fe739f02755010047c73afe63e7" class="m-doc-self">ComplexFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="af7e8b01b6f677ca5408397e738b84651">
@@ -138,20 +138,20 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a815a4d77f69a64994c9db05dbc45586c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a815a4d77f69a64994c9db05dbc45586c" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; v) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a815a4d77f69a64994c9db05dbc45586c" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; v) const -&gt; <a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the nested function at a geometry point.</dd>
             <dt id="aaa55c8bed3e38606d6f167779e999a3d">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaa55c8bed3e38606d6f167779e999a3d" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa55c8bed3e38606d6f167779e999a3d" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#ad4dd159248d6cf0910ba183bcaa6aa2f" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the nested function at an integration point.</dd>
             <dt id="af72e4c02d2113888b7853fbdd17250db">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af72e4c02d2113888b7853fbdd17250db" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Args</a>&amp;... args) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af72e4c02d2113888b7853fbdd17250db" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; <a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Forwards trace-domain configuration to the nested function.</dd>
             <dt id="a943384230ba4ced03cc801fcda4cff6a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the nested function order.</dd>
             <dt>
@@ -165,9 +165,9 @@
           <section class="m-doc-details" id="a6d94f4ed0ee5cbf5eb9b351c150b0d3e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1&gt;
+                template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>* Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d94f4ed0ee5cbf5eb9b351c150b0d3e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_complex_function.html" class="m-doc">ComplexFunction</a>* Rodin::<wbr />Variational::<wbr />ComplexFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d94f4ed0ee5cbf5eb9b351c150b0d3e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">

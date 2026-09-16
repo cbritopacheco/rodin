@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Piecewise constant (degree 0) vector Lagrange element.</p>
@@ -89,6 +89,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -233,7 +234,7 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
@@ -264,59 +265,64 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
             <dd>Type of range.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9aa5eea6a188b88105b871232fdea8f5" class="m-doc">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a9aa5eea6a188b88105b871232fdea8f5" class="m-doc">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructor with geometry, defaulting vdim to spatial dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a945b24e0fc1300b7160b6613631636a0" class="m-doc">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a945b24e0fc1300b7160b6613631636a0" class="m-doc">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              size_t vdim) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructor with explicit vector dimension.</dd>
             <dt id="ae4d4b3ac0938f3c9fb3400b6d0e3b148">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4d4b3ac0938f3c9fb3400b6d0e3b148" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae4d4b3ac0938f3c9fb3400b6d0e3b148" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a7b8f7561deca6658fbfebdc78015189c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7b8f7561deca6658fbfebdc78015189c" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7b8f7561deca6658fbfebdc78015189c" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt id="a028ac9a39979cc356cab76333da647b3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a028ac9a39979cc356cab76333da647b3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a028ac9a39979cc356cab76333da647b3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment.</dd>
             <dt id="a1803d8ecc68ecdeb862436e0644cfcb6">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1803d8ecc68ecdeb862436e0644cfcb6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1803d8ecc68ecdeb862436e0644cfcb6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment.</dd>
             <dt id="a44d43c17930cfe700de763b67a32fb7b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the number of degrees of freedom of the element.</dd>
             <dt id="ab76c8222791066450b9f5ba665cbc468">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab76c8222791066450b9f5ba665cbc468" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab76c8222791066450b9f5ba665cbc468" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the degree-of-freedom functional of a local degree of freedom.</dd>
             <dt id="ab0801a0c74b64b99571622d265d9bcc7">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab0801a0c74b64b99571622d265d9bcc7" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> BasisFunction&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0801a0c74b64b99571622d265d9bcc7" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; const BasisFunction&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
             <dt id="a9616ca13fa24c9534e013a91145b7bd1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9616ca13fa24c9534e013a91145b7bd1" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9616ca13fa24c9534e013a91145b7bd1" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the node of a local degree of freedom.</dd>
             <dt id="ad3baade2f2fd98cc264096ac98314369">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad3baade2f2fd98cc264096ac98314369" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a59e0b84f076a4b011aebb57a90a85a57" class="m-doc">RangeType</a>&amp; out,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Coefficient</a>&amp;&amp; coefficient,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;class Coefficient&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#ad3baade2f2fd98cc264096ac98314369" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a59e0b84f076a4b011aebb57a90a85a57" class="m-doc">RangeType</a>&amp; out,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp;) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the integrand into the output argument.</dd>
             <dt id="a15b23d5374f96033b06313f150a05b96">
-              <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the polynomial order.</dd>
           </dl>
@@ -326,9 +332,9 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
           <section class="m-doc-details" id="a9aa5eea6a188b88105b871232fdea8f5"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5eea6a188b88105b871232fdea8f5" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5eea6a188b88105b871232fdea8f5" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructor with geometry, defaulting vdim to spatial dimension.</p>
 <p>Keeps backward compatibility with previous behaviour.</p>
@@ -336,10 +342,10 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
           <section class="m-doc-details" id="a945b24e0fc1300b7160b6613631636a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar&gt;
+                template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a945b24e0fc1300b7160b6613631636a0" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a945b24e0fc1300b7160b6613631636a0" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              size_t vdim) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructor with explicit vector dimension.</p>
             <table class="m-table m-fullwidth m-flat">

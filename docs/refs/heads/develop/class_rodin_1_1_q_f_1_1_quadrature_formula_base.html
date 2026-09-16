@@ -143,6 +143,10 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8ddaa85ea5318c750b955eeb2f705892" class="m-doc">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
             <dt id="a48eea02491d8564d45bda3e0adf832a9">
               <span class="m-doc-wrap-bumper"><a href="#a48eea02491d8564d45bda3e0adf832a9" class="m-doc-self">~QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
@@ -153,19 +157,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8ddaa85ea5318c750b955eeb2f705892" class="m-doc">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a319cde5b2ea76e92e922845ecfa5c615" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a319cde5b2ea76e92e922845ecfa5c615" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the number of quadrature points.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae369245ac3f2131a97d29dfa61507fe9" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae369245ac3f2131a97d29dfa61507fe9" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the weight associated with the i-th quadrature point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad5978ce3db46b04d9724da1becf98333" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5978ce3db46b04d9724da1becf98333" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the coordinates of the i-th quadrature point.</dd>
             <dt>
@@ -178,7 +178,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a8ddaa85ea5318c750b955eeb2f705892"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ddaa85ea5318c750b955eeb2f705892" class="m-doc-self">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ddaa85ea5318c750b955eeb2f705892" class="m-doc-self">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -195,7 +195,7 @@
           </div></section>
           <section class="m-doc-details" id="a319cde5b2ea76e92e922845ecfa5c615"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a319cde5b2ea76e92e922845ecfa5c615" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a319cde5b2ea76e92e922845ecfa5c615" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the number of quadrature points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -209,7 +209,7 @@
           </div></section>
           <section class="m-doc-details" id="ae369245ac3f2131a97d29dfa61507fe9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae369245ac3f2131a97d29dfa61507fe9" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae369245ac3f2131a97d29dfa61507fe9" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the weight associated with the i-th quadrature point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -244,7 +244,7 @@ $ w_i $
           </div></section>
           <section class="m-doc-details" id="ad5978ce3db46b04d9724da1becf98333"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5978ce3db46b04d9724da1becf98333" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5978ce3db46b04d9724da1becf98333" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets the coordinates of the i-th quadrature point.</p>
             <table class="m-table m-fullwidth m-flat">

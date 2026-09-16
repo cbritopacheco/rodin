@@ -76,10 +76,21 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_solid_2_local_2_input_8h.html">&lt;Rodin/Solid/Local/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>Input <span class="m-thin">class</span>
         </h1>
         <p>CRTP base class for inputs.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Derived</td>
+              <td>The concrete input type (CRTP)</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -102,7 +113,7 @@
             </dt>
             <dd>Default constructor for derived CRTP inputs.</dd>
             <dt id="a6b7532f130f0fd54544907df79648de4">
-              <span class="m-doc-wrap-bumper"><a href="#a6b7532f130f0fd54544907df79648de4" class="m-doc-self">Input</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a6b7532f130f0fd54544907df79648de4" class="m-doc-self">Input</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a9e1029e28395cdd2b4416d1ce3c49d1b">
@@ -115,7 +126,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adda12e3615396ec81d272eb71ab88ead" class="m-doc">populate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#adda12e3615396ec81d272eb71ab88ead" class="m-doc">populate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
             </dt>
             <dd>Populates a ConstitutivePoint with auxiliary data.</dd>
           </dl>
@@ -124,7 +135,7 @@
           <h2><a href="#pro-methods">Protected functions</a></h2>
           <dl class="m-doc">
             <dt id="a93f6f51f833c75d3c296e6dbb9681334">
-              <span class="m-doc-wrap-bumper">auto <a href="#a93f6f51f833c75d3c296e6dbb9681334" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a93f6f51f833c75d3c296e6dbb9681334" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt id="a821ab6016a8594ae1243ae5a51a12ea7">
@@ -138,9 +149,9 @@
           <section class="m-doc-details" id="adda12e3615396ec81d272eb71ab88ead"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a> _1&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Solid::<wbr />Input&lt;_1&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adda12e3615396ec81d272eb71ab88ead" class="m-doc-self">populate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Input&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adda12e3615396ec81d272eb71ab88ead" class="m-doc-self">populate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
             </h3>
             <p>Populates a ConstitutivePoint with auxiliary data.</p>
             <table class="m-table m-fullwidth m-flat">

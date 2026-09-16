@@ -106,19 +106,19 @@
           <dl class="m-doc">
             <dt id="ac42e4b1e5e915d6bed8684ba4f20e462">
               <span class="m-doc-wrap-bumper"><a href="#ac42e4b1e5e915d6bed8684ba4f20e462" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; left,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; right)</span>
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; left,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; right)</span>
             </dt>
             <dd>Constructs the Cartesian product of two quadrature formulae.</dd>
             <dt id="a70039b6b2ac6c3ec8797d41f4d463851">
               <span class="m-doc-wrap-bumper"><a href="#a70039b6b2ac6c3ec8797d41f4d463851" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; first,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; second,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; third)</span>
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; first,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; second,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; third)</span>
             </dt>
             <dd>Constructs the Cartesian product of three quadrature formulae.</dd>
             <dt id="a28c143243c8213682444ce41f1225cd2">
-              <span class="m-doc-wrap-bumper"><a href="#a28c143243c8213682444ce41f1225cd2" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_tensor_product.html" class="m-doc">TensorProduct</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a28c143243c8213682444ce41f1225cd2" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_tensor_product.html" class="m-doc">TensorProduct</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copies a tensor-product quadrature formula.</dd>
           </dl>
@@ -127,15 +127,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the number of quadrature points.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the weight associated with the i-th quadrature point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the coordinates of the i-th quadrature point.</dd>
             <dt id="aaef10ae0396553a4843747b73f44ff78">
@@ -152,7 +152,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the number of quadrature points.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -166,7 +166,7 @@
           </div></section>
           <section class="m-doc-details" id="a56b74ff92cb5876bea3ef654457be465"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56b74ff92cb5876bea3ef654457be465" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the weight associated with the i-th quadrature point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,7 +201,7 @@ $ w_i $
           </div></section>
           <section class="m-doc-details" id="a3d9ae6d6960698e83f7b4f81ad9c40e3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> i) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the coordinates of the i-th quadrature point.</p>
             <table class="m-table m-fullwidth m-flat">

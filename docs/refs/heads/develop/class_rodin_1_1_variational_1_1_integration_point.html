@@ -95,13 +95,13 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a226901bb2d853182750029c0186818af">
-              <span class="m-doc-wrap-bumper"><a href="#a226901bb2d853182750029c0186818af" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a226901bb2d853182750029c0186818af" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span>
             </dt>
             <dd>Constructs an integration point from a geometric point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a20198759db6897c1f4b6f95c3c524f84" class="m-doc">IntegrationPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* qf,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> qp)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a20198759db6897c1f4b6f95c3c524f84" class="m-doc">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* qf,
+              size_t qp)</span>
             </dt>
             <dd>Constructs a quadrature-associated integration point.</dd>
           </dl>
@@ -110,15 +110,15 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a32eceb6f2fb4748f336249a143e3c623" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a32eceb6f2fb4748f336249a143e3c623" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>*</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd></dd>
           </dl>
@@ -127,9 +127,9 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a20198759db6897c1f4b6f95c3c524f84"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20198759db6897c1f4b6f95c3c524f84" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* qf,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> qp)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20198759db6897c1f4b6f95c3c524f84" class="m-doc-self">IntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* qf,
+              size_t qp)</span></span>
             </h3>
             <p>Constructs a quadrature-associated integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -154,7 +154,7 @@
           </div></section>
           <section class="m-doc-details" id="a2ad254d10c93568e5a3448c10112e47a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ad254d10c93568e5a3448c10112e47a" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -167,7 +167,7 @@
           </div></section>
           <section class="m-doc-details" id="a32eceb6f2fb4748f336249a143e3c623"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32eceb6f2fb4748f336249a143e3c623" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>* Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32eceb6f2fb4748f336249a143e3c623" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -180,7 +180,7 @@
           </div></section>
           <section class="m-doc-details" id="ad65a47a8b8a83be5d0b456b1074d1220"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />IntegrationPoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad65a47a8b8a83be5d0b456b1074d1220" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>

@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_f_m_m_8h.html">&lt;Rodin/Eikonal/FMM.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_eikonal.html">Eikonal</a>::<wbr/></span>FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; <span class="m-thin">class</span>
         </h1>
         <p>FMM specialization for P1 finite elements on local meshes.</p>
@@ -88,6 +88,10 @@
             <tr>
               <td style="width: 1%">Data</td>
               <td>Data storage type for the solution</td>
+            </tr>
+            <tr>
+              <td>SpeedFunction</td>
+              <td>Type of the speed function</td>
             </tr>
           </tbody>
         </table>
@@ -109,7 +113,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc">Label</a>: <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">uint8_<wbr />t</a> { </span><span class="m-doc-wrap"><a href="#a292e6792084beec58825c5c5abc5ce49acfcd41f0c1804fb7778f8f01301223f6" class="m-doc">Far</a>,
+              <span class="m-doc-wrap-bumper">enum class <a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc">Label</a>: uint8_t { </span><span class="m-doc-wrap"><a href="#a292e6792084beec58825c5c5abc5ce49acfcd41f0c1804fb7778f8f01301223f6" class="m-doc">Far</a>,
               <a href="#a292e6792084beec58825c5c5abc5ce49aec17516130082d92b59c2d09499ce2fc" class="m-doc">Considered</a>,
               <a href="#a292e6792084beec58825c5c5abc5ce49a382ab522931673c11e398ead1b7b1678" class="m-doc">Accepted</a> }</span>
             </dt>
@@ -135,7 +139,7 @@
             </dt>
             <dd>Solution type: grid function storing arrival times.</dd>
             <dt id="a0f9a347a53d2169da74827130e17e6ff">
-              using <a href="#a0f9a347a53d2169da74827130e17e6ff" class="m-doc-self">SpeedFunctionType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a>
+              using <a href="#a0f9a347a53d2169da74827130e17e6ff" class="m-doc-self">SpeedFunctionType</a> = SpeedFunction
             </dt>
             <dd>Speed function type.</dd>
           </dl>
@@ -144,9 +148,9 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&amp;&amp; speed)</span>
+              Callable&amp;&amp; speed)</span>
             </dt>
             <dd>Constructs a Fast Marching Method solver.</dd>
           </dl>
@@ -155,12 +159,12 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Seed</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Seed</a>&amp;&amp; seed) -&gt; <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class Seed&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed) -&gt; <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp;</span>
             </dt>
             <dd>Seeds the FMM with initial points.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Solves the Eikonal equation using the Fast Marching Method.</dd>
           </dl>
@@ -170,9 +174,9 @@
           <section class="m-doc-details" id="a292e6792084beec58825c5c5abc5ce49"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a> _2&gt;
+                template&lt;class Data, class SpeedFunction&gt;
               </div>
-              enum class Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, _2&gt;::<wbr /><a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc-self">Label</a>: <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">uint8_<wbr />t</a>
+              enum class Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /><a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc-self">Label</a>: uint8_t
             </h3>
             <p>Label for mesh vertices during FMM propagation.</p>
 <p>Vertices are classified into three states:</p><ul><li>Far: Not yet visited</li><li>Considered: In priority queue, being considered</li><li>Accepted: Finalized arrival time</li></ul>
@@ -206,20 +210,29 @@
           <section class="m-doc-details" id="a73d89b63b13fdd0797eef84d05c3a1e9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a> _2&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&gt;
+                template&lt;class Data, class SpeedFunction&gt;
+                template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Callable</a>&amp;&amp; speed)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
+              Callable&amp;&amp; speed)</span></span>
             </h3>
             <p>Constructs a Fast Marching Method solver.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Callable</td>
+                  <td>Type of the speed function (deduced)</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">u&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>u&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Grid function to store the solution (arrival times)</td>
                 </tr>
                 <tr>
@@ -248,19 +261,28 @@ $ F(x) $
           <section class="m-doc-details" id="a8213e76260eacc950aa49acedfce3cd3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a> _2&gt;
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Seed</a>&gt;
+                template&lt;class Data, class SpeedFunction&gt;
+                template&lt;class Seed&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp; Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Seed</a>&amp;&amp; seed)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp; Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed)</span></span>
             </h3>
             <p>Seeds the FMM with initial points.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Seed</td>
+                  <td>Type of seed container (e.g., std::vector&lt;Index&gt;)</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">seed&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>seed&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Container of vertex indices to use as seeds</td>
                 </tr>
               </tbody>
@@ -276,9 +298,9 @@ $ F(x) $
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a> _2&gt;
+                template&lt;class Data, class SpeedFunction&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the Eikonal equation using the Fast Marching Method.</p>
 <p>Propagates the solution from seed points throughout the domain by repeatedly accepting the vertex with the smallest arrival time from the priority queue and updating its neighbors.</p><h5 id="autotoc_md34">Algorithm</h5><ol><li>Initialize: seed points have time 0, all others have time ∞</li><li>Extract vertex with minimum arrival time from priority queue</li><li>Mark it as Accepted</li><li>Update arrival times of neighboring vertices</li><li>Repeat until priority queue is empty</li></ol><aside class="m-note m-info"><h4>Note</h4><p>The seed() method must be called before solve().</p></aside>

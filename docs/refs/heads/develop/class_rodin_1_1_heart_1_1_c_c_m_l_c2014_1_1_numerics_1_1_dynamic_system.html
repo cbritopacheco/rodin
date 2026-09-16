@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dynamic_system_8h.html">&lt;Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">PassiveLaw</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Input&gt;</div>
+          <div class="m-doc-template">template&lt;class PassiveLaw, class Input&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014.html">CCMLC2014</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_numerics.html">Numerics</a>::<wbr/></span>DynamicSystem <span class="m-thin">class</span>
         </h1>
         <p>Assembles the coupled full-state residual and exact tangent.</p>
@@ -86,7 +86,11 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">Input</td>
+              <td style="width: 1%">PassiveLaw</td>
+              <td>Passive stress operator type.</td>
+            </tr>
+            <tr>
+              <td>Input</td>
               <td>Model input parameter type.</td>
             </tr>
           </tbody>
@@ -107,7 +111,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a49161cf03c4ad101e9f0d326674911ca">
-              <span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc-self">DynamicSystem</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc-self">DynamicSystem</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Construct the dynamic system assembler.</dd>
           </dl>
@@ -116,26 +120,26 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a55f22d0caa406331e230e8884009910a">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> DenseVector, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> StateType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a55f22d0caa406331e230e8884009910a" class="m-doc-self">buildEvalData</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> DenseVector&amp; candidateUnknowns,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> StateType&amp; currentState,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> StateType&amp; previousState,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> DenseVector::Scalar tnp1,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> DenseVector::Scalar dt,
-              EvalData&amp; evalData) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class DenseVector, class StateType, class EvalData&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a55f22d0caa406331e230e8884009910a" class="m-doc-self">buildEvalData</a>(</span><span class="m-doc-wrap">const DenseVector&amp; candidateUnknowns,
+              const StateType&amp; currentState,
+              const StateType&amp; previousState,
+              typename DenseVector::Scalar tnp1,
+              typename DenseVector::Scalar dt,
+              EvalData&amp; evalData) const</span>
             </dt>
             <dd>Build intermediate evaluation data from candidate unknowns.</dd>
             <dt id="a7d76a8c30c936c0584130c810a81258b">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> DenseVector, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc-self">evaluateResidual</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> EvalData&amp; evalData,
-              DenseVector&amp; residualVector) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class DenseVector, class EvalData&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc-self">evaluateResidual</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
+              DenseVector&amp; residualVector) const</span>
             </dt>
             <dd>Evaluate the coupled 0D residual vector.</dd>
             <dt id="a340f6fb34e5a872150db45d2ca4d0432">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> DenseMatrix, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a340f6fb34e5a872150db45d2ca4d0432" class="m-doc-self">evaluateJacobian</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> EvalData&amp; evalData,
+              <div class="m-doc-template">template&lt;class DenseMatrix, class EvalData&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a340f6fb34e5a872150db45d2ca4d0432" class="m-doc-self">evaluateJacobian</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
               DenseMatrix&amp; jacobianMatrix,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> DenseMatrix::Scalar) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a></span>
+              typename DenseMatrix::Scalar) const</span>
             </dt>
             <dd>Assemble the exact Jacobian of the coupled residual.</dd>
           </dl>

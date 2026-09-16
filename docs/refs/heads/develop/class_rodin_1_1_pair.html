@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_pair_8h.html">&lt;Rodin/Pair.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;</div>
+          <div class="m-doc-template">template&lt;class L, class R&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Pair <span class="m-thin">class</span>
         </h1>
         <p>Forward declaration of the Pair template class.</p>
@@ -86,7 +86,11 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">R</td>
+              <td style="width: 1%">L</td>
+              <td>Type of the first element.</td>
+            </tr>
+            <tr>
+              <td>R</td>
               <td>Type of the second element.</td>
             </tr>
           </tbody>
@@ -110,7 +114,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ... Ts&gt;</div>
+              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
               class <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple&lt;L, R&gt;</a>
             </dt>
             <dd>Forward declaration of the Tuple template class.</dd>
@@ -120,7 +124,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a9c8feeabb5c353647a20235e9bfdfa61">
-              using <a href="#a9c8feeabb5c353647a20235e9bfdfa61" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a>, R&gt;
+              using <a href="#a9c8feeabb5c353647a20235e9bfdfa61" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;L, R&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -129,7 +133,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa0b890091253a0b6f37ade81fb54f18b" class="m-doc">Pair</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#aa0b890091253a0b6f37ade81fb54f18b" class="m-doc">Pair</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
@@ -142,27 +146,27 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a50627758ba89c8ce3b3c420e1a87da86" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a50627758ba89c8ce3b3c420e1a87da86" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other) -&gt; <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a51a7390cbb9706e85fcc9fefd4d2e781" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51a7390cbb9706e85fcc9fefd4d2e781" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7984b30737503c55fc7d645beb2d720f" class="m-doc">first</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7984b30737503c55fc7d645beb2d720f" class="m-doc">first</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp;</span>
             </dt>
             <dd>Retrieves the first element of the Pair.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a526ed400e6c2b6609bc73fbf5d0151b9" class="m-doc">second</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a526ed400e6c2b6609bc73fbf5d0151b9" class="m-doc">second</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp;</span>
             </dt>
             <dd>Retrieves the second element of the Pair.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a88f2165b11e40ac7a269ec5f1b5cf3d1" class="m-doc">first</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88f2165b11e40ac7a269ec5f1b5cf3d1" class="m-doc">first</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Retrieves the first element of the Pair (const version).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afb44dd99263d5c5e45bf6d317405a9df" class="m-doc">second</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afb44dd99263d5c5e45bf6d317405a9df" class="m-doc">second</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Retrieves the second element of the Pair (const version).</dd>
           </dl>
@@ -172,9 +176,9 @@
           <section class="m-doc-details" id="aa0b890091253a0b6f37ade81fb54f18b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b890091253a0b6f37ade81fb54f18b" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b890091253a0b6f37ade81fb54f18b" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -192,9 +196,9 @@
           <section class="m-doc-details" id="ae4624bd62a4abd0fbae79ecb8c464e6d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4624bd62a4abd0fbae79ecb8c464e6d" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4624bd62a4abd0fbae79ecb8c464e6d" class="m-doc-self">Pair</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -212,9 +216,9 @@
           <section class="m-doc-details" id="a50627758ba89c8ce3b3c420e1a87da86"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50627758ba89c8ce3b3c420e1a87da86" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a50627758ba89c8ce3b3c420e1a87da86" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -238,9 +242,9 @@
           <section class="m-doc-details" id="a51a7390cbb9706e85fcc9fefd4d2e781"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51a7390cbb9706e85fcc9fefd4d2e781" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51a7390cbb9706e85fcc9fefd4d2e781" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -264,9 +268,9 @@
           <section class="m-doc-details" id="a7984b30737503c55fc7d645beb2d720f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7984b30737503c55fc7d645beb2d720f" class="m-doc-self">first</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7984b30737503c55fc7d645beb2d720f" class="m-doc-self">first</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Retrieves the first element of the Pair.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -281,9 +285,9 @@
           <section class="m-doc-details" id="a526ed400e6c2b6609bc73fbf5d0151b9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a526ed400e6c2b6609bc73fbf5d0151b9" class="m-doc-self">second</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a526ed400e6c2b6609bc73fbf5d0151b9" class="m-doc-self">second</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Retrieves the second element of the Pair.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -298,9 +302,9 @@
           <section class="m-doc-details" id="a88f2165b11e40ac7a269ec5f1b5cf3d1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f2165b11e40ac7a269ec5f1b5cf3d1" class="m-doc-self">first</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f2165b11e40ac7a269ec5f1b5cf3d1" class="m-doc-self">first</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Retrieves the first element of the Pair (const version).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -315,9 +319,9 @@
           <section class="m-doc-details" id="afb44dd99263d5c5e45bf6d317405a9df"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">L</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> R&gt;
+                template&lt;class L, class R&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp; Rodin::<wbr />Pair&lt;_1, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb44dd99263d5c5e45bf6d317405a9df" class="m-doc-self">second</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Pair&lt;L, R&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb44dd99263d5c5e45bf6d317405a9df" class="m-doc-self">second</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Retrieves the second element of the Pair (const version).</p>
             <table class="m-table m-fullwidth m-flat">

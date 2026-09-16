@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_face_integral_8h.html">&lt;Rodin/Variational/FaceIntegral.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Integration of a test operator.</p>
@@ -169,7 +169,7 @@ $ V_h $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_nested_derived_00_098b200335f11a538dc0d8b3a17a60f0.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
             </dt>
             <dd>Local linear-form quadrature for a test shape function expression.</dd>
@@ -179,7 +179,7 @@ $ V_h $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a1c8f2c478375a639e32f9895befb927c">
-              using <a href="#a1c8f2c478375a639e32f9895befb927c" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a>, FES, TestSpace&gt;
+              using <a href="#a1c8f2c478375a639e32f9895befb927c" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;NestedDerived, FES, TestSpace&gt;
             </dt>
             <dd>Integrand expression type.</dd>
             <dt id="a623a79dabaed4b064fe975530995a51f">
@@ -192,17 +192,17 @@ $ V_h $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a4cb5b68c29cfdb0c35d9130e88b26e1d">
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a4cb5b68c29cfdb0c35d9130e88b26e1d" class="m-doc-self">FaceIntegral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>&gt;&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, FES, TestSpace&gt;&amp; rhs)</span>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a4cb5b68c29cfdb0c35d9130e88b26e1d" class="m-doc-self">FaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LHSDerived&gt;&amp; lhs,
+              const <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, FES, TestSpace&gt;&amp; rhs)</span>
             </dt>
             <dd>Constructs the face integral of the given integrand.</dd>
             <dt id="a27104357cf7ef5a09613ee9d35dc29cd">
-              <span class="m-doc-wrap-bumper"><a href="#a27104357cf7ef5a09613ee9d35dc29cd" class="m-doc-self">FaceIntegral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a1c8f2c478375a639e32f9895befb927c" class="m-doc">IntegrandType</a>&amp; integrand)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a27104357cf7ef5a09613ee9d35dc29cd" class="m-doc-self">FaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="#a1c8f2c478375a639e32f9895befb927c" class="m-doc">IntegrandType</a>&amp; integrand)</span>
             </dt>
             <dd>Constructs the integrator for the given integrand.</dd>
             <dt id="a24d1c10552dc788d556a82775e244ccc">
-              <span class="m-doc-wrap-bumper"><a href="#a24d1c10552dc788d556a82775e244ccc" class="m-doc-self">FaceIntegral</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_face_integral.html" class="m-doc">FaceIntegral</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a24d1c10552dc788d556a82775e244ccc" class="m-doc-self">FaceIntegral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_face_integral.html" class="m-doc">FaceIntegral</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="aeeda4484c3c3f72458ea883f6a0fcfcd">
@@ -229,9 +229,9 @@ $ V_h $
           <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the geometric region supported by this integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -246,9 +246,9 @@ $ V_h $
           <section class="m-doc-details" id="a8c36f23046b7f55c776a113ec228a94a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">NestedDerived</a> _1, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> FES&gt;
+                template&lt;class NestedDerived, class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_face_integral.html" class="m-doc">FaceIntegral</a>* Rodin::<wbr />Variational::<wbr />FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;_1, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c36f23046b7f55c776a113ec228a94a" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_face_integral.html" class="m-doc">FaceIntegral</a>* Rodin::<wbr />Variational::<wbr />FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c36f23046b7f55c776a113ec228a94a" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -85,32 +85,38 @@
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>Evaluates a vector field at the barycenter and extracts a specific component.</p>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="adbf49dc304996563acab6ccc2215e4e1">
-              <span class="m-doc-wrap-bumper">auto <a href="#adbf49dc304996563acab6ccc2215e4e1" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> vdim,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a> local,
-              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#adbf49dc304996563acab6ccc2215e4e1" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">size_t vdim,
+              size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the functional of a local degree of freedom.</dd>
             <dt id="abff57c111c258aea79c4f23d6f2f7c79">
-              <span class="m-doc-wrap-bumper">auto <a href="#abff57c111c258aea79c4f23d6f2f7c79" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abff57c111c258aea79c4f23d6f2f7c79" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a81fc4ad9c9f4a0a557fc7da22b8a6576">
-              <span class="m-doc-wrap-bumper">auto <a href="#a81fc4ad9c9f4a0a557fc7da22b8a6576" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a81fc4ad9c9f4a0a557fc7da22b8a6576" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; v) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a></span>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a></span>
             </dt>
             <dd>Evaluates the linear form on a vector field.</dd>
           </dl>
@@ -120,9 +126,9 @@
           <section class="m-doc-details" id="aacfb55719082f5b972bdbc96be74980a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> T&gt;
+                template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> T&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const</span></span>
             </h3>
             <p>Evaluates the linear form on a vector field.</p>
             <table class="m-table m-fullwidth m-flat">

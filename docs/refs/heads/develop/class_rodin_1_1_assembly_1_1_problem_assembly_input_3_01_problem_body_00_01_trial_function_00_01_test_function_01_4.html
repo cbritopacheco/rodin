@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunction, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunction&gt;</div>
+          <div class="m-doc-template">template&lt;class ProblemBody, class TrialFunction, class TestFunction&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt; <span class="m-thin">class</span>
         </h1>
         <p>Input data for complete problem assembly.</p>
@@ -127,8 +127,8 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aee5dd91163e0e1d2ebb4f283ed79b7c0" class="m-doc">ProblemAssemblyInput</a>(</span><span class="m-doc-wrap">ProblemBody&amp; body,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TrialFunction&amp; trialFunction,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TestFunction&amp; testFunction)</span>
+              const TrialFunction&amp; trialFunction,
+              const TestFunction&amp; testFunction)</span>
             </dt>
             <dd>Constructs problem assembly input.</dd>
           </dl>
@@ -141,11 +141,11 @@
             </dt>
             <dd>Gets the problem body.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad8dbf9a9fa22c470b5ddab5543c5386a" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TrialFunction&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad8dbf9a9fa22c470b5ddab5543c5386a" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const TrialFunction&amp;</span>
             </dt>
             <dd>Gets the trial function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a964f55dc71a5f136daf1c62c69e5fe80" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TestFunction&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a964f55dc71a5f136daf1c62c69e5fe80" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const TestFunction&amp;</span>
             </dt>
             <dd>Gets the test function.</dd>
           </dl>
@@ -155,11 +155,11 @@
           <section class="m-doc-details" id="aee5dd91163e0e1d2ebb4f283ed79b7c0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunction, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunction&gt;
+                template&lt;class ProblemBody, class TrialFunction, class TestFunction&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt;&lt;ProblemBody, TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee5dd91163e0e1d2ebb4f283ed79b7c0" class="m-doc-self">ProblemAssemblyInput</a>(</span><span class="m-doc-wrap">ProblemBody&amp; body,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TrialFunction&amp; trialFunction,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TestFunction&amp; testFunction)</span></span>
+              const TrialFunction&amp; trialFunction,
+              const TestFunction&amp; testFunction)</span></span>
             </h3>
             <p>Constructs problem assembly input.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -185,7 +185,7 @@
           <section class="m-doc-details" id="add73e1e2fbdc6b7e6fb1933ff878997f"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunction, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunction&gt;
+                template&lt;class ProblemBody, class TrialFunction, class TestFunction&gt;
               </div>
               <span class="m-doc-wrap-bumper">ProblemBody&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt;&lt;ProblemBody, TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add73e1e2fbdc6b7e6fb1933ff878997f" class="m-doc-self">getProblemBody</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
@@ -202,9 +202,9 @@
           <section class="m-doc-details" id="ad8dbf9a9fa22c470b5ddab5543c5386a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunction, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunction&gt;
+                template&lt;class ProblemBody, class TrialFunction, class TestFunction&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TrialFunction&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt;&lt;ProblemBody, TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8dbf9a9fa22c470b5ddab5543c5386a" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const TrialFunction&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt;&lt;ProblemBody, TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8dbf9a9fa22c470b5ddab5543c5386a" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the trial function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -219,9 +219,9 @@
           <section class="m-doc-details" id="a964f55dc71a5f136daf1c62c69e5fe80"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> ProblemBody, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TrialFunction, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> TestFunction&gt;
+                template&lt;class ProblemBody, class TrialFunction, class TestFunction&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> TestFunction&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt;&lt;ProblemBody, TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a964f55dc71a5f136daf1c62c69e5fe80" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const TestFunction&amp; Rodin::<wbr />Assembly::<wbr />ProblemAssemblyInput&lt;ProblemBody, TrialFunction, TestFunction&gt;&lt;ProblemBody, TrialFunction, TestFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a964f55dc71a5f136daf1c62c69e5fe80" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the test function.</p>
             <table class="m-table m-fullwidth m-flat">

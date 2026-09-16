@@ -99,7 +99,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Context&gt;</div>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase&lt;Context::MPI&gt;</a>
             </dt>
             <dd>Base class for loading meshes from files or streams.</dd>
@@ -135,11 +135,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Stream-based loading is not supported for HDF5 format.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> boost::filesystem::path&amp; filename) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads the local mesh shard from the given HDF5 file.</dd>
           </dl>
@@ -171,7 +171,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Stream-based loading is not supported for HDF5 format.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -191,7 +191,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a> Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Loads the local mesh shard from the given HDF5 file.</p>
             <table class="m-table m-fullwidth m-flat">

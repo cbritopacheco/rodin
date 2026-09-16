@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_potential_8h.html">&lt;Rodin/Variational/Potential.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, class RHSDerived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Potential&lt;LHS, FunctionBase&lt;RHSDerived&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Potential of a function expression against a kernel.</p>
@@ -98,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Potential&lt;LHS, FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for function objects which can be evaluated over a mesh.</dd>
@@ -120,7 +120,7 @@
             </dt>
             <dd>Cell kernel type.</dd>
             <dt id="a0bfdbbbc23626e1ff4450c7d872d8b98">
-              using <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>&gt;
+              using <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;RHSDerived&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ae010240968103862bcf4fa765c1dccfa">
@@ -128,11 +128,11 @@
             </dt>
             <dd>Operand type.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
-              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">typename</a> <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&gt;::RangeType
+              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
             <dt id="a445eec8df0727c551b208428b3bb251a">
-              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">void</a>&gt;&gt;
+              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
             <dt id="a82b469a2b289ad80ab32b16d6d73282c">
@@ -145,12 +145,12 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a6cd78d9e15dd074f03b6ad064ee2b505">
-              <span class="m-doc-wrap-bumper"><a href="#a6cd78d9e15dd074f03b6ad064ee2b505" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#afab1a98bbdac08888c098e1b2129addb" class="m-doc">KernelType</a>&amp; kernel,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc">OperandType</a>&amp; u)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a6cd78d9e15dd074f03b6ad064ee2b505" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap">const <a href="#afab1a98bbdac08888c098e1b2129addb" class="m-doc">KernelType</a>&amp; kernel,
+              const <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the potential of an operand against a kernel.</dd>
             <dt id="ab0340cc46cdc0a4a03e547204aaa4ea9">
-              <span class="m-doc-wrap-bumper"><a href="#ab0340cc46cdc0a4a03e547204aaa4ea9" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab0340cc46cdc0a4a03e547204aaa4ea9" class="m-doc-self">Potential</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="adbe317fbff1ed0f11204efc8da59925c">
@@ -163,19 +163,19 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a7c0219957177bd6176687bbe8e2bc280">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7c0219957177bd6176687bbe8e2bc280" class="m-doc-self">getKernel</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c0219957177bd6176687bbe8e2bc280" class="m-doc-self">getKernel</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the kernel of the potential.</dd>
             <dt id="a37f33013a5aa5afec8659481f014d52f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a37f33013a5aa5afec8659481f014d52f" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37f33013a5aa5afec8659481f014d52f" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
             <dt id="aa99abe0e3bf589a8b7e1d9e7c7f6bea9">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa99abe0e3bf589a8b7e1d9e7c7f6bea9" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the expression at a geometric point.</dd>
             <dt id="ad78217db120879985e090c4f79a27809">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad78217db120879985e090c4f79a27809" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">auto</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad78217db120879985e090c4f79a27809" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Gets the quadrature formula of the potential.</dd>
             <dt id="ae3f888ef045bce80c82c08a1d2454fb8">

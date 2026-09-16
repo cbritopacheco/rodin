@@ -131,7 +131,7 @@
             </dt>
             <dd>Base class for MMG-backed operations in Rodin.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">FuncName</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class FuncName&gt;</div>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5_exception.html" class="m-doc">MMG5Exception</a>
             </dt>
             <dd>Exception type for MMG wrapper failures.</dd>
@@ -158,7 +158,7 @@
             <dd>Material splitting policy map used by level-set discretization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range&gt;</div>
-              using <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
             <dd>Grid function type used by the MMG module.</dd>
             <dt>
@@ -170,7 +170,7 @@
             </dt>
             <dd>Vector-valued MMG grid function alias.</dd>
             <dt>
-              using <a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc">ReturnCode</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>
+              using <a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc">ReturnCode</a> = int
             </dt>
             <dd>Return-code type used by MMG C API calls.</dd>
           </dl>
@@ -179,15 +179,15 @@
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a633fbb05b119b987c84c6ce478d13f0a" class="m-doc">getISCDMshdistExecutable</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a633fbb05b119b987c84c6ce478d13f0a" class="m-doc">getISCDMshdistExecutable</a>(</span><span class="m-doc-wrap">) -&gt; const char*</span>
             </dt>
             <dd>Gets the configured path to the <code>mshdist</code> executable.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a967bf8e04bbec28ada3268faf6e647c2" class="m-doc">getISCDAdvectExecutable</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a967bf8e04bbec28ada3268faf6e647c2" class="m-doc">getISCDAdvectExecutable</a>(</span><span class="m-doc-wrap">) -&gt; const char*</span>
             </dt>
             <dd>Gets the configured path to the <code>advect</code> executable.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af2fd2fb7a1c5394e6c5a637486000037" class="m-doc">getMMGVerbosityLevel</a>(</span><span class="m-doc-wrap">) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af2fd2fb7a1c5394e6c5a637486000037" class="m-doc">getMMGVerbosityLevel</a>(</span><span class="m-doc-wrap">) -&gt; int</span>
             </dt>
             <dd>Gets the MMG verbosity level selected at configuration time.</dd>
           </dl>
@@ -196,27 +196,27 @@
           <h2><a href="#var-members">Variables</a></h2>
           <dl class="m-doc">
             <dt>
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="struct_rodin_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc">NoSplit</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a href="struct_rodin_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc">NoSplit</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Singleton tag instance for convenience in split configuration.</dd>
             <dt>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* <a href="#a26cac49512386118b0d6e0715e31f2b6" class="m-doc">iscdMshdistExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
+              const char* <a href="#a26cac49512386118b0d6e0715e31f2b6" class="m-doc">iscdMshdistExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Path to the ISCD Mshdist executable.</dd>
             <dt>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* <a href="#a57fc4a385e0782d623194782754c9e4d" class="m-doc">mshdistExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
+              const char* <a href="#a57fc4a385e0782d623194782754c9e4d" class="m-doc">mshdistExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Path to the Mshdist executable used by MMG helpers.</dd>
             <dt>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* <a href="#a540deb7d7d2126cd5d29caabde8725c2" class="m-doc">iscdAdvectionExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
+              const char* <a href="#a540deb7d7d2126cd5d29caabde8725c2" class="m-doc">iscdAdvectionExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Path to the ISCD Mshdist executable.</dd>
             <dt>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* <a href="#a9933c5c0907ae24f7d5b6094a9f0c71e" class="m-doc">advectionExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
+              const char* <a href="#a9933c5c0907ae24f7d5b6094a9f0c71e" class="m-doc">advectionExecutable</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Path to the ISCD advection executable used by MMG helpers.</dd>
             <dt>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> <a href="#a383a4d31be9bbb1f06ec6c0657a048c5" class="m-doc">verbosityLevel</a> <span class="m-label m-flat m-primary">constexpr</span>
+              const int <a href="#a383a4d31be9bbb1f06ec6c0657a048c5" class="m-doc">verbosityLevel</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Verbosity level for MMG console output.</dd>
           </dl>
@@ -237,7 +237,7 @@
               <div class="m-doc-template">
                 template&lt;class Range&gt;
               </div>
-              using Rodin::<wbr />MMG::<wbr /><a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Range</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using Rodin::<wbr />MMG::<wbr /><a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </h3>
             <p>Grid function type used by the MMG module.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -271,7 +271,7 @@
           </div></section>
           <section class="m-doc-details" id="a2e664251a56ddb6630af9e4586dd47cd"><div>
             <h3>
-              using Rodin::<wbr />MMG::<wbr /><a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc-self">ReturnCode</a> = <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a>
+              using Rodin::<wbr />MMG::<wbr /><a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc-self">ReturnCode</a> = int
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g5_8h.html">&lt;Rodin/MMG/MMG5.h&gt;</a></div>
             </h3>
             <p>Return-code type used by MMG C API calls.</p>
@@ -282,7 +282,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a633fbb05b119b987c84c6ce478d13f0a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a633fbb05b119b987c84c6ce478d13f0a" class="m-doc-self">getISCDMshdistExecutable</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a633fbb05b119b987c84c6ce478d13f0a" class="m-doc-self">getISCDMshdistExecutable</a>(</span><span class="m-doc-wrap">)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_common_8h.html">&lt;Rodin/MMG/Common.h&gt;</a></div>
             </h3>
             <p>Gets the configured path to the <code>mshdist</code> executable.</p>
@@ -297,7 +297,7 @@
           </div></section>
           <section class="m-doc-details" id="a967bf8e04bbec28ada3268faf6e647c2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a967bf8e04bbec28ada3268faf6e647c2" class="m-doc-self">getISCDAdvectExecutable</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">const char* Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a967bf8e04bbec28ada3268faf6e647c2" class="m-doc-self">getISCDAdvectExecutable</a>(</span><span class="m-doc-wrap">)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_common_8h.html">&lt;Rodin/MMG/Common.h&gt;</a></div>
             </h3>
             <p>Gets the configured path to the <code>advect</code> executable.</p>
@@ -312,7 +312,7 @@
           </div></section>
           <section class="m-doc-details" id="af2fd2fb7a1c5394e6c5a637486000037"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2fd2fb7a1c5394e6c5a637486000037" class="m-doc-self">getMMGVerbosityLevel</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">int Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2fd2fb7a1c5394e6c5a637486000037" class="m-doc-self">getMMGVerbosityLevel</a>(</span><span class="m-doc-wrap">)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_common_8h.html">&lt;Rodin/MMG/Common.h&gt;</a></div>
             </h3>
             <p>Gets the MMG verbosity level selected at configuration time.</p>
@@ -330,7 +330,7 @@
           <h2>Variable documentation</h2>
           <section class="m-doc-details" id="aedca4332ab915213f5f99c61b951ab12"><div>
             <h3>
-              static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="struct_rodin_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> Rodin::<wbr />MMG::<wbr /><a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc-self">NoSplit</a> <span class="m-label m-primary">constexpr</span>
+              static <a href="struct_rodin_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> Rodin::<wbr />MMG::<wbr /><a href="#aedca4332ab915213f5f99c61b951ab12" class="m-doc-self">NoSplit</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_common_8h.html">&lt;Rodin/MMG/Common.h&gt;</a></div>
             </h3>
             <p>Singleton tag instance for convenience in split configuration.</p>
@@ -339,35 +339,35 @@
           </div></section>
           <section class="m-doc-details" id="a26cac49512386118b0d6e0715e31f2b6"><div>
             <h3>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* Rodin::<wbr />MMG::<wbr /><a href="#a26cac49512386118b0d6e0715e31f2b6" class="m-doc-self">iscdMshdistExecutable</a> <span class="m-label m-primary">constexpr</span>
+              const char* Rodin::<wbr />MMG::<wbr /><a href="#a26cac49512386118b0d6e0715e31f2b6" class="m-doc-self">iscdMshdistExecutable</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
             </h3>
             <p>Path to the ISCD Mshdist executable.</p>
           </div></section>
           <section class="m-doc-details" id="a57fc4a385e0782d623194782754c9e4d"><div>
             <h3>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* Rodin::<wbr />MMG::<wbr /><a href="#a57fc4a385e0782d623194782754c9e4d" class="m-doc-self">mshdistExecutable</a> <span class="m-label m-primary">constexpr</span>
+              const char* Rodin::<wbr />MMG::<wbr /><a href="#a57fc4a385e0782d623194782754c9e4d" class="m-doc-self">mshdistExecutable</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
             </h3>
             <p>Path to the Mshdist executable used by MMG helpers.</p>
           </div></section>
           <section class="m-doc-details" id="a540deb7d7d2126cd5d29caabde8725c2"><div>
             <h3>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* Rodin::<wbr />MMG::<wbr /><a href="#a540deb7d7d2126cd5d29caabde8725c2" class="m-doc-self">iscdAdvectionExecutable</a> <span class="m-label m-primary">constexpr</span>
+              const char* Rodin::<wbr />MMG::<wbr /><a href="#a540deb7d7d2126cd5d29caabde8725c2" class="m-doc-self">iscdAdvectionExecutable</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
             </h3>
             <p>Path to the ISCD Mshdist executable.</p>
           </div></section>
           <section class="m-doc-details" id="a9933c5c0907ae24f7d5b6094a9f0c71e"><div>
             <h3>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">char</a>* Rodin::<wbr />MMG::<wbr /><a href="#a9933c5c0907ae24f7d5b6094a9f0c71e" class="m-doc-self">advectionExecutable</a> <span class="m-label m-primary">constexpr</span>
+              const char* Rodin::<wbr />MMG::<wbr /><a href="#a9933c5c0907ae24f7d5b6094a9f0c71e" class="m-doc-self">advectionExecutable</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
             </h3>
             <p>Path to the ISCD advection executable used by MMG helpers.</p>
           </div></section>
           <section class="m-doc-details" id="a383a4d31be9bbb1f06ec6c0657a048c5"><div>
             <h3>
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">int</a> Rodin::<wbr />MMG::<wbr /><a href="#a383a4d31be9bbb1f06ec6c0657a048c5" class="m-doc-self">verbosityLevel</a> <span class="m-label m-primary">constexpr</span>
+              const int Rodin::<wbr />MMG::<wbr /><a href="#a383a4d31be9bbb1f06ec6c0657a048c5" class="m-doc-self">verbosityLevel</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
             </h3>
             <p>Verbosity level for MMG console output.</p>

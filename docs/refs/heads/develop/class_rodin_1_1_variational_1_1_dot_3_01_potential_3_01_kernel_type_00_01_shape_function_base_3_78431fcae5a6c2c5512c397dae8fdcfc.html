@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dot_8h.html">&lt;Rodin/Variational/Dot.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> KernelType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Dot&lt;Potential&lt;KernelType, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>Dot product of a potential with a test shape function.</p>
@@ -89,6 +89,22 @@
               <td style="width: 1%">KernelType</td>
               <td>Type of the kernel function</td>
             </tr>
+            <tr>
+              <td>LHSDerived</td>
+              <td>Type of the potential&#x27;s shape function</td>
+            </tr>
+            <tr>
+              <td>TrialFES</td>
+              <td>Trial finite element space type</td>
+            </tr>
+            <tr>
+              <td>RHSDerived</td>
+              <td>Type of the test shape function</td>
+            </tr>
+            <tr>
+              <td>TestFES</td>
+              <td>Test finite element space type</td>
+            </tr>
           </tbody>
         </table>
         <nav class="m-block m-default">
@@ -99,6 +115,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -118,11 +135,11 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a27cd0f359cd406e2725eba6db0ece11c">
-              using <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;KernelType, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a>, TrialSpace&gt;&gt;
+              using <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;KernelType, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a9ae414697d3a4986c49f3b31e5b4c114">
-              using <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a>, TestSpace&gt;
+              using <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, TestFES, TestSpace&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a02f58f805c9cd09c1326a38fcb96f441">
@@ -131,32 +148,37 @@
             <dd>Parent class type.</dd>
           </dl>
         </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="aa30605a78683afeabc4ff8128ffe0b63">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>&amp; lhs,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
             <dt id="a870b081053865d3cfcb309952451a411">
-              <span class="m-doc-wrap-bumper">auto <a href="#a870b081053865d3cfcb309952451a411" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a8ea0b01546962a7618446316f478c041">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8ea0b01546962a7618446316f478c041" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;&amp; other) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
             <dt id="a27d508dbc60ed5fe35334634980355ea">
-              <span class="m-doc-wrap-bumper">auto <a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the left-hand side operand.</dd>
             <dt id="a0dba62dd79cbb7ce209fc7718fe12843">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the right-hand side operand.</dd>
             <dt id="a6e400401156b6ff28bd83a88a2a7d7e7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e400401156b6ff28bd83a88a2a7d7e7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">constexpr</a> std::optional&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">size_<wbr />t</a>&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6e400401156b6ff28bd83a88a2a7d7e7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; std::optional&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -170,9 +192,9 @@
           <section class="m-doc-details" id="a2b05336328aaaff5852fc5c16065eaf9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> KernelType, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">LHSDerived</a> _2, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TrialFES</a> _3, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">RHSDerived</a> _4, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">TestFES</a> _5&gt;
+                template&lt;class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* Rodin::<wbr />Variational::<wbr />Dot&lt;Potential&lt;KernelType, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;KernelType, _2, _3, _4, _5&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b05336328aaaff5852fc5c16065eaf9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>* Rodin::<wbr />Variational::<wbr />Dot&lt;Potential&lt;KernelType, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;KernelType, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b05336328aaaff5852fc5c16065eaf9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">

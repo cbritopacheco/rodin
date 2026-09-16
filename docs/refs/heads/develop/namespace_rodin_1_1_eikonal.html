@@ -177,12 +177,12 @@ $ F(x) $
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Solution, class SpeedFunction&gt;</div>
               class <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>
             </dt>
             <dd>Fast marching method for solving the Eikonal equation.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Data, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
               class <a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html" class="m-doc">FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt;</a>
             </dt>
             <dd>FMM specialization for P1 finite elements on local meshes.</dd>
@@ -193,8 +193,8 @@ $ F(x) $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class SpeedFunction&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc">FMM</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a>&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc">FMM</a>(</span><span class="m-doc-wrap">Solution&amp; u,
+              SpeedFunction&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span>
             </dt>
             <dd>Deduction guide for FMM constructor.</dd>
           </dl>
@@ -207,8 +207,8 @@ $ F(x) $
               <div class="m-doc-template">
                 template&lt;class Solution, class SpeedFunction&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Solution</a>&amp; u,
-              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">SpeedFunction</a>&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap">Solution&amp; u,
+              SpeedFunction&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span></span>
             </h3>
             <p>Deduction guide for FMM constructor.</p>
 <p>Allows template argument deduction when constructing FMM objects.</p>

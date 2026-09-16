@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> F&gt;</div>
+          <div class="m-doc-template">template&lt;class F&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>AnalyticMatrixFunction <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Matrix-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialMatrix&lt;Real&gt;</code>.</p>
@@ -88,6 +88,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -97,7 +98,7 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> Scalar, <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Derived</a>&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase&lt;Real, AnalyticMatrixFunction&lt;F&gt;&gt;</a>
             </dt>
             <dd>Base class for matrix-valued functions defined on a mesh.</dd>
@@ -124,34 +125,49 @@
             <dd>Parent class type.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ae9a01d44b78a5a52df063c22d8501c00">
+              <span class="m-doc-wrap-bumper"><a href="#ae9a01d44b78a5a52df063c22d8501c00" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t rows,
+              std::size_t cols)</span>
+            </dt>
+            <dd>Constructs the adapter from a callable and matrix dimensions.</dd>
+            <dt id="aade9e29158d0c7fa271e56f08f284ff5">
+              <span class="m-doc-wrap-bumper"><a href="#aade9e29158d0c7fa271e56f08f284ff5" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ada6b880b8ed5fc1c9ae745107dc248ab">
+              <span class="m-doc-wrap-bumper"><a href="#ada6b880b8ed5fc1c9ae745107dc248ab" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#add4fd83502646378d479df5c42869bf5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="af0e2923caa24f35613d3cc8427bdc6bb">
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a303da7b26d89b3cce339904679ebba3c" class="m-doc">RangeType</a></span>
             </dt>
-            <dd>Creates a polymorphic copy of the function.</dd>
+            <dd>Evaluates the wrapped matrix-valued callable.</dd>
+            <dt id="a44e820ab5ce4634d93878211ffc30085">
+              <span class="m-doc-wrap-bumper">auto <a href="#a44e820ab5ce4634d93878211ffc30085" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the row count.</dd>
+            <dt id="a704883ed7aa6094bb95b59d3a42b7f43">
+              <span class="m-doc-wrap-bumper">auto <a href="#a704883ed7aa6094bb95b59d3a42b7f43" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the column count.</dd>
+            <dt id="a0d286f690fed94cc9bcfff8c5869f9e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d286f690fed94cc9bcfff8c5869f9e0" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns no intrinsic polynomial order for analytic callables.</dd>
+            <dt id="add4fd83502646378d479df5c42869bf5">
+              <span class="m-doc-wrap-bumper">auto <a href="#add4fd83502646378d479df5c42869bf5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Clones this adapter.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="add4fd83502646378d479df5c42869bf5"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">class</a> F&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>* Rodin::<wbr />Adaptation::<wbr />AnalyticMatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add4fd83502646378d479df5c42869bf5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of the function.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>
