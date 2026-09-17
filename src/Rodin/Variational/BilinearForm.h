@@ -536,7 +536,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return (this->getOperator() * v.getData()).dot(u.getData());
+        return (this->getOperator() * u.getData()).dot(v.getData());
       }
 
       /**
@@ -606,9 +606,17 @@ namespace Rodin::Variational
   class BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>> final
     : public BilinearFormBase<Math::Matrix<Scalar>>
   {
-    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+    using TrialFESMeshType =
+      typename FormLanguage::Traits<TrialFES>::MeshType;
 
-    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+    using TestFESMeshType =
+      typename FormLanguage::Traits<TestFES>::MeshType;
+
+    using TrialFESContextType =
+      typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+    using TestFESContextType =
+      typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
       /// @brief Solution vector type.
@@ -722,7 +730,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return (this->getOperator() * v.getData()).dot(u.getData());
+        return (this->getOperator() * u.getData()).dot(v.getData());
       }
 
       /**

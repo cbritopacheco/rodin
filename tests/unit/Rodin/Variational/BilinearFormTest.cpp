@@ -163,4 +163,77 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.rows(), 0);
     EXPECT_GT(op.cols(), 0);
   }
+
+  /// @brief Verifies sparse bilinear-form action preserves trial/test argument order.
+  TEST(Rodin_Variational_Real_P1_BilinearForm, SparseActionUsesTrialThenTest)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+      .finalize();
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    BilinearForm form(u, v);
+
+    auto& A = form.getOperator();
+    A.resize(3, 3);
+    A.insert(0, 0) = 1.0;
+    A.insert(0, 1) = 2.0;
+    A.insert(1, 2) = -3.0;
+    A.insert(2, 0) = 4.0;
+    A.makeCompressed();
+
+    GridFunction trial(fes);
+    trial.getData() << 1.0, 2.0, -1.0;
+    GridFunction test(fes);
+    test.getData() << -2.0, 1.0, 3.0;
+
+    const Real expected = (A * trial.getData()).dot(test.getData());
+    const Real reversed = (A * test.getData()).dot(trial.getData());
+    EXPECT_NE(expected, reversed);
+    EXPECT_DOUBLE_EQ(form(trial, test), expected);
+  }
+
+  /// @brief Verifies dense bilinear-form action preserves trial/test argument order.
+  TEST(Rodin_Variational_Real_P1_BilinearForm, DenseActionUsesTrialThenTest)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+      .finalize();
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    using Solution = typename decltype(u)::SolutionType;
+    BilinearForm<Solution, decltype(fes), decltype(fes), Math::Matrix<Real>> form(u, v);
+
+    auto& A = form.getOperator();
+    A.resize(3, 3);
+    A << 1.0, 2.0, 0.0,
+         0.0, 0.0, -3.0,
+         4.0, 0.0, 0.0;
+
+    GridFunction trial(fes);
+    trial.getData() << 1.0, 2.0, -1.0;
+    GridFunction test(fes);
+    test.getData() << -2.0, 1.0, 3.0;
+
+    const Real expected = (A * trial.getData()).dot(test.getData());
+    const Real reversed = (A * test.getData()).dot(trial.getData());
+    EXPECT_NE(expected, reversed);
+    EXPECT_DOUBLE_EQ(form(trial, test), expected);
+  }
 }

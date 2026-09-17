@@ -2284,7 +2284,7 @@ namespace Rodin::Variational
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
-                physComp += Jinv(comp, j) * refGrad[i][comp](j);
+                physComp += Jinv(j, comp) * refGrad[i][comp](j);
               div += physComp;
             }
 
@@ -2542,7 +2542,7 @@ namespace Rodin::Variational
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
-                physComp += Jinv(comp, j) * refGrad[i][comp](j);
+                physComp += Jinv(j, comp) * refGrad[i][comp](j);
               div += physComp;
             }
 

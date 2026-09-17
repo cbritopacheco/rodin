@@ -186,6 +186,7 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
+  /// @brief Verifies optimized P1 divergence couplings on a sheared tetrahedron.
   TEST(Rodin_Variational_P1QuadratureRule,
     ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
@@ -433,5 +434,54 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mat.rows(), static_cast<Eigen::Index>(vel.getSize()));
     EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(pres.getSize()));
     EXPECT_NE(mat.norm(), 0.0);
+  }
+
+  TEST(Rodin_Variational_P1QuadratureRule,
+    DivergenceCouplingsTransformGradientsOnShearedTetrahedron)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(3)
+      .nodes(4)
+      .vertex({0, 0, 0})
+      .vertex({2, 0, 0})
+      .vertex({1, 3, 0})
+      .vertex({0, 1, 4})
+      .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
+      .finalize();
+
+    P1<Math::SpatialVector<Real>> velocityFES(mesh, 3);
+    P1<Real> pressureFES(mesh);
+    GridFunction velocity(velocityFES);
+    velocity.getData() <<
+      0.0, 2.0, 7.0, 2.0,
+      0.0, -2.0, 8.0, 19.0,
+      0.0, 4.0, 2.0, -8.0;
+    GridFunction pressure(pressureFES);
+    pressure.getData().setOnes();
+
+    TrialFunction u(velocityFES);
+    TestFunction q(pressureFES);
+    BilinearForm divergencePressure(u, q);
+    divergencePressure = Integral(Div(u), q);
+    divergencePressure.assemble();
+
+    TrialFunction p(pressureFES);
+    TestFunction v(velocityFES);
+    BilinearForm pressureDivergence(p, v);
+    pressureDivergence = Integral(p, Div(v));
+    pressureDivergence.assemble();
+
+    // The affine velocity has gradient
+    // [ 1  2  0; -1  3  4; 2  0 -2 ], hence divergence 2.
+    // The tetrahedron has volume 4, so both actions equal 8.
+    const Real trialDivergence =
+      (divergencePressure.getOperator() * velocity.getData())
+      .dot(pressure.getData());
+    const Real testDivergence =
+      (pressureDivergence.getOperator() * pressure.getData())
+      .dot(velocity.getData());
+    EXPECT_NEAR(trialDivergence, 8.0, 1e-12);
+    EXPECT_NEAR(testDivergence, 8.0, 1e-12);
   }
 }
