@@ -63,6 +63,11 @@ overloads — ill-graded expressions do not compile):
 `getDOFs(polytope)` gives local size; evaluation produces a `TensorBasis`
 (one value per basis function) rather than a single value.
 
+For complex-valued spaces, Trial ∘ Test expressions follow Rodin's
+trial-first, test-second sesquilinear convention. See
+[numerical-contracts.md](numerical-contracts.md#real-and-complex-form-convention)
+for the precise algebra and backend rules.
+
 ## Finite element spaces
 
 `FiniteElementSpace` = mesh association + element type + local↔global DOF

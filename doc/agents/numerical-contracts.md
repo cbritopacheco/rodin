@@ -43,6 +43,31 @@ J(x) dx = -F(x)
 
 Do not negate the residual twice.
 
+## Real and complex form convention
+
+Rodin writes forms in trial-first, test-second order. `Math::dot(lhs, rhs)`
+conjugates `rhs`, so a complex-valued form has the discrete actions
+
+```text
+L(v)   = v* b
+a(u,v) = v* A u
+```
+
+Here `*` denotes the conjugate transpose. A `LinearForm` is therefore
+conjugate-linear in its test argument over the complex numbers. A
+`BilinearForm` is sesquilinear: linear in the trial argument and
+conjugate-linear in the test argument. Over the reals these reduce to the
+ordinary linear and bilinear cases; the class names cover both scalar domains.
+
+Assembly stores `b[i] = L(psi_i)` and `A[i,j] = a(phi_j, psi_i)`. The local
+integrator returns this entry directly. Do not add a backend-level conjugation:
+`Integral(c * u, v)` represents `c * u * conj(v)`, not
+`conj(c) * conj(u) * v`. Eigen evaluates the action as `v.dot(A * u)` and
+PETSc as `VecDot(v, A * u)`; both backend calls conjugate their first operand.
+
+Sesquilinearity is not Hermitian symmetry. Whether `A == A*` is a separate
+property of the particular weak form and coefficients.
+
 ## LinearSystem lifetime
 
 A `Math::LinearSystem` is bound to the spaces that created it. A changed mesh,
@@ -85,4 +110,3 @@ Dirichlet conditions and identification conditions are structural constraints.
 Assembly eliminates or expands them through the constraint map. Do not replace
 them with penalty terms unless the mathematical model explicitly asks for a
 penalty method.
-

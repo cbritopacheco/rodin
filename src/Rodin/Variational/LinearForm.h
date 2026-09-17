@@ -57,17 +57,21 @@ namespace Rodin::Variational
    * @brief Base class for linear form representations.
    *
    * LinearFormBase provides the foundation for representing linear forms
-   * @f$ l(v) : V \to \mathbb{R} @f$ in finite element computations. A linear
-   * form is a linear functional that maps functions from the function space
-   * @f$ V @f$ to real numbers, typically representing loads, sources, or
-   * boundary data in variational formulations.
+   * @f$ l(v) : V \to \mathbb{K} @f$ in finite element computations. Over the
+   * reals this is a linear functional. Over the complex numbers Rodin follows
+   * the test-function convention and the form is conjugate-linear in @f$ v
+   * @f$. Such forms typically represent loads, sources, or boundary data in
+   * variational formulations.
    *
    * @tparam Vector Vector type for the discrete representation
    *
    * ## Mathematical Foundation
-   * A linear form @f$ l(v) @f$ satisfies:
+   * A real linear form @f$ l(v) @f$ satisfies:
    * - **Linearity**: @f$ l(\alpha v_1 + \beta v_2) = \alpha l(v_1) + \beta l(v_2) @f$
    * - **Boundedness**: @f$ |l(v)| \leq C \|v\|_V @f$ for some constant @f$ C @f$
+   *
+   * For complex scalars, the first identity instead carries conjugated
+   * coefficients.
    *
    * ## Discrete Representation
    * The discrete vector representation satisfies @f$ b_i = l(\psi_i) @f$ where
@@ -415,7 +419,7 @@ namespace Rodin::Variational
        * @brief Evaluates the linear form at the function @f$ u @f$.
        *
        * Given a grid function @f$ u @f$, this function will compute the
-       * action of the linear mapping @f$ L(u) @f$.
+       * action of the form @f$ L(u) @f$.
        *
        * @returns The value which the linear form takes at @f$ u @f$.
        */
@@ -423,7 +427,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType operator()(const GridFunction<FES, Data>& u) const
       {
-        return this->getVector().dot(u.getData());
+        return u.getData().dot(this->getVector());
       }
 
       void assemble() override
