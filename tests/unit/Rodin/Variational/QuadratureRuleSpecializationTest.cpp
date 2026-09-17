@@ -184,6 +184,64 @@ namespace
       }
   };
 
+  /// @brief Checks both optimized H1 divergence couplings against an exact
+  /// affine field on a non-orthogonal element.
+  template <size_t K>
+  void checkH1DivergenceTransformation()
+  {
+    SCOPED_TRACE("H1<" + std::to_string(K) + ">");
+
+    LocalMesh mesh =
+      LocalMesh::Builder()
+      .initialize(3)
+      .nodes(4)
+      .vertex({0, 0, 0})
+      .vertex({2, 0, 0})
+      .vertex({1, 3, 0})
+      .vertex({0, 1, 4})
+      .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
+      .finalize();
+    auto& connectivity = mesh.getConnectivity();
+    connectivity.compute(3, 2);
+    connectivity.compute(2, 1);
+    connectivity.compute(1, 0);
+    connectivity.compute(2, 3);
+
+    auto velocityFES = H1Family<K>::vector(mesh, 3);
+    auto pressureFES = H1Family<K>::scalar(mesh);
+    GridFunction velocity(velocityFES);
+    velocity.project(VectorFunction{
+      RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+      RealFunction([](const Point& p) { return -p.x() + 3 * p.y() + 4 * p.z(); }),
+      RealFunction([](const Point& p) { return 2 * p.x() - 2 * p.z(); })});
+    GridFunction pressure(pressureFES);
+    pressure.project(RealFunction(1.0));
+
+    TrialFunction u(velocityFES);
+    TestFunction q(pressureFES);
+    BilinearForm divergencePressure(u, q);
+    divergencePressure = Integral(Div(u), q);
+    divergencePressure.assemble();
+
+    TrialFunction p(pressureFES);
+    TestFunction v(velocityFES);
+    BilinearForm pressureDivergence(p, v);
+    pressureDivergence = Integral(p, Div(v));
+    pressureDivergence.assemble();
+
+    // The affine field has divergence 2 and the tetrahedron has volume 4.
+    EXPECT_NEAR(
+      (divergencePressure.getOperator() * velocity.getData())
+        .dot(pressure.getData()),
+      8.0,
+      tolerance);
+    EXPECT_NEAR(
+      (pressureDivergence.getOperator() * pressure.getData())
+        .dot(velocity.getData()),
+      8.0,
+      tolerance);
+  }
+
   /// @brief Scalar identities: mass and loads reproduce the measure, and
   /// derivative forms annihilate constants.
   template <class Family>
@@ -796,4 +854,13 @@ namespace
 TEST(QuadratureRuleSpecializationTest, P1HandlersAreOrderInvariant)
 {
   checkOrderInvariance<P1Family>("P1");
+}
+
+/// @brief H1 divergence transformations are correct on a sheared cell for
+/// linear through cubic spaces.
+TEST(QuadratureRuleSpecializationTest, H1DivergenceTransformsOnShearedTetrahedron)
+{
+  checkH1DivergenceTransformation<1>();
+  checkH1DivergenceTransformation<2>();
+  checkH1DivergenceTransformation<3>();
 }
