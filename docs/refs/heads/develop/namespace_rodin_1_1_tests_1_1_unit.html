@@ -334,6 +334,11 @@ $Q$
               P0MassMatrix_MatchesSequential)</span>
             </dt>
             <dd>P0 mass matrix: OpenMP result equals Sequential result.</dd>
+            <dt id="aef77132b99baa5de33a66ba96aba1774">
+              <span class="m-doc-wrap-bumper"><a href="#aef77132b99baa5de33a66ba96aba1774" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_OpenMP_BilinearForm,
+              ComplexCoefficientPreservesConvention)</span>
+            </dt>
+            <dd>Verifies that neither backend conjugates a complex coefficient.</dd>
             <dt id="a2f272ae3da0186dbf7b7ea869f8071c6">
               <span class="m-doc-wrap-bumper"><a href="#a2f272ae3da0186dbf7b7ea869f8071c6" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap">Assembly_OpenMP_BilinearForm,
               NonSquare_P0test_P1trial_MatchesSequential)</span>
@@ -5666,6 +5671,36 @@ $Q$
               MassMatrix)</span>
             </dt>
             <dd>Verifies mass matrix for variational real P1 bilinear form by checking form assembly.</dd>
+            <dt id="ab7c327822f79de0efc489508d4c6dc37">
+              <span class="m-doc-wrap-bumper"><a href="#ab7c327822f79de0efc489508d4c6dc37" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1_BilinearForm,
+              SparseActionUsesTrialThenTest)</span>
+            </dt>
+            <dd>Verifies sparse bilinear-form action preserves trial/test argument order.</dd>
+            <dt id="adf66bc1ecf6a09f0c08db6384880b0e7">
+              <span class="m-doc-wrap-bumper"><a href="#adf66bc1ecf6a09f0c08db6384880b0e7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1_BilinearForm,
+              DenseActionUsesTrialThenTest)</span>
+            </dt>
+            <dd>Verifies dense bilinear-form action preserves trial/test argument order.</dd>
+            <dt id="af5ada2ad041a4fe4f68b45bad5c40164">
+              <span class="m-doc-wrap-bumper"><a href="#af5ada2ad041a4fe4f68b45bad5c40164" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Complex_P1_BilinearForm,
+              SparseActionConjugatesTest)</span>
+            </dt>
+            <dd>Verifies sparse complex action is linear in trial and conjugate-linear in test.</dd>
+            <dt id="a0b3ca1f830f21baf013bbe6500c43545">
+              <span class="m-doc-wrap-bumper"><a href="#a0b3ca1f830f21baf013bbe6500c43545" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Complex_P1_BilinearForm,
+              DenseActionConjugatesTest)</span>
+            </dt>
+            <dd>Verifies dense complex action is linear in trial and conjugate-linear in test.</dd>
+            <dt id="aff2db53edb4a0af6f2fdc8784cdb6e2a">
+              <span class="m-doc-wrap-bumper"><a href="#aff2db53edb4a0af6f2fdc8784cdb6e2a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1_BilinearForm,
+              RectangularActionUsesTrialColumns)</span>
+            </dt>
+            <dd>Verifies a rectangular action maps trial coefficients into the test space.</dd>
+            <dt id="a81b02ea3878181299ab48e7e769542c1">
+              <span class="m-doc-wrap-bumper"><a href="#a81b02ea3878181299ab48e7e769542c1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Complex_P1_BilinearForm,
+              AssemblyPreservesCoefficient)</span>
+            </dt>
+            <dd>Verifies assembly preserves a complex trial coefficient without conjugating it.</dd>
             <dt id="a926287be394e19f6ed2b284db1b60c27">
               <span class="m-doc-wrap-bumper"><a href="#a926287be394e19f6ed2b284db1b60c27" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_BooleanFunction,
               TrueConstant_Construction)</span>
@@ -11110,6 +11145,11 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               AssembleVectorFunction)</span>
             </dt>
             <dd>Verifies assemble vector function for variational vector P1 linear form by checking form assembly.</dd>
+            <dt id="a01af8881e62e806c600bc70fb4f59e0a">
+              <span class="m-doc-wrap-bumper"><a href="#a01af8881e62e806c600bc70fb4f59e0a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Complex_P1_LinearForm,
+              ActionConjugatesTest)</span>
+            </dt>
+            <dd>Verifies complex linear-form action conjugates the test coefficients.</dd>
             <dt id="ae3e5f52ac704cbd4036e06ea9586b3bf">
               <span class="m-doc-wrap-bumper"><a href="#ae3e5f52ac704cbd4036e06ea9586b3bf" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1_LinearForm,
               ClearIntegrators)</span>
@@ -11935,8 +11975,8 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               VectorMass_MatchesGridFunctionLinearForm)</span>
             </dt>
             <dd>Verifies vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.</dd>
-            <dt id="ac23cb3082ae493cdd8c0e810f40397a1">
-              <span class="m-doc-wrap-bumper"><a href="#ac23cb3082ae493cdd8c0e810f40397a1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac23cb3082ae493cdd8c0e810f40397a1" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
               ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)</span>
             </dt>
             <dd>Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.</dd>
@@ -11955,6 +11995,11 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               VectorPotentialConstantKernel_UsesSeparateTrialAndTestBasisValues)</span>
             </dt>
             <dd>Verifies vector potential constant kernel uses separate trial and test basis values for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.</dd>
+            <dt id="ad94e60db986bdef590b5ece6bb9c68ce">
+              <span class="m-doc-wrap-bumper"><a href="#ad94e60db986bdef590b5ece6bb9c68ce" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
+              ComplexVectorPotentialPreservesKernel)</span>
+            </dt>
+            <dd>Verifies a complex potential kernel is not conjugated during contraction or assembly.</dd>
             <dt id="a68cef76d59ab7722302291ae3d8482c0">
               <span class="m-doc-wrap-bumper"><a href="#a68cef76d59ab7722302291ae3d8482c0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
               DivergencePressureCoupling_Assembles)</span>
@@ -11965,6 +12010,11 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               PressureDivergence_Assembles)</span>
             </dt>
             <dd>Verifies pressure divergence assembles for variational P1 quadrature rule by checking exact expected values, form assembly.</dd>
+            <dt id="a4408511b88c49877bfb97b75b90b9d50">
+              <span class="m-doc-wrap-bumper"><a href="#a4408511b88c49877bfb97b75b90b9d50" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
+              DivergenceCouplingsTransformGradientsOnShearedTetrahedron)</span>
+            </dt>
+            <dd>Verifies divergence couplings transform gradients on a sheared tetrahedron.</dd>
             <dt id="a79c49161551ef0c1660e403a92d1c389">
               <span class="m-doc-wrap-bumper"><a href="#a79c49161551ef0c1660e403a92d1c389" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1,
               SanityTest_2D_Square_Build)</span>
@@ -13435,6 +13485,14 @@ $ u_s - u_s = 0 $
             </h3>
             <p>Mixed P0/P1 problem: compare integral-only vs preassembled BF.</p>
 <p>System: Integral(u, v) – Integral(p, v) = 0 (test v in P1) Integral(p, q) = (f, q) (test q in P0)</p><p>We replace the Integral(p, q) block with a preassembled BilinearForm and verify the global matrix matches.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac23cb3082ae493cdd8c0e810f40397a1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac23cb3082ae493cdd8c0e810f40397a1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
+              ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)</span></span>
+            </h3>
+            <p>Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.</p>
+<p>Verifies optimized P1 divergence couplings on a sheared tetrahedron.</p>
           </div></section>
           <section class="m-doc-details" id="a2773494010556a7b71de9a6e33cddb38"><div>
             <h3>
