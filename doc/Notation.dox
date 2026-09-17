@@ -49,8 +49,8 @@
 | @f$ u @f$         | The trial function (unknown, sought solution). Corresponds to `TrialFunction` in Rodin. |
 | @f$ v @f$         | The test function (weighting function). Corresponds to `TestFunction` in Rodin. |
 | @f$ u_h @f$       | The discrete (finite element) approximation of @f$ u @f$. After solving, its coefficients are stored in the `GridFunction` associated with the trial function. |
-| @f$ a(u, v) @f$   | A bilinear form: linear in both @f$ u @f$ and @f$ v @f$. Built from `Integral` expressions involving both trial and test functions. Assembled into the system matrix @f$ A @f$. |
-| @f$ \ell(v) @f$   | A linear form: linear in @f$ v @f$ only. Built from `Integral` expressions involving only the test function. Assembled into the right-hand side vector @f$ \mathbf{b} @f$. |
+| @f$ a(u, v) @f$   | A bilinear form over the reals. Over the complex numbers it is linear in the trial function @f$ u @f$ and conjugate-linear in the test function @f$ v @f$. Built from `Integral` expressions involving both trial and test functions. Assembled into the system matrix @f$ A @f$. |
+| @f$ \ell(v) @f$   | A linear form over the reals and a conjugate-linear test functional over the complex numbers. Built from `Integral` expressions involving only the test function. Assembled into the right-hand side vector @f$ \mathbf{b} @f$. |
 | @f$ f @f$         | A source term or right-hand-side function. In Rodin, represented as a `RealFunction` or a lambda. |
 | @f$ g @f$         | A boundary data function (Dirichlet or Neumann data). |
 

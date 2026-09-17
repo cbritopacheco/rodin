@@ -415,6 +415,12 @@ TEST_F(CommonTest, DotProductEigen)
   Eigen::Vector3d v1(1, 2, 3);
   Eigen::Vector3d v2(4, 5, 6);
   EXPECT_DOUBLE_EQ(dot(v1, v2), 32.0);
+
+  Math::Vector<Complex> z1(2);
+  z1 << Complex(1, 2), Complex(3, -1);
+  Math::Vector<Complex> z2(2);
+  z2 << Complex(2, -1), Complex(-1, 4);
+  EXPECT_EQ(dot(z1, z2), z1(0) * std::conj(z2(0)) + z1(1) * std::conj(z2(1)));
 }
 
 /// @brief Verifies min function for common test by checking tolerance-based numerical results, exact expected values.
@@ -456,6 +462,10 @@ TEST_F(CommonTest, DotProductSpatialVector)
   SpatialVector<Real> a({1.0, 2.0, 3.0});
   SpatialVector<Real> b({4.0, 5.0, 6.0});
   EXPECT_DOUBLE_EQ(dot(a, b), 32.0);
+
+  SpatialVector<Complex> z1({Complex(1, 2), Complex(3, -1)});
+  SpatialVector<Complex> z2({Complex(2, -1), Complex(-1, 4)});
+  EXPECT_EQ(dot(z1, z2), z1(0) * std::conj(z2(0)) + z1(1) * std::conj(z2(1)));
 }
 
 /// @brief Verifies dot product spatial matrix for common test by checking tolerance-based numerical results.
@@ -470,6 +480,22 @@ TEST_F(CommonTest, DotProductSpatialMatrix)
   b(1, 0) = 7; b(1, 1) = 8;
 
   EXPECT_DOUBLE_EQ(dot(a, b), 70.0);
+
+  SpatialMatrix<Complex> z1(2, 2);
+  z1(0, 0) = Complex(1, 2);
+  z1(0, 1) = Complex(3, -1);
+  z1(1, 0) = Complex(-2, 1);
+  z1(1, 1) = Complex(4, 3);
+  SpatialMatrix<Complex> z2(2, 2);
+  z2(0, 0) = Complex(2, -1);
+  z2(0, 1) = Complex(-1, 4);
+  z2(1, 0) = Complex(3, 2);
+  z2(1, 1) = Complex(1, -2);
+  Complex expected = 0;
+  for (Eigen::Index i = 0; i < 2; ++i)
+    for (Eigen::Index j = 0; j < 2; ++j)
+      expected += z1(i, j) * std::conj(z2(i, j));
+  EXPECT_EQ(dot(z1, z2), expected);
 }
 
 /// @brief Verifies dot product mixed eigen spatial vector for common test by checking tolerance-based numerical results.
@@ -480,4 +506,12 @@ TEST_F(CommonTest, DotProductMixedEigenSpatialVector)
 
   EXPECT_DOUBLE_EQ(dot(ev, sv), 32.0);
   EXPECT_DOUBLE_EQ(dot(sv, ev), 32.0);
+
+  Math::Vector<Complex> ez(2);
+  ez << Complex(1, 2), Complex(3, -1);
+  SpatialVector<Complex> sz({Complex(2, -1), Complex(-1, 4)});
+  const Complex forward = ez(0) * std::conj(sz(0)) + ez(1) * std::conj(sz(1));
+  const Complex reverse = sz(0) * std::conj(ez(0)) + sz(1) * std::conj(ez(1));
+  EXPECT_EQ(dot(ez, sz), forward);
+  EXPECT_EQ(dot(sz, ez), reverse);
 }

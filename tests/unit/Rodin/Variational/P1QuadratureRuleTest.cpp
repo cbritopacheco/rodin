@@ -394,6 +394,65 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies a complex potential kernel is not conjugated during contraction or assembly.
+  TEST(Rodin_Variational_P1QuadratureRule, ComplexVectorPotentialPreservesKernel)
+  {
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
+
+    P1<Real> scalarFES(mesh);
+    TrialFunction scalarU(scalarFES);
+    TestFunction scalarV(scalarFES);
+    DenseProblem scalarProblem(scalarU, scalarV);
+    scalarProblem = Integral(
+      Potential([](const Point&, const Point&) { return 1.0; }, scalarU), scalarV);
+    scalarProblem.assemble();
+    const auto& scalarA = scalarProblem.getLinearSystem().getOperator();
+
+    P1<Math::SpatialVector<Complex>> fes(mesh, 2);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    const Complex entries[2][2] = {
+      {Complex(1, 2), Complex(-3, 1)}, {Complex(2, -4), Complex(5, 3)}};
+    auto kernel = [&](Math::SpatialMatrix<Complex>& out, const Point&, const Point&) {
+      out.resize(2, 2);
+      for (size_t i = 0; i < 2; ++i)
+        for (size_t j = 0; j < 2; ++j)
+          out(i, j) = entries[i][j];
+    };
+
+    DenseProblem problem(u, v);
+    problem = Integral(Potential(kernel, u), v);
+    problem.assemble();
+    const auto& A = problem.getLinearSystem().getOperator();
+
+    for (size_t testVertex = 0; testVertex < 3; ++testVertex)
+    {
+      for (size_t trialVertex = 0; trialVertex < 3; ++trialVertex)
+      {
+        for (size_t testComp = 0; testComp < 2; ++testComp)
+        {
+          for (size_t trialComp = 0; trialComp < 2; ++trialComp)
+          {
+            const Eigen::Index row = static_cast<Eigen::Index>(testVertex + testComp * 3);
+            const Eigen::Index col =
+              static_cast<Eigen::Index>(trialVertex + trialComp * 3);
+            const Complex expected = scalarA(static_cast<Eigen::Index>(testVertex),
+                                       static_cast<Eigen::Index>(trialVertex)) *
+              entries[testComp][trialComp];
+            EXPECT_NEAR(std::abs(A(row, col) - expected), 0.0, 1e-12);
+          }
+        }
+      }
+    }
+  }
+
   /// @brief Verifies divergence pressure coupling assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, DivergencePressureCoupling_Assembles)
   {
@@ -436,27 +495,24 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies divergence couplings transform gradients on a sheared tetrahedron.
   TEST(Rodin_Variational_P1QuadratureRule,
     DivergenceCouplingsTransformGradientsOnShearedTetrahedron)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(3)
-      .nodes(4)
-      .vertex({0, 0, 0})
-      .vertex({2, 0, 0})
-      .vertex({1, 3, 0})
-      .vertex({0, 1, 4})
-      .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(3)
+                  .nodes(4)
+                  .vertex({0, 0, 0})
+                  .vertex({2, 0, 0})
+                  .vertex({1, 3, 0})
+                  .vertex({0, 1, 4})
+                  .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
+                  .finalize();
 
     P1<Math::SpatialVector<Real>> velocityFES(mesh, 3);
     P1<Real> pressureFES(mesh);
     GridFunction velocity(velocityFES);
-    velocity.getData() <<
-      0.0, 2.0, 7.0, 2.0,
-      0.0, -2.0, 8.0, 19.0,
-      0.0, 4.0, 2.0, -8.0;
+    velocity.getData() << 0.0, 2.0, 7.0, 2.0, 0.0, -2.0, 8.0, 19.0, 0.0, 4.0, 2.0, -8.0;
     GridFunction pressure(pressureFES);
     pressure.getData().setOnes();
 
@@ -476,11 +532,9 @@ namespace Rodin::Tests::Unit
     // [ 1  2  0; -1  3  4; 2  0 -2 ], hence divergence 2.
     // The tetrahedron has volume 4, so both actions equal 8.
     const Real trialDivergence =
-      (divergencePressure.getOperator() * velocity.getData())
-      .dot(pressure.getData());
+      (divergencePressure.getOperator() * velocity.getData()).dot(pressure.getData());
     const Real testDivergence =
-      (pressureDivergence.getOperator() * pressure.getData())
-      .dot(velocity.getData());
+      (pressureDivergence.getOperator() * pressure.getData()).dot(velocity.getData());
     EXPECT_NEAR(trialDivergence, 8.0, 1e-12);
     EXPECT_NEAR(testDivergence, 8.0, 1e-12);
   }

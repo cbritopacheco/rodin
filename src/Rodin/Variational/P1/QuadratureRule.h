@@ -4129,12 +4129,8 @@ namespace Rodin::Variational
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                Math::SpatialVector<ScalarType> rx0(2), rz0(2),
-                                                rx1(2), rz1(2),
-                                                rx2(2), rz2(2),
-                                                rx3(2), rz3(2),
-                                                rx4(2), rz4(2),
-                                                rx5(2), rz5(2);
+                Math::SpatialPoint rx0(2), rz0(2), rx1(2), rz1(2), rx2(2), rz2(2), rx3(2),
+                  rz3(2), rx4(2), rz4(2), rx5(2), rz5(2);
 
                 // Sauter-Schwab for coincident panels: the four-dimensional
                 // integral is regularised onto the unit cube in the collapsed
@@ -4151,19 +4147,19 @@ namespace Rodin::Variational
                 m_matrix.setZero(testfe.getCount(), trialfe.getCount());
                 for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const ScalarType eta3 = m_collapsed[i3].first;
+                  const Real eta3 = m_collapsed[i3].first;
                   const Real w3 = m_collapsed[i3].second;
                   for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const ScalarType eta2 = m_collapsed[i2].first;
+                    const Real eta2 = m_collapsed[i2].first;
                     const Real w2 = m_collapsed[i2].second;
                     for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
                     {
-                      const ScalarType eta1 = m_collapsed[i1].first;
+                      const Real eta1 = m_collapsed[i1].first;
                       const Real w1 = m_collapsed[i1].second;
                       for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
                       {
-                        const ScalarType xi = m_collapsed[i0].first;
+                        const Real xi = m_collapsed[i0].first;
                         const Real w0 = m_collapsed[i0].second;
                         const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
                         const Real factor = w0 * w1 * w2 * w3 * jacobian;
@@ -4177,13 +4173,13 @@ namespace Rodin::Variational
                         // Jacobian integrating correctly, so the entries sum
                         // to the right total while being distributed wrongly
                         // among the basis functions.
-                        const ScalarType a = xi - xi * eta1;
-                        const ScalarType b = xi - xi * eta1 * eta2 * eta3;
-                        const ScalarType c = xi - xi * eta1 * eta2;
-                        const ScalarType d = xi * eta1 * (1 - eta2);
-                        const ScalarType e = xi * eta1 * (1 - eta2 * eta3);
-                        const ScalarType f = xi * eta1 * (1 - eta2 + eta2 * eta3);
-                        const ScalarType g = xi - xi * eta1 + xi * eta1 * eta2;
+                        const Real a = xi - xi * eta1;
+                        const Real b = xi - xi * eta1 * eta2 * eta3;
+                        const Real c = xi - xi * eta1 * eta2;
+                        const Real d = xi * eta1 * (1 - eta2);
+                        const Real e = xi * eta1 * (1 - eta2 * eta3);
+                        const Real f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const Real g = xi - xi * eta1 + xi * eta1 * eta2;
 
                         rx0[0] = 1 - xi;
                         rx0[1] = g;
@@ -4249,18 +4245,18 @@ namespace Rodin::Variational
                           for (size_t m = 0; m < trialfe.getCount(); ++m)
                           {
                             const auto& trb = trialfe.getBasis(m);
-                            m_matrix(l, m) +=
-                              factor * s0 * kernel(x0, z0) * trb(rx0) * teb(rz0);
-                            m_matrix(l, m) +=
-                              factor * s1 * kernel(x1, z1) * trb(rx1) * teb(rz1);
-                            m_matrix(l, m) +=
-                              factor * s2 * kernel(x2, z2) * trb(rx2) * teb(rz2);
-                            m_matrix(l, m) +=
-                              factor * s3 * kernel(x3, z3) * trb(rx3) * teb(rz3);
-                            m_matrix(l, m) +=
-                              factor * s4 * kernel(x4, z4) * trb(rx4) * teb(rz4);
-                            m_matrix(l, m) +=
-                              factor * s5 * kernel(x5, z5) * trb(rx5) * teb(rz5);
+                            m_matrix(l, m) += factor * s0 * kernel(x0, z0) *
+                              Math::dot(trb(rx0), teb(rz0));
+                            m_matrix(l, m) += factor * s1 * kernel(x1, z1) *
+                              Math::dot(trb(rx1), teb(rz1));
+                            m_matrix(l, m) += factor * s2 * kernel(x2, z2) *
+                              Math::dot(trb(rx2), teb(rz2));
+                            m_matrix(l, m) += factor * s3 * kernel(x3, z3) *
+                              Math::dot(trb(rx3), teb(rz3));
+                            m_matrix(l, m) += factor * s4 * kernel(x4, z4) *
+                              Math::dot(trb(rx4), teb(rz4));
+                            m_matrix(l, m) += factor * s5 * kernel(x5, z5) *
+                              Math::dot(trb(rx5), teb(rz5));
                           }
                         }
                       }
@@ -4295,7 +4291,7 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
                     const ScalarType trb = trialfe.getBasis(m)(rx);
-                    m_matrix(l, m) = m_sk * trb * teb;
+                    m_matrix(l, m) = m_sk * Math::dot(trb, teb);
                   }
                 }
                 break;
@@ -4326,7 +4322,7 @@ namespace Rodin::Variational
               for (size_t m = 0; m < trialfe.getCount(); ++m)
               {
                 const ScalarType trb = trialfe.getBasis(m)(rx);
-                m_matrix(l, m) = m_sk * trb * teb;
+                m_matrix(l, m) = m_sk * Math::dot(trb, teb);
               }
             }
           }
@@ -4341,12 +4337,8 @@ namespace Rodin::Variational
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                Math::SpatialVector<ScalarType> rx0(2), rz0(2),
-                                                rx1(2), rz1(2),
-                                                rx2(2), rz2(2),
-                                                rx3(2), rz3(2),
-                                                rx4(2), rz4(2),
-                                                rx5(2), rz5(2);
+                Math::SpatialPoint rx0(2), rz0(2), rx1(2), rz1(2), rx2(2), rz2(2), rx3(2),
+                  rz3(2), rx4(2), rz4(2), rx5(2), rz5(2);
 
                 // The vector-valued counterpart of the scalar case above, and
                 // the same two corrections: a tensor Gauss rule over the
@@ -4355,30 +4347,30 @@ namespace Rodin::Variational
                 m_matrix.setZero(testfe.getCount(), trialfe.getCount());
                 for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const ScalarType eta3 = m_collapsed[i3].first;
+                  const Real eta3 = m_collapsed[i3].first;
                   const Real w3 = m_collapsed[i3].second;
                   for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const ScalarType eta2 = m_collapsed[i2].first;
+                    const Real eta2 = m_collapsed[i2].first;
                     const Real w2 = m_collapsed[i2].second;
                     for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
                     {
-                      const ScalarType eta1 = m_collapsed[i1].first;
+                      const Real eta1 = m_collapsed[i1].first;
                       const Real w1 = m_collapsed[i1].second;
                       for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
                       {
-                        const ScalarType xi = m_collapsed[i0].first;
+                        const Real xi = m_collapsed[i0].first;
                         const Real w0 = m_collapsed[i0].second;
                         const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
                         const Real factor = w0 * w1 * w2 * w3 * jacobian;
 
-                        const ScalarType a = xi - xi * eta1;
-                        const ScalarType b = xi - xi * eta1 * eta2 * eta3;
-                        const ScalarType c = xi - xi * eta1 * eta2;
-                        const ScalarType d = xi * eta1 * (1 - eta2);
-                        const ScalarType e = xi * eta1 * (1 - eta2 * eta3);
-                        const ScalarType f = xi * eta1 * (1 - eta2 + eta2 * eta3);
-                        const ScalarType g = xi - xi * eta1 + xi * eta1 * eta2;
+                        const Real a = xi - xi * eta1;
+                        const Real b = xi - xi * eta1 * eta2 * eta3;
+                        const Real c = xi - xi * eta1 * eta2;
+                        const Real d = xi * eta1 * (1 - eta2);
+                        const Real e = xi * eta1 * (1 - eta2 * eta3);
+                        const Real f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const Real g = xi - xi * eta1 + xi * eta1 * eta2;
 
                         rx0[0] = 1 - xi;
                         rx0[1] = g;
@@ -4464,12 +4456,12 @@ namespace Rodin::Variational
                             const auto trv5 = trb(rx5);
                             const auto tev5 = teb(rz5);
 
-                            m_matrix(l, m) += factor * s0 * (m_k0 * trv0).dot(tev0);
-                            m_matrix(l, m) += factor * s1 * (m_k1 * trv1).dot(tev1);
-                            m_matrix(l, m) += factor * s2 * (m_k2 * trv2).dot(tev2);
-                            m_matrix(l, m) += factor * s3 * (m_k3 * trv3).dot(tev3);
-                            m_matrix(l, m) += factor * s4 * (m_k4 * trv4).dot(tev4);
-                            m_matrix(l, m) += factor * s5 * (m_k5 * trv5).dot(tev5);
+                            m_matrix(l, m) += factor * s0 * Math::dot(m_k0 * trv0, tev0);
+                            m_matrix(l, m) += factor * s1 * Math::dot(m_k1 * trv1, tev1);
+                            m_matrix(l, m) += factor * s2 * Math::dot(m_k2 * trv2, tev2);
+                            m_matrix(l, m) += factor * s3 * Math::dot(m_k3 * trv3, tev3);
+                            m_matrix(l, m) += factor * s4 * Math::dot(m_k4 * trv4, tev4);
+                            m_matrix(l, m) += factor * s5 * Math::dot(m_k5 * trv5, tev5);
                           }
                         }
                       }
@@ -4504,7 +4496,7 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
                     m_trv = trialfe.getBasis(m)(rx);
-                    m_matrix(l, m) = (m_mk * m_trv).dot(m_tev);
+                    m_matrix(l, m) = Math::dot(m_mk * m_trv, m_tev);
                   }
                 }
                 break;
@@ -4535,7 +4527,7 @@ namespace Rodin::Variational
               for (size_t m = 0; m < trialfe.getCount(); ++m)
               {
                 m_trv = trialfe.getBasis(m)(rx);
-                m_matrix(l, m) = (m_mk * m_trv).dot(m_tev);
+                m_matrix(l, m) = Math::dot(m_mk * m_trv, m_tev);
               }
             }
           }

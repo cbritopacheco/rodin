@@ -146,6 +146,27 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(vector.size(), 0);
   }
 
+  /// @brief Verifies complex linear-form action conjugates the test coefficients.
+  TEST(Rodin_Variational_Complex_P1_LinearForm, ActionConjugatesTest)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Complex> fes(mesh);
+    TestFunction v(fes);
+    LinearForm form(v);
+    form.getVector().resize(fes.getSize());
+    form.getVector().setZero();
+    form.getVector()(0) = Complex(1, 2);
+    form.getVector()(1) = Complex(-3, 1);
+
+    GridFunction test(fes);
+    test.getData().setZero();
+    test.getData()(0) = Complex(2, -1);
+    test.getData()(1) = Complex(1, 4);
+
+    const Complex expected = Math::dot(form.getVector(), test.getData());
+    EXPECT_NEAR(std::abs(form(test) - expected), 0.0, 1e-14);
+  }
+
   /// @brief Verifies clear integrators for variational real P1 linear form by checking false predicates.
   TEST(Rodin_Variational_Real_P1_LinearForm, ClearIntegrators)
   {

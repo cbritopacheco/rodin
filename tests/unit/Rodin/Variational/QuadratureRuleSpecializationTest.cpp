@@ -152,8 +152,6 @@ namespace
 {
   struct P1Family
   {
-      static constexpr const char* name = "P1";
-
       static P1<Real, LocalMesh> scalar(const LocalMesh& mesh)
       {
         return P1<Real, LocalMesh>(mesh);
@@ -169,8 +167,6 @@ namespace
   template <size_t K>
   struct H1Family
   {
-      static constexpr const char* name = "H1";
-
       static H1<K, Real, LocalMesh> scalar(const LocalMesh& mesh)
       {
         return H1<K, Real, LocalMesh>(std::integral_constant<size_t, K>{}, mesh);
@@ -219,17 +215,16 @@ namespace
       GridFunction velocity(velocityFES);
       if (element.dimension == 2)
       {
-        velocity.project(VectorFunction{
-          RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
-          RealFunction([](const Point& p) { return -p.x() + 3 * p.y(); })});
+        velocity.project(
+          VectorFunction{RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+            RealFunction([](const Point& p) { return -p.x() + 3 * p.y(); })});
       }
       else
       {
-        velocity.project(VectorFunction{
-          RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
-          RealFunction(
-            [](const Point& p) { return -p.x() + 3 * p.y() + 4 * p.z(); }),
-          RealFunction([](const Point& p) { return 2 * p.x() - 2 * p.z(); })});
+        velocity.project(
+          VectorFunction{RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+            RealFunction([](const Point& p) { return -p.x() + 3 * p.y() + 4 * p.z(); }),
+            RealFunction([](const Point& p) { return 2 * p.x() - 2 * p.z(); })});
       }
       GridFunction pressure(pressureFES);
       pressure.project(RealFunction(1.0));
@@ -249,15 +244,11 @@ namespace
       const Real divergence = (element.dimension == 2) ? 4.0 : 2.0;
       const Real expected = divergence * measureOf(mesh);
       EXPECT_NEAR(
-        (divergencePressure.getOperator() * velocity.getData())
-          .dot(pressure.getData()),
-        expected,
-        tolerance);
+        (divergencePressure.getOperator() * velocity.getData()).dot(pressure.getData()),
+        expected, tolerance);
       EXPECT_NEAR(
-        (pressureDivergence.getOperator() * pressure.getData())
-          .dot(velocity.getData()),
-        expected,
-        tolerance);
+        (pressureDivergence.getOperator() * pressure.getData()).dot(velocity.getData()),
+        expected, tolerance);
     }
   }
 
