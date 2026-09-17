@@ -152,8 +152,6 @@ namespace
 {
   struct P1Family
   {
-      static constexpr const char* name = "P1";
-
       static P1<Real, LocalMesh> scalar(const LocalMesh& mesh)
       {
         return P1<Real, LocalMesh>(mesh);
@@ -169,8 +167,6 @@ namespace
   template <size_t K>
   struct H1Family
   {
-      static constexpr const char* name = "H1";
-
       static H1<K, Real, LocalMesh> scalar(const LocalMesh& mesh)
       {
         return H1<K, Real, LocalMesh>(std::integral_constant<size_t, K>{}, mesh);
@@ -183,6 +179,78 @@ namespace
           std::integral_constant<size_t, K>{}, mesh, dimension);
       }
   };
+
+  /// @brief Checks both optimized divergence couplings against an exact
+  /// affine field on every supported, affinely sheared element geometry.
+  template <class Family>
+  void checkDivergenceTransformation(const std::string& label)
+  {
+    for (const auto& element : elements())
+    {
+      SCOPED_TRACE(label + " on " + element.name);
+      LocalMesh mesh = makeMesh(element);
+
+      // A global affine shear keeps the element family unchanged while making
+      // the inverse Jacobian nonsymmetric on every cell.
+      for (auto vertex = mesh.getVertex(); !vertex.end(); ++vertex)
+      {
+        const auto x = vertex->getCoordinates();
+        auto y = x;
+        if (element.dimension == 2)
+        {
+          y(0) = x(0) + 0.3 * x(1);
+          y(1) = 0.2 * x(0) + 1.1 * x(1);
+        }
+        else
+        {
+          y(0) = x(0) + 0.3 * x(1);
+          y(1) = 0.2 * x(0) + x(1) + 0.1 * x(2);
+          y(2) = 0.1 * x(1) + 1.1 * x(2);
+        }
+        mesh.setVertexCoordinates(vertex->getIndex(), y);
+      }
+
+      auto velocityFES = Family::vector(mesh, element.dimension);
+      auto pressureFES = Family::scalar(mesh);
+      GridFunction velocity(velocityFES);
+      if (element.dimension == 2)
+      {
+        velocity.project(
+          VectorFunction{RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+            RealFunction([](const Point& p) { return -p.x() + 3 * p.y(); })});
+      }
+      else
+      {
+        velocity.project(
+          VectorFunction{RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+            RealFunction([](const Point& p) { return -p.x() + 3 * p.y() + 4 * p.z(); }),
+            RealFunction([](const Point& p) { return 2 * p.x() - 2 * p.z(); })});
+      }
+      GridFunction pressure(pressureFES);
+      pressure.project(RealFunction(1.0));
+
+      TrialFunction u(velocityFES);
+      TestFunction q(pressureFES);
+      BilinearForm divergencePressure(u, q);
+      divergencePressure = Integral(Div(u), q);
+      divergencePressure.assemble();
+
+      TrialFunction p(pressureFES);
+      TestFunction v(velocityFES);
+      BilinearForm pressureDivergence(p, v);
+      pressureDivergence = Integral(p, Div(v));
+      pressureDivergence.assemble();
+
+      const Real divergence = (element.dimension == 2) ? 4.0 : 2.0;
+      const Real expected = divergence * measureOf(mesh);
+      EXPECT_NEAR(
+        (divergencePressure.getOperator() * velocity.getData()).dot(pressure.getData()),
+        expected, tolerance);
+      EXPECT_NEAR(
+        (pressureDivergence.getOperator() * pressure.getData()).dot(velocity.getData()),
+        expected, tolerance);
+    }
+  }
 
   /// @brief Scalar identities: mass and loads reproduce the measure, and
   /// derivative forms annihilate constants.
@@ -796,4 +864,14 @@ namespace
 TEST(QuadratureRuleSpecializationTest, P1HandlersAreOrderInvariant)
 {
   checkOrderInvariance<P1Family>("P1");
+}
+
+/// @brief Divergence transformations are correct on sheared versions of every
+/// supported geometry and finite element family.
+TEST(QuadratureRuleSpecializationTest, DivergenceTransformsOnShearedGeometries)
+{
+  checkDivergenceTransformation<P1Family>("P1");
+  checkDivergenceTransformation<H1Family<1>>("H1P1");
+  checkDivergenceTransformation<H1Family<2>>("H1P2");
+  checkDivergenceTransformation<H1Family<3>>("H1P3");
 }

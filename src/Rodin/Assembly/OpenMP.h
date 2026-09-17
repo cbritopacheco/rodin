@@ -312,7 +312,7 @@ namespace Rodin::Assembly
                 assert(cols.size() >= 0);
                 for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
-                  const ScalarType s = Math::conj(integrator->integrate(c, r));
+                  const ScalarType s = integrator->integrate(c, r);
                   if (s != ScalarType(0))
                     local.emplace_back(rows(r), cols(c), s);
                 }
@@ -609,7 +609,7 @@ namespace Rodin::Assembly
               const auto& cols = input.getTrialFES().getDOFs(d, i);
               for (size_t r = 0; r < rows.size(); ++r)
                 for (size_t c = 0; c < cols.size(); ++c)
-                  local(rows(r), cols(c)) += Math::conj(lbfi->integrate(c, r));
+                  local(rows(r), cols(c)) += lbfi->integrate(c, r);
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -673,7 +673,7 @@ namespace Rodin::Assembly
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (size_t r = 0; r < rows.size(); ++r)
                   for (size_t c = 0; c < cols.size(); ++c)
-                    local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
+                    local(rows(r), cols(c)) += gbfi->integrate(c, r);
               }
             }
 
@@ -1223,7 +1223,7 @@ namespace Rodin::Assembly
                   for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
                   {
                     const Index J = colsDOF(j);
-                    const ScalarType val = Math::conj(integrator->integrate(j, i));
+                    const ScalarType val = integrator->integrate(j, i);
                     sparseEntry(localT, localRhs, I, J, val);
                   }
                 }
@@ -1287,7 +1287,7 @@ namespace Rodin::Assembly
                     for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
                     {
                       const Index J = colsDOF(j);
-                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      const ScalarType val = integrator->integrate(j, i);
                       sparseEntry(localT, localRhs, I, J, val);
                     }
                   }
@@ -1475,7 +1475,7 @@ namespace Rodin::Assembly
                   for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
                   {
                     const Index J = colsDOF(j);
-                    const ScalarType val = Math::conj(integrator->integrate(j, i));
+                    const ScalarType val = integrator->integrate(j, i);
                     if (val != ScalarType(0))
                     {
                       const ScalarType colValue = constraints.isIdentified(J)
@@ -1552,7 +1552,7 @@ namespace Rodin::Assembly
                     for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
                     {
                       const Index J = colsDOF(j);
-                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      const ScalarType val = integrator->integrate(j, i);
                       if (val != ScalarType(0))
                       {
                         const ScalarType colValue = constraints.isIdentified(J)
@@ -2022,7 +2022,7 @@ namespace Rodin::Assembly
                     for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
                     {
                       const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
-                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      const ScalarType val = integrator->integrate(j, i);
                       if (val == ScalarType(0))
                         continue;
 
@@ -2129,7 +2129,7 @@ namespace Rodin::Assembly
                       for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
                       {
                         const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
-                        const ScalarType val = Math::conj(integrator->integrate(j, i));
+                        const ScalarType val = integrator->integrate(j, i);
                         if (val == ScalarType(0))
                           continue;
 
