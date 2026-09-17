@@ -7,6 +7,8 @@
 #ifndef RODIN_ADAPTATION_WNGIRREPORT_H
 #define RODIN_ADAPTATION_WNGIRREPORT_H
 
+#include <limits>
+
 #include "Rodin/Types.h"
 
 namespace Rodin::Adaptation
@@ -42,8 +44,14 @@ namespace Rodin::Adaptation
       Real lastAlpha = 0;
     /// @brief Effective per-volume coefficient assembled for the last barrier QP.
       Real primalBarrierCoefficient = 0;
-    /// @brief Last primal-barrier Newton correction relative to the predictor.
+    /// @brief Last primal-barrier Newton correction relative to the current iterate.
       Real primalBarrierRelativeCorrection = 0;
+      /// @brief Step factor accepted by the last primal-barrier correction.
+      Real lastPrimalBarrierAlpha = 0;
+      /// @brief Smallest step factor accepted by the final primal-barrier solve.
+      Real minPrimalBarrierAlpha = 1;
+      /// @brief Number of full primal-barrier Newton steps in the final inner solve.
+      std::size_t fullPrimalBarrierSteps = 0;
       /// @brief Number of primal-barrier Newton corrections accumulated by the solve.
       std::size_t primalBarrierIterations = 0;
       /// @brief Number of primal-barrier Newton corrections in the final outer step.
@@ -64,6 +72,12 @@ namespace Rodin::Adaptation
       Real activeSup = 0;
       /// @brief Fraction of interface quadrature in the active set.
       Real activeFraction = 0;
+      /// @brief RMS normalized level-set residual over the complete fitted interface.
+      Real geometricRMS = std::numeric_limits<Real>::infinity();
+      /// @brief Maximum normalized level-set residual over the complete fitted interface.
+      Real geometricSup = std::numeric_limits<Real>::infinity();
+      /// @brief RMS unoriented normal discrepancy over the complete fitted interface.
+      Real normalRMS = std::numeric_limits<Real>::infinity();
       /// @brief Measure of the active interface quadrature set.
       Real activeMeasure = 0;
       /// @brief Measure of the complete interface quadrature set.
@@ -104,6 +118,8 @@ namespace Rodin::Adaptation
       Real tSolve = 0; ///< CG iterations.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
+      std::size_t linearSolveCount = 0; ///< Number of linear solves performed.
+      std::size_t maxLinearIterations = 0; ///< Largest iteration count of one solve.
       Real linearError = 0; ///< Last linear solver residual/error estimate.
   };
 }

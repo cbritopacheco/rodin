@@ -20,7 +20,8 @@ namespace Rodin::Adaptation
       Real robustScale =
         0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
       Real h = 0; ///< reference mesh size (required).
-      Real kappaBulk = Real(0.001); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
+      Real kappaBulk =
+        Real(1e-4); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
         ///< bulk-strain coefficient.
       Real rDiv = 1; ///< @f$r_D@f$, divergence/deviatoric bulk-coefficient ratio.
       Real kappaObs =
@@ -79,7 +80,8 @@ namespace Rodin::Adaptation
       ///< stabilisation.
       Real cgRelativeTolerance =
         1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for CG.
-      std::size_t cgMaxIterations = 0; ///< 0 ⇒ min(2000, max(100, 2*ndofs)).
+      std::size_t cgMaxIterations =
+        1000; ///< Maximum iterations for each CG linear solve.
       std::size_t maxIterations = 200; ///< Maximum nonlinear WNGIR iterations.
       std::size_t quadratureOrder = 0; ///< @f$p_{\mathrm{quad}}@f$; 0 ⇒ 2·(FE order).
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.

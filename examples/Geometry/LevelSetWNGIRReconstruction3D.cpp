@@ -446,6 +446,7 @@ int main(int argc, char** argv)
 
   std::cout << "Lobed-sphere WNGIR reconstruction on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh\n";
+  std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes << "  center=("
             << cx << ", " << cy << ", " << cz << ")"
             << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
@@ -583,8 +584,12 @@ int main(int argc, char** argv)
   Real maxJ = Real(1);
   Real maxQRel = Real(1);
   Real activeRMS = Real(0);
+  Real activeSup = Real(0);
   Real levelSetGradientScale = Real(0);
   Real activeFraction = Real(0);
+  Real geometricRMS = std::numeric_limits<Real>::infinity();
+  Real geometricSup = std::numeric_limits<Real>::infinity();
+  Real normalRMS = std::numeric_limits<Real>::infinity();
   Real rigidModeCoercivity = Real(0);
   std::size_t jacobianRejections = 0;
   std::size_t distortionRejections = 0;
@@ -609,8 +614,12 @@ int main(int argc, char** argv)
     maxJ = wngirRep.maxJ;
     maxQRel = wngirRep.maxQRel;
     activeRMS = wngirRep.activeRMS;
+    activeSup = wngirRep.activeSup;
     levelSetGradientScale = wngirRep.levelSetGradientScale;
     activeFraction = wngirRep.activeFraction;
+    geometricRMS = wngirRep.geometricRMS;
+    geometricSup = wngirRep.geometricSup;
+    normalRMS = wngirRep.normalRMS;
     rigidModeCoercivity = wngirRep.rigidModeCoercivity;
     jacobianRejections = wngirRep.jacobianRejections;
     distortionRejections = wngirRep.distortionRejections;
@@ -702,14 +711,16 @@ int main(int argc, char** argv)
             << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
             << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
             << "  max_qrel=" << maxQRel << "  act_frac=" << activeFraction
-            << "  active_rms=" << activeRMS << "  active_rms_hg="
+            << "  active_rms=" << activeRMS << "  active_sup=" << activeSup
+            << "  active_rms_hg="
             << (h * levelSetGradientScale > Real(0)
                    ? activeRMS / (h * levelSetGradientScale)
                    : Real(0))
             << "  cR=" << rigidModeCoercivity << "  rej_j=" << jacobianRejections
             << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections
             << "  converged=" << (converged ? "yes" : "best-effort")
-            << "  exit=" << exitReason << '\n';
+            << "  exit=" << exitReason << "  geom_rms=" << geometricRMS
+            << "  geom_sup=" << geometricSup << "  normal_rms=" << normalRMS << '\n';
   std::cout << "\nSummary\n";
   std::cout << "  cases converged: " << (converged ? 1 : 0) << " / 1\n";
   std::cout << "  ||phi(X+u)||_RMS  min=" << std::scientific << std::setprecision(3)
