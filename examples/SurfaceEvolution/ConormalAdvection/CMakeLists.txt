@@ -1,6 +1,6 @@
 add_executable(Main Main.cpp)
 target_link_libraries(Main
-  PRIVATE
+  PUBLIC
   Rodin::Solver
   Rodin::Geometry
   Rodin::Variational
@@ -9,7 +9,7 @@ target_link_libraries(Main
 
 add_executable(Test Test.cpp)
 target_link_libraries(Test
-  PRIVATE
+  PUBLIC
   Rodin::Solver
   Rodin::Geometry
   Rodin::Variational
@@ -18,7 +18,7 @@ target_link_libraries(Test
 
 add_executable(Plane Plane.cpp)
 target_link_libraries(Plane
-  PRIVATE
+  PUBLIC
   Rodin::Solver
   Rodin::Geometry
   Rodin::Variational

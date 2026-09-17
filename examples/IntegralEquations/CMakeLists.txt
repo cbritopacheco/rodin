@@ -1,6 +1,6 @@
 add_executable(NewtonianPotential NewtonianPotential.cpp)
 target_link_libraries(NewtonianPotential
-  PRIVATE
+  PUBLIC
   Rodin::MMG
   Rodin::Geometry
   Rodin::Solver
@@ -9,7 +9,7 @@ target_link_libraries(NewtonianPotential
 
 add_executable(ElasticDistribution ElasticDistribution.cpp)
 target_link_libraries(ElasticDistribution
-  PRIVATE
+  PUBLIC
   Rodin::MMG
   Rodin::Geometry
   Rodin::Solver

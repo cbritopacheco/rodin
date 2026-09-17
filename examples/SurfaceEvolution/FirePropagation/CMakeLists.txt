@@ -1,6 +1,6 @@
 add_executable(Simulation Simulation.cpp)
 target_link_libraries(Simulation
-  PRIVATE
+  PUBLIC
   Rodin::Solver
   Rodin::Geometry
   Rodin::Variational
@@ -9,7 +9,7 @@ target_link_libraries(Simulation
 
 add_executable(Topography Topography.cpp)
 target_link_libraries(Topography
-  PRIVATE
+  PUBLIC
   Rodin::Solver
   Rodin::Geometry
   Rodin::Variational

@@ -1,7 +1,7 @@
 if (RODIN_USE_MPI)
   add_executable(PETSc_TemperatureMinimization TemperatureMinimization.cpp)
   target_link_libraries(PETSc_TemperatureMinimization
-    PRIVATE
+    PUBLIC
     Rodin::Solver
     Rodin::Geometry
     Rodin::Variational

@@ -1,6 +1,6 @@
 add_executable(SpaldingTucker SpaldingTucker.cpp)
 target_link_libraries(SpaldingTucker
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational

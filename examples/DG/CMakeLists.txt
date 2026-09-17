@@ -1,6 +1,6 @@
 add_executable(DGPoisson DGPoisson.cpp)
 target_link_libraries(DGPoisson
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational

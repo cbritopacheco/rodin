@@ -1,22 +1,22 @@
 add_executable(Trace Trace.cpp)
 target_link_libraries(Trace
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(Volume Volume.cpp)
 target_link_libraries(Volume
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(Displace Displace.cpp)
 target_link_libraries(Displace
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Variational)
 
 add_executable(LevelSetWNGIRReconstruction LevelSetWNGIRReconstruction.cpp)
 target_link_libraries(LevelSetWNGIRReconstruction
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
@@ -26,21 +26,21 @@ target_compile_definitions(LevelSetWNGIRReconstructionP2
   PRIVATE
   RODIN_WNGIR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetWNGIRReconstructionP2
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
 add_executable(LevelSetWNGIRReconstruction3D LevelSetWNGIRReconstruction3D.cpp)
 target_link_libraries(LevelSetWNGIRReconstruction3D
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
 add_executable(LevelSetWNGIRSweep LevelSetWNGIRSweep.cpp)
 target_link_libraries(LevelSetWNGIRSweep
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
@@ -50,7 +50,7 @@ target_compile_definitions(LevelSetWNGIRSweepP2
   PRIVATE
   RODIN_WNGIR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetWNGIRSweepP2
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
@@ -60,14 +60,14 @@ target_compile_definitions(LevelSetWNGIRReconstruction3DP2
   PRIVATE
   RODIN_WNGIR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetWNGIRReconstruction3DP2
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
 add_executable(LevelSetWNGIRSweep3D LevelSetWNGIRSweep3D.cpp)
 target_link_libraries(LevelSetWNGIRSweep3D
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
@@ -77,14 +77,14 @@ target_compile_definitions(LevelSetWNGIRSweep3DP2
   PRIVATE
   RODIN_WNGIR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetWNGIRSweep3DP2
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
 add_executable(LevelSetWNGIRAdvection LevelSetWNGIRAdvection.cpp)
 target_link_libraries(LevelSetWNGIRAdvection
-  PRIVATE
+  PUBLIC
   Rodin::Advection
   Rodin::Geometry
   Rodin::Solver
@@ -95,7 +95,7 @@ target_compile_definitions(LevelSetWNGIRAdvectionP2
   PRIVATE
   RODIN_WNGIR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetWNGIRAdvectionP2
-  PRIVATE
+  PUBLIC
   Rodin::Advection
   Rodin::Geometry
   Rodin::Solver
@@ -112,32 +112,32 @@ endforeach()
 
 add_executable(Skin Skin.cpp)
 target_link_libraries(Skin
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(Trim Trim.cpp)
 target_link_libraries(Trim
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(CCL CCL.cpp)
 target_link_libraries(CCL
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(Connectivity Connectivity.cpp)
 target_link_libraries(Connectivity
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(Square Square.cpp)
 target_link_libraries(Square
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(UniformGrid UniformGrid.cpp)
 target_link_libraries(UniformGrid
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(ExtrudeTriSurface ExtrudeTriSurface.cpp)
@@ -147,29 +147,29 @@ target_link_libraries(ExtrudeTriSurface
 
 add_executable(Box Box.cpp)
 target_link_libraries(Box
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(GreedyPartitioner GreedyPartitioner.cpp)
 target_link_libraries(GreedyPartitioner
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(BalancedCompactPartitioner BalancedCompactPartitioner.cpp)
 target_link_libraries(BalancedCompactPartitioner
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(Scale Scale.cpp)
 target_link_libraries(Scale
-  PRIVATE
+  PUBLIC
   Rodin::Geometry)
 
 add_executable(AnnulusDetection AnnulusDetection.cpp)
-target_link_libraries(AnnulusDetection PRIVATE Rodin::Geometry)
+target_link_libraries(AnnulusDetection PUBLIC Rodin::Geometry)
 
 add_executable(AnnulusClosing AnnulusClosing.cpp)
-target_link_libraries(AnnulusClosing PRIVATE Rodin::Geometry)
+target_link_libraries(AnnulusClosing PUBLIC Rodin::Geometry)
 
 add_executable(AttributeDetection AttributeDetection.cpp)
-target_link_libraries(AttributeDetection PRIVATE Rodin::Geometry)
+target_link_libraries(AttributeDetection PUBLIC Rodin::Geometry)

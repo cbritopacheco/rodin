@@ -1,6 +1,6 @@
 add_executable(TemperatureMinimization TemperatureMinimization.cpp)
 target_link_libraries(TemperatureMinimization
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)

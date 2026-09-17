@@ -1,23 +1,23 @@
 add_executable(MeshIO MeshIO.cpp)
 target_link_libraries(MeshIO
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::MMG)
 
 add_executable(GridFunctionIO GridFunctionIO.cpp)
 target_link_libraries(GridFunctionIO
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::MMG)
 
 add_executable(DomainDiscretization DomainDiscretization.cpp)
 target_link_libraries(DomainDiscretization
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::MMG)
 
 add_executable(MeshOptimization MeshOptimization.cpp)
 target_link_libraries(MeshOptimization
-  PRIVATE
+  PUBLIC
   Rodin::Geometry
   Rodin::MMG)
