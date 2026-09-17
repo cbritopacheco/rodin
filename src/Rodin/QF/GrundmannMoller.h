@@ -16,7 +16,7 @@
  * @ingroup RodinDirectives
  * @brief Maximum value permitted for the @f$ s \geq 0 @f$ parameter in
  * Grundmann-Moller quadrature.
- * @see Rodin::QF::GrundmannMoller
+ * @see <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html">Rodin::QF::GrundmannMoller</a>
  * @see RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER
  */
 #define RODIN_QF_GRUNDMANNMOLLER_MAX_S 16
@@ -26,7 +26,7 @@
  * @brief Maximum degree permitted for Grundmann-Moller quadrature.
  *
  * The degree is given by @f$ d = 2s + 1 @f$ where @f$ s \geq 0 @f$.
- * @see Rodin::QF::GrundmannMoller
+ * @see <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html">Rodin::QF::GrundmannMoller</a>
  * @see RODIN_QF_GRUNDMANNMOLLER_MAX_S
  */
 #define RODIN_QF_GRUNDMANNMOLLER_MAX_ORDER 2 * RODIN_QF_GRUNDMANNMOLLER_MAX_S + 1

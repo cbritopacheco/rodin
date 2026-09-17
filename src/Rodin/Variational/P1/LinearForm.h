@@ -19,7 +19,8 @@
  *   L(v) = \int_\Omega f \cdot v \, dx + \int_{\partial\Omega} g \cdot v \, ds
  * @f]
  *
- * @see LinearForm, P1
+ * @see <a href="_variational_2_linear_form_8h.html">LinearForm</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
  */
 #ifndef RODIN_VARIATIONAL_P1_LINEARFORM_H
 #define RODIN_VARIATIONAL_P1_LINEARFORM_H

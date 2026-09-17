@@ -23,27 +23,31 @@
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
+  /// space and the operand type.
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P0<Range, Mesh>;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
+  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
+  /// space, the shape function space and the operand type.
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<
       Variational::ShapeFunction<NestedDerived, Variational::P0<Range, Mesh>, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::P0<Range, Mesh>;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
   };
 }
@@ -103,6 +107,7 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      /// @brief Interpolates at a geometric point.
       void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -177,6 +182,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Creates a polymorphic copy.
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
@@ -211,6 +217,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Operand type.
@@ -219,51 +226,60 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
+      /// @brief Constructs the expression from its operand.
       Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u)
       {}
 
+      /// @brief Copy constructor.
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u)
       {}
 
+      /// @brief Move constructor.
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       auto getBasis(size_t local) const
       {
         const size_t sdim = getIntegrationPoint().getPoint().getPolytope().getMesh().getSpaceDimension();
@@ -280,10 +296,10 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
   };
 
+  /// @brief Deduction guide for @c Grad.
   template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
   Grad(const ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>&)
     -> Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>;
 }
 
-/// @endcond
 #endif

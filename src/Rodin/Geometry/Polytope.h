@@ -65,7 +65,10 @@ namespace Rodin::Geometry
    * }
    * @endcode
    *S 
-   * @see Cell, Face, Vertex, PolytopeIterator
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell.html">Cell</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face.html">Face</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex.html">Vertex</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a>
    */
   class Polytope
   {
@@ -473,7 +476,7 @@ namespace Rodin::Geometry
        * @brief Gets the geometric transformation for this polytope.
        * @returns Reference to the transformation @f$ x: K \rightarrow \tau @f$
        *
-       * @see PolytopeTransformation
+       * @see <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html">PolytopeTransformation</a>
        */
       const PolytopeTransformation& getTransformation() const;
 
@@ -568,7 +571,9 @@ namespace Rodin::Geometry
    * Cells form the basis for finite element computations and define the
    * computational domain.
    *
-   * @see Polytope, Face, Vertex
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face.html">Face</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex.html">Vertex</a>
    */
   class Cell : public Polytope
   {
@@ -613,7 +618,9 @@ namespace Rodin::Geometry
    * - Interface problems
    * - Flux computations
    *
-   * @see Polytope, Cell, Vertex
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell.html">Cell</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_vertex.html">Vertex</a>
    */
   class Face : public Polytope
   {
@@ -670,7 +677,9 @@ namespace Rodin::Geometry
    * - Endpoints for edges and corners for higher-dimensional elements
    * - Spatial anchors for the mesh geometry
    *
-   * @see Polytope, Cell, Face
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_cell.html">Cell</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_face.html">Face</a>
    */
   class Vertex : public Polytope
   {

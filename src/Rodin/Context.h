@@ -15,7 +15,7 @@
  * It handles thread-local and process-local state that may be needed during
  * finite element computations.
  *
- * @see Rodin::Context
+ * @see <a href="namespace_rodin_1_1_context.html">Rodin::Context</a>
  */
 
 #include "Context/Local.h"

@@ -27,8 +27,8 @@ namespace Rodin::PETSc
    *
    * - @ref Rodin::PETSc::Math "Math" — PETSc vector, matrix, and linear
    *   system wrappers
-   * - @ref Rodin::PETSc::Solver "Solver" — KSP, SNES, CG, and GMRES
-   *   solver aliases
+   * - @ref Rodin::PETSc::Solver "Solver" — @ref Rodin::Solver::KSP "KSP",
+   *   @ref Rodin::Solver::SNES "SNES", CG, and GMRES solver aliases
    * - @ref Rodin::PETSc::Assembly "Assembly" — Assembly strategies for PETSc
    *   objects (sequential, MPI, OpenMP)
    * - @ref Rodin::PETSc::Variational "Variational" — Trial/test functions,
@@ -36,7 +36,8 @@ namespace Rodin::PETSc
    *
    * @note Available only when Rodin is configured with PETSc support.
    *
-   * @see Rodin::PETSc::Math, Rodin::PETSc::Solver
+   * @see <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html">Rodin::PETSc::Math</a>
+   * @see <a href="namespace_rodin_1_1_p_e_t_sc_1_1_solver.html">Rodin::PETSc::Solver</a>
    */
 }
 

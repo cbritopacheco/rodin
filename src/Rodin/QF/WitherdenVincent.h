@@ -26,7 +26,7 @@ namespace Rodin::QF
    * Witherden--Vincent tables. Every entry is independently tested for
    * polynomial exactness, positive weights, and interior nodes.
    *
-   * @see XiaoGimbutas
+   * @see <a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html">XiaoGimbutas</a>
    */
   class WitherdenVincent final : public QuadratureFormulaBase
   {

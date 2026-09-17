@@ -48,7 +48,7 @@ Rodin can be easily installed from source on Linux and macOS systems.
 - C++20 compatible compiler (GCC 12+, Clang 14+, or AppleClang)
 - Boost 1.74+
 - Eigen3
-- Git LFS, if you need the large example/resource meshes
+- Git LFS, required for the resource tree
 
 **Optional:**
 - OpenMP (for parallel execution)
@@ -64,7 +64,7 @@ cd rodin
 
 git lfs install
 
-# Fetch large example/resource meshes
+# Fetch the resource tree
 git lfs pull
 
 # Configure and build
@@ -76,13 +76,12 @@ make -j4
 sudo make install
 ```
 
-If you only need the library and headers, skip the large resource payloads with
+If you only need the library and headers, skip resource hydration with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
 
-Large meshes and bulky resource payloads are tracked through Git LFS. Small
-test and benchmark fixtures stay in regular Git so CI and lightweight clones do
-not have to hydrate LFS objects. If an example fails while reading a mesh, run
-`git lfs pull` from the repository root and retry.
+All files under `resources/` are tracked through Git LFS, including test and
+benchmark fixtures. If an example or resource-dependent test fails while
+reading a file, run `git lfs pull` from the repository root and retry.
 
 ### User-Local Installation
 
@@ -145,13 +144,13 @@ make
 **Ubuntu/Debian:**
 ```bash
 sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
-sudo apt-get install git-lfs  # needed for large example/resource meshes
+sudo apt-get install git-lfs  # needed for resources
 ```
 
 **macOS (Homebrew):**
 ```bash
 brew install cmake boost eigen libomp
-brew install git-lfs  # needed for large example/resource meshes
+brew install git-lfs  # needed for resources
 ```
 
 ### Troubleshooting

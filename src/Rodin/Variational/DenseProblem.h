@@ -48,7 +48,6 @@
 
 #include "Problem.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class ... Parameters>
@@ -75,6 +74,7 @@ namespace Rodin::Variational
       using Parent::operator=;
   };
 
+  /// @brief Deduction guide for @c DenseProblem.
   template <class U, class V>
   DenseProblem(U& u, V& v)
     -> DenseProblem<
@@ -88,5 +88,4 @@ namespace Rodin::Variational
           U, V>;
 }
 
-/// @endcond
 #endif

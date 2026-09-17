@@ -32,7 +32,8 @@ namespace Rodin::Advection
   /**
    * @brief Boundary policy for characteristic tracing: stop-at-boundary with inward offset.
    *
-   * This policy is intended to be used with semi-Lagrangian / characteristic-based
+   * This policy is intended to be used with @ref Lagrangian
+   * "semi-Lagrangian" / characteristic-based
    * transport where the footpoint of a characteristic must remain inside the computational
    * domain (no sampling outside).
    *
@@ -62,7 +63,7 @@ namespace Rodin::Advection
    *   you want a stable, non-invasive handling of boundary hits without introducing
    *   tangential sliding artifacts or inflow modeling. Truncation + inward nudge is a good default.
    *
-   * - **Semi-Lagrangian advection of a scalar** when you deliberately choose:
+   * - **@ref Lagrangian "Semi-Lagrangian" advection of a scalar** when you deliberately choose:
    *   “if the departure point would be outside, sample the closest interior point”
    *   (often used as a robust fallback in graphics/engineering codes).
    *
@@ -77,7 +78,8 @@ namespace Rodin::Advection
    *
    * @par Assumptions
    * - The geometric mapping is sufficiently regular for using @f$ J^{-T} n_{\mathrm{ref}} @f$
-   *   as a physical normal direction on the face. (Best behavior for affine/P1 geometry.)
+   *   as a physical normal direction on the face. (Best behavior for
+   *   affine/<a href="class_rodin_1_1_variational_1_1_p1.html">P1</a> geometry.)
    *
    * @par Robustness notes
    * - The inward nudge is done in *physical space* so that the offset represents a true
@@ -99,7 +101,7 @@ namespace Rodin::Advection
        * @brief Constructs the boundary policy.
        *
        * @param[in] dt          Signed time step used by the tracer (kept for API symmetry).
-       * @param[in] mesh        Mesh on which tracing occurs.
+       * @param[in] mesh        @ref Geometry::Mesh "Mesh" on which tracing occurs.
        * @param[in] epsInPhys Inward physical offset used to place the footpoint strictly inside.
        */
       StopInsideBoundaryPolicy(
@@ -213,8 +215,10 @@ namespace Rodin::Advection
   /**
    * @brief First-order boundary-hit handler for semi-Lagrangian tracing with an inward shift.
    *
-   * This boundary policy is meant to be used with `Variational::Flow` (and therefore with
-   * semi-Lagrangian / characteristic-based schemes) when a traced characteristic hits a
+   * This boundary policy is meant to be used with
+   * <a href="_flow_8h.html">Variational::Flow</a>
+   * (and therefore with @ref Lagrangian "semi-Lagrangian" /
+   * characteristic-based schemes) when a traced characteristic hits a
    * boundary face before the remaining time `hit.tau` is consumed.
    *
    * The policy enforces an "always-sample-inside" rule:
@@ -265,7 +269,7 @@ namespace Rodin::Advection
    *
    * @par Parameters
    * - `dt`: Signed step size of the tracer (kept for API symmetry; not used directly here).
-   * - `mesh`: Mesh on which tracing occurs.
+   * - `mesh`: @ref Geometry::Mesh "Mesh" on which tracing occurs.
    * - `phi`: Scalar field/function to correct (typically the advected field itself in level-set use).
    * - `epsInPhys`: Desired inward physical offset. The effective shift is
    *   `max(epsInPhys, 50*sqrt(machine_epsilon))`.
@@ -277,7 +281,7 @@ namespace Rodin::Advection
       /**
        * @brief Constructs the boundary policy.
        * @param dt Signed time step used by the tracer.
-       * @param mesh Mesh on which tracing occurs.
+       * @param mesh @ref Geometry::Mesh "Mesh" on which tracing occurs.
        * @param phi Scalar field used for the Taylor correction.
        * @param epsInPhys Inward physical offset used after a boundary hit.
        */
@@ -425,6 +429,11 @@ namespace Rodin::Advection
    * - Mass-conservative in variational form
    *
    * @tparam Params Parameter pack for class specialization
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Lagrangian "Lagrangian<TrialFunction<GridFunction<FES, Data>, FES>, TestFunction<FES>, Initial, VectorField, Step>" | Semi-Lagrangian projection update for a trial/test scalar transport formulation. |
+   * | @ref Lagrangian "Lagrangian<...>" | Primary template documenting the supported specialization family for advection schemes. |
    */
   template <class ... Params>
   class Lagrangian;

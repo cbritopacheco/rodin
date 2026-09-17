@@ -37,7 +37,7 @@ namespace Rodin::FormLanguage
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
-    /// @brief Assembled operator type.
+      /// @brief Assembled operator type.
       using OperatorType = Operator;
   };
 
@@ -45,13 +45,13 @@ namespace Rodin::FormLanguage
   template <class Solution, class TrialFES, class TestFES, class Operator>
   struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
   {
-    /// @brief Solution vector type.
+      /// @brief Solution vector type.
       using SolutionType = Solution;
-    /// @brief Trial finite element space type.
+      /// @brief Trial finite element space type.
       using TrialFESType = TrialFES;
-    /// @brief Test finite element space type.
+      /// @brief Test finite element space type.
       using TestFESType = TestFES;
-    /// @brief Assembled operator type.
+      /// @brief Assembled operator type.
       using OperatorType = Operator;
   };
 }
@@ -61,7 +61,12 @@ namespace Rodin::Variational
   /**
    * @defgroup BilinearFormSpecializations BilinearForm Template Specializations
    * @brief Template specializations of the BilinearForm class.
-   * @see BilinearForm
+   * @see <a href="_variational_2_bilinear_form_8h.html">BilinearForm</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref BilinearForm "BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>>" | Bilinear form assembled into a sparse matrix operator. |
+   * | @ref BilinearForm "BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>>" | Bilinear form assembled into a dense matrix operator. |
    */
 
   /**

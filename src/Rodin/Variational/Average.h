@@ -25,13 +25,17 @@
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup AverageSpecializations Average Template Specializations
    * @brief Template specializations of the Average class.
-   * @see Average
+   * @see @ref Average
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Average "Average<FunctionBase<FunctionDerived>>" | Arithmetic average of a traceable function across an interior interface. |
+   * | @ref Average "Average<ShapeFunctionBase<NestedDerived, FES, Space>>" | Arithmetic average of a test or trial shape function across an interior interface. |
    */
 
   /**
@@ -63,7 +67,7 @@ namespace Rodin::Variational
    *
    * @tparam FunctionDerived Type of the function being averaged
    *
-   * @see Jump
+   * @see @ref Jump
    */
   template <class FunctionDerived>
   class Average<FunctionBase<FunctionDerived>> final
@@ -151,6 +155,7 @@ namespace Rodin::Variational
         return 0.5 * (v1 + v2);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       auto getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -180,6 +185,7 @@ namespace Rodin::Variational
         return 0.5 * (v1 + v2);
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -248,6 +254,7 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Average(const Average& other)
         : Parent(other),
@@ -255,6 +262,7 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Average(Average&& other)
         : Parent(std::move(other)),
@@ -365,6 +373,7 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -389,5 +398,4 @@ namespace Rodin::Variational
     -> Average<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

@@ -27,8 +27,9 @@ From the repository root:
 bash tests/installation/test_installation.sh
 ```
 
-The script installs resources by default. To test the library/header install
-path without hydrating Git LFS resources, run:
+The script installs resources by default and therefore requires hydrated Git
+LFS resources. To test the library/header install path without resource files,
+run:
 
 ```bash
 RODIN_INSTALL_RESOURCES=OFF bash tests/installation/test_installation.sh

@@ -19,13 +19,19 @@
 
 #include "ScalarFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup ComplexFunctionSpecializations ComplexFunction Template Specializations
    * @brief Template specializations of the ComplexFunction class.
    * @see ComplexFunction
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref ComplexFunction "ComplexFunction<Complex>" | Constant complex-valued function. |
+   * | @ref ComplexFunction "ComplexFunction<FunctionBase<NestedDerived>>" | Complex wrapper around a nested function. |
+   * | @ref ComplexFunction "ComplexFunction<FunctionBase<Real>, FunctionBase<Imaginary>>" | Complex function assembled from real and imaginary parts. |
+   * | @ref ComplexFunction "ComplexFunction<F>" | Complex function constructed from an arbitrary scalar callable. |
    */
 
   /**
@@ -97,6 +103,7 @@ namespace Rodin::Variational
       virtual ComplexFunctionBase* copy() const noexcept override = 0;
   };
 
+  /// @brief Complex-valued constant function built from an integer.
   template <>
   class ComplexFunction<Integer> final
     : public ComplexFunctionBase<ComplexFunction<Integer>>
@@ -161,6 +168,7 @@ namespace Rodin::Variational
   /// @brief Deduction guide for integer constants.
   ComplexFunction(Integer) -> ComplexFunction<Integer>;
 
+  /// @brief Complex-valued constant function built from a real.
   template <>
   class ComplexFunction<Real> final
     : public ComplexFunctionBase<ComplexFunction<Real>>
@@ -650,5 +658,4 @@ namespace Rodin::Variational
   ComplexFunction(const FReal&, const FImag&) -> ComplexFunction<FReal, FImag>;
 }
 
-/// @endcond
 #endif

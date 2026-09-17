@@ -46,14 +46,16 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Trace over a shape function: exposes the finite element
+  /// space and the shape function space.
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
@@ -151,6 +153,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -170,9 +173,11 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Trace.
   template <class NestedDerived>
   Trace(const FunctionBase<NestedDerived>&) -> Trace<FunctionBase<NestedDerived>>;
 
+  /// @brief Trace of a shape function.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   class Trace<ShapeFunctionBase<NestedDerived, FES, Space>> final
     : public ShapeFunctionBase<Trace<ShapeFunctionBase<NestedDerived, FES, Space>>>
@@ -180,6 +185,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Shape function space the expression belongs to, trial or test.
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       /// @brief Operand type.
@@ -188,64 +194,75 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
+      /// @brief Constructs the expression from its operand.
       constexpr
       Trace(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /// @brief Gets the operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
+      /// @brief Gets the operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
+      /// @brief Gets the global DOF indices for a polytope.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
+      /// @brief Gets the integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
       }
 
+      /// @brief Sets the integration point the expression is evaluated at.
       Trace& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       constexpr
       auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).trace();
       }
 
+      /// @brief Gets the finite element space.
       const FES& getFiniteElementSpace() const
       {
         return this->getOperand().getFiniteElementSpace();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -260,10 +277,10 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Trace.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   Trace(const ShapeFunctionBase<NestedDerived, FES, Space>&)
     -> Trace<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
-/// @endcond
 #endif

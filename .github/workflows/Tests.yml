@@ -35,6 +35,10 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - name: Hydrate test resources
+        run: >-
+          git lfs pull
+          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
 
       - name: Free Disk Space
         run: |
@@ -315,6 +319,10 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - name: Hydrate test resources
+        run: >-
+          git lfs pull
+          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1

@@ -19,14 +19,16 @@
 
 #include "Function.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c ScalarFunctionBase: exposes the scalar type and the
+  /// derived type.
   template <class Scalar, class Derived>
   struct Traits<Variational::ScalarFunctionBase<Scalar, Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Derived CRTP function type.
       using DerivedType = Derived;
   };
 }
@@ -34,9 +36,7 @@ namespace Rodin::FormLanguage
 namespace Rodin::Variational
 {
   /**
-   * @defgroup RealFunctionSpecializations RealFunction Template Specializations
-   * @brief Template specializations of the RealFunction class.
-   * @see RealFunction
+   * @addtogroup RealFunctionSpecializations
    */
 
   /**
@@ -55,7 +55,10 @@ namespace Rodin::Variational
    * @note This serves as an intermediate base between FunctionBase and concrete
    * scalar function types like RealFunction, ComplexFunction, and BooleanFunction.
    *
-   * @see FunctionBase, RealFunction, ComplexFunction, BooleanFunction
+   * @see <a href="class_rodin_1_1_variational_1_1_function_base.html">FunctionBase</a>
+   * @see <a href="_real_function_8h.html">RealFunction</a>
+   * @see <a href="_complex_function_8h.html">ComplexFunction</a>
+   * @see <a href="_boolean_function_8h.html">BooleanFunction</a>
    */
   template <class Scalar, class Derived>
   class ScalarFunctionBase
@@ -106,6 +109,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -115,6 +119,7 @@ namespace Rodin::Variational
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
@@ -130,5 +135,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

@@ -59,10 +59,10 @@ namespace Rodin::QF
    * PolytopeQuadratureFormula qf_default(Geometry::Polytope::Type::Tetrahedron);
    * @endcode
    *
-   * @see QuadratureFormulaBase
-   * @see GaussLegendre
-   * @see XiaoGimbutas
-   * @see WitherdenVincent
+   * @see <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html">QuadratureFormulaBase</a>
+   * @see <a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html">GaussLegendre</a>
+   * @see <a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html">XiaoGimbutas</a>
+   * @see <a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html">WitherdenVincent</a>
    */
   class PolytopeQuadratureFormula : public QuadratureFormulaBase
   {

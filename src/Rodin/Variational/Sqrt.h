@@ -17,7 +17,6 @@
 #include "Function.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -105,6 +104,7 @@ namespace Rodin::Variational
         return Math::sqrt(this->getOperand().getValue(p));
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -133,6 +133,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
+  /// @brief Deduction guide for @c Sqrt.
   template <class NestedDerived>
   Sqrt(const FunctionBase<NestedDerived>&) -> Sqrt<FunctionBase<NestedDerived>>;
 
@@ -146,5 +147,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

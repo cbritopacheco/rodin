@@ -23,7 +23,12 @@ namespace Rodin::Geometry
   /**
    * @defgroup SubMeshSpecializations SubMesh Template Specializations
    * @brief Template specializations of the SubMesh class.
-   * @see SubMesh
+   * @see @ref SubMesh
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | [SubMesh<Context::Local>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html) | Sequential submesh with local parent/child index maps. |
+   * | [SubMesh<Context::MPI>](class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed submesh with MPI-aware parent/child index maps. |
    */
 
   /**
@@ -151,7 +156,9 @@ namespace Rodin::Geometry
    * SubMesh objects are not thread-safe during construction. Once finalized,
    * read-only operations are thread-safe.
    *
-   * @see SubMeshBase, Mesh, Shard
+   * @see <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>
    */
   template <>
   class SubMesh<Context::Local> final : public SubMeshBase, public Mesh<Context::Local>
@@ -315,4 +322,3 @@ namespace Rodin::Geometry
 }
 
 #endif
-

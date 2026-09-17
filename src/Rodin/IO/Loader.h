@@ -51,7 +51,8 @@ namespace Rodin::IO
    * };
    * ```
    *
-   * @see MeshLoader, GridFunctionLoader
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a>
    */
   template <class T>
   class Loader

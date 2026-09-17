@@ -17,7 +17,7 @@ namespace Rodin::IO
   /**
    * @brief Base template for loading objects from files or streams.
    * @tparam T Type of object to load
-   * @see Loader
+   * @see <a href="class_rodin_1_1_i_o_1_1_loader.html">Loader</a>
    */
   template <class T>
   class Loader;
@@ -25,7 +25,7 @@ namespace Rodin::IO
   /**
    * @brief Base template for printing objects to streams.
    * @tparam T Type of object to print
-   * @see Printer
+   * @see <a href="class_rodin_1_1_i_o_1_1_printer.html">Printer</a>
    */
   template <class T>
   class Printer;
@@ -45,38 +45,74 @@ namespace Rodin::IO
 
   /**
    * @brief Loader template for meshes with specific file format and context.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | [MeshLoader<IO::FileFormat::MFEM, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html) | Loads local meshes from MFEM mesh files. |
+   * | [MeshLoader<IO::FileFormat::MEDIT, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html) | Loads local meshes from MEDIT `.mesh` files. |
+   * | [MeshLoader<IO::FileFormat::HDF5, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html) | Loads complete local meshes from Rodin HDF5 datasets. |
+   * | [MeshLoader<IO::FileFormat::HDF5, Context::MPI>](class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html) | Loads distributed MPI meshes from rank-local Rodin HDF5 @ref Rodin::Geometry::Shard "shards". |
+   *
    * @tparam Fmt File format to use for loading
    * @tparam Trait Context trait (e.g., sequential or parallel)
-   * @see MeshLoader
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
    */
   template <FileFormat Fmt, class Trait>
   class MeshLoader;
 
   /**
    * @brief Printer template for meshes with specific file format and context.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | [MeshPrinter<IO::FileFormat::MFEM, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html) | Writes local meshes in MFEM mesh format. |
+   * | [MeshPrinter<IO::FileFormat::MEDIT, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html) | Writes local meshes in MEDIT `.mesh` format. |
+   * | [MeshPrinter<IO::FileFormat::HDF5, Context::Local>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html) | Writes complete local meshes to Rodin HDF5 datasets. |
+   * | [MeshPrinter<IO::FileFormat::HDF5, Context::MPI>](class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html) | Writes distributed MPI @ref Rodin::Geometry::Shard "mesh shards" to rank-local Rodin HDF5 datasets. |
+   *
    * @tparam Fmt File format to use for printing
    * @tparam Trait Context trait (e.g., sequential or parallel)
-   * @see MeshPrinter
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a>
    */
   template <FileFormat Fmt, class Trait>
   class MeshPrinter;
 
   /**
    * @brief Loader template for grid functions with specific file format.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GridFunctionLoader "GridFunctionLoader<IO::FileFormat::MFEM, FES, Data>" | Loads MFEM grid functions into Rodin-owned vector storage. |
+   * | @ref GridFunctionLoader "GridFunctionLoader<IO::FileFormat::MFEM, FES, Math::Vector<Scalar>&>" | Loads MFEM grid functions into referenced vector storage. |
+   * | @ref GridFunctionLoader "GridFunctionLoader<IO::FileFormat::MEDIT, FES, Data>" | Loads MEDIT grid functions into Rodin-owned vector storage. |
+   * | @ref GridFunctionLoader "GridFunctionLoader<IO::FileFormat::MEDIT, FES, Math::Vector<Scalar>&>" | Loads MEDIT grid functions into referenced vector storage. |
+   * | @ref GridFunctionLoader "GridFunctionLoader<IO::FileFormat::HDF5, FES, Math::Vector<Scalar>>" | Loads HDF5 grid functions into Rodin vector storage. |
+   * | @ref GridFunctionLoader "GridFunctionLoader<IO::FileFormat::HDF5, FES, Vec>" | Loads HDF5 grid functions into PETSc vector storage. |
+   *
    * @tparam Fmt File format to use for loading
    * @tparam FES Finite element space type
    * @tparam Data Data storage type
-   * @see GridFunctionLoader
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a>
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionLoader;
 
   /**
    * @brief Printer template for grid functions with specific file format.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref GridFunctionPrinter "GridFunctionPrinter<IO::FileFormat::MFEM, FES, Math::Vector<Scalar>>" | Writes Rodin vector-backed grid functions in MFEM format. |
+   * | @ref GridFunctionPrinter "GridFunctionPrinter<IO::FileFormat::MFEM, FES, Vec>" | Writes PETSc vector-backed grid functions in MFEM format. |
+   * | @ref GridFunctionPrinter "GridFunctionPrinter<IO::FileFormat::MEDIT, FES, Math::Vector<Scalar>>" | Writes Rodin vector-backed grid functions in MEDIT format. |
+   * | @ref GridFunctionPrinter "GridFunctionPrinter<IO::FileFormat::MEDIT, FES, Vec>" | Writes PETSc vector-backed grid functions in MEDIT format. |
+   * | @ref GridFunctionPrinter "GridFunctionPrinter<IO::FileFormat::HDF5, FES, Math::Vector<Scalar>>" | Writes Rodin vector-backed grid functions to HDF5 datasets. |
+   * | @ref GridFunctionPrinter "GridFunctionPrinter<IO::FileFormat::HDF5, FES, Vec>" | Writes PETSc vector-backed grid functions to HDF5 datasets. |
+   *
    * @tparam Fmt File format to use for printing
    * @tparam FES Finite element space type
    * @tparam Data Data storage type
-   * @see GridFunctionPrinter
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinter;

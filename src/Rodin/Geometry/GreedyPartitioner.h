@@ -26,7 +26,8 @@ namespace Rodin::Geometry
    * @note This is a simpler and faster alternative to BalancedCompactPartitioner,
    * but may produce less spatially compact partitions.
    *
-   * @see Partitioner, BalancedCompactPartitioner
+   * @see <a href="class_rodin_1_1_geometry_1_1_partitioner.html">Partitioner</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html">BalancedCompactPartitioner</a>
    */
   class GreedyPartitioner : public Partitioner
   {

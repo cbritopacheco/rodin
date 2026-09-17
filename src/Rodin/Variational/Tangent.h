@@ -17,7 +17,6 @@
 #include "Function.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -122,6 +121,7 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);
@@ -148,9 +148,11 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /// @brief Deduction guide for @c Tan.
   template <class NestedDerived>
   Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
 
+  /// @brief Builds the pointwise tangent of a function expression.
   template <class NestedDerived>
   auto tan(const FunctionBase<NestedDerived>& f)
   {
@@ -158,5 +160,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

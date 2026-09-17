@@ -36,7 +36,6 @@
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -63,11 +62,13 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<OR<LHSType, RHSType>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       constexpr
       OR(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       OR(const OR& other)
         : Parent(other),
@@ -75,6 +76,7 @@ namespace Rodin::Variational
           m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       constexpr
       OR(OR&& other)
         : Parent(std::move(other)),
@@ -82,24 +84,28 @@ namespace Rodin::Variational
           m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the left-hand side operand.
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) || getRHS().getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -116,34 +122,35 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c OR.
   template <class LHSDerived, class RHSDerived>
   OR(const BooleanFunctionBase<LHSDerived>&, const BooleanFunctionBase<RHSDerived>&)
     -> OR<BooleanFunctionBase<LHSDerived>, BooleanFunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto
-  operator||(const BooleanFunctionBase<LHSDerived>& lhs, const BooleanFunctionBase<RHSDerived>& rhs)
+  constexpr auto
+  /// @brief Logical disjunction of two boolean function expressions.
+  operator||(const BooleanFunctionBase<LHSDerived>& lhs,
+    const BooleanFunctionBase<RHSDerived>& rhs)
   {
     return OR(lhs, rhs);
   }
 
   template <class RHSDerived>
-  constexpr
-  auto
+  constexpr auto
+  /// @brief Logical disjunction of two boolean function expressions.
   operator||(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
   {
     return OR(BooleanFunction(lhs), rhs);
   }
 
   template <class LHSDerived>
-  constexpr
-  auto
+  constexpr auto
+  /// @brief Logical disjunction of two boolean function expressions.
   operator||(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return OR(lhs, BooleanFunction(rhs));
   }
 }
 
-/// @endcond
 #endif

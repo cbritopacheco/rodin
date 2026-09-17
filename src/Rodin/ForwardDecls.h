@@ -22,15 +22,21 @@ namespace Rodin
    * @brief Forward declaration of the Pair template class.
    * @tparam L Type of the first element.
    * @tparam R Type of the second element.
-   * @see Pair
+   * @see <a href="class_rodin_1_1_pair.html">Pair</a>
    */
   template <class L, class R>
   class Pair;
 
   /**
    * @brief Forward declaration of the Tuple template class.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Tuple "Tuple<>" | Empty compile-time tuple, used as the terminal case for recursive tuple algorithms. |
+   * | @ref Tuple "Tuple<T, Ts...>" | Non-empty compile-time tuple storing a head element and the remaining tail. |
+   *
    * @tparam Ts Types of the tuple elements.
-   * @see Tuple
+   * @see <a href="class_rodin_1_1_tuple.html">Tuple</a>
    */
   template <class ... Ts>
   class Tuple;

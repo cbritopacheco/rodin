@@ -17,6 +17,11 @@
   lets you express these variational formulations in C++ code that closely
   mirrors the mathematical notation.
 
+  The cross-module rules behind these examples are summarized in
+  @ref guides-numerical-contracts "Numerical contracts", including the
+  `Problem` sign convention and the distinction between interpolation and
+  `L2` projection.
+
   @section guides-variational-weak From Strong to Weak Form
 
   Consider a generic second-order PDE in its strong form:
@@ -329,7 +334,8 @@
   @subsection guides-variational-dg-example DG Poisson Example
 
   The simplest DG approach uses `P0` (piecewise constant) functions. The
-  actual `examples/DG/Poisson.cpp` uses this pattern:
+  actual [DG Poisson example](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp)
+  uses this pattern:
 
   @code{.cpp}
   P0 Vh(mesh);           // Discontinuous piecewise-constant space
@@ -369,8 +375,8 @@
      + DirichletBC(u, Zero());
   @endcode
 
-  See the DG Poisson example for a complete
-  working implementation.
+  See the [DG Poisson example](https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp)
+  for a complete working implementation.
 
   @section guides-variational-see-also See Also
 
@@ -383,5 +389,7 @@
   - @ref Rodin::Solid "Solid module" — Hyperelastic constitutive laws and Newton solvers
   - @ref Rodin::Advection "Advection module" — Semi-Lagrangian transport
   - @ref guides-solvers "Solvers guide" — Direct, iterative, and nonlinear solvers
+  - @ref guides-numerical-contracts "Numerical contracts" — Projection,
+    assembly signs, quadrature, constraints, and tangent consistency
 
   */

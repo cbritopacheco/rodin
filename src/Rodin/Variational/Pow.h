@@ -19,7 +19,6 @@
 #include "Function.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -119,6 +118,7 @@ namespace Rodin::Variational
         return Math::pow(this->getBase().getValue(p), getExponent());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto o = getBase().getOrder(polytope);
@@ -144,11 +144,13 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
+      /// @brief Gets the base of the power.
       const BaseType& getBase() const
       {
         return *m_s;
       }
 
+      /// @brief Gets the exponent of the power.
       const ExponentType& getExponent() const
       {
         return m_p;
@@ -165,11 +167,13 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c Pow.
    * @ingroup RodinCTAD
    */
   template <class BaseDerived, class Number>
   Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
 
+  /// @brief Builds the pointwise power of a function expression.
   template <class NestedDerived, class Number>
   auto pow(const FunctionBase<NestedDerived>& f, Number exponent)
   {
@@ -177,5 +181,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

@@ -17,7 +17,6 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -31,6 +30,11 @@ namespace Rodin::Variational
    *
    * @note For an overview of all the possible specializations of the
    * H1 class, please see @ref H1ElementSpecializations.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref H1Element "H1Element<K, Scalar>" | Scalar-valued H1-conforming Lagrange element of degree `K`. |
+   * | @ref H1Element "H1Element<K, SpatialVector<Scalar>>" | Vector-valued H1-conforming Lagrange element of degree `K`. |
    *
    * @see H1ElementSpecializations
    */
@@ -49,6 +53,13 @@ namespace Rodin::Variational
    *
    * @note For an overview of all the possible specializations of the
    * H1 class, please see @ref H1Specializations.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref H1 "H1<K, Scalar, Mesh<Context::Local>>" | Scalar-valued local-mesh H1-conforming space of degree `K`. |
+   * | @ref H1 "H1<K, SpatialVector<Scalar>, Mesh<Context::Local>>" | Vector-valued local-mesh H1-conforming space of degree `K`. |
+   * | @ref H1 "H1<K, Scalar, Mesh<Context::MPI>>" | Scalar-valued distributed H1-conforming space of degree `K`. |
+   * | @ref H1 "H1<K, SpatialVector<Scalar>, Mesh<Context::MPI>>" | Vector-valued distributed H1-conforming space of degree `K`. |
    *
    * @see H1Specializations
    */
@@ -137,9 +148,9 @@ namespace Rodin::Variational
   template <size_t K>
   class VandermondeTriangle;
 
+  /// @brief Vandermonde matrix of the modal basis on the reference tetrahedron.
   template <size_t K>
   class VandermondeTetrahedron;
 }
 
-/// @endcond
 #endif

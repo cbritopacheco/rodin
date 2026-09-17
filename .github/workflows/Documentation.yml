@@ -6,6 +6,10 @@ on:
     branches:
       - master
       - develop
+  pull_request:
+    branches:
+      - master
+      - develop
 
 concurrency:
   group: Documentation-${{ github.ref }}
@@ -50,6 +54,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --target RodinDoxygen
       - name: Deploy
+        if: github.event_name == 'push'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

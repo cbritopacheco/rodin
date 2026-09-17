@@ -30,35 +30,35 @@ namespace Rodin::Heart::CCMLC2014::Physics
    */
   struct SolverConfig
   {
-    /// @brief Pressure-drop threshold for the Poiseuille fallback.
+      /// @brief Pressure-drop threshold for the Poiseuille fallback.
       static constexpr Real pressureDropTolerance = 1.0e-12;
-    /// @brief Minimum shear-rate bracket.
+      /// @brief Minimum shear-rate bracket.
       static constexpr Real minShearRate = 1.0e-8;
-    /// @brief Number of RK4 substeps for the WRMS flow integral.
+      /// @brief Number of RK4 substeps for the WRMS flow integral.
       static constexpr int integralSteps = 100;
-    /// @brief Maximum bracketing expansions for outlet scalar solves.
+      /// @brief Maximum bracketing expansions for outlet scalar solves.
       static constexpr int maxBracketIterations = 100;
-    /// @brief Wall shear root solver absolute tolerance.
+      /// @brief Wall shear root solver absolute tolerance.
       static constexpr Real shearAbsoluteTolerance = 1.0e-12;
-    /// @brief Wall shear root solver relative tolerance.
+      /// @brief Wall shear root solver relative tolerance.
       static constexpr Real shearRelativeTolerance = 1.0e-10;
-    /// @brief Wall shear root solver step tolerance.
+      /// @brief Wall shear root solver step tolerance.
       static constexpr Real shearStepTolerance = 1.0e-12;
-    /// @brief Wall shear root solver maximum iterations.
+      /// @brief Wall shear root solver maximum iterations.
       static constexpr int shearMaxIterations = 50;
-    /// @brief Flow inversion root solver absolute tolerance.
+      /// @brief Flow inversion root solver absolute tolerance.
       static constexpr Real flowAbsoluteTolerance = 1.0e-10;
-    /// @brief Flow inversion root solver relative tolerance.
+      /// @brief Flow inversion root solver relative tolerance.
       static constexpr Real flowRelativeTolerance = 1.0e-9;
-    /// @brief Flow inversion root solver step tolerance.
+      /// @brief Flow inversion root solver step tolerance.
       static constexpr Real flowStepTolerance = 1.0e-12;
-    /// @brief Flow inversion root solver maximum iterations.
+      /// @brief Flow inversion root solver maximum iterations.
       static constexpr int flowMaxIterations = 50;
-    /// @brief Flow magnitude treated as zero in pressure-drop inversion.
+      /// @brief Flow magnitude treated as zero in pressure-drop inversion.
       static constexpr Real zeroFlowTolerance = 1.0e-16;
-    /// @brief Minimum pressure-drop bracket.
+      /// @brief Minimum pressure-drop bracket.
       static constexpr Real pressureDropBracketMin = 1.0;
-    /// @brief Distal capacitor bracket pressure pad.
+      /// @brief Distal capacitor bracket pressure pad.
       static constexpr Real distalPressureBracketPad = 1000.0;
   };
 
