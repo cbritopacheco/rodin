@@ -184,62 +184,81 @@ namespace
       }
   };
 
-  /// @brief Checks both optimized H1 divergence couplings against an exact
-  /// affine field on a non-orthogonal element.
-  template <size_t K>
-  void checkH1DivergenceTransformation()
+  /// @brief Checks both optimized divergence couplings against an exact
+  /// affine field on every supported, affinely sheared element geometry.
+  template <class Family>
+  void checkDivergenceTransformation(const std::string& label)
   {
-    SCOPED_TRACE("H1<" + std::to_string(K) + ">");
+    for (const auto& element : elements())
+    {
+      SCOPED_TRACE(label + " on " + element.name);
+      LocalMesh mesh = makeMesh(element);
 
-    LocalMesh mesh =
-      LocalMesh::Builder()
-      .initialize(3)
-      .nodes(4)
-      .vertex({0, 0, 0})
-      .vertex({2, 0, 0})
-      .vertex({1, 3, 0})
-      .vertex({0, 1, 4})
-      .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
-      .finalize();
-    auto& connectivity = mesh.getConnectivity();
-    connectivity.compute(3, 2);
-    connectivity.compute(2, 1);
-    connectivity.compute(1, 0);
-    connectivity.compute(2, 3);
+      // A global affine shear keeps the element family unchanged while making
+      // the inverse Jacobian nonsymmetric on every cell.
+      for (auto vertex = mesh.getVertex(); !vertex.end(); ++vertex)
+      {
+        const auto x = vertex->getCoordinates();
+        auto y = x;
+        if (element.dimension == 2)
+        {
+          y(0) = x(0) + 0.3 * x(1);
+          y(1) = 0.2 * x(0) + 1.1 * x(1);
+        }
+        else
+        {
+          y(0) = x(0) + 0.3 * x(1);
+          y(1) = 0.2 * x(0) + x(1) + 0.1 * x(2);
+          y(2) = 0.1 * x(1) + 1.1 * x(2);
+        }
+        mesh.setVertexCoordinates(vertex->getIndex(), y);
+      }
 
-    auto velocityFES = H1Family<K>::vector(mesh, 3);
-    auto pressureFES = H1Family<K>::scalar(mesh);
-    GridFunction velocity(velocityFES);
-    velocity.project(VectorFunction{
-      RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
-      RealFunction([](const Point& p) { return -p.x() + 3 * p.y() + 4 * p.z(); }),
-      RealFunction([](const Point& p) { return 2 * p.x() - 2 * p.z(); })});
-    GridFunction pressure(pressureFES);
-    pressure.project(RealFunction(1.0));
+      auto velocityFES = Family::vector(mesh, element.dimension);
+      auto pressureFES = Family::scalar(mesh);
+      GridFunction velocity(velocityFES);
+      if (element.dimension == 2)
+      {
+        velocity.project(VectorFunction{
+          RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+          RealFunction([](const Point& p) { return -p.x() + 3 * p.y(); })});
+      }
+      else
+      {
+        velocity.project(VectorFunction{
+          RealFunction([](const Point& p) { return p.x() + 2 * p.y(); }),
+          RealFunction(
+            [](const Point& p) { return -p.x() + 3 * p.y() + 4 * p.z(); }),
+          RealFunction([](const Point& p) { return 2 * p.x() - 2 * p.z(); })});
+      }
+      GridFunction pressure(pressureFES);
+      pressure.project(RealFunction(1.0));
 
-    TrialFunction u(velocityFES);
-    TestFunction q(pressureFES);
-    BilinearForm divergencePressure(u, q);
-    divergencePressure = Integral(Div(u), q);
-    divergencePressure.assemble();
+      TrialFunction u(velocityFES);
+      TestFunction q(pressureFES);
+      BilinearForm divergencePressure(u, q);
+      divergencePressure = Integral(Div(u), q);
+      divergencePressure.assemble();
 
-    TrialFunction p(pressureFES);
-    TestFunction v(velocityFES);
-    BilinearForm pressureDivergence(p, v);
-    pressureDivergence = Integral(p, Div(v));
-    pressureDivergence.assemble();
+      TrialFunction p(pressureFES);
+      TestFunction v(velocityFES);
+      BilinearForm pressureDivergence(p, v);
+      pressureDivergence = Integral(p, Div(v));
+      pressureDivergence.assemble();
 
-    // The affine field has divergence 2 and the tetrahedron has volume 4.
-    EXPECT_NEAR(
-      (divergencePressure.getOperator() * velocity.getData())
-        .dot(pressure.getData()),
-      8.0,
-      tolerance);
-    EXPECT_NEAR(
-      (pressureDivergence.getOperator() * pressure.getData())
-        .dot(velocity.getData()),
-      8.0,
-      tolerance);
+      const Real divergence = (element.dimension == 2) ? 4.0 : 2.0;
+      const Real expected = divergence * measureOf(mesh);
+      EXPECT_NEAR(
+        (divergencePressure.getOperator() * velocity.getData())
+          .dot(pressure.getData()),
+        expected,
+        tolerance);
+      EXPECT_NEAR(
+        (pressureDivergence.getOperator() * pressure.getData())
+          .dot(velocity.getData()),
+        expected,
+        tolerance);
+    }
   }
 
   /// @brief Scalar identities: mass and loads reproduce the measure, and
@@ -856,11 +875,12 @@ TEST(QuadratureRuleSpecializationTest, P1HandlersAreOrderInvariant)
   checkOrderInvariance<P1Family>("P1");
 }
 
-/// @brief H1 divergence transformations are correct on a sheared cell for
-/// linear through cubic spaces.
-TEST(QuadratureRuleSpecializationTest, H1DivergenceTransformsOnShearedTetrahedron)
+/// @brief Divergence transformations are correct on sheared versions of every
+/// supported geometry and finite element family.
+TEST(QuadratureRuleSpecializationTest, DivergenceTransformsOnShearedGeometries)
 {
-  checkH1DivergenceTransformation<1>();
-  checkH1DivergenceTransformation<2>();
-  checkH1DivergenceTransformation<3>();
+  checkDivergenceTransformation<P1Family>("P1");
+  checkDivergenceTransformation<H1Family<1>>("H1P1");
+  checkDivergenceTransformation<H1Family<2>>("H1P2");
+  checkDivergenceTransformation<H1Family<3>>("H1P3");
 }
