@@ -21,7 +21,8 @@ using namespace Rodin::Variational;
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("malla_merge.mesh", IO::FileFormat::MEDIT);
+  mesh.load(
+    "../resources/examples/Heart/CoronaryArtery/MergedFSI.mesh", IO::FileFormat::MEDIT);
   // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(2, 3); // Compute boundary
   mesh.getConnectivity().compute(2, 1); // Compute boundary

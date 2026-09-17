@@ -269,6 +269,41 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
   }
 
+  /// @brief Verifies that neither backend conjugates a complex coefficient.
+  TEST(Assembly_OpenMP_BilinearForm, ComplexCoefficientPreservesConvention)
+  {
+    auto mesh = Mesh<Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
+    P1<Complex> fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    const Complex coefficient(2, 3);
+
+    BilinearForm form(u, v);
+    form = Integral(ComplexFunction(coefficient) * u, v);
+
+    using Form = decltype(form);
+    using Matrix = Math::SparseMatrix<Complex>;
+    const auto input = Assembly::BilinearFormAssemblyInput{
+      fes, fes, form.getLocalIntegrators(), form.getGlobalIntegrators()};
+
+    Matrix sequential;
+    Assembly::Sequential<Matrix, Form>{}.execute(sequential, input);
+    Matrix parallel;
+    Assembly::OpenMP<Matrix, Form>{}.execute(parallel, input);
+
+    const Complex expected = Complex(0.5) * coefficient;
+    EXPECT_NEAR(std::abs(sequential.sum() - expected), 0.0, 1e-14);
+    EXPECT_NEAR(std::abs(parallel.sum() - expected), 0.0, 1e-14);
+    EXPECT_NEAR((parallel - sequential).norm(), 0.0, 1e-14);
+  }
+
   /**
    * @brief Non-square mixed BF (P0 test × P1 trial): OpenMP equals Sequential.
    */

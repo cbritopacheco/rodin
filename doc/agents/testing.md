@@ -10,9 +10,17 @@ tests/installation/                Install-tree consumption checks
 src/Rodin/Test/                    Library-side helpers (Random functions, Utility)
 ```
 
-- ctest is **not** wired up (`ctest -N` → 0 tests). Run the gtest
-  executables directly: `build/tests/unit/Rodin/<Module>/
-  Rodin<Module><Component>Test` (`--gtest_filter`, `--gtest_list_tests`).
+- ctest **is** wired up: suites register through `gtest_discover_tests` with
+  the labels `unit`, `manufactured`, `slow`, `distributed` and `petsc` — the
+  same selectors CI uses. Scope a run to what changed:
+  `ctest --test-dir build/tests -L unit -LE "slow|distributed"
+  --output-on-failure`, or `-R <pattern>` for one suite. Running a gtest
+  executable directly still works when you want its raw output
+  (`--gtest_filter`, `--gtest_list_tests`).
+- Build type is part of correctness here: unit tests may run `Debug`
+  (assertions, sanitizers), but manufactured tests solve PDEs and verify
+  convergence rates, so they run `Release`/`RelWithDebInfo` — `Debug` is
+  impractically slow.
 - Manufactured tests are organized by space and cross-space combination
   (`H1/`, `P0/`, `P1/`, `P0_P1/`, `P1_H1/`, `PreassembledMixed/`,
   `Assembly/`, `Solver/`, `Models/`, `MPI/`, `PETSc/`) — the place for
@@ -55,6 +63,10 @@ re-indexing code. Others map onto standing hazards rather than patterns:
 PETSc handle ownership is resource/lifecycle, the OpenMP and MPI assembly
 backends are concurrency, and CI building against PETSc 3.19 while local
 builds are newer is compatibility.
+
+Use [backend-support.md](backend-support.md) to decide which configurations a
+feature must test, and [numerical-contracts.md](numerical-contracts.md) to
+choose the invariant or manufactured check that proves the numerical behavior.
 
 Two rules that make the difference between coverage and theatre:
 
@@ -103,3 +115,11 @@ CI facts that bite:
   look like an unrelated downstream failure.
 - Doxygen documentation is published per-branch; malformed doc comments
   can fail Documentation.yml.
+- Documentation.yml is also the review gate for specialization-family class
+  pages: if a class has multiple supported specializations, its Doxygen
+  description must include a complete `Specialization` / `Description` table
+  with each specialization linked.
+- Documentation review also treats unlinked public references as failures:
+  `@see` blocks and prose lists should use explicit `@ref` references or HTML
+  links for public classes, templates, specialization groups, and generated
+  file pages instead of bare comma-separated names.

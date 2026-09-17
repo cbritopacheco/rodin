@@ -315,12 +315,23 @@ namespace
 
     const auto formStart = Clock::now();
     Problem elasticity(u, v);
-    elasticity = Integral(lambda * Div(u), Div(v))
-               + Integral(
-                   mu * (Jacobian(u) + Jacobian(u).T()),
-                   0.5 * (Jacobian(v) + Jacobian(v).T()))
-               - Integral(f, v)
-               + DirichletBC(u, Zero());
+    // This manufactured solution is trigonometric, so no rule integrates the
+    // load exactly, and the degree inferred from the shape functions alone is
+    // too low for it. Under-integrating the load perturbs the solution, so
+    // the test reports more error than the discretisation actually carries:
+    // 5.3e-5 against the 3.5e-5 it means to measure, which put K = 1 over its
+    // 5e-5 tolerance. Integrating the load at degree 6 recovers 3.5e-5, and
+    // that value is stable to nine digits out to degree 16. Only the load
+    // needs it: for H1 of degree one the divergence and the symmetric
+    // gradient are constant on a triangle, so any rule is exact on the other
+    // two terms.
+    auto load = Integral(f, v);
+    load.setOrder(6);
+
+    elasticity = Integral(lambda * Div(u), Div(v)) +
+      Integral(
+        mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())) -
+      load + DirichletBC(u, Zero());
     printTiming(world, "computeError2D.K" + std::to_string(K) + ".form", secondsSince(formStart));
 
     const auto assembleStart = Clock::now();

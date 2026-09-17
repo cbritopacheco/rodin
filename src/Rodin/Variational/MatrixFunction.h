@@ -23,14 +23,16 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c MatrixFunctionBase: exposes the scalar type and the
+  /// derived type.
   template <class Scalar, class Derived>
   struct Traits<Variational::MatrixFunctionBase<Scalar, Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Derived CRTP function type.
       using DerivedType = Derived;
   };
 }
@@ -40,7 +42,7 @@ namespace Rodin::Variational
   /**
    * @defgroup MatrixFunctionSpecializations MatrixFunction Template Specializations
    * @brief Template specializations of the MatrixFunction class.
-   * @see MatrixFunction
+   * @see <a href="_matrix_function_8h.html">MatrixFunction</a>
    */
 
   /**
@@ -66,7 +68,9 @@ namespace Rodin::Variational
    * - `A(i, j)` for the entry at row i, column j
    * - `A(i)` for the i-th row (returning a vector function)
    *
-   * @see FunctionBase, VectorFunction, Transpose
+   * @see <a href="class_rodin_1_1_variational_1_1_function_base.html">FunctionBase</a>
+   * @see <a href="_vector_function_8h.html">VectorFunction</a>
+   * @see <a href="_transpose_8h.html">Transpose</a>
    */
   template <class Scalar, class Derived>
   class MatrixFunctionBase : public FunctionBase<MatrixFunctionBase<Scalar, Derived>>
@@ -116,6 +120,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -159,6 +164,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getColumns();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -176,6 +182,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Matrix-valued constant function.
    * @ingroup MatrixFunctionSpecializations
    */
   template <class Scalar>
@@ -194,26 +201,31 @@ namespace Rodin::Variational
 
       using Parent::traceOf;
 
+      /// @brief Constructs the MatrixFunction from the given arguments.
       MatrixFunction(const MatrixType& matrix)
         : m_matrix(matrix)
       {}
 
+      /// @brief Copy constructor.
       MatrixFunction(const MatrixFunction& other)
         : Parent(other),
           m_matrix(other.m_matrix)
       {}
 
+      /// @brief Move constructor.
       MatrixFunction(MatrixFunction&& other)
         : Parent(std::move(other)),
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       MatrixType getValue(const Geometry::Point&) const
       {
         return m_matrix;
       }
 
+      /// @brief Gets the number of rows.
       constexpr
       size_t getRows() const
       {
@@ -230,6 +242,7 @@ namespace Rodin::Variational
         return m_matrix.cols();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& ) const noexcept
       {
@@ -245,10 +258,10 @@ namespace Rodin::Variational
       const MatrixType m_matrix;
   };
 
+  /// @brief Deduction guide for @c MatrixFunction.
   template <class Scalar>
   MatrixFunction(const Math::Matrix<Scalar>&)
     -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 
-/// @endcond
 #endif

@@ -1,0 +1,3 @@
+# Every resource is binary or generated input data and is stored in Git LFS.
+# Keep this broad so new resource formats cannot silently bypass the policy.
+resources/** filter=lfs diff=lfs merge=lfs -text

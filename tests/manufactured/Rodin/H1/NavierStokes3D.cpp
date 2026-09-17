@@ -167,18 +167,34 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
 
     Real updateNorm = std::numeric_limits<Real>::infinity();
     size_t picardIts = 0;
+
+    // The pyramid is the one element whose basis is rational: its shape
+    // functions divide by (1 - z), so no quadrature rule integrates these
+    // forms exactly and an integrand's polynomial degree no longer bounds the
+    // quadrature error. At the degrees inferred here (2 to 6) that error is
+    // 3e-6 -- two hundred times the 1.5e-8 discretisation error this test is
+    // meant to measure -- and the velocity check below fails on it. Degree 9
+    // reaches the discretisation floor, for about a second of runtime. Every
+    // term is raised rather than only the nonlinear one, because the
+    // low-degree viscous and pressure couplings turn out to be the worst
+    // integrated: low degree buys the fewest points, and on a rational
+    // integrand points are what accuracy costs. The other elements have
+    // polynomial bases, so they keep the inferred order.
+    const bool rationalBasis = GetParam() == Polytope::Type::Pyramid;
+    const auto atOrder = [rationalBasis](auto integral) {
+      if (rationalBasis)
+        integral.setOrder(9);
+      return integral;
+    };
+
     for (size_t k = 0; k < maxIts; ++k)
     {
       Problem ns(u, p, lambda, v, q, mu);
       const auto conv_u = Mult(Jacobian(u), w);
-      ns = nu * Integral(Jacobian(u), Jacobian(v))
-         + Integral(Dot(conv_u, v))
-         - Integral(p, Div(v))
-         + Integral(Div(u), q)
-         + Integral(lambda, q)
-         + Integral(p, mu)
-         - Integral(f, v)
-         + DirichletBC(u, u_exact);
+      ns = nu * atOrder(Integral(Jacobian(u), Jacobian(v))) +
+        atOrder(Integral(Dot(conv_u, v))) - atOrder(Integral(p, Div(v))) +
+        atOrder(Integral(Div(u), q)) + atOrder(Integral(lambda, q)) +
+        atOrder(Integral(p, mu)) - atOrder(Integral(f, v)) + DirichletBC(u, u_exact);
 
       SparseLU solver(ns);
       solver.solve();
@@ -226,14 +242,14 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
 
     Problem ns_final(u, p, lambda, v, q, mu);
     const auto conv_u_final = Mult(Jacobian(u), w_final);
-    ns_final = nu * Integral(Jacobian(u), Jacobian(v))
-             + Integral(Dot(conv_u_final, v))
-             - Integral(p, Div(v))
-             + Integral(Div(u), q)
-             + Integral(lambda, q)
-             + Integral(p, mu)
-             - Integral(f, v)
-             + DirichletBC(u, u_exact);
+    // Must use the same quadrature as the Picard system above: the defect
+    // below asks whether the converged iterate is a fixed point of this
+    // system, so integrating it differently would measure the change of rule
+    // instead of the defect.
+    ns_final = nu * atOrder(Integral(Jacobian(u), Jacobian(v))) +
+      atOrder(Integral(Dot(conv_u_final, v))) - atOrder(Integral(p, Div(v))) +
+      atOrder(Integral(Div(u), q)) + atOrder(Integral(lambda, q)) +
+      atOrder(Integral(p, mu)) - atOrder(Integral(f, v)) + DirichletBC(u, u_exact);
 
     SparseLU solver(ns_final);
     solver.solve();

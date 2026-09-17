@@ -1,0 +1,140 @@
+/**
+  @page guides-numerical-contracts Numerical contracts
+  @brief Interpolation, projection, assembly signs, quadrature, and solver contracts
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Rodin tries to make code read like mathematics, but some operations have
+  precise numerical contracts. This page collects the rules that affect
+  accuracy and solver behavior across modules.
+
+  @section guides-numerical-contracts-interpolation Interpolation vs Projection
+
+  Assigning an expression to a `GridFunction` applies the finite element
+  space's degree-of-freedom functionals to that expression:
+
+  @code{.cpp}
+  GridFunction uh(Vh);
+  uh = f;        // interpolate f in the DOF sense of Vh
+  @endcode
+
+  This is interpolation, not an @f$ L^2 @f$-orthogonal projection. For nodal
+  @ref Rodin::Variational::P1 "P1" spaces, the DOF functionals are vertex
+  evaluations, so the assignment stores nodal values. For higher-order
+  `H1<K>` spaces, Rodin uses higher-order bases and DOF machinery; coefficients
+  should not be read as nodal values. Evaluate the
+  @ref Rodin::Variational::GridFunction "GridFunction" at a
+  @ref Rodin::Geometry::Point "Point" instead.
+
+  @subsection guides-numerical-contracts-l2 L2 Projection
+
+  When the mathematical operation is the @f$ L^2 @f$ projection, assemble the
+  mass problem:
+
+  @f[
+    \int_\Omega u_h v_h\,dx = \int_\Omega f v_h\,dx
+    \qquad \forall v_h \in V_h.
+  @f]
+
+  In Rodin this is written as:
+
+  @code{.cpp}
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Problem l2(u, v);
+  l2 = Integral(u, v) - Integral(f, v);
+  Solver::CG(l2).solve();
+
+  const auto& uh = u.getSolution();
+  @endcode
+
+  Use this route for optimal-order transfer of rough data, conservative
+  projection workflows, or whenever the variational definition of the
+  projection matters.
+
+  @section guides-numerical-contracts-signs Problem Sign Convention
+
+  A `Problem` assignment writes the residual equation with all terms on the
+  left-hand side. The Poisson weak form
+
+  @f[
+    a(u,v) = \ell(v)
+  @f]
+
+  becomes:
+
+  @code{.cpp}
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+  @endcode
+
+  Bilinear terms contribute to the operator @f$ A @f$. Linear terms contribute
+  to the right-hand side @f$ b @f$ with the sign implied by the residual
+  equation. For nonlinear Newton problems, assemble the tangent and residual
+  so the linearized system is
+
+  @f[
+    J(x^k)\,\delta x^k = -F(x^k).
+  @f]
+
+  Do not write a second manual negation around a residual term that the
+  `Problem` assembly already moves to the right-hand side.
+
+  @section guides-numerical-contracts-linearsystem LinearSystem Lifetime
+
+  A @ref Rodin::Math::LinearSystem "LinearSystem" is tied to the finite
+  element spaces and block layout that created it. If the mesh, finite element
+  space, number of fields, or global size changes, create a new problem or
+  linear system.
+
+  PETSc makes this rule explicit: once a `Mat` or `Vec` has been laid out and
+  assembled, it cannot be resized in place. Reassembly may reuse storage when
+  sizes and sparsity structure match, but changed structure is a new system.
+
+  @section guides-numerical-contracts-quadrature Quadrature Exactness
+
+  Quadrature order controls the mathematical form being assembled. For
+  polynomial integrands on affine elements, choose a rule exact for the
+  product degree. Curved transformations, material coefficients, nonlinear
+  constitutive laws, and flow-map evaluations can raise the effective degree
+  or make the integrand non-polynomial.
+
+  If a specialized integrator uses a shortcut, verify it against the generic
+  quadrature path or a manufactured solution. Agreement should include the
+  assembled values, convergence rates, and any invariants the form is expected
+  to satisfy.
+
+  @section guides-numerical-contracts-tangent Residual and Tangent Consistency
+
+  Nonlinear residual/tangent pairs must be consistent. For a residual
+  @f$ R(x) @f$ and tangent @f$ J(x) @f$, the check is:
+
+  @f[
+    J(x)w \approx
+    \frac{R(x+\varepsilon w)-R(x-\varepsilon w)}{2\varepsilon}.
+  @f]
+
+  Rodin provides finite-difference probe helpers under @ref Rodin::Test
+  "Rodin::Test". Run these checks when adding or changing nonlinear terms,
+  especially in solid mechanics and mesh optimization.
+
+  @section guides-numerical-contracts-constraints Constraints
+
+  Dirichlet and identification boundary conditions are structural constraints.
+  They are represented in the assembly constraint map and eliminated or
+  expanded algebraically. Use penalty terms only when the model is explicitly
+  a penalty method.
+
+  @section guides-numerical-contracts-see-also See Also
+
+  - @ref guides-getting-started-core-concepts "Core concepts"
+  - @ref guides-variational "Variational formulations"
+  - @ref guides-solvers "Solvers"
+  - @ref guides-petsc "PETSc"
+  - @ref guides-solid-mechanics "Solid mechanics"
+*/

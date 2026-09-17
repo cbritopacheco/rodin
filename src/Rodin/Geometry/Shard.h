@@ -199,7 +199,9 @@ namespace Rodin::Geometry
    * Global distributed numbering is a higher-level concern handled for example
    * by MPI finite element spaces.
    *
-   * @see Mesh<Context::Local>, Sharder, MPIMesh
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh<Context::Local></a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_sharder.html">Sharder</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">MPIMesh</a>
    */
   class Shard : public Mesh<Context::Local>
   {

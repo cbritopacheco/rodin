@@ -41,21 +41,21 @@ namespace Rodin::Solid
       /// @brief Cached passive and active quantities at a quadrature point.
       struct Cache
       {
-        /// @brief Passive law cache.
+          /// @brief Passive law cache.
           typename PassiveLaw::Cache passive;
-        /// @brief Fiber kinematics built from the constitutive point.
+          /// @brief Fiber kinematics built from the constitutive point.
           FiberKinematics fiber;
-        /// @brief Fiber strain driving the active branch.
+          /// @brief Fiber strain driving the active branch.
           Real strain = 0.0;
-        /// @brief Current active extension.
+          /// @brief Current active extension.
           Real activeExtension = 0.0;
-        /// @brief Active branch response.
+          /// @brief Active branch response.
           typename ActiveLaw::Response active;
-        /// @brief Updated active branch internal state.
+          /// @brief Updated active branch internal state.
           typename ActiveLaw::State newState;
-        /// @brief Whether the dynamic active update was used.
+          /// @brief Whether the dynamic active update was used.
           bool dynamic = false;
-        /// @brief Number of local Newton iterations used.
+          /// @brief Number of local Newton iterations used.
           size_t localIterations = 0;
       };
 

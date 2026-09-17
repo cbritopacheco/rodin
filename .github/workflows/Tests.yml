@@ -34,6 +34,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
+      - name: Hydrate test resources
+        run: >-
+          git lfs pull
+          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
 
       - name: Free Disk Space
         run: |
@@ -72,6 +77,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
@@ -132,6 +138,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Free Disk Space
         run: |
@@ -170,6 +177,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
@@ -230,6 +238,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
@@ -260,6 +269,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
@@ -308,6 +318,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
+      - name: Hydrate test resources
+        run: >-
+          git lfs pull
+          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
@@ -339,6 +354,7 @@ jobs:
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF

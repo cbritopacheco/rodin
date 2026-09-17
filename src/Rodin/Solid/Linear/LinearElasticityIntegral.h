@@ -48,6 +48,11 @@ namespace Rodin::Variational
    * @tparam FES Finite element space type
    * @tparam LambdaDerived Type of first Lamé parameter function
    * @tparam MuDerived Type of second Lamé parameter (shear modulus) function
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref LinearElasticityIntegrator "LinearElasticityIntegrator<Solution, FES, LambdaDerived, MuDerived>" | Generic vector-valued finite element integrator for the linear elasticity bilinear form. |
+   * | @ref LinearElasticityIntegrator "LinearElasticityIntegrator<Solution, P1<Range, Mesh>, MuDerived, LambdaDerived>" | P1 vector-space specialization using the constant-gradient structure of linear elements. |
    */
   template <class Solution, class FES, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator final

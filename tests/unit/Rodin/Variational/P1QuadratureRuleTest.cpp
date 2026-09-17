@@ -28,7 +28,12 @@ namespace Rodin::Tests::Unit
     LinearForm lf(v);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
-    lf = Integral(c, v);
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto integ = Integral(c, v);
+    integ.setOrder(2);
+    lf = integ;
     lf.assemble();
 
     const auto& b = lf.getVector();
@@ -61,7 +66,12 @@ namespace Rodin::Tests::Unit
     BilinearForm bf(u, v);
 
     RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
-    bf = Integral(Dot(Mult(c, u), v));
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto integ = Integral(Dot(Mult(c, u), v));
+    integ.setOrder(3);
+    bf = integ;
     bf.assemble();
 
     const auto& A = bf.getOperator();
@@ -176,6 +186,7 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
+  /// @brief Verifies optimized P1 divergence couplings on a sheared tetrahedron.
   TEST(Rodin_Variational_P1QuadratureRule,
     ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
@@ -203,11 +214,20 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
 
     BilinearForm mass(u, v);
-    mass = Integral(Dot(Mult(coeff, u), v));
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto massInteg = Integral(Dot(Mult(coeff, u), v));
+    massInteg.setOrder(3);
+    mass = massInteg;
     mass.assemble();
 
     LinearForm load(v);
-    load = Integral(Dot(coeff * gf, v));
+    // The same order as the bilinear form above, so both are integrated
+    // with one rule and the identity between them is exact.
+    auto loadInteg = Integral(Dot(coeff * gf, v));
+    loadInteg.setOrder(3);
+    load = loadInteg;
     load.assemble();
 
     const auto residual = mass.getOperator() * x - load.getVector();
@@ -242,11 +262,20 @@ namespace Rodin::Tests::Unit
       [](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
 
     BilinearForm mass(u, v);
-    mass = Integral(coeff * Dot(u, v));
+    // The coefficient is linear, but built from a lambda, so it reports no
+    // degree and order inference sees only the basis. The integrand's own
+    // degree is stated instead, which is what setOrder is for.
+    auto massInteg = Integral(coeff * Dot(u, v));
+    massInteg.setOrder(3);
+    mass = massInteg;
     mass.assemble();
 
     LinearForm load(v);
-    load = Integral(coeff * Dot(gf, v));
+    // The same order as the bilinear form above, so both are integrated
+    // with one rule and the identity between them is exact.
+    auto loadInteg = Integral(coeff * Dot(gf, v));
+    loadInteg.setOrder(3);
+    load = loadInteg;
     load.assemble();
 
     const auto residual = mass.getOperator() * x - load.getVector();
@@ -365,6 +394,65 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies a complex potential kernel is not conjugated during contraction or assembly.
+  TEST(Rodin_Variational_P1QuadratureRule, ComplexVectorPotentialPreservesKernel)
+  {
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
+
+    P1<Real> scalarFES(mesh);
+    TrialFunction scalarU(scalarFES);
+    TestFunction scalarV(scalarFES);
+    DenseProblem scalarProblem(scalarU, scalarV);
+    scalarProblem = Integral(
+      Potential([](const Point&, const Point&) { return 1.0; }, scalarU), scalarV);
+    scalarProblem.assemble();
+    const auto& scalarA = scalarProblem.getLinearSystem().getOperator();
+
+    P1<Math::SpatialVector<Complex>> fes(mesh, 2);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    const Complex entries[2][2] = {
+      {Complex(1, 2), Complex(-3, 1)}, {Complex(2, -4), Complex(5, 3)}};
+    auto kernel = [&](Math::SpatialMatrix<Complex>& out, const Point&, const Point&) {
+      out.resize(2, 2);
+      for (size_t i = 0; i < 2; ++i)
+        for (size_t j = 0; j < 2; ++j)
+          out(i, j) = entries[i][j];
+    };
+
+    DenseProblem problem(u, v);
+    problem = Integral(Potential(kernel, u), v);
+    problem.assemble();
+    const auto& A = problem.getLinearSystem().getOperator();
+
+    for (size_t testVertex = 0; testVertex < 3; ++testVertex)
+    {
+      for (size_t trialVertex = 0; trialVertex < 3; ++trialVertex)
+      {
+        for (size_t testComp = 0; testComp < 2; ++testComp)
+        {
+          for (size_t trialComp = 0; trialComp < 2; ++trialComp)
+          {
+            const Eigen::Index row = static_cast<Eigen::Index>(testVertex + testComp * 3);
+            const Eigen::Index col =
+              static_cast<Eigen::Index>(trialVertex + trialComp * 3);
+            const Complex expected = scalarA(static_cast<Eigen::Index>(testVertex),
+                                       static_cast<Eigen::Index>(trialVertex)) *
+              entries[testComp][trialComp];
+            EXPECT_NEAR(std::abs(A(row, col) - expected), 0.0, 1e-12);
+          }
+        }
+      }
+    }
+  }
+
   /// @brief Verifies divergence pressure coupling assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, DivergencePressureCoupling_Assembles)
   {
@@ -405,5 +493,49 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mat.rows(), static_cast<Eigen::Index>(vel.getSize()));
     EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(pres.getSize()));
     EXPECT_NE(mat.norm(), 0.0);
+  }
+
+  /// @brief Verifies divergence couplings transform gradients on a sheared tetrahedron.
+  TEST(Rodin_Variational_P1QuadratureRule,
+    DivergenceCouplingsTransformGradientsOnShearedTetrahedron)
+  {
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(3)
+                  .nodes(4)
+                  .vertex({0, 0, 0})
+                  .vertex({2, 0, 0})
+                  .vertex({1, 3, 0})
+                  .vertex({0, 1, 4})
+                  .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
+                  .finalize();
+
+    P1<Math::SpatialVector<Real>> velocityFES(mesh, 3);
+    P1<Real> pressureFES(mesh);
+    GridFunction velocity(velocityFES);
+    velocity.getData() << 0.0, 2.0, 7.0, 2.0, 0.0, -2.0, 8.0, 19.0, 0.0, 4.0, 2.0, -8.0;
+    GridFunction pressure(pressureFES);
+    pressure.getData().setOnes();
+
+    TrialFunction u(velocityFES);
+    TestFunction q(pressureFES);
+    BilinearForm divergencePressure(u, q);
+    divergencePressure = Integral(Div(u), q);
+    divergencePressure.assemble();
+
+    TrialFunction p(pressureFES);
+    TestFunction v(velocityFES);
+    BilinearForm pressureDivergence(p, v);
+    pressureDivergence = Integral(p, Div(v));
+    pressureDivergence.assemble();
+
+    // The affine velocity has gradient
+    // [ 1  2  0; -1  3  4; 2  0 -2 ], hence divergence 2.
+    // The tetrahedron has volume 4, so both actions equal 8.
+    const Real trialDivergence =
+      (divergencePressure.getOperator() * velocity.getData()).dot(pressure.getData());
+    const Real testDivergence =
+      (pressureDivergence.getOperator() * pressure.getData()).dot(velocity.getData());
+    EXPECT_NEAR(trialDivergence, 8.0, 1e-12);
+    EXPECT_NEAR(testDivergence, 8.0, 1e-12);
   }
 }

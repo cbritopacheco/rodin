@@ -281,9 +281,9 @@
   - @ref Rodin::Geometry::SubMesh "SubMesh reference"
   - @ref Rodin::Geometry::BalancedCompactPartitioner "Partitioner reference"
   - Examples:
-    - `examples/Geometry/Displace.cpp`
-    - `examples/Geometry/Skin.cpp`
-    - `examples/Geometry/CCL.cpp`
-    - `examples/Geometry/BalancedCompactPartitioner.cpp`
+    - [Displace.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Displace.cpp)
+    - [Skin.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/Skin.cpp)
+    - [CCL.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/CCL.cpp)
+    - [BalancedCompactPartitioner.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Geometry/BalancedCompactPartitioner.cpp)
 
   */

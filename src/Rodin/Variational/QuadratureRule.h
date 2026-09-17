@@ -47,6 +47,8 @@
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
+#include "Rodin/FormLanguage/IsSpecialized.h"
+
 #include "ForwardDecls.h"
 
 #include "Rodin/Geometry/PolytopeQuadrature.h"
@@ -57,15 +59,29 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup QuadratureRuleSpecializations QuadratureRule Template Specializations
    * @brief Template specializations of the QuadratureRule class.
    *
-   * @see QuadratureRule
-   * @see RodinQuadrature
+   * @see @ref QuadratureRule
+   * @see @ref RodinQuadrature
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref QuadratureRule "QuadratureRule<FunctionBase<FunctionDerived>>" | Generic quadrature rule for function expressions on mesh polytopes. |
+   * | @ref QuadratureRule "QuadratureRule<GridFunction<FES, Data>>" | Quadrature rule for grid-function values on mesh polytopes. |
+   * | @ref QuadratureRule "QuadratureRule<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>" | Generic bilinear quadrature rule for trial/test dot products. |
+   * | @ref QuadratureRule "QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>" | Generic linear quadrature rule for test shape functions. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Grad<Trial>, Grad<Test>>>" | H1 stiffness integrator for gradients of trial and test functions. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Trial, Test>>" | H1 mass integrator for trial/test dot products. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Coefficient, Test>>" | H1 linear-form integrator with a coefficient function. |
+   * | @ref QuadratureRule "QuadratureRule<H1<K, Scalar, Mesh>, Dot<Grad<Coefficient>, Grad<Test>>>" | H1 linear-form integrator for gradient coefficients. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Grad<Trial>, Grad<Test>>>" | P1 stiffness integrator for gradients of trial and test functions. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Trial, Test>>" | P1 mass integrator for trial/test dot products. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Coefficient, Test>>" | P1 linear-form integrator with a coefficient function. |
+   * | @ref QuadratureRule "QuadratureRule<P1<Range, Mesh>, Dot<Grad<Coefficient>, Grad<Test>>>" | P1 linear-form integrator for gradient coefficients. |
    */
 
   /**
@@ -81,8 +97,12 @@ namespace Rodin::Variational
     : public FormLanguage::Base
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Integrand expression type.
       using IntegrandType = FunctionBase<FunctionDerived>;
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
@@ -235,6 +255,9 @@ namespace Rodin::Variational
   class QuadratureRule<GridFunction<FES, Data>> : public Integrator
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Finite element space type.
       using FESType = FES;
       /// @brief Integrand expression type.
@@ -422,6 +445,9 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
       /// @brief Right-hand side operand type.
@@ -535,8 +561,8 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder()));
 
         const bool recompute =
           !m_set || (m_order != order) || (m_geometry != geometry);
@@ -643,6 +669,9 @@ namespace Rodin::Variational
           ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as generic, not optimized.
+      static constexpr bool Specialized = false;
+
       /// @brief Finite element space type.
       using FESType = FES;
       /// @brief Integrand expression type.
@@ -751,8 +780,8 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const bool recompute =
           !m_set || (m_order != order) || (m_geometry != geometry);
@@ -830,5 +859,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

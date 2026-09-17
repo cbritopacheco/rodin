@@ -2,9 +2,12 @@ set(RodinBenchmarks_SRCS
   GridFunction.cpp
   P1.cpp
   Poisson.cpp
+  RankOneJacobian.cpp
   MeshIO.cpp
   UniformGrid.cpp
   Connectivity.cpp
+  Integrators.cpp
+  Quadrature.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})

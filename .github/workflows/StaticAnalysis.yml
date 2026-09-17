@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: false
       - name: Setup destination path
         run: mkdir -p static/dev/${{ github.ref }}
       - name: Setup Graphviz

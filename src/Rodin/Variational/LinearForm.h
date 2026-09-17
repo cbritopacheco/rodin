@@ -28,22 +28,24 @@
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c LinearFormBase: exposes the vector type.
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
   };
 
+  /// @brief Type traits for @c LinearForm: exposes the finite element space and the
+  /// vector type.
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = FES;
-    /// @brief Vector type of the linear system.
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
   };
 }
@@ -55,17 +57,21 @@ namespace Rodin::Variational
    * @brief Base class for linear form representations.
    *
    * LinearFormBase provides the foundation for representing linear forms
-   * @f$ l(v) : V \to \mathbb{R} @f$ in finite element computations. A linear
-   * form is a linear functional that maps functions from the function space
-   * @f$ V @f$ to real numbers, typically representing loads, sources, or
-   * boundary data in variational formulations.
+   * @f$ l(v) : V \to \mathbb{K} @f$ in finite element computations. Over the
+   * reals this is a linear functional. Over the complex numbers Rodin follows
+   * the test-function convention and the form is conjugate-linear in @f$ v
+   * @f$. Such forms typically represent loads, sources, or boundary data in
+   * variational formulations.
    *
    * @tparam Vector Vector type for the discrete representation
    *
    * ## Mathematical Foundation
-   * A linear form @f$ l(v) @f$ satisfies:
+   * A real linear form @f$ l(v) @f$ satisfies:
    * - **Linearity**: @f$ l(\alpha v_1 + \beta v_2) = \alpha l(v_1) + \beta l(v_2) @f$
    * - **Boundedness**: @f$ |l(v)| \leq C \|v\|_V @f$ for some constant @f$ C @f$
+   *
+   * For complex scalars, the first identity instead carries conjugated
+   * coefficients.
    *
    * ## Discrete Representation
    * The discrete vector representation satisfies @f$ b_i = l(\psi_i) @f$ where
@@ -253,6 +259,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Replaces the integrators of the form.
       constexpr
       LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
@@ -327,15 +334,19 @@ namespace Rodin::Variational
       using VectorType =
         Math::Vector<ScalarType>;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<VectorType, LinearForm>;
 
+      /// @brief Assembly backend type.
       using AssemblyType =
         DefaultAssemblyType;
 
@@ -343,6 +354,7 @@ namespace Rodin::Variational
       using Parent =
         LinearFormBase<VectorType>;
 
+      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;
@@ -359,6 +371,7 @@ namespace Rodin::Variational
         : m_v(v)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
@@ -367,6 +380,7 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /// @brief Move constructor.
       constexpr
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
@@ -375,6 +389,7 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /// @brief Copy assignment.
       LinearForm& operator=(const LinearForm& other)
       {
         if (this != &other)
@@ -387,6 +402,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment.
       LinearForm& operator=(LinearForm&& other) noexcept
       {
         if (this != &other)
@@ -403,7 +419,7 @@ namespace Rodin::Variational
        * @brief Evaluates the linear form at the function @f$ u @f$.
        *
        * Given a grid function @f$ u @f$, this function will compute the
-       * action of the linear mapping @f$ L(u) @f$.
+       * action of the form @f$ L(u) @f$.
        *
        * @returns The value which the linear form takes at @f$ u @f$.
        */
@@ -411,7 +427,7 @@ namespace Rodin::Variational
       constexpr
       ScalarType operator()(const GridFunction<FES, Data>& u) const
       {
-        return this->getVector().dot(u.getData());
+        return u.getData().dot(this->getVector());
       }
 
       void assemble() override
@@ -420,11 +436,13 @@ namespace Rodin::Variational
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
+      /// @brief Gets the assembled vector.
       VectorType& getVector() override
       {
         return m_vector;
       }
 
+      /// @brief Gets the assembled vector.
       const VectorType& getVector() const override
       {
         return m_vector;
@@ -460,5 +478,4 @@ namespace Rodin::Variational
     -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 }
 
-/// @endcond
 #endif

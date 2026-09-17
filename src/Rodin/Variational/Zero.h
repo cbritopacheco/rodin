@@ -22,13 +22,17 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup ZeroSpecializations Zero Template Specializations
    * @brief Template specializations of the Zero class.
-   * @see Zero
+   * @see @ref Zero
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Zero "Zero<Scalar>" | Constant scalar zero function. |
+   * | @ref Zero "Zero<Math::SpatialVector<Scalar>>" | Constant spatial-vector zero function. |
    */
 
   /**
@@ -85,6 +89,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -169,6 +174,7 @@ namespace Rodin::Variational
         return v;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -203,5 +209,4 @@ namespace Rodin::Variational
   using VectorZero = Zero<Math::SpatialVector<Scalar>>;
 }
 
-/// @endcond
 #endif

@@ -125,3 +125,7 @@ is intentionally incremental.
 Do not place generated reports, experiment outputs, meshes, solver logs, or
 one-off scratch files here. Those belong in a scratch directory and should not
 be committed.
+
+Every resource file belongs under `resources/` and must be tracked through Git
+LFS. Before committing a new resource file, check `git check-attr filter --
+<path>` and confirm the intended state with `git lfs status`.

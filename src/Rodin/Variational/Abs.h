@@ -18,7 +18,6 @@
 #include "Function.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -99,6 +98,7 @@ namespace Rodin::Variational
         return Math::abs(getOperand().getValue(p));
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -127,16 +127,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
+  /// @brief Deduction guide for @c Abs.
   template <class NestedDerived>
   Abs(const FunctionBase<NestedDerived>&) -> Abs<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
   constexpr auto
+  /// @brief Builds the pointwise absolute value of a function expression.
   abs(const FunctionBase<NestedDerived>& op)
   {
     return Abs(op);
   }
 }
 
-/// @endcond
 #endif

@@ -10,6 +10,11 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/collectives.hpp>
+#include <boost/mpi/operations.hpp>
+
+#include <cassert>
+#include <cmath>
+#include <functional>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
@@ -29,6 +34,19 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
+  /// @brief Returns the PETSc object id of a vector.
+  ///
+  /// Unlike the raw handle, an id is never reused by a later object, which
+  /// makes it a reliable witness of whether a vector was reallocated.
+  PetscObjectId objectId(const ::Vec& vec)
+  {
+    PetscObjectId id = 0;
+    const PetscErrorCode ierr = PetscObjectGetId((PetscObject)vec, &id);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    return id;
+  }
+
   Mesh<Context::Local> makeShardableMesh()
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
@@ -53,6 +71,26 @@ namespace
     }
 
     return sharder.gather(0);
+  }
+
+  /// @brief Writes @p value into every DOF of the local shard, owned and ghost
+  ///        alike, through `operator[]`.
+  ///
+  /// Writing only the owned range is not equivalent: `flush()` scatters ghost
+  /// entries back to their owners with `INSERT_VALUES`, so untouched ghost
+  /// slots would overwrite the values their owners just wrote.
+  template <class FES, class GF, class Value>
+  void writeShardDOFs(
+    const Mesh<Context::MPI>& mesh, const FES& fes, GF& gf, const Value& value)
+  {
+    const size_t D = mesh.getDimension();
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const auto& fe = fes.getFiniteElement(D, cell->getIndex());
+      const auto& dofs = fes.getDOFs(D, cell->getIndex());
+      for (size_t local = 0; local < fe.getCount(); ++local)
+        gf[dofs[local]] = value(static_cast<Index>(dofs[local]));
+    }
   }
 
   /// @brief Verifies rank filtered const read does not deadlock for PET sc MPI grid function by checking tolerance-based numerical results, MPI behavior.
@@ -130,6 +168,273 @@ namespace
     EXPECT_GT(evaluated, 0);
     static_cast<const decltype(gf)&>(gf).flush();
     static_cast<const decltype(vector)&>(vector).flush();
+    world.barrier();
+  }
+
+  /// @brief Verifies that axpy accumulates a scaled grid function on the owned
+  ///        DOFs and refreshes the ghost layer, by checking exact expected
+  ///        values and MPI behavior.
+  TEST(PETSc_MPI_GridFunction, AxpyAccumulatesScaledGridFunctionAndRefreshesGhosts)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction y(fes);
+    Rodin::PETSc::Variational::GridFunction x(fes);
+
+    y = static_cast<PetscScalar>(2.0);
+    x = static_cast<PetscScalar>(3.0);
+
+    y.axpy(static_cast<PetscScalar>(0.5), x);
+
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+
+    const auto& cy = y;
+    for (Index i = begin; i < end; ++i)
+      EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cy[i])), 3.5);
+    cy.flush();
+
+    // Point evaluation reads owned and ghost coefficients alike, so a stale
+    // ghost layer would show up here.
+    size_t evaluated = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point p(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(y(p))), 3.5, 1e-14);
+      ++evaluated;
+    }
+    EXPECT_GT(evaluated, 0);
+    cy.flush();
+    world.barrier();
+  }
+
+  /// @brief Verifies that axpy flushes DOFs written through operator[] and
+  ///        propagates them to the ghost layer, by checking exact expected
+  ///        values and MPI behavior.
+  TEST(PETSc_MPI_GridFunction, AxpyFlushesPendingWritesBeforeGhostUpdate)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction y(fes);
+    Rodin::PETSc::Variational::GridFunction zero(fes);
+
+    zero = static_cast<PetscScalar>(0.0);
+
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+
+    // Every rank writes the same value into every DOF of its shard -- owned
+    // and ghost alike, as element-wise assembly does -- without flushing.
+    // Adding zero must still land every DOF on that value: the write has to
+    // be restored to the vector first, and the ghost layer refreshed
+    // afterwards.
+    writeShardDOFs(mesh, fes, y, [](Index) { return static_cast<PetscScalar>(7.0); });
+
+    y.axpy(static_cast<PetscScalar>(1.0), zero);
+
+    size_t evaluated = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point p(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(y(p))), 7.0, 1e-14);
+      ++evaluated;
+    }
+    EXPECT_GT(evaluated, 0);
+    static_cast<const decltype(y)&>(y).flush();
+    world.barrier();
+  }
+
+  /// @brief Verifies that sync releases pending read/write access and refreshes
+  ///        ghosts before direct PETSc use and point evaluation.
+  TEST(PETSc_MPI_GridFunction, SyncReleasesAccessAndRefreshesGhosts)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    writeShardDOFs(mesh, fes, gf, [](Index) { return static_cast<PetscScalar>(5.0); });
+    ASSERT_TRUE(gf.getArrayWrite().acquired);
+    gf.sync();
+    EXPECT_FALSE(gf.getArrayWrite().acquired);
+
+    size_t evaluated = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point p(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(gf(p))), 5.0, 1e-14);
+      ++evaluated;
+    }
+    EXPECT_GT(evaluated, 0);
+
+    const auto& cgf = gf;
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cgf[begin])), 5.0);
+    ASSERT_TRUE(cgf.getArrayRead().acquired);
+    gf.sync();
+    EXPECT_FALSE(cgf.getArrayRead().acquired);
+
+    PetscReal norm = 0.0;
+    PetscErrorCode ierr = VecNorm(gf.getData(), NORM_INFINITY, &norm);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    EXPECT_DOUBLE_EQ(norm, 5.0);
+    world.barrier();
+  }
+
+  /// @brief Verifies that reductions synchronize pending shard writes without
+  ///        requiring callers to flush first.
+  TEST(PETSc_MPI_GridFunction, ReductionsSynchronizePendingWrites)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    const auto dofValue = [](Index i) {
+      return static_cast<PetscScalar>(static_cast<Real>(i) - 4.0);
+    };
+    writeShardDOFs(mesh, fes, gf, dofValue);
+
+    Real localSquares = 0.0;
+    Real localAbs = 0.0;
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+    for (Index i = begin; i < end; ++i)
+    {
+      const Real value = static_cast<Real>(i) - 4.0;
+      localSquares += value * value;
+      localAbs += std::abs(value);
+    }
+
+    Real globalSquares = 0.0;
+    Real globalAbs = 0.0;
+    boost::mpi::all_reduce(world, localSquares, globalSquares, std::plus<Real>());
+    boost::mpi::all_reduce(world, localAbs, globalAbs, std::plus<Real>());
+
+    EXPECT_NEAR(gf.norm(), std::sqrt(globalSquares), 1e-10 * std::sqrt(globalSquares));
+    EXPECT_NEAR(gf.norm(NORM_1), globalAbs, 1e-10 * globalAbs);
+
+    Index idx = fes.getSize();
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(gf.min(idx))), -4.0);
+    EXPECT_EQ(idx, 0);
+
+    const Index maxIdx = static_cast<Index>(fes.getSize() - 1);
+    EXPECT_DOUBLE_EQ(
+      static_cast<double>(PetscRealPart(gf.max(idx))), static_cast<double>(maxIdx) - 4.0);
+    EXPECT_EQ(idx, maxIdx);
+    world.barrier();
+  }
+
+  /// @brief Verifies that norm is a global reduction over the owned DOFs by
+  ///        comparing against an independent MPI reduction.
+  TEST(PETSc_MPI_GridFunction, NormReducesOverAllRanks)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+
+    // A value that depends only on the global DOF index, so every rank agrees
+    // on the shared entries.
+    const auto dofValue = [](Index i) {
+      return static_cast<PetscScalar>(1.0 + static_cast<Real>(i));
+    };
+    writeShardDOFs(mesh, fes, gf, dofValue);
+    gf.flush();
+
+    Real localSquares = 0.0;
+    Real localAbs = 0.0;
+    Real localMax = 0.0;
+    for (Index i = begin; i < end; ++i)
+    {
+      const Real value = 1.0 + static_cast<Real>(i);
+      localSquares += value * value;
+      localAbs += std::abs(value);
+      localMax = std::max(localMax, std::abs(value));
+    }
+
+    Real globalSquares = 0.0;
+    Real globalAbs = 0.0;
+    Real globalMax = 0.0;
+    boost::mpi::all_reduce(world, localSquares, globalSquares, std::plus<Real>());
+    boost::mpi::all_reduce(world, localAbs, globalAbs, std::plus<Real>());
+    boost::mpi::all_reduce(world, localMax, globalMax, boost::mpi::maximum<Real>());
+
+    EXPECT_NEAR(gf.norm(), std::sqrt(globalSquares), 1e-10 * std::sqrt(globalSquares));
+    EXPECT_NEAR(gf.norm(NORM_1), globalAbs, 1e-10 * globalAbs);
+    EXPECT_NEAR(gf.norm(NORM_INFINITY), globalMax, 1e-10 * globalMax);
+    world.barrier();
+  }
+
+  /// @brief Verifies that copy assignment reuses the destination PETSc vector
+  ///        and leaves owned and ghost DOFs consistent, by checking exact
+  ///        expected values and MPI behavior.
+  TEST(PETSc_MPI_GridFunction, CopyAssignmentReusesVectorHandleAndSyncsGhosts)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction source(fes);
+    Rodin::PETSc::Variational::GridFunction destination(fes);
+
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    ASSERT_LT(begin, end);
+
+    writeShardDOFs(
+      mesh, fes, source, [](Index) { return static_cast<PetscScalar>(-2.75); });
+    source.flush();
+
+    // Deliberately no explicit flush() on the destination: the assignment
+    // must restore its array before overwriting the vector.
+    writeShardDOFs(
+      mesh, fes, destination, [](Index) { return static_cast<PetscScalar>(11.0); });
+
+    const ::Vec before = destination.getData();
+    const PetscObjectId beforeId = objectId(before);
+    destination = source;
+    EXPECT_EQ(before, destination.getData());
+    EXPECT_EQ(beforeId, objectId(destination.getData()));
+    EXPECT_NE(destination.getData(), source.getData());
+
+    const auto& cDestination = destination;
+    for (Index i = begin; i < end; ++i)
+      EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cDestination[i])), -2.75);
+    cDestination.flush();
+
+    size_t evaluated = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point p(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(destination(p))), -2.75, 1e-14);
+      ++evaluated;
+    }
+    EXPECT_GT(evaluated, 0);
+    cDestination.flush();
     world.barrier();
   }
 }

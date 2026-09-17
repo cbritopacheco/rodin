@@ -39,35 +39,52 @@ faster than grep.
 
 ```sh
 git submodule update --init --recursive   # first time only
+  git lfs pull                              # required when resources are needed
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j
 ```
 
 Key CMake options (all default ON): `RODIN_BUILD_EXAMPLES`,
-`RODIN_USE_PETSC`. An existing configured `build/` tree is usually present;
-prefer incremental builds of the target you need
+`RODIN_USE_PETSC`, `RODIN_INSTALL_RESOURCES`. Use
+`-DRODIN_INSTALL_RESOURCES=OFF` for library-only builds, installation tests, and
+CI-style jobs that do not need the full resource tree. An existing configured
+`build/` tree is usually present; prefer incremental builds of the target you need
 (`cmake --build build -j --target <name>`) over full rebuilds.
 
 ## Test
 
-Tests are GoogleTest executables (ctest is NOT wired up — `ctest -N` shows 0
-tests). Run the binary for the module you touched:
+Tests are GoogleTest executables registered with ctest via
+`gtest_discover_tests`. Scope the run to what you changed, using the same
+labels CI uses (`unit`, `manufactured`, `slow`, `distributed`, `petsc`):
 
 ```sh
-build/tests/unit/Rodin/Adaptation/RodinAdaptationTargetMatrixOptimizationTest
-build/tests/unit/Rodin/Variational/RodinVariationalH1Test
+ctest --test-dir build/tests -L unit -LE "slow|distributed" --output-on-failure
+ctest --test-dir build/tests -R <pattern> --output-on-failure
 ```
 
-Naming: `build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`.
-Suites: `tests/unit` (fast), `tests/manufactured` (convergence/regression,
-includes PETSc assembly regressions), `tests/benchmarks` (Google Benchmark,
-target `RodinBenchmarks`).
+Individual binaries still work when you want one suite's output directly:
+`build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`.
+
+Suites: `tests/unit` (fast; may be built `Debug`), `tests/manufactured`
+(convergence/regression, includes PETSc assembly regressions — build
+`Release`/`RelWithDebInfo`, `Debug` is impractically slow),
+`tests/benchmarks` (Google Benchmark, target `RodinBenchmarks`).
 
 A change is not done until the affected unit test executable passes and, for
 assembly/solver changes, the relevant manufactured tests pass too.
 
 ## Non-negotiable rules (summary — details in doc/agents/conventions.md)
 
+0. **Search Rodin before writing anything.** Establish that the tool or
+   concept does not already exist before adding a helper, a cache, or a
+   bespoke integrator — the form language, `Geometry`'s cached quadrature and
+   `Point`, and the assembly specialisations already cover most needs. See
+   `doc/agents/philosophy.md`, "Search before you build". Concluding that
+   Rodin *lacks* something requires a tree-wide search and a look at
+   `ls src/Rodin` first — capabilities are named by top-level modules
+   (`Location`, `Distance`, `Eikonal`, ...) and specializations live in
+   per-space subdirectories, so a narrow grep produces false negatives that
+   licence large amounts of duplicate code.
 1. **PETSc error handling:** `assert(ierr == PETSC_SUCCESS)` after each call
    is the house idiom. Do not introduce checking macros or convert existing
    asserts.
@@ -81,11 +98,20 @@ assembly/solver changes, the relevant manufactured tests pass too.
    fitting is always a smooth penalty term (see `doc/agents/conventions.md`).
 5. **Internal variables are first-class DOFs** in Solid — no per-quadrature
    Schur condensation (see `doc/agents/conventions.md`).
+6. **Explain every anomaly.** An unexplained measurement is a finding, not a
+   footnote; explore it to a root cause and write the cause down before
+   calling the work done. Anomalies are usually about the instrument rather
+   than the subject, so believing one costs more than chasing it (see
+   `doc/agents/conventions.md`).
 
 ## Housekeeping
 
 - Example runs dump `*.h5` / `*.xdmf` / `*.log` output into the CWD. Run
   examples from a scratch directory, and never commit these artifacts.
+- Every file under `resources/` is stored in Git LFS. Before committing a new
+  or updated resource, check its attributes with
+  `git check-attr filter -- <path>` and verify with `git lfs status` before
+  pushing. Resource-dependent builds and tests need hydrated LFS files.
 - Branches: `master` is the default; active development happens on
   `module/*`, `model/*` topic branches off `develop`. Do not commit or push
   unless asked.

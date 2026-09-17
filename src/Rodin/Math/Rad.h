@@ -32,7 +32,7 @@ namespace Rodin::Math
    * Rad sum = angle1 + angle2;  // 3π/2 radians
    * ```
    *
-   * @see Unit
+   * @see <a href="class_rodin_1_1_math_1_1_unit.html">Unit</a>
    */
   class Rad : public Unit<Rad, Real>
   {

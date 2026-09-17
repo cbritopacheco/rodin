@@ -40,7 +40,9 @@ namespace Rodin::Geometry::Euclidean
    *
    * @warning The behavior is undefined if @f$ a = 0 @f$ and @f$ b = 0 @f$.
    *
-   * @see Point2D, Circle, LineSegment2D
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html">Circle</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
    */
   template <class T>
   class Line2D : public Base<Line2D<T>, T>
@@ -239,7 +241,7 @@ namespace Rodin::Geometry::Euclidean
      * the two.
      * @note This is equivalent to the result of `point.connect(line).reverse();`
      *
-     * @see Point2D<T>::connect()
+     * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D<T>::connect()</a>
      */
     inline
     constexpr

@@ -43,10 +43,10 @@ namespace Rodin::Assembly
       /// @brief One master DOF contribution in an expansion row.
       struct Entry
       {
-        /// @brief Master DOF index.
+          /// @brief Master DOF index.
           Index index;
 
-        /// @brief Coefficient multiplying the master DOF.
+          /// @brief Coefficient multiplying the master DOF.
           Scalar coefficient;
       };
 

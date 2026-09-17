@@ -20,7 +20,6 @@
 
 #define RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE 1e-14
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -209,6 +208,7 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
+      /// @brief Gets the inverse of the matrix.
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {
@@ -288,6 +288,7 @@ namespace Rodin::Variational
         basis = pA * pB * pC * scaleB * scaleC;
       }
 
+      /// @brief Gets the gradient of the basis function.
       template <size_t P, size_t Q, size_t R>
       static constexpr void getGradient(Real& dpsi_da,
                                         Real& dpsi_db,
@@ -336,6 +337,7 @@ namespace Rodin::Variational
       //   b = 2 y / (1 - z) - 1          if 1 - z > tol
       //   a = 2 x / (1 - y - z) - 1      if 1 - y - z > tol
       //
+      /// @brief Maps reference coordinates to collapsed coordinates.
       static constexpr void getCollapsed(Real& a,
                                          Real& b,
                                          Real& c,
@@ -365,10 +367,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Vandermonde matrix of the Dubiner basis on the reference tetrahedron.
   template <size_t K>
   class VandermondeTetrahedron
   {
     public:
+      /// @brief Gets the underlying matrix.
       static const Math::Matrix<Real>& getMatrix()
       {
         static const Math::Matrix<Real> s_vandermonde = [] {
@@ -402,6 +406,7 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
+      /// @brief Gets the inverse of the matrix.
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {
@@ -421,5 +426,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

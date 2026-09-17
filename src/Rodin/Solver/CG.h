@@ -45,7 +45,7 @@
  *   std::cout << "Converged!\n";
  * ```
  *
- * @see CG for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_c_g.html">CG</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_CG_H
 #define RODIN_SOLVER_CG_H
@@ -66,7 +66,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::CG<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -76,7 +76,13 @@ namespace Rodin::Solver
   /**
    * @defgroup CGSpecializations CG Template Specializations
    * @brief Template specializations of the CG class.
-   * @see CG
+   * @see @ref CG
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref CG "CG<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Iterative conjugate-gradient solver for sparse symmetric positive-definite systems. |
+   * | @ref CG "CG<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Iterative conjugate-gradient solver for dense symmetric positive-definite systems. |
+   * | @ref CG "CG<PETSc::LinearSystem>" | PETSc-backed conjugate-gradient solver for distributed systems. |
    */
 
   /**
@@ -203,6 +209,18 @@ namespace Rodin::Solver
         return m_solver.info() == Eigen::Success;
       }
 
+      /// @brief Returns the iteration count from the most recent solve.
+      size_t getIterationNumber() const
+      {
+        return static_cast<size_t>(m_solver.iterations());
+      }
+
+      /// @brief Returns the estimated relative error from the most recent solve.
+      Real getError() const
+      {
+        return static_cast<Real>(m_solver.error());
+      }
+
       /**
        * @brief Creates a copy of this solver.
        * @returns Pointer to a new CG instance
@@ -315,6 +333,18 @@ namespace Rodin::Solver
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
+      }
+
+      /// @brief Returns the iteration count from the most recent solve.
+      size_t getIterationNumber() const
+      {
+        return static_cast<size_t>(m_solver.iterations());
+      }
+
+      /// @brief Returns the estimated relative error from the most recent solve.
+      Real getError() const
+      {
+        return static_cast<Real>(m_solver.error());
       }
 
       /**

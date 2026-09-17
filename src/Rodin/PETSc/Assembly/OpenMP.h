@@ -368,7 +368,7 @@ namespace Rodin::Assembly
               for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
                 for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
-                  const PetscScalar v = Math::conj(integrator->integrate(c, r));
+                  const PetscScalar v = integrator->integrate(c, r);
                   local.emplace_back(
                     static_cast<PetscInt>(rows[r]), static_cast<PetscInt>(cols[c]), v);
                 }
@@ -442,7 +442,7 @@ namespace Rodin::Assembly
                 for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
                   for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                   {
-                    const PetscScalar v = Math::conj(integrator->integrate(c, r));
+                    const PetscScalar v = integrator->integrate(c, r);
                     local.emplace_back(
                       static_cast<PetscInt>(rows[r]), static_cast<PetscInt>(cols[c]), v);
                   }

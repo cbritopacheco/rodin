@@ -31,7 +31,9 @@
  * evaluation when possible. Mixed trial/test P1 spaces are supported for the
  * mass, stiffness, and Jacobian forms.
  *
- * @see P1, QuadratureFormula, Integral
+ * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
+ * @see <a href="_quadrature_formula_8h.html">QuadratureFormula</a>
+ * @see <a href="_integral_8h.html">Integral</a>
  */
 #ifndef RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
@@ -43,6 +45,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
+#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "P1.h"
@@ -51,7 +54,6 @@
 
 namespace Rodin::Variational
 {
-  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Integration of a P1 ShapeFunction.
@@ -87,6 +89,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
 
@@ -94,6 +99,7 @@ namespace Rodin::Variational
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 
       /// @brief Scalar value type.
@@ -102,6 +108,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
@@ -110,6 +117,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -118,6 +126,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -130,6 +139,7 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -137,12 +147,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         static_assert(std::is_same_v<IntegrandRangeType, ScalarType>);
@@ -156,8 +168,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -195,11 +207,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -219,6 +233,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class NestedDerived, class Range, class Mesh>
@@ -264,6 +279,9 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Finite element space type.
       using FESType =
         P1<Range, Mesh>;
@@ -288,6 +306,7 @@ namespace Rodin::Variational
       using IntegrandType =
         ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
@@ -301,6 +320,7 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
@@ -309,6 +329,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -317,6 +338,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -329,6 +351,7 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -336,12 +359,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         static thread_local LHSRangeType s_v;
@@ -355,8 +380,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -426,11 +451,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element vector.
       ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -450,6 +477,7 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -496,8 +524,13 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -529,18 +562,21 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 
+      /// @brief Copy constructor.
       constexpr QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_basis(other.m_basis)
       {}
 
+      /// @brief Move constructor.
       constexpr QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -554,6 +590,7 @@ namespace Rodin::Variational
           m_geometry(std::move(other.m_geometry))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -561,11 +598,13 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -582,8 +621,15 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(
           polytope.getDimension(), polytope.getIndex());
 
-        // P1 × P1 product is degree 2 — need at least order-2 quadrature.
-        const size_t order = trialfe.getOrder() + testfe.getOrder();
+        // The integrand knows its own degree, coefficient included; the sum of
+        // the two shape function orders is only the degree of the product of
+        // the bases, and using it alone under-integrates any form carrying a
+        // non-constant coefficient. The generic handler asks the integrand
+        // first and this must agree with it, an optimized path being obliged
+        // to compute the same thing faster, not something else.
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            trialfe.getOrder() + testfe.getOrder()));
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
 
         if (recompute)
@@ -735,11 +781,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -759,6 +807,7 @@ namespace Rodin::Variational
       Optional<Geometry::Polytope::Type> m_geometry;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
     const Dot<
@@ -828,12 +877,19 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
@@ -848,9 +904,11 @@ namespace Rodin::Variational
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Range type of the multiplicand.
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
@@ -872,6 +930,7 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -880,6 +939,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -888,6 +948,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -901,6 +962,7 @@ namespace Rodin::Variational
           m_basis(std::move(other.m_basis))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -908,12 +970,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -931,7 +995,9 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe  = testfes.getFiniteElement(d, idx);
 
-        const size_t order = trialfe.getOrder() + testfe.getOrder();
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            trialfe.getOrder() + testfe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1061,11 +1127,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -1085,6 +1153,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_basis;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
   QuadratureRule(const
     Dot<
@@ -1149,17 +1218,24 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Type of the left-hand side operand.
       using LHSOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
@@ -1167,9 +1243,11 @@ namespace Rodin::Variational
       using RHSType =
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, RHSFESType, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
@@ -1185,6 +1263,7 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSOperandRangeType, ScalarType>);
       static_assert(std::is_same_v<RHSOperandRangeType, ScalarType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1193,6 +1272,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1201,6 +1281,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1214,6 +1295,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1221,12 +1303,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1245,7 +1329,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1260,16 +1346,23 @@ namespace Rodin::Variational
 
           const size_t n = trialfe.getCount();
 
-          m_refGrad.resize(n);
-
-          const auto& rc = m_qf->getPoint(0);
-          for (size_t local = 0; local < n; ++local)
+          // Cached per quadrature point, not at the first one: reference
+          // gradients are constant only on a simplex, so freezing them at one
+          // point is exact only there, or when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
+          m_refGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            auto& g = m_refGrad[local];
-            g.resize(d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t j = 0; j < d; ++j)
-              g(j) = basis.template getDerivative<1>(j)(rc);
+            const auto& rc = m_qf->getPoint(qp);
+            m_refGrad[qp].resize(n);
+            for (size_t local = 0; local < n; ++local)
+            {
+              auto& g = m_refGrad[qp][local];
+              g.resize(d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t j = 0; j < d; ++j)
+                g(j) = basis.template getDerivative<1>(j)(rc);
+            }
           }
 
           m_matrix.resize(n, n);
@@ -1278,7 +1371,7 @@ namespace Rodin::Variational
         assert(m_qf);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
-        const size_t n = m_refGrad.size();
+        const size_t n = m_refGrad.empty() ? 0 : m_refGrad.front().size();
 
         m_matrix.setZero();
 
@@ -1293,12 +1386,13 @@ namespace Rodin::Variational
           const auto& Jinv = p.getJacobianInverse();
           const auto G = Jinv * Jinv.transpose();
 
+          const auto& refGrad = m_refGrad[qp];
           for (size_t i = 0; i < n; ++i)
           {
-            const auto Ggi = G * m_refGrad[i];
-            m_matrix(i, i) += wdet * Math::dot(m_refGrad[i], Ggi);
+            const auto Ggi = G * refGrad[i];
+            m_matrix(i, i) += wdet * Math::dot(refGrad[i], Ggi);
             for (size_t j = 0; j < i; ++j)
-              m_matrix(i, j) += wdet * Math::dot(m_refGrad[j], Ggi);
+              m_matrix(i, j) += wdet * Math::dot(refGrad[j], Ggi);
           }
         }
 
@@ -1308,11 +1402,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -1328,10 +1424,12 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_refGrad;
+      /// @brief Reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
       const Dot<
@@ -1399,21 +1497,31 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Type of the multiplicand operand.
       using MultiplicandOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Range type of the multiplicand.
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
@@ -1421,6 +1529,7 @@ namespace Rodin::Variational
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
+      /// @brief Range type of the multiplicand operand.
       using MultiplicandOperandRangeType =
         typename FormLanguage::Traits<MultiplicandOperandType>::RangeType;
 
@@ -1429,9 +1538,11 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, RHSFESType, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
@@ -1447,6 +1558,7 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<MultiplicandOperandRangeType, ScalarType>);
       static_assert(std::is_same_v<RHSOperandRangeType, ScalarType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1455,6 +1567,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1463,6 +1576,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1477,6 +1591,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1484,12 +1599,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1509,7 +1626,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1522,36 +1641,45 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: reference
+          // gradients are constant only on a simplex, so freezing them at one
+          // point is exact only there, or when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
+          m_trialRefGrad.assign(nqp, {});
+          m_testRefGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
 
-          m_trialRefGrad.resize(trialfe.getCount());
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
-          {
-            auto& g = m_trialRefGrad[local];
-            g.resize(d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t j = 0; j < d; ++j)
-              g(j) = basis.template getDerivative<1>(j)(rc);
-          }
-
-          if (trialfes == testfes)
-          {
-            m_testRefGrad = m_trialRefGrad;
-          }
-          else
-          {
-            m_testRefGrad.resize(testfe.getCount());
-            for (size_t local = 0; local < testfe.getCount(); ++local)
+            m_trialRefGrad[qp].resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
             {
-              auto& g = m_testRefGrad[local];
+              auto& g = m_trialRefGrad[qp][local];
               g.resize(d);
-              const auto& basis = testfe.getBasis(local);
+              const auto& basis = trialfe.getBasis(local);
               for (size_t j = 0; j < d; ++j)
                 g(j) = basis.template getDerivative<1>(j)(rc);
             }
+
+            if (trialfes == testfes)
+            {
+              m_testRefGrad[qp] = m_trialRefGrad[qp];
+            }
+            else
+            {
+              m_testRefGrad[qp].resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& g = m_testRefGrad[qp][local];
+                g.resize(d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t j = 0; j < d; ++j)
+                  g(j) = basis.template getDerivative<1>(j)(rc);
+              }
+            }
           }
 
-          m_matrix.resize(m_testRefGrad.size(), m_trialRefGrad.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -1570,6 +1698,8 @@ namespace Rodin::Variational
 
           const auto& Jinv = p.getJacobianInverse();
           const auto G = Jinv * Jinv.transpose();
+          const auto& trialRefGrad = m_trialRefGrad[qp];
+          const auto& testRefGrad = m_testRefGrad[qp];
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -1577,25 +1707,25 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefGrad.size();
+              const size_t n = trialRefGrad.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto Ggi = G * m_trialRefGrad[i];
-                m_matrix(i, i) += wdet * csv * Math::dot(m_trialRefGrad[i], Ggi);
+                const auto Ggi = G * trialRefGrad[i];
+                m_matrix(i, i) += wdet * csv * Math::dot(trialRefGrad[i], Ggi);
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * csv * Math::dot(m_trialRefGrad[j], Ggi);
+                  m_matrix(i, j) += wdet * csv * Math::dot(trialRefGrad[j], Ggi);
               }
             }
             else
             {
-              const size_t ntr = m_trialRefGrad.size();
-              const size_t nte = m_testRefGrad.size();
+              const size_t ntr = trialRefGrad.size();
+              const size_t nte = testRefGrad.size();
 
               for (size_t te = 0; te < nte; ++te)
               {
-                const auto Ggte = G * m_testRefGrad[te];
+                const auto Ggte = G * testRefGrad[te];
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * csv * Math::dot(m_trialRefGrad[tr], Ggte);
+                  m_matrix(te, tr) += wdet * csv * Math::dot(trialRefGrad[tr], Ggte);
               }
             }
           }
@@ -1606,29 +1736,29 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefGrad.size();
+              const size_t n = trialRefGrad.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto AGgi = cmv * (G * m_trialRefGrad[i]);
-                m_matrix(i, i) += wdet * Math::dot(AGgi, m_trialRefGrad[i]);
+                const auto AGgi = cmv * (G * trialRefGrad[i]);
+                m_matrix(i, i) += wdet * Math::dot(AGgi, trialRefGrad[i]);
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(AGgi, m_trialRefGrad[j]);
+                  m_matrix(i, j) += wdet * Math::dot(AGgi, trialRefGrad[j]);
               }
 
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(
-                    cmv * (G * m_trialRefGrad[j]), m_trialRefGrad[i]);
+                  m_matrix(i, j) +=
+                    wdet * Math::dot(cmv * (G * trialRefGrad[j]), trialRefGrad[i]);
             }
             else
             {
-              const size_t ntr = m_trialRefGrad.size();
-              const size_t nte = m_testRefGrad.size();
+              const size_t ntr = trialRefGrad.size();
+              const size_t nte = testRefGrad.size();
 
               for (size_t te = 0; te < nte; ++te)
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * Math::dot(
-                    cmv * (G * m_trialRefGrad[tr]), m_testRefGrad[te]);
+                  m_matrix(te, tr) +=
+                    wdet * Math::dot(cmv * (G * trialRefGrad[tr]), testRefGrad[te]);
             }
           }
           else
@@ -1649,11 +1779,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -1669,13 +1801,16 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_trialRefGrad;
-      std::vector<Math::SpatialVector<ScalarType>> m_testRefGrad;
+      /// @brief Trial reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_trialRefGrad;
+      /// @brief Test reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_testRefGrad;
 
       Math::Matrix<ScalarType> m_matrix;
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -1736,9 +1871,15 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.
@@ -1749,6 +1890,7 @@ namespace Rodin::Variational
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
+      /// @brief Type of the inner integrand.
       using InnerIntegrandType = Dot<LHSType, RHSType>;
       /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
@@ -1757,6 +1899,7 @@ namespace Rodin::Variational
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
       /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType   = typename FormLanguage::Traits<InnerIntegrandType>::ScalarType;
 
       /// @brief Parent class type.
@@ -1764,6 +1907,7 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getRHS().getLHS().getLeaf(), integrand.getRHS().getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1772,6 +1916,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1780,6 +1925,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1792,6 +1938,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1799,12 +1946,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1823,7 +1972,9 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe  = testfes.getFiniteElement(d, idx);
 
-        const size_t order = trialfe.getOrder() + testfe.getOrder();
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            trialfe.getOrder() + testfe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1893,11 +2044,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -1915,6 +2068,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
     const Mult<
@@ -1964,9 +2118,14 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<Real, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -1984,6 +2143,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1992,6 +2152,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2000,6 +2161,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2014,6 +2176,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2021,12 +2184,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2045,7 +2210,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2058,27 +2225,38 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: the basis
+          // values vary within every element, and the reference gradients
+          // vary within every element that is not a simplex. Freezing either
+          // at one point is exact only when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
 
-          m_testBasis.resize(testfe.getCount());
-          for (size_t i = 0; i < testfe.getCount(); ++i)
-            m_testBasis[i] = testfe.getBasis(i)(rc);
-
-          m_refGrad.resize(trialfe.getCount());
-          for (size_t i = 0; i < trialfe.getCount(); ++i)
+          m_testBasis.assign(nqp, {});
+          m_refGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            auto& refg = m_refGrad[i];
-            refg.resize(trialfes.getVectorDimension());
-            for (size_t comp = 0; comp < trialfes.getVectorDimension(); ++comp)
+            const auto& rc = m_qf->getPoint(qp);
+
+            m_testBasis[qp].resize(testfe.getCount());
+            for (size_t i = 0; i < testfe.getCount(); ++i)
+              m_testBasis[qp][i] = testfe.getBasis(i)(rc);
+
+            m_refGrad[qp].resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
             {
-              refg[comp].resize(d);
-              const auto& basis = trialfe.getBasis(i);
-              for (size_t j = 0; j < d; ++j)
-                refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              auto& refg = m_refGrad[qp][i];
+              refg.resize(trialfes.getVectorDimension());
+              for (size_t comp = 0; comp < trialfes.getVectorDimension(); ++comp)
+              {
+                refg[comp].resize(d);
+                const auto& basis = trialfe.getBasis(i);
+                for (size_t j = 0; j < d; ++j)
+                  refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              }
             }
           }
 
-          m_matrix.resize(m_testBasis.size(), m_refGrad.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -2095,33 +2273,37 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
-          const size_t vdim = m_refGrad.empty() ? 0 : m_refGrad.front().size();
+          const auto& refGrad = m_refGrad[qp];
+          const auto& testBasis = m_testBasis[qp];
+          const size_t vdim = refGrad.empty() ? 0 : refGrad.front().size();
 
-          for (size_t i = 0; i < m_refGrad.size(); ++i)
+          for (size_t i = 0; i < refGrad.size(); ++i)
           {
             ScalarType div = 0;
             for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
-                physComp += Jinv(comp, j) * m_refGrad[i][comp](j);
+                physComp += Jinv(j, comp) * refGrad[i][comp](j);
               div += physComp;
             }
 
-            const size_t nte = m_testBasis.size();
+            const size_t nte = testBasis.size();
             for (size_t te = 0; te < nte; ++te)
-              m_matrix(te, i) += wdet * m_testBasis[te] * div;
+              m_matrix(te, i) += wdet * testBasis[te] * div;
           }
         }
 
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2136,11 +2318,14 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
-      std::vector<ScalarType> m_testBasis;
+      /// @brief Reference gradients per quadrature point, dof and component.
+      std::vector<std::vector<std::vector<Math::SpatialVector<ScalarType>>>> m_refGrad;
+      /// @brief Test basis values per quadrature point and dof.
+      std::vector<std::vector<ScalarType>> m_testBasis;
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Integrand type of the P1 divergence trial term.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   using P1DivTrialIntegrand =
     Dot<
@@ -2151,6 +2336,7 @@ namespace Rodin::Variational
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>;
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   QuadratureRule(const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
     -> QuadratureRule<P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
@@ -2190,9 +2376,14 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Real, LHSMesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<Math::SpatialVector<Real>, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -2210,6 +2401,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2218,6 +2410,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2226,6 +2419,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2240,6 +2434,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2247,12 +2442,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2271,7 +2468,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2284,27 +2483,38 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: the basis
+          // values vary within every element, and the reference gradients
+          // vary within every element that is not a simplex. Freezing either
+          // at one point is exact only when the rule has a single point.
+          const size_t nqp = m_qf->getSize();
 
-          m_trialBasis.resize(trialfe.getCount());
-          for (size_t i = 0; i < trialfe.getCount(); ++i)
-            m_trialBasis[i] = trialfe.getBasis(i)(rc);
-
-          m_refGrad.resize(testfe.getCount());
-          for (size_t i = 0; i < testfe.getCount(); ++i)
+          m_trialBasis.assign(nqp, {});
+          m_refGrad.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            auto& refg = m_refGrad[i];
-            refg.resize(testfes.getVectorDimension());
-            for (size_t comp = 0; comp < testfes.getVectorDimension(); ++comp)
+            const auto& rc = m_qf->getPoint(qp);
+
+            m_trialBasis[qp].resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
+              m_trialBasis[qp][i] = trialfe.getBasis(i)(rc);
+
+            m_refGrad[qp].resize(testfe.getCount());
+            for (size_t i = 0; i < testfe.getCount(); ++i)
             {
-              refg[comp].resize(d);
-              const auto& basis = testfe.getBasis(i);
-              for (size_t j = 0; j < d; ++j)
-                refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              auto& refg = m_refGrad[qp][i];
+              refg.resize(testfes.getVectorDimension());
+              for (size_t comp = 0; comp < testfes.getVectorDimension(); ++comp)
+              {
+                refg[comp].resize(d);
+                const auto& basis = testfe.getBasis(i);
+                for (size_t j = 0; j < d; ++j)
+                  refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+              }
             }
           }
 
-          m_matrix.resize(m_refGrad.size(), m_trialBasis.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -2321,33 +2531,37 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
-          const size_t vdim = m_refGrad.empty() ? 0 : m_refGrad.front().size();
+          const auto& refGrad = m_refGrad[qp];
+          const auto& trialBasis = m_trialBasis[qp];
+          const size_t vdim = refGrad.empty() ? 0 : refGrad.front().size();
 
-          for (size_t i = 0; i < m_refGrad.size(); ++i)
+          for (size_t i = 0; i < refGrad.size(); ++i)
           {
             ScalarType div = 0;
             for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
             {
               ScalarType physComp = 0;
               for (size_t j = 0; j < d; ++j)
-                physComp += Jinv(comp, j) * m_refGrad[i][comp](j);
+                physComp += Jinv(j, comp) * refGrad[i][comp](j);
               div += physComp;
             }
 
-            const size_t ntr = m_trialBasis.size();
+            const size_t ntr = trialBasis.size();
             for (size_t tr = 0; tr < ntr; ++tr)
-              m_matrix(i, tr) += wdet * m_trialBasis[tr] * div;
+              m_matrix(i, tr) += wdet * trialBasis[tr] * div;
           }
         }
 
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2362,11 +2576,14 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
-      std::vector<ScalarType> m_trialBasis;
+      /// @brief Reference gradients per quadrature point, dof and component.
+      std::vector<std::vector<std::vector<Math::SpatialVector<ScalarType>>>> m_refGrad;
+      /// @brief Trial basis values per quadrature point and dof.
+      std::vector<std::vector<ScalarType>> m_trialBasis;
       Math::Matrix<ScalarType> m_matrix;
   };
 
+  /// @brief Integrand type of the P1 divergence test term.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   using P1DivTestIntegrand =
     Dot<
@@ -2377,6 +2594,7 @@ namespace Rodin::Variational
         Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
         P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>;
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
     -> QuadratureRule<P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
@@ -2426,8 +2644,13 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       /// @brief Left-hand side operand type.
@@ -2435,9 +2658,11 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Type of the left-hand side operand.
       using LHSOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
@@ -2446,15 +2671,18 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, RHSFESType, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
@@ -2469,6 +2697,7 @@ namespace Rodin::Variational
       static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
       static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2477,6 +2706,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2485,6 +2715,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2499,6 +2730,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2506,12 +2738,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2530,7 +2764,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2543,8 +2779,303 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: reference
+          // derivatives are constant only on a simplex, so freezing them at
+          // one point is exact only there, or for a single-point rule.
+          const size_t nqp = m_qf->getSize();
+          m_trialRefJac.assign(nqp, {});
+          m_testRefJac.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
 
+            m_trialRefJac[qp].resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
+            {
+              auto& J = m_trialRefJac[qp][local];
+              J.resize(trialfes.getVectorDimension(), d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+                for (size_t j = 0; j < d; ++j)
+                  J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+            }
+
+            if (trialfes == testfes)
+            {
+              m_testRefJac[qp] = m_trialRefJac[qp];
+            }
+            else
+            {
+              m_testRefJac[qp].resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& J = m_testRefJac[qp][local];
+                J.resize(testfes.getVectorDimension(), d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                  for (size_t j = 0; j < d; ++j)
+                    J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
+            }
+          }
+
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
+        }
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
+
+        m_matrix.setZero();
+
+        assert(m_quadrature);
+        const auto& q = *m_quadrature;
+        for (size_t qp = 0; qp < q.getSize(); ++qp)
+        {
+          const auto& p = q.getPoint(qp);
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+
+          const auto& Jinv = p.getJacobianInverse();
+          const auto& trialRefJac = m_trialRefJac[qp];
+          const auto& testRefJac = m_testRefJac[qp];
+
+          if (trialfes == testfes)
+          {
+            const size_t n = trialRefJac.size();
+            for (size_t i = 0; i < n; ++i)
+            {
+              const auto Ji = trialRefJac[i] * Jinv;
+              m_matrix(i, i) += wdet * Ji.squaredNorm();
+
+              for (size_t j = 0; j < i; ++j)
+                m_matrix(i, j) += wdet * Math::dot(trialRefJac[j] * Jinv, Ji);
+            }
+          }
+          else
+          {
+            const size_t ntr = trialRefJac.size();
+            const size_t nte = testRefJac.size();
+
+            for (size_t te = 0; te < nte; ++te)
+            {
+              const auto Jte = testRefJac[te] * Jinv;
+              for (size_t tr = 0; tr < ntr; ++tr)
+                m_matrix(te, tr) += wdet * Math::dot(trialRefJac[tr] * Jinv, Jte);
+            }
+          }
+        }
+
+        if (trialfes == testfes)
+        {
+          m_matrix.template triangularView<Eigen::Upper>() =
+            m_matrix.template triangularView<Eigen::Lower>().transpose();
+        }
+
+        return *this;
+      }
+
+      /// @brief Returns an entry of the element matrix.
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_matrix(te, tr);
+      }
+
+      /// @brief Returns the integration region.
+      virtual Geometry::Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      const QF::QuadratureFormulaBase* m_qf;
+      const Geometry::PolytopeQuadrature* m_quadrature;
+
+      const Geometry::Polytope* m_polytope;
+      bool m_set;
+      size_t m_order;
+      Geometry::Polytope::Type m_geometry;
+
+      /// @brief Reference Jacobians per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialRefJac,
+        m_testRefJac;
+
+      Math::Matrix<ScalarType> m_matrix;
+  };
+
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @ingroup RodinCTAD
+   */
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
+  QuadratureRule(const
+    Dot<
+      ShapeFunctionBase<
+        Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+      ShapeFunctionBase<
+        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
+    ->
+      QuadratureRule<
+        Dot<
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Integration of a rank-one form in the P1 Jacobian of ShapeFunction.
+   *
+   * Assembles
+   * @f[
+   *   \int_K (A : \mathbf{J}\,u)\,(B : \mathbf{J}\,v)\ dx,
+   * @f]
+   * the outer product of Frobenius contractions of matrix coefficients @f$A@f$
+   * and @f$B@f$ against the Jacobians of the trial and test functions.
+   * Barrier and hinge metrics take this shape: the constraint gradient of a
+   * scalar margin @f$m(F)@f$ is @f$\partial_F m : \nabla v@f$, so its
+   * Gauss-Newton Hessian is the square of that contraction.
+   *
+   * The coefficient is evaluated once per quadrature point rather than once per
+   * basis pair, and the reference-space basis Jacobians are tabulated once per
+   * geometry and quadrature rule, shared by every physical cell.
+   */
+  template <class CoeffDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Dot<ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                P1<LHSRange, LHSMesh>, TrialSpace>>,
+                              P1<LHSRange, LHSMesh>, TrialSpace>>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
+                          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived,
+                                              P1<RHSRange, RHSMesh>, TestSpace>>,
+                            P1<RHSRange, RHSMesh>, TestSpace>>,
+        P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Traits<FunctionBase<CoeffDerived>>::ScalarType>
+  {
+    public:
+      /// @brief Left-hand finite element space type.
+      using LHSFESType = P1<LHSRange, LHSMesh>;
+      /// @brief Right-hand finite element space type.
+      using RHSFESType = P1<RHSRange, RHSMesh>;
+      /// @brief Scalar coefficient expression type.
+      using CoefficientType = FunctionBase<CoeffDerived>;
+
+      /// @brief Scalar type of the coefficient expression.
+      using ScalarType = typename FormLanguage::Traits<CoefficientType>::ScalarType;
+
+      /// @brief Left-hand shape-function expression type.
+      using LHSType = ShapeFunctionBase<
+        Dot<CoefficientType,
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>,
+            LHSFESType, TrialSpace>>,
+        LHSFESType, TrialSpace>;
+
+      /// @brief Right-hand shape-function expression type.
+      using RHSType = ShapeFunctionBase<
+        Dot<CoefficientType,
+          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>,
+            RHSFESType, TestSpace>>,
+        RHSFESType, TestSpace>;
+
+      /// @brief Rank-one Jacobian integrand type.
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      /// @brief Base local bilinear-form integrator type.
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      /// @brief Marks this specialization for compile-time selection tests.
+      static constexpr bool IsRankOneJacobianForm = true;
+
+      /// @brief Constructs an integrator for @p integrand.
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_qf(nullptr),
+          m_quadrature(nullptr),
+          m_polytope(nullptr),
+          m_set(false),
+          m_order(0)
+      {}
+
+      /// @brief Copy-constructs the integrator from @p other.
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_qf(nullptr),
+          m_quadrature(nullptr),
+          m_polytope(nullptr),
+          m_set(false),
+          m_order(0)
+      {}
+
+      /// @brief Move-constructs the integrator from @p other.
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_qf(other.m_qf),
+          m_quadrature(other.m_quadrature),
+          m_polytope(other.m_polytope),
+          m_set(other.m_set),
+          m_order(other.m_order),
+          m_geometry(other.m_geometry),
+          m_trialRefJac(std::move(other.m_trialRefJac)),
+          m_testRefJac(std::move(other.m_testRefJac)),
+          m_matrix(std::move(other.m_matrix))
+      {}
+
+      /// @brief Returns the stored integrand.
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = &polytope;
+
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialCoefficient = lhs.getDerived().getLHS();
+        const auto& testCoefficient = rhs.getDerived().getLHS();
+        const bool sharedCoefficient =
+          trialCoefficient.getUUID() == testCoefficient.getUUID();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
+
+        const size_t k_tr = trialfe.getOrder();
+        const size_t k_te = testfe.getOrder();
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+
+        const auto geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+        if (recompute)
+        {
+          m_set = true;
+          m_order = order;
+          m_geometry = geometry;
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+
+          // Reference-space basis Jacobians are shared by every physical cell
+          // with this geometry and quadrature rule.
+          const auto& rc = m_qf->getPoint(0);
           m_trialRefJac.resize(trialfe.getCount());
           for (size_t local = 0; local < trialfe.getCount(); ++local)
           {
@@ -2555,7 +3086,6 @@ namespace Rodin::Variational
               for (size_t j = 0; j < d; ++j)
                 J(i, j) = basis.template getDerivative<1>(i, j)(rc);
           }
-
           if (trialfes == testfes)
           {
             m_testRefJac = m_trialRefJac;
@@ -2573,55 +3103,96 @@ namespace Rodin::Variational
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
             }
           }
-
-          m_matrix.resize(m_testRefJac.size(), m_trialRefJac.size());
         }
 
         assert(m_qf);
         m_quadrature = &polytope.getQuadrature(*m_qf);
+        const auto& q = *m_quadrature;
 
+        const size_t ntr = m_trialRefJac.size();
+        const size_t nte = m_testRefJac.size();
+        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
 
-        assert(m_quadrature);
-        const auto& q = *m_quadrature;
+        m_trialAction.resize(ntr);
+        m_testAction.resize(nte);
+
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
-
           const auto& Jinv = p.getJacobianInverse();
 
-          if (trialfes == testfes)
-          {
-            const size_t n = m_trialRefJac.size();
-            for (size_t i = 0; i < n; ++i)
-            {
-              const auto Ji = m_trialRefJac[i] * Jinv;
-              m_matrix(i, i) += wdet * Ji.squaredNorm();
+          // Hoisted: one coefficient evaluation for each side of the basis-pair loop.
+          const auto A = trialCoefficient.getValue(ip);
 
-              for (size_t j = 0; j < i; ++j)
-                m_matrix(i, j) += wdet * Math::dot(m_trialRefJac[j] * Jinv, Ji);
+          for (size_t tr = 0; tr < ntr; ++tr)
+          {
+            ScalarType action = 0;
+            const auto& Jref = m_trialRefJac[tr];
+            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+            {
+              for (size_t j = 0; j < d; ++j)
+              {
+                ScalarType physicalDerivative = 0;
+                for (size_t r = 0; r < d; ++r)
+                  physicalDerivative += Jref(i, r) * Jinv(r, j);
+                action += A(i, j) * physicalDerivative;
+              }
+            }
+            m_trialAction[tr] = action;
+          }
+          if (trialfes == testfes && sharedCoefficient)
+          {
+            m_testAction = m_trialAction;
+          }
+          else
+          {
+            const auto B = testCoefficient.getValue(ip);
+            for (size_t te = 0; te < nte; ++te)
+            {
+              ScalarType action = 0;
+              const auto& Jref = m_testRefJac[te];
+              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              {
+                for (size_t j = 0; j < d; ++j)
+                {
+                  ScalarType physicalDerivative = 0;
+                  for (size_t r = 0; r < d; ++r)
+                    physicalDerivative += Jref(i, r) * Jinv(r, j);
+                  action += B(i, j) * physicalDerivative;
+                }
+              }
+              m_testAction[te] = action;
+            }
+          }
+
+          if (trialfes == testfes && sharedCoefficient)
+          {
+            for (size_t te = 0; te < nte; ++te)
+            {
+              const ScalarType at = wdet * m_trialAction[te];
+              for (size_t tr = 0; tr <= te; ++tr)
+                m_matrix(te, tr) += at * m_trialAction[tr];
             }
           }
           else
           {
-            const size_t ntr = m_trialRefJac.size();
-            const size_t nte = m_testRefJac.size();
-
             for (size_t te = 0; te < nte; ++te)
             {
-              const auto Jte = m_testRefJac[te] * Jinv;
+              const ScalarType at = wdet * m_testAction[te];
               for (size_t tr = 0; tr < ntr; ++tr)
-                m_matrix(te, tr) += wdet * Math::dot(m_trialRefJac[tr] * Jinv, Jte);
+                m_matrix(te, tr) += at * m_trialAction[tr];
             }
           }
         }
 
-        if (trialfes == testfes)
+        if (trialfes == testfes && sharedCoefficient)
         {
           m_matrix.template triangularView<Eigen::Upper>() =
-            m_matrix.template triangularView<Eigen::Lower>().transpose();
+            m_matrix.transpose().template triangularView<Eigen::Upper>();
         }
 
         return *this;
@@ -2638,37 +3209,18 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
-
       const QF::QuadratureFormulaBase* m_qf;
       const Geometry::PolytopeQuadrature* m_quadrature;
-
       const Geometry::Polytope* m_polytope;
       bool m_set;
       size_t m_order;
-      Geometry::Polytope::Type m_geometry;
-
-      std::vector<Math::SpatialMatrix<ScalarType>> m_trialRefJac, m_testRefJac;
-
-      Math::Matrix<ScalarType> m_matrix;
+      Optional<Geometry::Polytope::Type> m_geometry;
+      std::vector<Math::Matrix<ScalarType>> m_trialRefJac;
+      std::vector<Math::Matrix<ScalarType>> m_testRefJac;
+      std::vector<ScalarType> m_trialAction;
+      std::vector<ScalarType> m_testAction;
+      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_matrix;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   */
-  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    ->
-      QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2728,15 +3280,23 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Finite element space type of the left-hand side operand.
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
+      /// @brief Finite element space type of the right-hand side operand.
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Range type of the coefficient.
       using CoefficientRangeType =
         typename FormLanguage::Traits<CoefficientType>::RangeType;
 
+      /// @brief Type of the multiplicand in the integrand.
       using MultiplicandType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
@@ -2745,9 +3305,11 @@ namespace Rodin::Variational
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
+      /// @brief Type of the left-hand side operand.
       using LHSOperandType =
         ShapeFunction<LHSDerived, LHSFESType, TrialSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
@@ -2756,15 +3318,18 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>;
 
+      /// @brief Type of the right-hand side operand.
       using RHSOperandType =
         ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
       /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the integrand.
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
@@ -2779,6 +3344,7 @@ namespace Rodin::Variational
       static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
       static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2787,6 +3353,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2795,6 +3362,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2809,6 +3377,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2816,12 +3385,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2841,7 +3412,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2854,38 +3427,47 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
+          // Cached per quadrature point, not at the first one: reference
+          // derivatives are constant only on a simplex, so freezing them at
+          // one point is exact only there, or for a single-point rule.
+          const size_t nqp = m_qf->getSize();
+          m_trialRefJac.assign(nqp, {});
+          m_testRefJac.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
 
-          m_trialRefJac.resize(trialfe.getCount());
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
-          {
-            auto& J = m_trialRefJac[local];
-            J.resize(trialfes.getVectorDimension(), d);
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
-              for (size_t j = 0; j < d; ++j)
-                J(i, j) = basis.template getDerivative<1>(i, j)(rc);
-          }
-
-          if (trialfes == testfes)
-          {
-            m_testRefJac = m_trialRefJac;
-          }
-          else
-          {
-            m_testRefJac.resize(testfe.getCount());
-            for (size_t local = 0; local < testfe.getCount(); ++local)
+            m_trialRefJac[qp].resize(trialfe.getCount());
+            for (size_t local = 0; local < trialfe.getCount(); ++local)
             {
-              auto& J = m_testRefJac[local];
-              J.resize(testfes.getVectorDimension(), d);
-              const auto& basis = testfe.getBasis(local);
-              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              auto& J = m_trialRefJac[qp][local];
+              J.resize(trialfes.getVectorDimension(), d);
+              const auto& basis = trialfe.getBasis(local);
+              for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
             }
+
+            if (trialfes == testfes)
+            {
+              m_testRefJac[qp] = m_trialRefJac[qp];
+            }
+            else
+            {
+              m_testRefJac[qp].resize(testfe.getCount());
+              for (size_t local = 0; local < testfe.getCount(); ++local)
+              {
+                auto& J = m_testRefJac[qp][local];
+                J.resize(testfes.getVectorDimension(), d);
+                const auto& basis = testfe.getBasis(local);
+                for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                  for (size_t j = 0; j < d; ++j)
+                    J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
+            }
           }
 
-          m_matrix.resize(m_testRefJac.size(), m_trialRefJac.size());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
         }
 
         assert(m_qf);
@@ -2903,6 +3485,8 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
+          const auto& trialRefJac = m_trialRefJac[qp];
+          const auto& testRefJac = m_testRefJac[qp];
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -2910,26 +3494,26 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefJac.size();
+              const size_t n = trialRefJac.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto Ji = m_trialRefJac[i] * Jinv;
+                const auto Ji = trialRefJac[i] * Jinv;
                 m_matrix(i, i) += wdet * csv * Ji.squaredNorm();
 
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * csv * Math::dot(m_trialRefJac[j] * Jinv, Ji);
+                  m_matrix(i, j) += wdet * csv * Math::dot(trialRefJac[j] * Jinv, Ji);
               }
             }
             else
             {
-              const size_t ntr = m_trialRefJac.size();
-              const size_t nte = m_testRefJac.size();
+              const size_t ntr = trialRefJac.size();
+              const size_t nte = testRefJac.size();
 
               for (size_t te = 0; te < nte; ++te)
               {
-                const auto Jte = m_testRefJac[te] * Jinv;
+                const auto Jte = testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * csv * Math::dot(m_trialRefJac[tr] * Jinv, Jte);
+                  m_matrix(te, tr) += wdet * csv * Math::dot(trialRefJac[tr] * Jinv, Jte);
               }
             }
           }
@@ -2940,32 +3524,32 @@ namespace Rodin::Variational
 
             if (trialfes == testfes)
             {
-              const size_t n = m_trialRefJac.size();
+              const size_t n = trialRefJac.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto Ji = m_trialRefJac[i] * Jinv;
+                const auto Ji = trialRefJac[i] * Jinv;
                 m_matrix(i, i) += wdet * Math::dot(cmv * Ji, Ji);
 
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(cmv * (m_trialRefJac[j] * Jinv), Ji);
+                  m_matrix(i, j) += wdet * Math::dot(cmv * (trialRefJac[j] * Jinv), Ji);
               }
 
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(
-                    cmv * (m_trialRefJac[j] * Jinv), m_trialRefJac[i] * Jinv);
+                  m_matrix(i, j) += wdet *
+                    Math::dot(cmv * (trialRefJac[j] * Jinv), trialRefJac[i] * Jinv);
             }
             else
             {
-              const size_t ntr = m_trialRefJac.size();
-              const size_t nte = m_testRefJac.size();
+              const size_t ntr = trialRefJac.size();
+              const size_t nte = testRefJac.size();
 
               for (size_t te = 0; te < nte; ++te)
               {
-                const auto Jte = m_testRefJac[te] * Jinv;
+                const auto Jte = testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
-                  m_matrix(te, tr) += wdet * Math::dot(
-                    cmv * (m_trialRefJac[tr] * Jinv), Jte);
+                  m_matrix(te, tr) +=
+                    wdet * Math::dot(cmv * (trialRefJac[tr] * Jinv), Jte);
               }
             }
           }
@@ -2987,11 +3571,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -3007,12 +3593,15 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialMatrix<ScalarType>> m_trialRefJac, m_testRefJac;
+      /// @brief Reference Jacobians per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialRefJac,
+        m_testRefJac;
 
       Math::Matrix<ScalarType> m_matrix;
   };
 
   /**
+   * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
    */
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Mesh>
@@ -3091,14 +3680,21 @@ namespace Rodin::Variational
               P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<LHSRange, LHSMesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<RHSRange, RHSMesh>;
 
+      /// @brief Trial shape function type.
       using TrialSFType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
           TrialFESType, TrialSpace>;
 
+      /// @brief Coefficient type appearing in the integrand.
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
       /// @brief Left-hand side operand type.
@@ -3121,6 +3717,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the integrator for the given integrand.
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -3129,6 +3726,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Copy constructor.
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -3137,6 +3735,7 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
+      /// @brief Move constructor.
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -3151,6 +3750,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -3158,12 +3758,14 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Returns the polytope the integrator is bound to.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -3181,7 +3783,9 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order =
+          this->getOrder(polytope).value_or(getIntegrand().getOrder(polytope).value_or(
+            ((k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2))));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -3197,43 +3801,53 @@ namespace Rodin::Variational
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
 
-          const auto& rc = m_qf->getPoint(0);
-
-          if constexpr (std::is_same_v<LHSRange, ScalarType>)
+          // Cached per quadrature point, not at the first one: basis values
+          // vary within every element and reference gradients vary within
+          // every element that is not a simplex, so freezing either at one
+          // point is exact only for a single-point rule.
+          const size_t nqp = m_qf->getSize();
+          m_refGrad.assign(nqp, {});
+          m_basis.assign(nqp, {});
+          for (size_t qp = 0; qp < nqp; ++qp)
           {
-            const size_t n = trialfe.getCount();
-            m_refGrad.resize(n);
-            for (size_t a = 0; a < n; ++a)
+            const auto& rc = m_qf->getPoint(qp);
+
+            if constexpr (std::is_same_v<LHSRange, ScalarType>)
             {
-              m_refGrad[a].resize(d);
-              const auto& basisFn = trialfe.getBasis(a);
-              for (size_t j = 0; j < d; ++j)
-                m_refGrad[a](j) = basisFn.template getDerivative<1>(j)(rc);
+              const size_t n = trialfe.getCount();
+              m_refGrad[qp].resize(n);
+              for (size_t a = 0; a < n; ++a)
+              {
+                m_refGrad[qp][a].resize(d);
+                const auto& basisFn = trialfe.getBasis(a);
+                for (size_t j = 0; j < d; ++j)
+                  m_refGrad[qp][a](j) = basisFn.template getDerivative<1>(j)(rc);
+              }
+
+              m_basis[qp].resize(n);
+              for (size_t b = 0; b < n; ++b)
+                m_basis[qp][b] = testfe.getBasis(b)(rc);
             }
-
-            m_basis.resize(n);
-            for (size_t b = 0; b < n; ++b)
-              m_basis[b] = testfe.getBasis(b)(rc);
-          }
-          else
-          {
-            const size_t vdim = trialfes.getVectorDimension();
-            const size_t nVertices = trialfe.getCount() / vdim;
-
-            m_refGrad.resize(nVertices);
-            for (size_t v = 0; v < nVertices; ++v)
+            else
             {
-              m_refGrad[v].resize(d);
-              const auto& basisFn = trialfe.getBasis(v * vdim);
-              for (size_t j = 0; j < d; ++j)
-                m_refGrad[v](j) = basisFn.template getDerivative<1>(0, j)(rc);
-            }
+              const size_t vdim = trialfes.getVectorDimension();
+              const size_t nVertices = trialfe.getCount() / vdim;
 
-            m_basis.resize(nVertices);
-            for (size_t v = 0; v < nVertices; ++v)
-            {
-              const auto bv = testfe.getBasis(v * vdim)(rc);
-              m_basis[v] = bv(0);
+              m_refGrad[qp].resize(nVertices);
+              for (size_t v = 0; v < nVertices; ++v)
+              {
+                m_refGrad[qp][v].resize(d);
+                const auto& basisFn = trialfe.getBasis(v * vdim);
+                for (size_t j = 0; j < d; ++j)
+                  m_refGrad[qp][v](j) = basisFn.template getDerivative<1>(0, j)(rc);
+              }
+
+              m_basis[qp].resize(nVertices);
+              for (size_t v = 0; v < nVertices; ++v)
+              {
+                const auto bv = testfe.getBasis(v * vdim)(rc);
+                m_basis[qp][v] = bv(0);
+              }
             }
           }
         }
@@ -3241,7 +3855,7 @@ namespace Rodin::Variational
         assert(m_qf);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
-        const size_t n = m_refGrad.size();
+        const size_t n = m_refGrad.empty() ? 0 : m_refGrad.front().size();
         const size_t vdim = trialfes.getVectorDimension();
 
         const size_t ntr = lhs.getDOFs(polytope);
@@ -3260,15 +3874,17 @@ namespace Rodin::Variational
 
           const auto& Jinv = p.getJacobianInverse();
           const auto fval = coeff.getValue(ip);
+          const auto& refGrad = m_refGrad[qp];
+          const auto& basis = m_basis[qp];
 
           for (size_t a = 0; a < n; ++a)
           {
-            const auto physGrad = Jinv.transpose() * m_refGrad[a];
+            const auto physGrad = Jinv.transpose() * refGrad[a];
             const ScalarType gradDotF = Math::dot(physGrad, fval);
 
             for (size_t b = 0; b < n; ++b)
             {
-              const ScalarType val = wdet * gradDotF * m_basis[b];
+              const ScalarType val = wdet * gradDotF * basis[b];
 
               for (size_t c = 0; c < vdim; ++c)
               {
@@ -3285,11 +3901,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the integration region.
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -3304,8 +3922,10 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_refGrad;
-      std::vector<ScalarType> m_basis;
+      /// @brief Reference gradients per quadrature point and dof.
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
+      /// @brief Test basis values per quadrature point and dof.
+      std::vector<std::vector<ScalarType>> m_basis;
 
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -3313,32 +3933,24 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Range, class Mesh>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
+    class Mesh>
+  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        Mult<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-            P1<Range, Mesh>, TrialSpace>,
-          FunctionBase<CoefficientDerived>>,
-        P1<Range, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
+    const Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                         P1<Range, Mesh>, TrialSpace>>,
+                                       P1<Range, Mesh>, TrialSpace>,
+                                  FunctionBase<CoefficientDerived>>,
+                P1<Range, Mesh>, TrialSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
         P1<Range, Mesh>, TestSpace>>&)
     -> QuadratureRule<
-      Dot<
-        ShapeFunctionBase<
-          Mult<
-            ShapeFunctionBase<
-              Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-              P1<Range, Mesh>, TrialSpace>,
-            FunctionBase<CoefficientDerived>>,
-          P1<Range, Mesh>, TrialSpace>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
+      Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                     P1<Range, Mesh>, TrialSpace>>,
+                                   P1<Range, Mesh>, TrialSpace>,
+                              FunctionBase<CoefficientDerived>>,
+            P1<Range, Mesh>, TrialSpace>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
           P1<Range, Mesh>, TestSpace>>>;
 
   /**
@@ -3374,13 +3986,19 @@ namespace Rodin::Variational
     : public GlobalBilinearFormIntegratorBase<typename FormLanguage::Traits<Range>::ScalarType>
   {
     public:
+      /// @brief Reports this handler as an optimized specialization.
+      static constexpr bool Specialized = true;
+
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
+      /// @brief Cell kernel type.
       using KernelType = Kernel;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
 
+      /// @brief Test finite element space type.
       using TestFESType = P1<Range, Mesh>;
 
       /// @brief Left-hand side operand type.
@@ -3405,11 +4023,13 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /// @brief Constructs the expression from its left and right operands.
       constexpr
       QuadratureRule(const LHSType& lhs, const RHSType& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getOperand().getLeaf(), integrand.getRHS().getLeaf()),
@@ -3417,6 +4037,7 @@ namespace Rodin::Variational
           m_qfs(Geometry::Polytope::Type::Segment)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -3424,6 +4045,7 @@ namespace Rodin::Variational
           m_qfs(other.m_qfs)
       {}
 
+      /// @brief Move constructor.
       constexpr
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
@@ -3448,6 +4070,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Gets the integrand.
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -3455,6 +4078,7 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
+      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
       QuadratureRule& setPolytope(
         const Geometry::Polytope& trp, const Geometry::Polytope& tep) override
       {
@@ -3476,6 +4100,25 @@ namespace Rodin::Variational
         const auto& testfe = testfes.getFiniteElement(
           tep.getDimension(), tep.getIndex());
 
+        // The regularised integrand is smooth but not polynomial for the
+        // singular kernels this exists for, so the order is an accuracy
+        // choice rather than a degree that can be inferred. Seven is exact
+        // for the Jacobian and the first-order bases over it, and is the
+        // default when the caller states nothing.
+        {
+          const size_t order = this->getOrder(trp).value_or(7);
+          const size_t n = std::max<size_t>(1, (order + 2) / 2);
+          if (m_collapsed.size() != n)
+          {
+            std::vector<Real> nodes, weights;
+            QF::GaussLegendre::gl1dUnit(n, nodes, weights);
+            m_collapsed.clear();
+            m_collapsed.reserve(n);
+            for (size_t i = 0; i < n; ++i)
+              m_collapsed.emplace_back(nodes[i], weights[i]);
+          }
+        }
+
         if constexpr (std::is_same_v<Range, ScalarType>)
         {
 
@@ -3486,104 +4129,142 @@ namespace Rodin::Variational
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                Math::SpatialVector<ScalarType> rx0(2), rz0(2),
-                                                rx1(2), rz1(2),
-                                                rx2(2), rz2(2),
-                                                rx3(2), rz3(2),
-                                                rx4(2), rz4(2),
-                                                rx5(2), rz5(2);
+                Math::SpatialPoint rx0(2), rz0(2), rx1(2), rz1(2), rx2(2), rz2(2), rx3(2),
+                  rz3(2), rx4(2), rz4(2), rx5(2), rz5(2);
 
-                assert(m_qfs.getSize() == 1);
-                const auto r = m_qfs.getPoint(0).value();
-                const auto w = m_qfs.getWeight(0);
-
-                const ScalarType xi = 1 - r;
-                const ScalarType eta1 = r;
-                const ScalarType eta2 = r;
-                const ScalarType eta3 = r;
-
-                rx0[0] = xi;
-                rx0[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz1[0] = xi;
-                rz1[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz2[0] = xi * (1 - eta1 * eta2);
-                rz2[1] = xi * eta1 * (1 - eta2);
-
-                rx3[0] = xi * (1 - eta1 * eta2);
-                rx3[1] = xi * eta1 * (1 - eta2);
-
-                rz4[0] = xi;
-                rz4[1] = xi * eta1 * (1 - eta2);
-
-                rx5[0] = xi;
-                rx5[1] = xi * eta1 * (1 - eta2);
-
-                rz0[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz0[1] = xi * (1 - eta1);
-
-                rx1[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx1[1] = xi * (1 - eta1);
-
-                rx2[0] = xi;
-                rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rz3[0] = xi;
-                rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rx4[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx4[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                rz5[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz5[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                const Geometry::Point x0(polytope, rx0);
-                const Geometry::Point x1(polytope, rx1);
-                const Geometry::Point x2(polytope, rx2);
-                const Geometry::Point x3(polytope, rx3);
-                const Geometry::Point x4(polytope, rx4);
-                const Geometry::Point x5(polytope, rx5);
-
-                const Geometry::Point z0(polytope, rz0);
-                const Geometry::Point z1(polytope, rz1);
-                const Geometry::Point z2(polytope, rz2);
-                const Geometry::Point z3(polytope, rz3);
-                const Geometry::Point z4(polytope, rz4);
-                const Geometry::Point z5(polytope, rz5);
-
-                m_distortion = xi * xi * xi * eta1 * eta1 * eta2;
-                m_weight = w * w * w * w;
-                m_matrix.resize(testfe.getCount(), trialfe.getCount());
-
-                const Real s0 = x0.getDistortion() * z0.getDistortion();
-                const Real s1 = x1.getDistortion() * z1.getDistortion();
-                const Real s2 = x2.getDistortion() * z2.getDistortion();
-                const Real s3 = x3.getDistortion() * z3.getDistortion();
-                const Real s4 = x4.getDistortion() * z4.getDistortion();
-                const Real s5 = x5.getDistortion() * z5.getDistortion();
-
-                assert(std::isfinite(s0));
-                assert(std::isfinite(s1));
-                assert(std::isfinite(s2));
-                assert(std::isfinite(s3));
-                assert(std::isfinite(s4));
-                assert(std::isfinite(s5));
-
-                for (size_t l = 0; l < testfe.getCount(); ++l)
+                // Sauter-Schwab for coincident panels: the four-dimensional
+                // integral is regularised onto the unit cube in the collapsed
+                // variables, and what remains is smooth and integrated by a
+                // tensor Gauss rule --- the same rule in each direction, as
+                // the construction intends.
+                //
+                // Evaluating it at one point instead, as this did, does not
+                // integrate even the Jacobian: xi^3 eta1^2 eta2 has midpoint
+                // value 1/64 against an exact 1/24 over the cube, so a
+                // constant kernel came out at three eighths of its value on
+                // every coincident pair. The transformation was never the
+                // problem.
+                m_matrix.setZero(testfe.getCount(), trialfe.getCount());
+                for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const auto& teb = testfe.getBasis(l);
-                  for (size_t m = 0; m < trialfe.getCount(); ++m)
+                  const Real eta3 = m_collapsed[i3].first;
+                  const Real w3 = m_collapsed[i3].second;
+                  for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const auto& trb = trialfe.getBasis(m);
-                    m_matrix(l, m) = s0 * kernel(x0, z0) * trb(rx0) * teb(rz0);
-                    m_matrix(l, m) += s1 * kernel(x1, z1) * trb(rx1) * teb(rz1);
-                    m_matrix(l, m) += s2 * kernel(x2, z2) * trb(rx2) * teb(rz2);
-                    m_matrix(l, m) += s3 * kernel(x3, z3) * trb(rx3) * teb(rz3);
-                    m_matrix(l, m) += s4 * kernel(x4, z4) * trb(rx4) * teb(rz4);
-                    m_matrix(l, m) += s5 * kernel(x5, z5) * trb(rx5) * teb(rz5);
+                    const Real eta2 = m_collapsed[i2].first;
+                    const Real w2 = m_collapsed[i2].second;
+                    for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
+                    {
+                      const Real eta1 = m_collapsed[i1].first;
+                      const Real w1 = m_collapsed[i1].second;
+                      for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
+                      {
+                        const Real xi = m_collapsed[i0].first;
+                        const Real w0 = m_collapsed[i0].second;
+                        const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                        const Real factor = w0 * w1 * w2 * w3 * jacobian;
+
+                        // The six sub-domains of the identical-panel case,
+                        // in the variables of Sauter and Schwab. Written as
+                        // they appear there: the first coordinate carries
+                        // 1 - xi and the second carries xi, which a symmetric
+                        // one-point rule cannot tell apart and a real rule
+                        // can. Getting these the wrong way round leaves the
+                        // Jacobian integrating correctly, so the entries sum
+                        // to the right total while being distributed wrongly
+                        // among the basis functions.
+                        const Real a = xi - xi * eta1;
+                        const Real b = xi - xi * eta1 * eta2 * eta3;
+                        const Real c = xi - xi * eta1 * eta2;
+                        const Real d = xi * eta1 * (1 - eta2);
+                        const Real e = xi * eta1 * (1 - eta2 * eta3);
+                        const Real f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const Real g = xi - xi * eta1 + xi * eta1 * eta2;
+
+                        rx0[0] = 1 - xi;
+                        rx0[1] = g;
+                        rz0[0] = 1 - b;
+                        rz0[1] = a;
+
+                        rx1[0] = 1 - b;
+                        rx1[1] = a;
+                        rz1[0] = 1 - xi;
+                        rz1[1] = g;
+
+                        rx2[0] = 1 - xi;
+                        rx2[1] = f;
+                        rz2[0] = 1 - c;
+                        rz2[1] = d;
+
+                        rx3[0] = 1 - c;
+                        rx3[1] = d;
+                        rz3[0] = 1 - xi;
+                        rz3[1] = f;
+
+                        rx4[0] = 1 - b;
+                        rx4[1] = e;
+                        rz4[0] = 1 - xi;
+                        rz4[1] = d;
+
+                        rx5[0] = 1 - xi;
+                        rx5[1] = d;
+                        rz5[0] = 1 - b;
+                        rz5[1] = e;
+
+                        const Geometry::Point x0(polytope, rx0);
+                        const Geometry::Point x1(polytope, rx1);
+                        const Geometry::Point x2(polytope, rx2);
+                        const Geometry::Point x3(polytope, rx3);
+                        const Geometry::Point x4(polytope, rx4);
+                        const Geometry::Point x5(polytope, rx5);
+
+                        const Geometry::Point z0(polytope, rz0);
+                        const Geometry::Point z1(polytope, rz1);
+                        const Geometry::Point z2(polytope, rz2);
+                        const Geometry::Point z3(polytope, rz3);
+                        const Geometry::Point z4(polytope, rz4);
+                        const Geometry::Point z5(polytope, rz5);
+
+                        const Real s0 = x0.getDistortion() * z0.getDistortion();
+                        const Real s1 = x1.getDistortion() * z1.getDistortion();
+                        const Real s2 = x2.getDistortion() * z2.getDistortion();
+                        const Real s3 = x3.getDistortion() * z3.getDistortion();
+                        const Real s4 = x4.getDistortion() * z4.getDistortion();
+                        const Real s5 = x5.getDistortion() * z5.getDistortion();
+
+                        assert(std::isfinite(s0));
+                        assert(std::isfinite(s1));
+                        assert(std::isfinite(s2));
+                        assert(std::isfinite(s3));
+                        assert(std::isfinite(s4));
+                        assert(std::isfinite(s5));
+
+                        for (size_t l = 0; l < testfe.getCount(); ++l)
+                        {
+                          const auto& teb = testfe.getBasis(l);
+                          for (size_t m = 0; m < trialfe.getCount(); ++m)
+                          {
+                            const auto& trb = trialfe.getBasis(m);
+                            m_matrix(l, m) += factor * s0 * kernel(x0, z0) *
+                              Math::dot(trb(rx0), teb(rz0));
+                            m_matrix(l, m) += factor * s1 * kernel(x1, z1) *
+                              Math::dot(trb(rx1), teb(rz1));
+                            m_matrix(l, m) += factor * s2 * kernel(x2, z2) *
+                              Math::dot(trb(rx2), teb(rz2));
+                            m_matrix(l, m) += factor * s3 * kernel(x3, z3) *
+                              Math::dot(trb(rx3), teb(rz3));
+                            m_matrix(l, m) += factor * s4 * kernel(x4, z4) *
+                              Math::dot(trb(rx4), teb(rz4));
+                            m_matrix(l, m) += factor * s5 * kernel(x5, z5) *
+                              Math::dot(trb(rx5), teb(rz5));
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                m_distortion = 1;
+                m_weight = 1;
                 break;
               }
               default:
@@ -3610,7 +4291,7 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
                     const ScalarType trb = trialfe.getBasis(m)(rx);
-                    m_matrix(l, m) = m_sk * trb * teb;
+                    m_matrix(l, m) = m_sk * Math::dot(trb, teb);
                   }
                 }
                 break;
@@ -3641,7 +4322,7 @@ namespace Rodin::Variational
               for (size_t m = 0; m < trialfe.getCount(); ++m)
               {
                 const ScalarType trb = trialfe.getBasis(m)(rx);
-                m_matrix(l, m) = m_sk * trb * teb;
+                m_matrix(l, m) = m_sk * Math::dot(trb, teb);
               }
             }
           }
@@ -3656,124 +4337,139 @@ namespace Rodin::Variational
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                Math::SpatialVector<ScalarType> rx0(2), rz0(2),
-                                                rx1(2), rz1(2),
-                                                rx2(2), rz2(2),
-                                                rx3(2), rz3(2),
-                                                rx4(2), rz4(2),
-                                                rx5(2), rz5(2);
+                Math::SpatialPoint rx0(2), rz0(2), rx1(2), rz1(2), rx2(2), rz2(2), rx3(2),
+                  rz3(2), rx4(2), rz4(2), rx5(2), rz5(2);
 
-                assert(m_qfs.getSize() == 1);
-                const auto r = m_qfs.getPoint(0).value();
-                const auto w = m_qfs.getWeight(0);
-
-                const ScalarType xi = 1 - r;
-                const ScalarType eta1 = r;
-                const ScalarType eta2 = r;
-                const ScalarType eta3 = r;
-
-                rx0[0] = xi;
-                rx0[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz1[0] = xi;
-                rz1[1] = xi * (1 - eta1 + eta1 * eta2);
-
-                rz2[0] = xi * (1 - eta1 * eta2);
-                rz2[1] = xi * eta1 * (1 - eta2);
-
-                rx3[0] = xi * (1 - eta1 * eta2);
-                rx3[1] = xi * eta1 * (1 - eta2);
-
-                rz4[0] = xi;
-                rz4[1] = xi * eta1 * (1 - eta2);
-
-                rx5[0] = xi;
-                rx5[1] = xi * eta1 * (1 - eta2);
-
-                rz0[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz0[1] = xi * (1 - eta1);
-
-                rx1[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx1[1] = xi * (1 - eta1);
-
-                rx2[0] = xi;
-                rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rz3[0] = xi;
-                rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
-
-                rx4[0] = xi * (1 - eta1 * eta2 * eta3);
-                rx4[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                rz5[0] = xi * (1 - eta1 * eta2 * eta3);
-                rz5[1] = xi * eta1 * (1 - eta2 * eta3);
-
-                const Geometry::Point x0(polytope, rx0);
-                const Geometry::Point x1(polytope, rx1);
-                const Geometry::Point x2(polytope, rx2);
-                const Geometry::Point x3(polytope, rx3);
-                const Geometry::Point x4(polytope, rx4);
-                const Geometry::Point x5(polytope, rx5);
-
-                const Geometry::Point z0(polytope, rz0);
-                const Geometry::Point z1(polytope, rz1);
-                const Geometry::Point z2(polytope, rz2);
-                const Geometry::Point z3(polytope, rz3);
-                const Geometry::Point z4(polytope, rz4);
-                const Geometry::Point z5(polytope, rz5);
-
-                m_distortion = xi * xi * xi * eta1 * eta1 * eta2;
-                m_weight = w * w * w * w;
-                m_matrix.resize(testfe.getCount(), trialfe.getCount());
-
-                const Real s0 = x0.getDistortion() * z0.getDistortion();
-                const Real s1 = x1.getDistortion() * z1.getDistortion();
-                const Real s2 = x2.getDistortion() * z2.getDistortion();
-                const Real s3 = x3.getDistortion() * z3.getDistortion();
-                const Real s4 = x4.getDistortion() * z4.getDistortion();
-                const Real s5 = x5.getDistortion() * z5.getDistortion();
-
-                assert(std::isfinite(s0));
-                assert(std::isfinite(s1));
-                assert(std::isfinite(s2));
-                assert(std::isfinite(s3));
-                assert(std::isfinite(s4));
-                assert(std::isfinite(s5));
-
-                kernel(m_k0, x0, z0);
-                kernel(m_k1, x1, z1);
-                kernel(m_k2, x2, z2);
-                kernel(m_k3, x3, z3);
-                kernel(m_k4, x4, z4);
-                kernel(m_k5, x5, z5);
-
-                for (size_t l = 0; l < testfe.getCount(); ++l)
+                // The vector-valued counterpart of the scalar case above, and
+                // the same two corrections: a tensor Gauss rule over the
+                // collapsed variables rather than a single point, and the
+                // sub-domain maps written as Sauter and Schwab give them.
+                m_matrix.setZero(testfe.getCount(), trialfe.getCount());
+                for (size_t i3 = 0; i3 < m_collapsed.size(); ++i3)
                 {
-                  const auto& teb = testfe.getBasis(l);
-                  for (size_t m = 0; m < trialfe.getCount(); ++m)
+                  const Real eta3 = m_collapsed[i3].first;
+                  const Real w3 = m_collapsed[i3].second;
+                  for (size_t i2 = 0; i2 < m_collapsed.size(); ++i2)
                   {
-                    const auto& trb = trialfe.getBasis(m);
-                    const auto trv0 = trb(rx0);
-                    const auto tev0 = teb(rz0);
-                    const auto trv1 = trb(rx1);
-                    const auto tev1 = teb(rz1);
-                    const auto trv2 = trb(rx2);
-                    const auto tev2 = teb(rz2);
-                    const auto trv3 = trb(rx3);
-                    const auto tev3 = teb(rz3);
-                    const auto trv4 = trb(rx4);
-                    const auto tev4 = teb(rz4);
-                    const auto trv5 = trb(rx5);
-                    const auto tev5 = teb(rz5);
+                    const Real eta2 = m_collapsed[i2].first;
+                    const Real w2 = m_collapsed[i2].second;
+                    for (size_t i1 = 0; i1 < m_collapsed.size(); ++i1)
+                    {
+                      const Real eta1 = m_collapsed[i1].first;
+                      const Real w1 = m_collapsed[i1].second;
+                      for (size_t i0 = 0; i0 < m_collapsed.size(); ++i0)
+                      {
+                        const Real xi = m_collapsed[i0].first;
+                        const Real w0 = m_collapsed[i0].second;
+                        const Real jacobian = xi * xi * xi * eta1 * eta1 * eta2;
+                        const Real factor = w0 * w1 * w2 * w3 * jacobian;
 
-                    m_matrix(l, m) = s0 * (m_k0 * trv0).dot(tev0);
-                    m_matrix(l, m) += s1 * (m_k1 * trv1).dot(tev1);
-                    m_matrix(l, m) += s2 * (m_k2 * trv2).dot(tev2);
-                    m_matrix(l, m) += s3 * (m_k3 * trv3).dot(tev3);
-                    m_matrix(l, m) += s4 * (m_k4 * trv4).dot(tev4);
-                    m_matrix(l, m) += s5 * (m_k5 * trv5).dot(tev5);
+                        const Real a = xi - xi * eta1;
+                        const Real b = xi - xi * eta1 * eta2 * eta3;
+                        const Real c = xi - xi * eta1 * eta2;
+                        const Real d = xi * eta1 * (1 - eta2);
+                        const Real e = xi * eta1 * (1 - eta2 * eta3);
+                        const Real f = xi * eta1 * (1 - eta2 + eta2 * eta3);
+                        const Real g = xi - xi * eta1 + xi * eta1 * eta2;
+
+                        rx0[0] = 1 - xi;
+                        rx0[1] = g;
+                        rz0[0] = 1 - b;
+                        rz0[1] = a;
+
+                        rx1[0] = 1 - b;
+                        rx1[1] = a;
+                        rz1[0] = 1 - xi;
+                        rz1[1] = g;
+
+                        rx2[0] = 1 - xi;
+                        rx2[1] = f;
+                        rz2[0] = 1 - c;
+                        rz2[1] = d;
+
+                        rx3[0] = 1 - c;
+                        rx3[1] = d;
+                        rz3[0] = 1 - xi;
+                        rz3[1] = f;
+
+                        rx4[0] = 1 - b;
+                        rx4[1] = e;
+                        rz4[0] = 1 - xi;
+                        rz4[1] = d;
+
+                        rx5[0] = 1 - xi;
+                        rx5[1] = d;
+                        rz5[0] = 1 - b;
+                        rz5[1] = e;
+
+                        const Geometry::Point x0(polytope, rx0);
+                        const Geometry::Point x1(polytope, rx1);
+                        const Geometry::Point x2(polytope, rx2);
+                        const Geometry::Point x3(polytope, rx3);
+                        const Geometry::Point x4(polytope, rx4);
+                        const Geometry::Point x5(polytope, rx5);
+
+                        const Geometry::Point z0(polytope, rz0);
+                        const Geometry::Point z1(polytope, rz1);
+                        const Geometry::Point z2(polytope, rz2);
+                        const Geometry::Point z3(polytope, rz3);
+                        const Geometry::Point z4(polytope, rz4);
+                        const Geometry::Point z5(polytope, rz5);
+
+                        const Real s0 = x0.getDistortion() * z0.getDistortion();
+                        const Real s1 = x1.getDistortion() * z1.getDistortion();
+                        const Real s2 = x2.getDistortion() * z2.getDistortion();
+                        const Real s3 = x3.getDistortion() * z3.getDistortion();
+                        const Real s4 = x4.getDistortion() * z4.getDistortion();
+                        const Real s5 = x5.getDistortion() * z5.getDistortion();
+
+                        assert(std::isfinite(s0));
+                        assert(std::isfinite(s1));
+                        assert(std::isfinite(s2));
+                        assert(std::isfinite(s3));
+                        assert(std::isfinite(s4));
+                        assert(std::isfinite(s5));
+
+                        kernel(m_k0, x0, z0);
+                        kernel(m_k1, x1, z1);
+                        kernel(m_k2, x2, z2);
+                        kernel(m_k3, x3, z3);
+                        kernel(m_k4, x4, z4);
+                        kernel(m_k5, x5, z5);
+
+                        for (size_t l = 0; l < testfe.getCount(); ++l)
+                        {
+                          const auto& teb = testfe.getBasis(l);
+                          for (size_t m = 0; m < trialfe.getCount(); ++m)
+                          {
+                            const auto& trb = trialfe.getBasis(m);
+                            const auto trv0 = trb(rx0);
+                            const auto tev0 = teb(rz0);
+                            const auto trv1 = trb(rx1);
+                            const auto tev1 = teb(rz1);
+                            const auto trv2 = trb(rx2);
+                            const auto tev2 = teb(rz2);
+                            const auto trv3 = trb(rx3);
+                            const auto tev3 = teb(rz3);
+                            const auto trv4 = trb(rx4);
+                            const auto tev4 = teb(rz4);
+                            const auto trv5 = trb(rx5);
+                            const auto tev5 = teb(rz5);
+
+                            m_matrix(l, m) += factor * s0 * Math::dot(m_k0 * trv0, tev0);
+                            m_matrix(l, m) += factor * s1 * Math::dot(m_k1 * trv1, tev1);
+                            m_matrix(l, m) += factor * s2 * Math::dot(m_k2 * trv2, tev2);
+                            m_matrix(l, m) += factor * s3 * Math::dot(m_k3 * trv3, tev3);
+                            m_matrix(l, m) += factor * s4 * Math::dot(m_k4 * trv4, tev4);
+                            m_matrix(l, m) += factor * s5 * Math::dot(m_k5 * trv5, tev5);
+                          }
+                        }
+                      }
+                    }
                   }
                 }
+                m_distortion = 1;
+                m_weight = 1;
                 break;
               }
               default:
@@ -3800,7 +4496,7 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
                     m_trv = trialfe.getBasis(m)(rx);
-                    m_matrix(l, m) = (m_mk * m_trv).dot(m_tev);
+                    m_matrix(l, m) = Math::dot(m_mk * m_trv, m_tev);
                   }
                 }
                 break;
@@ -3831,7 +4527,7 @@ namespace Rodin::Variational
               for (size_t m = 0; m < trialfe.getCount(); ++m)
               {
                 m_trv = trialfe.getBasis(m)(rx);
-                m_matrix(l, m) = (m_mk * m_trv).dot(m_tev);
+                m_matrix(l, m) = Math::dot(m_mk * m_trv, m_tev);
               }
             }
           }
@@ -3844,16 +4540,19 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the element matrix.
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_distortion * m_weight * m_matrix(te, tr);
       }
 
+      /// @brief Returns the region the trial function is integrated over.
       Geometry::Region getTrialRegion() const override
       {
         return getIntegrand().getLHS().getRegion();
       }
 
+      /// @brief Returns the region the test function is integrated over.
       virtual Geometry::Region getTestRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -3863,6 +4562,17 @@ namespace Rodin::Variational
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_trp;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_tep;
+
+      /**
+       * @brief Points and weights on @f$ [0, 1] @f$ for the collapsed
+       * variables of a Sauter--Schwab transformation.
+       *
+       * One rule, applied in each of the four directions as a tensor product.
+       * Its size follows from the integrator's order, so setOrder() controls
+       * how finely the regularised integrand is resolved --- which is the only
+       * knob that matters once the transformation has removed the singularity.
+       */
+      std::vector<std::pair<Real, Real>> m_collapsed;
 
       const QF::Centroid m_qfs;
       Optional<QF::Centroid> m_qftr;
@@ -3879,7 +4589,6 @@ namespace Rodin::Variational
 
       Math::Matrix<ScalarType> m_matrix;
   };
-  /// @endcond
 }
 
 #endif

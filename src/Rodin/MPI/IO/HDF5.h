@@ -14,21 +14,21 @@
  * Provides MeshPrinter and MeshLoader specializations for
  * `Mesh<Context::MPI>` using the HDF5 file format.
  *
- * Each MPI rank persists its own local shard independently: the printer
- * delegates to `MeshPrinter<FileFormat::HDF5, Context::Local>` to write the
- * base mesh topology and then appends shard-specific metadata (ownership
+ * Each MPI rank persists its own local @ref Rodin::Geometry::Shard "shard" independently: the printer
+ * delegates to @ref Rodin::IO::MeshPrinter "MeshPrinter<FileFormat::HDF5, Context::Local>" to write the
+ * base mesh topology and then appends @ref Rodin::Geometry::Shard "shard"-specific metadata (ownership
  * flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the
  * `/Shard/...` HDF5 group.
  *
- * The loader delegates to `MeshLoader<FileFormat::HDF5, Context::Local>` to
- * restore the base mesh and then reconstructs the MPI shard metadata needed
+ * The loader delegates to @ref Rodin::IO::MeshLoader "MeshLoader<FileFormat::HDF5, Context::Local>" to
+ * restore the base mesh and then reconstructs the MPI @ref Rodin::Geometry::Shard "shard" metadata needed
  * for distributed assembly from the `/Shard/...` HDF5 datasets written by the
  * MPI printer.
  *
- * @see MeshPrinter
- * @see MeshLoader
- * @see Geometry::Mesh<Context::MPI>
- * @see Geometry::Shard
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a>
+ * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a>
+ * @see <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Geometry::Mesh<Context::MPI></a>
+ * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Geometry::Shard</a>
  */
 
 #include "Rodin/IO/HDF5.h"
@@ -44,15 +44,16 @@ namespace Rodin::IO
   /**
    * @brief Loads a distributed MPI mesh from an HDF5 file.
    *
-   * Each MPI rank independently loads its local shard from the given HDF5 file
-   * path using the canonical local mesh HDF5 layout and the vertex/cell shard
+   * Each MPI rank independently loads its local @ref Rodin::Geometry::Shard "shard" from the given HDF5 file
+   * path using the canonical local mesh HDF5 layout and the vertex/cell @ref Rodin::Geometry::Shard "shard"
    * metadata stored under `/Shard/...`.  The file is expected to have been
    * produced by `MeshPrinter<FileFormat::HDF5, Context::MPI>`.
    *
    * @note Each rank must be given a rank-specific file path (e.g. via
    *       the callable filename overload on Mesh<Context::MPI>::load).
    *
-   * @see MeshLoader<FileFormat::HDF5, Context::Local>
+   * @ingroup MeshLoaderSpecializations
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader<FileFormat::HDF5, Context::Local></a>
    */
   template <>
   class MeshLoader<FileFormat::HDF5, Context::MPI>
@@ -286,11 +287,11 @@ namespace Rodin::IO
    * file path.  The process consists of two phases:
    *
    * 1. **Base mesh** — delegated to
-   *    `MeshPrinter<FileFormat::HDF5, Context::Local>`, which writes the
+   *    @ref Rodin::IO::MeshPrinter "MeshPrinter<FileFormat::HDF5, Context::Local>", which writes the
    *    canonical `/Mesh/...` datasets (vertices, connectivity, attributes,
    *    transformations).
    *
-   * 2. **Shard metadata** — the file is reopened in read-write mode and
+   * 2. @ref Rodin::Geometry::Shard "Shard" metadata — the file is reopened in read-write mode and
    *    the following datasets are appended under `/Shard/`:
    *
    *    | Dataset | Type | Description |
@@ -308,8 +309,9 @@ namespace Rodin::IO
    * @note Each rank must be given a rank-specific file path (e.g. via
    *       the callable filename overload on Mesh<Context::MPI>::save).
    *
-   * @see MeshPrinter<FileFormat::HDF5, Context::Local>
-   * @see Geometry::Shard
+   * @ingroup PrinterSpecializations
+   * @see <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshPrinter<FileFormat::HDF5, Context::Local></a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_shard.html">Geometry::Shard</a>
    */
   template <>
   class MeshPrinter<FileFormat::HDF5, Context::MPI>

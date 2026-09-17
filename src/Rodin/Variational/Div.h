@@ -36,13 +36,22 @@
 #include "TrialFunction.h"
 #include "RealFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
     * @defgroup DivSpecializations Div Template Specializations
     * @brief Template specializations of the Div class.
-    * @see Div
+    * @see @ref Div
+    *
+    * | Specialization | Description |
+    * |----------------|-------------|
+    * | @ref DivBase "DivBase<GridFunction<FES, Data>, Derived>" | Generic divergence base for vector-valued grid functions. |
+    * | @ref Div "Div<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Divergence of a discontinuous P0g grid function. |
+    * | @ref Div "Div<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Divergence of a P0g shape-function expression. |
+    * | @ref Div "Div<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Divergence of an H1 grid function. |
+    * | @ref Div "Div<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Divergence of an H1 shape-function expression. |
+    * | @ref Div "Div<P1<Scalar, Mesh>, GridFunction<P1<Scalar, Mesh>, Data>>" | Divergence of a P1 grid function. |
+    * | @ref Div "Div<P1<Scalar, Mesh>, ShapeFunction<NestedDerived, P1<Scalar, Mesh>, Space>>" | Divergence of a P1 shape-function expression. |
     */
 
   /**
@@ -201,6 +210,7 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /// @brief Interpolates at an integration point.
       constexpr
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
@@ -210,6 +220,7 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
@@ -228,5 +239,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

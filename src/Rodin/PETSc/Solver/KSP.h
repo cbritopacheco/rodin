@@ -23,9 +23,9 @@
  * - Command-line overrides via `KSPSetFromOptions` (called inside `solve`).
  * - Automatic solution vector allocation when `x == PETSC_NULL`.
  *
- * @see Rodin::PETSc::Solver::CG,
- *      Rodin::PETSc::Solver::GMRES,
- *      Rodin::PETSc::Solver::SNES
+ * @see <a href="class_rodin_1_1_solver_1_1_c_g_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::PETSc::Solver::CG</a>
+ * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::PETSc::Solver::GMRES</a>
+ * @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::PETSc::Solver::SNES</a>
  */
 
 #include <petscksp.h>
@@ -48,9 +48,9 @@ namespace Rodin::Solver
    * Combines programmatic configuration (tolerances, type, preconditioner)
    * with PETSc command-line overrides (`-ksp_type`, `-ksp_rtol`, …).
    *
-   * @see Rodin::Solver::CG<PETSc::Math::LinearSystem>,
-   *      Rodin::Solver::GMRES<PETSc::Math::LinearSystem>,
-   *      Rodin::Solver::SNES
+   * @see <a href="class_rodin_1_1_solver_1_1_c_g_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::Solver::CG<PETSc::Math::LinearSystem></a>
+   * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::Solver::GMRES<PETSc::Math::LinearSystem></a>
+   * @see <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html">Rodin::Solver::SNES</a>
    */
   class KSP
     : public LinearSolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
@@ -122,6 +122,12 @@ namespace Rodin::Solver
                          PetscReal abstol,
                          PetscReal dtol,
                          PetscInt  maxIt) noexcept;
+
+      /// @brief Returns the iteration count from the most recent solve.
+      std::size_t getIterationNumber() const;
+
+      /// @brief Returns the residual norm from the most recent solve.
+      Real getError() const;
 
       /**
        * @brief Sets an explicit preconditioner matrix.

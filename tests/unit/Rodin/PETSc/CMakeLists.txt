@@ -145,6 +145,46 @@ if (RODIN_USE_MPI)
     )
     rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPISubMeshGridFunctionTest_np${np})
   endforeach()
+  add_executable(RodinPETScMPIKSPFactorizationReuseTest MPIKSPFactorizationReuseTest.cpp)
+  target_link_libraries(RodinPETScMPIKSPFactorizationReuseTest
+    PUBLIC
+    GTest::gtest
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+    Rodin::MPI
+    Rodin::PETSc)
+
+  foreach(np 2 4)
+    add_test(
+      NAME RodinPETScMPIKSPFactorizationReuseTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIKSPFactorizationReuseTest>)
+    set_tests_properties(RodinPETScMPIKSPFactorizationReuseTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed"
+      TIMEOUT 120
+    )
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIKSPFactorizationReuseTest_np${np})
+  endforeach()
+
 endif()
 
 add_subdirectory(IO)
+
+add_executable(RodinPETScKSPFactorizationReuseTest KSPFactorizationReuseTest.cpp)
+target_link_libraries(RodinPETScKSPFactorizationReuseTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  Rodin::PETSc)
+add_test(
+  NAME RodinPETScKSPFactorizationReuseTest
+  COMMAND $<TARGET_FILE:RodinPETScKSPFactorizationReuseTest>
+)
+set_tests_properties(RodinPETScKSPFactorizationReuseTest PROPERTIES
+  LABELS "unit;petsc"
+)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScKSPFactorizationReuseTest)

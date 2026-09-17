@@ -44,7 +44,10 @@
  * auto symmetry = InterfaceIntegral(Jump(u), Average(Grad(v)));
  * ```
  *
- * @see FaceIntegral, BoundaryIntegral, Jump, Average
+ * @see <a href="_face_integral_8h.html">FaceIntegral</a>
+ * @see <a href="_boundary_integral_8h.html">BoundaryIntegral</a>
+ * @see <a href="_jump_8h.html">Jump</a>
+ * @see <a href="_average_8h.html">Average</a>
  */
 #ifndef RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
 #define RODIN_VARIATIONAL_INTERFACEINTEGRAL_H
@@ -55,14 +58,18 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
    * @defgroup InterfaceIntegralSpecializations InterfaceIntegral Template Specializations
    * @brief Template specializations of the InterfaceIntegral class.
    *
-   * @see InterfaceIntegral
+   * @see @ref InterfaceIntegral
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref InterfaceIntegral "InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>" | Interior-face bilinear integrator for dot products of trial and test shape-function expressions. |
+   * | @ref InterfaceIntegral "InterfaceIntegral<FunctionBase<FunctionDerived>>" | Interior-face integrator for a general function expression. |
    */
 
   /**
@@ -158,10 +165,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c InterfaceIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   InterfaceIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
     -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c InterfaceIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   InterfaceIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
@@ -249,10 +258,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c InterfaceIntegral.
   template <class NestedDerived, class FES>
   InterfaceIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> InterfaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
+  /// @brief Deduction guide for @c InterfaceIntegral.
   template <class LHSDerived, class RHSDerived, class FES>
   InterfaceIntegral(
       const FunctionBase<LHSDerived>&,
@@ -263,5 +274,4 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
 }
 
-/// @endcond
 #endif

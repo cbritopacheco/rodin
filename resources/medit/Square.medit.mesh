@@ -1,34 +1,3 @@
-MeshVersionFormatted
-2
-
-Dimension
-2
-
-Vertices
-4
-0 0 1
-1 0 1
-1 1 1
-0 1 1
-
-Edges
-5
-1 2 1
-2 3 2
-3 4 3
-4 1 4
-2 4 5
-
-Triangles
-2
-1 2 4 1
-2 3 4 2
-
-Quadrilaterals
-0
-
-Tetrahedra
-0
-
-
-End
+version https://git-lfs.github.com/spec/v1
+oid sha256:4e6bc16bf5c86a4b2227e63ef5668308dc3e6bcfba069ad72855f7fcc9c7efa4
+size 177

@@ -101,6 +101,15 @@ target_link_libraries(LevelSetWNGIRAdvectionP2
   Rodin::Solver
   Rodin::Variational)
 
+foreach(target IN ITEMS
+    LevelSetWNGIRReconstruction LevelSetWNGIRReconstructionP2
+    LevelSetWNGIRReconstruction3D LevelSetWNGIRReconstruction3DP2
+    LevelSetWNGIRSweep LevelSetWNGIRSweepP2
+    LevelSetWNGIRSweep3D LevelSetWNGIRSweep3DP2
+    LevelSetWNGIRAdvection LevelSetWNGIRAdvectionP2)
+  target_link_libraries(${target} PRIVATE Rodin::MMG)
+endforeach()
+
 add_executable(Skin Skin.cpp)
 target_link_libraries(Skin
   PUBLIC
@@ -128,6 +137,11 @@ target_link_libraries(Square
 
 add_executable(UniformGrid UniformGrid.cpp)
 target_link_libraries(UniformGrid
+  PUBLIC
+  Rodin::Geometry)
+
+add_executable(ExtrudeTriSurface ExtrudeTriSurface.cpp)
+target_link_libraries(ExtrudeTriSurface
   PUBLIC
   Rodin::Geometry)
 

@@ -66,7 +66,7 @@
   std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;
   // For an 8×8 grid of triangles: 128 DOFs (= 128 cells)
 
-  // Project a function: each cell stores the function value at its centroid
+  // Assign a function: each cell stores the function value at its centroid
   GridFunction indicator(Wh);
   indicator = [](const Geometry::Point& p) {
     return (p.x() < 0.5) ? 1.0 : 0.0;
@@ -232,7 +232,7 @@
   function living in a finite element space. It stores the coefficients
   (DOF values) and can be evaluated, saved, and loaded.
 
-  @subsection fem-spaces-gf-creation Creating and Projecting
+  @subsection fem-spaces-gf-creation Creating and Assigning
 
   Grid functions are created by associating them with a finite element
   space. They can be initialized from lambda functions, constants, or
@@ -244,18 +244,19 @@
   // Create a grid function in the P1 space
   GridFunction gf(Vh);
 
-  // Project a smooth function onto the FE space
+  // Interpolate a smooth function into the FE space
   gf = [](const Geometry::Point& p) {
     return std::sin(M_PI * p.x()) * std::sin(M_PI * p.y());
   };
 
-  // Project from a constant
+  // Assign from a constant
   GridFunction constant(Vh);
   constant = 1.0;
   @endcode
 
-  For P0 (piecewise constant) spaces, the projection computes cell
-  averages:
+  Assignment applies the finite element space's DOF functionals; it is not an
+  `L2` projection. For P0 (piecewise constant) spaces, assignment computes the
+  cellwise P0 coefficients:
 
   @code{.cpp}
   P0 Wh(mesh);
@@ -267,8 +268,8 @@
 
   @subsection fem-spaces-gf-gradient Computing Gradients
 
-  The gradient of a scalar grid function can be projected into a
-  vector-valued space:
+  The gradient of a scalar grid function can be assigned into a vector-valued
+  space:
 
   @code{.cpp}
   P1 scalarVh(mesh);
@@ -278,7 +279,7 @@
              - (p.y() - 0.5) * (p.y() - 0.5);
   };
 
-  // Project the gradient into a vector P1 space
+  // Interpolate the gradient into a vector P1 space
   size_t d = mesh.getSpaceDimension();
   P1 vectorVh(mesh, d);
 

@@ -28,11 +28,13 @@ jobs:
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
+      RODIN_INSTALL_RESOURCES: "OFF"
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
@@ -59,6 +61,7 @@ jobs:
         env:
           RODIN_USE_MPI: ${{ matrix.mpi }}
           RODIN_USE_PETSC: ${{ matrix.petsc }}
+          RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
 
       - name: Archive installation artifacts on failure
         if: failure()
@@ -80,11 +83,13 @@ jobs:
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
+      RODIN_INSTALL_RESOURCES: "OFF"
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
 
       - name: Setup Python
         run: |
@@ -131,6 +136,7 @@ jobs:
         env:
           RODIN_USE_MPI: ${{ matrix.mpi }}
           RODIN_USE_PETSC: ${{ matrix.petsc }}
+          RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
 
       - name: Archive installation artifacts on failure
         if: failure()

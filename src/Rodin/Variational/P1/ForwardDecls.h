@@ -19,9 +19,15 @@ namespace Rodin::Variational
    * @tparam Range Range value type
    *
    * @note For an overview of all the possible specializations of the
-   * P1 class, please see `P1Specializations`.
+   * P1 class, please see
+   * <a href="_variational_2_p1_8h.html">P1Specializations</a>.
    *
-   * @see P1ElementSpecializations
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P1Element "P1Element<Scalar>" | Scalar-valued continuous piecewise linear element. |
+   * | @ref P1Element "P1Element<SpatialVector<Scalar>>" | Vector-valued continuous piecewise linear element. |
+   *
+   * @see <a href="_p1_element_8h.html">P1ElementSpecializations</a>
    */
   template <class Range>
   class P1Element;
@@ -40,9 +46,16 @@ namespace Rodin::Variational
    * for a given vector dimension @f$ d \in \mathbb{N} @f$.
    *
    * @note For an overview of all the possible specializations of the
-   * P1 class, please see `P1Specializations`.
+   * P1 class, please see
+   * <a href="_variational_2_p1_8h.html">P1Specializations</a>.
    *
-   * @see `P1Specializations`
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P1 "P1<Scalar, Mesh<Context::Local>>" | Scalar-valued local-mesh continuous piecewise linear space. |
+   * | @ref P1 "P1<SpatialVector<Scalar>, Mesh<Context::Local>>" | Vector-valued local-mesh continuous piecewise linear space. |
+   * | @ref P1 "P1<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh continuous piecewise linear space. |
+   *
+   * @see <a href="_variational_2_p1_8h.html">P1Specializations</a>
    */
   template <class Range, class Mesh>
   class P1;

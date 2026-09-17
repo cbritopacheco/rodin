@@ -1,3 +1,19 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file CCMLC2014_0D.cpp
+ * @brief Standalone driver for the 0D CCMLC2014 heart model.
+ *
+ * Integrates the lumped left-ventricle model of Caruel, Chabiniok, Moireau,
+ * Lecarpentier and Chapelle (2014) closed by a four-element Windkessel, driven
+ * by a periodic activation, and writes the resulting pressure/volume/flow
+ * history. No mesh and no finite element space are involved: this is the 0D
+ * reference the 3D coronary and atrium examples couple to.
+ */
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -15,9 +31,12 @@ static Real periodic_activation(Real t)
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
 
-  if (tau < 0.13)  return 0.0;
-  if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
-  if (tau < 0.281) return 35.0;
+  if (tau < 0.13)
+    return 0.0;
+  if (tau < 0.141)
+    return 35.0 * ((tau - 0.13) / 0.011);
+  if (tau < 0.281)
+    return 35.0;
   if (tau < 0.361)
     return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
   if (tau < 0.45)
@@ -115,44 +134,43 @@ int main()
 
   // Geometry / inertia
   in.rho = 1.0e3;
-  in.R0 = 2.36e-2;
-  in.d0 = 1.42e-2;
+  in.R0 = 2.4e-2;
+  in.d0 = 1.45e-2;
 
   // Active law parameters
-  in.Es = 3.0e7;
+  in.Es = 3.0e6;
   in.mu = 70.0;
   in.eta = 70.0;
   in.alpha = 1.5;
   in.alphaR = 0.12;
   in.k0 = 1.0e5;
-  in.sigma0 = 1.24e5;
+  in.sigma0 = 1.25e5;
 
   // Windkessel
-  in.Rp = 8.0e6;
-  in.Cp = 2.5e-9;
+  in.Rp = 5.0e7;
+  in.Cp = 6e-9;
   in.Rd = 1.0e8;
-  in.Cd = 1.0e-8;
+  in.Cd = 1.0e-9;
 
-  in.mu_0 = 0.0526559;
-  in.mu_Inf = 0.0052704;
-  in.lambda = 0.2435;
-  in.n = 0.2079;
-  in.m = 0.0035;
-  in.yasuda = 1.541;
+  in.mu_0 = 5.35;
+  in.mu_Inf = 0.0033;
+  in.lambda = 14.445;
+  in.n = 0.8;
+  in.m = 0.003;
+  in.yasuda = 0.62;
   in.mu_plasma = 0.0032704;
   in.k_0 = 3.5678;
   in.gamma_c = 10.2754;
   in.k_Inf = 1.5352;
-  in.proximalRadius = 0.015;
-  in.proximalLength = 0.4;
-  in.distalRadius = 0.0007;
-  in.distalLength = 0.004;
-  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
-
+  in.proximalRadius = 0.0125;
+  in.proximalLength = 0.35;
+  in.distalRadius = 0.002;
+  in.distalLength = 0.55;
+  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Cross;
   // Valve parameters
-  in.Kat = 9.0e-6;
-  in.Kp  = 5.0e-10;
-  in.Kar = 1.3e-5;
+  in.Kat = 6.0e-7;
+  in.Kp = 5.0e-11;
+  in.Kar = 1.0e-7;
 
   in.cavityCapacity = 5.0e-12;
 
@@ -187,19 +205,19 @@ int main()
 
   Model model(in);
   model.setMaxIterations(200)
-       .setAbsoluteTolerance(1e-8)
-       .setRelativeTolerance(1e-8)
-       .setStepTolerance(1e-10)
-       .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   Model::State s0;
   s0.t = 0.0;
 
-  s0.y   = 0.0;
-  s0.v   = 0.0;
-  s0.pv  = in.pAt(0.0) - 100.0;
+  s0.y = 0.0;
+  s0.v = 0.0;
+  s0.pv = in.pAt(0.0) - 100.0;
   s0.par = 11000.0;
-  s0.pd  = 10000.0;
+  s0.pd = 10000.0;
 
   // Initial local active state
   s0.ec = in.initFibDef;
@@ -238,17 +256,15 @@ int main()
     std::cout << "Step " << i << ": t = " << model.getState().t << "\n";
 
     const auto rep = model.step(dt);
-    std::cout << "  Newton step: "
-              << (rep.converged ? "converged" : "not converged")
+    std::cout << "  Newton step: " << (rep.converged ? "converged" : "not converged")
               << ", iterations = " << rep.iterations
               << ", final residual = " << rep.finalResidual
-              << ", final step norm = " << rep.finalStepNorm
-              << '\n';
+              << ", final step norm = " << rep.finalStepNorm << '\n';
 
     if (!rep.converged)
     {
-      std::cerr << "Solver failed to converge at step "
-                << i << ", t = " << model.getState().t << "\n";
+      std::cerr << "Solver failed to converge at step " << i
+                << ", t = " << model.getState().t << "\n";
       break;
     }
 

@@ -34,6 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
@@ -58,6 +59,7 @@ jobs:
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
@@ -83,6 +85,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          lfs: false
       - name: actions/setup-python#577
         run: |
           brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
@@ -106,6 +109,7 @@ jobs:
           -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
@@ -116,4 +120,3 @@ jobs:
           -DOpenMP_ROOT=/opt/homebrew/opt/libomp
       - name: Build
         run: cmake --build ${{github.workspace}}/build
-

@@ -47,7 +47,7 @@ namespace Rodin::Geometry
    *
    * @tparam T Type of data to associate with each polytope type
    *
-   * @see Polytope::Type
+   * @see <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7">Polytope::Type</a>
    */
   template <class T>
   class GeometryIndexed

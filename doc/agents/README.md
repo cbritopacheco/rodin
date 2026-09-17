@@ -14,6 +14,13 @@ Hierarchical: read top-down, stop at the depth your task needs.
 
 - [architecture.md](architecture.md) — the module map: every directory under
   `src/Rodin/`, what it is, how the layers stack.
+- [workflows.md](workflows.md) — operational checklists for extending nodes,
+  finite element spaces, assembly, solvers, IO, and Solid terms.
+- [backend-support.md](backend-support.md) — what "supported" means across
+  local Eigen, OpenMP, MPI, and PETSc code paths.
+- [numerical-contracts.md](numerical-contracts.md) — interpolation vs `L2`
+  projection, problem signs, linear-system lifetimes, quadrature, and
+  residual/tangent consistency.
 
 ## Level 3 — per-domain detail (open the one your task touches)
 
@@ -23,6 +30,8 @@ Hierarchical: read top-down, stop at the depth your task needs.
 - [geometry.md](geometry.md) — the mesh model: polytopes, connectivity,
   transformations, Point evaluation, mesh algebra (skin/trim/keep/trace),
   SubMesh, builders, partitioning, classification utilities.
+- [quadrature.md](quadrature.md) — quadrature families, exactness ranges,
+  positive conical-product fallbacks, dispatch, caching, and verification.
 - [variational.md](variational.md) — the form language in depth: operator
   taxonomy, shape-function grading, finite element spaces (P0, P0g, P1,
   high-order H1), GridFunction, integrals, boundary conditions, Problem.

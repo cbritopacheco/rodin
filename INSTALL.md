@@ -18,6 +18,7 @@ This guide provides instructions for building and installing the Rodin finite el
 - **C++20 compatible compiler** - GCC 10+, Clang 10+, or MSVC 2019+
 - **Boost 1.74+** - Required components: `filesystem`, `serialization`
 - **Eigen3 3.4+** - Linear algebra library
+- **Git LFS** - Required when cloning or installing resources
 
 ### Optional Dependencies
 
@@ -38,6 +39,17 @@ cd rodin
 ```
 
 **Important:** Use `--recursive` to initialize git submodules (eigen, googletest, etc.).
+All files under `resources/` are Git LFS objects. Install Git LFS and hydrate
+them after cloning when building or installing resources:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+If you are building only the library, headers, tests, or CI-style install
+checks, you can leave LFS objects unresolved and configure with
+`-DRODIN_INSTALL_RESOURCES=OFF`.
 
 If you've already cloned without `--recursive`, run:
 
@@ -92,6 +104,10 @@ This will install:
 - **Headers** to `${CMAKE_INSTALL_PREFIX}/include/Rodin`
 - **CMake config files** to `${CMAKE_INSTALL_PREFIX}/lib/cmake/Rodin`
 - **Resources** to `${CMAKE_INSTALL_PREFIX}/share/Rodin/resources`
+
+All resource files are stored with Git LFS. Run `git lfs pull` before
+installing the full resource tree, or configure with
+`-DRODIN_INSTALL_RESOURCES=OFF` for a library-only install.
 
 ### User-local Installation
 
@@ -270,6 +286,10 @@ brew install eigen                   # macOS
 # For Boost
 sudo apt-get install libboost-all-dev  # Ubuntu/Debian
 brew install boost                      # macOS
+
+# For Git LFS resources
+sudo apt-get install git-lfs  # Ubuntu/Debian
+brew install git-lfs          # macOS/Homebrew
 ```
 
 ### Submodules Not Initialized
@@ -279,6 +299,20 @@ If you see errors about missing third-party libraries:
 ```bash
 git submodule update --init --recursive
 ```
+
+### Git LFS Resources
+
+All example, test, and other resource payloads are stored with Git LFS.
+If these files are missing or examples fail while reading meshes, install Git
+LFS and hydrate the resources:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+For library-only builds and CI jobs that do not need examples or installed
+resources, configure with `-DRODIN_INSTALL_RESOURCES=OFF`.
 
 ### Custom Dependency Paths
 
