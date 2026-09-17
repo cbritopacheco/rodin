@@ -4772,7 +4772,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=11,
+		weight=12,
 		width=2];
 	"Rodin/Variational/H1/H1.h" -> "Rodin/Variational/H1/Fekete.h";
 	"Rodin/Variational/H1/GLL.h"	[colorscheme=spectral9,
@@ -4979,11 +4979,11 @@ strict digraph "" {
 	"Rodin/Variational/H1/Dubiner.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=13,
+		weight=16,
 		width=2];
 	"Rodin/Variational/H1/Dubiner.h" -> "Rodin/Math/Common.h";
 	"Rodin/Variational/H1/Dubiner.h" -> "Rodin/Math/Matrix.h";
@@ -5008,7 +5008,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=10,
+		weight=12,
 		width=2];
 	"Rodin/Variational/H1/Fekete.h" -> "Rodin/Variational/H1/WarpBlend.h";
 	"Rodin/Variational/H1/JacobiPolynomial.h" -> "Rodin/Types.h";
@@ -5022,11 +5022,11 @@ strict digraph "" {
 	"Rodin/Variational/H1/LagrangeBasis.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=6,
+		fontsize=7,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=7,
+		weight=9,
 		width=2];
 	"Rodin/Variational/H1/WarpBlend.h" -> "Rodin/Variational/H1/LagrangeBasis.h";
 	"Rodin/Variational/H1/WarpBlend.h" -> "Rodin/Variational/H1/GLL.h";
