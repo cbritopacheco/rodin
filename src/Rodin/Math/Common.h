@@ -615,7 +615,9 @@ namespace Rodin::Math
   constexpr
   auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
   {
-    return lhs.dot(rhs);
+    assert(lhs.size() == rhs.size());
+    const auto size = static_cast<Eigen::Index>(lhs.size());
+    return dot(lhs.getData().head(size), rhs.getData().head(size));
   }
 
   /**
@@ -631,7 +633,12 @@ namespace Rodin::Math
   constexpr
   auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
   {
-    return lhs.dot(rhs);
+    assert(lhs.rows() == rhs.rows());
+    assert(lhs.cols() == rhs.cols());
+    const auto rows = static_cast<Eigen::Index>(lhs.rows());
+    const auto cols = static_cast<Eigen::Index>(lhs.cols());
+    return dot(
+      lhs.getData().topLeftCorner(rows, cols), rhs.getData().topLeftCorner(rows, cols));
   }
 
   /**
@@ -647,7 +654,7 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
   {
-    return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
+    return dot(lhs, rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
   }
 
   /**
@@ -663,7 +670,7 @@ namespace Rodin::Math
   constexpr
   auto dot(const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
+    return dot(lhs.getData().head(static_cast<Eigen::Index>(lhs.size())), rhs);
   }
 
   /**
@@ -679,7 +686,9 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
   {
-    return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
+    const auto rows = static_cast<Eigen::Index>(rhs.rows());
+    const auto cols = static_cast<Eigen::Index>(rhs.cols());
+    return dot(lhs, rhs.getData().topLeftCorner(rows, cols));
   }
 
   /**
@@ -695,7 +704,9 @@ namespace Rodin::Math
   constexpr
   auto dot(const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
+    const auto rows = static_cast<Eigen::Index>(lhs.rows());
+    const auto cols = static_cast<Eigen::Index>(lhs.cols());
+    return dot(lhs.getData().topLeftCorner(rows, cols), rhs);
   }
 
   /**
