@@ -229,7 +229,6 @@
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -465,19 +464,24 @@ namespace Rodin::Variational
       using ValueType =
         FunctionBase<ValueDerived>;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Range type of the finite element space.
       using FESRangeType =
         typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<ValueDOFs,
           DirichletBC>;
 
+      /// @brief Assembly backend type.
       using AssemblyType =
         DefaultAssemblyType;
 
@@ -525,9 +529,9 @@ namespace Rodin::Variational
         return on(FlatSet<Geometry::Attribute>{bdrAtr});
       }
 
-      template <class A1, class A2, class ... As>
-      constexpr
-      DirichletBC& on(A1 a1, A2 a2, As... as)
+      template <class A1, class A2, class... As>
+      /// @brief Restricts the boundary condition to the given mesh attributes.
+      constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
         return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
       }
@@ -600,6 +604,7 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
+      /// @brief Gets the assembly backend.
       const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
         assert(m_assembly);
@@ -804,52 +809,67 @@ namespace Rodin::Variational
       /// Identified-DOFs alternative populated by this specialization
       using IdentifiedDOFs = typename Parent::IdentifiedDOFs;
 
+      /// @brief Values identified by a periodic boundary condition.
       using IdentificationValues = typename Parent::IdentificationValues;
 
       /// Variant DOFs type
       using DOFs = typename Parent::DOFs;
 
+      /// @brief Mesh type of the finite element space.
       using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Range type of the finite element space.
       using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Execution context of the finite element space mesh.
       using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Assembly backend chosen by default for this problem.
       using DefaultAssemblyType =
         typename Assembly::Default<FESMeshContextType>::template Type<IdentifiedDOFs,
           DirichletBC>;
 
+      /// @brief Assembly backend type.
       using AssemblyType = DefaultAssemblyType;
 
+      /// @brief Type-erased base for the defect a Dirichlet constraint imposes.
       class DefectBase
       {
         public:
           virtual ~DefectBase() = default;
 
+          /// @brief Evaluates the expression at a geometric point.
           virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
 
+          /// @brief Creates a polymorphic copy.
           virtual DefectBase* copy() const noexcept = 0;
       };
 
+      /// @brief Defect a Dirichlet constraint imposes on the trial function.
       template <class DefectDerived>
       class Defect final : public DefectBase
       {
         public:
+          /// @brief Type of the prescribed value.
           using FunctionType = FunctionBase<DefectDerived>;
 
+          /// @brief Constructs the defect from the prescribed value.
           explicit Defect(const FunctionType& value)
             : m_value(value.copy())
           {}
 
+          /// @brief Copy constructor.
           Defect(const Defect& other)
             : m_value(other.m_value->copy())
           {}
 
+          /// @brief Evaluates the expression at a geometric point.
           FESRangeType getValue(const Geometry::Point& p) const override
           {
             return (*m_value)(p);
           }
 
+          /// @brief Creates a polymorphic copy.
           Defect* copy() const noexcept override
           {
             return new Defect(*this);
@@ -1078,6 +1098,7 @@ namespace Rodin::Variational
         return m_values;
       }
 
+      /// @brief Gets the assembly backend.
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {
         return m_assembly;
@@ -1108,6 +1129,7 @@ namespace Rodin::Variational
     const TrialFunction<Solution, FES1>&, const ShapeFunctionBase<Derived2, FES2, Sp>&)
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 
+  /// @brief Deduction guide for @c DirichletBC.
   template <class Solution, class FES1, class Derived2, class FES2,
     ShapeFunctionSpaceType Sp, class DefectDerived>
   DirichletBC(const TrialFunction<Solution, FES1>&,
@@ -1115,5 +1137,4 @@ namespace Rodin::Variational
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 
-/// @endcond
 #endif

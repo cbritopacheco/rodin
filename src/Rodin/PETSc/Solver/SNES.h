@@ -44,7 +44,7 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Solver::KSP>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = PETSc::Math::LinearSystem;
   };
 }

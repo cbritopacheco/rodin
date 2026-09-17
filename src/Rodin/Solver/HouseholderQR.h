@@ -54,7 +54,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::HouseholderQR<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }

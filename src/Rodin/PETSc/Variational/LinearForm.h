@@ -86,6 +86,7 @@ namespace Rodin::Variational
       /// @brief Parent class providing the generic `LinearFormBase<Vec>` interface.
       using Parent = LinearFormBase<VectorType>;
 
+      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;

@@ -56,7 +56,6 @@
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
 
@@ -175,10 +174,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
     -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c Integral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   Integral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
@@ -207,19 +208,23 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
+      /// @brief Constructs the integral of the given integrand.
       template <class LHSDerived, class RHSDerived>
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
+      /// @brief Copy constructor.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
@@ -235,10 +240,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class NestedDerived, class FES>
   Integral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
+  /// @brief Deduction guide for @c Integral.
   template <class LHSDerived, class RHSDerived, class FES>
   Integral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
     -> Integral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>>>;
@@ -267,10 +274,12 @@ namespace Rodin::Variational
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
       }
 
+      /// @brief Copy constructor.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
@@ -286,9 +295,9 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Deduction guide for @c Integral.
   template <class FES, class Data>
   Integral(const GridFunction<FES, Data>&) -> Integral<GridFunction<FES, Data>>;
 }
 
-/// @endcond
 #endif

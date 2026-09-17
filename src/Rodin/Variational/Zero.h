@@ -22,7 +22,6 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -90,6 +89,7 @@ namespace Rodin::Variational
         return 0;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -174,6 +174,7 @@ namespace Rodin::Variational
         return v;
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -208,5 +209,4 @@ namespace Rodin::Variational
   using VectorZero = Zero<Math::SpatialVector<Scalar>>;
 }
 
-/// @endcond
 #endif

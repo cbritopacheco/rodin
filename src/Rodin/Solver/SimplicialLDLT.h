@@ -53,7 +53,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::SimplicialLDLT<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -152,10 +152,8 @@ namespace Rodin::Solver
        * @brief Creates a copy of this solver.
        * @returns Pointer to a new SimplicialLDLT instance
        */
-      inline
       /// @brief Returns a polymorphic copy of this solver.
-        SimplicialLDLT*
-        copy() const noexcept override
+      inline SimplicialLDLT* copy() const noexcept override
       {
         return new SimplicialLDLT(*this);
       }

@@ -51,7 +51,6 @@
 
 #include "ForwardDecls.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -166,10 +165,12 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_prod;
   };
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   FaceIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
     -> FaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
   FaceIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
     -> FaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
@@ -198,6 +199,7 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
+      /// @brief Constructs the face integral of the given integrand.
       template <class LHSDerived, class RHSDerived>
       FaceIntegral(
           const FunctionBase<LHSDerived>& lhs,
@@ -205,14 +207,17 @@ namespace Rodin::Variational
         : FaceIntegral(Dot(lhs, rhs))
       {}
 
+      /// @brief Constructs the integrator for the given integrand.
       FaceIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
+      /// @brief Copy constructor.
       FaceIntegral(const FaceIntegral& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       FaceIntegral(FaceIntegral&& other)
         : Parent(std::move(other))
       {}
@@ -231,14 +236,15 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
   };
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class NestedDerived, class FES>
   FaceIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> FaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
+  /// @brief Deduction guide for @c FaceIntegral.
   template <class LHSDerived, class RHSDerived, class FES>
   FaceIntegral(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
     -> FaceIntegral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
 }
 
-/// @endcond
 #endif

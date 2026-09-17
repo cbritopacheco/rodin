@@ -24,6 +24,7 @@
 #include <Rodin/Alert.h>
 #include <Rodin/Math.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Location.h>
 #include <Rodin/QF.h>
 #include <Rodin/FormLanguage.h>
 #include <Rodin/Variational.h>

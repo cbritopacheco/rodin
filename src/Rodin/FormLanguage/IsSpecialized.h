@@ -55,7 +55,7 @@ namespace Rodin::FormLanguage
   template <class T, class Enable = void>
   struct IsSpecialized
   {
-    /// @brief False, no @c Specialized member being declared.
+      /// @brief False, no @c Specialized member being declared.
       static constexpr const bool Value = false;
   };
 
@@ -66,7 +66,7 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsSpecialized<T, std::void_t<decltype(T::Specialized)>>
   {
-    /// @brief What the type reports.
+      /// @brief What the type reports.
       static constexpr const bool Value = T::Specialized;
   };
 }

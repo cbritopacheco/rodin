@@ -34,7 +34,7 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::VectorFunctionBase<Scalar, Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
       /// @brief Derived CRTP function type.
       using DerivedType = Derived;

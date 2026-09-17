@@ -66,7 +66,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::CG<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -209,6 +209,18 @@ namespace Rodin::Solver
         return m_solver.info() == Eigen::Success;
       }
 
+      /// @brief Returns the iteration count from the most recent solve.
+      size_t getIterationNumber() const
+      {
+        return static_cast<size_t>(m_solver.iterations());
+      }
+
+      /// @brief Returns the estimated relative error from the most recent solve.
+      Real getError() const
+      {
+        return static_cast<Real>(m_solver.error());
+      }
+
       /**
        * @brief Creates a copy of this solver.
        * @returns Pointer to a new CG instance
@@ -321,6 +333,18 @@ namespace Rodin::Solver
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
+      }
+
+      /// @brief Returns the iteration count from the most recent solve.
+      size_t getIterationNumber() const
+      {
+        return static_cast<size_t>(m_solver.iterations());
+      }
+
+      /// @brief Returns the estimated relative error from the most recent solve.
+      Real getError() const
+      {
+        return static_cast<Real>(m_solver.error());
       }
 
       /**

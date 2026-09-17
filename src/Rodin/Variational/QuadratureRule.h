@@ -59,7 +59,6 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -103,6 +102,7 @@ namespace Rodin::Variational
 
       /// @brief Integrand expression type.
       using IntegrandType = FunctionBase<FunctionDerived>;
+      /// @brief Range type of the integrand.
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
@@ -859,5 +859,4 @@ namespace Rodin::Variational
   };
 }
 
-/// @endcond
 #endif

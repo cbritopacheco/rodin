@@ -28,7 +28,7 @@ namespace Rodin::Test::Random
     struct UniformIntDistType
     {
       // libc++ rejects char / signed char / unsigned char as IntType.
-      /// @brief Integral type accepted by std::uniform_int_distribution.
+        /// @brief Integral type accepted by std::uniform_int_distribution.
         using type = std::conditional_t<std::is_same_v<T, char> ||
             std::is_same_v<T, signed char> || std::is_same_v<T, unsigned char>,
           int, T>;

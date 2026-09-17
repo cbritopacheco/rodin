@@ -129,10 +129,9 @@ Useful conventions:
 - Prefer plain code text over `@ref` for names that are intentionally not part
   of the generated public reference.
 - Keep generated files and local build output out of `doc/`.
-- Large example/demo meshes and bulky resource payloads should live under
-  `resources/` and be tracked with Git LFS. Documentation images and small
-  guide assets stay in regular Git unless they become large enough to affect
-  ordinary checkout cost.
+- Resource payloads should live under `resources/` and be tracked with Git LFS.
+  Documentation images and guide assets outside `resources/` stay in regular
+  Git unless they become large enough to affect ordinary checkout cost.
 
 ## Agent Knowledge Base
 

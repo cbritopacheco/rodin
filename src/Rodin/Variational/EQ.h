@@ -38,7 +38,6 @@
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -65,39 +64,46 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<EQ<LHSType, RHSType>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       EQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       EQ(const EQ& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       EQ(EQ&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Gets the left-hand side operand.
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->getLHS().getValue(p) == this->getRHS().getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -114,52 +120,52 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /// @brief Deduction guide for @c EQ.
   template <class LHSDerived, class RHSDerived>
   EQ(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto
+  constexpr auto
+  /// @brief Equality comparison of two function expressions.
   operator==(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(lhs, rhs);
   }
 
   template <class RHSDerived>
-  constexpr
-  auto
+  constexpr auto
+  /// @brief Equality comparison of two function expressions.
   operator==(Boolean lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(BooleanFunction(lhs), rhs);
   }
 
   template <class LHSDerived>
-  constexpr
-  auto
+  constexpr auto
+  /// @brief Equality comparison of two function expressions.
   operator==(const FunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return EQ(lhs, BooleanFunction(rhs));
   }
 
   template <class Number, class RHSDerived,
-           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  constexpr
-  auto
+    typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  constexpr auto
+  /// @brief Equality comparison of two function expressions.
   operator==(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(RealFunction(lhs), rhs);
   }
 
   template <class LHSDerived, class Number,
-           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  constexpr
-  auto
+    typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  constexpr auto
+  /// @brief Equality comparison of two function expressions.
   operator==(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return EQ(lhs, RealFunction(rhs));
   }
 }
 
-/// @endcond
 #endif
