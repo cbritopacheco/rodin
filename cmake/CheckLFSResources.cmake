@@ -3,14 +3,8 @@ function(rodin_check_lfs_resources resources_dir)
     return()
   endif()
 
-  file(GLOB_RECURSE _rodin_resource_files
-    "${resources_dir}/*.mesh"
-    "${resources_dir}/*.msh"
-    "${resources_dir}/*.sol"
-    "${resources_dir}/*.stp"
-    "${resources_dir}/*.step"
-    "${resources_dir}/*.gf"
-    "${resources_dir}/*.geo"
+  file(GLOB_RECURSE _rodin_resource_files LIST_DIRECTORIES false
+    "${resources_dir}/*"
   )
 
   foreach(_rodin_resource_file IN LISTS _rodin_resource_files)

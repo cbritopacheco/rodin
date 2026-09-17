@@ -92,14 +92,14 @@
   git clone --recursive https://github.com/cbritopacheco/rodin
   cd rodin
   git lfs install
-  git lfs pull  # needed for large example/resource meshes
+  git lfs pull  # required for resources
   mkdir build && cd build
   cmake .. -DCMAKE_BUILD_TYPE=Release
   make -j4
   @endcode
 
   If you only need the library and headers, configure with
-  `-DRODIN_INSTALL_RESOURCES=OFF` and skip the large Git LFS resource payloads.
+  `-DRODIN_INSTALL_RESOURCES=OFF` and skip hydrating the Git LFS resources.
 
   See the @ref guides-getting-started-installation "Installation guide" for
   detailed instructions, dependency lists, and platform-specific notes.

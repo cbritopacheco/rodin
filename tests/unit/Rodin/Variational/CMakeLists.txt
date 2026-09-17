@@ -665,6 +665,17 @@ gtest_discover_tests(RodinVariationalIntegratorOrderTest
     LABELS unit
 )
 
+add_executable(RodinVariationalRankOneJacobianFormTest RankOneJacobianFormTest.cpp)
+target_link_libraries(RodinVariationalRankOneJacobianFormTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalRankOneJacobianFormTest
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinVariationalQuadratureRuleDispatchTest
   QuadratureRuleDispatchTest.cpp)
 target_link_libraries(RodinVariationalQuadratureRuleDispatchTest
@@ -688,7 +699,3 @@ gtest_discover_tests(RodinVariationalQuadratureRuleSpecializationTest
   PROPERTIES
     LABELS unit
 )
-
-
-
-

@@ -39,7 +39,7 @@ faster than grep.
 
 ```sh
 git submodule update --init --recursive   # first time only
-git lfs pull                              # if examples/full resources are needed
+  git lfs pull                              # required when resources are needed
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j
 ```
@@ -75,6 +75,16 @@ assembly/solver changes, the relevant manufactured tests pass too.
 
 ## Non-negotiable rules (summary — details in doc/agents/conventions.md)
 
+0. **Search Rodin before writing anything.** Establish that the tool or
+   concept does not already exist before adding a helper, a cache, or a
+   bespoke integrator — the form language, `Geometry`'s cached quadrature and
+   `Point`, and the assembly specialisations already cover most needs. See
+   `doc/agents/philosophy.md`, "Search before you build". Concluding that
+   Rodin *lacks* something requires a tree-wide search and a look at
+   `ls src/Rodin` first — capabilities are named by top-level modules
+   (`Location`, `Distance`, `Eikonal`, ...) and specializations live in
+   per-space subdirectories, so a narrow grep produces false negatives that
+   licence large amounts of duplicate code.
 1. **PETSc error handling:** `assert(ierr == PETSC_SUCCESS)` after each call
    is the house idiom. Do not introduce checking macros or convert existing
    asserts.
@@ -98,12 +108,10 @@ assembly/solver changes, the relevant manufactured tests pass too.
 
 - Example runs dump `*.h5` / `*.xdmf` / `*.log` output into the CWD. Run
   examples from a scratch directory, and never commit these artifacts.
-- Large meshes and bulky files under `resources/` are stored in Git LFS. Small
-  test/benchmark fixtures stay in regular Git. Before committing a new or
-  updated resource, check its attributes with `git check-attr filter -- <path>`;
-  use `git lfs track <path>` and commit the `.gitattributes` update when the
-  file is a large example/demo payload. Verify with `git lfs status` before
-  pushing.
+- Every file under `resources/` is stored in Git LFS. Before committing a new
+  or updated resource, check its attributes with
+  `git check-attr filter -- <path>` and verify with `git lfs status` before
+  pushing. Resource-dependent builds and tests need hydrated LFS files.
 - Branches: `master` is the default; active development happens on
   `module/*`, `model/*` topic branches off `develop`. Do not commit or push
   unless asked.

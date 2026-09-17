@@ -30,6 +30,8 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - name: Hydrate benchmark resources
+        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/medit/UniformTriangular64.medit.mesh"
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:

@@ -23,6 +23,30 @@ namespace Rodin::Tests::Unit
       return mesh;
     }
 
+    /// @brief Uniform grid of the given geometry, with connectivity computed.
+    LocalMesh uniformGrid(Polytope::Type g, size_t n)
+    {
+      const size_t d = Polytope::Traits(g).getDimension();
+      Array<size_t> shape(d);
+      for (size_t i = 0; i < d; ++i)
+        shape(i) = n;
+      LocalMesh mesh = LocalMesh::UniformGrid(g, shape);
+      for (size_t k = d; k > 0; --k)
+        mesh.getConnectivity().compute(k, k - 1);
+      return mesh;
+    }
+
+    /// @brief f(x) = x_0^4. Its exact integral depends on the grid extent, so
+    /// exactness is checked by agreement between two sufficient orders rather
+    /// than against a hard-coded value.
+    auto quartic()
+    {
+      return RealFunction([](const Geometry::Point& p) -> Real {
+        const Real x = p.getPhysicalCoordinates()(0);
+        return x * x * x * x;
+      });
+    }
+
     /**
      * @brief Unit square as one triangle pair plus one quadrilateral, so that a
      * single mesh carries two polytope geometries.
@@ -349,5 +373,179 @@ namespace Rodin::Tests::Unit
       return p.getGeometry() == Polytope::Type::Quadrilateral ? 8 : 6;
     });
     EXPECT_NEAR(assembledIntegral(integ, v), Real(32) / Real(5), 1e-10);
+  }
+
+  // ==========================================================================
+  // Dimensional coverage: the order machinery must behave identically on every
+  // polytope geometry the library can mesh, in every dimension.
+  // ==========================================================================
+
+  /**
+   * @brief Zero-dimensional entities: the boundary facets of a 1D mesh.
+   *
+   * A standalone point mesh carries no finite element space, so the realistic
+   * 0D configuration is a segment mesh whose facets are points.
+   */
+  TEST(Rodin_Variational_IntegratorOrder, PointFacets_HonourOrder)
+  {
+    auto mesh = uniformGrid(Polytope::Type::Segment, 3);
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    TestFunction v(fes);
+
+    const auto facet = mesh.getPolytope(0, 0);
+    ASSERT_EQ(facet->getDimension(), 0u);
+
+    auto integ = BoundaryIntegral(RealFunction(1.0), v);
+    EXPECT_FALSE(integ.getOrder(*facet).has_value());
+
+    integ.setOrder(3);
+    EXPECT_EQ(integ.getOrder(*facet).value_or(0), 3u);
+
+    integ.setOrder(
+      [](const Polytope& p) -> size_t { return p.getDimension() == 0 ? 5 : 2; });
+    EXPECT_EQ(integ.getOrder(*facet).value_or(0), 5u);
+  }
+
+  /// @brief A 1D segment mesh integrates a quartic exactly at sufficient order.
+  TEST(Rodin_Variational_IntegratorOrder, Segment_ReachesQuadrature)
+  {
+    auto mesh = uniformGrid(Polytope::Type::Segment, 3);
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    TestFunction v(fes);
+    const auto f = quartic();
+
+    auto accurate = Integral(f, v);
+    accurate.setOrder(8);
+    auto finer = Integral(f, v);
+    finer.setOrder(12);
+    const Real reference = assembledIntegral(finer, v);
+    EXPECT_NEAR(assembledIntegral(accurate, v), reference, 1e-12);
+
+    auto deficient = Integral(f, v);
+    deficient.setOrder(1);
+    EXPECT_GT(std::abs(assembledIntegral(deficient, v) - reference), 1e-6);
+  }
+
+  /// @brief Tetrahedra: an explicit order reaches the quadrature in 3D.
+  TEST(Rodin_Variational_IntegratorOrder, Tetrahedron_ReachesQuadrature)
+  {
+    auto mesh = uniformGrid(Polytope::Type::Tetrahedron, 2);
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    TestFunction v(fes);
+    const auto f = quartic();
+
+    auto accurate = Integral(f, v);
+    accurate.setOrder(8);
+    auto finer = Integral(f, v);
+    finer.setOrder(12);
+    const Real reference = assembledIntegral(finer, v);
+    EXPECT_NEAR(assembledIntegral(accurate, v), reference, 1e-10);
+
+    auto deficient = Integral(f, v);
+    deficient.setOrder(1);
+    EXPECT_GT(std::abs(assembledIntegral(deficient, v) - reference), 1e-6);
+  }
+
+  /// @brief Wedges: prismatic cells honour an explicit order.
+  TEST(Rodin_Variational_IntegratorOrder, Wedge_ReachesQuadrature)
+  {
+    auto mesh = uniformGrid(Polytope::Type::Wedge, 2);
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    TestFunction v(fes);
+
+    auto integ = Integral(quartic(), v);
+    integ.setOrder(8);
+    auto finer = Integral(quartic(), v);
+    finer.setOrder(12);
+    EXPECT_NEAR(assembledIntegral(integ, v), assembledIntegral(finer, v), 1e-10);
+  }
+
+  /// @brief Pyramids: the quadrature rule follows the declared order.
+  TEST(Rodin_Variational_IntegratorOrder, Pyramid_ReachesQuadrature)
+  {
+    auto mesh = uniformGrid(Polytope::Type::Pyramid, 2);
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    TestFunction v(fes);
+
+    auto integ = Integral(quartic(), v);
+    integ.setOrder(8);
+    auto finer = Integral(quartic(), v);
+    finer.setOrder(12);
+    EXPECT_NEAR(assembledIntegral(integ, v), assembledIntegral(finer, v), 1e-10);
+  }
+
+  /// @brief A per-polytope rule sees every cell of a 3D mesh.
+  TEST(Rodin_Variational_IntegratorOrder, Tetrahedron_RulePerPolytope)
+  {
+    auto mesh = uniformGrid(Polytope::Type::Tetrahedron, 2);
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    TestFunction v(fes);
+
+    std::set<Index> seen;
+    auto integ = Integral(RealFunction(1.0), v);
+    integ.setOrder([&seen](const Polytope& p) -> size_t {
+      seen.insert(p.getIndex());
+      return 2 + p.getIndex() % 4;
+    });
+
+    for (auto it = mesh.getCell(); it; ++it)
+      EXPECT_EQ(integ.getOrder(*it).value_or(0), 2 + it->getIndex() % 4);
+    EXPECT_EQ(seen.size(), mesh.getCellCount());
+  }
+
+  /// @brief Bilinear forms honour an explicit order on every geometry.
+  TEST(Rodin_Variational_IntegratorOrder, Bilinear_AcrossGeometries)
+  {
+    for (const auto g :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+    {
+      auto mesh = uniformGrid(g, 2);
+      H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+      TrialFunction u(fes);
+      TestFunction v(fes);
+
+      auto integ = Integral(Dot(u, v));
+      integ.setOrder(6);
+      const auto it = mesh.getPolytope(mesh.getDimension(), 0);
+      EXPECT_EQ(integ.getOrder(*it).value_or(0), 6u)
+        << "geometry " << static_cast<int>(g);
+
+        // A mass form is integrated exactly by any sufficient rule, so
+        // over-integrating must not change its assembled total.
+      BilinearForm coarse(u, v);
+      coarse = integ;
+      coarse.assemble();
+
+      auto finerIntegrand = Integral(Dot(u, v));
+      finerIntegrand.setOrder(10);
+      BilinearForm fine(u, v);
+      fine = finerIntegrand;
+      fine.assemble();
+
+      EXPECT_NEAR(coarse.getOperator().sum(), fine.getOperator().sum(), 1e-10)
+        << "geometry " << static_cast<int>(g);
+      EXPECT_GT(std::abs(coarse.getOperator().sum()), 0.0)
+        << "geometry " << static_cast<int>(g);
+    }
+  }
+
+  /// @brief Boundary integrators honour an explicit order in 1D, 2D and 3D.
+  TEST(Rodin_Variational_IntegratorOrder, Boundary_AcrossDimensions)
+  {
+    for (const auto g :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+    {
+      auto mesh = uniformGrid(g, 2);
+      H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+      TestFunction v(fes);
+
+      auto integ = BoundaryIntegral(RealFunction(1.0), v);
+      const auto it = mesh.getPolytope(mesh.getDimension() - 1, 0);
+      EXPECT_FALSE(integ.getOrder(*it).has_value());
+      integ.setOrder(4);
+      EXPECT_EQ(integ.getOrder(*it).value_or(0), 4u)
+        << "geometry " << static_cast<int>(g);
+    }
   }
 }
