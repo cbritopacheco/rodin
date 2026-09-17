@@ -19,8 +19,9 @@
  *
  * ## Mathematical Background
  *
- * A linear form @f$ L : V_h \to \mathbb{R} @f$ is a mapping that takes
- * a test function @f$ v \in V_h @f$ and produces a scalar.  After
+ * A form @f$ L : V_h \to \mathbb{K} @f$ takes a test function @f$ v \in V_h
+ * @f$ and produces a scalar. It is linear over the reals and conjugate-linear
+ * over the complex numbers. After
  * discretisation the action of @f$ L @f$ on the basis functions
  * yields a load vector:
  * @f[
@@ -28,7 +29,7 @@
  * @f]
  *
  * This specialization stores @f$ \mathbf{b} @f$ in a PETSc @c Vec and
- * evaluates @f$ L(u_h) = \mathbf{b}^\top \mathbf{u} @f$ via `VecDot`.
+ * evaluates @f$ L(u_h) = \mathbf{u}^* \mathbf{b} @f$ via `VecDot`.
  *
  * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
  * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::PETSc::Variational::BilinearForm</a>
@@ -204,8 +205,8 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the linear form at a grid function @f$ u_h @f$.
        *
-       * Computes the action @f$ L(u_h) = \mathbf{b}^\top \mathbf{u} @f$
-       * via `VecDot(b, u, &result)`.
+       * Computes the action @f$ L(u_h) = \mathbf{u}^* \mathbf{b} @f$
+       * via `VecDot(u, b, &result)`.
        *
        * @param[in] u The grid function @f$ u_h @f$ to evaluate at.
        * @returns The scalar value @f$ L(u_h) @f$.
@@ -214,7 +215,7 @@ namespace Rodin::Variational
       {
         ScalarType result;
         PetscErrorCode ierr;
-        ierr = VecDot(this->getVector(), u.getData(), &result);
+        ierr = VecDot(u.getData(), this->getVector(), &result);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
         return result;

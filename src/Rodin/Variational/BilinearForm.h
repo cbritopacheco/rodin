@@ -74,16 +74,21 @@ namespace Rodin::Variational
    * @brief Base class for bilinear form representations.
    *
    * BilinearFormBase provides the foundation for representing bilinear forms
-   * @f$ a(u,v) : V \times V \to \mathbb{R} @f$ in finite element computations.
-   * A bilinear form is a function that is linear in both arguments and forms
-   * the basis for defining variational problems.
+   * @f$ a(u,v) : U \times V \to \mathbb{K} @f$ in finite element computations.
+   * Over the reals the form is bilinear. Over the complex numbers Rodin uses
+   * the standard finite element convention: the form is linear in the trial
+   * argument and conjugate-linear in the test argument.
    *
    * @tparam Operator Matrix type for the discrete representation
    *
    * ## Mathematical Foundation
-   * A bilinear form @f$ a(u,v) @f$ satisfies:
+   * A real bilinear form @f$ a(u,v) @f$ satisfies:
    * - **Linearity in first argument**: @f$ a(\alpha u_1 + \beta u_2, v) = \alpha a(u_1,v) + \beta a(u_2,v) @f$
    * - **Linearity in second argument**: @f$ a(u, \alpha v_1 + \beta v_2) = \alpha a(u,v_1) + \beta a(u,v_2) @f$
+   *
+   * For complex scalars, the second identity instead carries conjugated
+   * coefficients: @f$ a(u, \alpha v_1 + \beta v_2) = \overline{\alpha}
+   * a(u,v_1) + \overline{\beta} a(u,v_2) @f$.
    *
    * ## Discrete Representation  
    * The discrete matrix representation satisfies @f$ A_{ij} = a(\phi_j, \psi_i) @f$
@@ -522,7 +527,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
+       * @brief Evaluates the bilinear form at the functions @f$ u @f$ and @f$
        * v @f$.
        *
        * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
@@ -536,7 +541,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return (this->getOperator() * v.getData()).dot(u.getData());
+        return v.getData().dot(this->getOperator() * u.getData());
       }
 
       /**
@@ -606,9 +611,15 @@ namespace Rodin::Variational
   class BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>> final
     : public BilinearFormBase<Math::Matrix<Scalar>>
   {
-    using TrialFESContextType = typename FormLanguage::Traits<TrialFES>::ContextType;
+      using TrialFESMeshType = typename FormLanguage::Traits<TrialFES>::MeshType;
 
-    using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
+      using TestFESMeshType = typename FormLanguage::Traits<TestFES>::MeshType;
+
+      using TrialFESContextType =
+        typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+      using TestFESContextType =
+        typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
       /// @brief Solution vector type.
@@ -708,7 +719,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
+       * @brief Evaluates the bilinear form at the functions @f$ u @f$ and @f$
        * v @f$.
        *
        * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
@@ -722,7 +733,7 @@ namespace Rodin::Variational
       ScalarType operator()(
         const GridFunction<TrialFES, UData>& u, const GridFunction<TestFES, VData>& v) const
       {
-        return (this->getOperator() * v.getData()).dot(u.getData());
+        return v.getData().dot(this->getOperator() * u.getData());
       }
 
       /**

@@ -19,8 +19,10 @@
  *
  * ## Mathematical Background
  *
- * A bilinear form @f$ a : U_h \times V_h \to \mathbb{R} @f$ acts on
- * a trial function @f$ u \in U_h @f$ and a test function @f$ v \in V_h @f$.
+ * A form @f$ a : U_h \times V_h \to \mathbb{K} @f$ acts on a trial function
+ * @f$ u \in U_h @f$ and a test function @f$ v \in V_h @f$. It is bilinear
+ * over the reals and, over the complex numbers, linear in @f$ u @f$ and
+ * conjugate-linear in @f$ v @f$.
  * After discretisation, its entries are:
  * @f[
  *   A_{ij} = a(\psi_j, \phi_i), \quad
@@ -234,7 +236,7 @@ namespace Rodin::Variational
        * @brief Evaluates the bilinear form at grid functions @f$ u @f$
        *        and @f$ v @f$.
        *
-       * Computes @f$ a(u, v) = \mathbf{v}^\top A \mathbf{u} @f$ by
+       * Computes @f$ a(u, v) = \mathbf{v}^* A \mathbf{u} @f$ by
        * performing a matrix–vector product `MatMult(A, u, tmp)` followed
        * by `VecDot(v, tmp, &result)`.
        *
