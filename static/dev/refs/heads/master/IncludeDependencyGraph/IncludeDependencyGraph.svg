@@ -10344,7 +10344,7 @@
 <g id="node403" class="node">
 <title>Rodin/Variational/P1/P1Element.hpp</title>
 <ellipse fill="#66c2a5" stroke="black" cx="10810.21" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="10810.21" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/P1/P1Element.hpp</text>
+<text text-anchor="middle" x="10810.21" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/P1/P1Element.hpp</text>
 </g>
 <!-- Rodin/Variational/P1/P1Element.h&#45;&gt;Rodin/Variational/P1/P1Element.hpp -->
 <g id="edge1272" class="edge">
@@ -11670,7 +11670,7 @@
 <g id="node409" class="node">
 <title>Rodin/Variational/H1/LagrangeBasis.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="14829.21" cy="-1152" rx="72" ry="72"/>
-<text text-anchor="middle" x="14829.21" y="-1150.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/H1/LagrangeBasis.h</text>
+<text text-anchor="middle" x="14829.21" y="-1150.7" font-family="Times,serif" font-size="6.00">Rodin/Variational/H1/LagrangeBasis.h</text>
 </g>
 <!-- Rodin/Variational/H1/H1Element.hpp&#45;&gt;Rodin/Variational/H1/LagrangeBasis.h -->
 <g id="edge1368" class="edge">
