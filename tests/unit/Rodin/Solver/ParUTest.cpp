@@ -115,7 +115,8 @@ namespace Rodin::Tests::Unit::Solver
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
-    // A structural change invalidates the symbolic analysis automatically.
+    // A structural change requires explicitly clearing symbolic analysis.
+    solver.clear();
     system.getOperator().setZero();
     system.getOperator().insert(0, 0) = 2.0;
     system.getOperator().insert(1, 1) = 3.0;

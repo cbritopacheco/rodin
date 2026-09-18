@@ -69,19 +69,21 @@ namespace Rodin::Solver
    * @brief Parallel multifrontal LU solver for real sparse square systems.
    *
    * ParU factorizes a general matrix as @f$ PAQ = LU @f$. Symbolic analysis is
-   * reused while the matrix sparsity pattern and ordering remain unchanged.
+   * reused across explicit @ref factorize calls, which assume that the matrix
+   * sparsity pattern is unchanged.
    * The numeric factorization is retained after @ref factorize so multiple
    * right-hand sides can be solved without refactorization. The ordinary
    * @ref solve entry point builds a factorization only when none is retained.
-   * Call @ref factorize explicitly after changing the matrix, or call @ref clear
-   * to discard the numeric factorization and let the next solve rebuild it.
+   * Call @ref factorize explicitly after changing matrix values. After changing
+   * the sparsity pattern, call @ref clear so the next factorization also repeats
+   * symbolic analysis.
    *
    * Architecture:
    * 1. Compress the Eigen CSC matrix and expose its values through
    *    Eigen::viewAsCholmod without copying them.
    * 2. Convert the CSC column pointers and row indices to the signed 64-bit
    *    layout required by ParU.
-   * 3. Reuse symbolic analysis when the converted CSC pattern is unchanged.
+   * 3. Reuse symbolic analysis until explicitly cleared.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * | Specialization | Description |
@@ -180,9 +182,9 @@ namespace Rodin::Solver
       /**
        * @brief Analyzes and numerically factorizes the system matrix.
        *
-       * Reuses symbolic analysis when the sparsity pattern and ordering match
-       * the previous factorization. Any previous numeric factorization is
-       * replaced.
+       * Reuses existing symbolic analysis and replaces any previous numeric
+       * factorization. The matrix sparsity pattern must remain unchanged until
+       * @ref clear is called.
        */
       void factorize(LinearSystemType& axb)
       {
@@ -198,10 +200,8 @@ namespace Rodin::Solver
         cholmod_sparse view = Eigen::viewAsCholmod(matrix);
 
         m_resources.initialize(*this);
-        const bool samePattern = hasSamePattern(matrix);
-        if (!samePattern)
+        if (!m_resources.symbolic)
         {
-          m_resources.clearSymbolic();
           m_columnPointers.resize(matrix.outerSize() + 1);
           m_rowIndices.resize(matrix.nonZeros());
           for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
@@ -299,10 +299,12 @@ namespace Rodin::Solver
         return m_resources.numeric != nullptr;
       }
 
-      /** @brief Releases the retained numeric factorization. */
+      /** @brief Releases retained symbolic and numeric factorization state. */
       void clear() noexcept
       {
-        m_resources.clearNumeric();
+        m_resources.clearSymbolic();
+        m_columnPointers.resize(0);
+        m_rowIndices.resize(0);
       }
 
       /**
@@ -375,25 +377,6 @@ namespace Rodin::Solver
               : static_cast<std::int64_t>(m_ordering),
             m_resources.control),
           "ordering configuration");
-      }
-
-      bool hasSamePattern(const OperatorType& matrix) const
-      {
-        if (m_columnPointers.size() != matrix.outerSize() + 1 ||
-            m_rowIndices.size() != matrix.nonZeros())
-          return false;
-
-        for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
-        {
-          if (m_columnPointers(i) != matrix.outerIndexPtr()[i])
-            return false;
-        }
-        for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
-        {
-          if (m_rowIndices(i) != matrix.innerIndexPtr()[i])
-            return false;
-        }
-        return true;
       }
 
       void check(ParU_Info info, StringView operation) const
