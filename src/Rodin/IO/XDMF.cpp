@@ -355,7 +355,7 @@ namespace Rodin::IO
 
       {
         SnapshotRecord::MeshAttributeRecord meshAttr;
-        meshAttr.name = "Region";
+        meshAttr.name = "Attribute";
         meshAttr.center = Center::Cell;
         meshAttr.topologicalDimension = snapshot.meshDimension;
         snapshot.meshAttributes.push_back(std::move(meshAttr));
@@ -462,7 +462,7 @@ namespace Rodin::IO
 
       os << indent(bi + 1) << "<Attribute Name=\"" << attr.name
          << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
-      // Same reason as topology: Region is stored as U64 in HDF5.
+      // Same reason as topology: the mesh attribute is stored as U64 in HDF5.
       os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
          << dimStr.str() << "\">"
          << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)

@@ -790,6 +790,8 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(text.find("/Mesh/XDMF/Topology"), std::string::npos);
     EXPECT_NE(text.find("/Mesh/Geometry/Vertices"), std::string::npos);
     EXPECT_NE(text.find("/GridFunction/Values/Data"), std::string::npos);
+    EXPECT_NE(text.find("<Attribute Name=\"Attribute\""), std::string::npos);
+    EXPECT_EQ(text.find("<Attribute Name=\"Region\""), std::string::npos);
     EXPECT_NE(text.find("temperature"), std::string::npos);
 
     // Clean up the dedicated test directory
