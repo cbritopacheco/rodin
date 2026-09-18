@@ -18,16 +18,16 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  TEST(Rodin_Adaptation_WNGIRSolver, CalibratedDefaults)
-  {
-    const WNGIRParameters parameters;
-    EXPECT_EQ(parameters.kappaBulk, Real(1e-4));
-    EXPECT_EQ(parameters.cgMaxIterations, 1000);
-    EXPECT_EQ(parameters.maxIterations, 200);
-  }
-
   namespace
   {
+    TEST(Rodin_Adaptation_WNGIRSolver, CalibratedDefaults)
+    {
+      const WNGIRParameters parameters;
+      EXPECT_EQ(parameters.kappaBulk, Real(1e-4));
+      EXPECT_EQ(parameters.cgMaxIterations, 1000);
+      EXPECT_EQ(parameters.maxIterations, 200);
+    }
+
     constexpr Attribute Interface = 10;
 
     struct SolveState

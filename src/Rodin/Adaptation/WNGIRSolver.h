@@ -457,9 +457,8 @@ namespace Rodin::Adaptation
 
           {
             const Real modelDecrease = Real(0.5) * predictorAction;
-            const Real targetBarrierCoefficient = domainMeasure > Real(0)
-              ? p.muHat * modelDecrease / domainMeasure
-              : Real(0);
+            const Real targetBarrierCoefficient =
+              domainMeasure > Real(0) ? p.muHat * modelDecrease / domainMeasure : Real(0);
 #ifdef RODIN_WNGIR_EXPERIMENTAL_CONTINUATION
             const Real barrierCoefficient = previousBarrierCoefficient > Real(0)
               ? std::max(targetBarrierCoefficient, Real(0.5) * previousBarrierCoefficient)
@@ -525,8 +524,7 @@ namespace Rodin::Adaptation
                 scratch -= vK;
                 const Real correctionNorm =
                   std::max(std::abs(scratch.max()), std::abs(scratch.min()));
-                const Real iterateNorm =
-                  std::max(std::abs(vK.max()), std::abs(vK.min()));
+                const Real iterateNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
                 const Real correctionScale = std::max(iterateNorm, predictorNorm);
                 const Real relativeCorrection = correctionScale > Real(0)
                   ? correctionNorm / correctionScale
@@ -544,16 +542,16 @@ namespace Rodin::Adaptation
                   break;
                 }
                 rep.lastPrimalBarrierAlpha = innerAlpha;
-                rep.minPrimalBarrierAlpha = std::min(rep.minPrimalBarrierAlpha, innerAlpha);
+                rep.minPrimalBarrierAlpha =
+                  std::min(rep.minPrimalBarrierAlpha, innerAlpha);
                 if (innerAlpha >= Real(1) - Real(1e-12))
                   ++rep.fullPrimalBarrierSteps;
                 if (p.trace)
                   std::cout << "        barrier inner=" << (inner + 1)
-                            << "  outer=" << rep.iterations
-                            << "  corr=" << correctionNorm
+                            << "  outer=" << rep.iterations << "  corr=" << correctionNorm
                             << "  iterate=" << iterateNorm
-                            << "  rel=" << relativeCorrection
-                            << "  alpha=" << innerAlpha << '\n';
+                            << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
+                            << '\n';
                 scratch *= innerAlpha;
                 vK += scratch;
                 // A fraction-to-boundary step can be intentionally smaller
@@ -574,8 +572,8 @@ namespace Rodin::Adaptation
                 hasBarrierWarmCorrection = true;
               }
 #endif
-              if (solveOk &&
-                p.primalBarrierRelativeTolerance > Real(0) && !innerConverged)
+              if (solveOk && p.primalBarrierRelativeTolerance > Real(0) &&
+                !innerConverged)
               {
                 rep.exitReason = "primal-barrier-inner-not-converged";
                 solveOk = false;
@@ -1309,8 +1307,7 @@ namespace Rodin::Adaptation
                   {
                     mappedJacobian(static_cast<Eigen::Index>(component),
                       static_cast<Eigen::Index>(axis)) += u[dof] *
-                      fe.getBasis(local)
-                        .template getDerivative<1>(component, axis)(rc);
+                      fe.getBasis(local).template getDerivative<1>(component, axis)(rc);
                   }
                 }
               }
@@ -1355,8 +1352,9 @@ namespace Rodin::Adaptation
               fittedNormal /= fittedNormalNorm;
               const SpatialVec targetNormal = targetGradient / gradientNorm;
               const Real distance = std::abs(phi.getValue(movedPoint)) / gradientNorm;
-              const Real normalErrorSquared = Real(2) - Real(2) *
-                std::clamp(std::abs(fittedNormal.dot(targetNormal)), Real(0), Real(1));
+              const Real normalErrorSquared = Real(2) -
+                Real(2) *
+                  std::clamp(std::abs(fittedNormal.dot(targetNormal)), Real(0), Real(1));
               const Real weight = qf.getWeight(q) * mappedMeasure;
               state.measure += weight;
               state.squaredDistance += weight * distance * distance;
@@ -1376,8 +1374,7 @@ namespace Rodin::Adaptation
         }
         if (!(total.measure > Real(0)))
           return {};
-        return {
-          std::sqrt(std::max(Real(0), total.squaredDistance) / total.measure),
+        return {std::sqrt(std::max(Real(0), total.squaredDistance) / total.measure),
           total.maximumDistance,
           std::sqrt(std::max(Real(0), total.squaredNormal) / total.measure)};
       }
@@ -1750,8 +1747,8 @@ namespace Rodin::Adaptation
         {
           Real diagonalLift = Real(0);
           for (std::size_t k = 0; k < stabilisation.weights.size(); ++k)
-            diagonalLift += stabilisation.weights[k] *
-              stabilisation.modes[k](i) * stabilisation.modes[k](i);
+            diagonalLift += stabilisation.weights[k] * stabilisation.modes[k](i) *
+              stabilisation.modes[k](i);
           preconditionerMatrix.coeffRef(i, i) += diagonalLift;
         }
         preconditionerMatrix.makeCompressed();
@@ -1833,11 +1830,9 @@ namespace Rodin::Adaptation
           out = m_duStep.getSolution();
           if (m_parameters.trace &&
             (!ok || !std::isfinite(out.max()) || !std::isfinite(out.min())))
-            std::cout << "        cg failure: ok=" << ok
-                      << "  it=" << iterations << "  max_it=" << maxIterations
-                      << "  err=" << error
-                      << "  finite=" << (std::isfinite(out.max()) &&
-                                               std::isfinite(out.min())) << '\n';
+            std::cout << "        cg failure: ok=" << ok << "  it=" << iterations
+                      << "  max_it=" << maxIterations << "  err=" << error << "  finite="
+                      << (std::isfinite(out.max()) && std::isfinite(out.min())) << '\n';
           return ok && std::isfinite(out.max()) && std::isfinite(out.min());
         }
         else

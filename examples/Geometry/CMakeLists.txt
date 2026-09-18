@@ -55,29 +55,31 @@ target_link_libraries(LevelSetWNGIRReconstructionIC
   Rodin::Variational
   Rodin::MMG)
 
-add_executable(LevelSetWNGIRReconstructionPETScGAMG LevelSetWNGIRReconstruction.cpp)
-target_compile_definitions(LevelSetWNGIRReconstructionPETScGAMG
-  PRIVATE
-  RODIN_WNGIR_PETSC_GAMG=1)
-target_link_libraries(LevelSetWNGIRReconstructionPETScGAMG
-  PRIVATE
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::MMG
-  Rodin::PETSc)
+if (RODIN_USE_PETSC)
+  add_executable(LevelSetWNGIRReconstructionPETScGAMG LevelSetWNGIRReconstruction.cpp)
+  target_compile_definitions(LevelSetWNGIRReconstructionPETScGAMG
+    PRIVATE
+    RODIN_WNGIR_PETSC_GAMG=1)
+  target_link_libraries(LevelSetWNGIRReconstructionPETScGAMG
+    PRIVATE
+    Rodin::Geometry
+    Rodin::Solver
+    Rodin::Variational
+    Rodin::MMG
+    Rodin::PETSc)
 
-add_executable(LevelSetWNGIRReconstructionPETScLU LevelSetWNGIRReconstruction.cpp)
-target_compile_definitions(LevelSetWNGIRReconstructionPETScLU
-  PRIVATE
-  RODIN_WNGIR_PETSC_LU=1)
-target_link_libraries(LevelSetWNGIRReconstructionPETScLU
-  PRIVATE
-  Rodin::Geometry
-  Rodin::Solver
-  Rodin::Variational
-  Rodin::MMG
-  Rodin::PETSc)
+  add_executable(LevelSetWNGIRReconstructionPETScLU LevelSetWNGIRReconstruction.cpp)
+  target_compile_definitions(LevelSetWNGIRReconstructionPETScLU
+    PRIVATE
+    RODIN_WNGIR_PETSC_LU=1)
+  target_link_libraries(LevelSetWNGIRReconstructionPETScLU
+    PRIVATE
+    Rodin::Geometry
+    Rodin::Solver
+    Rodin::Variational
+    Rodin::MMG
+    Rodin::PETSc)
+endif()
 
 add_executable(LevelSetWNGIRReconstructionP2 LevelSetWNGIRReconstruction.cpp)
 target_compile_definitions(LevelSetWNGIRReconstructionP2

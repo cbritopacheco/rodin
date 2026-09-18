@@ -160,9 +160,9 @@ namespace Rodin::Solid
           vertices.assign(vs.begin(), vs.end());
           nv = vertices.size();
 
-        // Reference tangents from the (affine) vertex coordinates:
-        // X_{,xi_j} = X_{j+1} - X_0 for the unit simplex parametrization,
-        // consistent with p1FaceBasis/p1FaceBasisGrad above.
+          // Reference tangents from the (affine) vertex coordinates:
+          // X_{,xi_j} = X_{j+1} - X_0 for the unit simplex parametrization,
+          // consistent with p1FaceBasis/p1FaceBasisGrad above.
           Xjac.resize(sdim, faceDim);
           const auto X0 = mesh.getVertexCoordinates(vertices[0]);
           for (size_t j = 0; j < faceDim; ++j)
@@ -172,9 +172,9 @@ namespace Rodin::Solid
               Xjac(c, j) = Xj(c) - X0(c);
           }
 
-        // Orientation: sign such that surfaceCross points away from the
-        // incident cell centroid (outward of the solid), evaluated on the
-        // REFERENCE configuration (orientation is topological and constant).
+          // Orientation: sign such that surfaceCross points away from the
+          // incident cell centroid (outward of the solid), evaluated on the
+          // REFERENCE configuration (orientation is topological and constant).
           Math::SpatialVector<Real> t1(sdim), t2(sdim), cr;
           for (size_t c = 0; c < sdim; ++c)
           {

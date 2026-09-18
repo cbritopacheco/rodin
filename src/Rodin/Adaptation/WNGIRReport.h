@@ -44,7 +44,7 @@ namespace Rodin::Adaptation
       Real lastAlpha = 0;
     /// @brief Effective per-volume coefficient assembled for the last barrier QP.
       Real primalBarrierCoefficient = 0;
-    /// @brief Last primal-barrier Newton correction relative to the current iterate.
+      /// @brief Last primal-barrier Newton correction relative to the current iterate.
       Real primalBarrierRelativeCorrection = 0;
       /// @brief Step factor accepted by the last primal-barrier correction.
       Real lastPrimalBarrierAlpha = 0;

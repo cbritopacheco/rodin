@@ -20,9 +20,8 @@ namespace Rodin::Adaptation
       Real robustScale =
         0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
       Real h = 0; ///< reference mesh size (required).
-      Real kappaBulk =
-        Real(1e-4); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
-        ///< bulk-strain coefficient.
+      Real kappaBulk = Real(1e-4); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
+      ///< bulk-strain coefficient.
       Real rDiv = 1; ///< @f$r_D@f$, divergence/deviatoric bulk-coefficient ratio.
       Real kappaObs =
         1; ///< @f$\kappa_{\mathrm{obs}}@f$, surface observation metric weight.

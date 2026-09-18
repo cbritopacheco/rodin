@@ -94,8 +94,7 @@ namespace
     {
       const Vec2 x = mesh.getVertexCoordinates(vertex);
       const auto& dofs = uFes.getDOFs(0, vertex);
-      moved.setVertexCoordinates(
-        vertex, vec2(x(0) + u[dofs[0]], x(1) + u[dofs[1]]));
+      moved.setVertexCoordinates(vertex, vec2(x(0) + u[dofs[0]], x(1) + u[dofs[1]]));
     }
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
@@ -110,8 +109,8 @@ namespace
       {
         const auto& rc = geomFe.getNode(a);
         cell.getTransformation().transform(X, rc);
-        const Real ux = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
-        const Real uy = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
+        const Real ux = u[uFes.getGlobalIndex({D, cell.getIndex()}, a * 2)];
+        const Real uy = u[uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1)];
         pm(0, a) = X(0) + ux;
         pm(1, a) = X(1) + uy;
       }
@@ -706,11 +705,10 @@ int run(int argc, char** argv)
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
-                << "  cgSolves=" << wngirRep.linearSolveCount
-                << "  cgMean="
+                << "  cgSolves=" << wngirRep.linearSolveCount << "  cgMean="
                 << (wngirRep.linearSolveCount > 0
-                    ? Real(wngirRep.linearIterations) / Real(wngirRep.linearSolveCount)
-                    : Real(0))
+                       ? Real(wngirRep.linearIterations) / Real(wngirRep.linearSolveCount)
+                       : Real(0))
                 << "  cgMax=" << wngirRep.maxLinearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
@@ -791,8 +789,7 @@ int run(int argc, char** argv)
       jMoved[dof] = jK;
       const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
       qRelMoved[dof] = F.squaredNorm() / (Real(2) * std::max(jK, Real(1e-30)));
-      movedLabel[dof] =
-        static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
+      movedLabel[dof] = static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
     }
 
     phiMoved = [&](const Geometry::Point& p) -> Real {
@@ -802,11 +799,9 @@ int run(int argc, char** argv)
 
     std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
-              << "  step=" << acceptedStep << "  min_j=" << minJ
-              << "  max_j=" << maxJ << "  max_qrel=" << maxQRel
-              << "  active_rms=" << activeRMS
-              << "  active_sup=" << activeSup
-              << "  active_rms_hg="
+              << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
+              << "  max_qrel=" << maxQRel << "  active_rms=" << activeRMS
+              << "  active_sup=" << activeSup << "  active_rms_hg="
               << (h * levelSetGradientScale > Real(0)
                      ? activeRMS / (h * levelSetGradientScale)
                      : Real(0))
@@ -859,8 +854,7 @@ int main(int argc, char** argv)
   assert(petscError == PETSC_SUCCESS);
   petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-pc_type", "lu");
   assert(petscError == PETSC_SUCCESS);
-  petscError = PetscOptionsSetValue(
-    PETSC_NULLPTR, "-pc_factor_shift_type", "nonzero");
+  petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-pc_factor_shift_type", "nonzero");
   assert(petscError == PETSC_SUCCESS);
 #endif
   const int result = run(argc, argv);
