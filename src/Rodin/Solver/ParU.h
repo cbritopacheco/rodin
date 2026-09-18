@@ -10,9 +10,9 @@
  *
  * ParU computes a sparse LU factorization of a real square matrix and uses
  * OpenMP tasks and parallel BLAS in its numerical phase. The matrix values are
- * shared with ParU through a non-owning CHOLMOD view. Rodin's default Eigen
- * sparse matrices use 32-bit indices whereas ParU requires 64-bit indices, so
- * only the two CSC index arrays are converted.
+ * shared with ParU through a non-owning CHOLMOD view. Rodin sparse matrices
+ * use the signed 64-bit CSC indices required by ParU, so the full matrix is
+ * shared without copying.
  *
  * @note This solver requires SuiteSparse:ParU and RODIN_USE_PARU.
  */
@@ -25,13 +25,13 @@
 
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 #include <Eigen/CholmodSupport>
 #include <ParU.h>
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
-#include "Rodin/Array.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Vector.h"
 
@@ -50,6 +50,10 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Solver
 {
+  static_assert(
+    std::is_same_v<Math::SparseIndex, SuiteSparse_long>,
+    "ParU requires Rodin sparse matrices to use SuiteSparse_long indices.");
+
   /**
    * @defgroup ParUSpecializations ParU Template Specializations
    * @brief Template specializations of the ParU class.
@@ -75,9 +79,7 @@ namespace Rodin::Solver
    * Architecture:
    * 1. Compress the Eigen CSC matrix and expose its values through
    *    Eigen::viewAsCholmod without copying them.
-   * 2. Convert the CSC column pointers and row indices to the 64-bit layout
-   *    required by ParU.
-   * 3. Analyze, factorize, solve, and release all ParU objects with RAII.
+   * 2. Analyze, factorize, solve, and release all ParU objects with RAII.
    *
    * | Specialization | Description |
    * |----------------|-------------|
@@ -181,22 +183,13 @@ namespace Rodin::Solver
         matrix.makeCompressed();
         cholmod_sparse view = Eigen::viewAsCholmod(matrix);
 
-        Array<std::int64_t> columnPointers(matrix.outerSize() + 1);
-        Array<std::int64_t> rowIndices(matrix.nonZeros());
-        for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
-          columnPointers(i) = static_cast<std::int64_t>(matrix.outerIndexPtr()[i]);
-        for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
-          rowIndices(i) = static_cast<std::int64_t>(matrix.innerIndexPtr()[i]);
-
-        view.p = columnPointers.data();
-        view.i = rowIndices.data();
-        view.itype = CHOLMOD_LONG;
-
-        if (view.xtype != CHOLMOD_REAL || view.dtype != CHOLMOD_DOUBLE)
+        if (view.itype != CHOLMOD_LONG ||
+            view.xtype != CHOLMOD_REAL || view.dtype != CHOLMOD_DOUBLE)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "ParU requires a real double-precision CHOLMOD view, but got "
-            << "xtype " << view.xtype << " and dtype " << view.dtype << "."
+            << "ParU requires a signed 64-bit, real double-precision CHOLMOD "
+            << "view, but got itype " << view.itype << ", xtype " << view.xtype
+            << " and dtype " << view.dtype << "."
             << Alert::Raise;
         }
 

@@ -126,22 +126,22 @@ namespace Rodin::Assembly
    */
   template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
-    std::vector<Eigen::Triplet<
+    std::vector<Math::SparseTriplet<
       typename FormLanguage::Dot<
         typename FormLanguage::Traits<TrialFES>::ScalarType,
         typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<Solution, TrialFES, TestFES,
-      std::vector<Eigen::Triplet<
+      std::vector<Math::SparseTriplet<
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>> final
     : public AssemblyBase<
-        std::vector<Eigen::Triplet<
+        std::vector<Math::SparseTriplet<
           typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
         Variational::BilinearForm<Solution, TrialFES, TestFES,
-          std::vector<Eigen::Triplet<
+          std::vector<Math::SparseTriplet<
             typename FormLanguage::Dot<
               typename FormLanguage::Traits<TrialFES>::ScalarType,
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
@@ -154,7 +154,7 @@ namespace Rodin::Assembly
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       /// @brief Assembled operator type.
-      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
+      using OperatorType = std::vector<Math::SparseTriplet<ScalarType>>;
 
       /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType =
@@ -388,7 +388,7 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
-        std::vector<Eigen::Triplet<ScalarType>> triplets;
+        std::vector<Math::SparseTriplet<ScalarType>> triplets;
         m_assembly.execute(triplets, {
             input.getTrialFES(), input.getTestFES(),
             input.getLocalBFIs(), input.getGlobalBFIs() });
@@ -427,8 +427,8 @@ namespace Rodin::Assembly
 
     private:
       OpenMP<
-        std::vector<Eigen::Triplet<ScalarType>>,
-        Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<ScalarType>>>> m_assembly;
+        std::vector<Math::SparseTriplet<ScalarType>>,
+        Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Math::SparseTriplet<ScalarType>>>> m_assembly;
   };
 
   /**
@@ -1092,11 +1092,11 @@ namespace Rodin::Assembly
         if constexpr (IsSparse)
         {
           // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
-          std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
+          std::vector<std::vector<Math::SparseTriplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
           std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
             static_cast<size_t>(tc));
 
-          auto sparseEntry = [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
+          auto sparseEntry = [&](std::vector<Math::SparseTriplet<ScalarType>>& localT,
                                std::vector<std::pair<Index, ScalarType>>& localRhs,
                                Index row, Index col, ScalarType val) {
             if (val == ScalarType(0))
@@ -1305,7 +1305,7 @@ namespace Rodin::Assembly
           size_t totalTriplets = 0;
           for (auto& v0 : tchunks) totalTriplets += v0.size();
 
-          std::vector<Eigen::Triplet<ScalarType>> all;
+          std::vector<Math::SparseTriplet<ScalarType>> all;
           all.reserve(totalTriplets + rows);
 
           for (auto& v0 : tchunks)
@@ -1313,7 +1313,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
+            std::vector<Math::SparseTriplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -1863,7 +1863,7 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------------
         // Thread-local accumulators
         // ------------------------------------------------------------------
-        std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
+        std::vector<std::vector<Math::SparseTriplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
         std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
           static_cast<size_t>(tc));
 
@@ -2219,7 +2219,7 @@ namespace Rodin::Assembly
           size_t totalTriplets = 0;
           for (auto& v0 : tchunks) totalTriplets += v0.size();
 
-          std::vector<Eigen::Triplet<ScalarType>> all;
+          std::vector<Math::SparseTriplet<ScalarType>> all;
           all.reserve(totalTriplets + nrows);
 
           for (auto& v0 : tchunks)
@@ -2227,7 +2227,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
+            std::vector<Math::SparseTriplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())

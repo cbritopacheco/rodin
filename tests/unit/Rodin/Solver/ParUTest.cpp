@@ -48,6 +48,21 @@ namespace Rodin::Tests::Unit::Solver
     }
   }
 
+  TEST(Rodin_Solver_ParU, UsesZeroCopyCholmodView)
+  {
+    Math::SparseMatrix<Real> matrix(2, 2);
+    matrix.insert(0, 0) = 2.0;
+    matrix.insert(1, 1) = 3.0;
+    matrix.makeCompressed();
+
+    cholmod_sparse view = Eigen::viewAsCholmod(matrix);
+
+    EXPECT_EQ(view.itype, CHOLMOD_LONG);
+    EXPECT_EQ(view.p, static_cast<void*>(matrix.outerIndexPtr()));
+    EXPECT_EQ(view.i, static_cast<void*>(matrix.innerIndexPtr()));
+    EXPECT_EQ(view.x, static_cast<void*>(matrix.valuePtr()));
+  }
+
   TEST(Rodin_Solver_ParU, SolvesRawLinearSystem)
   {
     Mesh mesh;
