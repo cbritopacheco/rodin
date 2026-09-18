@@ -691,12 +691,12 @@ namespace Rodin::Variational
           // Dubiner modal gradients + chain rule (r,s) → (x,y)
           const auto& Vinv = VandermondeTriangle<K>::getInverse();
 
-          Scalar rc, sc;
+          Real rc, sc;
           DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
 
-          const Scalar x = r.x();
-          const Scalar y = r.y();
-          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+          const Real x = r.x();
+          const Real y = r.y();
+          const Real eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
           Scalar result = Scalar(0);
           size_t modeIdx = 0;
@@ -706,19 +706,19 @@ namespace Rodin::Variational
             Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
               constexpr size_t Q = qIdx.value;
 
-              Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+              Real dpsi_dr = 0, dpsi_ds = 0;
               DubinerTriangle<K>::template getGradient<P, Q>(dpsi_dr, dpsi_ds, rc, sc);
 
-              Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+              Real dpsi_dx = 0, dpsi_dy = 0;
 
               // r = 2x/(1-y) - 1, s = 2y - 1
-              if (Math::abs(Scalar(1) - y) > eps)
+              if (Math::abs(Real(1) - y) > eps)
               {
-                const Scalar denom = Scalar(1) - y;
-                const Scalar dr_dx = Scalar(2) / denom;
-                const Scalar dr_dy = Scalar(2) * x / (denom * denom);
-                const Scalar ds_dx = Scalar(0);
-                const Scalar ds_dy = Scalar(2);
+                const Real denom = Real(1) - y;
+                const Real dr_dx = Real(2) / denom;
+                const Real dr_dy = Real(2) * x / (denom * denom);
+                const Real ds_dx = Real(0);
+                const Real ds_dy = Real(2);
 
                 dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
                 dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
@@ -760,14 +760,14 @@ namespace Rodin::Variational
           // Dubiner modal gradients + chain rule (a,b,c) → (x,y,z)
           const auto& Vinv = VandermondeTetrahedron<K>::getInverse();
 
-          Scalar ac, bc, cc;
+          Real ac, bc, cc;
           DubinerTetrahedron<K>::getCollapsed(
               ac, bc, cc, r.x(), r.y(), r.z());
 
-          const Scalar x = r.x();
-          const Scalar y = r.y();
-          const Scalar z = r.z();
-          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+          const Real x = r.x();
+          const Real y = r.y();
+          const Real z = r.z();
+          const Real eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
           Scalar result = Scalar(0);
           size_t modeIdx = 0;
@@ -779,35 +779,35 @@ namespace Rodin::Variational
               Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
                 constexpr size_t R = rIdx.value;
 
-                Scalar dpsi_da = Scalar(0);
-                Scalar dpsi_db = Scalar(0);
-                Scalar dpsi_dc = Scalar(0);
+                Real dpsi_da = 0;
+                Real dpsi_db = 0;
+                Real dpsi_dc = 0;
                 DubinerTetrahedron<K>::template getGradient<P, Q, R>(
                   dpsi_da, dpsi_db, dpsi_dc, ac, bc, cc);
 
-                Scalar dpsi_dx = Scalar(0);
-                Scalar dpsi_dy = Scalar(0);
-                Scalar dpsi_dz = Scalar(0);
+                Real dpsi_dx = 0;
+                Real dpsi_dy = 0;
+                Real dpsi_dz = 0;
 
-                const Scalar denom2 = Scalar(1) - z; // 1 - z
-                const Scalar denom3 = Scalar(1) - y - z; // 1 - y - z
+                const Real denom2 = Real(1) - z; // 1 - z
+                const Real denom3 = Real(1) - y - z; // 1 - y - z
 
                 if (Math::abs(denom2) > eps && Math::abs(denom3) > eps)
                 {
                   // a = 2x / (1 - y - z) - 1
-                  const Scalar da_dx = Scalar(2) / denom3;
-                  const Scalar da_dy = Scalar(2) * x / (denom3 * denom3);
-                  const Scalar da_dz = da_dy;
+                  const Real da_dx = Real(2) / denom3;
+                  const Real da_dy = Real(2) * x / (denom3 * denom3);
+                  const Real da_dz = da_dy;
 
                   // b = 2y / (1 - z) - 1
-                  const Scalar db_dx = Scalar(0);
-                  const Scalar db_dy = Scalar(2) / denom2;
-                  const Scalar db_dz = Scalar(2) * y / (denom2 * denom2);
+                  const Real db_dx = Real(0);
+                  const Real db_dy = Real(2) / denom2;
+                  const Real db_dz = Real(2) * y / (denom2 * denom2);
 
                   // c = 2z - 1
-                  const Scalar dc_dx = Scalar(0);
-                  const Scalar dc_dy = Scalar(0);
-                  const Scalar dc_dz = Scalar(2);
+                  const Real dc_dx = Real(0);
+                  const Real dc_dy = Real(0);
+                  const Real dc_dz = Real(2);
 
                   dpsi_dx = dpsi_da * da_dx + dpsi_db * db_dx + dpsi_dc * dc_dx;
 
@@ -859,12 +859,12 @@ namespace Rodin::Variational
             // --- triangle gradient (same as Triangle case, but index = alpha) ---
             const auto& Vinv = VandermondeTriangle<K>::getInverse();
 
-            Scalar rc, sc;
+            Real rc, sc;
             DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
 
-            const Scalar x   = r.x();
-            const Scalar y   = r.y();
-            const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+            const Real x   = r.x();
+            const Real y   = r.y();
+            const Real eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
             Scalar triDeriv = Scalar(0);
             size_t modeIdx = 0;
@@ -874,19 +874,19 @@ namespace Rodin::Variational
               Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
                 constexpr size_t Q = qIdx.value;
 
-                Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+                Real dpsi_dr = 0, dpsi_ds = 0;
                 DubinerTriangle<K>::template getGradient<P, Q>(dpsi_dr, dpsi_ds, rc, sc);
 
-                Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+                Real dpsi_dx = 0, dpsi_dy = 0;
 
                 // r = 2x/(1-y) - 1, s = 2y - 1
-                if (Math::abs(Scalar(1) - y) > eps)
+                if (Math::abs(Real(1) - y) > eps)
                 {
-                  const Scalar denom = Scalar(1) - y;
-                  const Scalar dr_dx = Scalar(2) / denom;
-                  const Scalar dr_dy = Scalar(2) * x / (denom * denom);
-                  const Scalar ds_dx = Scalar(0);
-                  const Scalar ds_dy = Scalar(2);
+                  const Real denom = Real(1) - y;
+                  const Real dr_dx = Real(2) / denom;
+                  const Real dr_dy = Real(2) * x / (denom * denom);
+                  const Real ds_dx = Real(0);
+                  const Real ds_dy = Real(2);
 
                   dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
                   dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;

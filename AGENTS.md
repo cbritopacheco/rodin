@@ -66,9 +66,10 @@ Individual binaries still work when you want one suite's output directly:
 `build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`.
 
 Suites: `tests/unit` (fast; may be built `Debug`), `tests/manufactured`
-(convergence/regression, includes PETSc assembly regressions — build
-`Release`/`RelWithDebInfo`, `Debug` is impractically slow),
-`tests/benchmarks` (Google Benchmark, target `RodinBenchmarks`).
+(manufactured solutions and fixed-mesh regressions, including PETSc assembly
+regressions), `tests/convergence` (multi-resolution rate validation), and
+`tests/benchmarks` (Google Benchmark, target `RodinBenchmarks`). PDE-solving
+suites should use `Release`/`RelWithDebInfo`; `Debug` is impractically slow.
 
 A change is not done until the affected unit test executable passes and, for
 assembly/solver changes, the relevant manufactured tests pass too.

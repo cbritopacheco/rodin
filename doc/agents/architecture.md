@@ -9,7 +9,8 @@ map.
 ```
 src/Rodin/          The library
 tests/unit/         GoogleTest, mirrors src/Rodin module tree
-tests/manufactured/ Convergence + targeted regressions (incl. cross-space and PETSc)
+tests/manufactured/ Manufactured solutions + targeted fixed-mesh regressions
+tests/convergence/  Multi-resolution h, p, hp, and isoparametric rate validation
 tests/benchmarks/   Google Benchmark (target RodinBenchmarks)
 examples/           One directory per theme; each example is a CLI executable
 third-party/        Git submodules (eigen, googletest, ...)

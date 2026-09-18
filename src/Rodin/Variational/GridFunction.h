@@ -1145,6 +1145,9 @@ namespace Rodin::Variational
       {
         const GridFunctionBase* owner = nullptr;
         const FES* fes = nullptr;
+        // Distinguishes geometry-specific static elements when stack addresses
+        // for successive grid functions and spaces are reused.
+        const ElementType* element = nullptr;
         size_t d = static_cast<size_t>(-1);
         Index i = static_cast<Index>(-1);
         std::vector<Index> dofs;
@@ -1165,11 +1168,14 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
-        if (cache.owner != this || cache.fes != fes || cache.d != d || cache.i != i)
+        const auto* element = &fes->getFiniteElement(d, i);
+        if (cache.owner != this || cache.fes != fes || cache.element != element ||
+          cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
           cache.fes = fes;
+          cache.element = element;
           cache.d = d;
           cache.i = i;
           const size_t count = static_cast<size_t>(dofs.size());
@@ -1185,17 +1191,20 @@ namespace Rodin::Variational
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
-        if (!cache.hasBasisValues || cache.owner != this || cache.d != d ||
-          cache.i != i || cache.qf != ip.getQuadratureFormula() ||
+        const auto* fes = &this->getFiniteElementSpace();
+        const auto* element = &fes->getFiniteElement(d, i);
+        if (!cache.hasBasisValues || cache.owner != this || cache.fes != fes ||
+          cache.element != element || cache.d != d || cache.i != i ||
+          cache.qf != ip.getQuadratureFormula() ||
           cache.qp != ip.getIndex())
         {
-          const auto* fes = &this->getFiniteElementSpace();
-          const auto& fe = fes->getFiniteElement(d, i);
+          const auto& fe = *element;
           const size_t count = fe.getCount();
           const auto& p = ip.getPoint();
 
           cache.owner = this;
           cache.fes = fes;
+          cache.element = element;
           cache.d = d;
           cache.i = i;
           cache.qf = ip.getQuadratureFormula();
