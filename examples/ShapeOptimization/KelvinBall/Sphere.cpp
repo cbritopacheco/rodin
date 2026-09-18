@@ -100,6 +100,7 @@ namespace KelvinBall
 
   size_t Sphere::protectFixedGeometry(MMG::Mesh& mesh) const
   {
+    mesh.getRequiredTriangles().clear();
     size_t count = 0;
     const FlatSet<Attribute> fixed{
       Outer, SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
@@ -121,8 +122,8 @@ namespace KelvinBall
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
     protectFixedGeometry(mesh);
-    const Real hmin = 0.8 * h;
-    const Real hmax = 1.25 * h;
+    const Real hmin = 0.1 * h;
+    const Real hmax = 10 * h;
     const Real hausdorff = 0.1 * h * h;
     P1 levelSetSpace(mesh);
     GridFunction sphere(levelSetSpace);
@@ -140,7 +141,7 @@ namespace KelvinBall
       .setAngleDetection(false);
     mesh = discretizer.discretize(sphere);
     splitSelfPairedCut(mesh);
-    const size_t optimizedRequiredTriangles = protectFixedGeometry(mesh);
+    protectFixedGeometry(mesh);
     MMG::Optimizer()
       .setHMin(hmin)
       .setHMax(hmax)
@@ -149,8 +150,9 @@ namespace KelvinBall
       .setAngleDetection(false)
       .optimize(mesh);
     splitSelfPairedCut(mesh);
+    const size_t requiredTriangles = protectFixedGeometry(mesh);
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
-      {hmin, hmax, hausdorff, optimizedRequiredTriangles, cellsBefore, cellsAfter}};
+      {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
   }
 }

@@ -401,8 +401,8 @@ namespace KelvinBall
       {
         const size_t previousCells = mesh.getCellCount();
         const size_t requiredTriangles = protectFixedGeometry(mesh);
-        const Real hmin = 0.8 * h;
-        const Real hmax = 1.25 * h;
+        const Real hmin = 0.1 * h;
+        const Real hmax = 10 * h;
         const Real hausdorff = 0.1 * h * h;
         const MeshDiagnostics inputDiagnostics = getMeshDiagnostics(mesh);
 
@@ -472,7 +472,8 @@ namespace KelvinBall
                       << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize)
                       << Alert::Raise;
 
-        const size_t optimizedRequiredTriangles = protectFixedGeometry(reconstructed);
+        const size_t requiredTrianglesBeforeOptimization =
+          protectFixedGeometry(reconstructed);
         MMG::Optimizer()
           .setHMin(hmin)
           .setHMax(hmax)
@@ -481,10 +482,14 @@ namespace KelvinBall
           .setAngleDetection(false)
           .optimize(reconstructed);
         splitSelfPairedCut(reconstructed);
+        const size_t requiredTrianglesAfterOptimization =
+          protectFixedGeometry(reconstructed);
         const MeshDiagnostics outputDiagnostics = getMeshDiagnostics(reconstructed, false);
         Alert::Info() << substageHeading("MMG optimization") << Alert::NewLine
                       << diagnosticLabel("Required boundary triangles:")
-                      << Alert::Notation::Number(optimizedRequiredTriangles)
+                      << Alert::Notation::Number(requiredTrianglesBeforeOptimization)
+                      << " -> "
+                      << Alert::Notation::Number(requiredTrianglesAfterOptimization)
                       << Alert::NewLine << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(reconstructionDiagnostics.cells) << " -> "
                       << Alert::Notation::Number(outputDiagnostics.cells)
@@ -500,7 +505,7 @@ namespace KelvinBall
                       << " -> " << Alert::Notation::Number(outputDiagnostics.meanElementSize)
                       << Alert::Raise;
         return {std::move(reconstructed),
-          {hmin, hmax, hausdorff, optimizedRequiredTriangles, previousCells,
+          {hmin, hmax, hausdorff, requiredTrianglesAfterOptimization, previousCells,
             outputDiagnostics.cells}};
       }
 

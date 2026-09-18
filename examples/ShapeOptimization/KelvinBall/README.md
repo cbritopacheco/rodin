@@ -161,8 +161,8 @@ the sewn chamber; the outer boundary remains a physical boundary. The Eikonal
 distance is first projected into the same weakly matched trace space, so the
 subsequent advection increment does not include an unrelated trace correction.
 
-The MMG parameters are tied to the effective background size: `hmin=0.8 h`,
-`hmax=1.25 h`, `hausd=0.1 h^2`, and gradation `2`. Automatic angle detection
+The MMG parameters are tied to the effective background size: `hmin=0.1 h`,
+`hmax=10 h`, `hausd=0.1 h^2`, and gradation `2`. Automatic angle detection
 is disabled because the fixed chamber faces are protected explicitly. The
 element count before and after each reconstruction is reported. Each
 reconstruction is followed by
