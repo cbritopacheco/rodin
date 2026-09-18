@@ -93,7 +93,10 @@ namespace KelvinBall
           }
           if (found == 0 || missed != 0)
             throw std::runtime_error(
-              "The rotated chamber faces do not cover each other.");
+              "The rotated chamber faces do not cover each other for slave attribute " +
+              std::to_string(pair.slave) + " and master attribute " +
+              std::to_string(pair.master) + ": " + std::to_string(found) +
+              " quadrature points located and " + std::to_string(missed) + " missed.");
         }
       }
 

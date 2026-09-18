@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef KELVIN_BALL_ROTATED_BOUNDARY_POLICY_H
-#define KELVIN_BALL_ROTATED_BOUNDARY_POLICY_H
+#ifndef KELVIN_BALL_ROTATED_CHARACTERISTIC_CONTINUATION_H
+#define KELVIN_BALL_ROTATED_CHARACTERISTIC_CONTINUATION_H
 
 #include <array>
 #include <functional>
@@ -20,12 +20,12 @@ namespace KelvinBall
   using namespace Rodin;
   using namespace Rodin::Geometry;
 
-  /** Transports a characteristic across a rotational chamber cut. */
+  /** Continues a characteristic across an identified rotational chamber cut. */
   template <class Mesh, class Locator>
-  class RotatedBoundaryPolicy
+  class RotatedCharacteristicContinuation
   {
     public:
-      RotatedBoundaryPolicy(Real dt, const Mesh& mesh, const Locator& locator,
+      RotatedCharacteristicContinuation(Real dt, const Mesh& mesh, const Locator& locator,
         const std::array<RotationPair, 2>& pairs)
         : m_mesh(mesh), m_locator(locator), m_pairs(pairs), m_stop(dt, mesh)
       {}
@@ -44,25 +44,25 @@ namespace KelvinBall
 
         Attribute target = 0;
         Math::SpatialMatrix<Real> transform(3, 3);
-        bool periodic = false;
+        bool identifiedCut = false;
         for (const auto& pair : m_pairs.get())
         {
           if (*face->getAttribute() == pair.slave)
           {
             target = pair.master;
             transform = pair.rotation;
-            periodic = true;
+            identifiedCut = true;
             break;
           }
           if (*face->getAttribute() == pair.master)
           {
             target = pair.slave;
             transform = pair.rotation.transpose();
-            periodic = true;
+            identifiedCut = true;
             break;
           }
         }
-        if (!periodic)
+        if (!identifiedCut)
           return m_stop(hit);
 
         Math::SpatialPoint physical;
@@ -70,11 +70,12 @@ namespace KelvinBall
         const auto mapped = m_locator.get().locate(target, transform * physical);
         if (!mapped)
           throw std::runtime_error(
-            "A periodic characteristic could not cross a chamber cut.");
+            "A characteristic could not cross an identified rotational chamber cut.");
         const auto& incidence = mesh.getConnectivity().getIncidence(
           {dimension - 1, dimension}, mapped->getPolytope().getIndex());
         if (incidence.size() != 1)
-          throw std::runtime_error("A periodic target face has no unique incident cell.");
+          throw std::runtime_error(
+            "An identified target face has no unique incident chamber cell.");
         const Index cell = incidence[0];
         Math::SpatialPoint reference;
         mesh.getPolytopeTransformation(dimension, cell)

@@ -137,14 +137,18 @@ namespace KelvinBall
         Real penalty, const FlatSet<Attribute>& fixedBoundaries) const;
 
       template <class ScalarSpace, class LinearSystem>
-      void assembleScalar(
+      void assembleScalarTracePenalty(
         const ScalarSpace& space, LinearSystem& system, Real penalty) const;
 
-      template <class U>
-      Real scalarJump(const U& field) const;
+      template <class ScalarSpace, class LinearSystem, class Reference>
+      void assembleScalarTracePenalty(const ScalarSpace& space, LinearSystem& system,
+        Real penalty, const Reference& reference) const;
 
       template <class U>
       Real vectorJump(const U& field) const;
+
+      template <class U>
+      Real scalarJump(const U& field) const;
 
       template <class U0, class U1, class U2>
       Real familyJump(const U0& u0, const U1& u1, const U2& u2) const;
@@ -603,7 +607,7 @@ namespace KelvinBall
   }
 
   template <class ScalarSpace, class LinearSystem>
-  void RotatedNitscheIntegrator::assembleScalar(
+  void RotatedNitscheIntegrator::assembleScalarTracePenalty(
     const ScalarSpace& space, LinearSystem& system, Real penalty) const
   {
     const auto& mesh = space.getMesh();
@@ -653,12 +657,14 @@ namespace KelvinBall
     }
   }
 
-  template <class U>
-  Real RotatedNitscheIntegrator::scalarJump(const U& u) const
+  template <class ScalarSpace, class LinearSystem, class Reference>
+  void RotatedNitscheIntegrator::assembleScalarTracePenalty(const ScalarSpace& space,
+    LinearSystem& system, Real penalty, const Reference& reference) const
   {
-    const auto& mesh = u.getFiniteElementSpace().getMesh();
+    assembleScalarTracePenalty(space, system, penalty);
+    auto& rhs = system.getVector();
+    const auto& mesh = space.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
-    Real residual = 0;
     for (const RotationPair& pair : RotationPairs)
     {
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
@@ -669,18 +675,27 @@ namespace KelvinBall
         const auto& quadrature = face->getQuadrature(qf);
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
-          const auto& point = quadrature.getPoint(qp);
+          const auto& slavePoint = quadrature.getPoint(qp);
           const auto mapped =
-            m_locator.locate(pair.master, pair.rotation * point.vector());
+            m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
             throw std::runtime_error(
-              "A rotated scalar diagnostic point was not located.");
-          residual =
-            std::max(residual, std::abs(u.getValue(*mapped) - u.getValue(point)));
+              "A rotated scalar quadrature point was not located.");
+          const auto slave = Internal::evaluateScalarBasis<1>(
+            space, *face, slavePoint.getPhysicalCoordinates());
+          const auto master = Internal::evaluateScalarBasis<1>(
+            space, mapped->getPolytope(), mapped->getPhysicalCoordinates());
+          const Real referenceJump =
+            reference.getValue(*mapped) - reference.getValue(slavePoint);
+          const Real weight = qf.getWeight(qp) * slavePoint.getDistortion() * penalty *
+            Internal::diameter(*face);
+          for (size_t node = 0; node < master.values.size(); ++node)
+            rhs(master.dofs[node]) += weight * master.values[node] * referenceJump;
+          for (size_t node = 0; node < slave.values.size(); ++node)
+            rhs(slave.dofs[node]) -= weight * slave.values[node] * referenceJump;
         }
       }
     }
-    return residual;
   }
 
   template <class U0, class U1, class U2>
@@ -746,6 +761,35 @@ namespace KelvinBall
           const auto jump = u.getValue(*mapped) - pair.rotation * u.getValue(point);
           for (size_t i = 0; i < 3; ++i)
             residual = std::max(residual, std::abs(jump(i)));
+        }
+      }
+    }
+    return residual;
+  }
+
+  template <class U>
+  Real RotatedNitscheIntegrator::scalarJump(const U& u) const
+  {
+    const auto& mesh = u.getFiniteElementSpace().getMesh();
+    const size_t faceDimension = mesh.getDimension() - 1;
+    Real residual = 0;
+    for (const RotationPair& pair : RotationPairs)
+    {
+      for (auto face = mesh.getPolytope(faceDimension); face; ++face)
+      {
+        if (face->getAttribute() != pair.slave)
+          continue;
+        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& quadrature = face->getQuadrature(qf);
+        for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+        {
+          const auto& point = quadrature.getPoint(qp);
+          const auto mapped =
+            m_locator.locate(pair.master, pair.rotation * point.vector());
+          if (!mapped)
+            throw std::runtime_error("A rotated scalar diagnostic point was not located.");
+          residual =
+            std::max(residual, std::abs(u.getValue(*mapped) - u.getValue(point)));
         }
       }
     }

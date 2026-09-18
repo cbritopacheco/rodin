@@ -32,7 +32,7 @@
 
 #include "Configuration.h"
 #include "Metrics.h"
-#include "RotatedBoundaryPolicy.h"
+#include "RotatedCharacteristicContinuation.h"
 #include "RotatedNitscheIntegrator.h"
 #include "SewedOutput.h"
 #include "Sphere.h"
@@ -65,8 +65,8 @@ namespace KelvinBall
 
       static constexpr Real mu = KelvinBall::Mu;
       static constexpr Real remeshGradation = 2.0;
-      static constexpr Real periodicPhysicalTolerance = 0.01;
-      static constexpr Real periodicReferenceTolerance = 0.25;
+      static constexpr Real rotatedTracePhysicalTolerance = 0.01;
+      static constexpr Real rotatedTraceReferenceTolerance = 0.25;
       static constexpr Real linearResidualTolerance = KelvinBall::LinearResidualTolerance;
       static constexpr size_t chamberMultiplicity = KelvinBall::ChamberMultiplicity;
 #ifdef RODIN_USE_OPENMP
@@ -106,9 +106,18 @@ namespace KelvinBall
           size_t obstacleCells = 0;
           size_t fluidCells = 0;
           size_t interfaceTriangles = 0;
+          Real minimumQuality = std::numeric_limits<Real>::infinity();
+          Real meanQuality = 0;
+          Real maximumQuality = 0;
       };
 
       using ReconstructionDiagnostics = KelvinBall::ReconstructionDiagnostics;
+
+      struct MMGReconstruction
+      {
+          MMG::Mesh mesh;
+          ReconstructionDiagnostics diagnostics;
+      };
 
       void printUsage(const char* executable)
       {
@@ -130,6 +139,8 @@ namespace KelvinBall
           << "   H1 smoothing length in multiples of h (default: 4)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
           << "             Advection time step in multiples of h (default: 0.1)."
+          << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
+          << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--geometry-only")
           << "             Stop after initial MMG reconstruction." << Alert::NewLine
           << Alert::Notation("--state-only")
@@ -208,11 +219,13 @@ namespace KelvinBall
             "Mesh reconstruction changed the fixed boundary geometry.");
       }
 
-      MeshDiagnostics getMeshDiagnostics(const LocalMesh& mesh)
+      MeshDiagnostics getMeshDiagnostics(
+        const LocalMesh& mesh, bool requireCompletePartition = true)
       {
         MeshDiagnostics diagnostics;
         diagnostics.vertices = mesh.getVertexCount();
         diagnostics.cells = mesh.getCellCount();
+        Real qualitySum = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if (cell->getAttribute() == Obstacle)
@@ -221,14 +234,35 @@ namespace KelvinBall
             ++diagnostics.fluidCells;
           else
             throw std::runtime_error("A cell has an unexpected material attribute.");
+
+          const auto& vertices = cell->getVertices();
+          if (vertices.size() != 4)
+            throw std::runtime_error("Kelvin-ball mesh quality requires tetrahedra.");
+          Real squaredEdgeLengthSum = 0;
+          for (size_t i = 0; i < vertices.size(); ++i)
+          {
+            for (size_t j = i + 1; j < vertices.size(); ++j)
+            {
+              squaredEdgeLengthSum += (mesh.getVertexCoordinates(vertices[i]) -
+                mesh.getVertexCoordinates(vertices[j]))
+                                        .squaredNorm();
+            }
+          }
+          const Real quality =
+            12 * std::pow(3 * cell->getMeasure(), Real(2) / 3) / squaredEdgeLengthSum;
+          diagnostics.minimumQuality = std::min(diagnostics.minimumQuality, quality);
+          diagnostics.maximumQuality = std::max(diagnostics.maximumQuality, quality);
+          qualitySum += quality;
         }
+        diagnostics.meanQuality = qualitySum / static_cast<Real>(diagnostics.cells);
         for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
         {
           if (face->getAttribute() == Gamma)
             ++diagnostics.interfaceTriangles;
         }
-        if (diagnostics.obstacleCells == 0 || diagnostics.fluidCells == 0 ||
-          diagnostics.interfaceTriangles == 0)
+        if (requireCompletePartition &&
+          (diagnostics.obstacleCells == 0 || diagnostics.fluidCells == 0 ||
+            diagnostics.interfaceTriangles == 0))
           throw std::runtime_error("The fitted body/fluid partition is incomplete.");
         return diagnostics;
       }
@@ -243,6 +277,12 @@ namespace KelvinBall
                       << Alert::Notation::Number(diagnostics.fluidCells) << Alert::NewLine
                       << diagnosticLabel("Interface triangles:")
                       << Alert::Notation::Number(diagnostics.interfaceTriangles)
+                      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+                      << Alert::Notation::Number(diagnostics.minimumQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+                      << Alert::Notation::Number(diagnostics.meanQuality)
+                      << Alert::NewLine << diagnosticLabel("Maximum tetrahedron quality:")
+                      << Alert::Notation::Number(diagnostics.maximumQuality)
                       << Alert::Raise;
       }
 
@@ -331,14 +371,32 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      ReconstructionDiagnostics discretizeLevelSetMMG(
-        MMG::Mesh& mesh, const LevelSet& levelSet, Real h, Real outerRadius, bool initial)
+      MMGReconstruction discretizeLevelSetMMG(
+        MMG::Mesh& mesh, const LevelSet& levelSet, Real h)
       {
         const size_t previousCells = mesh.getCellCount();
         const size_t requiredTriangles = protectFixedGeometry(mesh);
         const Real hmin = 0.8 * h;
         const Real hmax = 1.25 * h;
         const Real hausdorff = 0.1 * h * h;
+        const MeshDiagnostics inputDiagnostics = getMeshDiagnostics(mesh);
+
+        Alert::Info() << substageHeading("MMG input") << Alert::NewLine
+                      << diagnosticLabel("Level-set minimum:")
+                      << Alert::Notation::Number(levelSet.min()) << Alert::NewLine
+                      << diagnosticLabel("Level-set maximum:")
+                      << Alert::Notation::Number(levelSet.max()) << Alert::NewLine
+                      << diagnosticLabel("Vertices:")
+                      << Alert::Notation::Number(inputDiagnostics.vertices)
+                      << Alert::NewLine << diagnosticLabel("Cells:")
+                      << Alert::Notation::Number(inputDiagnostics.cells) << Alert::NewLine
+                      << diagnosticLabel("Interface triangles:")
+                      << Alert::Notation::Number(inputDiagnostics.interfaceTriangles)
+                      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+                      << Alert::Notation::Number(inputDiagnostics.minimumQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+                      << Alert::Notation::Number(inputDiagnostics.meanQuality)
+                      << Alert::Raise;
 
         MMG::LevelSetDiscretizer discretizer;
         discretizer.split(Fluid, {Obstacle, Fluid})
@@ -346,15 +404,14 @@ namespace KelvinBall
           .setHMax(hmax)
           .setHausdorff(hausdorff)
           .setGradation(remeshGradation)
-          .setBaseReferences(
-            initial ? FlatSet<Attribute>{Fluid} : FlatSet<Attribute>{Obstacle, Fluid})
+          .setBaseReferences(FlatSet<Attribute>{Obstacle, Fluid})
           .setBoundaryReference(Gamma)
           .setAngleDetection(true);
-        if (!initial)
-          discretizer.split(Obstacle, {Obstacle, Fluid});
-        mesh = discretizer.discretize(levelSet);
+        discretizer.split(Obstacle, {Obstacle, Fluid});
+        MMG::Mesh reconstructed = discretizer.discretize(levelSet);
 
-        splitSelfPairedCut(mesh);
+        splitSelfPairedCut(reconstructed);
+        const MeshDiagnostics outputDiagnostics = getMeshDiagnostics(reconstructed, false);
         Alert::Info() << substageHeading("MMG reconstruction") << Alert::NewLine
                       << diagnosticLabel("Minimum size:") << Alert::Notation::Number(hmin)
                       << Alert::NewLine << diagnosticLabel("Maximum size:")
@@ -365,53 +422,26 @@ namespace KelvinBall
                       << Alert::Notation::Number(requiredTriangles) << Alert::NewLine
                       << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(previousCells) << " -> "
-                      << Alert::Notation::Number(mesh.getCellCount()) << Alert::Raise;
-        checkFixedGeometry(mesh, outerRadius);
-        checkMaterials(mesh);
-        return {
-          hmin, hmax, hausdorff, requiredTriangles, previousCells, mesh.getCellCount()};
-      }
-
-      template <class ScalarGridFunction, class Locator>
-      Real stitchScalarTrace(ScalarGridFunction& field, const Locator& locator)
-      {
-        const auto copy = field;
-        const auto& space = field.getFiniteElementSpace();
-        const auto& mesh = space.getMesh();
-        Math::Vector<Real> sum(space.getSize());
-        sum.setZero();
-        std::vector<size_t> count(space.getSize(), 0);
-        Real correction = 0;
-        for (const KelvinBall::RotationPair& pair : RotationPairs)
-        {
-          std::set<Index> vertices;
-          for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
-          {
-            if (face->getAttribute() == pair.slave)
-              vertices.insert(face->getVertices().begin(), face->getVertices().end());
-          }
-          for (const Index vertex : vertices)
-          {
-            const auto mapped = locator.locate(
-              pair.master, pair.rotation * mesh.getVertexCoordinates(vertex));
-            if (!mapped)
-              throw std::runtime_error("A scalar trace node has no rotated master.");
-            const Index dof = space.getDOFs(0, vertex)(0);
-            sum(dof) += copy.getValue(*mapped);
-            ++count[dof];
-          }
-        }
-        for (Eigen::Index dof = 0; dof < sum.size(); ++dof)
-        {
-          if (count[dof] == 0)
-            continue;
-          const Real value = sum(dof) / count[dof];
-          correction = std::max(correction, std::abs(field.getData()(dof) - value));
-          field.getData()(dof) = value;
-        }
-        Alert::Info() << "Scalar trace stitching correction: "
-                      << Alert::Notation::Number(correction) << Alert::Raise;
-        return correction;
+                      << Alert::Notation::Number(outputDiagnostics.cells)
+                      << Alert::NewLine << diagnosticLabel("Obstacle cells:")
+                      << Alert::Notation::Number(outputDiagnostics.obstacleCells)
+                      << Alert::NewLine << diagnosticLabel("Fluid cells:")
+                      << Alert::Notation::Number(outputDiagnostics.fluidCells)
+                      << Alert::NewLine << diagnosticLabel("Interface triangles:")
+                      << Alert::Notation::Number(inputDiagnostics.interfaceTriangles)
+                      << " -> "
+                      << Alert::Notation::Number(outputDiagnostics.interfaceTriangles)
+                      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+                      << Alert::Notation::Number(inputDiagnostics.minimumQuality)
+                      << " -> "
+                      << Alert::Notation::Number(outputDiagnostics.minimumQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+                      << Alert::Notation::Number(inputDiagnostics.meanQuality) << " -> "
+                      << Alert::Notation::Number(outputDiagnostics.meanQuality)
+                      << Alert::Raise;
+        return {std::move(reconstructed),
+          {hmin, hmax, hausdorff, requiredTriangles, previousCells,
+            outputDiagnostics.cells}};
       }
 
       template <class Space, class Density, class Output>
@@ -474,6 +504,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   bool stateOnly = false;
   Real regularizationFactor = 4.0;
   Real stepFactor = 0.1;
+  size_t advectionQuadratureOrder = 8;
   for (int argument = 1; argument < argc; ++argument)
   {
     const std::string_view mode(argv[argument]);
@@ -485,6 +516,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       regularizationFactor = std::stod(std::string(mode.substr(17)));
     else if (mode.rfind("--step=", 0) == 0)
       stepFactor = std::stod(std::string(mode.substr(7)));
+    else if (mode.rfind("--advection-quadrature=", 0) == 0)
+      advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
     else if (mode == "--save-mesh")
       saveMeshDiagnostic = true;
     else if (mode == "--geometry-only")
@@ -510,6 +543,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The regularization factor must be positive.");
   if (!(stepFactor > 0))
     throw std::runtime_error("The advection step factor must be positive.");
+  if (advectionQuadratureOrder == 0)
+    throw std::runtime_error("The advection quadrature order must be positive.");
   if (geometryOnly && stateOnly)
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
   const Real h = configuration.getH();
@@ -533,7 +568,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                 << Alert::Notation::Number(hilbertLength) << " = "
                 << Alert::Notation::Number(regularizationFactor) << " h" << Alert::NewLine
                 << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
-                << " = " << Alert::Notation::Number(stepFactor) << " h" << Alert::Raise;
+                << " = " << Alert::Notation::Number(stepFactor) << " h"
+                << Alert::NewLine << diagnosticLabel("Advection quadrature order:")
+                << Alert::Notation::Number(advectionQuadratureOrder) << Alert::Raise;
   announce("Stage 1: Discretizing the initial sphere with MMG.");
   auto sphere = Sphere(configuration).discretize();
   MMG::Mesh mesh(std::move(sphere.mesh));
@@ -549,16 +586,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
   std::ofstream history("kelvin-ball.csv");
   history.precision(17);
-  history << "iteration,outer_radius,h,dt,regularization_length,nitsche_penalty,"
+  history << "iteration,outer_radius,h,dt,advection_quadrature_order,"
+             "regularization_length,nitsche_penalty,"
              "stabilization_factor,assembly_backend,direct_solver,"
              "vertices,cells,obstacle_cells,fluid_cells,"
-             "interface_triangles,remesh_hmin,remesh_hmax,remesh_hausdorff,"
+             "interface_triangles,mesh_quality_min,mesh_quality_mean,mesh_quality_max,"
+             "remesh_hmin,remesh_hmax,remesh_hausdorff,"
              "required_boundary_triangles,remesh_cells_before,remesh_cells_after,"
              "k,c,q,rho,coupling_symmetry,nitsche_jump,volume,target_volume,"
              "volume_error,chamber_bbox_x,chamber_bbox_y,chamber_bbox_z,"
              "sewn_bbox_x,sewn_bbox_y,sewn_bbox_z,actual_delta_rho,"
              "predicted_delta_rho,actual_delta_volume,predicted_delta_volume,"
-             "incoming_scalar_trace_jump,incoming_stitch_correction,"
              "null_space_multiplier,xi_rho_inf_norm,theta_inf_norm,d_rho_theta,"
              "d_volume_theta,required_d_volume_theta,rho_gradient_residual,"
              "rho_gradient_jump,volume_gradient_residual,"
@@ -570,15 +608,21 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   IO::XDMF sewedXdmf("KelvinBallSewed");
   auto sewedDesignOutput = sewedXdmf.grid("Design");
   auto sewedFluidOutput = sewedXdmf.grid("Fluid");
+  IO::XDMF mmgXdmf("KelvinBallMMG");
+  auto mmgOutput = mmgXdmf.grid("Reconstructed");
   Optional<Real> previousRho;
   Optional<Real> predictedRhoChange;
   Optional<Real> previousVolume;
   Optional<Real> predictedVolumeChange;
-  Optional<Real> incomingScalarTraceJump;
-  Optional<Real> incomingStitchCorrection;
+  Optional<MMG::Mesh> nextMesh;
 
   for (size_t iteration = 0; iteration < maxIterations; ++iteration)
   {
+    if (nextMesh)
+    {
+      mesh = std::move(*nextMesh);
+      nextMesh.reset();
+    }
     Alert::Info() << " ------------------------------------------------------------"
                   << Alert::NewLine << " Iteration "
                   << Alert::Notation::Number(iteration + 1) << " of "
@@ -603,7 +647,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     VelocitySpace Vh = makeVelocitySpace(fluid);
     PressureSpace Qh(fluid);
     KelvinBall::RotatedNitscheIntegrator fluidCoupling(
-      fluid, MasterCuts, periodicPhysicalTolerance, periodicReferenceTolerance);
+      fluid, MasterCuts, rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
     GridFunction uT0(Vh), uT1(Vh), uT2(Vh), uR0(Vh), uR1(Vh), uR2(Vh);
     GridFunction pT0(Qh), pT1(Qh), pT2(Qh), pR0(Qh), pR1(Qh), pR2(Qh);
 
@@ -629,21 +673,21 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real actualVolumeChange = previousVolume ? volume - *previousVolume : nan;
     const Real incomingPredictedVolumeChange =
       predictedVolumeChange ? *predictedVolumeChange : nan;
-    const Real scalarTraceJump = incomingScalarTraceJump ? *incomingScalarTraceJump : nan;
-    const Real stitchCorrection =
-      incomingStitchCorrection ? *incomingStitchCorrection : nan;
     const auto writeHistory = [&](Real nullSpaceMultiplier, Real xiRhoInfinityNorm,
                                 Real thetaInfinityNorm, Real dRhoTheta, Real dVolumeTheta,
                                 Real requiredDVolumeTheta,
                                 const GradientDiagnostics& rhoGradientDiagnostics,
                                 const GradientDiagnostics& volumeGradientDiagnostics) {
       history << iteration << ',' << outerRadius << ',' << h << ',' << dt << ','
-              << hilbertLength << ',' << nitschePenalty << ',' << stabilizationFactor
-              << ',' << assemblyBackend << ',' << KelvinBall::DirectSolverName << ','
+              << advectionQuadratureOrder << ',' << hilbertLength << ','
+              << nitschePenalty << ',' << stabilizationFactor << ',' << assemblyBackend
+              << ',' << KelvinBall::DirectSolverName << ','
               << meshDiagnostics.vertices << ',' << meshDiagnostics.cells << ','
               << meshDiagnostics.obstacleCells << ',' << meshDiagnostics.fluidCells << ','
-              << meshDiagnostics.interfaceTriangles << ',' << reconstruction.minimumSize
-              << ',' << reconstruction.maximumSize << ','
+              << meshDiagnostics.interfaceTriangles << ','
+              << meshDiagnostics.minimumQuality << ',' << meshDiagnostics.meanQuality
+              << ',' << meshDiagnostics.maximumQuality << ','
+              << reconstruction.minimumSize << ',' << reconstruction.maximumSize << ','
               << reconstruction.hausdorffTolerance << ','
               << reconstruction.requiredBoundaryTriangles << ','
               << reconstruction.cellsBefore << ',' << reconstruction.cellsAfter << ','
@@ -654,8 +698,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << sewnBoundingBox(0) << ',' << sewnBoundingBox(1) << ','
               << sewnBoundingBox(2) << ',' << actualRhoChange << ','
               << incomingPredictedRhoChange << ',' << actualVolumeChange << ','
-              << incomingPredictedVolumeChange << ',' << scalarTraceJump << ','
-              << stitchCorrection << ',' << nullSpaceMultiplier << ','
+              << incomingPredictedVolumeChange << ',' << nullSpaceMultiplier << ','
               << xiRhoInfinityNorm << ',' << thetaInfinityNorm << ',' << dRhoTheta << ','
               << dVolumeTheta << ',' << requiredDVolumeTheta << ','
               << rhoGradientDiagnostics.residual << ',' << rhoGradientDiagnostics.jump
@@ -735,7 +778,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     P1 shapeSpace(mesh, 3);
     KelvinBall::RotatedNitscheIntegrator shapeCoupling(mesh,
       FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
-      periodicPhysicalTolerance, periodicReferenceTolerance);
+      rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
     GridFunction rhoGradient(shapeSpace), volumeGradient(shapeSpace);
     announce("Stage 6: Regularizing and constraining the shape direction.");
     const GradientDiagnostics rhoGradientDiagnostics = identifyGradient(shapeSpace,
@@ -785,8 +828,43 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     predictedRhoChange = dt * dRhoTheta;
     previousVolume = volume;
     predictedVolumeChange = dt * dVolumeTheta;
+    GridFunction eikonalDistance(levelSetSpace);
+    Distance::Eikonal(eikonalDistance)
+      .setInterior(Obstacle)
+      .setInterface(Gamma)
+      .solve()
+      .sign();
+    TrialFunction periodicDistance(levelSetSpace);
+    TestFunction distanceTest(levelSetSpace);
+    Problem distanceProjection(periodicDistance, distanceTest);
+    auto eikonalDistanceLoad = Integral(eikonalDistance, distanceTest);
+    eikonalDistanceLoad.setOrder(2);
+    distanceProjection =
+      Integral(periodicDistance, distanceTest) - eikonalDistanceLoad;
+    distanceProjection.assemble();
+    shapeCoupling.assembleScalarTracePenalty(
+      levelSetSpace, distanceProjection.getLinearSystem(), nitschePenalty);
+    Solver::CG(distanceProjection).solve();
     GridFunction distance(levelSetSpace);
-    Distance::Eikonal(distance).setInterior(Obstacle).setInterface(Gamma).solve().sign();
+    distance = periodicDistance.getSolution();
+    const auto& distanceSystem = distanceProjection.getLinearSystem();
+    const Real distanceProjectionResidual =
+      (distanceSystem.getOperator() * distanceSystem.getSolution() -
+        distanceSystem.getVector())
+          .norm() /
+      std::max(distanceSystem.getVector().norm(), Real(1));
+    const Real distanceProjectionCorrection =
+      (distance.getData() - eikonalDistance.getData()).lpNorm<Eigen::Infinity>();
+    Alert::Info() << substageHeading("Distance trace projection") << Alert::NewLine
+                  << diagnosticLabel("Linear residual:")
+                  << Alert::Notation::Number(distanceProjectionResidual)
+                  << Alert::NewLine << diagnosticLabel("Eikonal rotated jump:")
+                  << Alert::Notation::Number(shapeCoupling.scalarJump(eikonalDistance))
+                  << Alert::NewLine << diagnosticLabel("Projected rotated jump:")
+                  << Alert::Notation::Number(shapeCoupling.scalarJump(distance))
+                  << Alert::NewLine << diagnosticLabel("Infinity correction:")
+                  << Alert::Notation::Number(distanceProjectionCorrection)
+                  << Alert::Raise;
 
     announce("Stage 7: Writing the chamber and sewn fields.");
     chamber.clear();
@@ -859,36 +937,76 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     sewedFluidOutput.add("Pressure_Rotation_1", sewedPR1, IO::XDMF::Center::Node);
     sewedFluidOutput.add("Pressure_Rotation_2", sewedPR2, IO::XDMF::Center::Node);
 
-    xdmf.write(static_cast<Real>(iteration)).flush();
-    sewedXdmf.write(static_cast<Real>(iteration)).flush();
-
     if (iteration + 1 == maxIterations)
+    {
+      xdmf.write(static_cast<Real>(iteration)).flush();
+      sewedXdmf.write(static_cast<Real>(iteration)).flush();
       continue;
+    }
+
     announce("Stage 8: Advecting the level set.");
     TrialFunction advected(levelSetSpace);
     TestFunction test(levelSetSpace);
-    KelvinBall::RotatedBoundaryPolicy periodicBoundary(
+    KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
       -dt, mesh, shapeCoupling.getLocator(), RotationPairs);
     Problem transport(advected, test);
-    transport = Integral(advected, test) -
-      Integral(
-        Flow(-dt, distance, theta, Math::RungeKutta::RK4{}, periodicBoundary), test);
+    auto transportedDistance =
+      Integral(Flow(-dt, distance, theta, Math::RungeKutta::RK4{},
+                 rotationalContinuation),
+        test);
+    transportedDistance.setOrder(advectionQuadratureOrder);
+    transport = Integral(advected, test) - transportedDistance;
     transport.assemble();
-    shapeCoupling.assembleScalar(
-      levelSetSpace, transport.getLinearSystem(), nitschePenalty);
+    shapeCoupling.assembleScalarTracePenalty(
+      levelSetSpace, transport.getLinearSystem(), nitschePenalty, distance);
     Solver::CG(transport).solve();
-    incomingScalarTraceJump = shapeCoupling.scalarJump(advected.getSolution());
-    Alert::Info() << "Weak scalar trace jump: "
-                  << Alert::Notation::Number(*incomingScalarTraceJump) << Alert::Raise;
-    incomingStitchCorrection =
-      stitchScalarTrace(advected.getSolution(), shapeCoupling.getLocator());
+    const auto& advectedDistance = advected.getSolution();
+    const auto& transportSystem = transport.getLinearSystem();
+    const Real transportResidual =
+      (transportSystem.getOperator() * transportSystem.getSolution() -
+        transportSystem.getVector())
+          .norm() /
+      std::max(transportSystem.getVector().norm(), Real(1));
+    const Real advectionIncrement =
+      (advectedDistance.getData() - distance.getData()).lpNorm<Eigen::Infinity>();
+    const Real distanceJump = shapeCoupling.scalarJump(distance);
+    const Real advectedJump = shapeCoupling.scalarJump(advectedDistance);
+    Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
+                  << diagnosticLabel("Linear residual:")
+                  << Alert::Notation::Number(transportResidual) << Alert::NewLine
+                  << diagnosticLabel("Minimum:")
+                  << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
+                  << diagnosticLabel("Maximum:")
+                  << Alert::Notation::Number(advectedDistance.max()) << Alert::NewLine
+                  << diagnosticLabel("Increment infinity norm:")
+                  << Alert::Notation::Number(advectionIncrement) << Alert::NewLine
+                  << diagnosticLabel("Distance rotated jump:")
+                  << Alert::Notation::Number(distanceJump) << Alert::NewLine
+                  << diagnosticLabel("Advected rotated jump:")
+                  << Alert::Notation::Number(advectedJump) << Alert::Raise;
+    chamber.add("Advected", advectedDistance, IO::XDMF::Center::Node);
+    GridFunction sewedAdvected(sewedDesignScalar);
+    sewedDesign.setScalar(sewedAdvected, advectedDistance);
+    sewedDesignOutput.add("Advected", sewedAdvected, IO::XDMF::Center::Node);
+
+    xdmf.write(static_cast<Real>(iteration)).flush();
+    sewedXdmf.write(static_cast<Real>(iteration)).flush();
+
     announce("Stage 9: Reconstructing the advected interface with MMG.");
-    reconstruction =
-      discretizeLevelSetMMG(mesh, advected.getSolution(), h, outerRadius, false);
+    MMGReconstruction result = discretizeLevelSetMMG(mesh, advectedDistance, h);
+    reconstruction = result.diagnostics;
+    mmgOutput.clear();
+    mmgOutput.setMesh(result.mesh, IO::XDMF::MeshPolicy::Transient);
+    mmgXdmf.write(static_cast<Real>(iteration + 1)).flush();
+    checkFixedGeometry(result.mesh, outerRadius);
+    checkMaterials(result.mesh);
+    nextMesh.emplace(std::move(result.mesh));
   }
 
-  Alert::Success() << "Wrote KelvinBall.xdmf, KelvinBallSewed.xdmf, and kelvin-ball.csv"
-                   << Alert::Raise;
+  Alert::Success()
+    << "Wrote KelvinBall.xdmf, KelvinBallSewed.xdmf, KelvinBallMMG.xdmf, and "
+       "kelvin-ball.csv"
+    << Alert::Raise;
   return 0;
 }
 

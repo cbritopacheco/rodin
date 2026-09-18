@@ -109,15 +109,21 @@ arguments, the executable uses `--n=13`, `--outer-radius=2`, `--iterations=1`,
 `--penalty=320`, `--stabilization=0.05`, `--regularization=4`, and `--step=0.1`.
 
 Each iterate is written to two XDMF series. `KelvinBall.xdmf` contains the
-chamber design and chamber states. `KelvinBallSewed.xdmf` contains the complete
+chamber design and chamber states. On iterations followed by an update, its
+`Advected` field is the transported distance on the exact mesh passed to MMG.
+`KelvinBallSewed.xdmf` contains the complete
 24-copy design with the sewn distance and deformation fields, together with a
 complete fluid grid carrying the six sewn velocities and six sewn pressures.
+It also contains the fully sewn `Advected` field. `KelvinBallMMG.xdmf` records
+the mesh returned immediately by each MMG reconstruction, before the next
+finite-element spaces are constructed.
 The console and `kelvin-ball.csv` also report the three side lengths of the
 axis-aligned bounding boxes of the chamber mesh and the fully sewn mesh.
 The CSV records one row per evaluated design, including the run parameters,
-mesh and material counts, MMG reconstruction parameters, resistance metrics,
-volume error, update prediction and realization, trace stitching diagnostics,
-normalized direction derivatives, and extension residuals and jumps. Fields
+mesh and material counts, minimum, mean, and maximum tetrahedron mean-ratio
+quality, MMG reconstruction parameters, resistance metrics, volume error,
+update prediction and realization, normalized direction derivatives, and
+extension residuals and jumps. Fields
 that do not exist for the initial design or a `--state-only` run are `nan`.
 
 A one-iterate output smoke test is
@@ -133,6 +139,12 @@ state on the resulting design:
 KelvinBall --n=13 --iterations=2 --regularization=4 --step=0.01
 ```
 
+The transported-distance quadrature defaults to order 8 and can be changed
+with `--advection-quadrature=<order>`. Order 2 exactly integrates only the
+zero-displacement P1 mass-product limit. The composition with a nonzero
+characteristic displacement is not polynomial on one source element and
+requires a higher-order rule in practice.
+
 The uniform grid supplies the background resolution. MMG discretizes the
 initial spherical level set and each subsequently advected level set. The
 outer boundary and all chamber cuts are marked as required geometry; their
@@ -140,6 +152,13 @@ labels and planarity are checked after every reconstruction. Since the body
 interface crosses the chamber cuts, their triangulations may nevertheless
 change locally. The rotational Nitsche terms locate paired traces by AABB
 search and do not require matching cut meshes.
+
+During level-set transport, a characteristic crossing an identified chamber
+cut is continued through its rotated partner. The scalar projection weakly
+matches the two nonconforming traces. These operations express the topology of
+the sewn chamber; the outer boundary remains a physical boundary. The Eikonal
+distance is first projected into the same weakly matched trace space, so the
+subsequent advection increment does not include an unrelated trace correction.
 
 The MMG parameters are tied to the effective background size: `hmin=0.8 h`,
 `hmax=1.25 h`, `hausd=0.1 h^2`, and gradation `2`. The element count before
