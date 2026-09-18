@@ -25,6 +25,8 @@ target_link_libraries(LevelSetCantilever3D
   Rodin::MMG
   )
 
+add_subdirectory(KelvinBall)
+
 add_executable(LevelSetWNGIRCantilever2D LevelSetWNGIRCantilever2D.cpp)
 target_link_libraries(LevelSetWNGIRCantilever2D
   PUBLIC
