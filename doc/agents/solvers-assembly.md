@@ -41,12 +41,12 @@ from the system type.
   `IDRSTABL`, `LeastSquaresCG`.
 - Eigen direct: `SparseLU`, `SparseQR`, `SimplicialLLT`, `SimplicialLDLT`,
   `LDLT`, `HouseholderQR`, `PartialPivLU`.
-- SuiteSparse (configure-gated): `UMFPack`, `CHOLMOD`, `SPQR`.
+- SuiteSparse (configure-gated): `UMFPack`, `ParU`, `CHOLMOD`, `SPQR`.
 - Platform: `AppleAccelerate`.
 - PETSc KSP wrappers live under `PETSc/Solver` (petsc.md).
 
 Choosing: SPD → CG (iterative) or SimplicialLDLT/CHOLMOD (direct);
-nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack; small dense → LDLT/
+nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; small dense → LDLT/
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
 for Newton tangents.
 
