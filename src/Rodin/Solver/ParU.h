@@ -23,7 +23,6 @@
 
 #ifdef RODIN_USE_PARU
 
-#include <cstring>
 #include <cstdint>
 #include <limits>
 
@@ -73,10 +72,9 @@ namespace Rodin::Solver
    * reused while the matrix sparsity pattern and ordering remain unchanged.
    * The numeric factorization is retained after @ref factorize so multiple
    * right-hand sides can be solved without refactorization. The ordinary
-   * @ref solve entry point compares the current matrix with the factorized
-   * numeric state and refactorizes only when it has changed. Since Eigen does
-   * not expose a matrix mutation counter, ParU retains an exact snapshot of
-   * the factorized values for this comparison.
+   * @ref solve entry point builds a factorization only when none is retained.
+   * Call @ref factorize explicitly after changing the matrix, or call @ref clear
+   * to discard the numeric factorization and let the next solve rebuild it.
    *
    * Architecture:
    * 1. Compress the Eigen CSC matrix and expose its values through
@@ -169,7 +167,6 @@ namespace Rodin::Solver
         {
           m_ordering = ordering;
           m_resources.clearSymbolic();
-          m_factorizedValues.resize(0);
         }
         return *this;
       }
@@ -250,7 +247,6 @@ namespace Rodin::Solver
         }
 
         m_resources.clearNumeric();
-        m_factorizedValues.resize(0);
         const auto factorizeInfo =
           ParU_Factorize(
             &view,
@@ -262,10 +258,6 @@ namespace Rodin::Solver
           m_resources.clearNumeric();
           check(factorizeInfo, "numeric factorization");
         }
-
-        m_factorizedValues.resize(matrix.nonZeros());
-        for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
-          m_factorizedValues(i) = matrix.valuePtr()[i];
       }
 
       /**
@@ -307,33 +299,10 @@ namespace Rodin::Solver
         return m_resources.numeric != nullptr;
       }
 
-      /**
-       * @brief Returns whether the retained factorization matches a system.
-       *
-       * Both the CSC sparsity pattern and the matrix values are compared.
-       */
-      bool hasFactorization(const LinearSystemType& axb) const noexcept
-      {
-        const auto& matrix = axb.getOperator();
-        if (!m_resources.numeric || !matrix.isCompressed() ||
-            !hasSamePattern(matrix) ||
-            m_factorizedValues.size() != matrix.nonZeros())
-          return false;
-
-        if (matrix.nonZeros() == 0)
-          return true;
-
-        return std::memcmp(
-          m_factorizedValues.data(),
-          matrix.valuePtr(),
-          static_cast<size_t>(matrix.nonZeros()) * sizeof(ScalarType)) == 0;
-      }
-
       /** @brief Releases the retained numeric factorization. */
-      void clearFactorization() noexcept
+      void clear() noexcept
       {
         m_resources.clearNumeric();
-        m_factorizedValues.resize(0);
       }
 
       /**
@@ -342,7 +311,7 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        if (!hasFactorization(axb))
+        if (!hasFactorization())
           factorize(axb);
         solveFactorized(axb);
       }
@@ -442,7 +411,6 @@ namespace Rodin::Solver
       Ordering m_ordering = Ordering::Default;
       Array<SuiteSparse_long> m_columnPointers;
       Array<SuiteSparse_long> m_rowIndices;
-      Array<ScalarType> m_factorizedValues;
       Resources m_resources;
   };
 }
