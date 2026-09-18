@@ -373,7 +373,6 @@ int run(int argc, char** argv)
   auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
   const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
-  const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
@@ -633,7 +632,9 @@ int run(int argc, char** argv)
         const auto face = mesh.getFace(facet);
         const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
         const std::size_t nLocal = fe.getCount();
-        const std::size_t qFitOrder = std::max<std::size_t>(qOrder, 2 * fe.getOrder());
+        const std::size_t qFitOrder = wngirParams.geometricValidationOrder > 0
+          ? wngirParams.geometricValidationOrder
+          : wngirGeometricValidationOrder(fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
         const auto& quad = face->getQuadrature(qf);
@@ -674,7 +675,7 @@ int run(int argc, char** argv)
                 << "  outside=" << (classified.labels.size() - insideCount)
                 << "  fit0=" << interfaceFit << "\n";
     }
-    Real effectiveFitTol = fitTol;
+    Real geometricRMSTolerance = std::numeric_limits<Real>::infinity();
     Real minJ = Real(1);
     Real maxJ = Real(1);
     Real maxQRel = Real(1);
@@ -700,7 +701,7 @@ int run(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveTauRms;
+      geometricRMSTolerance = wngirRep.getGeometricRMSTolerance(h);
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -739,10 +740,8 @@ int run(int argc, char** argv)
                   << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    const std::string_view exit(exitReason);
-    const bool residualConverged =
-      exit.starts_with("numerical-") || exit.starts_with("geometric-");
-    const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
+    const bool converged = fitTol > Real(0) ? interfaceFit <= fitTol
+                                            : geometricRMS <= geometricRMSTolerance;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);

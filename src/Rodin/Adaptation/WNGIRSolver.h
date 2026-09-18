@@ -361,7 +361,7 @@ namespace Rodin::Adaptation
           if (p.quadratureOrder > 0)
             return p.quadratureOrder;
           const auto& fe = fes.getFiniteElement(face.getDimension(), face.getIndex());
-          return std::max<std::size_t>(2, 2 * fe.getOrder());
+          return wngirInterfaceQuadratureOrder(fe.getOrder());
         };
 
         FastAdm initialAdm{};
@@ -841,10 +841,9 @@ namespace Rodin::Adaptation
       /**
        * @brief Quadrature formula WNGIR uses on a polytope.
        *
-       * Exact for the products of shape functions the forms contain, unless an
-       * order is pinned in the parameters. Serves cells and interface facets
-       * alike: the polytope carries its own dimension, so the element degree
-       * follows from it.
+         * Cell sampling integrates finite-element products at order @f$2k@f$.
+         * Interface sampling adds two orders because its analytic level-set
+         * coefficients are non-polynomial. A pinned parameter overrides both.
        */
       template <class FES>
       const QF::QuadratureFormulaBase& getQuadrature(
@@ -852,9 +851,27 @@ namespace Rodin::Adaptation
       {
         const auto& fe =
           fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        const bool isInterface =
+          polytope.getDimension() < fes.getMesh().getDimension();
+        const std::size_t automaticOrder = isInterface
+          ? wngirInterfaceQuadratureOrder(fe.getOrder())
+          : std::max<std::size_t>(2, 2 * fe.getOrder());
         const std::size_t order = m_parameters.quadratureOrder > 0
           ? m_parameters.quadratureOrder
-          : std::max<std::size_t>(2, 2 * fe.getOrder());
+          : automaticOrder;
+        return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+      }
+
+      /// @brief Higher-order quadrature used only for reported geometric responses.
+      template <class FES>
+      const QF::QuadratureFormulaBase& getGeometricValidationQuadrature(
+        const Geometry::Polytope& polytope, const FES& fes) const
+      {
+        const auto& fe =
+          fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        const std::size_t order = m_parameters.geometricValidationOrder > 0
+          ? m_parameters.geometricValidationOrder
+          : wngirGeometricValidationOrder(fe.getOrder());
         return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
       }
 
@@ -1288,7 +1305,7 @@ namespace Rodin::Adaptation
             const Index facetIndex = interfaceFacets[static_cast<std::size_t>(i)];
             const auto face = mesh.getFace(facetIndex);
             const auto& fe = fes.getFiniteElement(face->getDimension(), facetIndex);
-            const auto& qf = getQuadrature(*face, fes);
+            const auto& qf = getGeometricValidationQuadrature(*face, fes);
             const auto& quadrature = face->getQuadrature(qf);
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {

@@ -78,6 +78,19 @@ namespace Rodin::Adaptation
       Real geometricSup = std::numeric_limits<Real>::infinity();
       /// @brief RMS unoriented normal discrepancy over the complete fitted interface.
       Real normalRMS = std::numeric_limits<Real>::infinity();
+
+      /// @brief Physical RMS-distance tolerance represented by the scale-aware test.
+      Real getGeometricRMSTolerance(Real h) const
+      {
+        return h * effectiveTauRmsH;
+      }
+
+      /// @brief Whether independent validation reaches the physical RMS target.
+      bool hasGeometricRMSConverged(Real h) const
+      {
+        return effectiveTauRmsH > Real(0) &&
+          geometricRMS <= getGeometricRMSTolerance(h);
+      }
       /// @brief Measure of the active interface quadrature set.
       Real activeMeasure = 0;
       /// @brief Measure of the complete interface quadrature set.

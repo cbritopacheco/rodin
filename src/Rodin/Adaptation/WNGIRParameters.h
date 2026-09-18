@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_WNGIRPARAMETERS_H
 #define RODIN_ADAPTATION_WNGIRPARAMETERS_H
 
+#include <algorithm>
 #include <cstddef>
 
 #include "Rodin/Geometry/Types.h"
@@ -14,6 +15,18 @@
 
 namespace Rodin::Adaptation
 {
+  /// @brief Interface-assembly order for a finite-element order.
+  inline std::size_t wngirInterfaceQuadratureOrder(std::size_t feOrder)
+  {
+    return std::max<std::size_t>(4, 2 * feOrder + 2);
+  }
+
+  /// @brief Independent geometric-validation order for a finite-element order.
+  inline std::size_t wngirGeometricValidationOrder(std::size_t feOrder)
+  {
+    return std::max<std::size_t>(6, 2 * feOrder + 4);
+  }
+
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
@@ -82,7 +95,10 @@ namespace Rodin::Adaptation
       std::size_t cgMaxIterations =
         1000; ///< Maximum iterations for each CG linear solve.
       std::size_t maxIterations = 200; ///< Maximum nonlinear WNGIR iterations.
-      std::size_t quadratureOrder = 0; ///< @f$p_{\mathrm{quad}}@f$; 0 ⇒ 2·(FE order).
+      std::size_t quadratureOrder =
+        0; ///< @f$p_{\mathrm{quad}}@f$ override; zero selects automatic orders.
+      std::size_t geometricValidationOrder =
+        0; ///< Geometric-response order; 0 ⇒ max(6, 2·(FE order) + 4).
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.

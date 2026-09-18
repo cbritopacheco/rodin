@@ -26,6 +26,26 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.kappaBulk, Real(1e-4));
       EXPECT_EQ(parameters.cgMaxIterations, 1000);
       EXPECT_EQ(parameters.maxIterations, 200);
+      EXPECT_EQ(parameters.geometricValidationOrder, 0);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(1), 4);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(2), 6);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(3), 8);
+      EXPECT_EQ(wngirGeometricValidationOrder(1), 6);
+      EXPECT_EQ(wngirGeometricValidationOrder(2), 8);
+      EXPECT_EQ(wngirGeometricValidationOrder(3), 10);
+    }
+
+    TEST(Rodin_Adaptation_WNGIRSolver, GeometricValidationUsesPhysicalDistance)
+    {
+      WNGIRReport report;
+      constexpr Real h = Real(0.02);
+      report.effectiveTauRmsH = Real(0.01) * h;
+      report.geometricRMS = Real(0.009) * h * h;
+      EXPECT_NEAR(report.getGeometricRMSTolerance(h), Real(0.01) * h * h, Real(1e-16));
+      EXPECT_TRUE(report.hasGeometricRMSConverged(h));
+
+      report.geometricRMS = Real(0.011) * h * h;
+      EXPECT_FALSE(report.hasGeometricRMSConverged(h));
     }
 
     constexpr Attribute Interface = 10;

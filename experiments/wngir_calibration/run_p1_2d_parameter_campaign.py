@@ -197,18 +197,20 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         "--wngir-direction-norm-factor=10",
         "--wngir-alpha-min=1e-4",
         "--wngir-omega-min=0.1",
-        # WNGIR multiplies these dimensionless floors by the mesh scale h.
-        # Passing O(h) here therefore imposes an effective O(h^2) floor.
-        f"--wngir-rms-floor={0.01 / (n - 1):.14g}",
-        f"--wngir-sup-floor={0.01 / (n - 1):.14g}",
+        # Do not stop on the geometric response: its P1 approximation floor is
+        # itself O(h^2), with a geometry-dependent coefficient. Converge the
+        # optimization to h^2-scaled stationarity and measure that response.
+        "--wngir-rms-floor=0",
+        "--wngir-sup-floor=0",
         "--wngir-rms-normal-jump-factor=0",
         "--wngir-sup-normal-jump-factor=0",
         "--wngir-rms-tol=1e-12",
         "--wngir-sup-tol=1e-12",
         "--wngir-energy-stag-tol=1e-8",
-        # Keep both stopping tests mesh-scaled exactly once. The absolute
-        # threshold is the WNGIR default 1e-4*h; this ratio is dimensionless.
-        "--wngir-step-h-tol=5e-4",
+        # Drive the optimizer below the expected O(h^2) geometric response
+        # without prescribing that response's geometry-dependent coefficient.
+        f"--wngir-step-tol={1e-3 / (n - 1) ** 2:.14g}",
+        f"--wngir-step-h-tol={1e-3 / (n - 1):.14g}",
         "--wngir-cg-rtol=1e-9",
         "--wngir-cg-max-iters=1000",
         f"--wngir-steps={args.steps}",
@@ -415,12 +417,14 @@ def main():
             "fraction_to_boundary": 0.95, "j_min": 1e-8, "j_line_search": 1e-2,
             "armijo": 1e-4, "descent_fraction": 1e-4, "direction_norm_factor": 10,
             "alpha_min": 1e-4, "omega_min": 0.1,
-            "tau_rms_h_floor": "0.01 h", "tau_inf_h_floor": "0.01 h",
+            "tau_rms_h_floor": 0, "tau_inf_h_floor": 0,
             "tau_jump_rms": 0, "tau_jump_inf": 0,
             "tau_rms": 1e-12, "tau_inf": 1e-12, "energy_stagnation": 1e-8,
-            "absolute_step_over_h": 1e-4, "accepted_step_over_h": 5e-4,
+            "absolute_step": "0.001 h^2", "accepted_step_over_h": "0.001 h",
             "cg_relative_tolerance": 1e-9, "cg_max_iterations": 1000,
-            "quadrature_order": "automatic: max(2, 2 * FE order)",
+            "cell_quadrature_order": "automatic: max(2, 2 * FE order)",
+            "interface_quadrature_order": "automatic: max(4, 2 * FE order + 2)",
+            "geometric_validation_order": "automatic: max(6, 2 * FE order + 4)",
             "max_iterations": args.steps,
         },
     }
