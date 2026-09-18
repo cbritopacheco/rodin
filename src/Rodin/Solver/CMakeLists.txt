@@ -27,6 +27,10 @@ if (RODIN_USE_UMFPACK)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::UMFPACK)
 endif()
 
+if (RODIN_USE_PARU)
+  target_link_libraries(RodinSolver INTERFACE SuiteSparse::ParU)
+endif()
+
 if (RODIN_USE_SPQR)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::SPQR)
 endif()
