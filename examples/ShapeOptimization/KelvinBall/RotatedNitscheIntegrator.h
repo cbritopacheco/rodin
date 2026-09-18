@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef KELVIN_BALL_ROTATED_NITSCHE_H
-#define KELVIN_BALL_ROTATED_NITSCHE_H
+#ifndef KELVIN_BALL_ROTATED_NITSCHE_INTEGRATOR_H
+#define KELVIN_BALL_ROTATED_NITSCHE_INTEGRATOR_H
 
 #include <array>
 #include <cmath>
@@ -24,30 +24,13 @@
 #include <Rodin/Alert/Notation.h>
 #include <Rodin/Variational.h>
 
+#include "Common.h"
+
 namespace KelvinBall
 {
   using namespace Rodin;
   using namespace Rodin::Geometry;
   using namespace Rodin::Variational;
-
-  inline Alert::Text<Alert::YellowT> diagnosticHeading(const std::string& text)
-  {
-    Alert::Text<Alert::YellowT> heading(Alert::Yellow, text);
-    return heading.setBold();
-  }
-
-  inline std::string diagnosticLabel(const std::string& text)
-  {
-    constexpr size_t width = 36;
-    return text + std::string(text.size() < width ? width - text.size() : 1, ' ');
-  }
-
-  struct RotationPair
-  {
-      Attribute slave;
-      Attribute master;
-      Math::SpatialMatrix<Real> rotation;
-  };
 
   template <class Mesh>
   class AttributeFaceLocator
@@ -125,270 +108,256 @@ namespace KelvinBall
       mutable size_t m_relaxedHits = 0;
   };
 
-  template <class Mesh, class Locator>
-  class RotatedBoundaryPolicy
+  /**
+   * @brief Mapped-face assembly of the rotational chamber conditions.
+   *
+   * The integrator owns the AABB map of the master cuts. Each assembly method
+   * traverses slave quadrature points, locates the rotated master trace, and
+   * inserts the resulting nonlocal coupling into the supplied linear system.
+   */
+  class RotatedNitscheIntegrator
   {
     public:
-      RotatedBoundaryPolicy(Real dt, const Mesh& mesh, const Locator& locator,
-        const std::array<RotationPair, 2>& pairs)
-        : m_mesh(mesh),
-          m_locator(locator),
-          m_pairs(pairs),
-          m_stop(dt, mesh)
-      {}
+      using Locator = AttributeFaceLocator<Mesh>;
 
-      bool operator()(const BoundaryHit& hit) const
-      {
-        const auto& mesh = m_mesh.get();
-        const size_t dimension = mesh.getDimension();
-        const auto& faces =
-          mesh.getConnectivity().getIncidence({dimension, dimension - 1}, hit.cell);
-        if (hit.face >= faces.size())
-          return m_stop(hit);
-        const auto face = mesh.getPolytope(dimension - 1, faces[hit.face]);
-        if (!face || !face->getAttribute())
-          return m_stop(hit);
+      RotatedNitscheIntegrator(const Mesh& mesh,
+        const FlatSet<Attribute>& masterCuts = MasterCuts, Real physicalTolerance = 1e-10,
+        Real referenceTolerance = 1e-10);
 
-        Attribute target = 0;
-        Math::SpatialMatrix<Real> transform(3, 3);
-        bool periodic = false;
-        for (const auto& pair : m_pairs.get())
-        {
-          if (*face->getAttribute() == pair.slave)
-          {
-            target = pair.master;
-            transform = pair.rotation;
-            periodic = true;
-            break;
-          }
-          if (*face->getAttribute() == pair.master)
-          {
-            target = pair.slave;
-            transform = pair.rotation.transpose();
-            periodic = true;
-            break;
-          }
-        }
-        if (!periodic)
-          return m_stop(hit);
+      const Locator& getLocator() const;
 
-        Math::SpatialPoint physical;
-        mesh.getPolytopeTransformation(dimension, hit.cell).transform(physical, hit.rref);
-        const auto mapped = m_locator.get().locate(target, transform * physical);
-        if (!mapped)
-          throw std::runtime_error(
-            "A periodic characteristic could not cross a chamber cut.");
-        const auto& incidence = mesh.getConnectivity().getIncidence(
-          {dimension - 1, dimension}, mapped->getPolytope().getIndex());
-        if (incidence.size() != 1)
-          throw std::runtime_error("A periodic target face has no unique incident cell.");
-        const Index cell = incidence[0];
-        Math::SpatialPoint reference;
-        mesh.getPolytopeTransformation(dimension, cell)
-          .inverse(reference, mapped->getPhysicalCoordinates());
-        const auto geometry = mesh.getGeometry(dimension, cell);
-        const auto centroid = Polytope::Traits(geometry).getCentroid();
-        reference = (Real(1) - Real(1e-10)) * reference + Real(1e-10) * centroid;
-        hit.cell = cell;
-        hit.rref = reference;
-        return true;
-      }
+      template <size_t VelocityOrder, class VelocitySpace, class PressureSpace,
+        class Offsets, class LinearSystem>
+      void assembleStokes(const VelocitySpace& velocity, const PressureSpace& pressure,
+        const Offsets& offsets, LinearSystem& system, Real viscosity, Real penalty,
+        Real pressureDiffusion, const FlatSet<Attribute>& fixedVelocityBoundaries) const;
+
+      template <class VectorSpace, class LinearSystem>
+      void assembleVector(const VectorSpace& space, LinearSystem& system, Real diffusion,
+        Real penalty, const FlatSet<Attribute>& fixedBoundaries) const;
+
+      template <class ScalarSpace, class LinearSystem>
+      void assembleScalar(
+        const ScalarSpace& space, LinearSystem& system, Real penalty) const;
+
+      template <class U>
+      Real scalarJump(const U& field) const;
+
+      template <class U>
+      Real vectorJump(const U& field) const;
+
+      template <class U0, class U1, class U2>
+      Real familyJump(const U0& u0, const U1& u1, const U2& u2) const;
 
     private:
-      std::reference_wrapper<const Mesh> m_mesh;
-      std::reference_wrapper<const Locator> m_locator;
-      std::reference_wrapper<const std::array<RotationPair, 2>> m_pairs;
-      Advection::StopInsideBoundaryPolicy m_stop;
+      class Internal;
+
+      static Alert::Text<Alert::YellowT> diagnosticHeading(const std::string& text)
+      {
+        Alert::Text<Alert::YellowT> heading(Alert::Yellow, text);
+        return heading.setBold();
+      }
+
+      static std::string diagnosticLabel(const std::string& text)
+      {
+        constexpr size_t width = 36;
+        return text + std::string(text.size() < width ? width - text.size() : 1, ' ');
+      }
+
+      Locator m_locator;
   };
 
-  namespace Internal
+  class RotatedNitscheIntegrator::Internal
   {
-    struct ScalarCellBasis
-    {
-        IndexVector dofs;
-        std::vector<Real> values;
-        std::vector<Math::SpatialVector<Real>> gradients;
-    };
-
-    struct StateBasis
-    {
-        Index dof;
-        Math::SpatialMatrix<Real> jump;
-        Math::SpatialMatrix<Real> traction;
-        Math::SpatialVector<Real> pressureJump;
-        Math::SpatialVector<Real> pressureFlux;
-    };
-
-    struct VectorBasis
-    {
-        Index dof;
-        Math::SpatialVector<Real> jump;
-        Math::SpatialVector<Real> flux;
-    };
-
-    inline Math::SpatialMatrix<Real> zeroMatrix()
-    {
-      Math::SpatialMatrix<Real> result(3, 3);
-      result.setZero();
-      return result;
-    }
-
-    inline Math::SpatialVector<Real> zeroVector()
-    {
-      Math::SpatialVector<Real> result(3);
-      result.setZero();
-      return result;
-    }
-
-    inline void setColumn(Math::SpatialMatrix<Real>& matrix, size_t column,
-      const Math::SpatialVector<Real>& value)
-    {
-      for (size_t row = 0; row < 3; ++row)
-        matrix(row, column) = value(row);
-    }
-
-    inline Index getIncidentCell(const Polytope& face)
-    {
-      const auto& mesh = face.getMesh();
-      const size_t faceDimension = mesh.getDimension() - 1;
-      const auto& incidence = mesh.getConnectivity().getIncidence(
-        {faceDimension, mesh.getDimension()}, face.getIndex());
-      if (incidence.size() != 1)
-        throw std::runtime_error("A chamber cut face must have one incident fluid cell.");
-      return incidence[0];
-    }
-
-    template <size_t Order, class Space>
-    ScalarCellBasis evaluateScalarBasis(
-      const Space& space, const Polytope& face, const Math::SpatialPoint& physical)
-    {
-      const Index cellIndex = getIncidentCell(face);
-      const auto cellIterator =
-        face.getMesh().getPolytope(face.getMesh().getDimension(), cellIndex);
-      if (!cellIterator)
-        throw std::runtime_error("A chamber cut face has no incident fluid cell.");
-      const auto& cell = *cellIterator;
-      Math::SpatialPoint reference;
-      cell.getTransformation().inverse(reference, physical);
-      const Geometry::Point point(cell, std::cref(reference), physical);
-      const H1Element<Order, Real> element(cell.getGeometry());
-      ScalarCellBasis result;
-      const auto dofs = space.getDOFs(cell.getDimension(), cell.getIndex());
-      result.dofs.assign(dofs.begin(), dofs.end());
-      result.values.resize(element.getCount());
-      result.gradients.resize(element.getCount());
-      for (size_t local = 0; local < element.getCount(); ++local)
+    public:
+      struct ScalarCellBasis
       {
-        const auto& basis = element.getBasis(local);
-        result.values[local] = basis(reference);
-        result.gradients[local] =
-          point.getJacobianInverse().transpose() * basis.getGradient()(reference);
+          IndexVector dofs;
+          std::vector<Real> values;
+          std::vector<Math::SpatialVector<Real>> gradients;
+      };
+
+      struct StateBasis
+      {
+          Index dof;
+          Math::SpatialMatrix<Real> jump;
+          Math::SpatialMatrix<Real> traction;
+          Math::SpatialVector<Real> pressureJump;
+          Math::SpatialVector<Real> pressureFlux;
+      };
+
+      struct VectorBasis
+      {
+          Index dof;
+          Math::SpatialVector<Real> jump;
+          Math::SpatialVector<Real> flux;
+      };
+
+      static Math::SpatialMatrix<Real> zeroMatrix()
+      {
+        Math::SpatialMatrix<Real> result(3, 3);
+        result.setZero();
+        return result;
       }
-      return result;
-    }
 
-    inline Real diameter(const Polytope& face)
-    {
-      const auto& mesh = face.getMesh();
-      Real result = 0;
-      const auto& vertices = face.getVertices();
-      for (size_t i = 0; i < vertices.size(); ++i)
+      static Math::SpatialVector<Real> zeroVector()
       {
-        for (size_t j = i + 1; j < vertices.size(); ++j)
+        Math::SpatialVector<Real> result(3);
+        result.setZero();
+        return result;
+      }
+
+      static void setColumn(Math::SpatialMatrix<Real>& matrix, size_t column,
+        const Math::SpatialVector<Real>& value)
+      {
+        for (size_t row = 0; row < 3; ++row)
+          matrix(row, column) = value(row);
+      }
+
+      static Index getIncidentCell(const Polytope& face)
+      {
+        const auto& mesh = face.getMesh();
+        const size_t faceDimension = mesh.getDimension() - 1;
+        const auto& incidence = mesh.getConnectivity().getIncidence(
+          {faceDimension, mesh.getDimension()}, face.getIndex());
+        if (incidence.size() != 1)
+          throw std::runtime_error(
+            "A chamber cut face must have one incident fluid cell.");
+        return incidence[0];
+      }
+
+      template <size_t Order, class Space>
+      static ScalarCellBasis evaluateScalarBasis(
+        const Space& space, const Polytope& face, const Math::SpatialPoint& physical)
+      {
+        const Index cellIndex = getIncidentCell(face);
+        const auto cellIterator =
+          face.getMesh().getPolytope(face.getMesh().getDimension(), cellIndex);
+        if (!cellIterator)
+          throw std::runtime_error("A chamber cut face has no incident fluid cell.");
+        const auto& cell = *cellIterator;
+        Math::SpatialPoint reference;
+        cell.getTransformation().inverse(reference, physical);
+        const Geometry::Point point(cell, std::cref(reference), physical);
+        const H1Element<Order, Real> element(cell.getGeometry());
+        ScalarCellBasis result;
+        const auto dofs = space.getDOFs(cell.getDimension(), cell.getIndex());
+        result.dofs.assign(dofs.begin(), dofs.end());
+        result.values.resize(element.getCount());
+        result.gradients.resize(element.getCount());
+        for (size_t local = 0; local < element.getCount(); ++local)
         {
-          result = std::max(result,
-            (mesh.getVertexCoordinates(vertices[i]) -
-              mesh.getVertexCoordinates(vertices[j]))
-              .norm());
+          const auto& basis = element.getBasis(local);
+          result.values[local] = basis(reference);
+          result.gradients[local] =
+            point.getJacobianInverse().transpose() * basis.getGradient()(reference);
         }
+        return result;
       }
-      if (!(result > 0))
-        throw std::runtime_error("A chamber cut face has zero diameter.");
-      return result;
-    }
 
-    inline Real frobenius(
-      const Math::SpatialMatrix<Real>& lhs, const Math::SpatialMatrix<Real>& rhs)
-    {
-      return lhs.dot(rhs);
-    }
-
-    template <class LinearSystem>
-    void addWithEliminatedColumns(LinearSystem& system,
-      const std::vector<Eigen::Triplet<Real>>& entries, const IndexSet& fixed)
-    {
-      auto& matrix = system.getOperator();
-      auto& rhs = system.getVector();
-      Math::SparseMatrix<Real> addition(matrix.rows(), matrix.cols());
-      addition.setFromTriplets(entries.begin(), entries.end());
-      std::vector<Eigen::Triplet<Real>> freeEntries;
-      freeEntries.reserve(addition.nonZeros());
-      for (Eigen::Index column = 0; column < addition.outerSize(); ++column)
+      static Real diameter(const Polytope& face)
       {
-        for (Math::SparseMatrix<Real>::InnerIterator coefficient(addition, column);
-             coefficient; ++coefficient)
+        const auto& mesh = face.getMesh();
+        Real result = 0;
+        const auto& vertices = face.getVertices();
+        for (size_t i = 0; i < vertices.size(); ++i)
         {
-          if (fixed.contains(coefficient.row()))
+          for (size_t j = i + 1; j < vertices.size(); ++j)
+          {
+            result = std::max(result,
+              (mesh.getVertexCoordinates(vertices[i]) -
+                mesh.getVertexCoordinates(vertices[j]))
+                .norm());
+          }
+        }
+        if (!(result > 0))
+          throw std::runtime_error("A chamber cut face has zero diameter.");
+        return result;
+      }
+
+      static Real frobenius(
+        const Math::SpatialMatrix<Real>& lhs, const Math::SpatialMatrix<Real>& rhs)
+      {
+        return lhs.dot(rhs);
+      }
+
+      template <class LinearSystem>
+      static void addWithEliminatedColumns(LinearSystem& system,
+        const std::vector<Eigen::Triplet<Real>>& entries, const IndexSet& fixed)
+      {
+        auto& matrix = system.getOperator();
+        auto& rhs = system.getVector();
+        Math::SparseMatrix<Real> addition(matrix.rows(), matrix.cols());
+        addition.setFromTriplets(entries.begin(), entries.end());
+        std::vector<Eigen::Triplet<Real>> freeEntries;
+        freeEntries.reserve(addition.nonZeros());
+        for (Eigen::Index column = 0; column < addition.outerSize(); ++column)
+        {
+          for (Math::SparseMatrix<Real>::InnerIterator coefficient(addition, column);
+               coefficient; ++coefficient)
+          {
+            if (fixed.contains(coefficient.row()))
+              continue;
+            if (fixed.contains(coefficient.col()))
+              rhs(coefficient.row()) -= coefficient.value() * rhs(coefficient.col());
+            else
+              freeEntries.emplace_back(
+                coefficient.row(), coefficient.col(), coefficient.value());
+          }
+        }
+        Math::SparseMatrix<Real> freeAddition(matrix.rows(), matrix.cols());
+        freeAddition.setFromTriplets(freeEntries.begin(), freeEntries.end());
+        matrix += freeAddition;
+      }
+
+      template <class Space>
+      static IndexSet getFixedDOFs(const Space& space,
+        const FlatSet<Attribute>& attributes, const std::array<size_t, 3>& blocks,
+        const std::vector<size_t>& offsets)
+      {
+        const auto& mesh = space.getMesh();
+        const size_t faceDimension = mesh.getDimension() - 1;
+        IndexSet fixed;
+        for (auto face = mesh.getPolytope(faceDimension); face; ++face)
+        {
+          const auto attribute = face->getAttribute();
+          if (!attribute || !attributes.contains(*attribute))
             continue;
-          if (fixed.contains(coefficient.col()))
-            rhs(coefficient.row()) -= coefficient.value() * rhs(coefficient.col());
-          else
-            freeEntries.emplace_back(
-              coefficient.row(), coefficient.col(), coefficient.value());
+          const auto dofs = space.getDOFs(faceDimension, face->getIndex());
+          for (const size_t block : blocks)
+          {
+            for (const Index dof : dofs)
+              fixed.insert(offsets[block] + dof);
+          }
         }
+        return fixed;
       }
-      Math::SparseMatrix<Real> freeAddition(matrix.rows(), matrix.cols());
-      freeAddition.setFromTriplets(freeEntries.begin(), freeEntries.end());
-      matrix += freeAddition;
-    }
 
-    template <class Space>
-    IndexSet getFixedDOFs(const Space& space, const FlatSet<Attribute>& attributes,
-      const std::array<size_t, 3>& blocks, const std::vector<size_t>& offsets)
-    {
-      const auto& mesh = space.getMesh();
-      const size_t faceDimension = mesh.getDimension() - 1;
-      IndexSet fixed;
-      for (auto face = mesh.getPolytope(faceDimension); face; ++face)
+      template <class Space>
+      static IndexSet getFixedDOFs(
+        const Space& space, const FlatSet<Attribute>& attributes)
       {
-        const auto attribute = face->getAttribute();
-        if (!attribute || !attributes.contains(*attribute))
-          continue;
-        const auto dofs = space.getDOFs(faceDimension, face->getIndex());
-        for (const size_t block : blocks)
+        const auto& mesh = space.getMesh();
+        const size_t faceDimension = mesh.getDimension() - 1;
+        IndexSet fixed;
+        for (auto face = mesh.getPolytope(faceDimension); face; ++face)
         {
-          for (const Index dof : dofs)
-            fixed.insert(offsets[block] + dof);
+          const auto attribute = face->getAttribute();
+          if (!attribute || !attributes.contains(*attribute))
+            continue;
+          const auto dofs = space.getDOFs(faceDimension, face->getIndex());
+          fixed.insert(dofs.begin(), dofs.end());
         }
+        return fixed;
       }
-      return fixed;
-    }
+  };
 
-    template <class Space>
-    IndexSet getFixedDOFs(const Space& space, const FlatSet<Attribute>& attributes)
-    {
-      const auto& mesh = space.getMesh();
-      const size_t faceDimension = mesh.getDimension() - 1;
-      IndexSet fixed;
-      for (auto face = mesh.getPolytope(faceDimension); face; ++face)
-      {
-        const auto attribute = face->getAttribute();
-        if (!attribute || !attributes.contains(*attribute))
-          continue;
-        const auto dofs = space.getDOFs(faceDimension, face->getIndex());
-        fixed.insert(dofs.begin(), dofs.end());
-      }
-      return fixed;
-    }
-  }
-
-  template <size_t VelocityOrder, class VelocitySpace, class PressureSpace, class Locator,
-    class Offsets, class LinearSystem>
-  void addRotatedStokesNitsche(const VelocitySpace& velocity,
-    const PressureSpace& pressure, const Locator& locator,
-    const std::array<RotationPair, 2>& pairs, const Offsets& offsets,
-    LinearSystem& system, Real viscosity, Real penalty, Real pressureDiffusion,
-    const FlatSet<Attribute>& fixedVelocityBoundaries)
+  template <size_t VelocityOrder, class VelocitySpace, class PressureSpace, class Offsets,
+    class LinearSystem>
+  void RotatedNitscheIntegrator::assembleStokes(const VelocitySpace& velocity,
+    const PressureSpace& pressure, const Offsets& offsets, LinearSystem& system,
+    Real viscosity, Real penalty, Real pressureDiffusion,
+    const FlatSet<Attribute>& fixedVelocityBoundaries) const
   {
     const auto& mesh = velocity.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
@@ -401,7 +370,7 @@ namespace KelvinBall
     size_t quadraturePoints = 0;
     Real normalResidual = 0;
 
-    for (const RotationPair& pair : pairs)
+    for (const RotationPair& pair : RotationPairs)
     {
       std::vector<Eigen::Triplet<Real>> entries;
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
@@ -415,7 +384,7 @@ namespace KelvinBall
           ++quadraturePoints;
           const auto& slavePoint = quadrature.getPoint(qp);
           const auto mapped =
-            locator.locate(pair.master, pair.rotation * slavePoint.vector());
+            m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
             throw std::runtime_error(
               "A rotated Nitsche quadrature point was not located.");
@@ -557,16 +526,16 @@ namespace KelvinBall
       throw std::runtime_error("The rotated cut-face normals are inconsistent.");
   }
 
-  template <class VectorSpace, class Locator, class LinearSystem>
-  void addRotatedVectorNitsche(const VectorSpace& space, const Locator& locator,
-    const std::array<RotationPair, 2>& pairs, LinearSystem& system, Real diffusion,
-    Real penalty, const FlatSet<Attribute>& fixedBoundaries)
+  template <class VectorSpace, class LinearSystem>
+  void RotatedNitscheIntegrator::assembleVector(const VectorSpace& space,
+    LinearSystem& system, Real diffusion, Real penalty,
+    const FlatSet<Attribute>& fixedBoundaries) const
   {
     const auto& mesh = space.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
     const IndexSet fixed = Internal::getFixedDOFs(space, fixedBoundaries);
     FaceNormal normal(mesh);
-    for (const RotationPair& pair : pairs)
+    for (const RotationPair& pair : RotationPairs)
     {
       std::vector<Eigen::Triplet<Real>> entries;
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
@@ -579,7 +548,7 @@ namespace KelvinBall
         {
           const auto& slavePoint = quadrature.getPoint(qp);
           const auto mapped =
-            locator.locate(pair.master, pair.rotation * slavePoint.vector());
+            m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
             throw std::runtime_error(
               "A rotated Nitsche quadrature point was not located.");
@@ -633,14 +602,14 @@ namespace KelvinBall
     }
   }
 
-  template <class ScalarSpace, class Locator, class LinearSystem>
-  void addRotatedScalarPenalty(const ScalarSpace& space, const Locator& locator,
-    const std::array<RotationPair, 2>& pairs, LinearSystem& system, Real penalty)
+  template <class ScalarSpace, class LinearSystem>
+  void RotatedNitscheIntegrator::assembleScalar(
+    const ScalarSpace& space, LinearSystem& system, Real penalty) const
   {
     const auto& mesh = space.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
     const IndexSet fixed;
-    for (const RotationPair& pair : pairs)
+    for (const RotationPair& pair : RotationPairs)
     {
       std::vector<Eigen::Triplet<Real>> entries;
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
@@ -653,7 +622,7 @@ namespace KelvinBall
         {
           const auto& slavePoint = quadrature.getPoint(qp);
           const auto mapped =
-            locator.locate(pair.master, pair.rotation * slavePoint.vector());
+            m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
             throw std::runtime_error(
               "A rotated scalar quadrature point was not located.");
@@ -684,14 +653,13 @@ namespace KelvinBall
     }
   }
 
-  template <class Locator, class U>
-  Real rotatedScalarJump(
-    const Locator& locator, const std::array<RotationPair, 2>& pairs, const U& u)
+  template <class U>
+  Real RotatedNitscheIntegrator::scalarJump(const U& u) const
   {
     const auto& mesh = u.getFiniteElementSpace().getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
     Real residual = 0;
-    for (const RotationPair& pair : pairs)
+    for (const RotationPair& pair : RotationPairs)
     {
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
       {
@@ -702,7 +670,8 @@ namespace KelvinBall
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
           const auto& point = quadrature.getPoint(qp);
-          const auto mapped = locator.locate(pair.master, pair.rotation * point.vector());
+          const auto mapped =
+            m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
             throw std::runtime_error(
               "A rotated scalar diagnostic point was not located.");
@@ -714,14 +683,14 @@ namespace KelvinBall
     return residual;
   }
 
-  template <class Locator, class U0, class U1, class U2>
-  Real rotatedFamilyJump(const Locator& locator, const std::array<RotationPair, 2>& pairs,
-    const U0& u0, const U1& u1, const U2& u2)
+  template <class U0, class U1, class U2>
+  Real RotatedNitscheIntegrator::familyJump(
+    const U0& u0, const U1& u1, const U2& u2) const
   {
     const auto& mesh = u0.getFiniteElementSpace().getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
     Real residual = 0;
-    for (const RotationPair& pair : pairs)
+    for (const RotationPair& pair : RotationPairs)
     {
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
       {
@@ -732,7 +701,8 @@ namespace KelvinBall
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
           const auto& point = quadrature.getPoint(qp);
-          const auto mapped = locator.locate(pair.master, pair.rotation * point.vector());
+          const auto mapped =
+            m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
             throw std::runtime_error("A rotated trace diagnostic point was not located.");
           Math::SpatialMatrix<Real> slave(3, 3), master(3, 3);
@@ -752,14 +722,13 @@ namespace KelvinBall
     return residual;
   }
 
-  template <class Locator, class U>
-  Real rotatedVectorJump(
-    const Locator& locator, const std::array<RotationPair, 2>& pairs, const U& u)
+  template <class U>
+  Real RotatedNitscheIntegrator::vectorJump(const U& u) const
   {
     const auto& mesh = u.getFiniteElementSpace().getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
     Real residual = 0;
-    for (const RotationPair& pair : pairs)
+    for (const RotationPair& pair : RotationPairs)
     {
       for (auto face = mesh.getPolytope(faceDimension); face; ++face)
       {
@@ -770,7 +739,8 @@ namespace KelvinBall
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
           const auto& point = quadrature.getPoint(qp);
-          const auto mapped = locator.locate(pair.master, pair.rotation * point.vector());
+          const auto mapped =
+            m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
             throw std::runtime_error("A rotated trace diagnostic point was not located.");
           const auto jump = u.getValue(*mapped) - pair.rotation * u.getValue(point);
@@ -782,42 +752,6 @@ namespace KelvinBall
     return residual;
   }
 
-  template <class Locator, class P0, class P1, class P2>
-  Real rotatedPressureJump(const Locator& locator,
-    const std::array<RotationPair, 2>& pairs, const P0& p0, const P1& p1, const P2& p2)
-  {
-    const auto& mesh = p0.getFiniteElementSpace().getMesh();
-    const size_t faceDimension = mesh.getDimension() - 1;
-    Real residual = 0;
-    for (const RotationPair& pair : pairs)
-    {
-      for (auto face = mesh.getPolytope(faceDimension); face; ++face)
-      {
-        if (face->getAttribute() != pair.slave)
-          continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
-        const auto& quadrature = face->getQuadrature(qf);
-        for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
-        {
-          const auto& point = quadrature.getPoint(qp);
-          const auto mapped = locator.locate(pair.master, pair.rotation * point.vector());
-          if (!mapped)
-            throw std::runtime_error("A rotated trace diagnostic point was not located.");
-          Math::SpatialVector<Real> slave(3), master(3);
-          slave(0) = p0.getValue(point);
-          slave(1) = p1.getValue(point);
-          slave(2) = p2.getValue(point);
-          master(0) = p0.getValue(*mapped);
-          master(1) = p1.getValue(*mapped);
-          master(2) = p2.getValue(*mapped);
-          const auto jump = master - pair.rotation * slave;
-          for (size_t i = 0; i < 3; ++i)
-            residual = std::max(residual, std::abs(jump(i)));
-        }
-      }
-    }
-    return residual;
-  }
 }
 
 #endif
