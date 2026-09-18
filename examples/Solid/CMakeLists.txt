@@ -18,3 +18,10 @@ target_link_libraries(RodinSolidActiveContractionPlaneWave
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)
+
+add_executable(RodinSolidShellCylinder ShellCylinder.cpp)
+target_link_libraries(RodinSolidShellCylinder
+  PUBLIC
+  Rodin::Solid
+  Rodin::Variational
+  Rodin::Solver)
