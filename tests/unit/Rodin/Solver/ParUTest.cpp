@@ -73,6 +73,7 @@ namespace Rodin::Tests::Unit::Solver
     Problem problem(u, v);
 
     Rodin::Solver::ParU solver(problem);
+    using enum decltype(solver)::Factorization;
     using LinearSystemType =
       Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     LinearSystemType system;
@@ -116,7 +117,7 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // A structural change requires explicitly clearing symbolic analysis.
-    solver.clear();
+    solver.clear(Symbolic);
     system.getOperator().setZero();
     system.getOperator().insert(0, 0) = 2.0;
     system.getOperator().insert(1, 1) = 3.0;
@@ -135,7 +136,7 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_TRUE(solver.hasFactorization());
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
-    solver.clear();
+    solver.clear(Numeric);
     EXPECT_FALSE(solver.hasFactorization());
     solver.solve(system);
     EXPECT_TRUE(solver.hasFactorization());
