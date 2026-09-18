@@ -17,6 +17,37 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit::Solver
 {
+  static Mesh<Context::Local> makeMesh(Polytope::Type geometry)
+  {
+    switch (geometry)
+    {
+      case Polytope::Type::Segment:
+      {
+        auto mesh = Mesh<Context::Local>::UniformGrid(geometry, {4});
+        mesh.getConnectivity().compute(0, 1);
+        mesh.getConnectivity().compute(1, 0);
+        return mesh;
+      }
+      case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Hexahedron:
+      case Polytope::Type::Pyramid:
+      case Polytope::Type::Wedge:
+      {
+        auto mesh = Mesh<Context::Local>::UniformGrid(geometry, {3, 3, 3});
+        mesh.getConnectivity().compute(2, 3);
+        mesh.getConnectivity().compute(3, 0);
+        return mesh;
+      }
+      default:
+      {
+        auto mesh = Mesh<Context::Local>::UniformGrid(geometry, {4, 4});
+        mesh.getConnectivity().compute(1, 2);
+        mesh.getConnectivity().compute(2, 0);
+        return mesh;
+      }
+    }
+  }
+
   TEST(Rodin_Solver_ParU, SolvesRawLinearSystem)
   {
     Mesh mesh;
@@ -51,11 +82,12 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
-  TEST(Rodin_Solver_ParU, SolvesVariationalProblemWithCTAD)
+  class Rodin_Solver_ParU_AllGeometries
+    : public ::testing::TestWithParam<Polytope::Type> {};
+
+  TEST_P(Rodin_Solver_ParU_AllGeometries, SolvesVariationalProblemWithCTAD)
   {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
-    mesh.getConnectivity().compute(1, 2);
+    auto mesh = makeMesh(GetParam());
 
     P1 vh(mesh);
     TrialFunction u(vh);
@@ -80,4 +112,16 @@ namespace Rodin::Tests::Unit::Solver
       (system.getOperator() * system.getSolution() - system.getVector()).norm(),
       1e-11);
   }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometries,
+    Rodin_Solver_ParU_AllGeometries,
+    ::testing::Values(
+      Polytope::Type::Segment,
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge));
 }
