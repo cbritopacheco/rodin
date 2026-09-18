@@ -115,15 +115,16 @@ chamber design and chamber states. On iterations followed by an update, its
 24-copy design with the sewn distance and deformation fields, together with a
 complete fluid grid carrying the six sewn velocities and six sewn pressures.
 It also contains the fully sewn `Advected` field. `KelvinBallMMG.xdmf` records
-the mesh returned immediately by each MMG reconstruction, before the next
+the reconstructed and subsequently optimized MMG mesh, before the next
 finite-element spaces are constructed.
 The console and `kelvin-ball.csv` also report the three side lengths of the
 axis-aligned bounding boxes of the chamber mesh and the fully sewn mesh.
 The CSV records one row per evaluated design, including the run parameters,
 mesh and material counts, minimum, mean, and maximum tetrahedron mean-ratio
-quality, MMG reconstruction parameters, resistance metrics, volume error,
-update prediction and realization, normalized direction derivatives, and
-extension residuals and jumps. Fields
+quality, mean element size, MMG reconstruction parameters, resistance metrics,
+volume error, update prediction and realization, normalized direction
+derivatives, extension residuals and jumps, and the wall-clock duration of each
+numbered stage. Fields
 that do not exist for the initial design or a `--state-only` run are `nan`.
 
 A one-iterate output smoke test is
@@ -161,8 +162,12 @@ distance is first projected into the same weakly matched trace space, so the
 subsequent advection increment does not include an unrelated trace correction.
 
 The MMG parameters are tied to the effective background size: `hmin=0.8 h`,
-`hmax=1.25 h`, `hausd=0.1 h^2`, and gradation `2`. The element count before
-and after each reconstruction is reported. The reconstructed update is not
-identical to the advected deformation, so its realised objective and volume
-changes are reported against their shape-derivative predictions at the
+`hmax=1.25 h`, `hausd=0.1 h^2`, and gradation `2`. Automatic angle detection
+is disabled because the fixed chamber faces are protected explicitly. The
+element count before and after each reconstruction is reported. Each
+reconstruction is followed by
+an MMG mesh-optimization pass with the same size and geometry parameters. The
+fixed chamber faces remain required during this pass. The reconstructed update
+is not identical to the advected deformation, so its realised objective and
+volume changes are reported against their shape-derivative predictions at the
 following iterate.

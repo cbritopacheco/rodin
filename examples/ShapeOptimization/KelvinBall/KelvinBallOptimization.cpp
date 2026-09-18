@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -109,6 +110,7 @@ namespace KelvinBall
           Real minimumQuality = std::numeric_limits<Real>::infinity();
           Real meanQuality = 0;
           Real maximumQuality = 0;
+          Real meanElementSize = 0;
       };
 
       using ReconstructionDiagnostics = KelvinBall::ReconstructionDiagnostics;
@@ -154,6 +156,20 @@ namespace KelvinBall
       void announce(const char* stage)
       {
         Alert::Info() << stageHeading(stage) << Alert::Raise;
+      }
+
+      using Clock = std::chrono::steady_clock;
+
+      Real elapsedSeconds(const Clock::time_point& start) const
+      {
+        return std::chrono::duration<Real>(Clock::now() - start).count();
+      }
+
+      void reportStageTiming(size_t stage, Real seconds)
+      {
+        Alert::Info() << substageHeading("Stage " + std::to_string(stage) + " timing")
+                      << Alert::NewLine << diagnosticLabel("Elapsed time:")
+                      << Alert::Notation::Number(seconds) << " s" << Alert::Raise;
       }
 
       using LocalMesh = Geometry::Mesh<Context::Local>;
@@ -226,6 +242,7 @@ namespace KelvinBall
         diagnostics.vertices = mesh.getVertexCount();
         diagnostics.cells = mesh.getCellCount();
         Real qualitySum = 0;
+        Real elementSizeSum = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if (cell->getAttribute() == Obstacle)
@@ -239,13 +256,16 @@ namespace KelvinBall
           if (vertices.size() != 4)
             throw std::runtime_error("Kelvin-ball mesh quality requires tetrahedra.");
           Real squaredEdgeLengthSum = 0;
+          Real edgeLengthSum = 0;
           for (size_t i = 0; i < vertices.size(); ++i)
           {
             for (size_t j = i + 1; j < vertices.size(); ++j)
             {
-              squaredEdgeLengthSum += (mesh.getVertexCoordinates(vertices[i]) -
+              const Real edgeLength = (mesh.getVertexCoordinates(vertices[i]) -
                 mesh.getVertexCoordinates(vertices[j]))
-                                        .squaredNorm();
+                                          .norm();
+              edgeLengthSum += edgeLength;
+              squaredEdgeLengthSum += edgeLength * edgeLength;
             }
           }
           const Real quality =
@@ -253,8 +273,11 @@ namespace KelvinBall
           diagnostics.minimumQuality = std::min(diagnostics.minimumQuality, quality);
           diagnostics.maximumQuality = std::max(diagnostics.maximumQuality, quality);
           qualitySum += quality;
+          elementSizeSum += edgeLengthSum / 6;
         }
         diagnostics.meanQuality = qualitySum / static_cast<Real>(diagnostics.cells);
+        diagnostics.meanElementSize =
+          elementSizeSum / static_cast<Real>(diagnostics.cells);
         for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
         {
           if (face->getAttribute() == Gamma)
@@ -283,6 +306,8 @@ namespace KelvinBall
                       << Alert::Notation::Number(diagnostics.meanQuality)
                       << Alert::NewLine << diagnosticLabel("Maximum tetrahedron quality:")
                       << Alert::Notation::Number(diagnostics.maximumQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean element size:")
+                      << Alert::Notation::Number(diagnostics.meanElementSize)
                       << Alert::Raise;
       }
 
@@ -396,6 +421,8 @@ namespace KelvinBall
                       << Alert::Notation::Number(inputDiagnostics.minimumQuality)
                       << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
                       << Alert::Notation::Number(inputDiagnostics.meanQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean element size:")
+                      << Alert::Notation::Number(inputDiagnostics.meanElementSize)
                       << Alert::Raise;
 
         MMG::LevelSetDiscretizer discretizer;
@@ -406,12 +433,13 @@ namespace KelvinBall
           .setGradation(remeshGradation)
           .setBaseReferences(FlatSet<Attribute>{Obstacle, Fluid})
           .setBoundaryReference(Gamma)
-          .setAngleDetection(true);
+          .setAngleDetection(false);
         discretizer.split(Obstacle, {Obstacle, Fluid});
         MMG::Mesh reconstructed = discretizer.discretize(levelSet);
 
         splitSelfPairedCut(reconstructed);
-        const MeshDiagnostics outputDiagnostics = getMeshDiagnostics(reconstructed, false);
+        const MeshDiagnostics reconstructionDiagnostics =
+          getMeshDiagnostics(reconstructed, false);
         Alert::Info() << substageHeading("MMG reconstruction") << Alert::NewLine
                       << diagnosticLabel("Minimum size:") << Alert::Notation::Number(hmin)
                       << Alert::NewLine << diagnosticLabel("Maximum size:")
@@ -422,25 +450,57 @@ namespace KelvinBall
                       << Alert::Notation::Number(requiredTriangles) << Alert::NewLine
                       << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(previousCells) << " -> "
-                      << Alert::Notation::Number(outputDiagnostics.cells)
+                      << Alert::Notation::Number(reconstructionDiagnostics.cells)
                       << Alert::NewLine << diagnosticLabel("Obstacle cells:")
-                      << Alert::Notation::Number(outputDiagnostics.obstacleCells)
+                      << Alert::Notation::Number(reconstructionDiagnostics.obstacleCells)
                       << Alert::NewLine << diagnosticLabel("Fluid cells:")
-                      << Alert::Notation::Number(outputDiagnostics.fluidCells)
+                      << Alert::Notation::Number(reconstructionDiagnostics.fluidCells)
                       << Alert::NewLine << diagnosticLabel("Interface triangles:")
                       << Alert::Notation::Number(inputDiagnostics.interfaceTriangles)
                       << " -> "
-                      << Alert::Notation::Number(outputDiagnostics.interfaceTriangles)
+                      << Alert::Notation::Number(
+                           reconstructionDiagnostics.interfaceTriangles)
                       << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
                       << Alert::Notation::Number(inputDiagnostics.minimumQuality)
                       << " -> "
-                      << Alert::Notation::Number(outputDiagnostics.minimumQuality)
+                      << Alert::Notation::Number(reconstructionDiagnostics.minimumQuality)
                       << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
                       << Alert::Notation::Number(inputDiagnostics.meanQuality) << " -> "
+                      << Alert::Notation::Number(reconstructionDiagnostics.meanQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean element size:")
+                      << Alert::Notation::Number(inputDiagnostics.meanElementSize) << " -> "
+                      << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize)
+                      << Alert::Raise;
+
+        const size_t optimizedRequiredTriangles = protectFixedGeometry(reconstructed);
+        MMG::Optimizer()
+          .setHMin(hmin)
+          .setHMax(hmax)
+          .setHausdorff(hausdorff)
+          .setGradation(remeshGradation)
+          .setAngleDetection(false)
+          .optimize(reconstructed);
+        splitSelfPairedCut(reconstructed);
+        const MeshDiagnostics outputDiagnostics = getMeshDiagnostics(reconstructed, false);
+        Alert::Info() << substageHeading("MMG optimization") << Alert::NewLine
+                      << diagnosticLabel("Required boundary triangles:")
+                      << Alert::Notation::Number(optimizedRequiredTriangles)
+                      << Alert::NewLine << diagnosticLabel("Cell count:")
+                      << Alert::Notation::Number(reconstructionDiagnostics.cells) << " -> "
+                      << Alert::Notation::Number(outputDiagnostics.cells)
+                      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+                      << Alert::Notation::Number(reconstructionDiagnostics.minimumQuality)
+                      << " -> "
+                      << Alert::Notation::Number(outputDiagnostics.minimumQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+                      << Alert::Notation::Number(reconstructionDiagnostics.meanQuality) << " -> "
                       << Alert::Notation::Number(outputDiagnostics.meanQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean element size:")
+                      << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize)
+                      << " -> " << Alert::Notation::Number(outputDiagnostics.meanElementSize)
                       << Alert::Raise;
         return {std::move(reconstructed),
-          {hmin, hmax, hausdorff, requiredTriangles, previousCells,
+          {hmin, hmax, hausdorff, optimizedRequiredTriangles, previousCells,
             outputDiagnostics.cells}};
       }
 
@@ -571,6 +631,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                 << " = " << Alert::Notation::Number(stepFactor) << " h"
                 << Alert::NewLine << diagnosticLabel("Advection quadrature order:")
                 << Alert::Notation::Number(advectionQuadratureOrder) << Alert::Raise;
+  const Real nan = std::numeric_limits<Real>::quiet_NaN();
+  const auto stage1Start = Clock::now();
   announce("Stage 1: Discretizing the initial sphere with MMG.");
   auto sphere = Sphere(configuration).discretize();
   MMG::Mesh mesh(std::move(sphere.mesh));
@@ -580,6 +642,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   if (saveMeshDiagnostic)
     mesh.save("KelvinBallInitial.mesh", IO::FileFormat::MEDIT);
   reportSphereGeometry(mesh);
+  const Real stage1Seconds = elapsedSeconds(stage1Start);
+  reportStageTiming(1, stage1Seconds);
   if (geometryOnly)
     return 0;
   const Real targetVolume = mesh.getVolume(Obstacle);
@@ -591,6 +655,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "stabilization_factor,assembly_backend,direct_solver,"
              "vertices,cells,obstacle_cells,fluid_cells,"
              "interface_triangles,mesh_quality_min,mesh_quality_mean,mesh_quality_max,"
+             "mean_element_size,"
              "remesh_hmin,remesh_hmax,remesh_hausdorff,"
              "required_boundary_triangles,remesh_cells_before,remesh_cells_after,"
              "k,c,q,rho,coupling_symmetry,nitsche_jump,volume,target_volume,"
@@ -600,7 +665,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "null_space_multiplier,xi_rho_inf_norm,theta_inf_norm,d_rho_theta,"
              "d_volume_theta,required_d_volume_theta,rho_gradient_residual,"
              "rho_gradient_jump,volume_gradient_residual,"
-             "volume_gradient_jump\n";
+             "volume_gradient_jump,stage_1_seconds,stage_2_seconds,"
+             "stage_3_seconds,stage_4_seconds,stage_5_seconds,"
+             "stage_6_seconds,stage_7_seconds,stage_8_seconds,"
+             "stage_9_seconds\n";
   IO::XDMF xdmf("KelvinBall");
   auto chamber = xdmf.grid("Chamber");
   chamber.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
@@ -618,6 +686,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
   for (size_t iteration = 0; iteration < maxIterations; ++iteration)
   {
+    std::array<Real, 9> stageSeconds;
+    stageSeconds.fill(nan);
+    if (iteration == 0)
+      stageSeconds[0] = stage1Seconds;
     if (nextMesh)
     {
       mesh = std::move(*nextMesh);
@@ -629,6 +701,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(maxIterations) << Alert::NewLine
                   << " ------------------------------------------------------------"
                   << Alert::Raise;
+    const auto stage2Start = Clock::now();
     announce("Stage 2: Preparing the chamber fluid mesh.");
     auto& connectivity = mesh.getConnectivity();
     connectivity.discover(3, 2);
@@ -650,12 +723,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       fluid, MasterCuts, rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
     GridFunction uT0(Vh), uT1(Vh), uT2(Vh), uR0(Vh), uR1(Vh), uR2(Vh);
     GridFunction pT0(Qh), pT1(Qh), pT2(Qh), pR0(Qh), pR1(Qh), pR2(Qh);
+    stageSeconds[1] = elapsedSeconds(stage2Start);
+    reportStageTiming(2, stageSeconds[1]);
 
+    const auto stage3Start = Clock::now();
     announce("Stage 3: Solving the translational and rotational Stokes states.");
     const KelvinBall::Parameters metricParameters{h, nitschePenalty, stabilizationFactor};
     const KelvinBall::Metrics resistanceMetrics(metricParameters);
     const KelvinBall::Values metrics = resistanceMetrics.evaluateChamber(
       Vh, Qh, fluidCoupling, uT0, uT1, uT2, uR0, uR1, uR2, pT0, pT1, pT2, pR0, pR1, pR2);
+    stageSeconds[2] = elapsedSeconds(stage3Start);
+    reportStageTiming(3, stageSeconds[2]);
     const Real k = metrics.k;
     const Real c = metrics.c;
     const Real q = metrics.q;
@@ -666,7 +744,6 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const auto chamberBoundingBox = boundingBoxSize(mesh);
     const auto sewnBoundingBox = sewnBoundingBoxSize(mesh);
     const auto meshDiagnostics = getMeshDiagnostics(mesh);
-    const Real nan = std::numeric_limits<Real>::quiet_NaN();
     const Real actualRhoChange = previousRho ? rho - *previousRho : nan;
     const Real incomingPredictedRhoChange =
       predictedRhoChange ? *predictedRhoChange : nan;
@@ -687,6 +764,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << meshDiagnostics.interfaceTriangles << ','
               << meshDiagnostics.minimumQuality << ',' << meshDiagnostics.meanQuality
               << ',' << meshDiagnostics.maximumQuality << ','
+              << meshDiagnostics.meanElementSize << ','
               << reconstruction.minimumSize << ',' << reconstruction.maximumSize << ','
               << reconstruction.hausdorffTolerance << ','
               << reconstruction.requiredBoundaryTriangles << ','
@@ -703,9 +781,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << dVolumeTheta << ',' << requiredDVolumeTheta << ','
               << rhoGradientDiagnostics.residual << ',' << rhoGradientDiagnostics.jump
               << ',' << volumeGradientDiagnostics.residual << ','
-              << volumeGradientDiagnostics.jump << '\n';
+              << volumeGradientDiagnostics.jump;
+      for (const Real seconds : stageSeconds)
+        history << ',' << seconds;
+      history << '\n';
       history.flush();
     };
+    const auto stage4Start = Clock::now();
     announce("Stage 4: Evaluating the resistance objective.");
     if (previousRho)
     {
@@ -738,6 +820,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(nitscheJump) << Alert::NewLine
                   << diagnosticLabel("Coupling symmetry residual:")
                   << Alert::Notation::Number(couplingSymmetry) << Alert::Raise;
+    stageSeconds[3] = elapsedSeconds(stage4Start);
+    reportStageTiming(4, stageSeconds[3]);
     if (stateOnly)
     {
       const GradientDiagnostics unavailable{nan, nan};
@@ -745,6 +829,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       return 0;
     }
 
+    const auto stage5Start = Clock::now();
     announce("Stage 5: Computing the shape derivative.");
     auto gradUT0 = Jacobian(uT0);
     gradUT0.traceOf(Fluid);
@@ -780,6 +865,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
       rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
     GridFunction rhoGradient(shapeSpace), volumeGradient(shapeSpace);
+    stageSeconds[4] = elapsedSeconds(stage5Start);
+    reportStageTiming(5, stageSeconds[4]);
+    const auto stage6Start = Clock::now();
     announce("Stage 6: Regularizing and constraining the shape direction.");
     const GradientDiagnostics rhoGradientDiagnostics = identifyGradient(shapeSpace,
       -rhoDensity, shapeCoupling, rhoGradient, hilbertLength, nitschePenalty, "Rho");
@@ -821,9 +909,6 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(dVolumeTheta) << Alert::NewLine
                   << diagnosticLabel("Required D volume [theta]:")
                   << Alert::Notation::Number(requiredDVolumeTheta) << Alert::Raise;
-    writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
-      dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
-      volumeGradientDiagnostics);
     previousRho = rho;
     predictedRhoChange = dt * dRhoTheta;
     previousVolume = volume;
@@ -866,6 +951,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(distanceProjectionCorrection)
                   << Alert::Raise;
 
+    stageSeconds[5] = elapsedSeconds(stage6Start);
+    reportStageTiming(6, stageSeconds[5]);
+    const auto stage7Start = Clock::now();
     announce("Stage 7: Writing the chamber and sewn fields.");
     chamber.clear();
     chamber.add("Distance", distance, IO::XDMF::Center::Node);
@@ -941,9 +1029,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
       xdmf.write(static_cast<Real>(iteration)).flush();
       sewedXdmf.write(static_cast<Real>(iteration)).flush();
+      stageSeconds[6] = elapsedSeconds(stage7Start);
+      reportStageTiming(7, stageSeconds[6]);
+      writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
+        dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
+        volumeGradientDiagnostics);
       continue;
     }
 
+    stageSeconds[6] = elapsedSeconds(stage7Start);
+    reportStageTiming(7, stageSeconds[6]);
+    const auto stage8Start = Clock::now();
     announce("Stage 8: Advecting the level set.");
     TrialFunction advected(levelSetSpace);
     TestFunction test(levelSetSpace);
@@ -972,6 +1068,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real distanceJump = shapeCoupling.scalarJump(distance);
     const Real advectedJump = shapeCoupling.scalarJump(advectedDistance);
     Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
+                  << diagnosticLabel("Advection step:")
+                  << Alert::Notation::Number(dt) << Alert::NewLine
                   << diagnosticLabel("Linear residual:")
                   << Alert::Notation::Number(transportResidual) << Alert::NewLine
                   << diagnosticLabel("Minimum:")
@@ -991,7 +1089,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
     xdmf.write(static_cast<Real>(iteration)).flush();
     sewedXdmf.write(static_cast<Real>(iteration)).flush();
+    stageSeconds[7] = elapsedSeconds(stage8Start);
+    reportStageTiming(8, stageSeconds[7]);
 
+    const auto stage9Start = Clock::now();
     announce("Stage 9: Reconstructing the advected interface with MMG.");
     MMGReconstruction result = discretizeLevelSetMMG(mesh, advectedDistance, h);
     reconstruction = result.diagnostics;
@@ -1001,6 +1102,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     checkFixedGeometry(result.mesh, outerRadius);
     checkMaterials(result.mesh);
     nextMesh.emplace(std::move(result.mesh));
+    stageSeconds[8] = elapsedSeconds(stage9Start);
+    reportStageTiming(9, stageSeconds[8]);
+    writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
+      dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
+      volumeGradientDiagnostics);
   }
 
   Alert::Success()

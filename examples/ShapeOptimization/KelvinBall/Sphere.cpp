@@ -120,7 +120,7 @@ namespace KelvinBall
     const Real h = m_configuration.getH();
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
-    const size_t requiredTriangles = protectFixedGeometry(mesh);
+    protectFixedGeometry(mesh);
     const Real hmin = 0.8 * h;
     const Real hmax = 1.25 * h;
     const Real hausdorff = 0.1 * h * h;
@@ -137,11 +137,20 @@ namespace KelvinBall
       .setGradation(2)
       .setBaseReferences(FlatSet<Attribute>{Fluid})
       .setBoundaryReference(Gamma)
-      .setAngleDetection(true);
+      .setAngleDetection(false);
     mesh = discretizer.discretize(sphere);
+    splitSelfPairedCut(mesh);
+    const size_t optimizedRequiredTriangles = protectFixedGeometry(mesh);
+    MMG::Optimizer()
+      .setHMin(hmin)
+      .setHMax(hmax)
+      .setHausdorff(hausdorff)
+      .setGradation(2)
+      .setAngleDetection(false)
+      .optimize(mesh);
     splitSelfPairedCut(mesh);
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
-      {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
+      {hmin, hmax, hausdorff, optimizedRequiredTriangles, cellsBefore, cellsAfter}};
   }
 }
