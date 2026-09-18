@@ -61,14 +61,19 @@ namespace Rodin::Variational
    * @f]
    *
    * @tparam Solution Solution type tag
-   * @tparam MuDerived Derived type of shear modulus function
    * @tparam LambdaDerived Derived type of Lamé parameter function
+   * @tparam MuDerived Derived type of shear modulus function
    * @tparam Range Value range type
    * @tparam Mesh Mesh type
+   *
+   * The coefficient slots follow the primary template, lambda then mu, so
+   * that the parameters deduced from the constructor land where the
+   * specialization expects them.
    */
-  template <class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh>
-  class LinearElasticityIntegrator<Solution, P1<Range, Mesh>, MuDerived, LambdaDerived> final
-    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
+  template <class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh>
+  class LinearElasticityIntegrator<Solution, P1<Range, Mesh>, LambdaDerived, MuDerived>
+    final : public LocalBilinearFormIntegratorBase<
+              typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
   {
     public:
       /// @brief Scalar value type.
