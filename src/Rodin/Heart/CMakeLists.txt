@@ -12,6 +12,9 @@ set(RodinHeart_HEADERS
   CCMLC2014/PassiveEnergy.h
   CCMLC2014/HolzapfelReducedLaw.h
   CCMLC2014/PassiveLaw.h
+  PoroelasticSphere.h
+  PoroelasticSphere/PoroelasticSphere.h
+  PoroelasticSphere/PassiveLaw.h
 )
 
 add_library(RodinHeart INTERFACE)
