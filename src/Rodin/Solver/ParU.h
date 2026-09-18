@@ -75,8 +75,8 @@ namespace Rodin::Solver
    * right-hand sides can be solved without refactorization. The ordinary
    * @ref solve entry point builds a factorization only when none is retained.
    * Call @ref factorize explicitly after changing matrix values. After changing
-   * the sparsity pattern, call @ref clear so the next factorization also repeats
-   * symbolic analysis.
+   * the sparsity pattern, clear the symbolic factorization so the next
+   * factorization also repeats symbolic analysis.
    *
    * Architecture:
    * 1. Compress the Eigen CSC matrix and expose its values through
@@ -103,6 +103,13 @@ namespace Rodin::Solver
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
+
+      /** @brief ParU factorization stage to release. */
+      enum class Factorization
+      {
+        Numeric,
+        Symbolic
+      };
 
       /** @brief Fill-reducing ordering used during symbolic analysis. */
       enum class Ordering : std::int64_t
@@ -168,7 +175,7 @@ namespace Rodin::Solver
         if (m_ordering != ordering)
         {
           m_ordering = ordering;
-          m_resources.clearSymbolic();
+          clear(Factorization::Symbolic);
         }
         return *this;
       }
@@ -184,7 +191,7 @@ namespace Rodin::Solver
        *
        * Reuses existing symbolic analysis and replaces any previous numeric
        * factorization. The matrix sparsity pattern must remain unchanged until
-       * @ref clear is called.
+       * the symbolic factorization is cleared.
        */
       void factorize(LinearSystemType& axb)
       {
@@ -299,12 +306,26 @@ namespace Rodin::Solver
         return m_resources.numeric != nullptr;
       }
 
-      /** @brief Releases retained symbolic and numeric factorization state. */
-      void clear() noexcept
+      /**
+       * @brief Releases a retained factorization stage.
+       *
+       * Clearing Factorization::Numeric preserves symbolic analysis. Clearing
+       * Factorization::Symbolic also releases its dependent numeric
+       * factorization and the converted CSC structure.
+       */
+      void clear(Factorization factorization) noexcept
       {
-        m_resources.clearSymbolic();
-        m_columnPointers.resize(0);
-        m_rowIndices.resize(0);
+        switch (factorization)
+        {
+          case Factorization::Numeric:
+            m_resources.clearNumeric();
+            break;
+          case Factorization::Symbolic:
+            m_resources.clearSymbolic();
+            m_columnPointers.resize(0);
+            m_rowIndices.resize(0);
+            break;
+        }
       }
 
       /**
