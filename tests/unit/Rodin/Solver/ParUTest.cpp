@@ -90,10 +90,20 @@ namespace Rodin::Tests::Unit::Solver
     solver
       .setMaxThreads(1)
       .setOrdering(decltype(solver)::Ordering::AMD)
-      .solve(system);
+      .factorize(system);
+    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_TRUE(solver.hasFactorization(system));
+    solver.solve(system);
 
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
+    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+
+    // A new right-hand side reuses the retained numeric factorization.
+    expected << -2.0, 1.0, 4.0;
+    system.getVector() = system.getOperator() * expected;
+    EXPECT_TRUE(solver.hasFactorization(system));
+    solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // A value-only change keeps the sparsity pattern and reuses analysis, but
@@ -101,7 +111,9 @@ namespace Rodin::Tests::Unit::Solver
     system.getOperator().coeffRef(0, 0) = 8.0;
     expected << 2.0, -1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
+    EXPECT_FALSE(solver.hasFactorization(system));
     solver.solve(system);
+    EXPECT_TRUE(solver.hasFactorization(system));
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // A structural change invalidates the symbolic analysis automatically.
@@ -111,11 +123,22 @@ namespace Rodin::Tests::Unit::Solver
     system.getOperator().insert(2, 2) = 4.0;
     expected << -1.0, 3.0, 2.0;
     system.getVector() = system.getOperator() * expected;
+    EXPECT_FALSE(solver.hasFactorization(system));
     solver.solve(system);
+    EXPECT_TRUE(solver.hasFactorization(system));
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // Ordering participates in symbolic analysis and therefore invalidates it.
-    solver.setOrdering(decltype(solver)::Ordering::Natural).solve(system);
+    solver.setOrdering(decltype(solver)::Ordering::Natural);
+    EXPECT_FALSE(solver.hasFactorization(system));
+    solver.solve(system);
+    EXPECT_TRUE(solver.hasFactorization(system));
+    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+
+    solver.clearFactorization();
+    EXPECT_FALSE(solver.hasFactorization());
+    solver.solve(system);
+    EXPECT_TRUE(solver.hasFactorization(system));
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
