@@ -293,7 +293,8 @@ namespace Rodin::IO
       struct GridOptions
       {
         MeshPolicy meshPolicy = MeshPolicy::Static;  ///< Mesh export policy for this grid.
-        Optional<FilePatterns> patterns;               ///< Per-grid file pattern overrides (empty = use writer defaults).
+        bool exportMeshAttribute = true;              ///< Export the cell-centered mesh attribute.
+        Optional<FilePatterns> patterns;              ///< Per-grid file pattern overrides (empty = use writer defaults).
       };
 
       /**

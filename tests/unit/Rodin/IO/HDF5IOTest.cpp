@@ -798,6 +798,32 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
+  TEST(Rodin_IO_HDF5, XDMFMeshAttributeCanBeDisabled)
+  {
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_no_mesh_attribute";
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "output";
+
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+
+    {
+      XDMF xdmf(stem);
+      XDMF::GridOptions options;
+      options.exportMeshAttribute = false;
+      xdmf.setMesh(mesh).setOptions(options).write();
+      xdmf.close();
+    }
+
+    std::ifstream ifs(stem.string() + ".xdmf");
+    ASSERT_TRUE(ifs.good());
+    std::ostringstream buffer;
+    buffer << ifs.rdbuf();
+    const auto text = buffer.str();
+    EXPECT_EQ(text.find("<Attribute Name=\"Attribute\""), std::string::npos);
+
+    boost::filesystem::remove_all(testDir);
+  }
+
   // ===========================================================================
   // Parameterized tests: 1D, 2D, and 3D across all HDF5/XDMF paths
   // ===========================================================================

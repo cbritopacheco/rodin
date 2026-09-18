@@ -353,6 +353,7 @@ namespace Rodin::IO
         snapshot.meshFile = meshFile;
       }
 
+      if (gr.options.exportMeshAttribute)
       {
         SnapshotRecord::MeshAttributeRecord meshAttr;
         meshAttr.name = "Attribute";
