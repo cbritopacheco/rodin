@@ -24,7 +24,7 @@ class SparseMatrixTest : public ::testing::Test
 /// @brief Test SparseMatrix type alias.
 TEST_F(SparseMatrixTest, TypeAliases)
 {
-  static_assert(std::is_same_v<SparseIndex, std::int64_t>);
+  static_assert(std::is_same_v<SparseIndex, std::int32_t>);
   static_assert(std::is_signed_v<SparseIndex>);
   static_assert(std::is_same_v<
     SparseMatrix<Real>,

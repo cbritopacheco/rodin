@@ -23,8 +23,8 @@
 
 namespace Rodin::Math
 {
-  /// Signed 64-bit index type used by sparse matrix storage.
-  using SparseIndex = std::int64_t;
+  /// Signed 32-bit index type used by sparse matrix storage.
+  using SparseIndex = std::int32_t;
 
   /**
    * @brief Sparse matrix entry used during assembly.
@@ -45,8 +45,8 @@ namespace Rodin::Math
    * Eigen's SparseMatrix uses Compressed Column Storage (CCS), also known as
    * Compressed Sparse Column (CSC) format, which stores:
    * - Non-zero values
-   * - Signed 64-bit row indices for each non-zero value
-   * - Signed 64-bit column pointers indicating where each column starts
+   * - Signed 32-bit row indices for each non-zero value
+   * - Signed 32-bit column pointers indicating where each column starts
    *
    * ## Typical Applications
    * - Stiffness matrices: @f$ K @f$ in @f$ Ku = f @f$
@@ -93,4 +93,3 @@ namespace Rodin::FormLanguage
 }
 
 #endif
-
