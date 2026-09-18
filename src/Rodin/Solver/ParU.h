@@ -68,16 +68,18 @@ namespace Rodin::Solver
    * @ingroup ParUSpecializations
    * @brief Parallel multifrontal LU solver for real sparse square systems.
    *
-   * ParU factorizes a general matrix as @f$ PAQ = LU @f$. The symbolic and
-   * numeric factorizations are rebuilt for every call to solve, matching the
-   * assembly contract in which the matrix may change between solves.
+   * ParU factorizes a general matrix as @f$ PAQ = LU @f$. Symbolic analysis is
+   * reused while the matrix sparsity pattern and ordering remain unchanged.
+   * Numeric factorization is rebuilt for every call because matrix values may
+   * change between assemblies.
    *
    * Architecture:
    * 1. Compress the Eigen CSC matrix and expose its values through
    *    Eigen::viewAsCholmod without copying them.
    * 2. Convert the CSC column pointers and row indices to the signed 64-bit
    *    layout required by ParU.
-   * 3. Analyze, factorize, solve, and release all ParU objects with RAII.
+   * 3. Reuse symbolic analysis when the converted CSC pattern is unchanged.
+   * 4. Factorize, solve, and release the numeric factorization with RAII.
    *
    * | Specialization | Description |
    * |----------------|-------------|
@@ -114,8 +116,18 @@ namespace Rodin::Solver
         : Parent(pb)
       {}
 
-      ParU(const ParU& other) = default;
-      ParU(ParU&& other) noexcept = default;
+      ParU(const ParU& other)
+        : Parent(other),
+          m_maxThreads(other.m_maxThreads),
+          m_ordering(other.m_ordering)
+      {}
+
+      ParU(ParU&& other) noexcept
+        : Parent(std::move(other)),
+          m_maxThreads(other.m_maxThreads),
+          m_ordering(other.m_ordering)
+      {}
+
       ~ParU() override = default;
 
       /**
@@ -148,7 +160,11 @@ namespace Rodin::Solver
        */
       ParU& setOrdering(Ordering ordering) noexcept
       {
-        m_ordering = ordering;
+        if (m_ordering != ordering)
+        {
+          m_ordering = ordering;
+          m_resources.clearSymbolic();
+        }
         return *this;
       }
 
@@ -181,21 +197,27 @@ namespace Rodin::Solver
         matrix.makeCompressed();
         cholmod_sparse view = Eigen::viewAsCholmod(matrix);
 
-        Array<SuiteSparse_long> columnPointers(matrix.outerSize() + 1);
-        Array<SuiteSparse_long> rowIndices(matrix.nonZeros());
-        for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
+        m_resources.initialize(*this);
+        const bool samePattern = hasSamePattern(matrix);
+        if (!samePattern)
         {
-          columnPointers(i) =
-            static_cast<SuiteSparse_long>(matrix.outerIndexPtr()[i]);
-        }
-        for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
-        {
-          rowIndices(i) =
-            static_cast<SuiteSparse_long>(matrix.innerIndexPtr()[i]);
+          m_resources.clearSymbolic();
+          m_columnPointers.resize(matrix.outerSize() + 1);
+          m_rowIndices.resize(matrix.nonZeros());
+          for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
+          {
+            m_columnPointers(i) =
+              static_cast<SuiteSparse_long>(matrix.outerIndexPtr()[i]);
+          }
+          for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
+          {
+            m_rowIndices(i) =
+              static_cast<SuiteSparse_long>(matrix.innerIndexPtr()[i]);
+          }
         }
 
-        view.p = columnPointers.data();
-        view.i = rowIndices.data();
+        view.p = m_columnPointers.data();
+        view.i = m_rowIndices.data();
         view.itype = CHOLMOD_LONG;
 
         if (view.xtype != CHOLMOD_REAL || view.dtype != CHOLMOD_DOUBLE)
@@ -206,47 +228,55 @@ namespace Rodin::Solver
             << Alert::Raise;
         }
 
-        Resources resources;
-        check(ParU_InitControl(&resources.control), "control initialization");
         check(
           ParU_Set(
             PARU_CONTROL_MAX_THREADS,
             static_cast<std::int64_t>(m_maxThreads),
-            resources.control),
+            m_resources.control),
           "thread-count configuration");
-        if (m_ordering != Ordering::Default)
+        check(
+          ParU_Set(
+            PARU_CONTROL_ORDERING,
+            m_ordering == Ordering::Default
+              ? static_cast<std::int64_t>(PARU_DEFAULT_ORDERING)
+              : static_cast<std::int64_t>(m_ordering),
+            m_resources.control),
+          "ordering configuration");
+
+        if (!m_resources.symbolic)
         {
-          check(
-            ParU_Set(
-              PARU_CONTROL_ORDERING,
-              static_cast<std::int64_t>(m_ordering),
-              resources.control),
-            "ordering configuration");
+          const auto analyzeInfo =
+            ParU_Analyze(
+              &view, &m_resources.symbolic, m_resources.control);
+          if (analyzeInfo != PARU_SUCCESS)
+          {
+            m_resources.clearSymbolic();
+            Alert::MemberFunctionException(*this, __func__)
+              << "ParU symbolic analysis failed with status "
+              << static_cast<Integer>(analyzeInfo) << " for a "
+              << view.nrow << " x " << view.ncol << " matrix (xtype "
+              << view.xtype << ", dtype " << view.dtype << ")."
+              << Alert::Raise;
+          }
         }
-        const auto analyzeInfo =
-          ParU_Analyze(&view, &resources.symbolic, resources.control);
-        if (analyzeInfo != PARU_SUCCESS)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "ParU symbolic analysis failed with status "
-            << static_cast<Integer>(analyzeInfo) << " for a "
-            << view.nrow << " x " << view.ncol << " matrix (xtype "
-            << view.xtype << ", dtype " << view.dtype << ")."
-            << Alert::Raise;
-        }
+
+        NumericResource numeric(m_resources.control);
         check(
           ParU_Factorize(
-            &view, resources.symbolic, &resources.numeric, resources.control),
+            &view,
+            m_resources.symbolic,
+            &numeric.value,
+            m_resources.control),
           "numeric factorization");
 
         axb.getSolution().resize(axb.getVector().size());
         check(
           ParU_Solve(
-            resources.symbolic,
-            resources.numeric,
+            m_resources.symbolic,
+            numeric.value,
             axb.getVector().data(),
             axb.getSolution().data(),
-            resources.control),
+            m_resources.control),
           "solve");
       }
 
@@ -258,17 +288,70 @@ namespace Rodin::Solver
     private:
       struct Resources
       {
+        Resources() = default;
+        Resources(const Resources&) = delete;
+        Resources& operator=(const Resources&) = delete;
+
         ParU_Control control = nullptr;
         ParU_Symbolic symbolic = nullptr;
-        ParU_Numeric numeric = nullptr;
+
+        void initialize(const ParU& solver)
+        {
+          if (!control)
+            solver.check(ParU_InitControl(&control), "control initialization");
+        }
+
+        void clearSymbolic() noexcept
+        {
+          if (symbolic)
+            ParU_FreeSymbolic(&symbolic, control);
+        }
 
         ~Resources()
         {
-          ParU_FreeNumeric(&numeric, control);
-          ParU_FreeSymbolic(&symbolic, control);
-          ParU_FreeControl(&control);
+          clearSymbolic();
+          if (control)
+            ParU_FreeControl(&control);
         }
       };
+
+      struct NumericResource
+      {
+        explicit NumericResource(ParU_Control control)
+          : control(control)
+        {}
+
+        NumericResource(const NumericResource&) = delete;
+        NumericResource& operator=(const NumericResource&) = delete;
+
+        ~NumericResource()
+        {
+          if (value)
+            ParU_FreeNumeric(&value, control);
+        }
+
+        ParU_Control control;
+        ParU_Numeric value = nullptr;
+      };
+
+      bool hasSamePattern(const OperatorType& matrix) const
+      {
+        if (m_columnPointers.size() != matrix.outerSize() + 1 ||
+            m_rowIndices.size() != matrix.nonZeros())
+          return false;
+
+        for (Eigen::Index i = 0; i <= matrix.outerSize(); ++i)
+        {
+          if (m_columnPointers(i) != matrix.outerIndexPtr()[i])
+            return false;
+        }
+        for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
+        {
+          if (m_rowIndices(i) != matrix.innerIndexPtr()[i])
+            return false;
+        }
+        return true;
+      }
 
       void check(ParU_Info info, StringView operation) const
       {
@@ -283,6 +366,9 @@ namespace Rodin::Solver
 
       Index m_maxThreads = 0;
       Ordering m_ordering = Ordering::Default;
+      Array<SuiteSparse_long> m_columnPointers;
+      Array<SuiteSparse_long> m_rowIndices;
+      Resources m_resources;
   };
 }
 

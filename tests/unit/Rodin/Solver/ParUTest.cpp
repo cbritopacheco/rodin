@@ -95,6 +95,28 @@ namespace Rodin::Tests::Unit::Solver
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+
+    // A value-only change keeps the sparsity pattern and reuses analysis, but
+    // must rebuild the numeric factorization.
+    system.getOperator().coeffRef(0, 0) = 8.0;
+    expected << 2.0, -1.0, 4.0;
+    system.getVector() = system.getOperator() * expected;
+    solver.solve(system);
+    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+
+    // A structural change invalidates the symbolic analysis automatically.
+    system.getOperator().setZero();
+    system.getOperator().insert(0, 0) = 2.0;
+    system.getOperator().insert(1, 1) = 3.0;
+    system.getOperator().insert(2, 2) = 4.0;
+    expected << -1.0, 3.0, 2.0;
+    system.getVector() = system.getOperator() * expected;
+    solver.solve(system);
+    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+
+    // Ordering participates in symbolic analysis and therefore invalidates it.
+    solver.setOrdering(decltype(solver)::Ordering::Natural).solve(system);
+    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
   class Rodin_Solver_ParU_AllGeometries
