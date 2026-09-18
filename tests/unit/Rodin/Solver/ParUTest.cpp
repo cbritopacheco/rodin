@@ -48,7 +48,7 @@ namespace Rodin::Tests::Unit::Solver
     }
   }
 
-  TEST(Rodin_Solver_ParU, UsesZeroCopyCholmodView)
+  TEST(Rodin_Solver_ParU, SharesValuesAndUses32BitIndices)
   {
     Math::SparseMatrix<Real> matrix(2, 2);
     matrix.insert(0, 0) = 2.0;
@@ -57,7 +57,7 @@ namespace Rodin::Tests::Unit::Solver
 
     cholmod_sparse view = Eigen::viewAsCholmod(matrix);
 
-    EXPECT_EQ(view.itype, CHOLMOD_LONG);
+    EXPECT_EQ(view.itype, CHOLMOD_INT);
     EXPECT_EQ(view.p, static_cast<void*>(matrix.outerIndexPtr()));
     EXPECT_EQ(view.i, static_cast<void*>(matrix.innerIndexPtr()));
     EXPECT_EQ(view.x, static_cast<void*>(matrix.valuePtr()));
