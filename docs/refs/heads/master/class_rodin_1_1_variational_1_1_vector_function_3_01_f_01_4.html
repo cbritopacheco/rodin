@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -115,7 +116,7 @@
             </dt>
             <dd>Vector type of the linear system.</dd>
             <dt id="ae023de41ec47dc939303db21dc3f82fc">
-              using <a href="#ae023de41ec47dc939303db21dc3f82fc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#a764b539355b292d1706141cf53f47790" class="m-doc">VectorFunction</a>&lt;F&gt;&gt;
+              using <a href="#ae023de41ec47dc939303db21dc3f82fc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&lt;F&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -129,11 +130,11 @@
             </dt>
             <dd>Constructs a vector function from a callable.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad776889a2d950d6274164343d87b0605" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap">const VectorFunction&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ad776889a2d950d6274164343d87b0605" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a066abd27177bd3745581646fc61e7043" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap">VectorFunction&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a066abd27177bd3745581646fc61e7043" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -146,11 +147,11 @@
             </dt>
             <dd>Evaluates the callable at a point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the callable at an integration point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab4fb9f6a2655ec7f6f30ebd42f759d63" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) -&gt; <a href="#a764b539355b292d1706141cf53f47790" class="m-doc">VectorFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab4fb9f6a2655ec7f6f30ebd42f759d63" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Leaves callable vector functions unchanged on trace domains.</dd>
             <dt>
@@ -158,7 +159,7 @@
             </dt>
             <dd>Returns the polynomial order of the callable.</dd>
             <dt id="ae03b33b8e074615727fb7838f0262314">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a764b539355b292d1706141cf53f47790" class="m-doc">VectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies the derived function.</dd>
           </dl>
@@ -195,7 +196,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad776889a2d950d6274164343d87b0605" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap">const VectorFunction&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad776889a2d950d6274164343d87b0605" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -215,7 +216,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a066abd27177bd3745581646fc61e7043" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap">VectorFunction&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a066abd27177bd3745581646fc61e7043" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,7 +262,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7bb9b63358cd9e481d0f8b135298bb0" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the callable at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -287,7 +288,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a764b539355b292d1706141cf53f47790" class="m-doc">VectorFunction</a>&amp; Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4fb9f6a2655ec7f6f30ebd42f759d63" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&amp; Rodin::<wbr />Variational::<wbr />VectorFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4fb9f6a2655ec7f6f30ebd42f759d63" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Leaves callable vector functions unchanged on trace domains.</p>
             <table class="m-table m-fullwidth m-flat">

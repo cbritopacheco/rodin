@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -80,9 +81,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md464">Key Classes</a></li>
-            <li><a href="#autotoc_md465">Expression Template Pattern</a></li>
-            <li><a href="#autotoc_md466">Object Lifetime</a></li>
+            <li><a href="#autotoc_md554">Key Classes</a></li>
+            <li><a href="#autotoc_md555">Expression Template Pattern</a></li>
+            <li><a href="#autotoc_md556">Object Lifetime</a></li>
             <li>
               Reference
               <ul>
@@ -93,10 +94,10 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/FormLanguage</p><p>Module for writing high level abstract expressions.</p><p>The FormLanguage module provides the expression template infrastructure underlying Rodin&#x27;s variational form language. It enables composing mathematical expressions that are lazily evaluated during assembly.</p><section id="autotoc_md464"><h3><a href="#autotoc_md464">Key Classes</a></h3><ul><li><code>FormLanguage::Base</code> — Root base class for all form language objects. Provides unique identification (UUID), object lifetime management via shared ownership, and polymorphic <code>copy()</code>. <strong>Not thread-safe</strong>: use <code>thread_local</code> caching for per-thread output in evaluation methods.</li><li><code>FormLanguage::Traits&lt;T&gt;</code> — Type trait template. Each form language type provides a specialization defining associated types (<code>ScalarType</code>, <code>RangeType</code>, <code>FESType</code>, etc.). Always specialize <code>Traits</code> for new types.</li><li><code>FormLanguage::List</code> — Container for variational form components (integrals, boundary conditions) that makes up the body of a <code>Problem</code>.</li></ul></section><section id="autotoc_md465"><h3><a href="#autotoc_md465">Expression Template Pattern</a></h3><p>Operators like <code>Grad</code>, <code>Div</code>, <code>Dot</code> are CRTP-based expression templates:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w"> </span><span class="c1">// expression, not yet evaluated</span>
+<p>Directory src/Rodin/FormLanguage</p><p>Module for writing high level abstract expressions.</p><p>The FormLanguage module provides the expression template infrastructure underlying Rodin&#x27;s variational form language. It enables composing mathematical expressions that are lazily evaluated during assembly.</p><section id="autotoc_md554"><h3><a href="#autotoc_md554">Key Classes</a></h3><ul><li><code>FormLanguage::Base</code> — Root base class for all form language objects. Provides unique identification (UUID), object lifetime management via shared ownership, and polymorphic <code>copy()</code>. <strong>Not thread-safe</strong>: use <code>thread_local</code> caching for per-thread output in evaluation methods.</li><li><code>FormLanguage::Traits&lt;T&gt;</code> — Type trait template. Each form language type provides a specialization defining associated types (<code>ScalarType</code>, <code>RangeType</code>, <code>FESType</code>, etc.). Always specialize <code>Traits</code> for new types.</li><li><code>FormLanguage::List</code> — Container for variational form components (integrals, boundary conditions) that makes up the body of a <code>Problem</code>.</li></ul></section><section id="autotoc_md555"><h3><a href="#autotoc_md555">Expression Template Pattern</a></h3><p>Operators like <code>Grad</code>, <code>Div</code>, <code>Dot</code> are CRTP-based expression templates:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w"> </span><span class="c1">// expression, not yet evaluated</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">                   </span><span class="c1">// another expression</span>
 <span class="n">Problem</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w"> </span><span class="c1">// combined expression</span></pre><p>Expressions store operands via <code>std::reference_wrapper</code> (non-owning) or <code>std::unique_ptr</code> (owning, for temporaries). No computation occurs until assembly iterates over mesh cells and evaluates the expression at quadrature points.</p></section><section id="autotoc_md466"><h3><a href="#autotoc_md466">Object Lifetime</a></h3><p>The <code>Base::object()</code> helpers manage temporary object lifetimes. When an expression captures a temporary (e.g. a lambda-constructed <code>RealFunction</code>), the temporary is stored in a <code>shared_ptr</code> table within the expression, ensuring it lives as long as the expression does.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational module</a> for the user-facing form language.</p></aside></section>
+<span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w"> </span><span class="c1">// combined expression</span></pre><p>Expressions store operands via <code>std::reference_wrapper</code> (non-owning) or <code>std::unique_ptr</code> (owning, for temporaries). No computation occurs until assembly iterates over mesh cells and evaluates the expression at quadrature points.</p></section><section id="autotoc_md556"><h3><a href="#autotoc_md556">Object Lifetime</a></h3><p>The <code>Base::object()</code> helpers manage temporary object lifetimes. When an expression captures a temporary (e.g. a lambda-constructed <code>RealFunction</code>), the temporary is stored in a <code>shared_ptr</code> table within the expression, ensuring it lives as long as the expression does.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational module</a> for the user-facing form language.</p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -170,6 +171,16 @@
             </dt>
             <dd>Type trait specialization for Math::SpatialVector.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class T, class Enable = void&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_specialized.html" class="m-doc">IsSpecialized</a>
+            </dt>
+            <dd>Whether <code>T</code> is an optimized specialization rather than a generic handler.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_specialized_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1_specialized_08_4_01_4.html" class="m-doc">IsSpecialized&lt;T, std::void_t&lt;decltype(T::Specialized)&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for types declaring a <code>Specialized</code> member.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">IsVectorRange</a>
             </dt>
@@ -194,6 +205,76 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_range_kind_of.html" class="m-doc">RangeKindOf</a>
             </dt>
             <dd>Deduces the RangeKind of a type <code>T</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class MatrixXpr&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of.html" class="m-doc">RangeOf</a>
+            </dt>
+            <dd>Type trait to deduce the mathematical range type of an expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_boolean_01_4.html" class="m-doc">RangeOf&lt;Boolean&gt;</a>
+            </dt>
+            <dd>Range type for Boolean values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_complex_01_4.html" class="m-doc">RangeOf&lt;Complex&gt;</a>
+            </dt>
+            <dd>Range type for Complex values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, int Rows, int Options, int MaxRows, int MaxCols&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_eigen_1_1_matrix_3_01_scalar_00_01_rows_00_011_02623a597dc3a0022393643b8b041765.html" class="m-doc">RangeOf&lt;Eigen::Matrix&lt;Scalar, Rows, 1, Options, MaxRows, MaxCols&gt;&gt;</a>
+            </dt>
+            <dd>Range type for Eigen column vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_eigen_1_1_matrix_3_01_scalar_00_01_rows_00_01_cf9d8867b63003b19b94e35f02c798bd7.html" class="m-doc">RangeOf&lt;Eigen::Matrix&lt;Scalar, Rows, Cols, Options, MaxRows, MaxCols&gt;&gt;</a>
+            </dt>
+            <dd>Range type for Eigen matrices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_integer_01_4.html" class="m-doc">RangeOf&lt;Integer&gt;</a>
+            </dt>
+            <dd>Range type for Integer values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html" class="m-doc">RangeOf&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Range type deduced for <code>Math::SpatialMatrix</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">RangeOf&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Range type deduced for <code>Math::SpatialVector</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_real_01_4.html" class="m-doc">RangeOf&lt;Real&gt;</a>
+            </dt>
+            <dd>Range type for Real values.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html" class="m-doc">RangeOf&lt;Variational::FunctionBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Range type for FunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_shape_function_base_3_01_derive3809fe9cae3a47d32df2a10b6ad6ada2.html" class="m-doc">RangeOf&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Range type for ShapeFunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a>
+            </dt>
+            <dd>Type trait to deduce the result type of an expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_result_of_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html" class="m-doc">ResultOf&lt;Variational::FunctionBase&lt;Derived&gt;&gt;</a>
+            </dt>
+            <dd>Specialization of ResultOf for FunctionBase.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_result_of_3_01_variational_1_1_shape_function_base_3_01_derivb416579babca9182c69f032ad2495e16.html" class="m-doc">ResultOf&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Specialization of ResultOf for ShapeFunctionBase.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">Sum</a>
@@ -365,10 +446,115 @@
             </dt>
             <dd>Traits for bilinear form bases.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class OperandDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_component_3_01_variational_1_1_sh44852b541af56c8f06c93015a56fa6a8.html" class="m-doc">Traits&lt;Variational::Component&lt;Variational::ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Component</code> over a shape function: exposes the finite element space, the shape function space, the operand type, the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_conjugate_3_01_variational_1_1_shb966be8893d302ed6a690717e767561c.html" class="m-doc">Traits&lt;Variational::Conjugate&lt;Variational::ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Conjugate</code> over a shape function: exposes the finite element space and the shape function space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_gf068d3a561b377ec6d962ad704aa7d81.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Derivative</code> over a grid function: exposes the finite element space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_g58724a2c5c62dd20bdce4beddfae7bcd.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::GridFunction&lt;Variational::P1&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Derivative</code> over a grid function: exposes the finite element space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_s98f2f1cd18655ae7082fabf76755976b.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::ShapeFunction&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Derivative</code> over a shape function: exposes the shape function space, the finite element space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_s53db84c5ae17aa797eac64fe386d992e.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P1&lt;Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Derivative</code> over a shape function: exposes the finite element space, the shape function space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_fundbf696e04de1b0e503c3df67a51c928b.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a grid function: exposes the finite element space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_funa5d182aa87b5a35d13c6e791563ca1be.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;Variational::P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a grid function: exposes the finite element space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_funbed33fb9b3941f9cf19b1a80b18cee6f.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;Variational::P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a grid function: exposes the finite element space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fubf96c33b90993c114e74bbf685e48f4a.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a shape function: exposes the finite element space, the shape function space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fu5754d93e39862a24a0d37efed9646316.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a shape function: exposes the finite element space, the shape function space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fu8ecdbc75397b4f6cf9284d86c0e5ab07.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Div</code> over a shape function: exposes the finite element space, the shape function space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_division_3_01_variational_1_1_sha903cc4329f02e5c3a4c5911c337ebaef.html" class="m-doc">Traits&lt;Variational::Division&lt;Variational::ShapeFunctionBase&lt;LHSDerived, FES, Space&gt;, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Division</code> over a shape function: exposes the finite element space, the shape function space, the left-hand side operand, the right-hand side operand and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_dot_3_01_variational_1_1_function71390069b7752294ae660c513b2c3fc1.html" class="m-doc">Traits&lt;Variational::Dot&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Dot</code> over a function expression: exposes the left-hand side operand, the right-hand side operand, the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_dot_3_01_variational_1_1_functiond259df502a0155a526721261d002b79e.html" class="m-doc">Traits&lt;Variational::Dot&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Dot</code> over a function expression: exposes the finite element space, the shape function space, the left-hand side operand, the right-hand side operand, the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_dot_3_01_variational_1_1_shape_fuecbe475adf98e52b058beeb9b93ce31b.html" class="m-doc">Traits&lt;Variational::Dot&lt;Variational::ShapeFunctionBase&lt;LHSDerived, TrialFES, Variational::TrialSpace&gt;, Variational::ShapeFunctionBase&lt;RHSDerived, TestFES, Variational::TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Dot</code> over a shape function: exposes the left-hand side operand, the right-hand side operand, the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, class VectorField, class Step, class BoundaryPolicy&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_flow_3_01_variational_1_1_shape_f97bbed8bfe8b13562a639e1551f44a19.html" class="m-doc">Traits&lt;Variational::Flow&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Variational::TestSpace&gt;, VectorField, Step, BoundaryPolicy&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Flow</code> over a shape function: exposes the finite element space, the shape function space and the operand type.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html" class="m-doc">Traits&lt;Variational::FunctionBase&lt;Derived&gt;&gt;</a>
             </dt>
             <dd>Form-language traits for variational functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fua196904abf89f73981f477a77f692d6b.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Grad</code> over a grid function: exposes the finite element space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fu2c7c4f7dc52d3793f7248205e6fb6475.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P0&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Grad</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f52b7de22acea11f024d8aa919f87a953.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Grad</code> over a shape function: exposes the finite element space, the shape function space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_fbffad7044fc0ed59ad1be2825766d83a.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P0&lt;Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Grad</code> over a shape function: exposes the finite element space, the shape function space and the operand type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Traits&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
@@ -380,10 +566,195 @@
             </dt>
             <dd>Traits for GridFunctionBase: exposes the space and data types.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_e1d1edf46f813663f3ef3ecd75d5fa55.html" class="m-doc">Traits&lt;Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>H1:</code> exposes the mesh type, the scalar type, the range type and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_h1_3_01_k_00_01_scalar_00_01_mesh_01_4_01_4.html" class="m-doc">Traits&lt;Variational::H1&lt;K, Scalar, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>H1:</code> exposes the mesh type, the scalar type, the range type and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_h1_element_3_01_k_00_01_range_01_4_01_4.html" class="m-doc">Traits&lt;Variational::H1Element&lt;K, Range&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>H1Element:</code> exposes the scalar type and the range type of the element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_grid4f6dd6a5d90dfda496719f8f1fe4440.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Jacobian</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_gri4b98fe715ce3345e4d0ed3ce006fc78e.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;Variational::P0g&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Jacobian</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_gri7fec67193840093d825c29ff94f719f5.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;Variational::P1&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Jacobian</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_sha4de08458a9c46b92610911f68efa8525.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::H1&lt;K, Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Jacobian</code> over a shape function: exposes the finite element space, the shape function space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_sha2667d3c7b2ef112f6610705e8c8bed10.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P0g&lt;Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Jacobian</code> over a shape function: exposes the finite element space, the shape function space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_sha4925565f6533f17d0e76a3f103332e38.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P1&lt;Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Jacobian</code> over a shape function: exposes the finite element space, the shape function space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Vector&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_linear_form_3_01_f_e_s_00_01_vector_01_4_01_4.html" class="m-doc">Traits&lt;Variational::LinearForm&lt;FES, Vector&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>LinearForm:</code> exposes the finite element space and the vector type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Vector&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_linear_form_base_3_01_vector_01_4_01_4.html" class="m-doc">Traits&lt;Variational::LinearFormBase&lt;Vector&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>LinearFormBase:</code> exposes the vector type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_matrix_function_base_3_01_scalar_00_01_derived_01_4_01_4.html" class="m-doc">Traits&lt;Variational::MatrixFunctionBase&lt;Scalar, Derived&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>MatrixFunctionBase:</code> exposes the scalar type and the derived type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_mult_3_01_variational_1_1_functioba81ec2985c4fbd2ea6abcb78786bac2.html" class="m-doc">Traits&lt;Variational::Mult&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Mult</code> over a function expression: exposes the finite element space, the shape function space, the scalar type, the left-hand side operand, the right-hand side operand and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_mult_3_01_variational_1_1_shape_f18bdb274c42b4957befe31e4b5d89a64.html" class="m-doc">Traits&lt;Variational::Mult&lt;Variational::ShapeFunctionBase&lt;LHSDerived, FES, Space&gt;, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Mult</code> over a shape function: exposes the finite element space and the shape function space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0_3_01_math_1_1_vector_3_01_number_01_4_00_01_mesh_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P0&lt;Math::Vector&lt;Number&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0:</code> exposes the mesh type, the scalar type, the range type, the execution context and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0_3_01_number_00_01_mesh_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P0&lt;Number, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0:</code> exposes the mesh type, the scalar type, the range type, the execution context and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0_element_3_01_range_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P0Element&lt;Range&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0Element:</code> exposes the scalar type and the range type of the element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_3_01_math_1_1_spatial_vector_c85613108c90bf910c52e266f28161e3.html" class="m-doc">Traits&lt;Variational::P0g&lt;Math::SpatialVector&lt;Number&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0g:</code> exposes the mesh type, the scalar type, the range type, the execution context and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_3_01_number_00_01_mesh_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P0g&lt;Number, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0g:</code> exposes the mesh type, the scalar type, the range type, the execution context and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_element_3_01_range_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P0gElement&lt;Range&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0gElement:</code> exposes the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p1_3_01_math_1_1_spatial_vector_3f9933c0ffde86d71ce67f842cfbb9e76.html" class="m-doc">Traits&lt;Variational::P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P1:</code> exposes the mesh type, the scalar type, the range type and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p1_3_01_scalar_00_01_mesh_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P1&lt;Scalar, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P1:</code> exposes the mesh type, the scalar type, the range type and the finite element type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p1_element_3_01_range_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P1Element&lt;Range&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P1Element:</code> exposes the scalar type and the range type of the element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHSDerived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_potential_3_01_l_h_s_00_01_variat369c2379ec45f137e06e96aea6819d49.html" class="m-doc">Traits&lt;Variational::Potential&lt;LHS, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Traits for Potential operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_potential_3_01_l_h_s_00_01_variat77d2ad9b9b9474b6cd9535f743d596e4.html" class="m-doc">Traits&lt;Variational::Potential&lt;LHS, Variational::ShapeFunctionBase&lt;Variational::ShapeFunction&lt;RHSDerived, FES, Space&gt;&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Traits for Potential.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class TrialFunction, class TestFunction&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_problem_3_01_trial_function_00_018e4cc3c9f8aa6f5553014e9dfd791e77.html" class="m-doc">Traits&lt;Variational::Problem&lt;TrialFunction, TestFunction, LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for a two-field variational problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_problem_base_3_01_linear_system_01_4_01_4.html" class="m-doc">Traits&lt;Variational::ProblemBase&lt;LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for a problem base.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_real_function_base_3_01_derived_01_4_01_4.html" class="m-doc">Traits&lt;Variational::RealFunctionBase&lt;Derived&gt;&gt;</a>
             </dt>
             <dd>Traits for the CRTP base of real-valued functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_scalar_function_base_3_01_scalar_00_01_derived_01_4_01_4.html" class="m-doc">Traits&lt;Variational::ScalarFunctionBase&lt;Scalar, Derived&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>ScalarFunctionBase:</code> exposes the scalar type and the derived type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_shape_function_3_01_derived_00_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Traits&lt;Variational::ShapeFunction&lt;Derived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>ShapeFunction:</code> exposes the derived type, the finite element space, the shape function space, the result type, the range type and the scalar type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_shape_function_base_3_01_derived_c684fa4f0298f07adc5e7feff787ee70.html" class="m-doc">Traits&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>ShapeFunctionBase:</code> exposes the derived type, the finite element space, the shape function space, the result type, the range type and the scalar type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_sum_3_01_variational_1_1_functionb4a3a4cf711f6ea15ae8f9272781b0f3.html" class="m-doc">Traits&lt;Variational::Sum&lt;Variational::FunctionBase&lt;LHSDerived&gt;, Variational::FunctionBase&lt;RHSDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Sum</code> over a function expression: exposes the left-hand side operand and the right-hand side operand.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSNumber, class RHSNumber&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_sum_3_01_variational_1_1_linear_f5e3f201ed52b0b90ac1eab59515b144a.html" class="m-doc">Traits&lt;Variational::Sum&lt;Variational::LinearFormIntegratorBase&lt;LHSNumber&gt;, Variational::LinearFormIntegratorBase&lt;RHSNumber&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Sum</code> over linear form integrators: exposes the left-hand side operand, the right-hand side operand and the scalar type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_sum_3_01_variational_1_1_shape_fu0ca873067ab44e5b9392a246102ada1b.html" class="m-doc">Traits&lt;Variational::Sum&lt;Variational::ShapeFunctionBase&lt;LHSDerived, FES, Space&gt;, Variational::ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Sum</code> over a shape function: exposes the finite element space, the left-hand side operand, the right-hand side operand and the shape function space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_test_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">Traits&lt;Variational::TestFunction&lt;FES&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>TestFunction:</code> exposes the finite element space and the shape function space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_trace_3_01_variational_1_1_shape_662f3a671aea46fa7a916b2eec7d5bf2.html" class="m-doc">Traits&lt;Variational::Trace&lt;Variational::ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Trace</code> over a shape function: exposes the finite element space and the shape function space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_trial_function_3_01_solution_00_01_f_e_s_01_4_01_4.html" class="m-doc">Traits&lt;Variational::TrialFunction&lt;Solution, FES&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>TrialFunction:</code> exposes the finite element space, the shape function space and the solution type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_unary_minus_3_01_variational_1_1_4db7212ebd3dd654e8c30683a1dce271.html" class="m-doc">Traits&lt;Variational::UnaryMinus&lt;Variational::ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>UnaryMinus</code> over a shape function: exposes the finite element space and the shape function space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_vector_function_base_3_01_scalar_00_01_derived_01_4_01_4.html" class="m-doc">Traits&lt;Variational::VectorFunctionBase&lt;Scalar, Derived&gt;&gt;</a>

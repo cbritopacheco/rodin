@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -83,9 +84,9 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md174">Usage</a>
+              <a href="#autotoc_md175">Usage</a>
               <ul>
-                <li><a href="#autotoc_md175">Creating a distributed boundary submesh:</a></li>
+                <li><a href="#autotoc_md176">Creating a distributed boundary submesh:</a></li>
               </ul>
             </li>
             <li>
@@ -99,14 +100,14 @@
             </li>
           </ul>
         </nav>
-<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md174"><h2><a href="#autotoc_md174">Usage</a></h2><section id="autotoc_md175"><h3><a href="#autotoc_md175">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md175"><h2><a href="#autotoc_md175">Usage</a></h2><section id="autotoc_md176"><h3><a href="#autotoc_md176">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 
 <span class="c1">// Include all owned boundary faces on this rank</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mpiMesh</span><span class="p">.</span><span class="n">getBoundary</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="w">  </span><span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">());</span>
 
-<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, Mesh&lt;Context::MPI&gt;, SubMesh&lt;Context::Local&gt;</p></aside></section></section>
+<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html">SubMeshBase</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh&lt;Context::<wbr />MPI&gt;</a></p><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a></p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

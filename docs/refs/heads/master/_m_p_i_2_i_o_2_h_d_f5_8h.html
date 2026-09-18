@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -89,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides MeshPrinter and MeshLoader specializations for <code>Mesh&lt;Context::MPI&gt;</code> using the HDF5 file format.</p><p>Each MPI rank persists its own local shard independently: the printer delegates to <code>MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</code> to write the base mesh topology and then appends shard-specific metadata (ownership flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the <code>/Shard/...</code> HDF5 group.</p><p>The loader delegates to <code>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</code> to restore the base mesh and then reconstructs the MPI shard metadata needed for distributed assembly from the <code>/Shard/...</code> HDF5 datasets written by the MPI printer.</p><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter</p><p>MeshLoader</p><p>Geometry::Mesh&lt;Context::MPI&gt;</p><p>Geometry::Shard</p></aside>
+<p>Provides MeshPrinter and MeshLoader specializations for <code>Mesh&lt;Context::MPI&gt;</code> using the HDF5 file format.</p><p>Each MPI rank persists its own local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a> independently: the printer delegates to <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a> to write the base mesh topology and then appends <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a>-specific metadata (ownership flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the <code>/Shard/...</code> HDF5 group.</p><p>The loader delegates to <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a> to restore the base mesh and then reconstructs the MPI <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">shard</a> metadata needed for distributed assembly from the <code>/Shard/...</code> HDF5 datasets written by the MPI printer.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a></p><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;</a></p><p><a href="class_rodin_1_1_geometry_1_1_shard.html">Geometry::<wbr />Shard</a></p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

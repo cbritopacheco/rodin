@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,7 +78,43 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Jump.h <span class="m-thin">file</span>
         </h1>
         <p>Jump operator for interface discontinuities in DG methods.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This file defines the Jump class, which computes the jump (difference) in function values across element interfaces. This operator is fundamental for Discontinuous Galerkin (DG) formulations where functions are allowed to be discontinuous at element boundaries.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jump_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">Rodin::Variational::Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
+            </dt>
+            <dd>Jump of a FunctionBase instance across an interface.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jump_3_01_shape_function_base_3_01_nested_derived_00_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Rodin::Variational::Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd>Jump of a ShapeFunctionBase instance across an interface.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

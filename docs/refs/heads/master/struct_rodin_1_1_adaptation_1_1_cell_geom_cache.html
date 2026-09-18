@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -93,6 +94,10 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
+            <dt id="a7875de9269063a44a5480b1c0c530a84">
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a7875de9269063a44a5480b1c0c530a84" class="m-doc-self">index</a>
+            </dt>
+            <dd>Mesh cell index for this cache entry.</dd>
             <dt id="aa4b45bf6cc9ca433ffa5ebd5e0425218">
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aa4b45bf6cc9ca433ffa5ebd5e0425218" class="m-doc-self">area</a>
             </dt>
@@ -106,7 +111,7 @@
             </dt>
             <dd>(1/|Khat|) integral |det A_K| dxhat</dd>
             <dt id="aae2f6995fa50138730f548199643767f">
-              <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">int</a> <a href="#aae2f6995fa50138730f548199643767f" class="m-doc-self">sigmaK</a>
+              int <a href="#aae2f6995fa50138730f548199643767f" class="m-doc-self">sigmaK</a>
             </dt>
             <dd>verified sign(det A_K(xhat_q))</dd>
             <dt id="a814cdd83b17c0c1ff34d560605528efa">
@@ -125,11 +130,24 @@
               <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a12f00c5c13e4a7ee48b7b7f295567534" class="m-doc-self">C</a>
             </dt>
             <dd>A_K A_K^T.</dd>
-            <dt id="abae6f3d0a6f3146e5ec5abc4deeb95e8">
-              <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#abae6f3d0a6f3146e5ec5abc4deeb95e8" class="m-doc-self">gradN</a>
+            <dt>
+              <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#abae6f3d0a6f3146e5ec5abc4deeb95e8" class="m-doc">gradN</a>
             </dt>
-            <dd>3x2: rows are spatial grads of P1 basis</dd>
+            <dd></dd>
+            <dt id="a8599c64d79c4bed454fac76934577f0c">
+              std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 3&gt; <a href="#a8599c64d79c4bed454fac76934577f0c" class="m-doc-self">vertices</a>
+            </dt>
+            <dd>Vertex indices of the triangular cell.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="abae6f3d0a6f3146e5ec5abc4deeb95e8"><div>
+            <h3>
+              <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Adaptation::<wbr />CellGeomCache::<wbr /><a href="#abae6f3d0a6f3146e5ec5abc4deeb95e8" class="m-doc-self">gradN</a>
+            </h3>
+<p>3x2: rows are spatial grads of P1 basis</p>
+          </div></section>
         </section>
       </div>
     </div>

@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -84,6 +85,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -92,15 +94,25 @@
           </ul>
         </nav>
 <p>Bridges the Numerics::DynamicSystem assembler into the Rodin::Variational::ProblemBase interface expected by the Newton solver.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase&lt;DenseLinearSystem&gt;</a>
+            </dt>
+            <dd>Base class for variational problem objects.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aab10e799acaa1bbb330a87aff20ec5bb">
-              using <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc-self">Parent</a> = Variational::ProblemBase&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;
+              using <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a3f2ebebbd7f1b5c84c32748c1ef66c1d">
-              using <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc-self">ProblemBodyType</a> = typename Parent::ProblemBodyType
+              using <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc-self">ProblemBodyType</a> = typename <a href="class_rodin_1_1_variational_1_1_problem_base.html#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">Parent::<wbr />ProblemBodyType</a>
             </dt>
             <dd>Problem body type accepted by the variational interface.</dd>
           </dl>

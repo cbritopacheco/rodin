@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,7 +78,57 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_4bca0b286e0f4e2445f6f25378ef63e0.html">H1</a>/</span>H1Element.hpp <span class="m-thin">file</span>
         </h1>
         <p>Template implementation for H1Element class.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This file contains the template member function implementations for H1Element, including:</p><ul><li>Basis function evaluation using modal Dubiner basis</li><li>First-order derivative computation via chain rule</li><li>Vandermonde matrix inversion for nodal-to-modal conversion</li></ul><p>The implementation uses:</p><ul><li><strong>Segments</strong>: Classical Lagrange interpolation with GLL nodes</li><li><strong>Triangles</strong>: Dubiner modal basis with Fekete nodes</li><li><strong>Quadrilaterals</strong>: Tensor product of 1D GLL Lagrange bases</li><li><strong>Tetrahedra</strong>: 3D Dubiner modal basis with Fekete nodes</li><li><strong>Wedges</strong>: Product of triangle Fekete basis and 1D GLL basis</li></ul>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              struct <a href="struct_rodin_1_1_variational_1_1_pyramid_index.html" class="m-doc">Rodin::Variational::PyramidIndex</a>
+            </dt>
+            <dd>Indexing of the tensor-product modes on the reference pyramid.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_pyramid_index_1_1_i_j.html" class="m-doc">Rodin::Variational::PyramidIndex::IJ</a>
+            </dt>
+            <dd>Pair of tensor-product indices of a pyramid mode.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bernstein_pyramid.html" class="m-doc">Rodin::Variational::BernsteinPyramid</a>
+            </dt>
+            <dd>Bernstein basis on the reference pyramid.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_pyramid_modal.html" class="m-doc">Rodin::Variational::PyramidModal</a>
+            </dt>
+            <dd>Modal basis on the reference pyramid.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vandermonde_pyramid.html" class="m-doc">Rodin::Variational::VandermondePyramid</a>
+            </dt>
+            <dd>Vandermonde matrix of the modal basis on the reference pyramid.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

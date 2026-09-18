@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,7 +78,76 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_b0697b43aaaf12fb9455ca020da71ca3.html">P0g</a>/</span>P0gElement.h <span class="m-thin">file</span>
         </h1>
         <p>P0g (global constant) finite element implementation.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>IMPORTANT:</p><ul><li>P0g is a <em>space</em> with 1 global DOF (scalar) or vdim global DOFs (vector), but its <em>element</em> is still the constant basis function on each cell.</li></ul><p>This element is therefore essentially identical to P0Element:</p><ul><li>Scalar basis: phi(x) = 1</li><li>Vector basis: phi_i(x) = e_i (constant unit vectors)</li><li>All derivatives are zero.</li></ul><p>Having a dedicated P0gElement is mostly for naming/clarity and to decouple P0g from P0Element headers if you prefer.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_element_3_01_range_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::P0gElement&lt;Range&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>P0gElement:</code> exposes the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">Rodin::Variational::P0gElement</a>
+            </dt>
+            <dd>Forward declaration of global P0 finite elements.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_linear_form.html" class="m-doc">Rodin::Variational::P0gElement::LinearForm</a>
+            </dt>
+            <dd>Degree-of-freedom functional of the P0g element.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html" class="m-doc">Rodin::Variational::P0gElement::BasisFunction</a>
+            </dt>
+            <dd>Basis function of the P0g element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::P0gElement::BasisFunction::DerivativeFunction</a>
+            </dt>
+            <dd>Derivative of a P0g basis function, identically zero.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Vector-valued cellwise-constant finite element.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::LinearForm</a>
+            </dt>
+            <dd>Degree-of-freedom functional of the vector-valued P0g element.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction</a>
+            </dt>
+            <dd>Basis function of the vector-valued P0g element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1fc4dde2717229eb96fca3572f04acc22.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
+            </dt>
+            <dd>Derivative of a vector-valued P0g basis function, identically zero.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

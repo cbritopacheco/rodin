@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -100,6 +101,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -187,6 +189,16 @@
 <use x='321.158612' y='-2.988792' xlink:href='#eq1-g1-99'/>
 </g>
 </svg></div>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Represernts a finite element space.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -209,11 +221,11 @@
             </dt>
             <dd>Execution context type.</dd>
             <dt id="ab971c6ec4177c374836d376ba1d8c92f">
-              using <a href="#ab971c6ec4177c374836d376ba1d8c92f" class="m-doc-self">FESType</a> = <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+              using <a href="#ab971c6ec4177c374836d376ba1d8c92f" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a34130e18c1deff7165fe2aa4d9429a35">
-              using <a href="#a34130e18c1deff7165fe2aa4d9429a35" class="m-doc-self">ScalarFESType</a> = <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, Scalar, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#a34130e18c1deff7165fe2aa4d9429a35" class="m-doc-self">ScalarFESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, Scalar, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Scalar distributed H1 space used for component-wise numbering.</dd>
             <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
@@ -229,11 +241,11 @@
             </dt>
             <dd>Mesh type.</dd>
             <dt id="a5606ef555735d542cf22d49f90326bc4">
-              using <a href="#a5606ef555735d542cf22d49f90326bc4" class="m-doc-self">ElementType</a> = H1Element&lt;K, <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&gt;
+              using <a href="#a5606ef555735d542cf22d49f90326bc4" class="m-doc-self">ElementType</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&gt;
             </dt>
             <dd>Finite element type.</dd>
             <dt id="a16684b7e715b851b6b93828d94f2c44e">
-              using <a href="#a16684b7e715b851b6b93828d94f2c44e" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
+              using <a href="#a16684b7e715b851b6b93828d94f2c44e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -248,11 +260,11 @@
             </dt>
             <dd>Constructs a distributed vector-valued H1 space.</dd>
             <dt id="a54af72f4bbd1ce5498fa715041cea174">
-              <span class="m-doc-wrap-bumper"><a href="#a54af72f4bbd1ce5498fa715041cea174" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const H1&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a54af72f4bbd1ce5498fa715041cea174" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="abb322efe6b21425ee99dae0c835ea9a7">
-              <span class="m-doc-wrap-bumper"><a href="#abb322efe6b21425ee99dae0c835ea9a7" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abb322efe6b21425ee99dae0c835ea9a7" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -261,7 +273,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="a19ff7be23fad19be92d41b13d6b58274">
-              <span class="m-doc-wrap-bumper">auto <a href="#a19ff7be23fad19be92d41b13d6b58274" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&amp;&amp;) -&gt; <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a19ff7be23fad19be92d41b13d6b58274" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt id="a88987bef7972e7ef2a6aa0c6b83138b0">

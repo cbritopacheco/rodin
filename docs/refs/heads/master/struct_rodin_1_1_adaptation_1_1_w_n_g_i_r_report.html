@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Adaptation::WNGIRReport struct | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>WNGIRReport <span class="m-thin">struct</span>
+        </h1>
+        <p>Diagnostics produced by a WNGIR solve.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a91c82320ece4c90b243cb3dbcd4d54a7">
+              std::size_t <a href="#a91c82320ece4c90b243cb3dbcd4d54a7" class="m-doc-self">iterations</a>
+            </dt>
+            <dd>Number of nonlinear iterations performed.</dd>
+            <dt id="aea6c7215b6d8026ab3ab5189363bbedd">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aea6c7215b6d8026ab3ab5189363bbedd" class="m-doc-self">sigma</a>
+            </dt>
+            <dd>Robust-loss scale used for the interface residual.</dd>
+            <dt id="a986ec8f25c20affa82e2a3a39a1644d9">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a986ec8f25c20affa82e2a3a39a1644d9" class="m-doc-self">levelSetGradientScale</a>
+            </dt>
+            <dd>Maximum sampled target level-set gradient on the interface.</dd>
+            <dt id="a4b12980dfd656356ddfaea309bf0f6ba">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a4b12980dfd656356ddfaea309bf0f6ba" class="m-doc-self">stationarityNorm</a>
+            </dt>
+            <dd>Natural-gradient norm obtained from the unconstrained predictor.</dd>
+            <dt id="ae8eefb5b4ec88db8d0b9fe70addbc886">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ae8eefb5b4ec88db8d0b9fe70addbc886" class="m-doc-self">directionAction</a>
+            </dt>
+            <dd>Action of the negative energy derivative on the accepted direction.</dd>
+            <dt id="afc3b816841a44b23223e8b82c7232dbf">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#afc3b816841a44b23223e8b82c7232dbf" class="m-doc-self">descentRatio</a>
+            </dt>
+            <dd>Direction action divided by the unconstrained predictor action.</dd>
+            <dt id="a6fc6479f320fc2dd5f6109d300e331c9">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6fc6479f320fc2dd5f6109d300e331c9" class="m-doc-self">directionNormRatio</a>
+            </dt>
+            <dd>Direction coefficient norm divided by the predictor norm.</dd>
+            <dt id="aee5033cdb650b4857739ad53314092e3">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aee5033cdb650b4857739ad53314092e3" class="m-doc-self">actualPredictedDecrease</a>
+            </dt>
+            <dd>Actual energy decrease divided by its linear prediction.</dd>
+            <dt id="af160ddacc7b8f271fdc4773c5253243f">
+              std::size_t <a href="#af160ddacc7b8f271fdc4773c5253243f" class="m-doc-self">backtracks</a>
+            </dt>
+            <dd>Number of outer backtracks accumulated by the solve.</dd>
+            <dt id="a20b19d84e4932d0ec10be1444732e51c">
+              std::size_t <a href="#a20b19d84e4932d0ec10be1444732e51c" class="m-doc-self">jacobianRejections</a>
+            </dt>
+            <dd>Trials rejected by the sampled Jacobian condition.</dd>
+            <dt id="af03b9e693ce9cea9277cb4297194448e">
+              std::size_t <a href="#af03b9e693ce9cea9277cb4297194448e" class="m-doc-self">distortionRejections</a>
+            </dt>
+            <dd>Trials rejected by the sampled relative-distortion condition.</dd>
+            <dt id="ab03fea980978653d6770fd7871fe3fac">
+              std::size_t <a href="#ab03fea980978653d6770fd7871fe3fac" class="m-doc-self">energyRejections</a>
+            </dt>
+            <dd>Geometrically admissible trials rejected by the energy condition.</dd>
+            <dt id="abd5c14d63aca21680d9d551fdb0e5a94">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#abd5c14d63aca21680d9d551fdb0e5a94" class="m-doc-self">lastAlpha</a>
+            </dt>
+            <dd>Last accepted line-search factor.</dd>
+            <dt id="aede1324f454ede6d4ea6354e96c25ee8">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aede1324f454ede6d4ea6354e96c25ee8" class="m-doc-self">primalBarrierCoefficient</a>
+            </dt>
+            <dd>Effective per-volume coefficient assembled for the last barrier QP.</dd>
+            <dt id="a518ded64108ba85fed71ff95305c471c">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a518ded64108ba85fed71ff95305c471c" class="m-doc-self">primalBarrierRelativeCorrection</a>
+            </dt>
+            <dd>Last primal-barrier Newton correction relative to the predictor.</dd>
+            <dt id="a55a5edbefd47907d59c60f84d26d7aba">
+              std::size_t <a href="#a55a5edbefd47907d59c60f84d26d7aba" class="m-doc-self">primalBarrierIterations</a>
+            </dt>
+            <dd>Number of primal-barrier Newton corrections accumulated by the solve.</dd>
+            <dt id="a5b95107048c279c63bb26a2ac737db95">
+              std::size_t <a href="#a5b95107048c279c63bb26a2ac737db95" class="m-doc-self">lastPrimalBarrierIterations</a>
+            </dt>
+            <dd>Number of primal-barrier Newton corrections in the final outer step.</dd>
+            <dt id="a8adce3c33acc505da4ac1b0c8407dd21">
+              bool <a href="#a8adce3c33acc505da4ac1b0c8407dd21" class="m-doc-self">primalBarrierConverged</a>
+            </dt>
+            <dd>Whether the final primal-barrier inner solve met its tolerance.</dd>
+            <dt id="ab262af08f81521490b165370d022165d">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ab262af08f81521490b165370d022165d" class="m-doc-self">acceptedStep</a>
+            </dt>
+            <dd>Norm or magnitude of the last accepted step.</dd>
+            <dt id="ad9a6957217b6c51fc64476238a49029d">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ad9a6957217b6c51fc64476238a49029d" class="m-doc-self">minJ</a>
+            </dt>
+            <dd>Minimum sampled Jacobian determinant.</dd>
+            <dt id="a4619798d2041e4e20432099dcfb79711">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a4619798d2041e4e20432099dcfb79711" class="m-doc-self">maxJ</a>
+            </dt>
+            <dd>Maximum sampled Jacobian determinant.</dd>
+            <dt id="a6c9841ddd60ea8068c4007151159b726">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6c9841ddd60ea8068c4007151159b726" class="m-doc-self">maxQRel</a>
+            </dt>
+            <dd>Maximum sampled relative distortion.</dd>
+            <dt id="a7b9a84907ecb774b2f296effc9a13279">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a7b9a84907ecb774b2f296effc9a13279" class="m-doc-self">activeRMS</a>
+            </dt>
+            <dd>Active-interface RMS residual.</dd>
+            <dt id="a7b3d807fbe8df2748e2a425cf8ec75b1">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a7b3d807fbe8df2748e2a425cf8ec75b1" class="m-doc-self">activeSup</a>
+            </dt>
+            <dd>Active-interface supremum residual.</dd>
+            <dt id="a510fb9e18312c7fd32c729047cc9e729">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a510fb9e18312c7fd32c729047cc9e729" class="m-doc-self">activeFraction</a>
+            </dt>
+            <dd>Fraction of interface quadrature in the active set.</dd>
+            <dt id="af495e96988a3eea473cd3d5f7e2aa43c">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#af495e96988a3eea473cd3d5f7e2aa43c" class="m-doc-self">activeMeasure</a>
+            </dt>
+            <dd>Measure of the active interface quadrature set.</dd>
+            <dt id="a32a1f5d1ed3ba058d67d23f8b1d47f26">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a32a1f5d1ed3ba058d67d23f8b1d47f26" class="m-doc-self">interfaceMeasure</a>
+            </dt>
+            <dd>Measure of the complete interface quadrature set.</dd>
+            <dt id="a9e1cb13b78cddfba22682572fdff025e">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a9e1cb13b78cddfba22682572fdff025e" class="m-doc-self">rigidModeCoercivity</a>
+            </dt>
+            <dd>Smallest observation eigenvalue on the rigid-motion space.</dd>
+            <dt id="ae2420b981f7acb3dba1491295c4db29c">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ae2420b981f7acb3dba1491295c4db29c" class="m-doc-self">rigidModeCoercivityRatio</a>
+            </dt>
+            <dd>Smallest-to-largest rigid-mode observation eigenvalue ratio.</dd>
+            <dt id="a11c753ec665fdb31c3fd119b39e69628">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a11c753ec665fdb31c3fd119b39e69628" class="m-doc-self">rigidTranslationFraction</a>
+            </dt>
+            <dd>Fraction of the accepted displacement carried by translation.</dd>
+            <dt id="ad2b27bf3b16256cde87af84a4b86e267">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ad2b27bf3b16256cde87af84a4b86e267" class="m-doc-self">rigidRotationFraction</a>
+            </dt>
+            <dd>Fraction of the accepted displacement carried by rotation.</dd>
+            <dt id="aaea9329c688a1f03acb085562b449955">
+              std::size_t <a href="#aaea9329c688a1f03acb085562b449955" class="m-doc-self">rigidModeDimension</a>
+            </dt>
+            <dd>Dimension of the uncontrolled rigid-motion space.</dd>
+            <dt id="a1e633e2930e78870ead0288908f8349e">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a1e633e2930e78870ead0288908f8349e" class="m-doc-self">effectiveTauRmsH</a>
+            </dt>
+            <dd>Effective RMS-over-(h times level-set gradient) tolerance.</dd>
+            <dt id="a0fbeb3d1c06be992b4af40a71cfe38b3">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a0fbeb3d1c06be992b4af40a71cfe38b3" class="m-doc-self">effectiveTauInfH</a>
+            </dt>
+            <dd>Effective sup-over-(h times level-set gradient) tolerance.</dd>
+            <dt id="a96125c03da9f46752be5930214b0742d">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a96125c03da9f46752be5930214b0742d" class="m-doc-self">effectiveTauRms</a>
+            </dt>
+            <dd>Effective RMS tolerance in level-set units.</dd>
+            <dt id="a2afb9bedec8fb4130d6fd556ae764a7a">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a2afb9bedec8fb4130d6fd556ae764a7a" class="m-doc-self">effectiveTauInf</a>
+            </dt>
+            <dd>Effective supremum tolerance in level-set units.</dd>
+            <dt id="a960431ba98f14ed51bdd89d27fe35340">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a960431ba98f14ed51bdd89d27fe35340" class="m-doc-self">normalJumpRMS</a>
+            </dt>
+            <dd>RMS jump of the normal field across the interface.</dd>
+            <dt id="a23ad1750222d078501aaecb35a0b2a59">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a23ad1750222d078501aaecb35a0b2a59" class="m-doc-self">normalJumpMax</a>
+            </dt>
+            <dd>Maximum jump of the normal field across the interface.</dd>
+            <dt id="a6ccecf169e044f4f450c9464a7b78234">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6ccecf169e044f4f450c9464a7b78234" class="m-doc-self">energy</a>
+            </dt>
+            <dd>Final WNGIR energy.</dd>
+            <dt id="aff59cbd949f7d4517eca5b0b110a3831">
+              const char* <a href="#aff59cbd949f7d4517eca5b0b110a3831" class="m-doc-self">exitReason</a>
+            </dt>
+            <dd>Textual reason the iteration stopped.</dd>
+            <dt id="a382b1e52d9d50a242509c53daf16e4a5">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a382b1e52d9d50a242509c53daf16e4a5" class="m-doc-self">tAssembly</a>
+            </dt>
+            <dd>WNGIR variational problem assembly.</dd>
+            <dt id="a07109972e5d0244e8602b59f6fa3d291">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a07109972e5d0244e8602b59f6fa3d291" class="m-doc-self">tSetup</a>
+            </dt>
+            <dd>WNGIR geometry/sigma/validation tabulation.</dd>
+            <dt id="a86c6722e325180fd90ac0bd6d9b79cef">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a86c6722e325180fd90ac0bd6d9b79cef" class="m-doc-self">tBulk</a>
+            </dt>
+            <dd>One-time constant bulk metric assembly.</dd>
+            <dt id="a6788c7edac39034f8550f5a91148cdb3">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6788c7edac39034f8550f5a91148cdb3" class="m-doc-self">tFactor</a>
+            </dt>
+            <dd>CG setup/preconditioner.</dd>
+            <dt id="a508912f24db1fe4575703571aa684bd7">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a508912f24db1fe4575703571aa684bd7" class="m-doc-self">tSolve</a>
+            </dt>
+            <dd>CG iterations.</dd>
+            <dt id="abce6c19ce6d958d5afc2c45822c5bd2f">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#abce6c19ce6d958d5afc2c45822c5bd2f" class="m-doc-self">tLineSearch</a>
+            </dt>
+            <dd>true-geometry admissibility + energy LS.</dd>
+            <dt id="a4589ab84c600c9f3c0e4e8a39c1b296d">
+              std::size_t <a href="#a4589ab84c600c9f3c0e4e8a39c1b296d" class="m-doc-self">linearIterations</a>
+            </dt>
+            <dd>Accumulated linear iterations.</dd>
+            <dt id="af0fe5f6343531418d852da815c503bbf">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#af0fe5f6343531418d852da815c503bbf" class="m-doc-self">linearError</a>
+            </dt>
+            <dd>Last linear solver residual/error estimate.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

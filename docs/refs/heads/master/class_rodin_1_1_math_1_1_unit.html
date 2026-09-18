@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -82,9 +83,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md171">Type Safety</a></li>
-            <li><a href="#autotoc_md172">Arithmetic Operations</a></li>
-            <li><a href="#autotoc_md173">Example Usage</a></li>
+            <li><a href="#autotoc_md172">Type Safety</a></li>
+            <li><a href="#autotoc_md173">Arithmetic Operations</a></li>
+            <li><a href="#autotoc_md174">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -96,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md171"><h3><a href="#autotoc_md171">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md172"><h3><a href="#autotoc_md172">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
+<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md172"><h3><a href="#autotoc_md172">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md173"><h3><a href="#autotoc_md173">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
 <title>
 $ u_1 \pm u_2 $
 </title>
@@ -171,7 +172,7 @@ $ -u $
 <use x='0' y='0' xlink:href='#eq5-g0-0'/>
 <use x='9.298497' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md173"><h3><a href="#autotoc_md173">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
+</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md174"><h3><a href="#autotoc_md174">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Meter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">public</span><span class="o">:</span>
@@ -182,7 +183,7 @@ $ -u $
 <span class="c1">// Using the unit</span>
 <span class="n">Meter</span><span class="w"> </span><span class="nf">length1</span><span class="p">(</span><span class="mf">5.0</span><span class="p">);</span>
 <span class="n">Meter</span><span class="w"> </span><span class="nf">length2</span><span class="p">(</span><span class="mf">3.0</span><span class="p">);</span>
-<span class="n">Meter</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">length2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8.0 meters</span></pre><aside class="m-note m-default"><h4>See also</h4><p>Rad</p></aside></section>
+<span class="n">Meter</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">length2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8.0 meters</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_math_1_1_rad.html">Rad</a></p></aside></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

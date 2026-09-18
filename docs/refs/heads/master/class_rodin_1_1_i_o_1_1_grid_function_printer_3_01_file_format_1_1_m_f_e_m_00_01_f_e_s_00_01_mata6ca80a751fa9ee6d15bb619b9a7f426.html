@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -96,7 +97,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md150">Usage Example</a></li>
+            <li><a href="#autotoc_md151">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -108,7 +109,7 @@
             </li>
           </ul>
         </nav>
-<p>Implements the complete printer for grid functions stored as Math::Vector objects.</p><section id="autotoc_md150"><h3><a href="#autotoc_md150">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Implements the complete printer for grid functions stored as Math::Vector objects.</p><section id="autotoc_md151"><h3><a href="#autotoc_md151">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="c1">// ... compute solution ...</span>
 <span class="n">GridFunctionPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
@@ -132,7 +133,7 @@
             </dt>
             <dd>Coefficient data storage type.</dd>
             <dt id="a87ab5050b41f14d97440bab3534e33ae">
-              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
+              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being printed.</dd>
             <dt id="a82935b4ee4c7eaf51ec5adff118900e7">

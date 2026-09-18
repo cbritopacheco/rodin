@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -75,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>DirichletBCShapeFunctionAssemblyInput <span class="m-thin">class</span>
         </h1>
         <p>Input data for identification-style Dirichlet BC assembly (<code>u = A(v)</code>).</p>
@@ -242,15 +243,15 @@ $ A(v) $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a324948d222fc99a8b343bf7c58dd298f">
-              using <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc-self">OperandType</a> = Variational::TrialFunction&lt;Sol1, FES1&gt;
+              using <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;Sol1, FES1&gt;
             </dt>
             <dd>Operand type.</dd>
             <dt id="ac73715afa4a4d3664c4295dd91052dd7">
-              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;
+              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;Derived2, FES2, Sp&gt;
             </dt>
             <dd>Shape-function expression type on the right-hand side.</dd>
             <dt id="a3f4e5aa9305c166599fe7e3db5f72207">
-              using <a href="#a3f4e5aa9305c166599fe7e3db5f72207" class="m-doc-self">DirichletBCType</a> = Variational::DirichletBC&lt;<a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>, <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&gt;
+              using <a href="#a3f4e5aa9305c166599fe7e3db5f72207" class="m-doc-self">DirichletBCType</a> = <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">Variational::<wbr />DirichletBC</a>&lt;<a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>, <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&gt;
             </dt>
             <dd>Dirichlet condition represented by this input.</dd>
           </dl>
@@ -288,7 +289,7 @@ $ A(v) $
           <section class="m-doc-details" id="a4fcc3c0b5f52526cdeb170cf9e40853e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fcc3c0b5f52526cdeb170cf9e40853e" class="m-doc-self">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
               const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
@@ -318,7 +319,7 @@ $ A(v) $
           <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
@@ -335,7 +336,7 @@ $ A(v) $
           <section class="m-doc-details" id="a4fa9fbf8c3fb4dff4de2bc76c06df467"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper">const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fa9fbf8c3fb4dff4de2bc76c06df467" class="m-doc-self">getShapeFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
@@ -352,7 +353,7 @@ $ A(v) $
           <section class="m-doc-details" id="aebcc7cb36480775d8bb4c133533030f1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc-self">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>

@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -81,9 +82,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md94">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md95">Hierarchy</a></li>
-            <li><a href="#autotoc_md96">Usage</a></li>
+            <li><a href="#autotoc_md95">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md96">Hierarchy</a></li>
+            <li><a href="#autotoc_md97">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -96,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>A Polytope represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md94"><h2><a href="#autotoc_md94">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>A Polytope represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md95"><h2><a href="#autotoc_md95">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -166,12 +167,12 @@ $ x: K \rightarrow \tau $
 <use x='30.683916' y='0' xlink:href='#eq6-g0-33'/>
 <use x='45.959948' y='0' xlink:href='#eq6-g1-28'/>
 </g>
-</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md95"><h2><a href="#autotoc_md95">Hierarchy</a></h2><p>The Polytope class serves as the base for specialized classes:</p><ul><li>Cell: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li>Face: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li>Vertex: 0-dimensional points</li></ul></section><section id="autotoc_md96"><h2><a href="#autotoc_md96">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md96"><h2><a href="#autotoc_md96">Hierarchy</a></h2><p>The Polytope class serves as the base for specialized classes:</p><ul><li>Cell: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li>Face: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li>Vertex: 0-dimensional points</li></ul></section><section id="autotoc_md97"><h2><a href="#autotoc_md97">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Cell "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span>
 <span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" has measure "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getMeasure</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="p">}</span></pre><p>S</p><aside class="m-note m-default"><h4>See also</h4><p>Cell, Face, Vertex, PolytopeIterator</p></aside></section>
+<span class="p">}</span></pre><p>S</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_cell.html">Cell</a></p><p><a href="class_rodin_1_1_geometry_1_1_face.html">Face</a></p><p><a href="class_rodin_1_1_geometry_1_1_vertex.html">Vertex</a></p><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html">PolytopeIterator</a></p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -567,7 +568,7 @@ $ x: K \rightarrow \tau $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p>PolytopeTransformation</p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html">PolytopeTransformation</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a8b0ab88ca43a70cd21dc35ca52782c71"><div>
             <h3>

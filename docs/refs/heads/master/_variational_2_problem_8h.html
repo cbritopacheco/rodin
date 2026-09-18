@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,6 +78,18 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Problem.h <span class="m-thin">file</span>
         </h1>
         <p>Variational problem classes for finite element systems.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This file defines the Problem classes which encapsulate complete finite element problems including bilinear forms, linear forms, boundary conditions, and solution methods. Problems represent the discrete system <svg class="m-math" style="width: 3.767em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.161202 8.302191">
 <title>
 $ Au = b $
@@ -94,6 +107,57 @@ $ Au = b $
 <use x='31.184096' y='0' xlink:href='#eq1-g0-98'/>
 </g>
 </svg> arising from weak formulations.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_problem_base_3_01_linear_system_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::ProblemBase&lt;LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for a problem base.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class TrialFunction, class TestFunction&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_problem_3_01_trial_function_00_018e4cc3c9f8aa6f5553014e9dfd791e77.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Problem&lt;TrialFunction, TestFunction, LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for a two-field variational problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Rodin::Variational::ProblemBase</a>
+            </dt>
+            <dd>Base class for variational problem objects.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U, class V&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">Rodin::Variational::ProblemUVBase</a>
+            </dt>
+            <dd>General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>, class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_trial_function_00_01_test_function_01_4.html" class="m-doc">Rodin::Variational::Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;</a>
+            </dt>
+            <dd>Two-field variational problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_us_base.html" class="m-doc">Rodin::Variational::ProblemUsBase</a>
+            </dt>
+            <dd>Base for mixed variational problems with three or more functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_3_01_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html" class="m-doc">Rodin::Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;</a>
+            </dt>
+            <dd>Variational problem in three or more unknown fields.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

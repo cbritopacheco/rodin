@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -165,7 +166,7 @@ $ m $
             </dt>
             <dd>Type of operator associated to the bilinear form.</dd>
             <dt id="a8ccdd29f23d3381f88dd4e95e3bc8552">
-              using <a href="#a8ccdd29f23d3381f88dd4e95e3bc8552" class="m-doc-self">DefaultAssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;TrialFESContextType, TestFESContextType&gt; ::template Type&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&gt;
+              using <a href="#a8ccdd29f23d3381f88dd4e95e3bc8552" class="m-doc-self">DefaultAssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;TrialFESContextType, TestFESContextType&gt; ::template Type&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&gt;
             </dt>
             <dd>Default assembly backend selected from the trial/test contexts.</dd>
             <dt id="a118b130eca49442aa89065f12dbde36f">
@@ -182,16 +183,16 @@ $ m $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, TrialFES&gt;&amp; u,
-              const TestFunction&lt;TestFES&gt;&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, TrialFES&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a sparse bilinear form from trial and test functions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad169134545b30ab04cc34ba7160c7d55" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap">const BilinearForm&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad169134545b30ab04cc34ba7160c7d55" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4cce6cf50a7c4ac80f5a11a57e8d6bb4" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap">BilinearForm&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a4cce6cf50a7c4ac80f5a11a57e8d6bb4" class="m-doc">BilinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -200,19 +201,19 @@ $ m $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a406889f2e5c30cc8cd061996a2e6d7fb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp; other) -&gt; <a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a406889f2e5c30cc8cd061996a2e6d7fb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a751f6ac58d638452b4f377c980580f84" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp;&amp; other) -&gt; <a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a751f6ac58d638452b4f377c980580f84" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class UData, class VData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a75effe54df82b577472997cead12ca88" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;TrialFES, UData&gt;&amp; u,
-              const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;TestFES, VData&gt;&amp; v) const -&gt; <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a75effe54df82b577472997cead12ca88" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TrialFES, UData&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TestFES, VData&gt;&amp; v) const -&gt; <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Evaluates the linear form at the functions <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+            <dd>Evaluates the bilinear form at the functions <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -247,15 +248,15 @@ v $
             </dt>
             <dd>Assembles the bilinear form.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab757e8b5019cf22bd5d701e3450f24cd" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const TrialFunction&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, TrialFES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab757e8b5019cf22bd5d701e3450f24cd" class="m-doc">getTrialFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, TrialFES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the reference to the associated TrialFunction object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23fe47aff4e3261892c4959c0480000e" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const TestFunction&lt;TestFES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23fe47aff4e3261892c4959c0480000e" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the reference to the associated TestFunction object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aaa7c5c5e77f450259b1059ceee5feb13" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa7c5c5e77f450259b1059ceee5feb13" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of this object.</dd>
             <dt>
@@ -315,8 +316,8 @@ v $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, TrialFES&gt;&amp; u,
-              const TestFunction&lt;TestFES&gt;&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, TrialFES&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs a sparse bilinear form from trial and test functions.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -340,7 +341,7 @@ v $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad169134545b30ab04cc34ba7160c7d55" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap">const BilinearForm&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad169134545b30ab04cc34ba7160c7d55" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -360,7 +361,7 @@ v $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cce6cf50a7c4ac80f5a11a57e8d6bb4" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap">BilinearForm&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cce6cf50a7c4ac80f5a11a57e8d6bb4" class="m-doc-self">BilinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -380,7 +381,7 @@ v $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a406889f2e5c30cc8cd061996a2e6d7fb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a406889f2e5c30cc8cd061996a2e6d7fb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -406,7 +407,7 @@ v $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a751f6ac58d638452b4f377c980580f84" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a751f6ac58d638452b4f377c980580f84" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -433,10 +434,10 @@ v $
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
                 template&lt;class UData, class VData&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75effe54df82b577472997cead12ca88" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;TrialFES, UData&gt;&amp; u,
-              const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;TestFES, VData&gt;&amp; v) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75effe54df82b577472997cead12ca88" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TrialFES, UData&gt;&amp; u,
+              const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;TestFES, VData&gt;&amp; v) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Evaluates the linear form at the functions <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+            <p>Evaluates the bilinear form at the functions <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -595,7 +596,7 @@ $ a(u, v) $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const TrialFunction&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, TrialFES&gt;&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab757e8b5019cf22bd5d701e3450f24cd" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, TrialFES&gt;&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab757e8b5019cf22bd5d701e3450f24cd" class="m-doc-self">getTrialFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference to the associated TrialFunction object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -612,7 +613,7 @@ $ a(u, v) $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const TestFunction&lt;TestFES&gt;&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23fe47aff4e3261892c4959c0480000e" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23fe47aff4e3261892c4959c0480000e" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the reference to the associated TestFunction object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -629,7 +630,7 @@ $ a(u, v) $
               <div class="m-doc-template">
                 template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#aeb7cbd99f9e60d3617fb380c227bcf46" class="m-doc">BilinearForm</a>* Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa7c5c5e77f450259b1059ceee5feb13" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>* Rodin::<wbr />Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;Scalar&gt;&gt;&lt;Solution, TrialFES, TestFES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa7c5c5e77f450259b1059ceee5feb13" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">

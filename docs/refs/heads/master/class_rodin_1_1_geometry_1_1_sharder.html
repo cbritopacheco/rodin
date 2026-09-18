@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -90,7 +91,7 @@
             </tr>
           </tbody>
         </table>
-<p>A Sharder decomposes a mesh into smaller pieces (shards) that can be processed independently. This is useful for distributed computing and parallel finite element analysis.</p><aside class="m-note m-default"><h4>See also</h4><p>Shard, MeshShard</p></aside>
+<p>A Sharder decomposes a mesh into smaller pieces (shards) that can be processed independently. This is useful for distributed computing and parallel finite element analysis.</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder&lt;Context::<wbr />Local&gt;</a></td><td>Local mesh sharder that builds shard metadata without MPI communication.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder&lt;Context::<wbr />MPI&gt;</a></td><td>Distributed mesh sharder that prepares shards for MPI mesh ownership and halo exchange.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a></p><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh&lt;Context::<wbr />MPI&gt;</a></p></aside>
       </div>
     </div>
   </div>

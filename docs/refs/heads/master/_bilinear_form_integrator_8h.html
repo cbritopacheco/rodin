@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,7 +78,48 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>BilinearFormIntegrator.h <span class="m-thin">file</span>
         </h1>
         <p>Base classes for bilinear form integrators.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This file defines the abstract base classes for bilinear form integrators, which are responsible for computing local contributions to the global system matrix in finite element assembly. Integrators represent specific terms in the weak formulation involving both trial and test functions.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">Rodin::Variational::BilinearFormIntegratorBase</a>
+            </dt>
+            <dd>Abstract base class for bilinear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Rodin::Variational::LocalBilinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for bilinear form integrators whose trial and test functions live on the same polytope.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Rodin::Variational::GlobalBilinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for bilinear form integrators coupling a trial and a test polytope across the mesh.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

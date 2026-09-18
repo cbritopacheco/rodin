@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -100,7 +101,7 @@
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;FunctionBase&lt;NestedDerived&gt;&gt;</a>
             </dt>
-            <dd>Base class for real-valued scalar functions.</dd>
+            <dd>Base class for real-valued functions defined on a mesh.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -124,11 +125,11 @@
             </dt>
             <dd>Constructs a real function wrapper around an existing expression.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap">const RealFunction&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap">RealFunction&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -141,7 +142,7 @@
             </dt>
             <dd>Evaluates the wrapped function at a point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the wrapped function at an integration point.</dd>
             <dt>
@@ -149,7 +150,7 @@
             </dt>
             <dd>Returns the wrapped function order on a mesh entity.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a18a78d4ef7fc54dab61bf98189131d4c" class="m-doc">RealFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the function.</dd>
           </dl>
@@ -181,7 +182,7 @@
               <div class="m-doc-template">
                 template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">const RealFunction&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -201,7 +202,7 @@
               <div class="m-doc-template">
                 template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">RealFunction&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -247,7 +248,7 @@
               <div class="m-doc-template">
                 template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the wrapped function at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -299,7 +300,7 @@
               <div class="m-doc-template">
                 template&lt;class NestedDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a18a78d4ef7fc54dab61bf98189131d4c" class="m-doc">RealFunction</a>* Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>* Rodin::<wbr />Variational::<wbr />RealFunction&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">

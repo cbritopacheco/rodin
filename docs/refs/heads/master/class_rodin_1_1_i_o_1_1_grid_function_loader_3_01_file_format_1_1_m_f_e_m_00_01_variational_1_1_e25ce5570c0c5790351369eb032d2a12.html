@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -96,8 +97,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md146">MFEM Grid Function Format</a></li>
-            <li><a href="#autotoc_md147">Usage Example</a></li>
+            <li><a href="#autotoc_md147">MFEM Grid Function Format</a></li>
+            <li><a href="#autotoc_md148">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -109,10 +110,10 @@
             </li>
           </ul>
         </nav>
-<p>Loads finite element solution data for H1-conforming Lagrange elements of arbitrary degree from MFEM grid function files. Handles DOF reordering between MFEM&#x27;s ordering and Rodin&#x27;s internal ordering.</p><section id="autotoc_md146"><h3><a href="#autotoc_md146">MFEM Grid Function Format</a></h3><p>The format includes:</p><ul><li>FiniteElementSpace header</li><li>FiniteElementCollection name (e.g., &quot;H1_2D_P2&quot; for degree 2 in 2D)</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values (ordered by MFEM convention)</li></ul><p>MFEM DOF ordering: vertices -&gt; edge interiors -&gt; face interiors -&gt; element interiors</p></section><section id="autotoc_md147"><h3><a href="#autotoc_md147">Usage Example</a></h3><pre class="m-code"><span class="n">H1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span>
+<p>Loads finite element solution data for H1-conforming Lagrange elements of arbitrary degree from MFEM grid function files. Handles DOF reordering between MFEM&#x27;s ordering and Rodin&#x27;s internal ordering.</p><section id="autotoc_md147"><h3><a href="#autotoc_md147">MFEM Grid Function Format</a></h3><p>The format includes:</p><ul><li>FiniteElementSpace header</li><li>FiniteElementCollection name (e.g., &quot;H1_2D_P2&quot; for degree 2 in 2D)</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values (ordered by MFEM convention)</li></ul><p>MFEM DOF ordering: vertices -&gt; edge interiors -&gt; face interiors -&gt; element interiors</p></section><section id="autotoc_md148"><h3><a href="#autotoc_md148">Usage Example</a></h3><pre class="m-code"><span class="n">H1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">gf</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
 <span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">H1</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">gf</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"solution.gf"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionPrinter</p></aside></section>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"solution.gf"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -127,7 +128,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a490e9439ee35c791eb62ce24fad56f56">
-              using <a href="#a490e9439ee35c791eb62ce24fad56f56" class="m-doc-self">FESType</a> = Variational::H1&lt;K, Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+              using <a href="#a490e9439ee35c791eb62ce24fad56f56" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
             </dt>
             <dd>Finite element space type.</dd>
             <dt id="a707fcf9a5b0601453725205cb3894ee9">
@@ -139,7 +140,7 @@
             </dt>
             <dd>Coefficient data storage type.</dd>
             <dt>
-              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#a490e9439ee35c791eb62ce24fad56f56" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;
+              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#a490e9439ee35c791eb62ce24fad56f56" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being loaded.</dd>
             <dt id="aa497f0af6ce394d50349b4416616b312">
@@ -173,7 +174,7 @@
               <div class="m-doc-template">
                 template&lt;size_t K, class Range&gt;
               </div>
-              using Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;K, Range&gt;::<wbr /><a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#a490e9439ee35c791eb62ce24fad56f56" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;
+              using Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;K, Range&gt;::<wbr /><a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#a490e9439ee35c791eb62ce24fad56f56" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;
             </h3>
             <p>Grid function type being loaded.</p>
 <p>Grid function type being loaded.</p>

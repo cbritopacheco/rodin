@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -96,6 +97,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -104,6 +106,16 @@
           </ul>
         </nav>
 <p>This specialization wraps a local shard P1 space and augments it with distributed global indexing. Owned degrees of freedom receive contiguous global ranges per rank, while ghost dofs are synchronized from owner ranks.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, P1&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Represernts a finite element space.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -151,7 +163,7 @@
             </dt>
             <dd>Type of finite element.</dd>
             <dt id="a9d4069688e084877dc99a9648464c333">
-              using <a href="#a9d4069688e084877dc99a9648464c333" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc">RangeType</a>, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
+              using <a href="#a9d4069688e084877dc99a9648464c333" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc">RangeType</a>, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>

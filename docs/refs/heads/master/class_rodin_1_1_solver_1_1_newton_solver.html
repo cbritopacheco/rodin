@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -209,7 +210,7 @@ $ \alpha &lt; 1 $
 <use x='10.842553' y='0' xlink:href='#eq5-g0-60'/>
 <use x='23.268034' y='0' xlink:href='#eq5-g1-49'/>
 </g>
-</svg> trades convergence speed for robustness and can stabilize mildly nonconvex problems, but it is not a substitute for a line search.</li></ul></aside><p>The nonlinear state vector passed to <code>solve()</code> is updated in place and is used both as the initial guess and as the storage for the final iterate.</p><aside class="m-note m-default"><h4>Associated tangential problem</h4><p>The solver obtains the tangential <code>Variational::ProblemBase</code> from the supplied linear solver through <code>LinearSolverBase::getProblem()</code>. At each Newton iteration:</p><ul><li>the tangential problem is reassembled by calling <code>assemble()</code>,</li><li>the assembled linear system is accessed through <code>ProblemBase::getLinearSystem()</code>,</li><li>the linear correction is computed by the associated linear solver.</li></ul></aside><aside class="m-note m-default"><h4>Contract</h4><p>This solver assumes that the associated problem is already assembled in Newton form:</p><div class="m-math"><svg style="width: 9.465em; height: 1.245em;" viewBox="148.837383 -11.955168 90.868221 11.955168">
+</svg> trades convergence speed for robustness and can stabilize mildly nonconvex problems, but it is not a substitute for a line search.</li></ul></aside><p>The nonlinear state vector passed to <code>solve()</code> is updated in place and is used both as the initial guess and as the storage for the final iterate.</p><aside class="m-note m-default"><h4>Associated tangential problem</h4><p>The solver obtains the tangential <a href="_variational_2_problem_8h.html">Variational::<wbr />ProblemBase</a> from the supplied linear solver through <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase::<wbr />getProblem()</a>. At each Newton iteration:</p><ul><li>the tangential problem is reassembled by calling <code>assemble()</code>,</li><li>the assembled linear system is accessed through <a href="_variational_2_problem_8h.html">ProblemBase::<wbr />getLinearSystem()</a>,</li><li>the linear correction is computed by the associated linear solver.</li></ul></aside><aside class="m-note m-default"><h4>Contract</h4><p>This solver assumes that the associated problem is already assembled in Newton form:</p><div class="m-math"><svg style="width: 9.465em; height: 1.245em;" viewBox="148.837383 -11.955168 90.868221 11.955168">
 <title>
 \[
   J(x)\,\delta x = -F(x).

@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -74,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>AssemblyBase&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt; <span class="m-thin">class</span>
         </h1>
         <p>AssemblyBase specialization for the identification Dirichlet BC <code>u = A(v)</code>.</p>
@@ -107,7 +108,7 @@
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_matha8b8ef1c7463599156c514d3fe5101ee.html" class="m-doc">OpenMP&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>OpenMP assembler for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
@@ -121,7 +122,7 @@
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="ac73715afa4a4d3664c4295dd91052dd7">
-              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;
+              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;Derived2, FES2, Sp&gt;
             </dt>
             <dd>Shape-function expression type.</dd>
             <dt id="a80a1d4273f96998f8ead3f6f76cfd02f">
@@ -174,7 +175,7 @@
           <section class="m-doc-details" id="a8c4c517560f41cda2246faf15f4bef4c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />AssemblyBase&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c4c517560f41cda2246faf15f4bef4c" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc">OutputType</a>&amp; out,
               const <a href="#a80a1d4273f96998f8ead3f6f76cfd02f" class="m-doc">InputType</a>&amp; data) const <span class="m-label m-warning">pure virtual</span></span></span>
@@ -199,7 +200,7 @@
           <section class="m-doc-details" id="a0f610752ceb018058f57d5dfd588e8d2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>* Rodin::<wbr />Assembly::<wbr />AssemblyBase&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f610752ceb018058f57d5dfd588e8d2" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>

@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,6 +78,18 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_80838750593a9f1caedce9bf7d761a53.html">P1</a>/</span>Derivative.h <span class="m-thin">file</span>
         </h1>
         <p>Partial derivative operator specialization for P1 functions.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>This file provides specialized implementations of the partial derivative operator for P1 GridFunctions and ShapeFunctions.</p><p>For a scalar P1 function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
@@ -133,7 +146,38 @@ $ x_i $
 <use x='224.194762' y='-9.993925' xlink:href='#eq3-g0-101'/>
 <use x='230.331474' y='-8.200662' xlink:href='#eq3-g2-105'/>
 </g>
-</svg></div><p>For P1 elements, partial derivatives are piecewise constant on each element.</p><aside class="m-note m-default"><h4>See also</h4><p>Derivative, Grad, P1</p></aside>
+</svg></div><p>For P1 elements, partial derivatives are piecewise constant on each element.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_derivative_8h.html">Derivative</a></p><p><a href="_grad_8h.html">Grad</a></p><p><a href="class_rodin_1_1_variational_1_1_p1.html">P1</a></p></aside>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_g58724a2c5c62dd20bdce4beddfae7bcd.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Derivative&lt;Variational::GridFunction&lt;Variational::P1&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Derivative</code> over a grid function: exposes the finite element space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_s53db84c5ae17aa797eac64fe386d992e.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Derivative&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P1&lt;Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for <code>Derivative</code> over a shape function: exposes the finite element space, the shape function space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_derivative_3_01_grid_function_3_01_p1_3_01_range_00_01_mesh_01_4_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::Derivative&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Derivative of a P1 GridFunction.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

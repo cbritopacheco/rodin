@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -77,6 +78,18 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_80838750593a9f1caedce9bf7d761a53.html">P1</a>/</span>Grad.h <span class="m-thin">file</span>
         </h1>
         <p>Gradient operator specialization for P1 (piecewise linear) functions.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>For P1 functions, the gradient is constant on each element:</p><div class="m-math"><svg style="width: 9.685em; height: 3.533em;" viewBox="147.535563 -35.112727 92.973717 33.917214">
 <title>
 \[
@@ -139,6 +152,42 @@ $ n $
 <use x='0' y='0' xlink:href='#eq3-g0-110'/>
 </g>
 </svg> is the spatial dimension.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_scalar_00_01_mesh_01_4_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P1&lt;Scalar, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Gradient of a P1 grid function.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scalacde5300190b44b3a7a99aef6fcfa52a3.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;</a>
+            </dt>
+            <dd>Gradient of a ShapeFunction.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scale6071144b195dc623170533e45cec13e.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;::Cache</a>
+            </dt>
+            <dd>Per-cell tabulation cache.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scal427dda357b64740705b4ec7cb910beaf.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;::Cache::CellKey</a>
+            </dt>
+            <dd>Key identifying the cell a tabulation was computed for.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scal818fa85df8e2caab9989e87db16cc42a.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;::Cache::QpKey</a>
+            </dt>
+            <dd>Key identifying the quadrature point a tabulation was computed for.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

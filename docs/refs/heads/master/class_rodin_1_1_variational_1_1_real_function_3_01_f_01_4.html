@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -100,7 +101,7 @@
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;RealFunction&lt;F&gt;&gt;</a>
             </dt>
-            <dd>Base class for real-valued scalar functions.</dd>
+            <dd>Base class for real-valued functions defined on a mesh.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -111,7 +112,7 @@
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a26752c581ab4f47037f1c624efe559bf">
-              using <a href="#a26752c581ab4f47037f1c624efe559bf" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="#a4589f9d4d7efb7564d1efb669735923e" class="m-doc">RealFunction</a>&lt;F&gt;&gt;
+              using <a href="#a26752c581ab4f47037f1c624efe559bf" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&lt;F&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -124,11 +125,11 @@
             </dt>
             <dd>Constructs a real function from a callable.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap">const RealFunction&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap">RealFunction&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc">RealFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -141,12 +142,12 @@
             </dt>
             <dd>Evaluates the callable at a point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1c984ff37275ae2ac896b0ea74353d43" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c984ff37275ae2ac896b0ea74353d43" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the callable at an integration point.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class ... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acc35a3b48ea7ac348f8030780e1a418e" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) -&gt; <a href="#a4589f9d4d7efb7564d1efb669735923e" class="m-doc">RealFunction</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acc35a3b48ea7ac348f8030780e1a418e" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) -&gt; <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Leaves callable functions unchanged on trace domains.</dd>
             <dt>
@@ -154,7 +155,7 @@
             </dt>
             <dd>Returns the polynomial order of the callable.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a4589f9d4d7efb7564d1efb669735923e" class="m-doc">RealFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the function.</dd>
           </dl>
@@ -186,7 +187,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">const RealFunction&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8e8b106402b6aa1c52be70d597cf2d0" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -206,7 +207,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap">RealFunction&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad18f420191db394b8d5bb2938c4479ff" class="m-doc-self">RealFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -252,7 +253,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c984ff37275ae2ac896b0ea74353d43" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c984ff37275ae2ac896b0ea74353d43" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the callable at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -279,7 +280,7 @@
                 template&lt;class F&gt;
                 template&lt;class ... Args&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a4589f9d4d7efb7564d1efb669735923e" class="m-doc">RealFunction</a>&amp; Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc35a3b48ea7ac348f8030780e1a418e" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>&amp; Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc35a3b48ea7ac348f8030780e1a418e" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Leaves callable functions unchanged on trace domains.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -313,7 +314,7 @@
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a4589f9d4d7efb7564d1efb669735923e" class="m-doc">RealFunction</a>* Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>* Rodin::<wbr />Variational::<wbr />RealFunction&lt;F&gt;&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe6979553a531bd7a48a8c3972f6d99" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of the function.</p>
             <table class="m-table m-fullwidth m-flat">

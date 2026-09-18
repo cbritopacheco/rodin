@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -75,10 +76,99 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class F&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>AnalyticMatrixFunction <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Matrix-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialMatrix&lt;Real&gt;</code>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase&lt;Real, AnalyticMatrixFunction&lt;F&gt;&gt;</a>
+            </dt>
+            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="ad59f4aea58801344076738c87e9279c9">
+              using <a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc-self">SpatialMatrixType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Small spatial matrix value type.</dd>
+            <dt id="a303da7b26d89b3cce339904679ebba3c">
+              using <a href="#a303da7b26d89b3cce339904679ebba3c" class="m-doc-self">RangeType</a> = <a href="#ad59f4aea58801344076738c87e9279c9" class="m-doc">SpatialMatrixType</a>
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="a2e30870a82865b283a479d7a9cf1e002">
+              using <a href="#a2e30870a82865b283a479d7a9cf1e002" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">Variational::<wbr />MatrixFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>&lt;F&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ae9a01d44b78a5a52df063c22d8501c00">
+              <span class="m-doc-wrap-bumper"><a href="#ae9a01d44b78a5a52df063c22d8501c00" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t rows,
+              std::size_t cols)</span>
+            </dt>
+            <dd>Constructs the adapter from a callable and matrix dimensions.</dd>
+            <dt id="aade9e29158d0c7fa271e56f08f284ff5">
+              <span class="m-doc-wrap-bumper"><a href="#aade9e29158d0c7fa271e56f08f284ff5" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ada6b880b8ed5fc1c9ae745107dc248ab">
+              <span class="m-doc-wrap-bumper"><a href="#ada6b880b8ed5fc1c9ae745107dc248ab" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="af0e2923caa24f35613d3cc8427bdc6bb">
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a303da7b26d89b3cce339904679ebba3c" class="m-doc">RangeType</a></span>
+            </dt>
+            <dd>Evaluates the wrapped matrix-valued callable.</dd>
+            <dt id="a44e820ab5ce4634d93878211ffc30085">
+              <span class="m-doc-wrap-bumper">auto <a href="#a44e820ab5ce4634d93878211ffc30085" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the row count.</dd>
+            <dt id="a704883ed7aa6094bb95b59d3a42b7f43">
+              <span class="m-doc-wrap-bumper">auto <a href="#a704883ed7aa6094bb95b59d3a42b7f43" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the column count.</dd>
+            <dt id="a0d286f690fed94cc9bcfff8c5869f9e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d286f690fed94cc9bcfff8c5869f9e0" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns no intrinsic polynomial order for analytic callables.</dd>
+            <dt id="add4fd83502646378d479df5c42869bf5">
+              <span class="m-doc-wrap-bumper">auto <a href="#add4fd83502646378d479df5c42869bf5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Clones this adapter.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

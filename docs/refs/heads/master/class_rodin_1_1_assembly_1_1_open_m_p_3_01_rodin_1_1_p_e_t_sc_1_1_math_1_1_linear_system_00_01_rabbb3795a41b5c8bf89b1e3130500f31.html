@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -108,7 +109,7 @@
             </li>
           </ul>
         </nav>
-<p>Assembles a <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> backed by PETSc objects using OpenMP threads, populating both the system matrix and right-hand side vector.</p>
+<p>Assembles a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> backed by PETSc objects using OpenMP threads, populating both the system matrix and right-hand side vector.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -127,7 +128,7 @@
             </dt>
             <dd>Linear system type.</dd>
             <dt id="a22a610b1d2f3c1fe26ecc7a1d35fecb8">
-              using <a href="#a22a610b1d2f3c1fe26ecc7a1d35fecb8" class="m-doc-self">ProblemType</a> = <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>, U, V&gt;
+              using <a href="#a22a610b1d2f3c1fe26ecc7a1d35fecb8" class="m-doc-self">ProblemType</a> = <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>, U, V&gt;
             </dt>
             <dd>Problem type being assembled.</dd>
             <dt id="a2f7b6029bea6dbc14676c5f525d90b1c">
@@ -163,15 +164,15 @@
             </dt>
             <dd>Context type for the trial mesh.</dd>
             <dt id="ac3859a7e3ef0eddad69d23927f6446f6">
-              using <a href="#ac3859a7e3ef0eddad69d23927f6446f6" class="m-doc-self">LocalBilinearIntegratorBase</a> = Variational::LocalBilinearFormIntegratorBase&lt;PetscScalar&gt;
+              using <a href="#ac3859a7e3ef0eddad69d23927f6446f6" class="m-doc-self">LocalBilinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;PetscScalar&gt;
             </dt>
             <dd>Base type for local bilinear form integrators.</dd>
             <dt id="ab2d1c9420188243bdd4388b093222836">
-              using <a href="#ab2d1c9420188243bdd4388b093222836" class="m-doc-self">GlobalBilinearIntegratorBase</a> = Variational::GlobalBilinearFormIntegratorBase&lt;PetscScalar&gt;
+              using <a href="#ab2d1c9420188243bdd4388b093222836" class="m-doc-self">GlobalBilinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;PetscScalar&gt;
             </dt>
             <dd>Base type for global bilinear form integrators.</dd>
             <dt id="a7bb4a4d9c26ce732fbbf88aba362d27d">
-              using <a href="#a7bb4a4d9c26ce732fbbf88aba362d27d" class="m-doc-self">LinearIntegratorBase</a> = Variational::LinearFormIntegratorBase&lt;PetscScalar&gt;
+              using <a href="#a7bb4a4d9c26ce732fbbf88aba362d27d" class="m-doc-self">LinearIntegratorBase</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;PetscScalar&gt;
             </dt>
             <dd>Base type for linear form integrators.</dd>
           </dl>
@@ -212,7 +213,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
-              Rodin::Variational::AssemblyTarget target) const</span>
+              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const</span>
             </dt>
             <dd>Assembles only the requested single-field system target.</dd>
             <dt id="a1d27227915eb0acdf4017085fbc61244">
@@ -281,7 +282,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
-              Rodin::Variational::AssemblyTarget target) const</span></span>
+              <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">Rodin::<wbr />Variational::<wbr />AssemblyTarget</a> target) const</span></span>
             </h3>
             <p>Assembles only the requested single-field system target.</p>
             <table class="m-table m-fullwidth m-flat">

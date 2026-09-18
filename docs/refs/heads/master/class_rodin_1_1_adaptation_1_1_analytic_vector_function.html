@@ -33,6 +33,7 @@
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
                 <li><a href="gallery.html">Gallery</a></li>
                 <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -75,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class F&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>AnalyticVectorFunction <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Vector-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialVector&lt;Real&gt;</code>.</p>
@@ -86,6 +87,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -101,9 +104,60 @@
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="ae0445970d2d5087741c6518a1a7238d2">
+              using <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc-self">SpatialVectorType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Small spatial vector value type.</dd>
+            <dt id="a5f5f23e332c977e3c63c02c76fd5027d">
+              using <a href="#a5f5f23e332c977e3c63c02c76fd5027d" class="m-doc-self">RangeType</a> = <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="a49a5124f726a03993e46606f26db17c1">
+              using <a href="#a49a5124f726a03993e46606f26db17c1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>&lt;F&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ae38d564f13bc5525fdc726eff9ea8299">
+              <span class="m-doc-wrap-bumper"><a href="#ae38d564f13bc5525fdc726eff9ea8299" class="m-doc-self">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t dimension)</span>
+            </dt>
+            <dd>Constructs the adapter from a callable and vector dimension.</dd>
+            <dt id="a4db817c57cb053a2087d6964ffce4f73">
+              <span class="m-doc-wrap-bumper"><a href="#a4db817c57cb053a2087d6964ffce4f73" class="m-doc-self">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a7d87be2d2f8b6f2282680f4f9a1b8f1e">
+              <span class="m-doc-wrap-bumper"><a href="#a7d87be2d2f8b6f2282680f4f9a1b8f1e" class="m-doc-self">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="af0e2923caa24f35613d3cc8427bdc6bb">
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a5f5f23e332c977e3c63c02c76fd5027d" class="m-doc">RangeType</a></span>
+            </dt>
+            <dd>Evaluates the wrapped vector-valued callable.</dd>
+            <dt id="a70c730dbc037bcdddbe14d018c6e4165">
+              <span class="m-doc-wrap-bumper">auto <a href="#a70c730dbc037bcdddbe14d018c6e4165" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the vector dimension.</dd>
+            <dt id="a0d286f690fed94cc9bcfff8c5869f9e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d286f690fed94cc9bcfff8c5869f9e0" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns no intrinsic polynomial order for analytic callables.</dd>
             <dt id="a5093cb103601a153b81d39b3f809d311">
               <span class="m-doc-wrap-bumper">auto <a href="#a5093cb103601a153b81d39b3f809d311" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
