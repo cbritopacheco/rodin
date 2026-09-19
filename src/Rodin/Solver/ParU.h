@@ -92,7 +92,8 @@ namespace Rodin::Solver
    */
   template <>
   class ParU<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
   {
     public:
       using ScalarType = Real;
@@ -152,8 +153,7 @@ namespace Rodin::Solver
         if (count > static_cast<Index>(std::numeric_limits<std::int64_t>::max()))
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "The maximum thread count exceeds ParU's integer range."
-            << Alert::Raise;
+            << "The maximum thread count exceeds ParU's integer range." << Alert::Raise;
         }
         m_maxThreads = count;
         return *this;
@@ -199,8 +199,7 @@ namespace Rodin::Solver
         if (matrix.rows() != matrix.cols())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "ParU requires a square matrix."
-            << Alert::Raise;
+            << "ParU requires a square matrix." << Alert::Raise;
         }
 
         matrix.makeCompressed();
@@ -218,8 +217,7 @@ namespace Rodin::Solver
           }
           for (Eigen::Index i = 0; i < matrix.nonZeros(); ++i)
           {
-            m_rowIndices(i) =
-              static_cast<SuiteSparse_long>(matrix.innerIndexPtr()[i]);
+            m_rowIndices(i) = static_cast<SuiteSparse_long>(matrix.innerIndexPtr()[i]);
           }
         }
 
@@ -239,27 +237,21 @@ namespace Rodin::Solver
         if (!m_resources.symbolic)
         {
           const auto analyzeInfo =
-            ParU_Analyze(
-              &view, &m_resources.symbolic, m_resources.control);
+            ParU_Analyze(&view, &m_resources.symbolic, m_resources.control);
           if (analyzeInfo != PARU_SUCCESS)
           {
             m_resources.clearSymbolic();
             Alert::MemberFunctionException(*this, __func__)
               << "ParU symbolic analysis failed with status "
-              << static_cast<Integer>(analyzeInfo) << " for a "
-              << view.nrow << " x " << view.ncol << " matrix (xtype "
-              << view.xtype << ", dtype " << view.dtype << ")."
-              << Alert::Raise;
+              << static_cast<Integer>(analyzeInfo) << " for a " << view.nrow << " x "
+              << view.ncol << " matrix (xtype " << view.xtype << ", dtype " << view.dtype
+              << ")." << Alert::Raise;
           }
         }
 
         m_resources.clearNumeric();
-        const auto factorizeInfo =
-          ParU_Factorize(
-            &view,
-            m_resources.symbolic,
-            &m_resources.numeric,
-            m_resources.control);
+        const auto factorizeInfo = ParU_Factorize(
+          &view, m_resources.symbolic, &m_resources.numeric, m_resources.control);
         if (factorizeInfo != PARU_SUCCESS)
         {
           m_resources.clearNumeric();
@@ -278,25 +270,18 @@ namespace Rodin::Solver
         if (!m_resources.numeric)
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "No ParU numeric factorization is available."
-            << Alert::Raise;
+            << "No ParU numeric factorization is available." << Alert::Raise;
         }
         if (axb.getVector().size() != axb.getOperator().rows())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "The right-hand side size does not match the matrix."
-            << Alert::Raise;
+            << "The right-hand side size does not match the matrix." << Alert::Raise;
         }
 
         configureControl();
         axb.getSolution().resize(axb.getVector().size());
-        check(
-          ParU_Solve(
-            m_resources.symbolic,
-            m_resources.numeric,
-            axb.getVector().data(),
-            axb.getSolution().data(),
-            m_resources.control),
+        check(ParU_Solve(m_resources.symbolic, m_resources.numeric,
+                axb.getVector().data(), axb.getSolution().data(), m_resources.control),
           "solve");
       }
 
@@ -347,56 +332,51 @@ namespace Rodin::Solver
     private:
       struct Resources
       {
-        Resources() = default;
-        Resources(const Resources&) = delete;
-        Resources& operator=(const Resources&) = delete;
+          Resources() = default;
+          Resources(const Resources&) = delete;
+          Resources& operator=(const Resources&) = delete;
 
-        ParU_Control control = nullptr;
-        ParU_Symbolic symbolic = nullptr;
-        ParU_Numeric numeric = nullptr;
+          ParU_Control control = nullptr;
+          ParU_Symbolic symbolic = nullptr;
+          ParU_Numeric numeric = nullptr;
 
-        void initialize(const ParU& solver)
-        {
-          if (!control)
-            solver.check(ParU_InitControl(&control), "control initialization");
-        }
+          void initialize(const ParU& solver)
+          {
+            if (!control)
+              solver.check(ParU_InitControl(&control), "control initialization");
+          }
 
-        void clearNumeric() noexcept
-        {
-          if (numeric)
-            ParU_FreeNumeric(&numeric, control);
-        }
+          void clearNumeric() noexcept
+          {
+            if (numeric)
+              ParU_FreeNumeric(&numeric, control);
+          }
 
-        void clearSymbolic() noexcept
-        {
-          clearNumeric();
-          if (symbolic)
-            ParU_FreeSymbolic(&symbolic, control);
-        }
+          void clearSymbolic() noexcept
+          {
+            clearNumeric();
+            if (symbolic)
+              ParU_FreeSymbolic(&symbolic, control);
+          }
 
-        ~Resources()
-        {
-          clearSymbolic();
-          if (control)
-            ParU_FreeControl(&control);
-        }
+          ~Resources()
+          {
+            clearSymbolic();
+            if (control)
+              ParU_FreeControl(&control);
+          }
       };
 
       void configureControl()
       {
-        check(
-          ParU_Set(
-            PARU_CONTROL_MAX_THREADS,
-            static_cast<std::int64_t>(m_maxThreads),
-            m_resources.control),
+        check(ParU_Set(PARU_CONTROL_MAX_THREADS, static_cast<std::int64_t>(m_maxThreads),
+                m_resources.control),
           "thread-count configuration");
-        check(
-          ParU_Set(
-            PARU_CONTROL_ORDERING,
-            m_ordering == Ordering::Default
-              ? static_cast<std::int64_t>(PARU_DEFAULT_ORDERING)
-              : static_cast<std::int64_t>(m_ordering),
-            m_resources.control),
+        check(ParU_Set(PARU_CONTROL_ORDERING,
+                m_ordering == Ordering::Default
+                  ? static_cast<std::int64_t>(PARU_DEFAULT_ORDERING)
+                  : static_cast<std::int64_t>(m_ordering),
+                m_resources.control),
           "ordering configuration");
       }
 
@@ -406,8 +386,7 @@ namespace Rodin::Solver
         {
           Alert::MemberFunctionException(*this, __func__)
             << "ParU " << operation << " failed with status "
-            << static_cast<Integer>(info) << "."
-            << Alert::Raise;
+            << static_cast<Integer>(info) << "." << Alert::Raise;
         }
       }
 

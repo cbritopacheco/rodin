@@ -56,8 +56,7 @@ namespace Rodin::Math
    * @tparam ScalarType The element type (e.g., Real, Complex)
    */
   template <class ScalarType>
-  using SparseMatrix =
-    Eigen::SparseMatrix<ScalarType, Eigen::ColMajor, SparseIndex>;
+  using SparseMatrix = Eigen::SparseMatrix<ScalarType, Eigen::ColMajor, SparseIndex>;
 
   /**
    * @brief Performs the AXPY operation on sparse matrices.

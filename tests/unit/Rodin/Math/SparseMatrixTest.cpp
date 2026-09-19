@@ -26,11 +26,9 @@ TEST_F(SparseMatrixTest, TypeAliases)
 {
   static_assert(std::is_same_v<SparseIndex, std::int32_t>);
   static_assert(std::is_signed_v<SparseIndex>);
-  static_assert(std::is_same_v<
-    SparseMatrix<Real>,
+  static_assert(std::is_same_v<SparseMatrix<Real>,
     Eigen::SparseMatrix<Real, Eigen::ColMajor, SparseIndex>>);
-  static_assert(std::is_same_v<
-    SparseMatrix<Complex>,
+  static_assert(std::is_same_v<SparseMatrix<Complex>,
     Eigen::SparseMatrix<Complex, Eigen::ColMajor, SparseIndex>>);
 }
 

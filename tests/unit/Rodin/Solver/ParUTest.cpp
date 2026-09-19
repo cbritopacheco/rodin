@@ -88,8 +88,7 @@ namespace Rodin::Tests::Unit::Solver
     system.getVector().resize(3);
     system.getVector() << 6.0, 15.0, 24.0;
 
-    solver
-      .setMaxThreads(1)
+    solver.setMaxThreads(1)
       .setOrdering(decltype(solver)::Ordering::AMD)
       .factorize(system);
     EXPECT_TRUE(solver.hasFactorization());
@@ -143,8 +142,8 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
-  class Rodin_Solver_ParU_AllGeometries
-    : public ::testing::TestWithParam<Polytope::Type> {};
+  class Rodin_Solver_ParU_AllGeometries : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   TEST_P(Rodin_Solver_ParU_AllGeometries, SolvesVariationalProblemWithCTAD)
   {
@@ -156,33 +155,21 @@ namespace Rodin::Tests::Unit::Solver
     RealFunction f = 1.0;
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) +
-      DirichletBC(u, Zero());
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
 
     Rodin::Solver::ParU solver(poisson);
-    static_assert(std::is_same_v<
-      typename FormLanguage::Traits<decltype(solver)>::LinearSystemType,
-      typename decltype(poisson)::LinearSystemType>);
-    solver
-      .setMaxThreads(1)
-      .setOrdering(decltype(solver)::Ordering::AMD)
-      .solve();
+    static_assert(
+      std::is_same_v<typename FormLanguage::Traits<decltype(solver)>::LinearSystemType,
+        typename decltype(poisson)::LinearSystemType>);
+    solver.setMaxThreads(1).setOrdering(decltype(solver)::Ordering::AMD).solve();
 
     const auto& system = poisson.getLinearSystem();
     EXPECT_LT(
-      (system.getOperator() * system.getSolution() - system.getVector()).norm(),
-      1e-11);
+      (system.getOperator() * system.getSolution() - system.getVector()).norm(), 1e-11);
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometries,
-    Rodin_Solver_ParU_AllGeometries,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge));
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, Rodin_Solver_ParU_AllGeometries,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }
