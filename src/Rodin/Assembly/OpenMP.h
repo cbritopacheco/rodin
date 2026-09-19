@@ -125,26 +125,21 @@ namespace Rodin::Assembly
    * This approach minimizes synchronization overhead while ensuring correctness.
    */
   template <class Solution, class TrialFES, class TestFES>
-  class OpenMP<
-    std::vector<Math::SparseTriplet<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
+  class OpenMP<std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
+                 typename FormLanguage::Traits<TrialFES>::ScalarType,
+                 typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<Solution, TrialFES, TestFES,
       std::vector<Math::SparseTriplet<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>> final
-    : public AssemblyBase<
-        std::vector<Math::SparseTriplet<
-          typename FormLanguage::Dot<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
+    final
+    : public AssemblyBase<std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
+                            typename FormLanguage::Traits<TrialFES>::ScalarType,
+                            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
         Variational::BilinearForm<Solution, TrialFES, TestFES,
-          std::vector<Math::SparseTriplet<
-            typename FormLanguage::Dot<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
+          std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
   {
     public:
       /// @brief Scalar value type.
@@ -426,9 +421,10 @@ namespace Rodin::Assembly
       }
 
     private:
-      OpenMP<
-        std::vector<Math::SparseTriplet<ScalarType>>,
-        Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Math::SparseTriplet<ScalarType>>>> m_assembly;
+      OpenMP<std::vector<Math::SparseTriplet<ScalarType>>,
+        Variational::BilinearForm<Solution, TrialFES, TestFES,
+          std::vector<Math::SparseTriplet<ScalarType>>>>
+        m_assembly;
   };
 
   /**
@@ -1092,7 +1088,8 @@ namespace Rodin::Assembly
         if constexpr (IsSparse)
         {
           // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
-          std::vector<std::vector<Math::SparseTriplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
+          std::vector<std::vector<Math::SparseTriplet<ScalarType>>> tchunks(
+            static_cast<size_t>(tc));
           std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
             static_cast<size_t>(tc));
 
@@ -1863,7 +1860,8 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------------
         // Thread-local accumulators
         // ------------------------------------------------------------------
-        std::vector<std::vector<Math::SparseTriplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
+        std::vector<std::vector<Math::SparseTriplet<ScalarType>>> tchunks(
+          static_cast<size_t>(tc));
         std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
           static_cast<size_t>(tc));
 
