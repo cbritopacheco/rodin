@@ -798,8 +798,8 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
-  /// @brief Verifies XDMF mesh attribute export can be disabled for IO HDF 5 by checking exact
-  /// expected values, false predicates.
+  /// @brief Verifies disabling mesh attribute export omits the built-in cell-centered XDMF
+  /// Attribute field for IO HDF 5.
   TEST(Rodin_IO_HDF5, XDMFMeshAttributeCanBeDisabled)
   {
     const boost::filesystem::path testDir = "/tmp/rodin_xdmf_no_mesh_attribute";
