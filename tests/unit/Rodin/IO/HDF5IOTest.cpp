@@ -798,13 +798,15 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
+  /// @brief Verifies XDMF mesh attribute export can be disabled for IO HDF 5 by checking exact
+  /// expected values, false predicates.
   TEST(Rodin_IO_HDF5, XDMFMeshAttributeCanBeDisabled)
   {
     const boost::filesystem::path testDir = "/tmp/rodin_xdmf_no_mesh_attribute";
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
 
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
 
     {
       XDMF xdmf(stem);
