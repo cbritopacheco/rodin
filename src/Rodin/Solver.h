@@ -43,6 +43,7 @@
 
 // SuiteSparse solvers
 #include "Solver/UMFPack.h"
+#include "Solver/ParU.h"
 #include "Solver/SPQR.h"
 #include "Solver/CHOLMOD.h"
 
