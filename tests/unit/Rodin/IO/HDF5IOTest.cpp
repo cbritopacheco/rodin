@@ -790,9 +790,39 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(text.find("/Mesh/XDMF/Topology"), std::string::npos);
     EXPECT_NE(text.find("/Mesh/Geometry/Vertices"), std::string::npos);
     EXPECT_NE(text.find("/GridFunction/Values/Data"), std::string::npos);
+    EXPECT_NE(text.find("<Attribute Name=\"Attribute\""), std::string::npos);
+    EXPECT_EQ(text.find("<Attribute Name=\"Region\""), std::string::npos);
     EXPECT_NE(text.find("temperature"), std::string::npos);
 
     // Clean up the dedicated test directory
+    boost::filesystem::remove_all(testDir);
+  }
+
+  /// @brief Verifies disabling mesh attribute export omits the built-in cell-centered mesh
+  /// attribute field from generated XDMF output for IO HDF 5.
+  TEST(Rodin_IO_HDF5, XDMFMeshAttributeCanBeDisabled)
+  {
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_no_mesh_attribute";
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "output";
+
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+
+    {
+      XDMF xdmf(stem);
+      XDMF::GridOptions options;
+      options.exportMeshAttribute = false;
+      xdmf.setMesh(mesh).setOptions(options).write();
+      xdmf.close();
+    }
+
+    std::ifstream ifs(stem.string() + ".xdmf");
+    ASSERT_TRUE(ifs.good());
+    std::ostringstream buffer;
+    buffer << ifs.rdbuf();
+    const auto text = buffer.str();
+    EXPECT_EQ(text.find("<Attribute Name=\"Attribute\""), std::string::npos);
+
     boost::filesystem::remove_all(testDir);
   }
 
