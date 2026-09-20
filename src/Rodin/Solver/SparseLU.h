@@ -41,8 +41,6 @@
 
 #include <Eigen/SparseLU>
 
-#include "Rodin/Alert/MemberFunctionException.h"
-#include "Rodin/Alert/Raise.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -154,21 +152,26 @@ namespace Rodin::Solver
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
-        if (m_solver.info() != Eigen::Success)
+        if (!success())
         {
-          // Eigen leaves a failed factorization unusable, and solving with it
-          // reads uninitialized state, so the failure must stop here.
-          Alert::MemberFunctionException(*this, __func__)
-            << "The sparse LU factorization failed: " << m_solver.lastErrorMessage()
-            << Alert::Raise;
+          // Eigen guards its solve with an assertion that a release build
+          // compiles out, so solving with a failed factorization reads
+          // uninitialized state. Leave the solution untouched instead; the
+          // failure is reported by success().
+          return;
         }
         axb.getSolution() = m_solver.solve(axb.getVector());
-        if (m_solver.info() != Eigen::Success)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "The sparse LU solve failed: " << m_solver.lastErrorMessage()
-            << Alert::Raise;
-        }
+      }
+
+      /**
+       * @brief Checks if the factorization and the solve succeeded.
+       * @returns true if the solver succeeded, false otherwise
+       *
+       * A failed factorization leaves the solution vector untouched.
+       */
+      Boolean success() const
+      {
+        return m_solver.info() == Eigen::Success;
       }
 
       /**

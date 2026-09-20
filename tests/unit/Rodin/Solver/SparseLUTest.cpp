@@ -43,6 +43,7 @@ namespace Rodin::Tests::Unit::Solver
 
     Rodin::Solver::SparseLU solver(problem);
     solver.solve(system);
+    EXPECT_TRUE(solver.success());
 
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
@@ -50,6 +51,8 @@ namespace Rodin::Tests::Unit::Solver
   }
 
   /// @brief A failed factorization is reported instead of being solved with.
+  ///
+  /// The solve must not run on a factorization that was never built.
   TEST(Rodin_Solver_SparseLU, ReportsFailedFactorization)
   {
     Mesh mesh;
@@ -67,7 +70,15 @@ namespace Rodin::Tests::Unit::Solver
     system.getVector().resize(3);
     system.getVector() << 1.0, 1.0, 1.0;
 
+    // A sentinel the solver must not overwrite with a bogus solution.
+    system.getSolution().resize(3);
+    system.getSolution() << 7.0, 7.0, 7.0;
+
     Rodin::Solver::SparseLU solver(problem);
-    EXPECT_ANY_THROW(solver.solve(system));
+    solver.solve(system);
+    EXPECT_FALSE(solver.success());
+    EXPECT_EQ(system.getSolution()(0), 7.0);
+    EXPECT_EQ(system.getSolution()(1), 7.0);
+    EXPECT_EQ(system.getSolution()(2), 7.0);
   }
 }
