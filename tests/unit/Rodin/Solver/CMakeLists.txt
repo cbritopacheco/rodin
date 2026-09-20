@@ -53,3 +53,18 @@ if (RODIN_USE_PARU)
       LABELS unit
   )
 endif()
+
+if (RODIN_USE_MUMPS)
+  add_executable(RodinMUMPSTest MUMPSTest.cpp)
+  target_link_libraries(RodinMUMPSTest
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  gtest_discover_tests(RodinMUMPSTest
+    PROPERTIES
+      LABELS unit
+  )
+endif()

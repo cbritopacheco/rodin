@@ -325,6 +325,21 @@ namespace Rodin::Solver
   class ParU;
 #endif
 
+#ifdef RODIN_USE_MUMPS
+  /**
+   * @brief MUMPS multifrontal sparse direct factorization.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref MUMPS "MUMPS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | MUMPS factorization for real sparse systems. |
+   *
+   * @see MUMPSSpecializations for available template specializations.
+   */
+  template <class LinearSystem>
+  class MUMPS;
+#endif
+
 #ifdef RODIN_USE_CHOLMOD
   /**
    * @brief CHOLMOD solver implementations from SuiteSparse.

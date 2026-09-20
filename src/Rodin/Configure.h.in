@@ -132,6 +132,20 @@
 
 /**
  * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with MUMPS support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifndef RODIN_USE_MUMPS
+ * // Code depending on MUMPS
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_MUMPS
+
+/**
+ * @ingroup RodinDirectives
  * @brief Indicates if Rodin is built with SuiteSparse support.
  *
  * # Utilization
