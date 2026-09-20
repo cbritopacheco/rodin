@@ -611,6 +611,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies pointwise integration points do not reuse cached basis values.
   TEST(Rodin_Variational_GridFunction, PointwiseIntegrationPointsUseTheirCoordinates)
   {
     LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});

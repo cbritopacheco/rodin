@@ -400,8 +400,8 @@ namespace Rodin::Assembly
           m_outerIndices.size() != static_cast<size_t>(out.outerSize()) + 1 ||
           m_innerIndices.size() != static_cast<size_t>(out.nonZeros()))
           return false;
-        return std::equal(m_outerIndices.begin(), m_outerIndices.end(),
-                   out.outerIndexPtr()) &&
+        return std::equal(
+                 m_outerIndices.begin(), m_outerIndices.end(), out.outerIndexPtr()) &&
           std::equal(m_innerIndices.begin(), m_innerIndices.end(), out.innerIndexPtr());
       }
 
@@ -445,10 +445,9 @@ namespace Rodin::Assembly
           assert(k == m_offsets[i + 1]);
         }
         m_nonZeroCount = static_cast<size_t>(out.nonZeros());
-        m_outerIndices.assign(out.outerIndexPtr(),
-          out.outerIndexPtr() + out.outerSize() + 1);
-        m_innerIndices.assign(out.innerIndexPtr(),
-          out.innerIndexPtr() + out.nonZeros());
+        m_outerIndices.assign(
+          out.outerIndexPtr(), out.outerIndexPtr() + out.outerSize() + 1);
+        m_innerIndices.assign(out.innerIndexPtr(), out.innerIndexPtr() + out.nonZeros());
         m_fingerprint = fingerprint;
         m_built = true;
       }
