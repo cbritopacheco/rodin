@@ -477,4 +477,18 @@ namespace Rodin::Tests::Unit
       }
     }
   }
+
+  TEST(Rodin_Variational_GridFunction, PointwiseIntegrationPointsUseTheirCoordinates)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    gf.project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
+
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    const Point p1(cell, Math::SpatialPoint{0.2, 0.3});
+    const Point p2(cell, Math::SpatialPoint{0.6, 0.1});
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(p1)), 3.2, 1e-12);
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(p2)), 1.6, 1e-12);
+  }
 }
