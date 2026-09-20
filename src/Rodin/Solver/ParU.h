@@ -124,6 +124,48 @@ namespace Rodin::Solver
         Natural = PARU_ORDERING_NONE
       };
 
+      /** @brief Factorization stages retained between solves. */
+      struct Resources
+      {
+          Resources() = default;
+          Resources(const Resources&) = delete;
+          Resources& operator=(const Resources&) = delete;
+
+          /// @brief ParU control object, or nullptr before initialization.
+          ParU_Control control = nullptr;
+          /// @brief Symbolic analysis, or nullptr when none is retained.
+          ParU_Symbolic symbolic = nullptr;
+          /// @brief Numeric factorization, or nullptr when none is retained.
+          ParU_Numeric numeric = nullptr;
+
+          void initialize(const ParU& solver)
+          {
+            if (!control)
+              solver.check(ParU_InitControl(&control), "control initialization");
+          }
+
+          /**
+           * @brief Releases a factorization stage.
+           *
+           * Releasing Factorization::Symbolic also releases its dependent
+           * numeric factorization.
+           */
+          void clear(Factorization factorization) noexcept
+          {
+            if (numeric)
+              ParU_FreeNumeric(&numeric, control);
+            if (factorization == Factorization::Symbolic && symbolic)
+              ParU_FreeSymbolic(&symbolic, control);
+          }
+
+          ~Resources()
+          {
+            clear(Factorization::Symbolic);
+            if (control)
+              ParU_FreeControl(&control);
+          }
+      };
+
       /** @brief Constructs a ParU solver for the given problem. */
       ParU(ProblemBaseType& pb)
         : Parent(pb)
@@ -233,14 +275,14 @@ namespace Rodin::Solver
             << Alert::Raise;
         }
 
-        configureControl();
+        configure();
         if (!m_resources.symbolic)
         {
           const auto analyzeInfo =
             ParU_Analyze(&view, &m_resources.symbolic, m_resources.control);
           if (analyzeInfo != PARU_SUCCESS)
           {
-            m_resources.clearSymbolic();
+            m_resources.clear(Factorization::Symbolic);
             Alert::MemberFunctionException(*this, __func__)
               << "ParU symbolic analysis failed with status "
               << static_cast<Integer>(analyzeInfo) << " for a " << view.nrow << " x "
@@ -249,12 +291,12 @@ namespace Rodin::Solver
           }
         }
 
-        m_resources.clearNumeric();
+        m_resources.clear(Factorization::Numeric);
         const auto factorizeInfo = ParU_Factorize(
           &view, m_resources.symbolic, &m_resources.numeric, m_resources.control);
         if (factorizeInfo != PARU_SUCCESS)
         {
-          m_resources.clearNumeric();
+          m_resources.clear(Factorization::Numeric);
           check(factorizeInfo, "numeric factorization");
         }
       }
@@ -278,17 +320,23 @@ namespace Rodin::Solver
             << "The right-hand side size does not match the matrix." << Alert::Raise;
         }
 
-        configureControl();
+        configure();
         axb.getSolution().resize(axb.getVector().size());
         check(ParU_Solve(m_resources.symbolic, m_resources.numeric,
                 axb.getVector().data(), axb.getSolution().data(), m_resources.control),
           "solve");
       }
 
-      /** @brief Returns whether a reusable numeric factorization is available. */
-      bool hasFactorization() const noexcept
+      /**
+       * @brief Returns the retained ParU resources.
+       *
+       * A non-null @ref Resources::numeric denotes a reusable numeric
+       * factorization, and a non-null @ref Resources::symbolic denotes reusable
+       * symbolic analysis.
+       */
+      const Resources& getResources() const noexcept
       {
-        return m_resources.numeric != nullptr;
+        return m_resources;
       }
 
       /**
@@ -300,16 +348,11 @@ namespace Rodin::Solver
        */
       void clear(Factorization factorization) noexcept
       {
-        switch (factorization)
+        m_resources.clear(factorization);
+        if (factorization == Factorization::Symbolic)
         {
-          case Factorization::Numeric:
-            m_resources.clearNumeric();
-            break;
-          case Factorization::Symbolic:
-            m_resources.clearSymbolic();
-            m_columnPointers.resize(0);
-            m_rowIndices.resize(0);
-            break;
+          m_columnPointers.resize(0);
+          m_rowIndices.resize(0);
         }
       }
 
@@ -319,7 +362,7 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        if (!hasFactorization())
+        if (!getResources().numeric)
           factorize(axb);
         solveFactorized(axb);
       }
@@ -330,44 +373,7 @@ namespace Rodin::Solver
       }
 
     private:
-      struct Resources
-      {
-          Resources() = default;
-          Resources(const Resources&) = delete;
-          Resources& operator=(const Resources&) = delete;
-
-          ParU_Control control = nullptr;
-          ParU_Symbolic symbolic = nullptr;
-          ParU_Numeric numeric = nullptr;
-
-          void initialize(const ParU& solver)
-          {
-            if (!control)
-              solver.check(ParU_InitControl(&control), "control initialization");
-          }
-
-          void clearNumeric() noexcept
-          {
-            if (numeric)
-              ParU_FreeNumeric(&numeric, control);
-          }
-
-          void clearSymbolic() noexcept
-          {
-            clearNumeric();
-            if (symbolic)
-              ParU_FreeSymbolic(&symbolic, control);
-          }
-
-          ~Resources()
-          {
-            clearSymbolic();
-            if (control)
-              ParU_FreeControl(&control);
-          }
-      };
-
-      void configureControl()
+      void configure()
       {
         check(ParU_Set(PARU_CONTROL_MAX_THREADS, static_cast<std::int64_t>(m_maxThreads),
                 m_resources.control),

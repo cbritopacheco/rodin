@@ -91,7 +91,7 @@ namespace Rodin::Tests::Unit::Solver
     solver.setMaxThreads(1)
       .setOrdering(decltype(solver)::Ordering::AMD)
       .factorize(system);
-    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_NE(solver.getResources().numeric, nullptr);
     solver.solve(system);
 
     Math::Vector<Real> expected(3);
@@ -101,7 +101,7 @@ namespace Rodin::Tests::Unit::Solver
     // A new right-hand side reuses the retained numeric factorization.
     expected << -2.0, 1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
-    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_NE(solver.getResources().numeric, nullptr);
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
@@ -111,7 +111,7 @@ namespace Rodin::Tests::Unit::Solver
     expected << 2.0, -1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
     solver.factorize(system);
-    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_NE(solver.getResources().numeric, nullptr);
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
@@ -124,21 +124,21 @@ namespace Rodin::Tests::Unit::Solver
     expected << -1.0, 3.0, 2.0;
     system.getVector() = system.getOperator() * expected;
     solver.factorize(system);
-    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_NE(solver.getResources().numeric, nullptr);
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // Ordering participates in symbolic analysis and therefore invalidates it.
     solver.setOrdering(decltype(solver)::Ordering::Natural);
-    EXPECT_FALSE(solver.hasFactorization());
+    EXPECT_EQ(solver.getResources().numeric, nullptr);
     solver.solve(system);
-    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_NE(solver.getResources().numeric, nullptr);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     solver.clear(Numeric);
-    EXPECT_FALSE(solver.hasFactorization());
+    EXPECT_EQ(solver.getResources().numeric, nullptr);
     solver.solve(system);
-    EXPECT_TRUE(solver.hasFactorization());
+    EXPECT_NE(solver.getResources().numeric, nullptr);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
