@@ -98,6 +98,11 @@ namespace Rodin::Tests::Unit::Solver
 
     solver.setOrdering(decltype(solver)::Ordering::AMD).factorize(system);
     EXPECT_TRUE(solver.getResources().numeric);
+
+    // The system type is process-local, so the solve must be private to this
+    // process rather than collective over MPI_COMM_WORLD.
+    EXPECT_EQ(solver.getResources().instance.comm_fortran,
+      static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF)));
     solver.solve(system);
 
     Math::Vector<Real> expected(3);
