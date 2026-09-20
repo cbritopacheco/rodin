@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1789739214623,
+  "lastUpdate": 1789888591666,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -152344,6 +152344,2184 @@ window.BENCHMARK_DATA = {
             "value": 1288.1391603602585,
             "unit": "ns/iter",
             "extra": "iterations: 217641\ncpu: 1288.0213562701654 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "596796597d276aabcf6901e92d4564c5ee7f4426",
+          "message": "Harden copilot setup workflow token scope for CodeQL alert #11 (#342)\n\n* Add Robin impedance\n\n* Revert \"Add Robin impedance\"\n\n* Develop (#317)\n\n* Correct signs\n\n* Modularize\n\n* Fix modular CoronaryArtery build and move top-level driver\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/308af78c-dfd8-4661-86d2-c55dc54a4e38\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix modular CoronaryArtery class typing and model initialization\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/308af78c-dfd8-4661-86d2-c55dc54a4e38\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add CCMLC2014 finite-difference tests across scales and data\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0dfb38f9-c839-4eb6-b1a0-cda318a29404\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Symmetrize\n\n* Update mesh path\n\n* Update mesh path\n\n* Upload good mesh\n\n* Document CoronaryArtery example driver file\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/278d7259-a5aa-4052-a70e-59319a15ada6\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* VMS stab\n\n* fix: replace decltype(auto) with explicit const T& returns in leaf getValue() functions\n\nGrad, Derivative, Jacobian, FaceNormal, BoundaryNormal, GridFunction base class,\nand the GridFunction::project lambda all returned thread-local scratch by value\nvia decltype(auto)+unparenthesized id-expression. Each call therefore produced\nan rvalue that triggered FormLanguage::Base::object() to heap-allocate a copy\n(new R(...)), causing unbounded memory growth during assembly.\n\nVectorFunction variadic specialisation is deliberately left with decltype(auto):\nit uses a compile-time fixed-size Eigen type whose allocation is bounded, and\nthe thread-local would alias when LHS and RHS are the same template instantiation\n(confirmed by test failures) -- that case needs a separate caller-side fix.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/a6d29b98-a02b-4e31-a609-39eaed4bcb97\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: eliminate thread_local aliasing in binary operators and VectorFunction getValue\n\nVectorFunction<V,Values...>::getValue was returning the fixed-size result vector\nby value via decltype(auto).  In binary operators that called getValue() on both\noperands (Sum, Mult, Dot, Division, Jump, Average), a left-then-right evaluation\nof two operands of the *same* template type shares a single static thread_local,\nso the second call silently overwrote the first result before the operator was\napplied — e.g. Sum(VF,VF) computed 2*VF instead of LHS+RHS.\n\nFixes:\n* VectorFunction<V,Values...>::getValue: decltype(auto) -> const FixedSizeVectorType&\n  (returns reference to the existing thread_local; no copy, no allocation).\n* Sum / Mult / Dot / Division getValue (Function×Function variants): materialize\n  the LHS result into a static thread_local LHSRangeType buffer *before* evaluating\n  the RHS.  This guarantees the LHS value is safe even when LHS and RHS share the\n  same underlying thread_local.  object() is kept on the RHS to preserve lifetime\n  extension for any callable-based VectorFunction that returns by value.\n  constexpr removed from these methods (thread_local not allowed in constexpr\n  before C++23).\n* Jump / Average getValue: same pattern — the single operand is called with two\n  different geometric points; without materialization, the second call overwrote\n  the first result.  OperandRangeType added to both class bodies.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c4815f05-8443-403f-91c6-a13f30d4067b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* revert: remove materialization from binary operators; keep VectorFunction const& fix only\n\nThe materialization pattern added to Sum, Mult, Dot, Division, Jump, and Average\nwas over-broad. VectorFunction<V,Values...> is the targeted case: fixing its\ngetValue() to return const FixedSizeVectorType& (instead of a by-value copy via\ndecltype(auto)) is sufficient, consistent with how all other leaf getValue()\nfunctions were already fixed in the previous commit.\n\nThe same aliasing trade-off that exists for Grad, Jacobian, etc. (when the same\ntemplate instantiation appears on both sides of a binary operator) is accepted\nfor VectorFunction as well. Reverting Sum/Mult/Dot/Division/Jump/Average to\ntheir original constexpr form with this->object() on both operands.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6cd8c77a-e9df-4732-8946-36a6875e896f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: replace static thread_local with mutable instance members in leaf getValue functions\n\nEliminates the aliasing limitation where Sum<F,F> (or any binary operator\nwhere LHS and RHS are the same template type) would produce 2*RHS instead of\nLHS+RHS.\n\nRoot cause: static thread_local scratch is per-type, not per-instance. When\nbinary operators hold LHS and RHS as distinct unique_ptr objects of the same\ntemplate type, both calls to getValue() wrote to the same thread_local buffer.\n\nFix: replace static thread_local with mutable instance members. Since binary\noperators always store operands as distinct objects (unique_ptr), LHS and RHS\nalways have different addresses and thus independent scratch buffers — no\naliasing regardless of template type equality.\n\nAlso simplifies the GridFunction::project() lambda: the fn parameter is already\na const RangeType& that outlives the lambda call, so the intermediate\nthread_local copy is unnecessary.\n\nChanged files:\n- VectorFunction.h  — mutable FixedSizeVectorType m_res\n- Grad.h            — mutable RangeType m_res\n- Jacobian.h        — same\n- FaceNormal.h      — same\n- BoundaryNormal.h  — same\n- Derivative.h      — mutable ScalarType m_out\n- GridFunction.h    — mutable RangeType m_out; project lambda simplified\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1ad186f1-ac77-482e-a793-be607d549164\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* UPdat\n\n* Revert back changes\n\n* Refactor variational ranges to spatial types and add range kind detection\n\n* Fix range predicate integration includes across variational headers\n\n* Update\n\n* Use capitalized trait members for vector/matrix range predicates\n\n* Map FormLanguage RangeOf to spatial vector/matrix ranges\n\n* Materialize stack-backed range objects and add Complex range kind\n\n* Fix interpolate overload conflicts after spatial RangeType migration\n\n* Guard ColsAtCompileTime detection for non-Eigen scalar ranges\n\n* Remove heap-backed object persistence from FormLanguage::Base::object\n\n* Return spatial variational evaluations by value and remove thread_local scratch\n\n* Remove Base object cache usage from variational nodes\n\n* Viscosity works !\n\n* Fix SpatialVector/SpatialMatrix migration regressions in FormLanguage and Variational range handling (#242)\n\n* fix: handle spatial vector values in vector element linear forms\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: support spatial vector and matrix indexing in component extraction\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: allow variadic vector functions above spatial capacity\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: use generic indexing for vector ranges in quadrature rules\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix SpatialVector/SpatialMatrix migration regressions in FormLanguage and Variational range handling\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* ci: enable MPI/PETSc tests and add MPI np4/np8 cases\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/9f204a37-7d2e-4b07-a59c-be9e6fd3e6db\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: add explicit braces around EXPECT_GT to fix dangling-else compile errors\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/8ef1d252-f107-4ebc-b877-7734ad939658\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 1: Migrate P0Element vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 2: Migrate P1Element + P1 FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 3: Migrate H1Element + H1 FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 4: Migrate P0gElement + P0g FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 5: Migrate Zero<Math::Vector> to Zero<Math::SpatialVector>\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 6: Update operators and QuadratureRules to use SpatialVector FES keys\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 7: Update tests, examples, and doc comments to use SpatialVector FES keys\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8a: Fix element test accumulator types and H1Element vector specialization key in tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8b: Fix remaining accumulator and gf value type errors in H1ElementTest and H1Test\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8c: Add coeffRef and size_t overloads to SpatialVector for Eigen-compatible usage\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8c fix: Remove ambiguous size_t operator overloads, keep only coeffRef(size_t)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8d: Fix MMG GridFunction VectorGridFunction alias and MMGTest to use SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: count only owned cells in GlobalCellCount tests to avoid ghost cell double-counting\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/eb81ecf7-f17d-414c-ab82-1cc199df1864\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 9: Fix CI blockers and complete value-semantic spatial-range migration\n\n- P1/QuadratureRule.h: change m_mk, m_k0..m_k5 from Math::Matrix to Math::SpatialMatrix\n  and m_trv, m_tev from Math::Vector to Math::SpatialVector; add SpatialMatrix.h include\n- Math/SpatialVector.h: add std::enable_if_t<std::is_arithmetic_v<LHS>> constraint to\n  operator*(LHS, SpatialVector) to prevent non-scalar (e.g. Math::Matrix) LHS from\n  accidentally resolving to the element-wise scalar multiply path\n- H1Element.h: remove thread_local scratch buffers from GradientFunction::operator(),\n  JacobianFunction::operator(), and vector BasisFunction::operator(); return by value\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3b7544f2-9030-40aa-8bed-762b779c7e3f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add HDF5 shard workflow tests (local and MPI)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ddcec175-ca0a-4c82-a21a-af6a1a46b77e\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/aef47959-410b-4700-8838-54b7e68bde90\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/4c88ff7a-7640-4125-8e5c-111aedb00e4b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix compile\n\n* Try to fix tests\n\n* update vms\n\n* Fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* Remove cache\n\n* Add custom VMS integrator for performance\n\n* Add doc\n\n* Add info about velocity\n\n* Add plotting script\n\n* Update\n\n* Clamp viscosity\n\n* Update VMS\n\n* add dynamic subscale\n\n* Fix plotting script\n\n* Fix compile\n\n* CI\n\n* CI\n\n* CI\n\n* Update\n\n* Fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Correct VMS\n\n* CI\n\n* CI\n\n* Copy fixes\n\n* Minor cleanup\n\n* CI\n\n* Update\n\n* Add rho\n\n* CI\n\n* CI\n\n* CI\n\n* Fix ASAN/LSan CI failures for MPI/PETSc tests: use ASAN_OPTIONS=detect_leaks=0, move PetscInitialize to main()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/96fae0ce-7cab-4fa8-a0e9-2e46f3e17641\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix installation test: add MPI to FindPETSc.cmake and remove conflicting hdf5 on macOS (#245)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/4619f80c-f091-4ede-a809-1af5516d8c33\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix missing Context::MPI forward declaration in PETSc GridFunction.h (#246)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c0205059-2a7e-4f68-900d-212756c28f36\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* update model\n\n* feat(MPI): implement distributed H1 finite element space for MPI meshes\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/dfde4522-f697-4293-9b46-d30bc22dedb4\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* ci: free disk space before build steps in Tests workflow to fix ASAN+UBSAN OOM\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ac090e40-58ed-412d-b646-ffb126849454\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add distributed MPI H1 finite element space with DOF exchange\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d91083cf-df41-4ee2-a6a6-cc8dc13ebb96\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix(MPI/H1): replace halo-based DOF exchange with two-phase request-response\n\nThe previous halo-based push was only correct when reconcile() populated\nhalo[d][e] for ALL ranks that hold entity e.  For K=2 edges on 4+ rank\npartitions an edge can be in a rank's ghost layer via an intermediate\nneighbour (rank C holds edge e through B's ghost cell, but A - the owner -\nand C do not share a cell boundary and C is absent from A's halo).\nA's send[] therefore omitted e's DOF for C; C's irecv received an unrelated\nbatch and silently left m_local_to_global.left[dof] = MAX_INDEX, causing\na PETSc \"scatter indices out of range\" error.\n\nFix: replace the one-phase halo push with a two-phase request-response:\n\n  Phase 1 (request): non-owners send the global entity IDs they need to\n  the owning rank.  A boost::mpi::all_to_all count exchange is done first\n  so every owner can post irecv calls before the isend loop, guaranteeing\n  deadlock-free operation for any partition topology.\n\n  Phase 2 (response): owners reply with (gid, firstGlobalDOF) to each\n  requester.  Non-owners know the response count from Phase 1, so no\n  second count exchange is needed.\n\nAll H1 manufactured tests now pass on 1, 2, and 4 MPI ranks.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0c7276f9-df10-4374-8f05-3ce5bafbc868\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: complete entity halo in reconcile() and replace all_to_all with owner-push in H1::build()\n\nreconcile() now runs an iterative holder-set propagation phase after gid\nconvergence. Each round floods (entity, holder-rank) pairs through the\ndirect-neighbor stencil until globally converged, so halo[d] is complete\neven for multi-hop cases (e.g. a 3D edge shared by four ranks in a ring\nwhere two are not face-adjacent). For UniformGrid this converges in 1 round;\nfor Sharder-partitioned meshes in O(partition-graph diameter) rounds.\n\nH1::build() replaces the O(P) all_to_all count exchange + two-phase\nrequest-response with a direct owner-push: owners iterate halo[d] and send\n(gid, firstGlobalDOF) to each holder; non-owners post irecv from their\nowner rank. Communication cost is now O(entity-sharing neighbors) per rank\nrather than O(P). The Sharder is unchanged — its vertex and cell halos are\nalready correct by construction.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0da9e1f4-3848-4140-86c7-d6b22083f794\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d58e0997-b6fa-4e9e-a39f-c6d16d961456\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* feat(tests): add distributed MPI H1 LinearElasticity manufactured tests; fix H1Element scalar DirichletBC for vector spaces\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/db5a0610-3434-4daf-932c-d464624a7090\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: clarify per-component degree in LinearElasticityTest 3D doc comment\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/db5a0610-3434-4daf-932c-d464624a7090\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Checkout Tests.yml from develop\n\n* feat(tests): add Workflow 2 and 3 to MPI H1 PoissonTest covering all three mesh construction paths\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f24a0f3b-3059-4521-a92e-df456e3d8eb3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: improve H1Element LinearForm comment explaining scalar/vector DirichletBC branching\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f24a0f3b-3059-4521-a92e-df456e3d8eb3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix(ci): add MPI::MPI_CXX to PETSc::PETSc interface and install HDF5 on macOS in Installation workflow\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/aa0710fa-df68-4622-a608-354cab466bd0\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rewrite NavierStokes example with Rodin semantics; add SNES setSubVector/hasConverged/getIterationNumber/solve()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/8b20668c-09e4-4cf3-a898-63854e17eb2b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove setSubVector/m_x from SNES; no-arg solve() uses system.getSolution() directly\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/207fdfe6-0ff9-4d21-b50f-134f6a57a1b5\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rename SNES::hasConverged() to converged()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1593f360-1172-4070-b512-528c0efac09d\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rodin semantics\n\n* Do not zero solution entries\n\n* RK design\n\n* Fix the math\n\n* Implement rheological RCR and dynamic VMS stabilization\n\n- Add safeguarded Newton-Raphson support for nonlinear scalar solves\n- Implement Carreau-Yasuda WRMS pipe-flow closure for outlet RCR updates\n- Replace linear RCR resistance update with nonlinear pressure-flow inversion\n- Add projected dynamic VMS convective stabilization terms\n- Include dynamic subscale projection and history update\n- Document VMS integrators and rheological model equations\n\n* update vms and code to account for dital prressures\n\n* CI\n\n* CI\n\n* CI\n\n* Non-linear navier stokes\n\n* Nonlinear NS\n\n* Disable K=6 test\n\n* Put lagged VMS again\n\n* Revert back\n\n* IntegrationPoint path for FunctionBase\n\n* Delete resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh\n\n* Restore mesh\n\n* CI\n\n* Separation of paths for IntegrationPoint and Geometry::Point\n\n* Refactor\n\n* thread_local and spatial audit\n\n* Separate paths\n\n* Audit for fast path\n\n* Continue fast path audit\n\n* Deadlock problems\n\n* Fix slowness\n\n* Add suggested command\n\n* Add timing\n\n* Add SCOTCH partioning\n\n* Remove K4, K6 Hexahedron\n\n* Assembly-solve semantics\n\n* Re-add viscosity\n\n* Update\n\n* Default flow mode is Oseen\n\n* Update outputs\n\n* Correct bug\n\n* CI\n\n* add distal logging\n\n* time adaptivity\n\n* Stabilize coronary open-boundary backflow\n\nFix the sign of the outlet backflow stabilization terms under Rodin's\na(u, v) - b(v) = 0 convention, making them positive damping\ncontributions to the flow operator.\n\nAdd analogous reversed-flow damping on the pressure inlet to regularize\nthe inlet/no-slip wall transition without penalizing intended inflow.\nExpose inlet/outlet damping strengths and coronary time-step adaptivity\ncontrols as documented PETSc driver options.\n\nOn failed 3D KSP/SNES solves, retry only the 3D flow state with a reduced\nsolver time step while preserving the already advanced 0D state.\n\n* Add relaxation variable\n\n* Relaxation variable\n\n* windkessel with nonnewtonian\n\n* update windkessel\n\n* Correct errors\n\n* Add behaviour test\n\n* Initial ALE\n\n* Refactor Point\n\n* Initial ALE test (#268)\n\n* Initial design for ActiveLaw\n\n* Update\n\n* Updat\n\n* Update\n\n* Test with decay rate\n\n* Wave has to be biphasic, remove decay rate\n\n* Gap parameter\n\n* Add possibility to terminate without throwing\n\n* Initial ALE\n\n* Refactor Point\n\n* Initial ALE\n\n* scratch lazy bug expression\n\n* CI\n\n* CI\n\n* CI\n\n* ALE works\n\n* Non linear coronary artery (#267)\n\n* update\n\n* Style correction\n\n* Re-organize\n\n* fix quemada\n\n* Style !!!!\n\n* Rename struct 'solverConfig' to 'SolverConfig'\n\n---------\n\nCo-authored-by: oscarito <oscar.ruz@usach.cl>\n\n* MPI Submesh (#269)\n\n* Initial design for ActiveLaw\n\n* Update\n\n* Updat\n\n* Update\n\n* Test with decay rate\n\n* Wave has to be biphasic, remove decay rate\n\n* Gap parameter\n\n* Add SubMesh<Context::MPI> with Builder, restriction(), and unit tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f5839eba-cb87-43a7-baf3-061a4bc08e00\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add possibility to terminate without throwing\n\n* Rename to ConvergedReason\n\n* Add SubMesh GridFunction tests: P1/P0 FES on SubMesh, cross-mesh evaluation (inclusion/restriction paths)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1177c774-ff47-46e6-aa8f-b4750f8a9691\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix P0 test comment; remove stale test_detail.json\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1177c774-ff47-46e6-aa8f-b4750f8a9691\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Delete test_detail.json\n\n* Initial ALE\n\n* add distributed SubMesh GridFunction tests for MPI and PETSc contexts\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0e03e99f-2196-4148-8de2-e796ca674464\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix distributed SubMesh GridFunction tests: remove P1/cross-mesh, fix collective ordering\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d1d6d887-5541-4797-844f-255861c47dd8\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* scratch lazy bug expression\n\n* Fix P1/P0 distributed FES crash on SubMesh at np≥2; restore cross-mesh evaluation tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6887f599-4b55-4c4f-93d3-a70630cf6cc1\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n* CI\n\n* Replace broken all_gather orphan fix with scalable 2-round neighbor exchange\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/29331155-feac-4e94-9f66-a0ba7dcef7ec\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Replace all_gather orphan fix with scalable 2-round neighbor exchange in SubMesh finalize\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/29331155-feac-4e94-9f66-a0ba7dcef7ec\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n* MPI SubMesh: fix orphaned vertex ownership via scalable 2-round neighbor exchange\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/390c2fd8-cafd-4da7-91e8-492011a2d7dd\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* ALE works\n\n* Fix MPI tag collision in P0/P1/H1 DOF exchange via symmetric drain; add regression tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6d38a6e7-be5f-4dc0-96d9-9c6599ee57ee\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix SubMesh halo pruning: remove stale parent-mesh halo entries after Round 1\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6d38a6e7-be5f-4dc0-96d9-9c6599ee57ee\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Audit\n\n* Test MPI quadrature point mesh identity\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix CI: rename solverConfig to SolverConfig in Windkessel.h (#270)\n\n* CI\n\n* CI\n\n* Harden tests\n\n* CI\n\n* Initial support for Pyramid (#271)\n\n* Initial support for Pyramid\n\n* Handle missing `Pyramid` branches in Variational element switches (#272)\n\n* Fix missing pyramid case in P1 vector element order switch\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1d0738b2-1c02-44ff-a800-f9f7b1d6ed69\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Handle pyramid centroid in P0g element reference node switch\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1d0738b2-1c02-44ff-a800-f9f7b1d6ed69\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Guard PETSc MPI unit tests behind `RODIN_USE_MPI` to unblock non-MPI builds (#274)\n\n* Guard PETSc MPI unit tests behind RODIN_USE_MPI\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c60e5d16-b3f0-4ee1-aa35-55a52b9c5a0f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix missing return path in HDF5 mixed topology id helper\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/54299d1f-db51-4a5b-97e1-3459772b19d9\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Clarify unreachable fallback return in HDF5 helper\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/54299d1f-db51-4a5b-97e1-3459772b19d9\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Coverage for 3d polytopes\n\n* Audit 3D polytope test coverage and move heavy elasticity cases to slow (#275)\n\n* Add missing 3D polytope coverage and slow labeling\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/9a214ef8-f606-4a7d-9cd5-452c4545fe90\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Finalize 3D polytope test audit updates\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/9a214ef8-f606-4a7d-9cd5-452c4545fe90\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add point-evaluation support for H1 shape functions (#280)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1aba08fb-4b25-4417-9ee6-b120baf7ddbc\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update build types in Tests.yml\n\nRemoved Debug build type from CI workflow.\n\n---------\n\nCo-authored-by: Copilot <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* DirichletBC(u, A(v)) (#276)\n\n* Initial design for Dirichlet\n\n* A(v)\n\n* Remove SinglePointQF\n\n* Refactor IntegrationPoint quadrature access to pointer semantics and document nullptr contract (#277)\n\n* Refactor IntegrationPoint to pointer-based quadrature access and remove hasQuadratureFormula\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d0e2bb79-a862-4cd5-870f-5afbc412cc30\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Refactor IntegrationPoint API to pointer-return getQuadratureFormula\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d0e2bb79-a862-4cd5-870f-5afbc412cc30\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Document DirichletBC semantics and IntegrationPoint nullptr quadrature semantics\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/95a82be9-e059-4164-bc77-37c627af9cf5\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Doc\n\n* Fix Debug-only DirichletBC CI failures and expand API/manufactured coverage (#278)\n\n* test: expand DirichletBC coverage\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c32c2edd-b85d-4eff-b362-4c5414edff27\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* test: fix DirichletBC debug coverage\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c32c2edd-b85d-4eff-b362-4c5414edff27\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* test: tighten DirichletBC helper preconditions\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c32c2edd-b85d-4eff-b362-4c5414edff27\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove setPoint API from ShapeFunction, replace with setIntegrationPoint (#279)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/334e2c2a-b253-4aa0-9feb-a1df496e0f72\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Keep IntegrationPoint alive during DirichletBC basis evaluation (#281)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/b2e4f25a-716b-4352-9196-a47920afcf74\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add tests\n\n* Variational elimination\n\n* Normalize self-identification constraints across assembly backends (#282)\n\n* Implement variational elimination fixes\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1181fec3-7070-4ec4-8fda-e5b58221b805\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Validate variational elimination fixes\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1181fec3-7070-4ec4-8fda-e5b58221b805\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Harden constraint normalization\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1181fec3-7070-4ec4-8fda-e5b58221b805\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add cross-backend elimination tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0764081f-e6a2-4208-aaae-c28d57418e30\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Validate cross-backend elimination tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0764081f-e6a2-4208-aaae-c28d57418e30\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Refactor\n\n* Transitive elimination\n\n* CI\n\n* test: expect Alert exception for overlapping identification (#283)\n\n* test: guard PETSc OpenMP-only form tests (#284)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/acf13459-c760-4037-befa-8a913b0a4ce9\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: resolve broken IntegrationPoint merge (#285)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6e6204d1-ab3b-4095-b8b7-f46e3778f7d7\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Monolithic FSI ALE example\n\n* Defect\n\n---------\n\nCo-authored-by: Copilot <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Doc CI\n\n* Fix MEDIT attribute indexing for mixed entity sections\n\n* Use forwarding references in MPI finite element mappings\n\n* Fix MEDIT attribute indexing for canonical polytopes\n\nAdd index-returning polytope insertion overloads to Connectivity and\nMesh::Builder so callers can retrieve the canonical polytope index produced\nby insertion/deduplication.\n\nUse that index in the MEDIT loader when assigning entity attributes instead\nof relying on section-local counters. This preserves attributes when MEDIT\nsections share a topological dimension or contain duplicate entity records.\n\nAdd a load-save-load regression test covering duplicate MEDIT entities and\ncanonical attribute preservation.\n\n* CI: make coverage job Codecov upload resilient to CLI GPG verification failure (#291)\n\n* Initial plan\n\n* ci: use PyPI Codecov uploader in coverage job\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\n\n* Add unary minus for SpatialMatrix (#290)\n\n* Add Robin impedance\n\n* Revert \"Add Robin impedance\"\n\n* Add unary minus for SpatialMatrix\n\n---------\n\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\nCo-authored-by: wang jiajun <jiajun.wang621@gmail.com>\n\n* Fix double assembly\n\n* Guard PETSc SNES state caching for cross-version compatibility (#296)\n\n* Use PetscObjectStateGet for Vec state access\n\n* Validate PETSc compatibility fix\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\n\n* Fix SNES assembly state reuse (#297)\n\n* [codex] Split Solid nonlinear form integrator work (#298)\n\n* Split Solid nonlinear form integrator work\n\n* Refactor PETSc matrix setup\n\n* Fix Debug abort in HyperElasticity wrong-residual-sign test\n\nThe WrongResidualSignRegresses test drove Newton with a flipped residual\nsign for 12 undamped iterations. A wrong sign turns the Newton direction\ninto an ascent direction, so the iterate diverged until an element\ninverted (det F <= 0), tripping the KinematicState assert(m_J > 0)\nphysics invariant. This aborted every Debug Manufactured CI job while\nRelease passed (asserts compiled out).\n\nDemonstrate the regression with two small damped steps instead: a\nwrong-sign step is an ascent direction for the residual norm, so the\nresidual grows even infinitesimally, while the small damping keeps every\nassembled iterate physical (det F > 0). Assert the residual increases.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\n\n* Add PETSc two-field targeted assembly\n\n* Extend PETSc targeted assembly to block Sequential/OpenMP backends\n\nThe block (two-field) Problem only supported targeted LHS/RHS assembly\nfor the MPI context; Sequential and OpenMP fell through to a throw. SNES\ncalls assemble(target) on every residual/Jacobian evaluation, so block\nproblems on those backends could not use the targeted path.\n\n- Add AssemblyMode (Full/LHS/RHS) + AssemblyTarget overloads to the block\n  Sequential and OpenMP assembly classes, gating matrix vs. vector work on\n  doMatrix/doVector and branching BC application (MatZeroRowsColumns /\n  MatZeroRows / VecSetValues), mirroring the MPI block reference.\n- Both new paths reject targeted assembly with identification DirichletBCs,\n  as the MPI block already does.\n- Remove the MPI-only gate in the block Problem::assemble(target) so all\n  backends dispatch to their targeted execute().\n\nVerified: P1P1 Seq FSI shows clean quadratic Newton convergence\n(~4.9e-3 -> 2.6e-14 in 6-7 iters), confirming LHS/RHS consistency.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n* Targeted assembly: full backend coverage + regression tests (#301)\n\n* Add PETSc targeted assembly regression tests\n\n* Add targeted assembly to Eigen single-field Sequential backend\n\nImplements LHS-only / RHS-only assembly for the core (Eigen-backed)\nsingle-field Sequential assembler, mirroring the PETSc backends:\ndoMatrix/doVector gating, identification DirichletBCs rejected in\ntargeted mode, and a Full/LHS/RHS finalize. Wires the single-field\nProblem::assemble(AssemblyTarget) override to dispatch to it.\n\nAdds a manufactured regression test (BC-free P1 system) asserting that\ntargeted LHS reproduces the full operator and targeted RHS reproduces the\nfull vector. OpenMP/block coverage follows in subsequent commits.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n* Add targeted assembly to remaining Eigen backends (OpenMP, block)\n\nCompletes targeted (LHS-only / RHS-only) assembly coverage for the core\nEigen-backed backends:\n\n- OpenMP single-field, Sequential block, and OpenMP block assemblers gain\n  an execute(axb, input, AssemblyTarget) overload. These backends assemble\n  the full system into a scratch object and expose only the requested side,\n  leaving the other operand untouched (the targeted contract). This keeps\n  the intricate parallel/block Dirichlet-BC elimination logic in a single\n  code path rather than duplicating a gated variant four times.\n- Wires the block Problem::assemble(AssemblyTarget) override.\n\nExtends the manufactured regression test with the OpenMP single-field case\nand a two-field block case (BC-free), asserting targeted LHS reproduces the\nfull operator and targeted RHS reproduces the full vector.\n\nAll targeted tests pass across Eigen (Sequential/OpenMP/block) and PETSc\n(Sequential/OpenMP/MPI).\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n* Test block Sequential and OpenMP targeted backends explicitly\n\nAssembly::Default resolves to a single backend at compile time (OpenMP in\nthis build), so the high-level Problem API only exercises one block backend.\nBuild the block ProblemAssemblyInput directly (mirroring how Problem builds\nit) so both the Sequential and OpenMP block targeted paths are covered\nlocally, in addition to the end-to-end Problem::assemble(target) test.\n\nFull targeted suite (9 tests) passes via ctest: Eigen single-field and\nblock on Sequential/OpenMP, PETSc Sequential/OpenMP, and PETSc MPI at 1/2/4\nranks.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\n\n* [codex] Split adaptation infrastructure fixes (#303)\n\n* Split adaptation infrastructure fixes\n\n* Add XDMF and PETSc assembly regressions\n\n* PETSc assembly: rely on PETSc zero handling, harden matrix/vector setup\n\nLet PETSc own the sparsity pattern instead of the manual +1/-1 trick, and\nfix two latent bugs surfaced while reviewing it.\n\n- Remove the `if (v == 0) { MatSetValue(+1); MatSetValue(-1); }` dance in all\n  three PETSc backends. Structural zeros stay in the pattern via\n  MAT_IGNORE_ZERO_ENTRIES = PETSC_FALSE (already set by MatrixSetup); entries\n  are now inserted unconditionally. Vector zero-skips kept.\n\n- MatrixSetup: a LinearSystem is bound to fixed finite element spaces, so its\n  dimensions never change. PETSc has no in-place resize for an assembled Mat,\n  so prepare() no longer calls MatSetSizes on a live matrix; it reuses on a\n  size match, sets up a virgin matrix, and raises on an assembled-but-different\n  size instead of silently corrupting state.\n\n- Add VectorSetup mirroring MatrixSetup for b/x/res across all backends. b/res\n  are zeroed each assembly; x is not zeroed on reuse so the solver warm-start\n  iterate is preserved. Replaces the inconsistent per-call b re-setup and the\n  stale `if (!xType)` guard on x.\n\n- Add RODIN_PETSC_CHECK_OK (src/Rodin/PETSc/Check.h): raises a Rodin exception\n  with the PETSc error code, message, and source location in every build.\n  Replaces ~277 assert(ierr == PETSC_SUCCESS) in the assembly backends, which\n  were compiled out under -DNDEBUG and hid the resize failure.\n\n- Regression tests (Sequential, OpenMP, and MPI at np=1/2/4): reuse keeps the\n  nonzero pattern (identical nnz, no new mallocs), structural zeros stay\n  allocated, and a resized problem yields a different pattern.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\n\n* [codex] Fix PETSc GridFunction min max calls (#304)\n\n* Fix PETSc GridFunction min max calls\n\n* Add PETSc GridFunction extrema regression\n\n* [codex] Remove PETSc check wrapper (#305)\n\n* Remove PETSc check wrapper\n\n* Add MPI PETSc assembly option regression\n\n* Preserve PETSc solution vectors on reassembly (#306)\n\n* Remove PETSc check wrapper\n\n* Add MPI PETSc assembly option regression\n\n* Inline PETSc matrix setup reuse check\n\n* Preserve PETSc solution vectors on reassembly\n\n* [codex] Improve OpenMP assembly backends (#308)\n\n* Initial plan\n\n* Add polytope-scoped quadrature caching\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1533648b-dbbc-49d9-a205-84b24e68bb33\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Complete mesh/MPIMesh quadrature cache wiring and limit variational change to QuadratureRule\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ad33315e-9728-4cd2-8359-bd83696ab5ed\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix build regression and add PolytopeQuadratureIndex unit tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e6e15053-b84d-4f15-83df-1a79406bd239\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Use fixed array quadrature cache and decouple base geometry\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/64511392-82b5-4492-958e-8d1d20ec19e1\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add cache behaviour\n\n* CI\n\n* CI\n\n* Incorporate the new quadrature cache into QuadratureRule\n\n* Fix tests\n\n* Adopt polytope getQuadrature in P1 quadrature rules\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/b7af9bcf-7da6-4314-ae62-55d17f6d2e24\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Use new architecture\n\n* Corrected caches\n\n* Refactor P1 specializations: replace all inlined P1Element with getFiniteElement uniformly\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/2755b3ad-2e29-4162-8f1f-4d7d6be2044e\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Refine P1 vector branches to avoid scalar extraction from vector basis\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/79df068f-75a8-479c-9234-118ce7ce0d0b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Update labeler\n\n* Remove inlining\n\n* Remove all inlined P1Element from P1 QuadratureRule specializations; use getFiniteElement uniformly\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/7a8a4b5b-3574-4ebb-818f-9abadee5f5b3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Start work on a 3d discretizer\n\n* refactor(H1): use getQuadrature API in QuadratureRule specializations\n\nReplace std::vector<Geometry::Point> m_ps member with\nconst Geometry::PolytopeQuadrature* m_quadrature across all 12\nH1 QuadratureRule specializations, matching the P1 pattern.\n\n- Replace m_ps member with m_quadrature pointer\n- Use polytope.getQuadrature(*m_qf) instead of manual Point construction\n- Update move constructors to use std::exchange for m_quadrature\n- Initialize m_quadrature(nullptr) in default/copy constructors\n- Replace m_ps iteration with q.getSize()/q.getPoint(qp) pattern\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fixes\n\n* Adopt getQuadrature in getMeasure, Solid integrators, and LinearElasticity integrals\n\n- Polytope::getMeasure(): use polytope.getQuadrature(qf) instead of manual Point construction\n- Solid/Integrators/InternalForce.h: replace Geometry::Point(polytope, rc) with cached quadrature\n- Solid/Integrators/MaterialTangent.h: same getQuadrature adoption\n- Solid/Linear/LinearElasticityIntegral.h: replace m_ps vector with const PolytopeQuadrature* pointer, remove recompute logic (m_set, m_order, m_geometry)\n- Solid/Linear/P1/LinearElasticityIntegral.h: same pattern as generic\n- Variational/Potential.h: update dead-code path for consistency\n\nAll 1868 unit tests pass. Solid/LinearElasticity tests (64/64) pass.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d85ec1ff-b48c-47b5-a243-925cc50e107c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rename GenericPolytopeQuadrature to PolytopeQuadratureFormula across codebase\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/2d843431-f74c-45a6-b363-da9c4a991a3d\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Correct MMG constructor\n\n* Test out ls on the shape optimization\n\n* Refine candidate scoring with interface-reference and quality spread\n\n* Update\n\n* LevelSetInterfaceGraph\n\n* Update\n\n* Update\n\n* Update\n\n* TMOP\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Curved visualization\n\n* Curved visualization\n\n* Update\n\n* Update\n\n* update\n\n* Update\n\n* Simplify pipelines\n\n* Implement no-cut relabel TMOP pipeline\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/62df2c97-36b3-4ed7-9758-fd070cd4184a\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Tune no-cut relabel diagnostics and validation flow\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/62df2c97-36b3-4ed7-9758-fd070cd4184a\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix no-cut level-set TMOP example\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Move towards gradient descent\n\n* Update\n\n* Remove TMOP\n\n* Remove other\n\n* Remove\n\n* Update\n\n* Update\n\n* Address comments\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Update non linear form integrator interface\n\n* Update\n\n* Update\n\n* Update\n\n* Update\n\n* Add demons\n\n* Update\n\n* WNGIR\n\n* Update\n\n* Remove Solid nonlinear integrator work from Adaptation\n\n* Remove NewtonSolver changes from Adaptation\n\n* Update\n\n* Update\n\n* Remove LSR\n\n* Remove useless tests\n\n* Update\n\n* Split adaptation infrastructure fixes\n\n* Split adaptation infrastructure fixes\n\n* Update WNGIR adaptation defaults\n\n* Add XDMF and PETSc assembly regressions\n\n* PETSc assembly: rely on PETSc zero handling, harden matrix/vector setup\n\nLet PETSc own the sparsity pattern instead of the manual +1/-1 trick, and\nfix two latent bugs surfaced while reviewing it.\n\n- Remove the `if (v == 0) { MatSetValue(+1); MatSetValue(-1); }` dance in all\n  three PETSc backends. Structural zeros stay in the pattern via\n  MAT_IGNORE_ZERO_ENTRIES = PETSC_FALSE (already set by MatrixSetup); entries\n  are now inserted unconditionally. Vector zero-skips kept.\n\n- MatrixSetup: a LinearSystem is bound to fixed finite element spaces, so its\n  dimensions never change. PETSc has no in-place resize for an assembled Mat,\n  so prepare() no longer calls MatSetSizes on a live matrix; it reuses on a\n  size match, sets up a virgin matrix, and raises on an assembled-but-different\n  size instead of silently corrupting state.\n\n- Add VectorSetup mirroring MatrixSetup for b/x/res across all backends. b/res\n  are zeroed each assembly; x is not zeroed on reuse so the solver warm-start\n  iterate is preserved. Replaces the inconsistent per-call b re-setup and the\n  stale `if (!xType)` guard on x.\n\n- Add RODIN_PETSC_CHECK_OK (src/Rodin/PETSc/Check.h): raises a Rodin exception\n  with the PETSc error code, message, and source location in every build.\n  Replaces ~277 assert(ierr == PETSC_SUCCESS) in the assembly backends, which\n  were compiled out under -DNDEBUG and hid the resize failure.\n\n- Regression tests (Sequential, OpenMP, and MPI at np=1/2/4): reuse keeps the\n  nonzero pattern (identical nnz, no new mallocs), structural zeros stay\n  allocated, and a resized problem yields a different pattern.\n\nCo-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\n\n* Update\n\n* Make WNGIR use variational trial functions\n\n* Fix PETSc GridFunction min max calls\n\n* Remove PETSc check wrapper\n\n* Remove PETSc check wrapper\n\n* Remove PETSc check wrapper\n\n* Add MPI PETSc assembly option regression\n\n* Add MPI PETSc assembly option regression\n\n* Inline PETSc matrix setup reuse check\n\n* Inline PETSc matrix setup reuse check\n\n* Preserve PETSc solution vectors on reassembly\n\n* Preserve PETSc solution vectors on reassembly\n\n* Improve OpenMP assembly backends\n\n* Uniformize OpenMP form assembly backends\n\n* Fix unused-function build error when MULTITHREADED=OFF\n\nGuard expectSameStandaloneVector and expectSameStandaloneMatrix with\n#ifdef RODIN_USE_OPENMP since they are only used by\ncheckPETScStandaloneOpenMPFormsMatchSequential which is itself guarded.\nWithout this, building with MULTITHREADED=OFF emits a -Wunused-function\nerror (tests/CMakeLists.txt uses -Wall -Werror), causing all test\nexecutables to fail to link.\n\n* CI\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Claude Opus 4.8 <noreply@anthropic.com>\n\n* Add MMG required entity support (#309)\n\n* Add MMG required entity support\n\n* Update\n\n* Fix heap overflow when deleteBoundaryRef empties the boundary arrays\n\nMMG treats a non-null tria/edge array as holding at least one entry\n(MMG3D_Clean_isoSurf and MMG5_Clean_isoEdges iterate with a do/while),\nso an empty result must leave the pointer null. Also keep ntmax/namax\nuntouched in that case since MMG5_bdrySet asserts xtmax = ntmax > 0.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>\n\n* Agent knowledge base, documentation expansion, and layered style enforcement (#310)\n\n* Port knowledge base, documentation, and style tooling onto develop\n\nRebases the doc/AgentKnowledgeBase deliverable from the module/Adaptation\nlineage onto develop, per review. WNGIR-lineage changes are dropped: the\nin-flight WNGIR header/example work stays on module/Adaptation, and this\nPR carries only documentation, tooling, and the small source fixes below.\n\nContents (squashed from the original commit series; see PR #310 history\nbefore the rebase for the incremental record):\n\n- AGENTS.md entry point (CLAUDE.md symlink) and doc/agents/ knowledge\n  base: design philosophy, module map, conventions, per-domain docs, and\n  a theory layer tying the mathematics to the code. Branch-specific\n  statements re-verified against develop (no TargetMatrixOptimization,\n  no PETSc/Adaptation here).\n- Doxygen documentation: four new guides (shape optimization, solid\n  mechanics, thread safety, interfaces/DG), namespace docs for\n  Adaptation/Heart/Location/Serialization, @file briefs for previously\n  undocumented headers, enriched NewtonSolver/GridFunction docs.\n- Layered style enforcement (CONTRIBUTING.md): .clang-format tuned to\n  the existing style (changed-lines CI enforcement), .clang-tidy naming\n  rules (CamelCase functions allowed; variables camelBack or math\n  notation), dev/style_lint.py house rules, dev/check_format.py,\n  dev/check_doxygen_warnings.py ratchet, Style CI workflow,\n  .editorconfig. Baselines are regenerated against this tree in a\n  follow-up commit.\n- Source fixes: NewtonSolver Report/StepResult members renamed to\n  camelBack with all consumers updated; all 22 @param documentation\n  bugs fixed (constitutive-law math parameter names, XDMF #ifdef doc\n  placement, unnamed serialize/print/region parameters); Heart\n  CCMLC2014 alias-redeclaration and namespace-shadowed solver lookup\n  fixed; Test/Utility.h copy-pasted include guard corrected;\n  GridFunction _unused locals renamed.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Fix Serialization/Export.h: register the only legal instantiation\n\nThe header never compiled: VectorP1Element is an alias template used\nwithout arguments, and ParametricTransformation<FE> static-asserts a\nscalar real-valued element, so the Complex and Vector registrations\nwere never instantiable at all. Only RealP1Element qualifies. Nothing\nincluded the header, which is why the breakage was silent - it is now\npart of dev/TidyTU.cpp so it can no longer rot unnoticed.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Eliminate the entire style_lint baseline: 211 violations fixed\n\n- 117 files gained the standard Boost license header block.\n- 72 include guards renamed to the path-derived RODIN_*_H / _HPP form\n  (the .h/.hpp distinction matters: .hpp companions hold out-of-line\n  inline definitions and must not share the .h guard - the linter rule\n  itself was corrected for this, caught by a build failure when\n  P1Element.hpp briefly collided with P1Element.h).\n- 30 headers gained @file/@brief documentation (WNGIR module,\n  Euclidean primitives, Test utilities, Variational exceptions, P0g\n  family, per-FES ShapeFunction headers).\n- FormLanguage/IsPlaneObject.h had no include guard at all; added.\n\ndev/style_lint.baseline is now EMPTY - every house-rule violation in\nthe tree is fixed, and any new one fails CI immediately.\n\nVerified: aggregate TU compiles; NewtonSolver 4/4, Heart 13/13,\nSolid 58/58 tests pass.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Burn down doxygen backlog; convert clang-tidy to a findings ratchet\n\nDoxygen warning baseline: 8286 -> 6852 (-1434, -17%).\n\n- 1255 uniform @brief one-liners for the repeated house-vocabulary type\n  aliases (Parent, ScalarType, RangeType, FESType, LHS/RHSType, ...)\n  across 159 headers.\n- All broken cross-references repaired (97 sites): member refs on class\n  templates redirected to the class, refs to ifdef-gated solvers\n  (UMFPack/CHOLMOD/SPQR) and example files converted to code text,\n  malformed targets (trailing colons, slash-joined refs, overload\n  signatures) corrected.\n- All out-of-math LaTeX fixed: \\nablau/\\cdotv-style concatenation typos\n  split; prose formulas converted to Unicode math (the codebase already\n  uses ∑/φ in comments) or wrapped in @f$.\n- Four missing Doxygen groups: RodinGeometry, DerivativeSpecializations,\n  and LinearElasticitySpecializations defined; the orphan\n  TraitsSpecializations tag dropped.\n\nclang-tidy job redesigned as a ratchet (dev/check_clang_tidy.py +\ndev/clang_tidy.baseline, 258 findings): the previous changed-files\nfilter would have demanded every header touched by the mass\nlicense/guard pass be fully renamed at once. Findings are keyed\n(file, kind, identifier) - line-agnostic - and only new violations\nfail; CONTRIBUTING.md updated.\n\nRemaining baselined backlog: 6852 documentation warnings (dominated by\nundocumented member functions) and 258 naming findings, to be shrunk\nopportunistically.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Trigger CI on rebased branch\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Eliminate the clang-tidy naming backlog: 258 findings fixed, baseline empty\n\nRenames all 258 snake_case identifiers to the house camelBack/CamelCase\nstyle via clang-tidy --fix (AST-aware: declaration + every reference),\nacross 39 headers/sources. Mathematical notation stays exempt (phi_vertex,\nJinv, F, I1 untouched).\n\nCategories: 197 local variables (fe_u -> feU, sparse_entry ->\nsparseEntry), 20 functions (QF build_hex -> buildHex), 15 parameters,\n11 constexpr variables, 4 private members (NewtonRaphson m_abs_g_tol ->\nm_absGTol), 4 enum constants (MFEM Keyword::dimension -> Dimension, string\nliteral in toCharString preserved), 3 public members (grad_phys ->\ngradPhys), 2 type aliases (internal_iterator -> InternalIterator),\n2 template parameters.\n\nHand-fixed cases --fix could not do safely:\n- DependentValue Value_ -> ValueParam (would have collapsed into the\n  sibling `Value` member).\n- MFEM.h: --fix renamed a spirit semantic-action lambda get_geometry ->\n  getGeometry, which then SHADOWED the free function getGeometry(\n  GeometryType) called two lines below -> the lambda is renamed to\n  assignGeometry instead. Caught by the full build; would otherwise have\n  been a silent miscompile.\n- Cross-TU references --fix never saw (it only edits the compiled TU +\n  headers): MFEM.cpp (Keyword enum) and GaussLegendre.cpp (out-of-line\n  build_*/gl1dUnit definitions) updated by hand.\n- NewtonRaphson @param doc names updated to the renamed parameters;\n  gradPhys/divPhys cache members documented (doxygen baseline shrinks\n  6852 -> 6849).\n\ndev/clang_tidy.baseline is now EMPTY. Every naming violation in the tree\nis fixed; new ones fail CI immediately.\n\nVerified: full library + examples + tests build clean at -j8 (0 errors);\nunit tests pass (H1 139, Solid 58, Math/NewtonRaphson 8, Grad 14, Div 18,\nFormLanguage List 20, ...); IO MeshLoader 26 + GridFunction IO (H1 69,\nP1 17, P0 9) validate the MFEM/MEDIT parser and the getGeometry fix;\nQF GaussLegendre 13 validates the build_* renames; manufactured Assembly\n33 + Poisson3D 48 pass. Format and style_lint clean.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Solver module public API: 85 doxygen warnings fixed\n\nAdds accurate @brief docs to the repeated public API of the linear-solver\nclasses (CG, GMRES, DGMRES, MINRES, IDRS, IDRSTABL, HouseholderQR,\nPartialPivLU, Simplicial*, ...): constructors, setTolerance/\nsetMaxIterations/setRestart chainable setters, solve(), success(),\ncopy(), and the ProblemType/LinearSystemType/... typedefs.\n\nNewtonSolver.h deliberately untouched (nonlinear solver, already fully\ndocumented; its templated solve() overload needs the comment above the\ntemplate<> line, not the linear-solver brief).\n\ndoxygen baseline 6849 -> 6764. Comment-only; RodinNewtonSolverTest\ncompiles, format clean.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Math/LinearSystem.h public API: 26 doxygen warnings fixed\n\nCase-by-case @briefs read from the implementation: the Traits\nspecialization, the concrete operator/vector/solution accessors and\ncopy/move assignment and merge() on both the sparse and dense\nspecializations, and the structured-binding support (std::tuple_element\n0/1/2 and the four get<I> overloads, documenting element 0 = operator A,\n1 = solution x, 2 = right-hand side b).\n\ndoxygen baseline 6764 -> 6738. Comment-only.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Math/SpatialVector.h public API: 66 doxygen warnings fixed\n\nCase-by-case @briefs read from the implementation: typedefs, all\nconstructors, componentwise arithmetic operators (in-place and free,\nincluding the Eigen-expression-mixing overloads), element access\n(operator()/[]/x/y/z/value), norms (norm/squaredNorm/stableNorm/\nblueNorm/lpNorm/normalized/normalize), cross/dot products, transpose\n(to a 1-by-n row matrix), conjugate, serialize, streaming, and the\nTraits specialization.\n\ndoxygen baseline 6738 -> 6672. Comment-only; aggregate TU compiles.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Math/SpatialMatrix.h public API: 48 doxygen warnings fixed\n\nCase-by-case @briefs read from the implementation: typedefs,\nconstructors, Identity, Eigen/array assignment, componentwise\narithmetic, element access, Frobenius norm/squaredNorm/dot, transpose/\nconjugate/adjoint/trace/determinant/inverse (size-specialized), value,\ngetData, and the free matrix/scalar/vector/Eigen product and sum\noperators plus streaming and the Traits specialization.\n\ndoxygen baseline 6672 -> 6624. Comment-only; aggregate TU compiles.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document remaining Math module headers: 42 doxygen warnings fixed\n\nCase-by-case @briefs read from each header, completing the Math module:\n- Unit.h: the Type typedef and the special members\n- Traits.h: ColsAtCompileTime, RangeKind, IsSpatialVector/Matrix,\n  IsVectorRange/MatrixRange, RangeKindOf(+V), Sum trait structs and\n  their Value/Type members\n- Vector.h / Matrix.h / SparseMatrix.h: the FormLanguage::Traits\n  specializations (and FixedSizeVector's compile-time Size)\n- RungeKutta/RK4.h: the time-dependent step(t, dt, ...) overload\n\ndoxygen baseline 6624 -> 6582. Comment-only; aggregate TU compiles.\nThe entire Math module is now documented.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Geometry/PointCloud.h public API: 48 doxygen warnings fixed\n\nCase-by-case @briefs read from the implementation: typedefs and Eigen\nmap/stride views, constructors, dimension/count accessors, push_back\noverloads, coordinate and packed-point access, active-coordinate matrix\nviews, dot/squaredNorm, in-place scaling, serialize, and the free\nscalar/point-cloud/Eigen product and sum operators plus streaming and\nthe Traits specialization.\n\ndoxygen baseline 6582 -> 6534. Comment-only; aggregate TU compiles.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Polytope::Key public API: 25 doxygen warnings fixed\n\nCase-by-case @briefs for the Polytope::Key vertex-set key: the STL-style\ntypedefs, the SplitMix64 (sm64) and cswap helpers, the\nSymmetricEquality/SymmetricHash functor call operators, constructors,\nelement access, resize/size/getVertices, iterators, and serialize.\n\ndoxygen baseline 6534 -> 6509. Comment-only; aggregate TU compiles.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Geometry/MinSTCut.h public API: 19 doxygen warnings fixed\n\nCase-by-case @briefs: the Inside/Outside/InvalidIndex label constants,\nthe Edge and Result structs and all their members, the unary-cost\nhelpers, and the classify/solve entry points.\n\ndoxygen baseline 6509 -> 6490. Comment-only; aggregate TU compiles.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Document Geometry mesh transformation public API\n\n* …",
+          "timestamp": "2026-09-20T07:53:20+02:00",
+          "tree_id": "a8eaa2a0a3050dfd876b8a2b2ae37d42dead7d6a",
+          "url": "https://github.com/cbritopacheco/rodin/commit/596796597d276aabcf6901e92d4564c5ee7f4426"
+        },
+        "date": 1789888580407,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+            "value": 29.274236595101954,
+            "unit": "ns/iter",
+            "extra": "iterations: 9579615\ncpu: 29.271036362108497 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+            "value": 21.494825800004946,
+            "unit": "ns/iter",
+            "extra": "iterations: 10000000\ncpu: 21.491469000000002 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarReferenceExpansion",
+            "value": 13.011590466316065,
+            "unit": "ns/iter",
+            "extra": "iterations: 22046050\ncpu: 13.011368930035088 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarSpaceExpansion",
+            "value": 16.2180983848449,
+            "unit": "ns/iter",
+            "extra": "iterations: 17131805\ncpu: 16.21713853268817 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarMappedBasis",
+            "value": 27.572451487177904,
+            "unit": "ns/iter",
+            "extra": "iterations: 10235028\ncpu: 27.569840453782838 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorMappedBasis",
+            "value": 80.33211536289306,
+            "unit": "ns/iter",
+            "extra": "iterations: 3546063\ncpu: 80.32058398285643 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+            "value": 77.85576106192379,
+            "unit": "ns/iter",
+            "extra": "iterations: 3445311\ncpu: 77.839201453802 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+            "value": 68.57806026145494,
+            "unit": "ns/iter",
+            "extra": "iterations: 4050185\ncpu: 68.57208176910444 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarMappedBasis",
+            "value": 67.45210989682232,
+            "unit": "ns/iter",
+            "extra": "iterations: 4145961\ncpu: 67.4481694352648 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorMappedBasis",
+            "value": 198.26214274573238,
+            "unit": "ns/iter",
+            "extra": "iterations: 1410060\ncpu: 198.25091981901457 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3524850409962185,
+            "unit": "ns/iter",
+            "extra": "iterations: 795190483\ncpu: 0.3524014170074019 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.35174943658247315,
+            "unit": "ns/iter",
+            "extra": "iterations: 796217716\ncpu: 0.3517228672163831 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3517582616191793,
+            "unit": "ns/iter",
+            "extra": "iterations: 796561834\ncpu: 0.35173156187144183 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.3517648953376928,
+            "unit": "ns/iter",
+            "extra": "iterations: 796884478\ncpu: 0.3517295062685365 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 485.6122682684777,
+            "unit": "ns/iter",
+            "extra": "iterations: 597297\ncpu: 485.494005494754 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 95804.28360767366,
+            "unit": "ns/iter",
+            "extra": "iterations: 2916\ncpu: 95786.05109739359 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 408420.1138685407,
+            "unit": "ns/iter",
+            "extra": "iterations: 685\ncpu: 408394.0963503648 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 775.5214636192261,
+            "unit": "ns/iter",
+            "extra": "iterations: 360121\ncpu: 775.4384137553757 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 167565.45292010775,
+            "unit": "ns/iter",
+            "extra": "iterations: 1678\ncpu: 167561.6686531584 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 711381.7499999892,
+            "unit": "ns/iter",
+            "extra": "iterations: 392\ncpu: 711255.2653061231 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 150681.52979414907,
+            "unit": "ns/iter",
+            "extra": "iterations: 1846\ncpu: 150667.81473456149 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 159443.37471125758,
+            "unit": "ns/iter",
+            "extra": "iterations: 1732\ncpu: 159411.44399538075 ns\nthreads: 1"
+          },
+          {
+            "name": "P1RankOneSpecialized",
+            "value": 619121.9066666538,
+            "unit": "ns/iter",
+            "extra": "iterations: 450\ncpu: 619094.1511111112 ns\nthreads: 1"
+          },
+          {
+            "name": "P1RankOneGeneric",
+            "value": 2536004.577981399,
+            "unit": "ns/iter",
+            "extra": "iterations: 109\ncpu: 2535963.981651366 ns\nthreads: 1"
+          },
+          {
+            "name": "H1P2RankOneSpecialized",
+            "value": 3299439.358973662,
+            "unit": "ns/iter",
+            "extra": "iterations: 78\ncpu: 3298534.782051281 ns\nthreads: 1"
+          },
+          {
+            "name": "H1P2RankOneGeneric",
+            "value": 22190847.91666622,
+            "unit": "ns/iter",
+            "extra": "iterations: 12\ncpu: 22186602.333333325 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 16091.782168538171,
+            "unit": "ns/iter",
+            "extra": "iterations: 17385\ncpu: 16089.29542709239 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6487644.116281296,
+            "unit": "ns/iter",
+            "extra": "iterations: 43\ncpu: 6487527.883720934 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 110009.92994881692,
+            "unit": "ns/iter",
+            "extra": "iterations: 2541\ncpu: 110003.59031877216 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2078588.0298510517,
+            "unit": "ns/iter",
+            "extra": "iterations: 134\ncpu: 2077976.6791044679 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9185557.199998584,
+            "unit": "ns/iter",
+            "extra": "iterations: 30\ncpu: 9184977.100000028 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 63842203.25000456,
+            "unit": "ns/iter",
+            "extra": "iterations: 4\ncpu: 63833496.50000003 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 387690569.0000285,
+            "unit": "ns/iter",
+            "extra": "iterations: 1\ncpu: 387632752.99999833 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_AllPairs",
+            "value": 1105669.2103199875,
+            "unit": "ns/iter",
+            "extra": "iterations: 252\ncpu: 1105676.3849206402 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_AllPairs",
+            "value": 17.001657907387443,
+            "unit": "ns/iter",
+            "extra": "iterations: 16704190\ncpu: 16.99958208090307 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+            "value": 1104082.9011812734,
+            "unit": "ns/iter",
+            "extra": "iterations: 253\ncpu: 1103838.758893276 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_1",
+            "value": 812638.5838144904,
+            "unit": "ns/iter",
+            "extra": "iterations: 346\ncpu: 812469.9479769215 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_0",
+            "value": 298860.30150089436,
+            "unit": "ns/iter",
+            "extra": "iterations: 932\ncpu: 298612.03969966026 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_1",
+            "value": 830696.4156960618,
+            "unit": "ns/iter",
+            "extra": "iterations: 344\ncpu: 830520.9273255187 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_0",
+            "value": 4.223058468024093,
+            "unit": "ns/iter",
+            "extra": "iterations: 66301213\ncpu: 4.222288572608792 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_1",
+            "value": 4.2209401564478535,
+            "unit": "ns/iter",
+            "extra": "iterations: 66376123\ncpu: 4.219176916976632 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_0",
+            "value": 2.8122287654181837,
+            "unit": "ns/iter",
+            "extra": "iterations: 99604740\ncpu: 2.812060520413002 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_1",
+            "value": 4.219532599820528,
+            "unit": "ns/iter",
+            "extra": "iterations: 66319016\ncpu: 4.21910331118299 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_AllPairs",
+            "value": 8714376.81249887,
+            "unit": "ns/iter",
+            "extra": "iterations: 32\ncpu: 8711260.343750026 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_AllPairs",
+            "value": 41.87500252706882,
+            "unit": "ns/iter",
+            "extra": "iterations: 6677719\ncpu: 41.874339276629954 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_1",
+            "value": 5386124.51923261,
+            "unit": "ns/iter",
+            "extra": "iterations: 52\ncpu: 5383685.28846167 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_2",
+            "value": 6084412.826072841,
+            "unit": "ns/iter",
+            "extra": "iterations: 46\ncpu: 6083581.913043561 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_2",
+            "value": 2151094.5671600406,
+            "unit": "ns/iter",
+            "extra": "iterations: 134\ncpu: 2150694.1194030168 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_1",
+            "value": 7635809.297303118,
+            "unit": "ns/iter",
+            "extra": "iterations: 37\ncpu: 7635316.2432431225 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_1",
+            "value": 4.929095794918721,
+            "unit": "ns/iter",
+            "extra": "iterations: 56717299\ncpu: 4.927907638902199 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_2",
+            "value": 4.928101013105639,
+            "unit": "ns/iter",
+            "extra": "iterations: 56908813\ncpu: 4.927680761853174 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_2",
+            "value": 4.222942423878165,
+            "unit": "ns/iter",
+            "extra": "iterations: 66338056\ncpu: 4.2225741586397785 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_1",
+            "value": 5.626628528855785,
+            "unit": "ns/iter",
+            "extra": "iterations: 49815129\ncpu: 5.626302101917677 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Build_1",
+            "value": 3828805.7671239856,
+            "unit": "ns/iter",
+            "extra": "iterations: 73\ncpu: 3828358.7260273155 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Build_1",
+            "value": 1369455.257422442,
+            "unit": "ns/iter",
+            "extra": "iterations: 202\ncpu: 1369459.7623762998 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Transpose_1_2",
+            "value": 2171782.3178283484,
+            "unit": "ns/iter",
+            "extra": "iterations: 129\ncpu: 2171354.635659213 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Transpose_1_2",
+            "value": 555902.4911588955,
+            "unit": "ns/iter",
+            "extra": "iterations: 509\ncpu: 556149.889980342 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_2_2_via_0",
+            "value": 1895256.000003164,
+            "unit": "ns/iter",
+            "extra": "iterations: 148\ncpu: 1895019.5675677322 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_2_2_via_0",
+            "value": 1168498.5950397796,
+            "unit": "ns/iter",
+            "extra": "iterations: 242\ncpu: 1168453.9380165176 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_1_1_via_0",
+            "value": 3444171.609757865,
+            "unit": "ns/iter",
+            "extra": "iterations: 82\ncpu: 3443925.243902669 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_1_1_via_0",
+            "value": 1682519.1104700489,
+            "unit": "ns/iter",
+            "extra": "iterations: 172\ncpu: 1682564.546511624 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_AllPairs",
+            "value": 5493519.529418157,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 5493264.470588222 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_AllPairs",
+            "value": 42.01966849774589,
+            "unit": "ns/iter",
+            "extra": "iterations: 6661312\ncpu: 42.016468377401 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_1",
+            "value": 3175845.0795510127,
+            "unit": "ns/iter",
+            "extra": "iterations: 88\ncpu: 3175371.8409091635 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_2",
+            "value": 3607104.623377488,
+            "unit": "ns/iter",
+            "extra": "iterations: 77\ncpu: 3607207.8441560213 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_2",
+            "value": 1141724.768294678,
+            "unit": "ns/iter",
+            "extra": "iterations: 246\ncpu: 1141669.1788616537 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_1",
+            "value": 4491363.064509583,
+            "unit": "ns/iter",
+            "extra": "iterations: 62\ncpu: 4491332.6612904295 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_1",
+            "value": 4.929666605225956,
+            "unit": "ns/iter",
+            "extra": "iterations: 56678723\ncpu: 4.929587069207585 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_2",
+            "value": 4.9279287267709515,
+            "unit": "ns/iter",
+            "extra": "iterations: 56669694\ncpu: 4.927443476225575 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+            "value": 4.228352654695642,
+            "unit": "ns/iter",
+            "extra": "iterations: 66410776\ncpu: 4.227572028370815 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_1",
+            "value": 5.635289997712488,
+            "unit": "ns/iter",
+            "extra": "iterations: 49798031\ncpu: 5.634941991983571 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Build_1",
+            "value": 2330211.082650283,
+            "unit": "ns/iter",
+            "extra": "iterations: 121\ncpu: 2330109.016528895 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Build_1",
+            "value": 820949.2089568514,
+            "unit": "ns/iter",
+            "extra": "iterations: 335\ncpu: 821056.8776116273 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Transpose_1_2",
+            "value": 1364660.5686247705,
+            "unit": "ns/iter",
+            "extra": "iterations: 204\ncpu: 1364491.5343138997 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Transpose_1_2",
+            "value": 356582.4097311298,
+            "unit": "ns/iter",
+            "extra": "iterations: 781\ncpu: 356729.6952623951 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_2_2_via_0",
+            "value": 977284.2826882702,
+            "unit": "ns/iter",
+            "extra": "iterations: 283\ncpu: 976887.0176678365 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_2_2_via_0",
+            "value": 487663.7111932714,
+            "unit": "ns/iter",
+            "extra": "iterations: 554\ncpu: 487822.2274366118 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_1_1_via_0",
+            "value": 2054172.3529327235,
+            "unit": "ns/iter",
+            "extra": "iterations: 136\ncpu: 2053771.3676464935 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_1_1_via_0",
+            "value": 851617.8079309927,
+            "unit": "ns/iter",
+            "extra": "iterations: 328\ncpu: 851708.2865851985 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_AllPairs",
+            "value": 79824039.33336475,
+            "unit": "ns/iter",
+            "extra": "iterations: 3\ncpu: 79823335.66666473 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_AllPairs",
+            "value": 78.57568633574994,
+            "unit": "ns/iter",
+            "extra": "iterations: 3559883\ncpu: 78.56773214175826 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_1",
+            "value": 21290803.46152862,
+            "unit": "ns/iter",
+            "extra": "iterations: 13\ncpu: 21288466.461537763 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_2",
+            "value": 24062849.33332851,
+            "unit": "ns/iter",
+            "extra": "iterations: 12\ncpu: 24062952.4166683 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_2_3",
+            "value": 26873858.90000087,
+            "unit": "ns/iter",
+            "extra": "iterations: 10\ncpu: 26871142.6000003 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_3",
+            "value": 9639390.034478843,
+            "unit": "ns/iter",
+            "extra": "iterations: 29\ncpu: 9637729.48275844 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_1",
+            "value": 4.927428723301116,
+            "unit": "ns/iter",
+            "extra": "iterations: 56916251\ncpu: 4.926604828557748 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_2",
+            "value": 4.922733036087581,
+            "unit": "ns/iter",
+            "extra": "iterations: 56621016\ncpu: 4.922605980789808 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_2_3",
+            "value": 4.951472084160458,
+            "unit": "ns/iter",
+            "extra": "iterations: 56858366\ncpu: 4.950824738790395 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_3",
+            "value": 4.225604726335773,
+            "unit": "ns/iter",
+            "extra": "iterations: 66196224\ncpu: 4.2248575387019 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_1",
+            "value": 11616938.375008583,
+            "unit": "ns/iter",
+            "extra": "iterations: 24\ncpu: 11615755.666668134 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_1",
+            "value": 7186336.6923095705,
+            "unit": "ns/iter",
+            "extra": "iterations: 39\ncpu: 7186411.923077011 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_2",
+            "value": 14930453.684200983,
+            "unit": "ns/iter",
+            "extra": "iterations: 19\ncpu: 14928823.21052678 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_2",
+            "value": 5866426.791672078,
+            "unit": "ns/iter",
+            "extra": "iterations: 48\ncpu: 5866161.229166463 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Transpose_2_3",
+            "value": 7202706.274992466,
+            "unit": "ns/iter",
+            "extra": "iterations: 40\ncpu: 7201543.575000358 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Transpose_2_3",
+            "value": 1896833.4027754785,
+            "unit": "ns/iter",
+            "extra": "iterations: 144\ncpu: 1896736.6041663997 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_0",
+            "value": 9328306.718742851,
+            "unit": "ns/iter",
+            "extra": "iterations: 32\ncpu: 9327144.812499411 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_0",
+            "value": 7978095.461523411,
+            "unit": "ns/iter",
+            "extra": "iterations: 39\ncpu: 7977138.948718131 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_2",
+            "value": 7317493.894743764,
+            "unit": "ns/iter",
+            "extra": "iterations: 38\ncpu: 7315473.157895457 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_2",
+            "value": 1755760.449365817,
+            "unit": "ns/iter",
+            "extra": "iterations: 158\ncpu: 1755906.1455698353 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_AllPairs",
+            "value": 17925842.187480614,
+            "unit": "ns/iter",
+            "extra": "iterations: 16\ncpu: 17925377.437500335 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_AllPairs",
+            "value": 78.45162131647399,
+            "unit": "ns/iter",
+            "extra": "iterations: 3565806\ncpu: 78.44613139357666 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_1",
+            "value": 5274495.592600572,
+            "unit": "ns/iter",
+            "extra": "iterations: 54\ncpu: 5274331.851851941 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_2",
+            "value": 4476074.333331507,
+            "unit": "ns/iter",
+            "extra": "iterations: 63\ncpu: 4475368.6190477405 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_2_3",
+            "value": 5033909.589290683,
+            "unit": "ns/iter",
+            "extra": "iterations: 56\ncpu: 5033723.928571758 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_3",
+            "value": 1359568.485436417,
+            "unit": "ns/iter",
+            "extra": "iterations: 206\ncpu: 1359522.2961166047 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_1",
+            "value": 4.969303351748551,
+            "unit": "ns/iter",
+            "extra": "iterations: 56689642\ncpu: 4.9686393327373315 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_2",
+            "value": 4.92883864576725,
+            "unit": "ns/iter",
+            "extra": "iterations: 56913307\ncpu: 4.928756397866698 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_2_3",
+            "value": 4.931084280792689,
+            "unit": "ns/iter",
+            "extra": "iterations: 56597581\ncpu: 4.9305753897855675 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_3",
+            "value": 4.22291950530105,
+            "unit": "ns/iter",
+            "extra": "iterations: 66402969\ncpu: 4.2226371685277915 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_1",
+            "value": 4053695.3333339235,
+            "unit": "ns/iter",
+            "extra": "iterations: 69\ncpu: 4053712.710144638 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_1",
+            "value": 2186315.370079497,
+            "unit": "ns/iter",
+            "extra": "iterations: 127\ncpu: 2186110.708661969 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_2",
+            "value": 3357544.3011948178,
+            "unit": "ns/iter",
+            "extra": "iterations: 83\ncpu: 3357177.8915662677 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_2",
+            "value": 1344730.8365412115,
+            "unit": "ns/iter",
+            "extra": "iterations: 208\ncpu: 1344864.1634615872 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Transpose_2_3",
+            "value": 1686002.8975888344,
+            "unit": "ns/iter",
+            "extra": "iterations: 166\ncpu: 1685549.3132527994 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Transpose_2_3",
+            "value": 471884.1494043175,
+            "unit": "ns/iter",
+            "extra": "iterations: 589\ncpu: 472051.8166384108 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_0",
+            "value": 1166235.5523037938,
+            "unit": "ns/iter",
+            "extra": "iterations: 239\ncpu: 1165854.7615063093 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_0",
+            "value": 730393.1415365766,
+            "unit": "ns/iter",
+            "extra": "iterations: 325\ncpu: 730513.4984616538 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_2",
+            "value": 1766160.0126579101,
+            "unit": "ns/iter",
+            "extra": "iterations: 158\ncpu: 1765504.7848102802 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_2",
+            "value": 416870.0685544124,
+            "unit": "ns/iter",
+            "extra": "iterations: 671\ncpu: 417043.39791406837 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_AllPairs",
+            "value": 30031499.22220574,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 30030634.333335295 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_AllPairs",
+            "value": 78.46646208403331,
+            "unit": "ns/iter",
+            "extra": "iterations: 3572151\ncpu: 78.4600399031287 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_1",
+            "value": 8005594.542860958,
+            "unit": "ns/iter",
+            "extra": "iterations: 35\ncpu: 8004900.599999588 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_2",
+            "value": 8438643.78788167,
+            "unit": "ns/iter",
+            "extra": "iterations: 33\ncpu: 8437179.545454701 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_2_3",
+            "value": 9463322.533338215,
+            "unit": "ns/iter",
+            "extra": "iterations: 30\ncpu: 9463442.63333335 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_3",
+            "value": 2601489.7870401945,
+            "unit": "ns/iter",
+            "extra": "iterations: 108\ncpu: 2601285.5277777193 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_1",
+            "value": 4.925830538895958,
+            "unit": "ns/iter",
+            "extra": "iterations: 56858806\ncpu: 4.92489399091483 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_2",
+            "value": 4.927270169885945,
+            "unit": "ns/iter",
+            "extra": "iterations: 56549204\ncpu: 4.926386673806991 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_2_3",
+            "value": 4.935293489882304,
+            "unit": "ns/iter",
+            "extra": "iterations: 56868451\ncpu: 4.934526808194707 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_3",
+            "value": 4.223400351082941,
+            "unit": "ns/iter",
+            "extra": "iterations: 66155657\ncpu: 4.223335307515675 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_1",
+            "value": 5816216.041660975,
+            "unit": "ns/iter",
+            "extra": "iterations: 48\ncpu: 5815891.1666668095 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_1",
+            "value": 3677110.324673918,
+            "unit": "ns/iter",
+            "extra": "iterations: 77\ncpu: 3676828.493505715 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_2",
+            "value": 6277832.066679264,
+            "unit": "ns/iter",
+            "extra": "iterations: 45\ncpu: 6277334.444444213 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_2",
+            "value": 2322602.7438092637,
+            "unit": "ns/iter",
+            "extra": "iterations: 121\ncpu: 2322615.950413294 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Transpose_2_3",
+            "value": 2922096.0416675247,
+            "unit": "ns/iter",
+            "extra": "iterations: 96\ncpu: 2921409.760416586 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Transpose_2_3",
+            "value": 795474.388095945,
+            "unit": "ns/iter",
+            "extra": "iterations: 353\ncpu: 795522.804532589 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_0",
+            "value": 2337818.0677938825,
+            "unit": "ns/iter",
+            "extra": "iterations: 118\ncpu: 2337354.6440676716 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_0",
+            "value": 1653424.6918564446,
+            "unit": "ns/iter",
+            "extra": "iterations: 172\ncpu: 1653444.9302333721 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_2",
+            "value": 3082622.4835166885,
+            "unit": "ns/iter",
+            "extra": "iterations: 91\ncpu: 3081966.1758241095 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_2",
+            "value": 720095.3989641732,
+            "unit": "ns/iter",
+            "extra": "iterations: 386\ncpu: 720247.126942739 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/BasisLoad",
+            "value": 15217.82189533571,
+            "unit": "ns/iter",
+            "extra": "iterations: 18287\ncpu: 15214.034833488713 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/SourceLoad",
+            "value": 13604.211448480804,
+            "unit": "ns/iter",
+            "extra": "iterations: 20090\ncpu: 13603.295669487257 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericFluxLoad",
+            "value": 26910.71765616563,
+            "unit": "ns/iter",
+            "extra": "iterations: 10342\ncpu: 26908.541481338278 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/Mass",
+            "value": 22401.260205298124,
+            "unit": "ns/iter",
+            "extra": "iterations: 12567\ncpu: 22399.151667064445 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedMass",
+            "value": 25582.20935824068,
+            "unit": "ns/iter",
+            "extra": "iterations: 10814\ncpu: 25579.578139448688 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/OuterWeightedMass",
+            "value": 25433.58040497166,
+            "unit": "ns/iter",
+            "extra": "iterations: 11013\ncpu: 25431.397439390406 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GridFunctionWeightedMass",
+            "value": 47660.644315853075,
+            "unit": "ns/iter",
+            "extra": "iterations: 5876\ncpu: 47647.00782845507 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GradGrad",
+            "value": 20586.936084435372,
+            "unit": "ns/iter",
+            "extra": "iterations: 13643\ncpu: 20583.318918126548 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedGradGrad",
+            "value": 28430.068141872092,
+            "unit": "ns/iter",
+            "extra": "iterations: 9671\ncpu: 28426.762692586515 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorMass",
+            "value": 59708.30879521578,
+            "unit": "ns/iter",
+            "extra": "iterations: 4673\ncpu: 59693.64797774346 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorSourceLoad",
+            "value": 34391.22073455244,
+            "unit": "ns/iter",
+            "extra": "iterations: 8141\ncpu: 34387.53494656709 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/AnisotropicMass",
+            "value": 88175.43618028336,
+            "unit": "ns/iter",
+            "extra": "iterations: 3173\ncpu: 88170.33312322487 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/JacobianJacobian",
+            "value": 65138.98159796218,
+            "unit": "ns/iter",
+            "extra": "iterations: 4293\ncpu: 65118.98183088744 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedJacobianJacobian",
+            "value": 82507.02736099053,
+            "unit": "ns/iter",
+            "extra": "iterations: 3399\ncpu: 82502.26184171677 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/Advection",
+            "value": 64598.99329946621,
+            "unit": "ns/iter",
+            "extra": "iterations: 4328\ncpu: 64590.845194087466 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GridFunctionAdvection",
+            "value": 133155.57952377535,
+            "unit": "ns/iter",
+            "extra": "iterations: 2100\ncpu: 133148.30047619352 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/DivPressure",
+            "value": 20935.94711999957,
+            "unit": "ns/iter",
+            "extra": "iterations: 13559\ncpu: 20935.08533077654 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/PressureDiv",
+            "value": 24211.025751448033,
+            "unit": "ns/iter",
+            "extra": "iterations: 11611\ncpu: 24210.68934630978 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericDivDiv",
+            "value": 59391.78900632309,
+            "unit": "ns/iter",
+            "extra": "iterations: 4730\ncpu: 59374.434672304764 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericElasticity",
+            "value": 255824.46901018816,
+            "unit": "ns/iter",
+            "extra": "iterations: 1081\ncpu: 255789.329324703 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/BasisLoad",
+            "value": 11782.46108884131,
+            "unit": "ns/iter",
+            "extra": "iterations: 23952\ncpu: 11781.421342685291 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/SourceLoad",
+            "value": 11625.496992093598,
+            "unit": "ns/iter",
+            "extra": "iterations: 23272\ncpu: 11624.706729116126 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericFluxLoad",
+            "value": 23480.325506846828,
+            "unit": "ns/iter",
+            "extra": "iterations: 12479\ncpu: 23477.94454683857 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/Mass",
+            "value": 23308.130071201645,
+            "unit": "ns/iter",
+            "extra": "iterations: 12078\ncpu: 23303.58213280322 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedMass",
+            "value": 22779.822630469684,
+            "unit": "ns/iter",
+            "extra": "iterations: 12302\ncpu: 22774.702893838654 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/OuterWeightedMass",
+            "value": 22330.486179898333,
+            "unit": "ns/iter",
+            "extra": "iterations: 12518\ncpu: 22329.176386004427 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GridFunctionWeightedMass",
+            "value": 53483.42925432081,
+            "unit": "ns/iter",
+            "extra": "iterations: 5230\ncpu: 53481.48260038338 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GradGrad",
+            "value": 22122.394322763845,
+            "unit": "ns/iter",
+            "extra": "iterations: 12647\ncpu: 22120.756147703545 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedGradGrad",
+            "value": 20794.39441665666,
+            "unit": "ns/iter",
+            "extra": "iterations: 13397\ncpu: 20793.165634097273 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/VectorMass",
+            "value": 37534.14729929622,
+            "unit": "ns/iter",
+            "extra": "iterations: 7461\ncpu: 37532.054148238036 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/VectorSourceLoad",
+            "value": 13149.800420923044,
+            "unit": "ns/iter",
+            "extra": "iterations: 22332\ncpu: 13147.820213146915 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/AnisotropicMass",
+            "value": 52915.947487728365,
+            "unit": "ns/iter",
+            "extra": "iterations: 5294\ncpu: 52910.81771817158 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/JacobianJacobian",
+            "value": 37376.62798452865,
+            "unit": "ns/iter",
+            "extra": "iterations: 7497\ncpu: 37371.23822862436 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedJacobianJacobian",
+            "value": 37212.6741042081,
+            "unit": "ns/iter",
+            "extra": "iterations: 7619\ncpu: 37210.43312770589 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/Advection",
+            "value": 35332.912247712855,
+            "unit": "ns/iter",
+            "extra": "iterations: 7977\ncpu: 35330.768208599824 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GridFunctionAdvection",
+            "value": 120366.9822894315,
+            "unit": "ns/iter",
+            "extra": "iterations: 2315\ncpu: 120334.83023758112 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/DivPressure",
+            "value": 23486.12052225877,
+            "unit": "ns/iter",
+            "extra": "iterations: 11948\ncpu: 23482.49338801444 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/PressureDiv",
+            "value": 22722.64542190036,
+            "unit": "ns/iter",
+            "extra": "iterations: 12254\ncpu: 22721.461971600816 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericDivDiv",
+            "value": 60121.60713512334,
+            "unit": "ns/iter",
+            "extra": "iterations: 4625\ncpu: 60105.6287567595 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericElasticity",
+            "value": 338112.5572978632,
+            "unit": "ns/iter",
+            "extra": "iterations: 829\ncpu: 338098.20024125755 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/BasisLoad",
+            "value": 14616.886152074669,
+            "unit": "ns/iter",
+            "extra": "iterations: 19122\ncpu: 14615.583777847518 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/SourceLoad",
+            "value": 16062.337922330504,
+            "unit": "ns/iter",
+            "extra": "iterations: 17433\ncpu: 16057.58033614449 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericFluxLoad",
+            "value": 29346.57016528917,
+            "unit": "ns/iter",
+            "extra": "iterations: 9499\ncpu: 29342.394146751987 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/Mass",
+            "value": 57425.01616532759,
+            "unit": "ns/iter",
+            "extra": "iterations: 4887\ncpu: 57421.183548190085 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedMass",
+            "value": 66896.42870814339,
+            "unit": "ns/iter",
+            "extra": "iterations: 4180\ncpu: 66891.56052631592 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/OuterWeightedMass",
+            "value": 67214.90002396276,
+            "unit": "ns/iter",
+            "extra": "iterations: 4171\ncpu: 67213.79860944666 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GridFunctionWeightedMass",
+            "value": 240495.09905252792,
+            "unit": "ns/iter",
+            "extra": "iterations: 1161\ncpu: 240490.65805341347 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GradGrad",
+            "value": 60070.866067618466,
+            "unit": "ns/iter",
+            "extra": "iterations: 4674\ncpu: 60064.14955070725 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedGradGrad",
+            "value": 67807.19490909563,
+            "unit": "ns/iter",
+            "extra": "iterations: 4125\ncpu: 67798.0150303001 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/VectorMass",
+            "value": 116683.82411644151,
+            "unit": "ns/iter",
+            "extra": "iterations: 2405\ncpu: 116661.09022868938 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/VectorSourceLoad",
+            "value": 23563.000253312228,
+            "unit": "ns/iter",
+            "extra": "iterations: 11843\ncpu: 23562.656505952767 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/AnisotropicMass",
+            "value": 214316.16937353864,
+            "unit": "ns/iter",
+            "extra": "iterations: 1293\ncpu: 214294.87161639755 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/JacobianJacobian",
+            "value": 126869.02585032005,
+            "unit": "ns/iter",
+            "extra": "iterations: 2205\ncpu: 126860.84081632526 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedJacobianJacobian",
+            "value": 130580.367365971,
+            "unit": "ns/iter",
+            "extra": "iterations: 2145\ncpu: 130564.44568764375 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/Advection",
+            "value": 167730.0233532532,
+            "unit": "ns/iter",
+            "extra": "iterations: 1670\ncpu: 167719.03113771728 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GridFunctionAdvection",
+            "value": 517028.81666655134,
+            "unit": "ns/iter",
+            "extra": "iterations: 540\ncpu: 516951.29814814526 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/DivPressure",
+            "value": 80407.88304596071,
+            "unit": "ns/iter",
+            "extra": "iterations: 3480\ncpu: 80402.2008620705 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/PressureDiv",
+            "value": 87284.39538510592,
+            "unit": "ns/iter",
+            "extra": "iterations: 3207\ncpu: 87278.27564702512 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericDivDiv",
+            "value": 184924.28373019182,
+            "unit": "ns/iter",
+            "extra": "iterations: 1512\ncpu: 184906.23015873332 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericElasticity",
+            "value": 3273119.919539902,
+            "unit": "ns/iter",
+            "extra": "iterations: 87\ncpu: 3272893.6091954196 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/BasisLoad",
+            "value": 17959.457597512785,
+            "unit": "ns/iter",
+            "extra": "iterations: 15459\ncpu: 17958.032602367533 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/SourceLoad",
+            "value": 21039.43640000807,
+            "unit": "ns/iter",
+            "extra": "iterations: 10000\ncpu: 21036.89439999954 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericFluxLoad",
+            "value": 96522.25411844159,
+            "unit": "ns/iter",
+            "extra": "iterations: 2853\ncpu: 96520.39607430689 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/Mass",
+            "value": 167728.0041940948,
+            "unit": "ns/iter",
+            "extra": "iterations: 1669\ncpu: 167693.56440982968 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedMass",
+            "value": 226180.2188770659,
+            "unit": "ns/iter",
+            "extra": "iterations: 1229\ncpu: 226150.99104962865 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/OuterWeightedMass",
+            "value": 227049.57213114,
+            "unit": "ns/iter",
+            "extra": "iterations: 1220\ncpu: 227018.1868852449 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GridFunctionWeightedMass",
+            "value": 1251819.535714357,
+            "unit": "ns/iter",
+            "extra": "iterations: 224\ncpu: 1251653.7767857423 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GradGrad",
+            "value": 176633.12988645356,
+            "unit": "ns/iter",
+            "extra": "iterations: 1586\ncpu: 176630.1941992428 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedGradGrad",
+            "value": 256132.6737132131,
+            "unit": "ns/iter",
+            "extra": "iterations: 1088\ncpu: 256102.83915441576 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/VectorMass",
+            "value": 346612.8304239363,
+            "unit": "ns/iter",
+            "extra": "iterations: 802\ncpu: 346594.7930174573 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/VectorSourceLoad",
+            "value": 43513.99190155888,
+            "unit": "ns/iter",
+            "extra": "iterations: 6421\ncpu: 43510.88490889265 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/AnisotropicMass",
+            "value": 811145.4434781438,
+            "unit": "ns/iter",
+            "extra": "iterations: 345\ncpu: 811064.1333333262 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/JacobianJacobian",
+            "value": 411915.5029071027,
+            "unit": "ns/iter",
+            "extra": "iterations: 688\ncpu: 411894.3415697588 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedJacobianJacobian",
+            "value": 391577.06451614155,
+            "unit": "ns/iter",
+            "extra": "iterations: 713\ncpu: 391571.1290322579 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/Advection",
+            "value": 669073.5837319305,
+            "unit": "ns/iter",
+            "extra": "iterations: 418\ncpu: 668962.3732057454 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GridFunctionAdvection",
+            "value": 3190791.2758619017,
+            "unit": "ns/iter",
+            "extra": "iterations: 87\ncpu: 3190428.35632178 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/DivPressure",
+            "value": 287878.8659793911,
+            "unit": "ns/iter",
+            "extra": "iterations: 970\ncpu: 287856.8886597944 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/PressureDiv",
+            "value": 292753.0693277148,
+            "unit": "ns/iter",
+            "extra": "iterations: 952\ncpu: 292722.46428571834 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericDivDiv",
+            "value": 828228.1721069325,
+            "unit": "ns/iter",
+            "extra": "iterations: 337\ncpu: 828187.3887240158 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericElasticity",
+            "value": 16573987.294116385,
+            "unit": "ns/iter",
+            "extra": "iterations: 17\ncpu: 16572584.705882907 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/BasisLoad",
+            "value": 15983.29827752408,
+            "unit": "ns/iter",
+            "extra": "iterations: 17591\ncpu: 15981.586436245178 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/SourceLoad",
+            "value": 13434.032290610656,
+            "unit": "ns/iter",
+            "extra": "iterations: 20811\ncpu: 13433.13199750184 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericFluxLoad",
+            "value": 40108.085056816504,
+            "unit": "ns/iter",
+            "extra": "iterations: 6866\ncpu: 40100.00189338833 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/Mass",
+            "value": 27731.74724192062,
+            "unit": "ns/iter",
+            "extra": "iterations: 10152\ncpu: 27729.52393617063 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedMass",
+            "value": 37026.055812723745,
+            "unit": "ns/iter",
+            "extra": "iterations: 7561\ncpu: 37025.39769871584 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/OuterWeightedMass",
+            "value": 36997.74273639805,
+            "unit": "ns/iter",
+            "extra": "iterations: 7572\ncpu: 36993.53262017786 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GridFunctionWeightedMass",
+            "value": 74724.17870518216,
+            "unit": "ns/iter",
+            "extra": "iterations: 3738\ncpu: 74714.96655965647 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GradGrad",
+            "value": 26212.155532553978,
+            "unit": "ns/iter",
+            "extra": "iterations: 10628\ncpu: 26210.60133609224 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedGradGrad",
+            "value": 39801.39960012506,
+            "unit": "ns/iter",
+            "extra": "iterations: 7002\ncpu: 39796.934590117715 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorMass",
+            "value": 190593.0653061214,
+            "unit": "ns/iter",
+            "extra": "iterations: 1470\ncpu: 190584.9006802674 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorSourceLoad",
+            "value": 47022.28826101288,
+            "unit": "ns/iter",
+            "extra": "iterations: 5946\ncpu: 47009.263538512365 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/AnisotropicMass",
+            "value": 320026.9037799594,
+            "unit": "ns/iter",
+            "extra": "iterations: 873\ncpu: 319979.9553264466 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/JacobianJacobian",
+            "value": 289481.20829017565,
+            "unit": "ns/iter",
+            "extra": "iterations: 965\ncpu: 289476.21139896073 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedJacobianJacobian",
+            "value": 362158.3156532624,
+            "unit": "ns/iter",
+            "extra": "iterations: 773\ncpu: 362074.8188874603 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/Advection",
+            "value": 156289.26809960412,
+            "unit": "ns/iter",
+            "extra": "iterations: 1768\ncpu: 156278.94174207738 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GridFunctionAdvection",
+            "value": 465859.8485856239,
+            "unit": "ns/iter",
+            "extra": "iterations: 601\ncpu: 465821.37104823615 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/DivPressure",
+            "value": 37967.26502102683,
+            "unit": "ns/iter",
+            "extra": "iterations: 7373\ncpu: 37955.03621321124 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/PressureDiv",
+            "value": 43231.265781741335,
+            "unit": "ns/iter",
+            "extra": "iterations: 6479\ncpu: 43225.91279518374 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericDivDiv",
+            "value": 111979.84996005429,
+            "unit": "ns/iter",
+            "extra": "iterations: 2506\ncpu: 111972.49880287836 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericElasticity",
+            "value": 724185.6821705727,
+            "unit": "ns/iter",
+            "extra": "iterations: 387\ncpu: 724150.0568475376 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/BasisLoad",
+            "value": 18388.714538546014,
+            "unit": "ns/iter",
+            "extra": "iterations: 15256\ncpu: 18387.056764551722 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/SourceLoad",
+            "value": 19957.686044007754,
+            "unit": "ns/iter",
+            "extra": "iterations: 13951\ncpu: 19953.459250232252 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericFluxLoad",
+            "value": 61416.17848517731,
+            "unit": "ns/iter",
+            "extra": "iterations: 4555\ncpu: 61404.269154775546 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/Mass",
+            "value": 165237.38770683366,
+            "unit": "ns/iter",
+            "extra": "iterations: 1692\ncpu: 165227.61288416342 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedMass",
+            "value": 227997.18564360458,
+            "unit": "ns/iter",
+            "extra": "iterations: 1212\ncpu: 227981.8374587532 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/OuterWeightedMass",
+            "value": 227016.4868636942,
+            "unit": "ns/iter",
+            "extra": "iterations: 1218\ncpu: 226995.03448274903 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GridFunctionWeightedMass",
+            "value": 1073168.146154138,
+            "unit": "ns/iter",
+            "extra": "iterations: 260\ncpu: 1073114.2230769072 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GradGrad",
+            "value": 162337.3495652007,
+            "unit": "ns/iter",
+            "extra": "iterations: 1725\ncpu: 162310.65275362192 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedGradGrad",
+            "value": 204016.90909091133,
+            "unit": "ns/iter",
+            "extra": "iterations: 1364\ncpu: 203995.19061583298 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/VectorMass",
+            "value": 628988.0158015243,
+            "unit": "ns/iter",
+            "extra": "iterations: 443\ncpu: 628846.8577878092 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/VectorSourceLoad",
+            "value": 63965.404898125795,
+            "unit": "ns/iter",
+            "extra": "iterations: 4369\ncpu: 63956.65300984176 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/AnisotropicMass",
+            "value": 1591478.414772625,
+            "unit": "ns/iter",
+            "extra": "iterations: 176\ncpu: 1591407.028409057 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/JacobianJacobian",
+            "value": 639483.2196797251,
+            "unit": "ns/iter",
+            "extra": "iterations: 437\ncpu: 639294.2654462174 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedJacobianJacobian",
+            "value": 625631.9977627586,
+            "unit": "ns/iter",
+            "extra": "iterations: 447\ncpu: 625524.3579418283 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/Advection",
+            "value": 809721.7543354286,
+            "unit": "ns/iter",
+            "extra": "iterations: 346\ncpu: 809670.3583814953 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GridFunctionAdvection",
+            "value": 3076336.777778326,
+            "unit": "ns/iter",
+            "extra": "iterations: 90\ncpu: 3075706.877777722 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/DivPressure",
+            "value": 338738.6488730756,
+            "unit": "ns/iter",
+            "extra": "iterations: 843\ncpu: 338715.9122182655 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/PressureDiv",
+            "value": 384389.05241381977,
+            "unit": "ns/iter",
+            "extra": "iterations: 725\ncpu: 384367.5434482771 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericDivDiv",
+            "value": 609541.2183407458,
+            "unit": "ns/iter",
+            "extra": "iterations: 458\ncpu: 609312.5786026319 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericElasticity",
+            "value": 29020268.80000221,
+            "unit": "ns/iter",
+            "extra": "iterations: 10\ncpu: 29015072.900000405 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReassemblyMass",
+            "value": 34557.51232808059,
+            "unit": "ns/iter",
+            "extra": "iterations: 8071\ncpu: 34553.0097881305 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReassemblyGradGrad",
+            "value": 30072.065297700603,
+            "unit": "ns/iter",
+            "extra": "iterations: 9204\ncpu: 30065.95295523609 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReactionDiffusion",
+            "value": 63689.423347716154,
+            "unit": "ns/iter",
+            "extra": "iterations: 4403\ncpu: 63684.627753803914 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ColdMass",
+            "value": 35279.56667507183,
+            "unit": "ns/iter",
+            "extra": "iterations: 7934\ncpu: 35277.30325182819 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ColdGradGrad",
+            "value": 30729.75560932642,
+            "unit": "ns/iter",
+            "extra": "iterations: 9092\ncpu: 30720.96678398663 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/Elasticity",
+            "value": 368269.42819504876,
+            "unit": "ns/iter",
+            "extra": "iterations: 759\ncpu: 368234.55862978287 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReassemblyMass",
+            "value": 103878.26001484288,
+            "unit": "ns/iter",
+            "extra": "iterations: 2696\ncpu: 103868.92915430102 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReassemblyGradGrad",
+            "value": 108642.7233630335,
+            "unit": "ns/iter",
+            "extra": "iterations: 2581\ncpu: 108634.71910112482 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReactionDiffusion",
+            "value": 217803.6643572397,
+            "unit": "ns/iter",
+            "extra": "iterations: 1299\ncpu: 217794.80600461975 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ColdMass",
+            "value": 104384.8616941391,
+            "unit": "ns/iter",
+            "extra": "iterations: 2668\ncpu: 104364.57233883179 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ColdGradGrad",
+            "value": 109216.16867937664,
+            "unit": "ns/iter",
+            "extra": "iterations: 2567\ncpu: 109209.98246981307 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/Elasticity",
+            "value": 3826947.397261729,
+            "unit": "ns/iter",
+            "extra": "iterations: 73\ncpu: 3826396.561643758 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReassemblyMass",
+            "value": 311945.6783754323,
+            "unit": "ns/iter",
+            "extra": "iterations: 911\ncpu: 311875.24478594144 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReassemblyGradGrad",
+            "value": 321569.91504018253,
+            "unit": "ns/iter",
+            "extra": "iterations: 871\ncpu: 321564.55683122855 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReactionDiffusion",
+            "value": 622566.9218751863,
+            "unit": "ns/iter",
+            "extra": "iterations: 448\ncpu: 622465.8102678454 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ColdMass",
+            "value": 309330.571587112,
+            "unit": "ns/iter",
+            "extra": "iterations: 901\ncpu: 309268.94117647986 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ColdGradGrad",
+            "value": 320248.1931034736,
+            "unit": "ns/iter",
+            "extra": "iterations: 870\ncpu: 320203.05172414833 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/Elasticity",
+            "value": 18468078.799999904,
+            "unit": "ns/iter",
+            "extra": "iterations: 15\ncpu: 18466839.99999925 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReassemblyMass",
+            "value": 49968.02157763956,
+            "unit": "ns/iter",
+            "extra": "iterations: 5654\ncpu: 49954.792182525445 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReassemblyGradGrad",
+            "value": 41284.920390050116,
+            "unit": "ns/iter",
+            "extra": "iterations: 6871\ncpu: 41283.1979333446 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReactionDiffusion",
+            "value": 95518.2191298888,
+            "unit": "ns/iter",
+            "extra": "iterations: 3126\ncpu: 95502.52975047746 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ColdMass",
+            "value": 51435.81139878117,
+            "unit": "ns/iter",
+            "extra": "iterations: 5562\ncpu: 51429.18608414089 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ColdGradGrad",
+            "value": 41548.16525052058,
+            "unit": "ns/iter",
+            "extra": "iterations: 6826\ncpu: 41543.8773806017 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/Elasticity",
+            "value": 1021665.5839415075,
+            "unit": "ns/iter",
+            "extra": "iterations: 274\ncpu: 1021450.0547445006 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReassemblyMass",
+            "value": 304673.5402173918,
+            "unit": "ns/iter",
+            "extra": "iterations: 920\ncpu: 304653.9619565088 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReassemblyGradGrad",
+            "value": 301269.8776823353,
+            "unit": "ns/iter",
+            "extra": "iterations: 932\ncpu: 301238.8905579305 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReactionDiffusion",
+            "value": 615119.9186813375,
+            "unit": "ns/iter",
+            "extra": "iterations: 455\ncpu: 614982.2307692261 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ColdMass",
+            "value": 303839.3548035161,
+            "unit": "ns/iter",
+            "extra": "iterations: 916\ncpu: 303791.9388646184 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ColdGradGrad",
+            "value": 301016.3589189343,
+            "unit": "ns/iter",
+            "extra": "iterations: 925\ncpu: 301001.4183783713 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/Elasticity",
+            "value": 32603084.00000314,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 32593922.111108974 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/BoundaryMass",
+            "value": 7913.960514640447,
+            "unit": "ns/iter",
+            "extra": "iterations: 36064\ncpu: 7913.8133595825175 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/BoundaryLoad",
+            "value": 4713.600796771384,
+            "unit": "ns/iter",
+            "extra": "iterations: 57482\ncpu: 4713.2476949304555 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/BoundaryMass",
+            "value": 12348.934038693784,
+            "unit": "ns/iter",
+            "extra": "iterations: 22589\ncpu: 12345.155252556586 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/BoundaryLoad",
+            "value": 4645.755114961517,
+            "unit": "ns/iter",
+            "extra": "iterations: 60020\ncpu: 4645.219843385897 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/BoundaryMass",
+            "value": 25931.990216508682,
+            "unit": "ns/iter",
+            "extra": "iterations: 11039\ncpu: 25929.48718180884 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+            "value": 11159.56954887061,
+            "unit": "ns/iter",
+            "extra": "iterations: 25004\ncpu: 11156.774076147685 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D2/Mass",
+            "value": 10601.866376343485,
+            "unit": "ns/iter",
+            "extra": "iterations: 26178\ncpu: 10601.160249063272 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D2/SourceLoad",
+            "value": 10434.162723644402,
+            "unit": "ns/iter",
+            "extra": "iterations: 27052\ncpu: 10431.831066094795 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D3/Mass",
+            "value": 10609.480390311468,
+            "unit": "ns/iter",
+            "extra": "iterations: 26543\ncpu: 10609.3065968426 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D3/SourceLoad",
+            "value": 10361.843826471635,
+            "unit": "ns/iter",
+            "extra": "iterations: 26970\ncpu: 10360.396588801594 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GlobalPotential",
+            "value": 8987017.387095964,
+            "unit": "ns/iter",
+            "extra": "iterations: 31\ncpu: 8986139.225805985 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GlobalPotential",
+            "value": 1428913.8061221077,
+            "unit": "ns/iter",
+            "extra": "iterations: 196\ncpu: 1428791.6887755962 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorGlobalPotential",
+            "value": 39761631.142856196,
+            "unit": "ns/iter",
+            "extra": "iterations: 7\ncpu: 39760881.85714031 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorGlobalPotential",
+            "value": 8449452.48484857,
+            "unit": "ns/iter",
+            "extra": "iterations: 33\ncpu: 8447600.969696732 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D2/Mass",
+            "value": 34949.70364818709,
+            "unit": "ns/iter",
+            "extra": "iterations: 8004\ncpu: 34946.260369814794 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D2/GradGrad",
+            "value": 29057.4350358915,
+            "unit": "ns/iter",
+            "extra": "iterations: 9613\ncpu: 29056.85155518547 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3-P2/D2/Mass",
+            "value": 105242.28038095662,
+            "unit": "ns/iter",
+            "extra": "iterations: 2625\ncpu: 105222.43504761891 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3-P2/D2/GradGrad",
+            "value": 110703.94220111305,
+            "unit": "ns/iter",
+            "extra": "iterations: 2526\ncpu: 110695.04592240683 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D3/Mass",
+            "value": 70363.79859014388,
+            "unit": "ns/iter",
+            "extra": "iterations: 3972\ncpu: 70350.86027190209 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D3/GradGrad",
+            "value": 52062.967401531125,
+            "unit": "ns/iter",
+            "extra": "iterations: 5307\ncpu: 52057.44488411834 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/1",
+            "value": 1006.3155132949042,
+            "unit": "ns/iter",
+            "extra": "iterations: 277852\ncpu: 1006.2600989015332 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/2",
+            "value": 22370.050004016022,
+            "unit": "ns/iter",
+            "extra": "iterations: 12459\ncpu: 22368.01846055105 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/3",
+            "value": 19326.339323538683,
+            "unit": "ns/iter",
+            "extra": "iterations: 14635\ncpu: 19220.28800819984 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/4",
+            "value": 27469.504437000774,
+            "unit": "ns/iter",
+            "extra": "iterations: 10142\ncpu: 27466.90435811522 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/6",
+            "value": 64713.9834845318,
+            "unit": "ns/iter",
+            "extra": "iterations: 4299\ncpu: 64697.37124912884 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/7",
+            "value": 29764.010045951563,
+            "unit": "ns/iter",
+            "extra": "iterations: 9357\ncpu: 29759.822165225636 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/5",
+            "value": 50032.490630635475,
+            "unit": "ns/iter",
+            "extra": "iterations: 5550\ncpu: 50025.35603603884 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/1",
+            "value": 1129.681899865854,
+            "unit": "ns/iter",
+            "extra": "iterations: 248186\ncpu: 1129.615058867179 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/2",
+            "value": 20637.07715660813,
+            "unit": "ns/iter",
+            "extra": "iterations: 13505\ncpu: 20635.076934468674 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/3",
+            "value": 26214.74866007725,
+            "unit": "ns/iter",
+            "extra": "iterations: 10635\ncpu: 26214.337658675904 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/4",
+            "value": 27053.198333655302,
+            "unit": "ns/iter",
+            "extra": "iterations: 10442\ncpu: 27047.828864203035 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/6",
+            "value": 111157.05214968346,
+            "unit": "ns/iter",
+            "extra": "iterations: 2512\ncpu: 111144.21218152328 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/7",
+            "value": 40922.31377997638,
+            "unit": "ns/iter",
+            "extra": "iterations: 6836\ncpu: 40916.530134579174 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/5",
+            "value": 88521.02033568088,
+            "unit": "ns/iter",
+            "extra": "iterations: 3098\ncpu: 88510.31568754447 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/CurvedMass",
+            "value": 57702.31339564753,
+            "unit": "ns/iter",
+            "extra": "iterations: 4815\ncpu: 57696.19563863004 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/CurvedGradGrad",
+            "value": 60848.37814207693,
+            "unit": "ns/iter",
+            "extra": "iterations: 4575\ncpu: 60841.55825136372 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/CurvedMass",
+            "value": 175786.62704113903,
+            "unit": "ns/iter",
+            "extra": "iterations: 1531\ncpu: 175775.88634879276 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/CurvedGradGrad",
+            "value": 165704.24961484663,
+            "unit": "ns/iter",
+            "extra": "iterations: 1298\ncpu: 165688.15870569984 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/2",
+            "value": 8.0908791847987,
+            "unit": "ns/iter",
+            "extra": "iterations: 34571833\ncpu: 8.089957769956982 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/4",
+            "value": 7.396306114859802,
+            "unit": "ns/iter",
+            "extra": "iterations: 37817635\ncpu: 7.3961833150065335 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/6",
+            "value": 5.279381697407404,
+            "unit": "ns/iter",
+            "extra": "iterations: 53122986\ncpu: 5.279303727391724 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/8",
+            "value": 5.627662982677269,
+            "unit": "ns/iter",
+            "extra": "iterations: 49742250\ncpu: 5.6268018435033635 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/2",
+            "value": 4.931371147746001,
+            "unit": "ns/iter",
+            "extra": "iterations: 56608101\ncpu: 4.93111636088969 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/4",
+            "value": 4.574850989285275,
+            "unit": "ns/iter",
+            "extra": "iterations: 61304988\ncpu: 4.5745094836330225 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/6",
+            "value": 5.983144660523074,
+            "unit": "ns/iter",
+            "extra": "iterations: 46811991\ncpu: 5.982365159387836 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/8",
+            "value": 7.0650479176919765,
+            "unit": "ns/iter",
+            "extra": "iterations: 39791881\ncpu: 7.064062063313216 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/2",
+            "value": 7.393530957737896,
+            "unit": "ns/iter",
+            "extra": "iterations: 37946359\ncpu: 7.393091389874992 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/4",
+            "value": 8.186324170739699,
+            "unit": "ns/iter",
+            "extra": "iterations: 34558270\ncpu: 8.184997686516233 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/6",
+            "value": 4.574428458496394,
+            "unit": "ns/iter",
+            "extra": "iterations: 61235448\ncpu: 4.573992501859122 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/8",
+            "value": 4.932655755364242,
+            "unit": "ns/iter",
+            "extra": "iterations: 56862632\ncpu: 4.932350634068582 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/2",
+            "value": 6.332533594006248,
+            "unit": "ns/iter",
+            "extra": "iterations: 43492505\ncpu: 6.331815585237077 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/4",
+            "value": 6.743982372650259,
+            "unit": "ns/iter",
+            "extra": "iterations: 41867207\ncpu: 6.743226745457983 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/6",
+            "value": 7.388838885198155,
+            "unit": "ns/iter",
+            "extra": "iterations: 37858315\ncpu: 7.387880311102019 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/8",
+            "value": 7.7416649564961935,
+            "unit": "ns/iter",
+            "extra": "iterations: 36224466\ncpu: 7.739963537350322 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/2",
+            "value": 43.82162488087723,
+            "unit": "ns/iter",
+            "extra": "iterations: 6343665\ncpu: 43.81886779960829 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/4",
+            "value": 86.06033025061022,
+            "unit": "ns/iter",
+            "extra": "iterations: 3251470\ncpu: 86.05412444217805 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/6",
+            "value": 156.38400436276453,
+            "unit": "ns/iter",
+            "extra": "iterations: 1789688\ncpu: 156.37152062260108 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/8",
+            "value": 227.5874954990892,
+            "unit": "ns/iter",
+            "extra": "iterations: 1230309\ncpu: 227.5516768551599 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/2",
+            "value": 110.02009017999809,
+            "unit": "ns/iter",
+            "extra": "iterations: 2546020\ncpu: 110.00338606924124 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/4",
+            "value": 299.8171025363192,
+            "unit": "ns/iter",
+            "extra": "iterations: 935639\ncpu: 299.7814648598505 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/6",
+            "value": 628.1640658801418,
+            "unit": "ns/iter",
+            "extra": "iterations: 446083\ncpu: 628.0202540782541 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/8",
+            "value": 1207.611061325599,
+            "unit": "ns/iter",
+            "extra": "iterations: 232106\ncpu: 1207.586981810034 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/2",
+            "value": 163.82348225071075,
+            "unit": "ns/iter",
+            "extra": "iterations: 1706293\ncpu: 163.8156699933777 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/4",
+            "value": 489.8179311865847,
+            "unit": "ns/iter",
+            "extra": "iterations: 571284\ncpu: 489.7454926096322 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/6",
+            "value": 1193.9990230706526,
+            "unit": "ns/iter",
+            "extra": "iterations: 234408\ncpu: 1193.8767917476218 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/8",
+            "value": 2166.12474570501,
+            "unit": "ns/iter",
+            "extra": "iterations: 129279\ncpu: 2165.624208107919 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/2",
+            "value": 137.0738328713325,
+            "unit": "ns/iter",
+            "extra": "iterations: 2040392\ncpu: 137.07210330170787 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/4",
+            "value": 273.03768756774906,
+            "unit": "ns/iter",
+            "extra": "iterations: 1028562\ncpu: 273.01515513893895 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/6",
+            "value": 660.0765909816085,
+            "unit": "ns/iter",
+            "extra": "iterations: 425272\ncpu: 659.9476852461797 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/8",
+            "value": 1280.6123232804073,
+            "unit": "ns/iter",
+            "extra": "iterations: 218708\ncpu: 1280.4077582895466 ns\nthreads: 1"
           }
         ]
       }
