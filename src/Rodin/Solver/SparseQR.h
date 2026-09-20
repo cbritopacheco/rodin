@@ -153,6 +153,8 @@ namespace Rodin::Solver
       void solve(LinearSystemType& axb) override
       {
         m_info = Info{};
+        // Eigen requires compressed storage here, and asserts on it.
+        axb.getOperator().makeCompressed();
         m_solver.compute(axb.getOperator());
         if (!record())
         {
