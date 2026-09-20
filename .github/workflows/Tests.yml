@@ -162,6 +162,7 @@ jobs:
           -DRODIN_USE_PARU=ON
           -DRODIN_USE_MUMPS=ON
           -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_CHOLMOD=ON
           -DRODIN_USE_PETSC=OFF
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_DOC=OFF
@@ -175,11 +176,12 @@ jobs:
         run: >
           cmake --build ${{ github.workspace }}/build
           --target RodinParUTest RodinMUMPSTest RodinUMFPackTest RodinSparseLUTest
+          RodinInfoTest
 
       - name: Run solver tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -R "ParU|MUMPS|UMFPack|SparseLU"
+          -L unit -R "ParU|MUMPS|UMFPack|SparseLU|Solver_Info"
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -187,7 +189,7 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -R "ParU|MUMPS|UMFPack|SparseLU"
+          -L unit -R "ParU|MUMPS|UMFPack|SparseLU|Solver_Info"
           --rerun-failed -V --output-on-failure
 
   Manufactured:

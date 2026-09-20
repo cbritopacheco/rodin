@@ -50,7 +50,9 @@ Factorization-based solvers share no base class, but report uniformly through
 operation, the retained `Factorization` stage, and the backend's own `status`.
 A factorization that fails is an outcome, not a defect: the solve is skipped,
 the solution vector is left untouched, and nothing is raised. A violated
-contract, such as a matrix that is not square, still raises.
+contract, such as a matrix that is not square, still raises. `HouseholderQR`
+and `PartialPivLU` report nothing, because Eigen exposes no status for them:
+a caller that needs to know checks the residual, or picks another solver.
 - Platform: `AppleAccelerate`.
 - PETSc KSP wrappers live under `PETSc/Solver` (petsc.md).
 

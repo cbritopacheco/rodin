@@ -58,6 +58,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 #include "LinearSolver.h"
 
 namespace Rodin::FormLanguage
@@ -77,7 +78,8 @@ namespace Rodin::Solver::CHOLMOD
    * @brief CTAD (Class Template Argument Deduction) guide for SupernodalLLT
    */
   template <class LinearSystemType>
-  SupernodalLLT(Variational::ProblemBase<LinearSystemType>&) -> SupernodalLLT<LinearSystemType>;
+  SupernodalLLT(Variational::ProblemBase<LinearSystemType>&)
+    -> SupernodalLLT<LinearSystemType>;
 
   /**
    * @brief CHOLMOD supernodal LLT Cholesky factorization solver.
@@ -158,17 +160,37 @@ namespace Rodin::Solver::CHOLMOD
        */
       void solve(LinearSystemType& axb) override
       {
+        m_info = Info{};
         m_solver.compute(axb.getOperator());
+        if (!record())
+        {
+          // A failed factorization is unusable, so the solve is skipped and
+          // the solution vector is left untouched.
+          return;
+        }
+        m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
+        record();
       }
 
       /**
-       * @brief Checks if the factorization succeeded.
-       * @returns true if the solver succeeded, false otherwise
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
        */
-      Real success() const
+      const Info& getInfo() const noexcept
       {
-        return m_solver.info() == Eigen::Success;
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -182,6 +204,17 @@ namespace Rodin::Solver::CHOLMOD
 
     private:
       /// Underlying Eigen CHOLMOD supernodal LLT solver
+      /// @brief Records the Eigen status, and returns whether it succeeded.
+      Boolean record()
+      {
+        m_info.status = static_cast<Integer>(m_solver.info());
+        m_info.success = m_solver.info() == Eigen::Success;
+        return m_info.success;
+      }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
+
       Eigen::CholmodSupernodalLLT<OperatorType> m_solver;
   };
 }
