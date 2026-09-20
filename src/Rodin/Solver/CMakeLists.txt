@@ -31,6 +31,11 @@ if (RODIN_USE_PARU)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::ParU)
 endif()
 
+# ---- MUMPS -----------------------------------------------------------------
+if (RODIN_USE_MUMPS)
+  target_link_libraries(RodinSolver INTERFACE MUMPS::MUMPS)
+endif()
+
 if (RODIN_USE_SPQR)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::SPQR)
 endif()

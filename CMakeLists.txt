@@ -69,6 +69,7 @@ option(RODIN_USE_MPI                  "Use Rodin with MPI support"              
 option(RODIN_USE_OPENMP               "Use Rodin with OpenMP support"             OFF)
 option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"            OFF)
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
+option(RODIN_USE_MUMPS                "Use Rodin with MUMPS support"              OFF)
 option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"             OFF)
 option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
 option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"            OFF)
@@ -280,6 +281,11 @@ if (RODIN_BUILD_SRC)
     find_package(Scotch REQUIRED)
   endif()
 
+  # ---- MUMPS ----
+  if (RODIN_USE_MUMPS)
+    find_package(MUMPS REQUIRED)
+  endif()
+
   # ---- SuiteSparse ---------------------------------------------------------
   set(_RODIN_SUITESPARSE_COMPONENTS)
 
@@ -409,6 +415,7 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindPETSc.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindSuiteSparse.cmake"
+  "${PROJECT_SOURCE_DIR}/cmake/FindMUMPS.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 

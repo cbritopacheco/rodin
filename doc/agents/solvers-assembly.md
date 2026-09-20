@@ -42,11 +42,14 @@ from the system type.
 - Eigen direct: `SparseLU`, `SparseQR`, `SimplicialLLT`, `SimplicialLDLT`,
   `LDLT`, `HouseholderQR`, `PartialPivLU`.
 - SuiteSparse (configure-gated): `UMFPack`, `ParU`, `CHOLMOD`, `SPQR`.
+- MUMPS (configure-gated): `MUMPS`, the only direct solver that exploits a
+  symmetric matrix (`setSymmetric`), halving the factor it stores.
 - Platform: `AppleAccelerate`.
 - PETSc KSP wrappers live under `PETSc/Solver` (petsc.md).
 
 Choosing: SPD → CG (iterative) or SimplicialLDLT/CHOLMOD (direct);
-nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; small dense → LDLT/
+nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; symmetric indefinite
+(saddle point) → MUMPS with `setSymmetric`; small dense → LDLT/
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
 for Newton tangents.
 
