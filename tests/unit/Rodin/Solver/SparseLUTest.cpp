@@ -44,6 +44,7 @@ namespace Rodin::Tests::Unit::Solver
     Rodin::Solver::SparseLU solver(problem);
     solver.solve(system);
     EXPECT_TRUE(solver.success());
+    EXPECT_EQ(solver.getInfo().factorization, Rodin::Solver::Factorization::Numeric);
 
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
@@ -80,5 +81,8 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(system.getSolution()(0), 7.0);
     EXPECT_EQ(system.getSolution()(1), 7.0);
     EXPECT_EQ(system.getSolution()(2), 7.0);
+    EXPECT_FALSE(solver.getInfo().factorization.has_value());
+    EXPECT_NE(solver.getInfo().status, 0);
+    EXPECT_FALSE(solver.getLastErrorMessage().empty());
   }
 }

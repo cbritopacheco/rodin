@@ -17,6 +17,8 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit::Solver
 {
+  using Rodin::Solver::Factorization;
+
   using LinearSystemType =
     Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
@@ -97,7 +99,8 @@ namespace Rodin::Tests::Unit::Solver
     LinearSystemType system = makeUnsymmetricSystem();
 
     solver.setOrdering(decltype(solver)::Ordering::AMD).factorize(system);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
 
     // The system type is process-local, so the solve must be private to this
     // process rather than collective over MPI_COMM_WORLD.
@@ -112,7 +115,8 @@ namespace Rodin::Tests::Unit::Solver
     // A new right-hand side reuses the retained numeric factorization.
     expected << -2.0, 1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
@@ -122,13 +126,14 @@ namespace Rodin::Tests::Unit::Solver
     expected << 2.0, -1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
     solver.factorize(system);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // A structural change requires explicitly clearing symbolic analysis.
     solver.clear(Symbolic);
-    EXPECT_FALSE(solver.getResources().symbolic);
+    EXPECT_FALSE(solver.getInfo().factorization.has_value());
     system.getOperator().setZero();
     system.getOperator().insert(0, 0) = 2.0;
     system.getOperator().insert(1, 1) = 3.0;
@@ -136,22 +141,25 @@ namespace Rodin::Tests::Unit::Solver
     expected << -1.0, 3.0, 2.0;
     system.getVector() = system.getOperator() * expected;
     solver.factorize(system);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     solver.solve(system);
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // Ordering participates in symbolic analysis and therefore invalidates it.
     solver.setOrdering(decltype(solver)::Ordering::Automatic);
-    EXPECT_FALSE(solver.getResources().numeric);
+    EXPECT_NE(solver.getInfo().factorization, Factorization::Numeric);
     solver.solve(system);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
 
     solver.clear(Numeric);
-    EXPECT_FALSE(solver.getResources().numeric);
-    EXPECT_TRUE(solver.getResources().symbolic);
+    EXPECT_NE(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Symbolic);
     solver.solve(system);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
@@ -179,14 +187,15 @@ namespace Rodin::Tests::Unit::Solver
     solver.setSymmetric(decltype(solver)::Symmetry::General);
     EXPECT_EQ(solver.getSymmetric(), decltype(solver)::Symmetry::General);
     solver.solve(symmetric);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     EXPECT_NEAR((symmetric.getSolution() - expected).norm(), 0.0, 1e-12);
 
     // Symmetry selects the factorization itself, so changing it releases the
     // retained factorization and the converted structure.
     solver.setSymmetric(decltype(solver)::Symmetry::Unsymmetric);
-    EXPECT_FALSE(solver.getResources().numeric);
-    EXPECT_FALSE(solver.getResources().symbolic);
+    EXPECT_NE(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_FALSE(solver.getInfo().factorization.has_value());
     solver.solve(symmetric);
     EXPECT_NEAR((symmetric.getSolution() - expected).norm(), 0.0, 1e-12);
   }
@@ -215,7 +224,8 @@ namespace Rodin::Tests::Unit::Solver
 
     Rodin::Solver::MUMPS solver(problem);
     solver.setSymmetric(decltype(solver)::Symmetry::PositiveDefinite).solve(system);
-    EXPECT_TRUE(solver.getResources().numeric);
+    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    EXPECT_TRUE(solver.success());
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 

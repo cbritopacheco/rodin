@@ -36,6 +36,7 @@
 #include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 #include "LinearSolver.h"
 
 namespace Rodin::FormLanguage
@@ -92,7 +93,7 @@ namespace Rodin::Solver
    */
   template <>
   class ParU<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>> final
-    : public LinearSolverBase<
+    : public FactorizationSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
   {
     public:
@@ -101,16 +102,12 @@ namespace Rodin::Solver
       using OperatorType = Math::SparseMatrix<ScalarType>;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = LinearSolverBase<LinearSystemType>;
+      using Parent = FactorizationSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      /** @brief ParU factorization stage to release. */
-      enum class Factorization
-      {
-        Numeric,
-        Symbolic
-      };
+      /** @brief Factorization stage, shared by the factorization solvers. */
+      using Factorization = Rodin::Solver::Factorization;
 
       /** @brief Fill-reducing ordering used during symbolic analysis. */
       enum class Ordering : std::int64_t
@@ -283,13 +280,10 @@ namespace Rodin::Solver
           if (analyzeInfo != PARU_SUCCESS)
           {
             m_resources.clear(Factorization::Symbolic);
-            Alert::MemberFunctionException(*this, __func__)
-              << "ParU symbolic analysis failed with status "
-              << static_cast<Integer>(analyzeInfo) << " for a " << view.nrow << " x "
-              << view.ncol << " matrix (xtype " << view.xtype << ", dtype " << view.dtype
-              << ")." << Alert::Raise;
+            return record(analyzeInfo, {});
           }
         }
+        this->m_info.factorization = Factorization::Symbolic;
 
         m_resources.clear(Factorization::Numeric);
         const auto factorizeInfo = ParU_Factorize(
@@ -297,8 +291,9 @@ namespace Rodin::Solver
         if (factorizeInfo != PARU_SUCCESS)
         {
           m_resources.clear(Factorization::Numeric);
-          check(factorizeInfo, "numeric factorization");
+          return record(factorizeInfo, Factorization::Symbolic);
         }
+        record(PARU_SUCCESS, Factorization::Numeric);
       }
 
       /**
@@ -327,6 +322,15 @@ namespace Rodin::Solver
         {
           m_columnPointers.resize(0);
           m_rowIndices.resize(0);
+          this->m_info.factorization.reset();
+        }
+        else if (m_resources.symbolic)
+        {
+          this->m_info.factorization = Factorization::Symbolic;
+        }
+        else
+        {
+          this->m_info.factorization.reset();
         }
       }
 
@@ -349,13 +353,17 @@ namespace Rodin::Solver
         }
 
         if (!getResources().numeric)
+        {
           factorize(axb);
+          if (!success())
+            return;
+        }
 
         configure();
         axb.getSolution().resize(axb.getVector().size());
-        check(ParU_Solve(m_resources.symbolic, m_resources.numeric,
-                axb.getVector().data(), axb.getSolution().data(), m_resources.control),
-          "solve");
+        record(ParU_Solve(m_resources.symbolic, m_resources.numeric,
+                 axb.getVector().data(), axb.getSolution().data(), m_resources.control),
+          Factorization::Numeric);
       }
 
       ParU* copy() const noexcept override
@@ -375,6 +383,20 @@ namespace Rodin::Solver
                   : static_cast<std::int64_t>(m_ordering),
                 m_resources.control),
           "ordering configuration");
+      }
+
+      /**
+       * @brief Records a ParU status and the stage that survived it.
+       *
+       * A failing analysis, factorization or solve is an outcome rather than a
+       * defect in the caller, so it is reported through getInfo() instead of
+       * raising.
+       */
+      void record(ParU_Info info, Optional<Factorization> factorization)
+      {
+        this->m_info.status = static_cast<Integer>(info);
+        this->m_info.success = info == PARU_SUCCESS;
+        this->m_info.factorization = factorization;
       }
 
       void check(ParU_Info info, StringView operation) const
