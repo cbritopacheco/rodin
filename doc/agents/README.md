@@ -9,6 +9,10 @@ Hierarchical: read top-down, stop at the depth your task needs.
   surface style. **Read before writing any code.**
 - [conventions.md](conventions.md) — hard rules: scope discipline, error
   handling, design preferences, testing conventions.
+- [writing.md](writing.md) — scientific writing: impersonal explanatory voice,
+  mathematical exposition, claim status, numerical reporting, and editing.
+- [reasoning.md](reasoning.md) — reasoning and reflection: problem framing,
+  dependencies, comparisons, independent checks, simplifications, and limits.
 
 ## Level 2 — orientation
 
