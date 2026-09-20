@@ -96,9 +96,10 @@ namespace Rodin::Solver
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * MUMPS is parallel over MPI processes, and within each process over OpenMP
-   * threads and threaded BLAS. This specialization runs in a single process,
+   * threads and threaded BLAS. This specialization solves on @c MPI_COMM_SELF,
    * so its parallelism and its memory are both shared: the whole factorization
-   * is held in this process and computed by @ref setMaxThreads threads.
+   * is held in this process and computed by @ref setMaxThreads threads. Under
+   * a distributed run each process solves its own system independently.
    *
    * MUMPS calls into MPI. When the host application has not initialized MPI,
    * the first factorization initializes it and leaves finalization to the
@@ -178,7 +179,13 @@ namespace Rodin::Solver
           {
             if (initialized)
               return;
-            instance.comm_fortran = UseCommWorld;
+            // This specialization is nailed to the process-local linear system
+            // type, which only Local-context assembly produces, so the solve is
+            // private to this process. MPI_COMM_WORLD would instead make it
+            // collective over ranks that each hold a different matrix. This
+            // mirrors the PETSc backend, which creates its objects on
+            // PETSC_COMM_SELF for a Context::Local mesh.
+            instance.comm_fortran = static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF));
             instance.par = 1;
             instance.sym = static_cast<MUMPS_INT>(symmetry);
             instance.job = JobInitialize;
@@ -467,8 +474,6 @@ namespace Rodin::Solver
       }
 
     private:
-      /// @brief Value of @c comm_fortran selecting @c MPI_COMM_WORLD.
-      static constexpr MUMPS_INT UseCommWorld = -987654;
       static constexpr MUMPS_INT JobInitialize = -1;
       static constexpr MUMPS_INT JobDestroy = -2;
       static constexpr MUMPS_INT JobAnalyze = 1;
