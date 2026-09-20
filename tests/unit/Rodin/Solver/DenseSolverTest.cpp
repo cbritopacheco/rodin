@@ -32,12 +32,14 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit::Solver
 {
+  /// @brief Dense linear system type assembled throughout this file.
   using DenseSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
   /// @brief A problem assembling into a dense operator.
   template <class TrialFunctionType, class TestFunctionType>
   using DenseProblem = Problem<DenseSystem, TrialFunctionType, TestFunctionType>;
 
+  /// @brief A segment mesh with the connectivity a boundary condition needs.
   static Mesh<Context::Local> makeMesh()
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {8});
@@ -56,6 +58,7 @@ namespace Rodin::Tests::Unit::Solver
     problem.assemble();
   }
 
+  /// @brief Solves and checks that the residual of the assembled system vanishes.
   template <class Solver, class ProblemType>
   static void expectSolvedResidual(Solver& solver, ProblemType& problem)
   {
@@ -67,6 +70,7 @@ namespace Rodin::Tests::Unit::Solver
       (system.getOperator() * system.getSolution() - system.getVector()).norm(), 1e-10);
   }
 
+  /// @brief The dense LDLT solves an assembled problem and reports its status.
   TEST(Rodin_Solver_Dense, LDLTSolvesAnAssembledDenseProblem)
   {
     auto mesh = makeMesh();
@@ -84,6 +88,7 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(solver.getInfo().status, 0);
   }
 
+  /// @brief The dense Householder QR solves an assembled problem.
   TEST(Rodin_Solver_Dense, HouseholderQRSolvesAnAssembledDenseProblem)
   {
     auto mesh = makeMesh();
@@ -100,6 +105,7 @@ namespace Rodin::Tests::Unit::Solver
     expectSolvedResidual(solver, poisson);
   }
 
+  /// @brief The dense partially pivoted LU solves an assembled problem.
   TEST(Rodin_Solver_Dense, PartialPivLUSolvesAnAssembledDenseProblem)
   {
     auto mesh = makeMesh();
