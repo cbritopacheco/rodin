@@ -226,12 +226,14 @@ namespace Rodin::Tests::Unit::Solver
     Rodin::Solver::MUMPS solver(problem);
     LinearSystemType system = makeUnsymmetricSystem();
 
-    // Solving without a factorization is an error, and so is a right-hand side
-    // that does not match the matrix.
-    EXPECT_ANY_THROW(solver.solveFactorized(system));
+    // A right-hand side that does not match the matrix is an error, whether or
+    // not a factorization is retained.
+    system.getVector().resize(2);
+    EXPECT_ANY_THROW(solver.solve(system));
+    system = makeUnsymmetricSystem();
     solver.factorize(system);
     system.getVector().resize(2);
-    EXPECT_ANY_THROW(solver.solveFactorized(system));
+    EXPECT_ANY_THROW(solver.solve(system));
 
     // A rectangular matrix cannot be factorized.
     LinearSystemType rectangular;

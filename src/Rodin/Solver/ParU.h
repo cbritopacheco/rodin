@@ -302,32 +302,6 @@ namespace Rodin::Solver
       }
 
       /**
-       * @brief Solves using the retained numeric factorization.
-       *
-       * The caller must call @ref factorize again after changing the matrix.
-       * Only the right-hand side may change between calls.
-       */
-      void solveFactorized(LinearSystemType& axb)
-      {
-        if (!m_resources.numeric)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "No ParU numeric factorization is available." << Alert::Raise;
-        }
-        if (axb.getVector().size() != axb.getOperator().rows())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "The right-hand side size does not match the matrix." << Alert::Raise;
-        }
-
-        configure();
-        axb.getSolution().resize(axb.getVector().size());
-        check(ParU_Solve(m_resources.symbolic, m_resources.numeric,
-                axb.getVector().data(), axb.getSolution().data(), m_resources.control),
-          "solve");
-      }
-
-      /**
        * @brief Returns the retained ParU resources.
        *
        * A non-null @ref Resources::numeric denotes a reusable numeric
@@ -358,13 +332,30 @@ namespace Rodin::Solver
 
       /**
        * @brief Solves the linear system with ParU.
+       *
+       * Reuses the retained numeric factorization and builds one only when
+       * none is retained, so repeated right-hand sides are solved without
+       * refactorization. The caller must call @ref factorize after changing
+       * the matrix.
+       *
        * @param[in,out] axb System whose solution vector receives @f$ A^{-1}b @f$.
        */
       void solve(LinearSystemType& axb) override
       {
+        if (axb.getVector().size() != axb.getOperator().rows())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "The right-hand side size does not match the matrix." << Alert::Raise;
+        }
+
         if (!getResources().numeric)
           factorize(axb);
-        solveFactorized(axb);
+
+        configure();
+        axb.getSolution().resize(axb.getVector().size());
+        check(ParU_Solve(m_resources.symbolic, m_resources.numeric,
+                axb.getVector().data(), axb.getSolution().data(), m_resources.control),
+          "solve");
       }
 
       ParU* copy() const noexcept override

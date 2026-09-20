@@ -400,36 +400,6 @@ namespace Rodin::Solver
       }
 
       /**
-       * @brief Solves using the retained numeric factorization.
-       *
-       * The caller must call @ref factorize again after changing the matrix.
-       * Only the right-hand side may change between calls.
-       */
-      void solveFactorized(LinearSystemType& axb)
-      {
-        if (!m_resources.numeric)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "No MUMPS numeric factorization is available." << Alert::Raise;
-        }
-        if (axb.getVector().size() != axb.getOperator().rows())
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "The right-hand side size does not match the matrix." << Alert::Raise;
-        }
-
-        // MUMPS solves in place, overwriting the right-hand side it is given.
-        axb.getSolution() = axb.getVector();
-        auto& instance = m_resources.instance;
-        instance.nrhs = 1;
-        instance.lrhs = static_cast<MUMPS_INT>(axb.getSolution().size());
-        instance.rhs = axb.getSolution().data();
-        instance.job = JobSolve;
-        dmumps_c(&instance);
-        check("solve");
-      }
-
-      /**
        * @brief Returns the retained MUMPS resources.
        *
        * A true @ref Resources::numeric denotes a reusable numeric
@@ -461,13 +431,34 @@ namespace Rodin::Solver
 
       /**
        * @brief Solves the linear system with MUMPS.
+       *
+       * Reuses the retained numeric factorization and builds one only when
+       * none is retained, so repeated right-hand sides are solved without
+       * refactorization. The caller must call @ref factorize after changing
+       * the matrix.
+       *
        * @param[in,out] axb System whose solution vector receives @f$ A^{-1}b @f$.
        */
       void solve(LinearSystemType& axb) override
       {
+        if (axb.getVector().size() != axb.getOperator().rows())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "The right-hand side size does not match the matrix." << Alert::Raise;
+        }
+
         if (!getResources().numeric)
           factorize(axb);
-        solveFactorized(axb);
+
+        // MUMPS solves in place, overwriting the right-hand side it is given.
+        axb.getSolution() = axb.getVector();
+        auto& instance = m_resources.instance;
+        instance.nrhs = 1;
+        instance.lrhs = static_cast<MUMPS_INT>(axb.getSolution().size());
+        instance.rhs = axb.getSolution().data();
+        instance.job = JobSolve;
+        dmumps_c(&instance);
+        check("solve");
       }
 
       MUMPS* copy() const noexcept override
