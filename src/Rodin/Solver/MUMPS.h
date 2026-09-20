@@ -118,7 +118,7 @@ namespace Rodin::Solver
    */
   template <>
   class MUMPS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>> final
-    : public FactorizationSolverBase<
+    : public LinearSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
   {
     public:
@@ -127,7 +127,7 @@ namespace Rodin::Solver
       using OperatorType = Math::SparseMatrix<ScalarType>;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = FactorizationSolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -264,7 +264,7 @@ namespace Rodin::Solver
           m_symmetry = symmetry;
           clear(Factorization::Symbolic);
           m_resources.destroy();
-          this->m_info = Info{};
+          m_info = Info{};
         }
         return *this;
       }
@@ -410,6 +410,26 @@ namespace Rodin::Solver
       }
 
       /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
+      }
+
+      /**
        * @brief Returns the retained MUMPS resources.
        *
        * A true @ref Resources::numeric denotes a reusable numeric
@@ -436,15 +456,15 @@ namespace Rodin::Solver
           m_rowIndices.resize(0);
           m_columnIndices.resize(0);
           m_values.resize(0);
-          this->m_info.factorization.reset();
+          m_info.factorization.reset();
         }
         else if (m_resources.symbolic)
         {
-          this->m_info.factorization = Factorization::Symbolic;
+          m_info.factorization = Factorization::Symbolic;
         }
         else
         {
-          this->m_info.factorization.reset();
+          m_info.factorization.reset();
         }
       }
 
@@ -623,9 +643,9 @@ namespace Rodin::Solver
       void record(Optional<Factorization> factorization)
       {
         const auto& instance = m_resources.instance;
-        this->m_info.status = static_cast<Integer>(instance.infog[0]);
-        this->m_info.success = instance.infog[0] >= 0;
-        this->m_info.factorization = factorization;
+        m_info.status = static_cast<Integer>(instance.infog[0]);
+        m_info.success = instance.infog[0] >= 0;
+        m_info.factorization = factorization;
       }
 
       void check(StringView operation) const
@@ -640,6 +660,9 @@ namespace Rodin::Solver
             << Alert::Raise;
         }
       }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
 
       Index m_maxThreads = 0;
       Symmetry m_symmetry = Symmetry::Unsymmetric;

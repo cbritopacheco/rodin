@@ -105,7 +105,7 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public FactorizationSolverBase<
+    : public LinearSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
@@ -125,7 +125,7 @@ namespace Rodin::Solver
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
       /// Parent class type
-      using Parent = FactorizationSolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -165,20 +165,40 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        this->m_info = Info{};
+        m_info = Info{};
         m_solver.compute(axb.getOperator());
-        this->m_info.status = static_cast<Integer>(m_solver.umfpackFactorizeReturncode());
+        m_info.status = static_cast<Integer>(m_solver.umfpackFactorizeReturncode());
         if (m_solver.info() != Eigen::Success)
         {
           // A failed factorization makes Eigen return from its solve without
           // writing anything, which is indistinguishable from a solve that
           // produced the vector already held. Leave it untouched instead.
-          this->m_info.success = false;
+          m_info.success = false;
           return;
         }
-        this->m_info.factorization = Factorization::Numeric;
+        m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
-        this->m_info.success = m_solver.info() == Eigen::Success;
+        m_info.success = m_solver.info() == Eigen::Success;
+      }
+
+      /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -221,6 +241,9 @@ namespace Rodin::Solver
       }
 
     private:
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
+
       /// Underlying Eigen UMFPACK solver
       Eigen::UmfPackLU<OperatorType> m_solver;
   };

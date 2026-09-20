@@ -45,12 +45,12 @@ from the system type.
 - MUMPS (configure-gated): `MUMPS`, the only direct solver that exploits a
   symmetric matrix (`setSymmetric`), halving the factor it stores.
 
-Factorization-based solvers derive from `FactorizationSolverBase` and report
-through `getInfo()`: `success`, the retained `Factorization` stage, and the
-backend's own `status`. A factorization that fails is an outcome, not a defect:
-the solve is skipped, the solution vector is left untouched, and nothing is
-raised. A violated contract, such as a matrix that is not square, still
-raises.
+Factorization-based solvers share no base class, but report uniformly through
+`getInfo()` and `success()` (`Solver/Info.h`): the success of the most recent
+operation, the retained `Factorization` stage, and the backend's own `status`.
+A factorization that fails is an outcome, not a defect: the solve is skipped,
+the solution vector is left untouched, and nothing is raised. A violated
+contract, such as a matrix that is not square, still raises.
 - Platform: `AppleAccelerate`.
 - PETSc KSP wrappers live under `PETSc/Solver` (petsc.md).
 
