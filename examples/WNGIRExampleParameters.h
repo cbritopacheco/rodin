@@ -195,8 +195,8 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
 
     p.quadratureOrder = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
-    p.geometricValidationOrder = sizeOption(
-      argc, argv, "geometric-validation-order", p.geometricValidationOrder);
+    p.geometricValidationOrder =
+      sizeOption(argc, argv, "geometric-validation-order", p.geometricValidationOrder);
     p.maxIterations = sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
     if (defaults.parseLegacyMaxIterations)
       p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);

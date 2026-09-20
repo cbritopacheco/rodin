@@ -88,8 +88,7 @@ namespace Rodin::Adaptation
       /// @brief Whether independent validation reaches the physical RMS target.
       bool hasGeometricRMSConverged(Real h) const
       {
-        return effectiveTauRmsH > Real(0) &&
-          geometricRMS <= getGeometricRMSTolerance(h);
+        return effectiveTauRmsH > Real(0) && geometricRMS <= getGeometricRMSTolerance(h);
       }
       /// @brief Measure of the active interface quadrature set.
       Real activeMeasure = 0;

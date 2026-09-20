@@ -851,8 +851,7 @@ namespace Rodin::Adaptation
       {
         const auto& fe =
           fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
-        const bool isInterface =
-          polytope.getDimension() < fes.getMesh().getDimension();
+        const bool isInterface = polytope.getDimension() < fes.getMesh().getDimension();
         const std::size_t automaticOrder = isInterface
           ? wngirInterfaceQuadratureOrder(fe.getOrder())
           : std::max<std::size_t>(2, 2 * fe.getOrder());

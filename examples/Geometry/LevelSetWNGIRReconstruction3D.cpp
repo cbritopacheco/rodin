@@ -632,8 +632,8 @@ int main(int argc, char** argv)
                 << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
   }
 
-  const bool converged = fitTol > Real(0) ? interfaceFit <= fitTol
-                                          : geometricRMS <= geometricRMSTolerance;
+  const bool converged =
+    fitTol > Real(0) ? interfaceFit <= fitTol : geometricRMS <= geometricRMSTolerance;
 
   const std::size_t D = mesh.getDimension();
   for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)

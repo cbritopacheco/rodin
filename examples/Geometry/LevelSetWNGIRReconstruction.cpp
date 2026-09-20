@@ -740,8 +740,8 @@ int run(int argc, char** argv)
                   << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    const bool converged = fitTol > Real(0) ? interfaceFit <= fitTol
-                                            : geometricRMS <= geometricRMSTolerance;
+    const bool converged =
+      fitTol > Real(0) ? interfaceFit <= fitTol : geometricRMS <= geometricRMSTolerance;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);
