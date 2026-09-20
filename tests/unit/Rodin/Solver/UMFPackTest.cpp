@@ -44,6 +44,8 @@ namespace Rodin::Tests::Unit::Solver
     Rodin::Solver::UMFPack solver(problem);
     solver.solve(system);
     EXPECT_TRUE(solver.success());
+    EXPECT_EQ(solver.getInfo().factorization, Rodin::Solver::Factorization::Numeric);
+    EXPECT_EQ(solver.getInfo().status, 0);
 
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
@@ -84,6 +86,7 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(system.getSolution()(2), 7.0);
     // UMFPACK's own status distinguishes the failures, such as a singular
     // matrix from an allocation that could not be made.
-    EXPECT_NE(solver.getFactorizationStatus(), 0);
+    EXPECT_NE(solver.getInfo().status, 0);
+    EXPECT_FALSE(solver.getInfo().factorization.has_value());
   }
 }

@@ -40,6 +40,7 @@
 #include "Rodin/Math/Vector.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 #include "LinearSolver.h"
 
 namespace Rodin::FormLanguage
@@ -108,13 +109,16 @@ namespace Rodin::Solver
    * The system matrix must outlive the solves that follow a factorization,
    * because its values may be shared with MUMPS rather than copied.
    *
+   * Info::status holds MUMPS's own @c INFOG(1): zero on success, a negative
+   * value for an error, and a positive one for a warning.
+   *
    * | Specialization | Description |
    * |----------------|-------------|
    * | @ref MUMPS "MUMPS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>" | Real double-precision sparse systems. |
    */
   template <>
   class MUMPS<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>> final
-    : public LinearSolverBase<
+    : public FactorizationSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
   {
     public:
@@ -123,16 +127,12 @@ namespace Rodin::Solver
       using OperatorType = Math::SparseMatrix<ScalarType>;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = LinearSolverBase<LinearSystemType>;
+      using Parent = FactorizationSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
-      /** @brief MUMPS factorization stage to release. */
-      enum class Factorization
-      {
-        Numeric,
-        Symbolic
-      };
+      /** @brief Factorization stage, shared by the factorization solvers. */
+      using Factorization = Rodin::Solver::Factorization;
 
       /** @brief Matrix symmetry declared to MUMPS. */
       enum class Symmetry : int
@@ -264,6 +264,7 @@ namespace Rodin::Solver
           m_symmetry = symmetry;
           clear(Factorization::Symbolic);
           m_resources.destroy();
+          this->m_info = Info{};
         }
         return *this;
       }
@@ -394,7 +395,7 @@ namespace Rodin::Solver
           if (instance.infog[0] < 0)
           {
             m_resources.clear(Factorization::Symbolic);
-            check("symbolic analysis");
+            return record({});
           }
           m_resources.symbolic = true;
         }
@@ -402,8 +403,10 @@ namespace Rodin::Solver
         m_resources.clear(Factorization::Numeric);
         instance.job = JobFactorize;
         dmumps_c(&instance);
-        check("numeric factorization");
+        if (instance.infog[0] < 0)
+          return record(Factorization::Symbolic);
         m_resources.numeric = true;
+        record(Factorization::Numeric);
       }
 
       /**
@@ -433,6 +436,15 @@ namespace Rodin::Solver
           m_rowIndices.resize(0);
           m_columnIndices.resize(0);
           m_values.resize(0);
+          this->m_info.factorization.reset();
+        }
+        else if (m_resources.symbolic)
+        {
+          this->m_info.factorization = Factorization::Symbolic;
+        }
+        else
+        {
+          this->m_info.factorization.reset();
         }
       }
 
@@ -455,7 +467,11 @@ namespace Rodin::Solver
         }
 
         if (!getResources().numeric)
+        {
           factorize(axb);
+          if (!success())
+            return;
+        }
 
         // MUMPS solves in place, overwriting the right-hand side it is given.
         axb.getSolution() = axb.getVector();
@@ -465,7 +481,7 @@ namespace Rodin::Solver
         instance.rhs = axb.getSolution().data();
         instance.job = JobSolve;
         dmumps_c(&instance);
-        check("solve");
+        record(Factorization::Numeric);
       }
 
       MUMPS* copy() const noexcept override
@@ -595,6 +611,21 @@ namespace Rodin::Solver
           instance.icntl[15] = static_cast<MUMPS_INT>(m_maxThreads);
         if (m_workspacePercentage > 0)
           instance.icntl[13] = static_cast<MUMPS_INT>(m_workspacePercentage);
+      }
+
+      /**
+       * @brief Records MUMPS's status and the stage that survived it.
+       *
+       * A failing analysis, factorization or solve is an outcome rather than a
+       * defect in the caller, so it is reported through getInfo() instead of
+       * raising.
+       */
+      void record(Optional<Factorization> factorization)
+      {
+        const auto& instance = m_resources.instance;
+        this->m_info.status = static_cast<Integer>(instance.infog[0]);
+        this->m_info.success = instance.infog[0] >= 0;
+        this->m_info.factorization = factorization;
       }
 
       void check(StringView operation) const

@@ -56,6 +56,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 
 namespace Rodin::FormLanguage
 {
@@ -96,11 +97,15 @@ namespace Rodin::Solver
    * - **Memory**: Efficient for sparse systems
    * - **Performance**: Excellent for large sparse systems
    *
+   * Info::status holds UMFPACK's own status: zero on success, a negative
+   * value for an error such as @c UMFPACK_ERROR_out_of_memory, and a positive
+   * one for a warning such as @c UMFPACK_WARNING_singular_matrix.
+   *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
   template <class Scalar>
   class UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public LinearSolverBase<
+    : public FactorizationSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
@@ -120,7 +125,7 @@ namespace Rodin::Solver
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
       /// Parent class type
-      using Parent = LinearSolverBase<LinearSystemType>;
+      using Parent = FactorizationSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -160,40 +165,20 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
+        this->m_info = Info{};
         m_solver.compute(axb.getOperator());
-        if (!success())
+        this->m_info.status = static_cast<Integer>(m_solver.umfpackFactorizeReturncode());
+        if (m_solver.info() != Eigen::Success)
         {
           // A failed factorization makes Eigen return from its solve without
           // writing anything, which is indistinguishable from a solve that
-          // produced the vector already held. Leave it untouched instead; the
-          // failure is reported by success().
+          // produced the vector already held. Leave it untouched instead.
+          this->m_info.success = false;
           return;
         }
+        this->m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
-      }
-
-      /**
-       * @brief Checks if the factorization and the solve succeeded.
-       * @returns true if the solver succeeded, false otherwise
-       *
-       * A failed factorization leaves the solution vector untouched. UMFPACK's
-       * own status is available through getFactorizationStatus().
-       */
-      Boolean success() const
-      {
-        return m_solver.info() == Eigen::Success;
-      }
-
-      /**
-       * @brief Returns UMFPACK's status from the most recent factorization.
-       *
-       * Zero denotes success. The negative values are errors, such as
-       * @c UMFPACK_ERROR_out_of_memory, and the positive ones warnings, such
-       * as @c UMFPACK_WARNING_singular_matrix.
-       */
-      Integer getFactorizationStatus() const
-      {
-        return static_cast<Integer>(m_solver.umfpackFactorizeReturncode());
+        this->m_info.success = m_solver.info() == Eigen::Success;
       }
 
       /**
