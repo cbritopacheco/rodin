@@ -74,7 +74,7 @@ find_library(MUMPS_COMMON_LIBRARY
 # Optional: the ordering library shipped with MUMPS, and the sequential MPI
 # stub used by builds made without a real MPI implementation.
 find_library(MUMPS_PORD_LIBRARY
-  NAMES pord
+  NAMES pord pord_seq
   HINTS
     ${MUMPS_ROOT}
     ${MUMPS_DIR}
@@ -84,7 +84,7 @@ find_library(MUMPS_PORD_LIBRARY
 )
 
 find_library(MUMPS_MPISEQ_LIBRARY
-  NAMES mpiseq
+  NAMES mpiseq mpiseq_seq
   HINTS
     ${MUMPS_ROOT}
     ${MUMPS_DIR}
