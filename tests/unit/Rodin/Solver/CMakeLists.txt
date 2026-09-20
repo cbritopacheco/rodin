@@ -69,6 +69,19 @@ if (RODIN_USE_MUMPS)
   )
 endif()
 
+add_executable(RodinInfoTest InfoTest.cpp)
+target_link_libraries(RodinInfoTest
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinInfoTest
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinSparseLUTest SparseLUTest.cpp)
 target_link_libraries(RodinSparseLUTest
   GTest::gtest
