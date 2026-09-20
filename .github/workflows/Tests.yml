@@ -29,6 +29,12 @@ jobs:
       MAKEFLAGS: "-j2"
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 2
+      # The optional direct solvers, built on the entries without a sanitizer:
+      # MUMPS calls into MPI, whose implementations leak by design, and the
+      # leak checker would report that as a failure of every one of them.
+      # ParU stays out: its C API needs SuiteSparse 7.10, newer than the
+      # runner image packages.
+      RODIN_DIRECT_SOLVERS: ${{ (matrix.asan == 'OFF' && matrix.ubsan == 'OFF') && 'ON' || 'OFF' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +69,11 @@ jobs:
           libscotch-dev
           libmetis-dev
           libhdf5-dev
+          libmumps-dev
+          libmumps-headers-dev
           libomp-dev
+          mpi-default-bin
+          mpi-default-dev
           petsc-dev
           mpich
           lcov
@@ -76,6 +86,10 @@ jobs:
           -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
+          -DRODIN_USE_CHOLMOD=${{ env.RODIN_DIRECT_SOLVERS }}
+          -DRODIN_USE_MUMPS=${{ env.RODIN_DIRECT_SOLVERS }}
+          -DRODIN_USE_SPQR=${{ env.RODIN_DIRECT_SOLVERS }}
+          -DRODIN_USE_UMFPACK=${{ env.RODIN_DIRECT_SOLVERS }}
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF
@@ -116,81 +130,6 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -L distributed -LE slow
-          --rerun-failed -V --output-on-failure
-
-  DirectSolvers:
-    # The ParU C API this wrapper targets ships with SuiteSparse 7.10 or newer,
-    # which the Ubuntu runner images do not package: their libsuitesparse-dev
-    # carries the older ParU_C interface and no ParU.h. Debian trixie packages
-    # SuiteSparse 7.10.1 and MUMPS, so both solvers are built there.
-    runs-on: ubuntu-latest
-    container: debian:trixie
-
-    env:
-      MAKEFLAGS: "-j2"
-      OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
-      DEBIAN_FRONTEND: noninteractive
-
-    steps:
-      - name: Install dependencies
-        run: >-
-          apt-get update && apt-get install -y --no-install-recommends
-          build-essential
-          ca-certificates
-          cmake
-          git
-          libboost-all-dev
-          libeigen3-dev
-          libhdf5-dev
-          libmetis-dev
-          libmumps-dev
-          libscotch-dev
-          libsuitesparse-dev
-          mpi-default-bin
-          mpi-default-dev
-
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          lfs: false
-
-      - name: Configure CMake
-        run: >
-          cmake -B ${{ github.workspace }}/build
-          -DCMAKE_BUILD_TYPE=Release
-          -DRODIN_USE_PARU=ON
-          -DRODIN_USE_MUMPS=ON
-          -DRODIN_USE_UMFPACK=ON
-          -DRODIN_USE_CHOLMOD=ON
-          -DRODIN_USE_SPQR=ON
-          -DRODIN_USE_PETSC=OFF
-          -DRODIN_USE_MCSS=OFF
-          -DRODIN_BUILD_DOC=OFF
-          -DRODIN_BUILD_EXAMPLES=OFF
-          -DRODIN_BUILD_BENCHMARKS=OFF
-          -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_UNIT_TESTS=ON
-          -DRODIN_INSTALL_RESOURCES=OFF
-
-      - name: Build solver tests
-        run: >
-          cmake --build ${{ github.workspace }}/build
-          --target RodinParUTest RodinMUMPSTest RodinUMFPackTest RodinSparseLUTest
-          RodinInfoTest RodinDenseSolverTest
-
-      - name: Run solver tests
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -R "ParU|MUMPS|UMFPack|SparseLU|Solver_Info|Solver_Dense"
-          --output-on-failure
-          -j ${{ env.CTEST_PARALLEL_LEVEL }}
-
-      - name: Rerun failed solver tests (verbose)
-        if: failure()
-        run: >
-          ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -R "ParU|MUMPS|UMFPack|SparseLU|Solver_Info|Solver_Dense"
           --rerun-failed -V --output-on-failure
 
   Manufactured:
