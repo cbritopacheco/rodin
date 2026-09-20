@@ -52,6 +52,8 @@
 
 #include <Eigen/UmfPackSupport>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -100,7 +102,8 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// Type of scalar values in the system
@@ -160,7 +163,21 @@ namespace Rodin::Solver
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
+        if (m_solver.info() != Eigen::Success)
+        {
+          // A failed factorization leaves the destination vector untouched, so
+          // an unchecked solve silently returns whatever it already held.
+          Alert::MemberFunctionException(*this, __func__)
+            << "The UMFPACK factorization failed with status "
+            << static_cast<Integer>(m_solver.umfpackFactorizeReturncode()) << "."
+            << Alert::Raise;
+        }
         axb.getSolution() = m_solver.solve(axb.getVector());
+        if (m_solver.info() != Eigen::Success)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "The UMFPACK solve failed." << Alert::Raise;
+        }
       }
 
       /**
