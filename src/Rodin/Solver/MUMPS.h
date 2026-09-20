@@ -65,9 +65,8 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for MUMPS.
    */
-  template <class LinearSystem, class TrialFunction, class TestFunction>
-  MUMPS(Variational::Problem<LinearSystem, TrialFunction, TestFunction>&)
-    -> MUMPS<LinearSystem>;
+  template <class LinearSystem>
+  MUMPS(Variational::ProblemBase<LinearSystem>&) -> MUMPS<LinearSystem>;
 
   /**
    * @ingroup MUMPSSpecializations

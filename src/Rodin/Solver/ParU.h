@@ -61,9 +61,8 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for ParU.
    */
-  template <class LinearSystem, class TrialFunction, class TestFunction>
-  ParU(Variational::Problem<LinearSystem, TrialFunction, TestFunction>&)
-    -> ParU<LinearSystem>;
+  template <class LinearSystem>
+  ParU(Variational::ProblemBase<LinearSystem>&) -> ParU<LinearSystem>;
 
   /**
    * @ingroup ParUSpecializations
