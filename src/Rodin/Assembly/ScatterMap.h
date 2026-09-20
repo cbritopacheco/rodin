@@ -383,18 +383,26 @@ namespace Rodin::Assembly
       /**
        * @brief Tests whether the cached pattern still fits @p out.
        *
-       * Shape only; whether it fits the DOF maps and the selection is settled
-       * by the fingerprint, which the scatter loop accumulates as it goes.
+       * The matrix dimensions and compressed sparse index arrays must match
+       * the pattern for which the cached scatter indices were built. Whether
+       * it fits the DOF maps and the selection is settled by the fingerprint,
+       * which the scatter loop accumulates as it goes.
        */
       template <class TrialFES, class TestFES>
       bool isValid(const MatrixType& out, const TrialFES& trialFES,
         const TestFES& testFES, Index count) const
       {
-        return m_built && out.isCompressed() &&
-          static_cast<size_t>(out.rows()) == testFES.getSize() &&
-          static_cast<size_t>(out.cols()) == trialFES.getSize() &&
-          static_cast<size_t>(out.nonZeros()) == m_nonZeroCount &&
-          m_offsets.size() == static_cast<size_t>(count) + 1;
+        if (!m_built || !out.isCompressed() ||
+          static_cast<size_t>(out.rows()) != testFES.getSize() ||
+          static_cast<size_t>(out.cols()) != trialFES.getSize() ||
+          static_cast<size_t>(out.nonZeros()) != m_nonZeroCount ||
+          m_offsets.size() != static_cast<size_t>(count) + 1 ||
+          m_outerIndices.size() != static_cast<size_t>(out.outerSize()) + 1 ||
+          m_innerIndices.size() != static_cast<size_t>(out.nonZeros()))
+          return false;
+        return std::equal(m_outerIndices.begin(), m_outerIndices.end(),
+                   out.outerIndexPtr()) &&
+          std::equal(m_innerIndices.begin(), m_innerIndices.end(), out.innerIndexPtr());
       }
 
       /**
@@ -437,12 +445,18 @@ namespace Rodin::Assembly
           assert(k == m_offsets[i + 1]);
         }
         m_nonZeroCount = static_cast<size_t>(out.nonZeros());
+        m_outerIndices.assign(out.outerIndexPtr(),
+          out.outerIndexPtr() + out.outerSize() + 1);
+        m_innerIndices.assign(out.innerIndexPtr(),
+          out.innerIndexPtr() + out.nonZeros());
         m_fingerprint = fingerprint;
         m_built = true;
       }
 
       mutable bool m_built = false;
       mutable size_t m_nonZeroCount = 0;
+      mutable std::vector<typename MatrixType::StorageIndex> m_outerIndices;
+      mutable std::vector<typename MatrixType::StorageIndex> m_innerIndices;
       mutable size_t m_fingerprint = 0;
       mutable std::vector<size_t> m_offsets;
       mutable std::vector<Index> m_indices;
