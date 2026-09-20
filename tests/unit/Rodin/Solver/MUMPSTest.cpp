@@ -258,6 +258,35 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_ANY_THROW(solver.factorize(rectangular));
   }
 
+  /// @brief A problem of several trial and test functions deduces the solver.
+  TEST(Rodin_Solver_MUMPS, DeducesProblemOfSeveralFields)
+  {
+    auto mesh = makeMesh(Polytope::Type::Triangle);
+
+    P1 vh(mesh);
+    P1 qh(mesh);
+    TrialFunction u(vh);
+    TrialFunction p(qh);
+    TestFunction v(vh);
+    TestFunction q(qh);
+    RealFunction f = 1.0;
+
+    Problem mixed(u, p, v, q);
+    mixed = Integral(Grad(u), Grad(v)) + Integral(p, q) - Integral(f, v) -
+      Integral(f, q) + DirichletBC(u, Zero());
+
+    Rodin::Solver::MUMPS solver(mixed);
+    static_assert(
+      std::is_same_v<typename FormLanguage::Traits<decltype(solver)>::LinearSystemType,
+        typename decltype(mixed)::LinearSystemType>);
+    solver.solve();
+    EXPECT_TRUE(solver.success());
+
+    const auto& system = mixed.getLinearSystem();
+    EXPECT_LT(
+      (system.getOperator() * system.getSolution() - system.getVector()).norm(), 1e-11);
+  }
+
   class Rodin_Solver_MUMPS_AllGeometries : public ::testing::TestWithParam<Polytope::Type>
   {};
 
