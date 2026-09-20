@@ -53,9 +53,10 @@ the solution vector is left untouched, and nothing is raised. A violated
 contract, such as a matrix that is not square, still raises. `HouseholderQR`
 and `PartialPivLU` report nothing, because Eigen exposes no status for them:
 a caller that needs to know checks the residual, or picks another solver.
-The dense solvers act on `Math::Matrix` systems, which assembly never
-produces; `DenseSolverTest.cpp` reaches them through a problem that carries
-one.
+The dense solvers act on `Math::Matrix` systems. A `Problem` assembles into
+whichever `LinearSystem` it is given, and only its deduction guide assumes a
+sparse one, so a dense problem is written by naming the template arguments:
+`Problem<Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>, U, V>`.
 - Platform: `AppleAccelerate`.
 - PETSc KSP wrappers live under `PETSc/Solver` (petsc.md).
 

@@ -8,12 +8,14 @@
  * @file DenseSolverTest.cpp
  * @brief The solvers that factorize a dense operator.
  *
- * Assembly produces sparse systems, so no problem in the tree carries a dense
- * one. These solvers are exercised through a problem that holds a dense system
- * and does nothing else, which is all they read from it.
+ * A problem assembles into whichever linear system it is given, so a dense one
+ * is named rather than adapted: only the deduction guide of Problem assumes a
+ * sparse system, and naming the template arguments bypasses it.
  */
 #include <gtest/gtest.h>
 
+#include "Rodin/Assembly.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
@@ -21,118 +23,125 @@
 #include "Rodin/Solver/Info.h"
 #include "Rodin/Solver/LDLT.h"
 #include "Rodin/Solver/PartialPivLU.h"
-#include "Rodin/Variational/Problem.h"
+#include "Rodin/Solver/SparseLU.h"
+#include "Rodin/Variational.h"
 
 using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit::Solver
 {
   using DenseSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
-  /// @brief A problem that carries a dense system and assembles nothing.
-  class DenseProblem final : public Variational::ProblemBase<DenseSystem>
+  /// @brief A problem assembling into a dense operator.
+  template <class TrialFunctionType, class TestFunctionType>
+  using DenseProblem = Problem<DenseSystem, TrialFunctionType, TestFunctionType>;
+
+  static Mesh<Context::Local> makeMesh()
   {
-    public:
-      using Parent = Variational::ProblemBase<DenseSystem>;
-      using ProblemBodyType = typename Parent::ProblemBodyType;
-
-      DenseProblem& operator=(const ProblemBodyType&) override
-      {
-        return *this;
-      }
-
-      void solve(Rodin::Solver::LinearSolverBase<DenseSystem>& solver) override
-      {
-        solver.solve(m_system);
-      }
-
-      DenseProblem& assemble() override
-      {
-        return *this;
-      }
-
-      DenseSystem& getLinearSystem() override
-      {
-        return m_system;
-      }
-
-      const DenseSystem& getLinearSystem() const override
-      {
-        return m_system;
-      }
-
-      DenseProblem* copy() const noexcept override
-      {
-        return new DenseProblem(*this);
-      }
-
-    private:
-      DenseSystem m_system;
-  };
-
-  /// @brief A symmetric positive definite system whose solution is (1, 2, 3).
-  static void fill(DenseSystem& system)
-  {
-    system.getOperator().resize(3, 3);
-    system.getOperator() << 4.0, 1.0, 0.0, 1.0, 5.0, 2.0, 0.0, 2.0, 6.0;
-    Math::Vector<Real> expected(3);
-    expected << 1.0, 2.0, 3.0;
-    system.getVector() = system.getOperator() * expected;
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {8});
+    mesh.getConnectivity().compute(0, 1);
+    mesh.getConnectivity().compute(1, 0);
+    return mesh;
   }
 
-  template <class Solver>
-  static void expectSolved(Solver& solver, DenseSystem& system)
+  /// @brief Assembles a Poisson problem into the system the problem carries.
+  template <class ProblemType, class TrialFunctionType, class TestFunctionType>
+  static void assemblePoisson(
+    ProblemType& problem, TrialFunctionType& u, TestFunctionType& v)
   {
-    solver.solve(system);
-
-    Math::Vector<Real> expected(3);
-    expected << 1.0, 2.0, 3.0;
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    RealFunction f = 1.0;
+    problem = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
+    problem.assemble();
   }
 
-  TEST(Rodin_Solver_Dense, LDLTSolvesAndReportsItsStatus)
+  template <class Solver, class ProblemType>
+  static void expectSolvedResidual(Solver& solver, ProblemType& problem)
   {
-    DenseProblem problem;
-    fill(problem.getLinearSystem());
+    solver.solve();
 
-    Rodin::Solver::LDLT solver(problem);
-    expectSolved(solver, problem.getLinearSystem());
+    const auto& system = problem.getLinearSystem();
+    EXPECT_GT(system.getOperator().rows(), 0);
+    EXPECT_LT(
+      (system.getOperator() * system.getSolution() - system.getVector()).norm(), 1e-10);
+  }
+
+  TEST(Rodin_Solver_Dense, LDLTSolvesAnAssembledDenseProblem)
+  {
+    auto mesh = makeMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+
+    DenseProblem<decltype(u), decltype(v)> poisson(u, v);
+    assemblePoisson(poisson, u, v);
+
+    Rodin::Solver::LDLT solver(poisson);
+    expectSolvedResidual(solver, poisson);
     EXPECT_TRUE(solver.success());
     EXPECT_EQ(solver.getInfo().factorization, Rodin::Solver::Factorization::Numeric);
     EXPECT_EQ(solver.getInfo().status, 0);
   }
 
-  TEST(Rodin_Solver_Dense, HouseholderQRSolves)
+  TEST(Rodin_Solver_Dense, HouseholderQRSolvesAnAssembledDenseProblem)
   {
-    DenseProblem problem;
-    fill(problem.getLinearSystem());
+    auto mesh = makeMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
 
-    // Eigen reports no status for this factorization, so there is nothing to
-    // assert beyond the solution itself.
-    Rodin::Solver::HouseholderQR solver(problem);
-    expectSolved(solver, problem.getLinearSystem());
+    DenseProblem<decltype(u), decltype(v)> poisson(u, v);
+    assemblePoisson(poisson, u, v);
+
+    // Eigen reports no status for this factorization, so the residual is all
+    // there is to assert.
+    Rodin::Solver::HouseholderQR solver(poisson);
+    expectSolvedResidual(solver, poisson);
   }
 
-  TEST(Rodin_Solver_Dense, PartialPivLUSolves)
+  TEST(Rodin_Solver_Dense, PartialPivLUSolvesAnAssembledDenseProblem)
   {
-    DenseProblem problem;
-    fill(problem.getLinearSystem());
+    auto mesh = makeMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
 
-    Rodin::Solver::PartialPivLU solver(problem);
-    expectSolved(solver, problem.getLinearSystem());
+    DenseProblem<decltype(u), decltype(v)> poisson(u, v);
+    assemblePoisson(poisson, u, v);
+
+    Rodin::Solver::PartialPivLU solver(poisson);
+    expectSolvedResidual(solver, poisson);
   }
 
-  /// @brief Solving through the problem reaches the same solution.
-  TEST(Rodin_Solver_Dense, SolvesThroughTheProblem)
+  /// @brief Dense assembly reaches the same system, and solution, as sparse.
+  TEST(Rodin_Solver_Dense, DenseAssemblyMatchesSparseAssembly)
   {
-    DenseProblem problem;
-    fill(problem.getLinearSystem());
+    auto mesh = makeMesh();
+    P1 vh(mesh);
 
-    Rodin::Solver::LDLT solver(problem);
-    solver.solve();
+    TrialFunction uSparse(vh);
+    TestFunction vSparse(vh);
+    Problem sparse(uSparse, vSparse);
+    assemblePoisson(sparse, uSparse, vSparse);
+    Rodin::Solver::SparseLU sparseSolver(sparse);
+    sparseSolver.solve();
 
-    Math::Vector<Real> expected(3);
-    expected << 1.0, 2.0, 3.0;
-    EXPECT_NEAR((problem.getLinearSystem().getSolution() - expected).norm(), 0.0, 1e-12);
+    TrialFunction uDense(vh);
+    TestFunction vDense(vh);
+    DenseProblem<decltype(uDense), decltype(vDense)> dense(uDense, vDense);
+    assemblePoisson(dense, uDense, vDense);
+    Rodin::Solver::LDLT denseSolver(dense);
+    denseSolver.solve();
+
+    const auto& sparseSystem = sparse.getLinearSystem();
+    const auto& denseSystem = dense.getLinearSystem();
+    EXPECT_EQ(denseSystem.getOperator().rows(), sparseSystem.getOperator().rows());
+    EXPECT_EQ(denseSystem.getOperator().cols(), sparseSystem.getOperator().cols());
+    EXPECT_LT(
+      (Math::Matrix<Real>(sparseSystem.getOperator()) - denseSystem.getOperator()).norm(),
+      1e-12);
+    EXPECT_LT((sparseSystem.getVector() - denseSystem.getVector()).norm(), 1e-12);
+    EXPECT_LT((sparseSystem.getSolution() - denseSystem.getSolution()).norm(), 1e-10);
   }
 }
