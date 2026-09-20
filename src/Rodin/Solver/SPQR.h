@@ -51,6 +51,34 @@
 #include <optional>
 #include <functional>
 
+#include <type_traits>
+
+#include <SuiteSparseQR.hpp>
+
+/**
+ * @brief Compatibility overload for SuiteSparse 7 and later.
+ *
+ * Eigen calls @c SuiteSparseQR<Scalar>(...) passing the column count as
+ * @c Eigen::Index while its own @c m_E is @c SuiteSparse_long. SuiteSparse 7
+ * deduces its @c Int template parameter from both, so on a platform where the
+ * two types differ, such as macOS where @c SuiteSparse_long is @c long @c long
+ * and @c Eigen::Index is @c long, the deduction conflicts and no candidate is
+ * viable. This overload accepts the mixed pair and forwards with @c Int fixed.
+ *
+ * It is a free function because it interposes on an external C++ API that
+ * Eigen reaches through argument-dependent lookup. It removes itself where the
+ * two types agree, leaving SuiteSparse's own declaration to be selected.
+ */
+template <typename Entry, typename EconIndex,
+  std::enable_if_t<!std::is_same_v<EconIndex, SuiteSparse_long>, int> = 0>
+SuiteSparse_long SuiteSparseQR(int ordering, double tol, EconIndex econ,
+  cholmod_sparse* A, cholmod_sparse** R, SuiteSparse_long** E, cholmod_sparse** H,
+  SuiteSparse_long** HPinv, cholmod_dense** HTau, cholmod_common* cc)
+{
+  return SuiteSparseQR<Entry, SuiteSparse_long>(
+    ordering, tol, static_cast<SuiteSparse_long>(econ), A, R, E, H, HPinv, HTau, cc);
+}
+
 #include <Eigen/SPQRSupport>
 
 #include "Rodin/Math/Vector.h"
