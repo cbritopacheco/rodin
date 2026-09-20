@@ -66,6 +66,9 @@ The following targets define the SuiteSparse components searched for.
 ``SuiteSparse::UMFPACK``
   UMFPACK
 
+``SuiteSparse::ParU``
+  Parallel multifrontal sparse LU factorization (ParU)
+
 ``SuiteSparse::AMD``
     Symmetric Approximate Minimum Degree (AMD)
 
@@ -146,6 +149,11 @@ endif (CHOLMOD IN_LIST SuiteSparse_FIND_COMPONENTS)
 if (SPQR IN_LIST SuiteSparse_FIND_COMPONENTS)
   list (APPEND SuiteSparse_IMPLICIT_COMPONENTS CHOLMOD)
 endif (SPQR IN_LIST SuiteSparse_FIND_COMPONENTS)
+
+# ParU depends on UMFPACK and CHOLMOD.
+if (ParU IN_LIST SuiteSparse_FIND_COMPONENTS)
+  list (APPEND SuiteSparse_IMPLICIT_COMPONENTS UMFPACK CHOLMOD)
+endif (ParU IN_LIST SuiteSparse_FIND_COMPONENTS)
 
 # Implicit components are always required
 foreach (component IN LISTS SuiteSparse_IMPLICIT_COMPONENTS)
@@ -320,6 +328,8 @@ foreach (component IN LISTS SuiteSparse_FIND_COMPONENTS)
     set (component_library suitesparseconfig)
   elseif (component STREQUAL "SPQR")
     set (component_header SuiteSparseQR.hpp)
+  elseif (component STREQUAL "ParU")
+    set (component_header ParU.h)
   else (component STREQUAL "SPQR")
     set (component_header ${component_library}.h)
   endif (component STREQUAL "Config")
@@ -357,6 +367,18 @@ if (TARGET SuiteSparse::SPQR)
       "not compiled with TBB.")
   endif (TBB_FOUND)
 endif (TARGET SuiteSparse::SPQR)
+
+# ParU requires UMFPACK and CHOLMOD.
+if (TARGET SuiteSparse::ParU)
+  foreach (component IN ITEMS UMFPACK CHOLMOD)
+    if (TARGET SuiteSparse::${component})
+      set_property (TARGET SuiteSparse::ParU APPEND PROPERTY
+        INTERFACE_LINK_LIBRARIES SuiteSparse::${component})
+    else (TARGET SuiteSparse::${component})
+      set (SuiteSparse_ParU_FOUND FALSE)
+    endif (TARGET SuiteSparse::${component})
+  endforeach (component IN ITEMS UMFPACK CHOLMOD)
+endif (TARGET SuiteSparse::ParU)
 
 check_library_exists(rt shm_open "" HAVE_LIBRT)
 

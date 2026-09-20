@@ -41,12 +41,24 @@ from the system type.
   `IDRSTABL`, `LeastSquaresCG`.
 - Eigen direct: `SparseLU`, `SparseQR`, `SimplicialLLT`, `SimplicialLDLT`,
   `LDLT`, `HouseholderQR`, `PartialPivLU`.
-- SuiteSparse (configure-gated): `UMFPack`, `CHOLMOD`, `SPQR`.
+- SuiteSparse (configure-gated): `UMFPack`, `ParU`, `CHOLMOD`, `SPQR`.
+- MUMPS (configure-gated): `MUMPS`, the only direct solver that exploits a
+  symmetric matrix (`setSymmetric`), halving the factor it stores.
+
+Factorization-based solvers share no base class, but report uniformly through
+`getInfo()` and `success()` (`Solver/Info.h`): the success of the most recent
+operation, the retained `Factorization` stage, and the backend's own `status`.
+A factorization that fails is an outcome, not a defect: the solve is skipped,
+the solution vector is left untouched, and nothing is raised. A violated
+contract, such as a matrix that is not square, still raises. `HouseholderQR`
+and `PartialPivLU` report nothing, because Eigen exposes no status for them:
+a caller that needs to know checks the residual, or picks another solver.
 - Platform: `AppleAccelerate`.
 - PETSc KSP wrappers live under `PETSc/Solver` (petsc.md).
 
 Choosing: SPD → CG (iterative) or SimplicialLDLT/CHOLMOD (direct);
-nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack; small dense → LDLT/
+nonsymmetric → BiCGSTAB/GMRES or SparseLU/UMFPack/ParU; symmetric indefinite
+(saddle point) → MUMPS with `setSymmetric`; small dense → LDLT/
 PartialPivLU. Examples default to CG for Poisson-like and SparseLU/LDLT
 for Newton tangents.
 

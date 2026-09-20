@@ -118,6 +118,80 @@ jobs:
           -L unit -L distributed -LE slow
           --rerun-failed -V --output-on-failure
 
+  DirectSolvers:
+    # The ParU C API this wrapper targets ships with SuiteSparse 7.10 or newer,
+    # which the Ubuntu runner images do not package: their libsuitesparse-dev
+    # carries the older ParU_C interface and no ParU.h. Debian trixie packages
+    # SuiteSparse 7.10.1 and MUMPS, so both solvers are built there.
+    runs-on: ubuntu-latest
+    container: debian:trixie
+
+    env:
+      MAKEFLAGS: "-j2"
+      OMP_NUM_THREADS: 2
+      CTEST_PARALLEL_LEVEL: 2
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - name: Install dependencies
+        run: >-
+          apt-get update && apt-get install -y --no-install-recommends
+          build-essential
+          ca-certificates
+          cmake
+          git
+          libboost-all-dev
+          libeigen3-dev
+          libhdf5-dev
+          libmetis-dev
+          libmumps-dev
+          libscotch-dev
+          libsuitesparse-dev
+          mpi-default-bin
+          mpi-default-dev
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ github.workspace }}/build
+          -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_USE_PARU=ON
+          -DRODIN_USE_MUMPS=ON
+          -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_CHOLMOD=ON
+          -DRODIN_USE_PETSC=OFF
+          -DRODIN_USE_MCSS=OFF
+          -DRODIN_BUILD_DOC=OFF
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=ON
+          -DRODIN_INSTALL_RESOURCES=OFF
+
+      - name: Build solver tests
+        run: >
+          cmake --build ${{ github.workspace }}/build
+          --target RodinParUTest RodinMUMPSTest RodinUMFPackTest RodinSparseLUTest
+          RodinInfoTest
+
+      - name: Run solver tests
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L unit -R "ParU|MUMPS|UMFPack|SparseLU|Solver_Info"
+          --output-on-failure
+          -j ${{ env.CTEST_PARALLEL_LEVEL }}
+
+      - name: Rerun failed solver tests (verbose)
+        if: failure()
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L unit -R "ParU|MUMPS|UMFPack|SparseLU|Solver_Info"
+          --rerun-failed -V --output-on-failure
+
   Manufactured:
     runs-on: ubuntu-latest
     strategy:
