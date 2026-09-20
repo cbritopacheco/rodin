@@ -52,8 +52,6 @@
 
 #include <Eigen/UmfPackSupport>
 
-#include "Rodin/Alert/MemberFunctionException.h"
-#include "Rodin/Alert/Raise.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
@@ -163,21 +161,39 @@ namespace Rodin::Solver
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
-        if (m_solver.info() != Eigen::Success)
+        if (!success())
         {
-          // A failed factorization leaves the destination vector untouched, so
-          // an unchecked solve silently returns whatever it already held.
-          Alert::MemberFunctionException(*this, __func__)
-            << "The UMFPACK factorization failed with status "
-            << static_cast<Integer>(m_solver.umfpackFactorizeReturncode()) << "."
-            << Alert::Raise;
+          // A failed factorization makes Eigen return from its solve without
+          // writing anything, which is indistinguishable from a solve that
+          // produced the vector already held. Leave it untouched instead; the
+          // failure is reported by success().
+          return;
         }
         axb.getSolution() = m_solver.solve(axb.getVector());
-        if (m_solver.info() != Eigen::Success)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "The UMFPACK solve failed." << Alert::Raise;
-        }
+      }
+
+      /**
+       * @brief Checks if the factorization and the solve succeeded.
+       * @returns true if the solver succeeded, false otherwise
+       *
+       * A failed factorization leaves the solution vector untouched. UMFPACK's
+       * own status is available through getFactorizationStatus().
+       */
+      Boolean success() const
+      {
+        return m_solver.info() == Eigen::Success;
+      }
+
+      /**
+       * @brief Returns UMFPACK's status from the most recent factorization.
+       *
+       * Zero denotes success. The negative values are errors, such as
+       * @c UMFPACK_ERROR_out_of_memory, and the positive ones warnings, such
+       * as @c UMFPACK_WARNING_singular_matrix.
+       */
+      Integer getFactorizationStatus() const
+      {
+        return static_cast<Integer>(m_solver.umfpackFactorizeReturncode());
       }
 
       /**
