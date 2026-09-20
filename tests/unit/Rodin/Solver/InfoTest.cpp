@@ -17,7 +17,6 @@
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Solver/CHOLMOD.h"
 #include "Rodin/Solver/Info.h"
-#include "Rodin/Solver/LDLT.h"  // compiled here; its dense system has no Problem
 #include "Rodin/Solver/SPQR.h"
 #include "Rodin/Solver/SimplicialLDLT.h"
 #include "Rodin/Solver/SimplicialLLT.h"
