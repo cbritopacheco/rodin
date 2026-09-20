@@ -1209,10 +1209,11 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
-        bool sameReferenceCoordinates = cache.referenceCoordinates.size() ==
+        const size_t referenceCoordinateCount =
           static_cast<size_t>(referenceCoordinates.size());
-        for (size_t j = 0; sameReferenceCoordinates &&
-             j < static_cast<size_t>(referenceCoordinates.size()); ++j)
+        bool sameReferenceCoordinates =
+          cache.referenceCoordinates.size() == referenceCoordinateCount;
+        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinateCount; ++j)
           sameReferenceCoordinates = cache.referenceCoordinates[j] == referenceCoordinates(j);
         if (!cache.hasBasisValues || cache.owner != m_identity || cache.d != d ||
           cache.i != i || cache.qf != ip.getQuadratureFormula() ||
@@ -1229,7 +1230,7 @@ namespace Rodin::Variational
           cache.i = i;
           cache.qf = ip.getQuadratureFormula();
           cache.qp = ip.getIndex();
-          cache.referenceCoordinates.resize(static_cast<size_t>(referenceCoordinates.size()));
+          cache.referenceCoordinates.resize(referenceCoordinateCount);
           for (size_t j = 0; j < cache.referenceCoordinates.size(); ++j)
             cache.referenceCoordinates[j] = referenceCoordinates(j);
           cache.basisValues.resize(count);
