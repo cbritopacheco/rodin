@@ -99,7 +99,7 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    final : public FactorizationSolverBase<
+    final : public LinearSolverBase<
               Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
@@ -119,7 +119,7 @@ namespace Rodin::Solver
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
       /// Parent class type
-      using Parent = FactorizationSolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -157,7 +157,7 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        this->m_info = Info{};
+        m_info = Info{};
         m_solver.compute(axb.getOperator());
         if (!record())
         {
@@ -166,7 +166,7 @@ namespace Rodin::Solver
           // uninitialized state. Leave the solution untouched instead.
           return;
         }
-        this->m_info.factorization = Factorization::Numeric;
+        m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
         record();
       }
@@ -175,6 +175,26 @@ namespace Rodin::Solver
       std::string getLastErrorMessage() const
       {
         return m_solver.lastErrorMessage();
+      }
+
+      /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -190,10 +210,13 @@ namespace Rodin::Solver
       /// @brief Records the Eigen status, and returns whether it succeeded.
       Boolean record()
       {
-        this->m_info.status = static_cast<Integer>(m_solver.info());
-        this->m_info.success = m_solver.info() == Eigen::Success;
-        return this->m_info.success;
+        m_info.status = static_cast<Integer>(m_solver.info());
+        m_info.success = m_solver.info() == Eigen::Success;
+        return m_info.success;
       }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
 
       /// Underlying Eigen SparseLU solver
       Eigen::SparseLU<OperatorType> m_solver;

@@ -6,14 +6,25 @@
  */
 /**
  * @file Info.h
- * @brief Status reporting shared by the factorization-based solvers.
+ * @brief Status reported by the factorization-based solvers.
+ *
+ * The solvers that factorize their operator have no common ancestor: each one
+ * wraps a library of its own. They share this vocabulary instead, and expose
+ * it uniformly through `getInfo()` and `success()`.
+ *
+ * A factorization can fail for reasons that are not programming errors, such
+ * as a singular matrix or a factor that does not fit in memory. Solving with a
+ * failed factorization yields no solution and, depending on the backend,
+ * either leaves the solution vector untouched or reads state that was never
+ * computed. A solver therefore stops before the solve and reports what
+ * happened through its @ref Rodin::Solver::Info "Info", leaving the caller to
+ * act on it. A violated contract, such as a matrix that is not square, remains
+ * an exception: it is a defect in the calling code rather than an outcome.
  */
 #ifndef RODIN_SOLVER_INFO_H
 #define RODIN_SOLVER_INFO_H
 
 #include "Rodin/Types.h"
-
-#include "LinearSolver.h"
 
 namespace Rodin::Solver
 {
@@ -34,7 +45,8 @@ namespace Rodin::Solver
    * @brief Outcome of the most recent operation of a factorization-based
    * solver.
    *
-   * @see FactorizationSolverBase
+   * Obtained from the solver's `getInfo()`, whose `success` is also returned
+   * on its own by `success()`.
    */
   struct Info
   {
@@ -58,76 +70,6 @@ namespace Rodin::Solver
       Integer status = 0;
   };
 
-  /**
-   * @brief Base class of the solvers that factorize their operator.
-   *
-   * A factorization can fail for reasons that are not programming errors, such
-   * as a singular matrix or a factor that does not fit in memory. Solving with
-   * a failed factorization yields no solution and, depending on the backend,
-   * either leaves the solution vector untouched or reads state that was never
-   * computed. These solvers therefore stop before the solve and report what
-   * happened through @ref getInfo, leaving the caller to act on it.
-   *
-   * A violated contract, such as a matrix that is not square, remains an
-   * exception: it is a defect in the calling code rather than an outcome.
-   *
-   * @tparam LinearSystem Type of linear system to solve.
-   */
-  template <class LinearSystem>
-  class FactorizationSolverBase : public LinearSolverBase<LinearSystem>
-  {
-    public:
-      /// @brief Parent class type.
-      using Parent = LinearSolverBase<LinearSystem>;
-
-      /// @brief Problem type solved by this solver.
-      using ProblemBaseType = Variational::ProblemBase<LinearSystem>;
-
-      using Parent::solve;
-
-      /// @brief Constructs the solver for the given problem.
-      FactorizationSolverBase(ProblemBaseType& pb)
-        : Parent(pb)
-      {}
-
-      /// @brief Copy constructor. The copy retains no factorization.
-      FactorizationSolverBase(const FactorizationSolverBase& other)
-        : Parent(other)
-      {}
-
-      /// @brief Move constructor.
-      FactorizationSolverBase(FactorizationSolverBase&& other) noexcept
-        : Parent(std::move(other)),
-          m_info(other.m_info)
-      {}
-
-      /// @brief Default virtual destructor.
-      virtual ~FactorizationSolverBase() = default;
-
-      /**
-       * @brief Returns the outcome of the most recent operation.
-       *
-       * The returned @ref Info is updated by every factorization and every
-       * solve, so a caller reads it after the call it wants to check.
-       */
-      const Info& getInfo() const noexcept
-      {
-        return m_info;
-      }
-
-      /**
-       * @brief Checks whether the most recent operation succeeded.
-       * @returns true if the solver succeeded, false otherwise.
-       */
-      Boolean success() const noexcept
-      {
-        return m_info.success;
-      }
-
-    protected:
-      /// @brief Outcome of the most recent operation.
-      Info m_info;
-  };
 }
 
 #endif

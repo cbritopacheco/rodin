@@ -93,7 +93,7 @@ namespace Rodin::Solver
    */
   template <>
   class ParU<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>> final
-    : public FactorizationSolverBase<
+    : public LinearSolverBase<
         Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>
   {
     public:
@@ -102,7 +102,7 @@ namespace Rodin::Solver
       using OperatorType = Math::SparseMatrix<ScalarType>;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = FactorizationSolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -283,7 +283,7 @@ namespace Rodin::Solver
             return record(analyzeInfo, {});
           }
         }
-        this->m_info.factorization = Factorization::Symbolic;
+        m_info.factorization = Factorization::Symbolic;
 
         m_resources.clear(Factorization::Numeric);
         const auto factorizeInfo = ParU_Factorize(
@@ -294,6 +294,26 @@ namespace Rodin::Solver
           return record(factorizeInfo, Factorization::Symbolic);
         }
         record(PARU_SUCCESS, Factorization::Numeric);
+      }
+
+      /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -322,15 +342,15 @@ namespace Rodin::Solver
         {
           m_columnPointers.resize(0);
           m_rowIndices.resize(0);
-          this->m_info.factorization.reset();
+          m_info.factorization.reset();
         }
         else if (m_resources.symbolic)
         {
-          this->m_info.factorization = Factorization::Symbolic;
+          m_info.factorization = Factorization::Symbolic;
         }
         else
         {
-          this->m_info.factorization.reset();
+          m_info.factorization.reset();
         }
       }
 
@@ -394,9 +414,9 @@ namespace Rodin::Solver
        */
       void record(ParU_Info info, Optional<Factorization> factorization)
       {
-        this->m_info.status = static_cast<Integer>(info);
-        this->m_info.success = info == PARU_SUCCESS;
-        this->m_info.factorization = factorization;
+        m_info.status = static_cast<Integer>(info);
+        m_info.success = info == PARU_SUCCESS;
+        m_info.factorization = factorization;
       }
 
       void check(ParU_Info info, StringView operation) const
@@ -408,6 +428,9 @@ namespace Rodin::Solver
             << static_cast<Integer>(info) << "." << Alert::Raise;
         }
       }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
 
       Index m_maxThreads = 0;
       Ordering m_ordering = Ordering::Default;
