@@ -547,7 +547,9 @@ wall-clock time of each stage. They are followed by:
   coupling and rotational mobilities $q/(kq-c^2)$, $-c/(kq-c^2)$ and
   $k/(kq-c^2)$, the period $2\pi(kq-c^2)/|c|$ of one revolution, the pitch
   $2\pi q/|c|$ and the resistance length $\ell = \sqrt{q/k}$, with
-  pitch $= 2\pi\ell/\rho$;
+  pitch $= 2\pi\ell/\rho$, and at the end of the row the components of $Z$
+  and $\omega$ for the unit force along `--motion-force`, which are also
+  printed at every iterate;
 - the level-set penalty, and the thickness bound, weight, penalty, rays that
   leave the body and deepest exit;
 - the identification across the cuts: the rotated jump of the Eikonal

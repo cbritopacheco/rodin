@@ -92,6 +92,17 @@ namespace KelvinBall
         return heading.setBold();
       }
 
+      /// Formats a vector as (x, y, z), with signed zeros printed as 0.
+      std::string vectorText(const Math::SpatialVector<Real>& v)
+      {
+        std::ostringstream text;
+        text << '(';
+        for (Eigen::Index i = 0; i < v.size(); ++i)
+          text << (i ? ", " : "") << v(i) + Real(0);
+        text << ')';
+        return text.str();
+      }
+
       Alert::Text<Alert::YellowT> substageHeading(const std::string& text)
       {
         Alert::Text<Alert::YellowT> heading(Alert::Yellow, text);
@@ -1115,7 +1126,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "thickness_violating_rays,thickness_deepest_exit,"
              "eikonal_rotated_jump,projected_rotated_jump,distance_correction,"
              "interface_shift_max,advection_increment,advected_rotated_jump,"
-             "min_crossing_fraction,snapped_vertices,reconstruction_scale\n";
+             "min_crossing_fraction,snapped_vertices,reconstruction_scale,"
+             "z_x,z_y,z_z,omega_x,omega_y,omega_z\n";
   IO::XDMF xdmf("KelvinBall");
   auto chamber = xdmf.grid("Chamber");
   chamber.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
@@ -1261,6 +1273,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << stageDiagnostics.advectionIncrement << ','
               << stageDiagnostics.advectedJump << ',' << reconstruction.minimumCrossing
               << ',' << reconstruction.snappedVertices << ',' << reconstruction.scale;
+      // Z and omega themselves, for the unit force along --motion-force.
+      const Math::SpatialVector<Real> unitForce = motionForce / motionForce.norm();
+      for (Eigen::Index component = 0; component < 3; ++component)
+        history << ',' << q / determinant * unitForce(component);
+      for (Eigen::Index component = 0; component < 3; ++component)
+        history << ',' << -c / determinant * unitForce(component);
       history << '\n';
       history.flush();
     };
@@ -1290,13 +1308,32 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::NewLine << diagnosticLabel("Volume:")
                   << Alert::Notation::Number(volume) << Alert::NewLine
                   << diagnosticLabel("Chamber bounding box:")
-                  << Alert::Notation::Print(chamberBoundingBox.transpose())
-                  << Alert::NewLine << diagnosticLabel("Sewn mesh bounding box:")
-                  << Alert::Notation::Print(sewnBoundingBox.transpose()) << Alert::NewLine
+                  << vectorText(chamberBoundingBox) << Alert::NewLine
+                  << diagnosticLabel("Sewn mesh bounding box:")
+                  << vectorText(sewnBoundingBox) << Alert::NewLine
                   << diagnosticLabel("Nitsche jump:")
                   << Alert::Notation::Number(nitscheJump) << Alert::NewLine
                   << diagnosticLabel("Coupling symmetry residual:")
                   << Alert::Notation::Number(couplingSymmetry) << Alert::Raise;
+    {
+      // Free motion under a unit force along --motion-force, without torque.
+      const Real determinant = k * q - c * c;
+      const Math::SpatialVector<Real> force = motionForce / motionForce.norm();
+      const Math::SpatialVector<Real> translation = (q / determinant) * force;
+      const Math::SpatialVector<Real> angular = (-c / determinant) * force;
+      Alert::Info() << substageHeading("Free motion under a unit force") << Alert::NewLine
+                    << diagnosticLabel("Force direction:") << vectorText(force)
+                    << Alert::NewLine << diagnosticLabel("Translational velocity Z:")
+                    << vectorText(translation) << Alert::NewLine
+                    << diagnosticLabel("Angular velocity omega:") << vectorText(angular)
+                    << Alert::NewLine << diagnosticLabel("Period of one revolution:")
+                    << Alert::Notation::Number(
+                         c != 0 ? 2 * M_PI * determinant / std::abs(c) : nan)
+                    << Alert::NewLine << diagnosticLabel("Pitch:")
+                    << Alert::Notation::Number(c != 0 ? 2 * M_PI * q / std::abs(c) : nan)
+                    << Alert::NewLine << diagnosticLabel("Resistance length sqrt(q/k):")
+                    << Alert::Notation::Number(std::sqrt(q / k)) << Alert::Raise;
+    }
     stageSeconds[3] = elapsedSeconds(stage4Start);
     reportStageTiming(4, stageSeconds[3]);
     if (stateOnly)
@@ -1578,13 +1615,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       const Real angularSpeed = angular.norm();
       const Real period = angularSpeed > 0 ? 2 * M_PI / angularSpeed : Real(1);
       Alert::Info() << substageHeading("Rigid motion") << Alert::NewLine
-                    << diagnosticLabel("Force:")
-                    << Alert::Notation::Print(motionForce.transpose()) << Alert::NewLine
-                    << diagnosticLabel("Translational velocity Z:")
-                    << Alert::Notation::Print(translation.transpose()) << Alert::NewLine
-                    << diagnosticLabel("Angular velocity omega:")
-                    << Alert::Notation::Print(angular.transpose()) << Alert::NewLine
-                    << diagnosticLabel("Period of one revolution:")
+                    << diagnosticLabel("Force:") << vectorText(motionForce)
+                    << Alert::NewLine << diagnosticLabel("Translational velocity Z:")
+                    << vectorText(translation) << Alert::NewLine
+                    << diagnosticLabel("Angular velocity omega:") << vectorText(angular)
+                    << Alert::NewLine << diagnosticLabel("Period of one revolution:")
                     << Alert::Notation::Number(period) << Alert::NewLine
                     << diagnosticLabel("Pitch (travel per revolution):")
                     << Alert::Notation::Number(translation.norm() * period)
