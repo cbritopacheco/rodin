@@ -34,9 +34,34 @@ namespace KelvinBall
       Real nitschePenalty = DefaultNitschePenalty;
       Real stabilizationFactor = DefaultStabilizationFactor;
 
+      /**
+       * @brief Stabilization @f$ \alpha h^2/\mu @f$ at the background size.
+       *
+       * Used on the rotated cut faces, which lie on the fixed background mesh
+       * and keep its size. Inside the chamber the size varies, so the cell
+       * integrals use @ref cellStabilization instead.
+       */
       Real pressureStabilization() const
       {
         return stabilizationFactor * h * h / Mu;
+      }
+
+      /**
+       * @brief Stabilization @f$ \tau_K = \alpha h_K^2/\mu @f$ of each cell.
+       *
+       * The Brezzi--Pitkaenta term is only consistent with the local mesh
+       * size: it is the inverse estimate on a cell that produces the
+       * @f$ h_K^2 @f$, and a single size taken from the background
+       * over-stabilizes the cells that are smaller than it. Reconstructed
+       * chambers are graded, so the local size is the one that belongs here.
+       */
+      auto cellStabilization() const
+      {
+        const Real factor = stabilizationFactor;
+        return RealFunction([factor](const Geometry::Point& point) {
+          const Real cell = cellSize(point.getPolytope());
+          return factor * cell * cell / Mu;
+        });
       }
   };
 
@@ -134,14 +159,15 @@ namespace KelvinBall
         const auto Dv1 = Real(0.5) * (Jacobian(v1) + Jacobian(v1).T());
         const auto Dv2 = Real(0.5) * (Jacobian(v2) + Jacobian(v2).T());
         const Real stabilization = m_parameters.pressureStabilization();
+        const auto tau = m_parameters.cellStabilization();
 
         Problem stokes(u0, p0, u1, p1, u2, p2, v0, q0, v1, q1, v2, q2);
         stokes = Integral(Real(2) * Mu * Du0, Dv0) - Integral(p0, Div(v0)) -
-          Integral(Div(u0), q0) - stabilization * Integral(Grad(p0), Grad(q0)) +
+          Integral(Div(u0), q0) - Integral(tau * Grad(p0), Grad(q0)) +
           Integral(Real(2) * Mu * Du1, Dv1) - Integral(p1, Div(v1)) -
-          Integral(Div(u1), q1) - stabilization * Integral(Grad(p1), Grad(q1)) +
+          Integral(Div(u1), q1) - Integral(tau * Grad(p1), Grad(q1)) +
           Integral(Real(2) * Mu * Du2, Dv2) - Integral(p2, Div(v2)) -
-          Integral(Div(u2), q2) - stabilization * Integral(Grad(p2), Grad(q2)) +
+          Integral(Div(u2), q2) - Integral(tau * Grad(p2), Grad(q2)) +
           DirichletBC(u0, rigid0).on(Gamma) + DirichletBC(u1, rigid1).on(Gamma) +
           DirichletBC(u2, rigid2).on(Gamma) +
           DirichletBC(u0, VectorFunction{0, 0, 0}).on(Outer) +
@@ -184,19 +210,19 @@ namespace KelvinBall
         const auto Dv0 = Real(0.5) * (Jacobian(v0) + Jacobian(v0).T());
         const auto Dv1 = Real(0.5) * (Jacobian(v1) + Jacobian(v1).T());
         const auto Dv2 = Real(0.5) * (Jacobian(v2) + Jacobian(v2).T());
-        const Real stabilization = m_parameters.pressureStabilization();
+        const auto tau = m_parameters.cellStabilization();
         P0g gauge(Vh.getMesh());
         TrialFunction lambda0(gauge), lambda1(gauge), lambda2(gauge);
         TestFunction eta0(gauge), eta1(gauge), eta2(gauge);
         Problem stokes(u0, p0, u1, p1, u2, p2, lambda0, lambda1, lambda2, v0, q0, v1, q1,
           v2, q2, eta0, eta1, eta2);
         stokes = Integral(Real(2) * Mu * Du0, Dv0) - Integral(p0, Div(v0)) -
-          Integral(Div(u0), q0) - stabilization * Integral(Grad(p0), Grad(q0)) +
+          Integral(Div(u0), q0) - Integral(tau * Grad(p0), Grad(q0)) +
           Integral(lambda0, q0) + Integral(p0, eta0) + Integral(Real(2) * Mu * Du1, Dv1) -
           Integral(p1, Div(v1)) - Integral(Div(u1), q1) -
-          stabilization * Integral(Grad(p1), Grad(q1)) + Integral(lambda1, q1) +
+          Integral(tau * Grad(p1), Grad(q1)) + Integral(lambda1, q1) +
           Integral(p1, eta1) + Integral(Real(2) * Mu * Du2, Dv2) - Integral(p2, Div(v2)) -
-          Integral(Div(u2), q2) - stabilization * Integral(Grad(p2), Grad(q2)) +
+          Integral(Div(u2), q2) - Integral(tau * Grad(p2), Grad(q2)) +
           Integral(lambda2, q2) + Integral(p2, eta2) + DirichletBC(u0, rigid0).on(Gamma) +
           DirichletBC(u1, rigid1).on(Gamma) + DirichletBC(u2, rigid2).on(Gamma) +
           DirichletBC(u0, VectorFunction{0, 0, 0}).on(Outer) +

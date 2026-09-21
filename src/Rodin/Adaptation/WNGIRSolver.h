@@ -11,6 +11,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <map>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -24,6 +25,16 @@
 #include <Eigen/IterativeLinearSolvers>
 
 #include "Rodin/Solver/CG.h"
+#ifdef RODIN_USE_MUMPS
+#include "Rodin/Solver/MUMPS.h"
+#endif
+#include "Rodin/Solver/SparseLU.h"
+#ifdef RODIN_USE_UMFPACK
+#include "Rodin/Solver/UMFPack.h"
+#endif
+#include "Rodin/Variational/DirichletBC.h"
+#include "Rodin/Variational/FaceIntegral.h"
+#include "Rodin/Variational/FaceNormal.h"
 #include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Trace.h"
@@ -66,6 +77,20 @@ namespace Rodin::Adaptation
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
       using LinearSystemType = typename ProblemType::LinearSystemType;
       using StepSolverType = Solver::CG<LinearSystemType>;
+
+      /**
+       * @brief Direct solver used for the step when the backend provides one.
+       *
+       * MUMPS factorizes the symmetric step matrix as @f$ LDL^T @f$; the other
+       * backends factorize it as @f$ LU @f$.
+       */
+#if defined(RODIN_USE_MUMPS)
+      using DirectStepSolverType = Solver::MUMPS<LinearSystemType>;
+#elif defined(RODIN_USE_UMFPACK)
+      using DirectStepSolverType = Solver::UMFPack<LinearSystemType>;
+#else
+      using DirectStepSolverType = Solver::SparseLU<LinearSystemType>;
+#endif
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
       using LinearFormType = std::decay_t<decltype(Variational::LinearForm(
@@ -262,6 +287,8 @@ namespace Rodin::Adaptation
           return rep;
         }
 
+        buildBoundaryConstraints(mesh);
+
         // One bounding-volume locator per solve: the background mesh is fixed
         // for the frame, and the index builds lazily on first query.
         const Location::AABB<Mesh> locator(mesh);
@@ -421,8 +448,21 @@ namespace Rodin::Adaptation
           Real predictorAction = Real(0);
           typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
           predictorBody = predictorBody + m_obsForm - m_surfaceForm;
+          if (!p.fixedBoundaryAttributes.empty())
+          {
+            const auto zero = Variational::VectorFunction(meshDim,
+              [meshDim](const Geometry::Point&) {
+                Math::SpatialVector<Real> value(meshDim);
+                value.setZero();
+                return value;
+              });
+            predictorBody.getDBCs().add(
+              Variational::DirichletBC(m_duStep, zero)
+                .on(p.fixedBoundaryAttributes));
+          }
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
+          applySlipConstraint(m_stepProblem.getLinearSystem());
           rep.tAssembly += secondsSince(tic);
 
           tic = Clock::now();
@@ -477,8 +517,21 @@ namespace Rodin::Adaptation
                   m_vStep, u, vK, p, barrierCoefficient);
                 typename ProblemType::ProblemBodyType body(m_bulkForm);
                 body = body + m_obsForm + barrierMetric - m_surfaceForm - barrierForce;
+                if (!p.fixedBoundaryAttributes.empty())
+                {
+                  const auto zero = Variational::VectorFunction(meshDim,
+                    [meshDim](const Geometry::Point&) {
+                      Math::SpatialVector<Real> value(meshDim);
+                      value.setZero();
+                      return value;
+                    });
+                  body.getDBCs().add(
+                    Variational::DirichletBC(m_duStep, zero)
+                      .on(p.fixedBoundaryAttributes));
+                }
                 m_stepProblem = body;
                 m_stepProblem.assemble();
+                applySlipConstraint(m_stepProblem.getLinearSystem());
                 rep.tAssembly += secondsSince(tic);
 
                 tic = Clock::now();
@@ -1433,6 +1486,33 @@ namespace Rodin::Adaptation
         if (!(rho > Real(0)) || m_rigidModeBasis.empty())
           return result;
 
+        // Only the rigid modes the constraints admit belong to the space being
+        // stabilised: a mode that an essential condition or a slip constraint
+        // forbids is not in it, and a rank update built from it would
+        // re-couple eliminated degrees of freedom. Pinning a boundary admits
+        // none, whereas slip still admits the motions its facets allow.
+        const auto admissible = [this](const Math::Vector<Real>& mode) {
+          for (const Index dof : m_pinnedDofs)
+          {
+            if (std::abs(mode(static_cast<Eigen::Index>(dof))) > Real(1e-10))
+              return false;
+          }
+          if (m_slipNodes.empty())
+            return true;
+          const Math::Vector<Real> projected = m_slipProjector * mode;
+          return (projected - mode).norm() <= Real(1e-10) * std::max(mode.norm(), Real(1));
+        };
+        std::vector<Math::Vector<Real>> basis;
+        basis.reserve(m_rigidModeBasis.size());
+        for (const auto& mode : m_rigidModeBasis)
+        {
+          if (admissible(mode))
+            basis.push_back(mode);
+        }
+        if (basis.empty())
+          return result;
+        const auto& m_rigidModeBasis = basis;
+
         const auto n = static_cast<Eigen::Index>(m_rigidModeBasis.size());
         Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> restriction(n, n);
         std::vector<Math::Vector<Real>> images(m_rigidModeBasis.size());
@@ -1563,6 +1643,348 @@ namespace Rodin::Adaptation
         return std::isfinite(error) && error <= std::max(relativeTolerance, Real(1e-6));
       }
 
+      /// @brief A node whose displacement is restricted to a subspace.
+      struct SlipNode
+      {
+          std::vector<Index> dofs;
+          /// @brief Projector onto the directions the slip facets forbid.
+          Math::Matrix<Real> complement;
+      };
+
+      /**
+       * @brief Collects the essential and slip constraints of this solve.
+       *
+       * A slip facet keeps its surface while its nodes slide within it, so the
+       * node displacement is restricted to the orthogonal complement of the
+       * facet normals meeting there. A node on two facets of different
+       * orientation may only slide along their common line, and one on three
+       * cannot move at all; taking the span of the normals handles all three
+       * cases at once.
+       */
+      template <class MeshType>
+      void buildBoundaryConstraints(const MeshType& mesh)
+      {
+        m_slipNodes.clear();
+        m_pinnedDofs.clear();
+        const auto& fes = m_duStep.getFiniteElementSpace();
+        const auto size = static_cast<Eigen::Index>(fes.getSize());
+        const std::size_t meshDim = mesh.getDimension();
+        const auto& parameters = m_parameters;
+
+        std::map<Index, std::vector<Math::SpatialVector<Real>>> normals;
+        for (auto face = mesh.getPolytope(meshDim - 1); face; ++face)
+        {
+          const auto attribute = face->getAttribute();
+          if (!attribute)
+            continue;
+          if (parameters.fixedBoundaryAttributes.contains(*attribute))
+          {
+            for (const Index vertex : face->getVertices())
+            {
+              const auto& dofs = fes.getDOFs(0, vertex);
+              for (Eigen::Index k = 0; k < dofs.size(); ++k)
+                m_pinnedDofs.insert(static_cast<Index>(dofs(k)));
+            }
+          }
+          if (!parameters.slipBoundaryAttributes.contains(*attribute))
+            continue;
+          const auto& vertices = face->getVertices();
+          if (vertices.size() < meshDim)
+            continue;
+          Math::SpatialVector<Real> normal(meshDim);
+          normal.setZero();
+          const auto x0 = mesh.getVertexCoordinates(vertices[0]);
+          if (meshDim == 3)
+          {
+            const Math::SpatialVector<Real> a = mesh.getVertexCoordinates(vertices[1]) - x0;
+            const Math::SpatialVector<Real> b = mesh.getVertexCoordinates(vertices[2]) - x0;
+            normal(0) = a(1) * b(2) - a(2) * b(1);
+            normal(1) = a(2) * b(0) - a(0) * b(2);
+            normal(2) = a(0) * b(1) - a(1) * b(0);
+          }
+          else
+          {
+            const Math::SpatialVector<Real> a = mesh.getVertexCoordinates(vertices[1]) - x0;
+            normal(0) = -a(1);
+            normal(1) = a(0);
+          }
+          const Real length = normal.norm();
+          if (!(length > Real(0)))
+            continue;
+          normal /= length;
+          for (const Index vertex : vertices)
+            normals[vertex].push_back(normal);
+        }
+
+        if (normals.empty())
+        {
+          m_slipProjector.resize(0, 0);
+          return;
+        }
+
+        std::vector<Math::SparseTriplet<Real>> entries;
+        entries.reserve(static_cast<std::size_t>(size) + 9 * normals.size());
+        std::vector<char> constrained(static_cast<std::size_t>(size), 0);
+        for (const auto& [vertex, facetNormals] : normals)
+        {
+          const auto& dofs = fes.getDOFs(0, vertex);
+          const auto components = static_cast<Eigen::Index>(dofs.size());
+          Math::Matrix<Real> complement(components, components);
+          complement.setZero();
+          // Gram--Schmidt over the facet normals gives an orthonormal basis of
+          // the forbidden subspace, whose rank is one, two, or three.
+          std::vector<Math::SpatialVector<Real>> basis;
+          for (const auto& candidate : facetNormals)
+          {
+            Math::SpatialVector<Real> q = candidate;
+            for (const auto& previous : basis)
+              q -= previous.dot(q) * previous;
+            const Real norm = q.norm();
+            if (norm > Real(1e-8))
+              basis.push_back(q / norm);
+          }
+          for (const auto& q : basis)
+          {
+            for (Eigen::Index i = 0; i < components; ++i)
+              for (Eigen::Index j = 0; j < components; ++j)
+                complement(i, j) += q(i) * q(j);
+          }
+
+          SlipNode node;
+          node.complement = complement;
+          node.dofs.reserve(static_cast<std::size_t>(components));
+          for (Eigen::Index k = 0; k < components; ++k)
+          {
+            const auto dof = static_cast<Index>(dofs(k));
+            node.dofs.push_back(dof);
+            constrained[static_cast<std::size_t>(dof)] = 1;
+          }
+          for (Eigen::Index i = 0; i < components; ++i)
+          {
+            for (Eigen::Index j = 0; j < components; ++j)
+            {
+              const Real value =
+                (i == j ? Real(1) : Real(0)) - complement(i, j);
+              if (value != Real(0))
+                entries.emplace_back(static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(i)]),
+                  static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(j)]), value);
+            }
+          }
+          m_slipNodes.push_back(std::move(node));
+        }
+        for (Eigen::Index dof = 0; dof < size; ++dof)
+        {
+          if (!constrained[static_cast<std::size_t>(dof)])
+            entries.emplace_back(static_cast<Math::SparseIndex>(dof),
+              static_cast<Math::SparseIndex>(dof), Real(1));
+        }
+        m_slipProjector.resize(size, size);
+        m_slipProjector.setFromTriplets(entries.begin(), entries.end());
+        m_slipProjector.makeCompressed();
+      }
+
+      /**
+       * @brief Restricts an assembled step to the slip-admissible subspace.
+       *
+       * With @f$ P @f$ the projector onto that subspace and @f$ Q=I-P @f$, the
+       * step solves @f$ (PAP + \alpha Q)u = Pb @f$. Its solution satisfies
+       * @f$ Qu=0 @f$ exactly and @f$ P(Au-b)=0 @f$, so the facets keep their
+       * surface to roundoff rather than to a penalty. The diagonal of the
+       * eliminated block carries the scale of the row it replaces.
+       */
+      void applySlipConstraint(LinearSystemType& axb) const
+      {
+        if (m_slipNodes.empty())
+          return;
+        if constexpr (std::is_same_v<
+                        typename FormLanguage::Traits<LinearSystemType>::OperatorType,
+                        Math::SparseMatrix<Real>>)
+        {
+          auto& A = axb.getOperator();
+          auto& b = axb.getVector();
+          if (A.rows() != m_slipProjector.rows())
+            return;
+          A.makeCompressed();
+
+          std::vector<Math::SparseTriplet<Real>> eliminated;
+          eliminated.reserve(9 * m_slipNodes.size());
+          for (const auto& node : m_slipNodes)
+          {
+            Real scale = 0;
+            for (const Index dof : node.dofs)
+              scale += std::abs(A.coeff(static_cast<Eigen::Index>(dof),
+                static_cast<Eigen::Index>(dof)));
+            scale /= static_cast<Real>(node.dofs.size());
+            if (!(scale > Real(0)))
+              scale = Real(1);
+            const auto components = static_cast<Eigen::Index>(node.dofs.size());
+            for (Eigen::Index i = 0; i < components; ++i)
+            {
+              for (Eigen::Index j = 0; j < components; ++j)
+              {
+                const Real value = scale * node.complement(i, j);
+                if (value != Real(0))
+                  eliminated.emplace_back(
+                    static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(i)]),
+                    static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(j)]),
+                    value);
+              }
+            }
+          }
+          Math::SparseMatrix<Real> complement(A.rows(), A.cols());
+          complement.setFromTriplets(eliminated.begin(), eliminated.end());
+
+          Math::SparseMatrix<Real> restricted =
+            (m_slipProjector.transpose() * A * m_slipProjector).eval();
+          restricted = (restricted + complement).eval();
+          restricted.makeCompressed();
+          A = std::move(restricted);
+          b = m_slipProjector.transpose() * b;
+        }
+      }
+
+      /// @brief Fingerprint of a sparsity pattern, compared across assemblies.
+      static std::uint64_t getPatternKey(const Math::SparseMatrix<Real>& A)
+      {
+        std::uint64_t key = 14695981039346656037ull;
+        const auto mix = [&key](std::uint64_t value) {
+          key ^= value;
+          key *= 1099511628211ull;
+        };
+        mix(static_cast<std::uint64_t>(A.rows()));
+        mix(static_cast<std::uint64_t>(A.nonZeros()));
+        const auto* outer = A.outerIndexPtr();
+        for (Eigen::Index k = 0; k <= A.outerSize(); ++k)
+          mix(static_cast<std::uint64_t>(outer[k]));
+        const auto* inner = A.innerIndexPtr();
+        for (Eigen::Index k = 0; k < A.nonZeros(); ++k)
+          mix(static_cast<std::uint64_t>(inner[k]));
+        return key;
+      }
+
+      /**
+       * @brief Solves the assembled step with a sparse direct factorization.
+       *
+       * The step matrices of one solve share their sparsity pattern, so the
+       * symbolic analysis of the first factorization is reused by every later
+       * one. The rigid-mode correction is applied through the Woodbury
+       * identity, so the same numeric factorization serves the step and every
+       * rigid right-hand side.
+       *
+       * @returns false when no factorization is available, leaving the step to
+       * the iterative path.
+       */
+      bool solveStepDirectly(Displacement& out, std::size_t& iterations, Real& error)
+      {
+        auto& axb = m_stepProblem.getLinearSystem();
+        axb.getOperator().makeCompressed();
+        const auto& A = axb.getOperator();
+        const auto& b = axb.getVector();
+        if (A.rows() != A.cols() || b.size() != A.rows())
+          return false;
+
+        if (!m_directStepSolver)
+          m_directStepSolver.emplace(m_stepProblem);
+        auto& solver = *m_directStepSolver;
+
+        // The barrier metric skips the quadrature points it finds
+        // inadmissible, so the step pattern is not constant across the
+        // iteration: symbolic analysis is reused only while it does hold.
+        const auto pattern = getPatternKey(A);
+        if (pattern != m_directStepPattern)
+        {
+          if constexpr (requires {
+                          solver.clear(DirectStepSolverType::Factorization::Symbolic);
+                        })
+          {
+            solver.clear(DirectStepSolverType::Factorization::Symbolic);
+          }
+          m_directStepPattern = pattern;
+        }
+        if constexpr (requires {
+                        solver.setSymmetric(DirectStepSolverType::Symmetry::General);
+                      })
+        {
+          // Bulk, observation, barrier, and slip metrics are all symmetric.
+          solver.setSymmetric(DirectStepSolverType::Symmetry::General);
+        }
+
+        // Solves with the retained factorization, which the rigid correction
+        // reuses for each of its right-hand sides.
+        Math::Vector<Real> rhs = b;
+        auto solveWith = [&](const Math::Vector<Real>& vector,
+                           Math::Vector<Real>& solution) {
+          axb.getVector() = vector;
+          solver.solve(axb);
+          solution = axb.getSolution();
+          return solver.success();
+        };
+
+        bool ok = true;
+        if constexpr (requires { solver.factorize(axb); })
+        {
+          solver.factorize(axb);
+          ok = solver.success();
+        }
+
+        Math::Vector<Real> y;
+        ok = ok && solveWith(rhs, y);
+        if (!ok)
+        {
+          axb.getVector() = rhs;
+          if constexpr (requires { solver.clear(DirectStepSolverType::Factorization::Symbolic); })
+            solver.clear(DirectStepSolverType::Factorization::Symbolic);
+          return false;
+        }
+
+        // Woodbury realisation of the rigid-mode correction: with
+        // \tilde A = A + U C U^T, solve A Z = U and correct the baseline step.
+        const auto stabilisation = getRigidStabilisation(A);
+        if (!stabilisation.modes.empty())
+        {
+          const auto rank = static_cast<Eigen::Index>(stabilisation.modes.size());
+          Math::Matrix<Real> Z(A.rows(), rank);
+          Math::Matrix<Real> inner(rank, rank);
+          Math::Vector<Real> column;
+          for (Eigen::Index k = 0; ok && k < rank; ++k)
+          {
+            ok = solveWith(stabilisation.modes[static_cast<std::size_t>(k)], column);
+            Z.col(k) = column;
+          }
+          if (ok)
+          {
+            for (Eigen::Index k = 0; k < rank; ++k)
+            {
+              for (Eigen::Index l = 0; l < rank; ++l)
+                inner(k, l) = stabilisation.modes[static_cast<std::size_t>(k)].dot(Z.col(l));
+              inner(k, k) += Real(1) / stabilisation.weights[static_cast<std::size_t>(k)];
+            }
+            Math::Vector<Real> projection(rank);
+            for (Eigen::Index k = 0; k < rank; ++k)
+              projection(k) = stabilisation.modes[static_cast<std::size_t>(k)].dot(y);
+            const Math::Vector<Real> correction = inner.fullPivLu().solve(projection);
+            y -= Z * correction;
+          }
+        }
+
+        axb.getVector() = rhs;
+        if (!ok || !y.allFinite())
+        {
+          if constexpr (requires { solver.clear(DirectStepSolverType::Factorization::Symbolic); })
+            solver.clear(DirectStepSolverType::Factorization::Symbolic);
+          return false;
+        }
+
+        axb.getSolution() = y;
+        m_duStep.getSolution().setData(y);
+        out = m_duStep.getSolution();
+        iterations = 1;
+        error = (A * y - rhs).norm() /
+          std::max(rhs.norm(), std::numeric_limits<Real>::epsilon());
+        return std::isfinite(error) && std::isfinite(out.max()) &&
+          std::isfinite(out.min());
+      }
+
       // Solves the currently-assembled step problem with CG and copies the
       // backend-matched solution GridFunction into @p out.
       bool solveStep(Displacement& out, std::size_t& iterations, Real& error)
@@ -1574,6 +1996,43 @@ namespace Rodin::Adaptation
         if constexpr (std::is_same_v<OperatorType, Math::SparseMatrix<Real>> &&
           std::is_same_v<VectorType, Math::Vector<Real>>)
         {
+          if (m_parameters.directStep && solveStepDirectly(out, iterations, error))
+            return true;
+          if (!m_parameters.fixedBoundaryAttributes.empty())
+          {
+            m_stepProblem.solve(m_stepSolver);
+            out = m_duStep.getSolution();
+            if constexpr (requires(
+                            const StepSolverType& solver) { solver.getIterationNumber(); })
+              iterations = m_stepSolver.getIterationNumber();
+            else
+              iterations = 0;
+            if constexpr (requires(const StepSolverType& solver) { solver.getError(); })
+              error = m_stepSolver.getError();
+            else
+              error = Real(0);
+            bool success = [&]() {
+              if constexpr (requires(const StepSolverType& solver) { solver.success(); })
+                return static_cast<bool>(m_stepSolver.success());
+              else
+                return true;
+            }();
+#ifdef RODIN_USE_UMFPACK
+            if (!success)
+            {
+              Solver::UMFPack directSolver(m_stepProblem);
+              m_stepProblem.solve(directSolver);
+              out = m_duStep.getSolution();
+              iterations = 1;
+              const auto residual =
+                axb.getOperator() * axb.getSolution() - axb.getVector();
+              error = residual.norm() /
+                std::max(axb.getVector().norm(), std::numeric_limits<Real>::epsilon());
+              success = std::isfinite(error);
+            }
+#endif
+            return success && std::isfinite(out.max()) && std::isfinite(out.min());
+          }
           const auto& rhs = axb.getVector();
           const auto& guess = axb.getSolution();
           const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
@@ -1620,6 +2079,14 @@ namespace Rodin::Adaptation
       TestFunctionType m_vStep;
       ProblemType m_stepProblem;
       StepSolverType m_stepSolver;
+      /// @brief Direct step solver, created on first use and kept for its
+      /// symbolic analysis.
+      Optional<DirectStepSolverType> m_directStepSolver;
+      /// @brief Pattern the retained symbolic analysis was built for.
+      std::uint64_t m_directStepPattern = 0;
+      std::vector<SlipNode> m_slipNodes;
+      Math::SparseMatrix<Real> m_slipProjector;
+      FlatSet<Index> m_pinnedDofs;
       BilinearFormType m_bulkForm;
       bool m_bulkFormAssembled = false;
       /// @brief Observation metric and fitting force at the outer displacement.

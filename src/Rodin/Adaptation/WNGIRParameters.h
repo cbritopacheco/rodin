@@ -77,6 +77,15 @@ namespace Rodin::Adaptation
         Real(1); ///< @f$\rho@f$, lifts weakly observed rigid modes to this
       ///< fraction of the stiffest rigid mode; zero disables the
       ///< stabilisation.
+      /**
+       * @brief Solve each step with a sparse direct factorization.
+       *
+       * The step matrices of one solve share their sparsity pattern, so the
+       * symbolic analysis is computed once and every later factorization
+       * reuses it. The iterative path is used when this is false, and as the
+       * fallback when a factorization fails.
+       */
+      bool directStep = true;
       Real cgRelativeTolerance =
         1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for CG.
       std::size_t cgMaxIterations = 0; ///< 0 ⇒ min(2000, max(100, 2*ndofs)).
@@ -85,6 +94,11 @@ namespace Rodin::Adaptation
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
+      FlatSet<Geometry::Attribute> fixedBoundaryAttributes;
+      ///< Facet attributes on which the displacement vanishes.
+      FlatSet<Geometry::Attribute> slipBoundaryAttributes;
+      ///< Facet attributes whose nodes may slide within the facet surface but
+      ///< not through it, imposed by eliminating the normal displacement.
       bool trace = false; ///< Print per-iteration diagnostics when true.
       /// @brief Compute the rigid-observation coercivity diagnostics.
       ///

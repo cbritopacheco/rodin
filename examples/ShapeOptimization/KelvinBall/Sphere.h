@@ -44,6 +44,14 @@ namespace KelvinBall
 
       SphereDiscretization discretize() const;
 
+      /**
+       * @brief Prepares the fixed background mesh used by WNGIR.
+       *
+       * MMG acts only on the interface-free chamber background. The returned
+       * mesh contains no design interface and remains fixed during optimization.
+       */
+      SphereDiscretization prepareWNGIRBackground() const;
+
     private:
       Mesh makeUniformChamber() const;
 

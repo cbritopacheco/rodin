@@ -10,8 +10,13 @@
 #include <array>
 #include <initializer_list>
 
+#include <stdexcept>
+#include <string>
+
 #include <Rodin/Geometry.h>
-#ifdef RODIN_USE_UMFPACK
+#ifdef RODIN_USE_MUMPS
+#include <Rodin/Solver/MUMPS.h>
+#elif defined(RODIN_USE_UMFPACK)
 #include <Rodin/Solver/UMFPack.h>
 #else
 #include <Rodin/Solver/SparseLU.h>
@@ -39,7 +44,9 @@ namespace KelvinBall
   inline constexpr Real LinearResidualTolerance = 1e-8;
   inline constexpr size_t ChamberMultiplicity = 24;
 
-#ifdef RODIN_USE_UMFPACK
+#ifdef RODIN_USE_MUMPS
+  inline constexpr const char* DirectSolverName = "MUMPS";
+#elif defined(RODIN_USE_UMFPACK)
   inline constexpr const char* DirectSolverName = "UMFPACK";
 #else
   inline constexpr const char* DirectSolverName = "Eigen SparseLU";
@@ -64,18 +71,43 @@ namespace KelvinBall
 
   Math::SpatialPoint centroid(const Mesh& mesh, const Polytope& face);
 
+  /**
+   * @brief Local mesh size of a cell.
+   *
+   * The edge length of the regular tetrahedron of the same measure, so that a
+   * quasi-uniform mesh of size @f$ h @f$ returns @f$ h @f$ and a flat or small
+   * cell returns its own scale.
+   */
+  Real cellSize(const Polytope& cell);
+
   void splitSelfPairedCut(Mesh& mesh);
 
   void prepare(Mesh& mesh);
 
+  /**
+   * @brief Factorizes and solves a Stokes system with the direct solver.
+   *
+   * The Stokes operators are symmetric, so MUMPS is told so: its @f$ LDL^T @f$
+   * factorization stores about half of the corresponding @f$ LU @f$, which is
+   * what keeps the three-family chamber system within memory.
+   */
   template <class Problem>
   void solveDirect(Problem& problem)
   {
-#ifdef RODIN_USE_UMFPACK
-    Solver::UMFPack(problem).solve();
+#ifdef RODIN_USE_MUMPS
+    Solver::MUMPS solver(problem);
+    solver.setSymmetric(decltype(solver)::Symmetry::General);
+#elif defined(RODIN_USE_UMFPACK)
+    Solver::UMFPack solver(problem);
 #else
-    Solver::SparseLU(problem).solve();
+    Solver::SparseLU solver(problem);
 #endif
+    solver.solve();
+    if (!solver.success())
+    {
+      throw std::runtime_error(std::string(DirectSolverName) +
+        " failed with status " + std::to_string(solver.getInfo().status) + ".");
+    }
   }
 }
 

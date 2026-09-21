@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <cmath>
+
 #include "Common.h"
 
 namespace KelvinBall
@@ -33,6 +35,13 @@ namespace KelvinBall
     for (const Index vertex : face.getVertices())
       result += mesh.getVertexCoordinates(vertex);
     return result / static_cast<Real>(face.getVertices().size());
+  }
+
+  Real cellSize(const Polytope& cell)
+  {
+    // A regular tetrahedron of edge h has measure h^3 / (6 sqrt(2)).
+    static const Real scale = std::cbrt(6 * std::sqrt(Real(2)));
+    return scale * std::cbrt(cell.getMeasure());
   }
 
   void splitSelfPairedCut(Mesh& mesh)

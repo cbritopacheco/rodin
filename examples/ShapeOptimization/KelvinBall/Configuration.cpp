@@ -30,6 +30,14 @@ namespace KelvinBall
       nitschePenalty = std::stod(std::string(option.substr(10)));
     else if (option.rfind("--stabilization=", 0) == 0)
       stabilizationFactor = std::stod(std::string(option.substr(16)));
+    else if (option.rfind("--background-hmin=", 0) == 0)
+      backgroundHMin = std::stod(std::string(option.substr(18)));
+    else if (option.rfind("--background-hmax=", 0) == 0)
+      backgroundHMax = std::stod(std::string(option.substr(18)));
+    else if (option.rfind("--background-hausdorff=", 0) == 0)
+      backgroundHausdorff = std::stod(std::string(option.substr(23)));
+    else if (option.rfind("--background-gradation=", 0) == 0)
+      backgroundGradation = std::stod(std::string(option.substr(23)));
     else
       return false;
     return true;
@@ -54,6 +62,13 @@ namespace KelvinBall
       throw std::runtime_error("The Nitsche penalty must be positive.");
     if (stabilizationFactor < 0)
       throw std::runtime_error("The pressure stabilization must be nonnegative.");
+    if (!(backgroundHMin > 0) || !(backgroundHMax >= backgroundHMin))
+      throw std::runtime_error(
+        "The background sizes must satisfy 0 < --background-hmin <= --background-hmax.");
+    if (!(backgroundHausdorff > 0))
+      throw std::runtime_error("The background Hausdorff tolerance must be positive.");
+    if (!(backgroundGradation > 1))
+      throw std::runtime_error("The background gradation must exceed one.");
   }
 
   Real Configuration::getH() const

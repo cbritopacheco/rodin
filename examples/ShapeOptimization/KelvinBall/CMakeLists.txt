@@ -9,6 +9,7 @@ add_executable(KelvinBall EXCLUDE_FROM_ALL
   Sphere.cpp)
 target_link_libraries(KelvinBall
   PRIVATE
+  Rodin::Adaptation
   Rodin::Advection
   Rodin::Assembly
   Rodin::Geometry

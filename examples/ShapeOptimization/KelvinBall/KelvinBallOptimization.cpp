@@ -15,12 +15,15 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <string>
 #include <string_view>
 #include <stdexcept>
 #include <vector>
 
 #include <Rodin/Advection/Lagrangian.h>
+#include <Rodin/Adaptation.h>
 #include <Rodin/Alert/Info.h>
+#include <Rodin/Location.h>
 #include <Rodin/Alert/Notation.h>
 #include <Rodin/Alert/Raise.h>
 #include <Rodin/Alert/Success.h>
@@ -37,6 +40,7 @@
 #include "RotatedNitscheIntegrator.h"
 #include "SewedOutput.h"
 #include "Sphere.h"
+#include "../../WNGIRExampleParameters.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -121,6 +125,156 @@ namespace KelvinBall
           ReconstructionDiagnostics diagnostics;
       };
 
+      template <class Displacement>
+      void moveMesh(KelvinBall::Mesh& moved, const KelvinBall::Mesh& mesh,
+        const Displacement& displacement)
+      {
+        const auto& space = displacement.getFiniteElementSpace();
+        const auto& coefficients = displacement.getData();
+        for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+        {
+          auto coordinates = mesh.getVertexCoordinates(vertex);
+          const auto& dofs = space.getDOFs(0, vertex);
+          for (size_t component = 0; component < mesh.getSpaceDimension(); ++component)
+            coordinates(component) += coefficients(dofs[component]);
+          moved.setVertexCoordinates(vertex, coordinates);
+        }
+      }
+
+      template <class LevelSet>
+      MMG::Mesh classifyLevelSetForWNGIR(
+        const MMG::Mesh& background, const LevelSet& levelSet)
+      {
+        MMG::Mesh classified(background);
+        const auto& space = levelSet.getFiniteElementSpace();
+        const auto& coefficients = levelSet.getData();
+        for (auto cell = classified.getCell(); cell; ++cell)
+        {
+          Real meanLevelSet = 0;
+          for (const Index vertex : cell->getVertices())
+          {
+            const auto& dofs = space.getDOFs(0, vertex);
+            meanLevelSet += coefficients(dofs[0]);
+          }
+          meanLevelSet /= static_cast<Real>(cell->getVertices().size());
+          classified.setAttribute({classified.getDimension(), cell->getIndex()},
+            meanLevelSet < 0 ? Obstacle : Fluid);
+        }
+
+        classified.getConnectivity().compute(2, 3);
+        for (auto face = classified.getFace(); face; ++face)
+        {
+          const auto& incident =
+            classified.getConnectivity().getIncidence({2, 3}, face->getIndex());
+          if (incident.size() != 2)
+            continue;
+          const auto first = classified.getCell(incident[0])->getAttribute();
+          const auto second = classified.getCell(incident[1])->getAttribute();
+          if (first && second && *first != *second)
+            classified.setAttribute({2, face->getIndex()}, Gamma);
+        }
+        return classified;
+      }
+
+      template <class LevelSet>
+      MMGReconstruction fitLevelSetWNGIR(const KelvinBall::Mesh& mesh,
+        const LevelSet& levelSet, Real h, Real outerRadius, int argc, char** argv)
+      {
+        P1<Math::SpatialVector<Real>, KelvinBall::Mesh> gradientSpace(mesh, 3);
+        GridFunction projectedGradient(gradientSpace);
+        TrialFunction gradientTrial(gradientSpace);
+        TestFunction gradientTest(gradientSpace);
+        Problem gradientProjection(gradientTrial, gradientTest);
+        gradientProjection = Integral(gradientTrial, gradientTest)
+                           - Integral(Grad(levelSet), gradientTest);
+        gradientProjection.assemble();
+        Solver::CG(gradientProjection).solve();
+        projectedGradient.getData() = gradientTrial.getSolution().getData();
+
+        P1<Math::SpatialVector<Real>, KelvinBall::Mesh> displacementSpace(mesh, 3);
+        TrialFunction displacementTrial(displacementSpace);
+        TestFunction displacementTest(displacementSpace);
+        Rodin::Examples::WNGIRExampleDefaults defaults;
+        defaults.kappaBulk = Real(8e-4);
+        // A fit from the classified staircase converges in seven to nine steps.
+        defaults.maxIterations = 12;
+        auto parameters =
+          Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, defaults);
+        if (!Rodin::Examples::findOption(
+              argc, argv, "wngir-primal-barrier-iterations", nullptr))
+          parameters.primalBarrierIterations = 30;
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-cg-max-iters", nullptr))
+          parameters.cgMaxIterations = 10000;
+        // The outer sphere is curved, so its nodes are pinned: sliding in a
+        // facet plane would walk them off the sphere. The cut planes bound the
+        // wedge but are not walls, and the rim of the interface lies entirely
+        // on them, so they slide within themselves instead of being frozen.
+        parameters.fixedBoundaryAttributes = {Outer};
+        parameters.slipBoundaryAttributes =
+          {SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
+        parameters.rigidStabilisationLevel = 0;
+        Adaptation::WNGIR fitting(displacementTrial, displacementTest);
+        fitting.setParameters(parameters);
+
+        std::vector<Index> interface;
+        for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+          if (face->getAttribute() == Attribute{Gamma})
+            interface.push_back(face->getIndex());
+
+        RealFunction target(
+          [&](const Geometry::Point& point) { return levelSet.getValue(point); });
+        Adaptation::AnalyticVectorFunction targetGradient(
+          [&](const Geometry::Point& point) {
+            return projectedGradient.getValue(point);
+          }, 3);
+
+        const auto report = fitting.solve(mesh, interface, target, targetGradient);
+        Alert::Info() << substageHeading("WNGIR reconstruction") << Alert::NewLine
+                      << diagnosticLabel("Iterations:")
+                      << Alert::Notation::Number(report.iterations) << Alert::NewLine
+
+
+                      << diagnosticLabel("Skeleton normal jump RMS:")
+                      << Alert::Notation::Number(report.normalJumpRMS) << Alert::NewLine
+                      << diagnosticLabel("Exit reason:") << report.exitReason
+                      << Alert::NewLine << diagnosticLabel("Active RMS:")
+                      << Alert::Notation::Number(report.activeRMS) << Alert::NewLine
+                      << diagnosticLabel("Active RMS / level-set mesh scale:")
+                      << Alert::Notation::Number(
+                           report.levelSetGradientScale > 0
+                             ? report.activeRMS /
+                                 (parameters.h * report.levelSetGradientScale)
+                             : 0)
+                      << Alert::NewLine
+                      << diagnosticLabel("RMS stopping tolerance:")
+                      << Alert::Notation::Number(report.effectiveTauRms)
+                      << Alert::NewLine
+                      << diagnosticLabel("Scaled RMS stopping tolerance:")
+                      << Alert::Notation::Number(report.effectiveTauRmsH)
+                      << Alert::NewLine
+                      << diagnosticLabel("Active supremum:")
+                      << Alert::Notation::Number(report.activeSup) << Alert::NewLine
+                      << diagnosticLabel("Supremum stopping tolerance:")
+                      << Alert::Notation::Number(report.effectiveTauInf)
+                      << Alert::NewLine
+                      << diagnosticLabel("Scaled supremum stopping tolerance:")
+                      << Alert::Notation::Number(report.effectiveTauInfH)
+                      << Alert::NewLine
+                      << diagnosticLabel("Minimum Jacobian:")
+                      << Alert::Notation::Number(report.minJ) << Alert::NewLine
+                      << diagnosticLabel("Maximum relative distortion:")
+                      << Alert::Notation::Number(report.maxQRel) << Alert::Raise;
+
+        KelvinBall::Mesh moved(mesh);
+        moveMesh(moved, mesh, displacementTrial.getSolution());
+        checkFixedGeometry(moved, outerRadius);
+        checkMaterials(moved);
+        const MeshDiagnostics diagnostics = getMeshDiagnostics(moved);
+        return {MMG::Mesh(std::move(moved)),
+          {h, h, 0, parameters.fixedBoundaryAttributes.size(), diagnostics.cells,
+            diagnostics.cells}};
+      }
+
       void printUsage(const char* executable)
       {
         Alert::Info()
@@ -143,6 +297,10 @@ namespace KelvinBall
           << "             Advection time step in multiples of h (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
           << " Quadrature order for the transported distance (default: 8)."
+          << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
+          << "  Interface reconstruction: mmg or wngir (default: mmg)."
+          << Alert::NewLine << Alert::Notation("--wngir-*=<value>")
+          << "        WNGIR fitting parameters."
           << Alert::NewLine << Alert::Notation("--geometry-only")
           << "             Stop after initial MMG reconstruction." << Alert::NewLine
           << Alert::Notation("--state-only")
@@ -570,6 +728,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Real regularizationFactor = 4.0;
   Real stepFactor = 0.1;
   size_t advectionQuadratureOrder = 8;
+  std::string reconstructionMethod = "mmg";
   for (int argument = 1; argument < argc; ++argument)
   {
     const std::string_view mode(argv[argument]);
@@ -583,6 +742,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       stepFactor = std::stod(std::string(mode.substr(7)));
     else if (mode.rfind("--advection-quadrature=", 0) == 0)
       advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
+    else if (mode.rfind("--reconstruction=", 0) == 0)
+      reconstructionMethod = std::string(mode.substr(17));
+    else if (mode.rfind("--wngir-", 0) == 0 || mode.rfind("--quad-order=", 0) == 0)
+      continue;
     else if (mode == "--save-mesh")
       saveMeshDiagnostic = true;
     else if (mode == "--geometry-only")
@@ -610,6 +773,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The advection step factor must be positive.");
   if (advectionQuadratureOrder == 0)
     throw std::runtime_error("The advection quadrature order must be positive.");
+  if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
+    throw std::runtime_error("The reconstruction method must be mmg or wngir.");
   if (geometryOnly && stateOnly)
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
   const Real h = configuration.getH();
@@ -635,13 +800,43 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                 << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
                 << " = " << Alert::Notation::Number(stepFactor) << " h"
                 << Alert::NewLine << diagnosticLabel("Advection quadrature order:")
-                << Alert::Notation::Number(advectionQuadratureOrder) << Alert::Raise;
+                << Alert::Notation::Number(advectionQuadratureOrder) << Alert::NewLine
+                << diagnosticLabel("Reconstruction method:") << reconstructionMethod
+                << Alert::Raise;
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
-  announce("Stage 1: Discretizing the initial sphere with MMG.");
-  auto sphere = Sphere(configuration).discretize();
-  MMG::Mesh mesh(std::move(sphere.mesh));
-  ReconstructionDiagnostics reconstruction = sphere.diagnostics;
+  announce(reconstructionMethod == "wngir"
+      ? "Stage 1: Preparing the background mesh and fitting the initial sphere with WNGIR."
+      : "Stage 1: Discretizing the initial sphere with MMG.");
+  Sphere sphere(configuration);
+  SphereDiscretization initial = reconstructionMethod == "wngir"
+    ? sphere.prepareWNGIRBackground()
+    : sphere.discretize();
+  ReconstructionDiagnostics reconstruction = initial.diagnostics;
+  Optional<MMG::Mesh> wngirBackground;
+  MMG::Mesh mesh;
+  if (reconstructionMethod == "wngir")
+  {
+    wngirBackground.emplace(std::move(initial.mesh));
+    P1 sphereSpace(*wngirBackground);
+    GridFunction sphereLevelSet(sphereSpace);
+    sphereLevelSet = RealFunction([](const Geometry::Point& point) {
+      return point.getPhysicalCoordinates().norm() - Real(1);
+    });
+    MMG::Mesh classified =
+      classifyLevelSetForWNGIR(*wngirBackground, sphereLevelSet);
+    P1 classifiedSphereSpace(classified);
+    GridFunction classifiedSphereLevelSet(classifiedSphereSpace);
+    classifiedSphereLevelSet.getData() = sphereLevelSet.getData();
+    MMGReconstruction fitted =
+      fitLevelSetWNGIR(
+        classified, classifiedSphereLevelSet, h, outerRadius, argc, argv);
+    mesh = std::move(fitted.mesh);
+  }
+  else
+  {
+    mesh = std::move(initial.mesh);
+  }
   checkFixedGeometry(mesh, outerRadius);
   checkMaterials(mesh);
   if (saveMeshDiagnostic)
@@ -681,8 +876,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   IO::XDMF sewedXdmf("KelvinBallSewed");
   auto sewedDesignOutput = sewedXdmf.grid("Design");
   auto sewedFluidOutput = sewedXdmf.grid("Fluid");
-  IO::XDMF mmgXdmf("KelvinBallMMG");
-  auto mmgOutput = mmgXdmf.grid("Reconstructed");
+  const std::string reconstructionName = reconstructionMethod == "wngir"
+    ? "KelvinBallWNGIR"
+    : "KelvinBallMMG";
+  IO::XDMF reconstructionXdmf(reconstructionName);
+  auto reconstructionOutput = reconstructionXdmf.grid("Reconstructed");
   Optional<Real> previousRho;
   Optional<Real> predictedRhoChange;
   Optional<Real> previousVolume;
@@ -1046,20 +1244,87 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     reportStageTiming(7, stageSeconds[6]);
     const auto stage8Start = Clock::now();
     announce("Stage 8: Advecting the level set.");
-    TrialFunction advected(levelSetSpace);
-    TestFunction test(levelSetSpace);
+    MMG::Mesh& advectionMesh = wngirBackground ? *wngirBackground : mesh;
+    auto& advectionConnectivity = advectionMesh.getConnectivity();
+    advectionConnectivity.discover(3, 2);
+    advectionConnectivity.discover(3, 1);
+    advectionConnectivity.restrict(1, 0);
+    advectionConnectivity.restrict(2, 0);
+    advectionConnectivity.restrict(2, 3);
+    advectionConnectivity.discover(0, 0);
+    P1 advectionLevelSetSpace(advectionMesh);
+    P1 advectionShapeSpace(advectionMesh, 3);
+    GridFunction advectionDistance(advectionLevelSetSpace);
+    GridFunction advectionDirection(advectionShapeSpace);
+    if (wngirBackground)
+    {
+      // The fitted mesh is the background with its vertices moved: the same
+      // numbering at different positions. Copying nodal values would carry
+      // each one from x + u(x) back to x and undo the fit near the interface,
+      // so both fields are evaluated at the positions of the background.
+      const Location::AABB<MMG::Mesh> fittedLocator(mesh);
+      std::size_t unlocated = 0;
+      advectionDistance = RealFunction([&](const Geometry::Point& point) {
+        const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
+        if (!located)
+        {
+          ++unlocated;
+          return Real(0);
+        }
+        return distance.getValue(*located);
+      });
+      advectionDirection = VectorFunction(static_cast<size_t>(3),
+        [&](const Geometry::Point& point) {
+          Math::SpatialVector<Real> value(3);
+          value.setZero();
+          const auto located =
+            fittedLocator.locate(3, point.getPhysicalCoordinates());
+          if (!located)
+          {
+            ++unlocated;
+            return value;
+          }
+          const auto sample = theta.getValue(*located);
+          for (Eigen::Index component = 0; component < 3; ++component)
+            value(component) = sample(component);
+          return value;
+        });
+      if (unlocated > 0)
+        throw std::runtime_error(
+          "Background points fell outside the fitted mesh during the transfer.");
+      Alert::Info() << substageHeading("Fitted-to-background transfer")
+                    << Alert::NewLine << diagnosticLabel("Nodal-copy error (distance):")
+                    << Alert::Notation::Number(
+                         (advectionDistance.getData() - distance.getData())
+                           .lpNorm<Eigen::Infinity>())
+                    << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
+                    << Alert::Notation::Number(
+                         (advectionDirection.getData() - theta.getData())
+                           .lpNorm<Eigen::Infinity>())
+                    << Alert::Raise;
+    }
+    else
+    {
+      advectionDistance.getData() = distance.getData();
+      advectionDirection.getData() = theta.getData();
+    }
+    KelvinBall::RotatedNitscheIntegrator advectionCoupling(advectionMesh,
+      FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
+      rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+    TrialFunction advected(advectionLevelSetSpace);
+    TestFunction test(advectionLevelSetSpace);
     KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
-      -dt, mesh, shapeCoupling.getLocator(), RotationPairs);
+      -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
     Problem transport(advected, test);
     auto transportedDistance =
-      Integral(Flow(-dt, distance, theta, Math::RungeKutta::RK4{},
+      Integral(Flow(-dt, advectionDistance, advectionDirection, Math::RungeKutta::RK4{},
                  rotationalContinuation),
         test);
     transportedDistance.setOrder(advectionQuadratureOrder);
     transport = Integral(advected, test) - transportedDistance;
     transport.assemble();
-    shapeCoupling.assembleScalarTracePenalty(
-      levelSetSpace, transport.getLinearSystem(), nitschePenalty, distance);
+    advectionCoupling.assembleScalarTracePenalty(advectionLevelSetSpace,
+      transport.getLinearSystem(), nitschePenalty, advectionDistance);
     Solver::CG(transport).solve();
     const auto& advectedDistance = advected.getSolution();
     const auto& transportSystem = transport.getLinearSystem();
@@ -1069,9 +1334,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           .norm() /
       std::max(transportSystem.getVector().norm(), Real(1));
     const Real advectionIncrement =
-      (advectedDistance.getData() - distance.getData()).lpNorm<Eigen::Infinity>();
-    const Real distanceJump = shapeCoupling.scalarJump(distance);
-    const Real advectedJump = shapeCoupling.scalarJump(advectedDistance);
+      (advectedDistance.getData() - advectionDistance.getData()).lpNorm<Eigen::Infinity>();
+    const Real distanceJump = advectionCoupling.scalarJump(advectionDistance);
+    const Real advectedJump = advectionCoupling.scalarJump(advectedDistance);
     Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
                   << diagnosticLabel("Advection step:")
                   << Alert::Notation::Number(dt) << Alert::NewLine
@@ -1087,9 +1352,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(distanceJump) << Alert::NewLine
                   << diagnosticLabel("Advected rotated jump:")
                   << Alert::Notation::Number(advectedJump) << Alert::Raise;
-    chamber.add("Advected", advectedDistance, IO::XDMF::Center::Node);
+    GridFunction advectedOutput(levelSetSpace);
+    advectedOutput.getData() = advectedDistance.getData();
+    chamber.add("Advected", advectedOutput, IO::XDMF::Center::Node);
     GridFunction sewedAdvected(sewedDesignScalar);
-    sewedDesign.setScalar(sewedAdvected, advectedDistance);
+    sewedDesign.setScalar(sewedAdvected, advectedOutput);
     sewedDesignOutput.add("Advected", sewedAdvected, IO::XDMF::Center::Node);
 
     xdmf.write(static_cast<Real>(iteration)).flush();
@@ -1098,12 +1365,26 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     reportStageTiming(8, stageSeconds[7]);
 
     const auto stage9Start = Clock::now();
-    announce("Stage 9: Reconstructing the advected interface with MMG.");
-    MMGReconstruction result = discretizeLevelSetMMG(mesh, advectedDistance, h);
+    announce(reconstructionMethod == "wngir"
+        ? "Stage 9: Fitting the advected interface with WNGIR."
+        : "Stage 9: Reconstructing the advected interface with MMG.");
+    MMGReconstruction result = [&]() {
+      if (reconstructionMethod == "wngir")
+      {
+        MMG::Mesh classified =
+          classifyLevelSetForWNGIR(*wngirBackground, advectedDistance);
+        P1 classifiedLevelSetSpace(classified);
+        GridFunction classifiedLevelSet(classifiedLevelSetSpace);
+        classifiedLevelSet.getData() = advectedDistance.getData();
+        return fitLevelSetWNGIR(
+          classified, classifiedLevelSet, h, outerRadius, argc, argv);
+      }
+      return discretizeLevelSetMMG(mesh, advectedDistance, h);
+    }();
     reconstruction = result.diagnostics;
-    mmgOutput.clear();
-    mmgOutput.setMesh(result.mesh, IO::XDMF::MeshPolicy::Transient);
-    mmgXdmf.write(static_cast<Real>(iteration + 1)).flush();
+    reconstructionOutput.clear();
+    reconstructionOutput.setMesh(result.mesh, IO::XDMF::MeshPolicy::Transient);
+    reconstructionXdmf.write(static_cast<Real>(iteration + 1)).flush();
     checkFixedGeometry(result.mesh, outerRadius);
     checkMaterials(result.mesh);
     nextMesh.emplace(std::move(result.mesh));
@@ -1115,7 +1396,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   }
 
   Alert::Success()
-    << "Wrote KelvinBall.xdmf, KelvinBallSewed.xdmf, KelvinBallMMG.xdmf, and "
+    << "Wrote KelvinBall.xdmf, KelvinBallSewed.xdmf, " << reconstructionName
+    << ".xdmf, and "
        "kelvin-ball.csv"
     << Alert::Raise;
   return 0;

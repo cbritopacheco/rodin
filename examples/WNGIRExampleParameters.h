@@ -204,6 +204,7 @@ namespace Rodin::Examples
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
+    p.directStep = boolOption(argc, argv, "wngir-direct-step", p.directStep);
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;
     p.trace =

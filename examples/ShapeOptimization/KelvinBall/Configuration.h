@@ -23,6 +23,12 @@ namespace KelvinBall
       Real outerRadius = 2;
       Real nitschePenalty = DefaultNitschePenalty;
       Real stabilizationFactor = DefaultStabilizationFactor;
+      /// Settings of the single MMG optimization of the WNGIR background, the
+      /// sizes in multiples of h.
+      Real backgroundHMin = 0.1;
+      Real backgroundHMax = 1;
+      Real backgroundHausdorff = 0.05;
+      Real backgroundGradation = 2;
       bool pointsSpecified = false;
       bool hSpecified = false;
 

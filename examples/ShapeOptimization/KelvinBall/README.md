@@ -146,13 +146,13 @@ zero-displacement P1 mass-product limit. The composition with a nonzero
 characteristic displacement is not polynomial on one source element and
 requires a higher-order rule in practice.
 
-The uniform grid supplies the background resolution. MMG discretizes the
-initial spherical level set and each subsequently advected level set. The
-outer boundary and all chamber cuts are marked as required geometry; their
-labels and planarity are checked after every reconstruction. Since the body
-interface crosses the chamber cuts, their triangulations may nevertheless
-change locally. The rotational Nitsche terms locate paired traces by AABB
-search and do not require matching cut meshes.
+The uniform grid supplies the background resolution. With MMG reconstruction,
+MMG discretizes the initial spherical level set and each subsequently advected
+level set. The outer boundary and all chamber cuts are marked as required
+geometry; their labels and planarity are checked after every reconstruction.
+Since the body interface crosses the chamber cuts, their triangulations may
+nevertheless change locally. The rotational Nitsche terms locate paired traces
+by AABB search and do not require matching cut meshes.
 
 During level-set transport, a characteristic crossing an identified chamber
 cut is continued through its rotated partner. The scalar projection weakly
@@ -171,3 +171,38 @@ fixed chamber faces remain required during this pass. The reconstructed update
 is not identical to the advected deformation, so its realised objective and
 volume changes are reported against their shape-derivative predictions at the
 following iterate.
+
+As an alternative to topological reconstruction, `--reconstruction=wngir`
+uses MMG exactly once to improve an interface-free chamber mesh. This mesh is
+the fixed background of the complete optimization and need not contain, or be
+fitted to, the initial sphere. The sphere is represented by its P1 level-set
+field on this background. At every design iterate, the level set labels the
+background cells and thereby selects an internal facet envelope. WNGIR then
+fits a fresh copy of the background mesh so that this envelope approaches the
+zero level set. The fitted copy is used for the state and shape calculations;
+it is never used as the background of the following reconstruction.
+
+The level-set gradient is first projected into the continuous P1 vector space,
+so its trace on the selected envelope is unambiguous. The outer boundary and
+the four chamber cuts carry homogeneous displacement conditions throughout the
+WNGIR solve; consequently their vertices remain fixed and the chamber can still
+be sewn exactly. The default bulk coefficient for this path is `8e-4`. Other
+fitting parameters retain the common `--wngir-*` spellings used by the WNGIR
+examples.
+
+The transported level set and shape direction are represented on the fixed
+background for advection. At the beginning of an update, the Eikonal stage
+reconstructs a distance to the fitted interface; its nodal values are then
+transferred by the unchanged background topology before transport. Thus every
+WNGIR fit is followed by redistancing before the next advection. For example:
+
+```sh
+KelvinBall --n=13 --iterations=5 --regularization=4 --step=0.01 \
+  --reconstruction=wngir --wngir-steps=8
+```
+
+Each fitted copy preserves the connectivity of the background. Deformation is
+therefore not accumulated from one fitted mesh to the next: every iterate starts
+again from the same high-quality background coordinates. Its Jacobian,
+distortion, and tetrahedron-quality diagnostics measure the validity of that
+iterate's fit.

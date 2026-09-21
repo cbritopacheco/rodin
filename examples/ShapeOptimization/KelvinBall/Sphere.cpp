@@ -155,4 +155,28 @@ namespace KelvinBall
     return {std::move(mesh),
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
   }
+
+  SphereDiscretization Sphere::prepareWNGIRBackground() const
+  {
+    const Real h = m_configuration.getH();
+    const Real hmin = m_configuration.backgroundHMin * h;
+    const Real hmax = m_configuration.backgroundHMax * h;
+    const Real hausdorff = m_configuration.backgroundHausdorff * h;
+    MMG::Mesh mesh(makeUniformChamber());
+    const size_t cellsBefore = mesh.getCellCount();
+    protectFixedGeometry(mesh);
+    MMG::Optimizer()
+      .setHMin(hmin)
+      .setHMax(hmax)
+      .setHausdorff(hausdorff)
+      .setGradation(m_configuration.backgroundGradation)
+      .setAngleDetection(false)
+      .optimize(mesh);
+    splitSelfPairedCut(mesh);
+    const size_t requiredTriangles = protectFixedGeometry(mesh);
+
+    const size_t cellsAfter = mesh.getCellCount();
+    return {std::move(mesh),
+      {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
+  }
 }
