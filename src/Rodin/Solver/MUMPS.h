@@ -626,10 +626,8 @@ namespace Rodin::Solver
         instance.icntl[2] = -1;
         instance.icntl[3] = 0;
         instance.icntl[6] = static_cast<MUMPS_INT>(m_ordering);
-        if (m_maxThreads > 0)
-          instance.icntl[15] = static_cast<MUMPS_INT>(m_maxThreads);
-        if (m_workspacePercentage > 0)
-          instance.icntl[13] = static_cast<MUMPS_INT>(m_workspacePercentage);
+        instance.icntl[15] = static_cast<MUMPS_INT>(m_maxThreads);
+        instance.icntl[13] = static_cast<MUMPS_INT>(m_workspacePercentage);
       }
 
       /**
