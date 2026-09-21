@@ -300,6 +300,43 @@ $0.1\,h^2$ and gradation 2, followed by an optimisation pass with the same
 settings. The outer boundary and the cuts are required geometry, and their
 labels and planarity are checked after every reconstruction.
 
+Each cut starts from a single material: before MMG sees the mesh, every cell is
+relabelled fluid and every face label other than the outer boundary and the
+cuts is removed, exactly as for the initial sphere. The level set alone then
+defines the new body. If the previous body and fluid labels were kept, MMG
+would carry their common faces through the cut as internal triangles lying
+inside one material, and the optimisation pass would preserve them, so every
+past interface would accumulate in the mesh until MMG fails.
+
+#### Size-controlled adaptation
+
+The optimisation pass takes its target sizes from the current edge lengths.
+After a cut these include the short edges the cut created, so the mesh
+refines from one iterate to the next and never coarsens back. With
+`--mmg-adapt` the optimisation pass is replaced by an adaptation to a
+prescribed size map,
+
+```math
+h(x) = h_\Gamma + \bigl(h_{\mathrm{far}} - h_\Gamma\bigr)\min\Bigl(1, \frac{d(x)}{w}\Bigr),
+```
+
+where $d$ is the distance to $\Gamma$ on the cut mesh. Both passes finish with
+the same quality improvement; they differ only in where the target sizes come
+from. The adaptation applies to the initial sphere and to every iterate:
+
+| Option | Meaning | Default |
+|---|---|---|
+| `--mmg-adapt` | Enables the adaptation | Off |
+| `--mmg-adapt-interface-size` | Size $h_\Gamma$ on $\Gamma$, in multiples of $h$ | 1 |
+| `--mmg-adapt-far-size` | Size $h_{\mathrm{far}}$ away from $\Gamma$, in multiples of $h$ | 1 |
+| `--mmg-adapt-width` | Distance $w$ over which the size changes, in multiples of $h$ | 3 |
+| `--mmg-adapt-gradation` | Largest ratio between neighbouring sizes | 1.3 |
+
+The minimum size and the Hausdorff tolerance are those of the cut. The cut
+triangles remain required, so near the rim of $\Gamma$ on the cuts the size
+cannot drop below that of the existing cut triangulation. The option is
+rejected with `--reconstruction=wngir`, whose background is fixed.
+
 ### WNGIR
 
 MMG is called **once**, before any interface exists, to optimise the
@@ -342,6 +379,7 @@ KelvinBall --n=17 --iterations=20
 KelvinBall --h=0.125 --iterations=20
 KelvinBall --outer-radius=3 --h=0.1666666667 --iterations=2
 KelvinBall --n=25 --iterations=5 --reconstruction=wngir
+KelvinBall --n=30 --iterations=20 --mmg-adapt --mmg-adapt-interface-size=0.5
 ```
 
 The resolution is given either as points per edge (`--n`) or as a mesh size

@@ -52,6 +52,16 @@ namespace KelvinBall
        */
       SphereDiscretization prepareWNGIRBackground() const;
 
+      /**
+       * @brief Adapts a mesh fitted to Gamma to the prescribed size map.
+       *
+       * Replaces the MMG optimization pass after a level-set cut when
+       * `--mmg-adapt` is given. The optimization pass keeps the edge lengths the
+       * cut created, including its short edges; adaptation remeshes towards
+       * a size set by the distance to Gamma instead.
+       */
+      void adapt(MMG::Mesh& mesh) const;
+
     private:
       Mesh makeUniformChamber() const;
 

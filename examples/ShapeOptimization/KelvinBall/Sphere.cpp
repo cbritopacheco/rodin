@@ -13,6 +13,7 @@
 #include <tuple>
 #include <vector>
 
+#include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Variational.h>
 
 namespace KelvinBall
@@ -141,15 +142,22 @@ namespace KelvinBall
       .setAngleDetection(false);
     mesh = discretizer.discretize(sphere);
     splitSelfPairedCut(mesh);
-    protectFixedGeometry(mesh);
-    MMG::Optimizer()
-      .setHMin(hmin)
-      .setHMax(hmax)
-      .setHausdorff(hausdorff)
-      .setGradation(2)
-      .setAngleDetection(false)
-      .optimize(mesh);
-    splitSelfPairedCut(mesh);
+    if (m_configuration.adapt)
+    {
+      adapt(mesh);
+    }
+    else
+    {
+      protectFixedGeometry(mesh);
+      MMG::Optimizer()
+        .setHMin(hmin)
+        .setHMax(hmax)
+        .setHausdorff(hausdorff)
+        .setGradation(2)
+        .setAngleDetection(false)
+        .optimize(mesh);
+      splitSelfPairedCut(mesh);
+    }
     const size_t requiredTriangles = protectFixedGeometry(mesh);
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
@@ -178,5 +186,35 @@ namespace KelvinBall
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
+  }
+
+  void Sphere::adapt(MMG::Mesh& mesh) const
+  {
+    const Real h = m_configuration.getH();
+    const Real interfaceSize = m_configuration.adaptInterfaceSize * h;
+    const Real farSize = m_configuration.adaptFarSize * h;
+    const Real width = m_configuration.adaptWidth * h;
+
+    P1<Real, Mesh> sizeSpace(mesh);
+    MMG::RealGridFunction size(sizeSpace);
+    mesh.getConnectivity().compute(0, 0);
+    mesh.getConnectivity().compute(0, mesh.getDimension());
+    GridFunction distance(sizeSpace);
+    Distance::Eikonal(distance).setInterior(Obstacle).setInterface(Gamma).solve();
+    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+    {
+      const Real ratio = std::min(Real(1), std::abs(distance[vertex]) / width);
+      size[vertex] = interfaceSize + (farSize - interfaceSize) * ratio;
+    }
+
+    protectFixedGeometry(mesh);
+    MMG::Adapt()
+      .setHMin(0.1 * h)
+      .setHMax(std::max(interfaceSize, farSize))
+      .setHausdorff(0.1 * h * h)
+      .setGradation(m_configuration.adaptGradation)
+      .setAngleDetection(false)
+      .adapt(mesh, size);
+    splitSelfPairedCut(mesh);
   }
 }

@@ -29,6 +29,14 @@ namespace KelvinBall
       Real backgroundHMax = 1;
       Real backgroundHausdorff = 0.05;
       Real backgroundGradation = 2;
+      /// Optional MMG adaptation that replaces the optimization pass after each
+      /// level-set cut. The size grows linearly from the interface size on
+      /// Gamma to the far size at the given width; all in multiples of h.
+      bool adapt = false;
+      Real adaptInterfaceSize = 1;
+      Real adaptFarSize = 1;
+      Real adaptWidth = 3;
+      Real adaptGradation = 1.3;
       bool pointsSpecified = false;
       bool hSpecified = false;
 

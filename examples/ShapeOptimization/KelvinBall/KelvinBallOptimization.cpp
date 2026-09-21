@@ -310,6 +310,18 @@ namespace KelvinBall
           << " WNGIR background Hausdorff tolerance, in h (default: 0.05)."
           << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
           << " WNGIR background gradation (default: 2)."
+          << Alert::NewLine << Alert::Notation("--mmg-adapt")
+          << "                MMG path: replace the optimization pass after each"
+          << Alert::NewLine
+          << "                              cut by adaptation to a size map."
+          << Alert::NewLine << Alert::Notation("--mmg-adapt-interface-size=<value>")
+          << " Size on Gamma, in h (default: 1)."
+          << Alert::NewLine << Alert::Notation("--mmg-adapt-far-size=<value>")
+          << "   Size away from Gamma, in h (default: 1)."
+          << Alert::NewLine << Alert::Notation("--mmg-adapt-width=<value>")
+          << "      Distance over which the size grows, in h (default: 3)."
+          << Alert::NewLine << Alert::Notation("--mmg-adapt-gradation=<value>")
+          << "  Adaptation gradation (default: 1.3)."
           << Alert::NewLine << Alert::Notation("--wngir-*=<value>")
           << "        WNGIR fitting parameters (--wngir-steps defaults to 12;"
           << Alert::NewLine
@@ -567,8 +579,8 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      MMGReconstruction discretizeLevelSetMMG(
-        MMG::Mesh& mesh, const LevelSet& levelSet, Real h)
+      MMGReconstruction discretizeLevelSetMMG(MMG::Mesh& mesh,
+        const LevelSet& levelSet, Real h, const Sphere& sphere, bool adapt)
       {
         const size_t previousCells = mesh.getCellCount();
         const size_t requiredTriangles = protectFixedGeometry(mesh);
@@ -596,16 +608,32 @@ namespace KelvinBall
                       << Alert::Notation::Number(inputDiagnostics.meanElementSize)
                       << Alert::Raise;
 
+        // The level set alone defines the new partition. MMG keeps the faces
+        // between differently labelled cells as internal boundaries through
+        // the cut, where they end up inside one material; the optimization
+        // pass (opnbdy) then preserves them, so every past interface would
+        // accumulate in the mesh. The cut therefore starts, as the initial
+        // one does, from a single material and only the fixed boundary.
+        const FlatSet<Attribute> fixed{
+          Outer, SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
+        for (auto cell = mesh.getCell(); cell; ++cell)
+          mesh.setAttribute({mesh.getDimension(), cell->getIndex()}, Fluid);
+        for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+        {
+          const auto attribute = face->getAttribute();
+          if (attribute && !fixed.contains(*attribute))
+            mesh.setAttribute({mesh.getDimension() - 1, face->getIndex()}, {});
+        }
+
         MMG::LevelSetDiscretizer discretizer;
         discretizer.split(Fluid, {Obstacle, Fluid})
           .setHMin(hmin)
           .setHMax(hmax)
           .setHausdorff(hausdorff)
           .setGradation(remeshGradation)
-          .setBaseReferences(FlatSet<Attribute>{Obstacle, Fluid})
+          .setBaseReferences(FlatSet<Attribute>{Fluid})
           .setBoundaryReference(Gamma)
           .setAngleDetection(false);
-        discretizer.split(Obstacle, {Obstacle, Fluid});
         MMG::Mesh reconstructed = discretizer.discretize(levelSet);
 
         splitSelfPairedCut(reconstructed);
@@ -645,18 +673,26 @@ namespace KelvinBall
 
         const size_t requiredTrianglesBeforeOptimization =
           protectFixedGeometry(reconstructed);
-        MMG::Optimizer()
-          .setHMin(hmin)
-          .setHMax(hmax)
-          .setHausdorff(hausdorff)
-          .setGradation(remeshGradation)
-          .setAngleDetection(false)
-          .optimize(reconstructed);
-        splitSelfPairedCut(reconstructed);
+        if (adapt)
+        {
+          sphere.adapt(reconstructed);
+        }
+        else
+        {
+          MMG::Optimizer()
+            .setHMin(hmin)
+            .setHMax(hmax)
+            .setHausdorff(hausdorff)
+            .setGradation(remeshGradation)
+            .setAngleDetection(false)
+            .optimize(reconstructed);
+          splitSelfPairedCut(reconstructed);
+        }
         const size_t requiredTrianglesAfterOptimization =
           protectFixedGeometry(reconstructed);
         const MeshDiagnostics outputDiagnostics = getMeshDiagnostics(reconstructed, false);
-        Alert::Info() << substageHeading("MMG optimization") << Alert::NewLine
+        Alert::Info() << substageHeading(adapt ? "MMG adaptation" : "MMG optimization")
+                      << Alert::NewLine
                       << diagnosticLabel("Required boundary triangles:")
                       << Alert::Notation::Number(requiredTrianglesBeforeOptimization)
                       << " -> "
@@ -791,6 +827,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The advection quadrature order must be positive.");
   if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
     throw std::runtime_error("The reconstruction method must be mmg or wngir.");
+  if (configuration.adapt && reconstructionMethod != "mmg")
+    throw std::runtime_error("--mmg-adapt applies only to --reconstruction=mmg.");
   if (geometryOnly && stateOnly)
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
   const Real h = configuration.getH();
@@ -829,6 +867,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                       << Alert::Notation::Number(configuration.backgroundHausdorff) << " h"
                       << Alert::NewLine << diagnosticLabel("Background gradation:")
                       << Alert::Notation::Number(configuration.backgroundGradation);
+  }
+  else if (configuration.adapt)
+  {
+    configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation interface size:")
+                      << Alert::Notation::Number(configuration.adaptInterfaceSize) << " h"
+                      << Alert::NewLine << diagnosticLabel("Adaptation far size:")
+                      << Alert::Notation::Number(configuration.adaptFarSize) << " h"
+                      << Alert::NewLine << diagnosticLabel("Adaptation width:")
+                      << Alert::Notation::Number(configuration.adaptWidth) << " h"
+                      << Alert::NewLine << diagnosticLabel("Adaptation gradation:")
+                      << Alert::Notation::Number(configuration.adaptGradation);
   }
   configurationInfo << Alert::Raise;
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
@@ -1407,7 +1456,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         return fitLevelSetWNGIR(
           classified, classifiedLevelSet, h, outerRadius, argc, argv);
       }
-      return discretizeLevelSetMMG(mesh, advectedDistance, h);
+      return discretizeLevelSetMMG(mesh, advectedDistance, h, sphere, configuration.adapt);
     }();
     reconstruction = result.diagnostics;
     reconstructionOutput.clear();

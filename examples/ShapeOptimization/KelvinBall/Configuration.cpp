@@ -38,6 +38,16 @@ namespace KelvinBall
       backgroundHausdorff = std::stod(std::string(option.substr(23)));
     else if (option.rfind("--background-gradation=", 0) == 0)
       backgroundGradation = std::stod(std::string(option.substr(23)));
+    else if (option == "--mmg-adapt")
+      adapt = true;
+    else if (option.rfind("--mmg-adapt-interface-size=", 0) == 0)
+      adaptInterfaceSize = std::stod(std::string(option.substr(27)));
+    else if (option.rfind("--mmg-adapt-far-size=", 0) == 0)
+      adaptFarSize = std::stod(std::string(option.substr(21)));
+    else if (option.rfind("--mmg-adapt-width=", 0) == 0)
+      adaptWidth = std::stod(std::string(option.substr(18)));
+    else if (option.rfind("--mmg-adapt-gradation=", 0) == 0)
+      adaptGradation = std::stod(std::string(option.substr(22)));
     else
       return false;
     return true;
@@ -69,6 +79,12 @@ namespace KelvinBall
       throw std::runtime_error("The background Hausdorff tolerance must be positive.");
     if (!(backgroundGradation > 1))
       throw std::runtime_error("The background gradation must exceed one.");
+    if (!(adaptInterfaceSize > 0) || !(adaptFarSize > 0))
+      throw std::runtime_error("The adaptation sizes must be positive.");
+    if (!(adaptWidth > 0))
+      throw std::runtime_error("The adaptation width must be positive.");
+    if (!(adaptGradation > 1))
+      throw std::runtime_error("The adaptation gradation must exceed one.");
   }
 
   Real Configuration::getH() const
