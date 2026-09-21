@@ -194,21 +194,42 @@ namespace Rodin::Solver
           }
 
           /**
-           * @brief Releases a factorization stage.
+           * @brief Releases retained factorization resources.
            *
-           * Releasing Factorization::Symbolic also releases its dependent
-           * numeric factorization.
+           * MUMPS resources are released coarsely through destruction of the
+           * current instance. Consequently, clearing either retained stage
+           * destroys the MUMPS instance and drops any dependent retained
+           * state. Releasing Factorization::Symbolic also releases its
+           * dependent numeric factorization.
            */
           void clear(Factorization factorization) noexcept
           {
-            numeric = false;
-            if (factorization == Factorization::Symbolic)
-              symbolic = false;
+            if (!initialized)
+            {
+              numeric = false;
+              if (factorization == Factorization::Symbolic)
+                symbolic = false;
+              return;
+            }
+
+            if (factorization == Factorization::Numeric)
+            {
+              if (!numeric)
+                return;
+            }
+            else
+            {
+              if (!symbolic && !numeric)
+                return;
+            }
+
+            destroy();
           }
 
           void destroy() noexcept
           {
-            clear(Factorization::Symbolic);
+            numeric = false;
+            symbolic = false;
             if (!initialized)
               return;
             instance.job = JobDestroy;
