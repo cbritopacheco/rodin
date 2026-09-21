@@ -90,7 +90,8 @@ namespace KelvinBall
     if (!(adaptGradation > 1))
       throw std::runtime_error("The adaptation gradation must exceed one.");
     if (!(mmgSnap >= 0) || !(mmgSnap < 0.5))
-      throw std::runtime_error("The snapping fraction must satisfy 0 <= --mmg-snap < 0.5.");
+      throw std::runtime_error(
+        "The snapping fraction must satisfy 0 <= --mmg-snap < 0.5.");
   }
 
   Real Configuration::getH() const

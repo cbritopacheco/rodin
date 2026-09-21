@@ -450,15 +450,14 @@ namespace Rodin::Adaptation
           predictorBody = predictorBody + m_obsForm - m_surfaceForm;
           if (!p.fixedBoundaryAttributes.empty())
           {
-            const auto zero = Variational::VectorFunction(meshDim,
-              [meshDim](const Geometry::Point&) {
+            const auto zero =
+              Variational::VectorFunction(meshDim, [meshDim](const Geometry::Point&) {
                 Math::SpatialVector<Real> value(meshDim);
                 value.setZero();
                 return value;
               });
             predictorBody.getDBCs().add(
-              Variational::DirichletBC(m_duStep, zero)
-                .on(p.fixedBoundaryAttributes));
+              Variational::DirichletBC(m_duStep, zero).on(p.fixedBoundaryAttributes));
           }
           m_stepProblem = predictorBody;
           m_stepProblem.assemble();
@@ -519,15 +518,14 @@ namespace Rodin::Adaptation
                 body = body + m_obsForm + barrierMetric - m_surfaceForm - barrierForce;
                 if (!p.fixedBoundaryAttributes.empty())
                 {
-                  const auto zero = Variational::VectorFunction(meshDim,
-                    [meshDim](const Geometry::Point&) {
+                  const auto zero = Variational::VectorFunction(
+                    meshDim, [meshDim](const Geometry::Point&) {
                       Math::SpatialVector<Real> value(meshDim);
                       value.setZero();
                       return value;
                     });
-                  body.getDBCs().add(
-                    Variational::DirichletBC(m_duStep, zero)
-                      .on(p.fixedBoundaryAttributes));
+                  body.getDBCs().add(Variational::DirichletBC(m_duStep, zero)
+                                       .on(p.fixedBoundaryAttributes));
                 }
                 m_stepProblem = body;
                 m_stepProblem.assemble();
@@ -1500,7 +1498,8 @@ namespace Rodin::Adaptation
           if (m_slipNodes.empty())
             return true;
           const Math::Vector<Real> projected = m_slipProjector * mode;
-          return (projected - mode).norm() <= Real(1e-10) * std::max(mode.norm(), Real(1));
+          return (projected - mode).norm() <=
+            Real(1e-10) * std::max(mode.norm(), Real(1));
         };
         std::vector<Math::Vector<Real>> basis;
         basis.reserve(m_rigidModeBasis.size());
@@ -1511,19 +1510,18 @@ namespace Rodin::Adaptation
         }
         if (basis.empty())
           return result;
-        const auto& m_rigidModeBasis = basis;
 
-        const auto n = static_cast<Eigen::Index>(m_rigidModeBasis.size());
+        const auto n = static_cast<Eigen::Index>(basis.size());
         Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> restriction(n, n);
-        std::vector<Math::Vector<Real>> images(m_rigidModeBasis.size());
-        for (std::size_t j = 0; j < m_rigidModeBasis.size(); ++j)
-          images[j] = A * m_rigidModeBasis[j];
+        std::vector<Math::Vector<Real>> images(basis.size());
+        for (std::size_t j = 0; j < basis.size(); ++j)
+          images[j] = A * basis[j];
         for (Eigen::Index i = 0; i < n; ++i)
         {
           for (Eigen::Index j = i; j < n; ++j)
           {
-            const Real value = m_rigidModeBasis[static_cast<std::size_t>(i)].dot(
-              images[static_cast<std::size_t>(j)]);
+            const Real value =
+              basis[static_cast<std::size_t>(i)].dot(images[static_cast<std::size_t>(j)]);
             restriction(i, j) = value;
             restriction(j, i) = value;
           }
@@ -1546,11 +1544,9 @@ namespace Rodin::Adaptation
           if (!(beta > Real(0)))
             continue;
 
-          Math::Vector<Real> mode =
-            Math::Vector<Real>::Zero(m_rigidModeBasis.front().size());
+          Math::Vector<Real> mode = Math::Vector<Real>::Zero(basis.front().size());
           for (Eigen::Index j = 0; j < n; ++j)
-            mode +=
-              eig.eigenvectors()(j, i) * m_rigidModeBasis[static_cast<std::size_t>(j)];
+            mode += eig.eigenvectors()(j, i) * basis[static_cast<std::size_t>(j)];
           const Real norm = mode.norm();
           if (norm > Real(0))
           {
@@ -1696,15 +1692,18 @@ namespace Rodin::Adaptation
           const auto x0 = mesh.getVertexCoordinates(vertices[0]);
           if (meshDim == 3)
           {
-            const Math::SpatialVector<Real> a = mesh.getVertexCoordinates(vertices[1]) - x0;
-            const Math::SpatialVector<Real> b = mesh.getVertexCoordinates(vertices[2]) - x0;
+            const Math::SpatialVector<Real> a =
+              mesh.getVertexCoordinates(vertices[1]) - x0;
+            const Math::SpatialVector<Real> b =
+              mesh.getVertexCoordinates(vertices[2]) - x0;
             normal(0) = a(1) * b(2) - a(2) * b(1);
             normal(1) = a(2) * b(0) - a(0) * b(2);
             normal(2) = a(0) * b(1) - a(1) * b(0);
           }
           else
           {
-            const Math::SpatialVector<Real> a = mesh.getVertexCoordinates(vertices[1]) - x0;
+            const Math::SpatialVector<Real> a =
+              mesh.getVertexCoordinates(vertices[1]) - x0;
             normal(0) = -a(1);
             normal(1) = a(0);
           }
@@ -1763,11 +1762,12 @@ namespace Rodin::Adaptation
           {
             for (Eigen::Index j = 0; j < components; ++j)
             {
-              const Real value =
-                (i == j ? Real(1) : Real(0)) - complement(i, j);
+              const Real value = (i == j ? Real(1) : Real(0)) - complement(i, j);
               if (value != Real(0))
-                entries.emplace_back(static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(i)]),
-                  static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(j)]), value);
+                entries.emplace_back(
+                  static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(i)]),
+                  static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(j)]),
+                  value);
             }
           }
           m_slipNodes.push_back(std::move(node));
@@ -1812,8 +1812,8 @@ namespace Rodin::Adaptation
           {
             Real scale = 0;
             for (const Index dof : node.dofs)
-              scale += std::abs(A.coeff(static_cast<Eigen::Index>(dof),
-                static_cast<Eigen::Index>(dof)));
+              scale += std::abs(
+                A.coeff(static_cast<Eigen::Index>(dof), static_cast<Eigen::Index>(dof)));
             scale /= static_cast<Real>(node.dofs.size());
             if (!(scale > Real(0)))
               scale = Real(1);
@@ -1824,9 +1824,10 @@ namespace Rodin::Adaptation
               {
                 const Real value = scale * node.complement(i, j);
                 if (value != Real(0))
-                  eliminated.emplace_back(
-                    static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(i)]),
-                    static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(j)]),
+                  eliminated.emplace_back(static_cast<Math::SparseIndex>(
+                                            node.dofs[static_cast<std::size_t>(i)]),
+                    static_cast<Math::SparseIndex>(
+                      node.dofs[static_cast<std::size_t>(j)]),
                     value);
               }
             }
@@ -1932,7 +1933,9 @@ namespace Rodin::Adaptation
         if (!ok)
         {
           axb.getVector() = rhs;
-          if constexpr (requires { solver.clear(DirectStepSolverType::Factorization::Symbolic); })
+          if constexpr (requires {
+                          solver.clear(DirectStepSolverType::Factorization::Symbolic);
+                        })
             solver.clear(DirectStepSolverType::Factorization::Symbolic);
           return false;
         }
@@ -1956,7 +1959,8 @@ namespace Rodin::Adaptation
             for (Eigen::Index k = 0; k < rank; ++k)
             {
               for (Eigen::Index l = 0; l < rank; ++l)
-                inner(k, l) = stabilisation.modes[static_cast<std::size_t>(k)].dot(Z.col(l));
+                inner(k, l) =
+                  stabilisation.modes[static_cast<std::size_t>(k)].dot(Z.col(l));
               inner(k, k) += Real(1) / stabilisation.weights[static_cast<std::size_t>(k)];
             }
             Math::Vector<Real> projection(rank);
@@ -1970,7 +1974,9 @@ namespace Rodin::Adaptation
         axb.getVector() = rhs;
         if (!ok || !y.allFinite())
         {
-          if constexpr (requires { solver.clear(DirectStepSolverType::Factorization::Symbolic); })
+          if constexpr (requires {
+                          solver.clear(DirectStepSolverType::Factorization::Symbolic);
+                        })
             solver.clear(DirectStepSolverType::Factorization::Symbolic);
           return false;
         }
@@ -2002,8 +2008,9 @@ namespace Rodin::Adaptation
           {
             m_stepProblem.solve(m_stepSolver);
             out = m_duStep.getSolution();
-            if constexpr (requires(
-                            const StepSolverType& solver) { solver.getIterationNumber(); })
+            if constexpr (requires(const StepSolverType& solver) {
+                            solver.getIterationNumber();
+                          })
               iterations = m_stepSolver.getIterationNumber();
             else
               iterations = 0;

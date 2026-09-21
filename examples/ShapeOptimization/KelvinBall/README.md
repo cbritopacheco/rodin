@@ -279,7 +279,12 @@ j_h(r, s) = \gamma_\phi\, h_\Sigma \int_{\Sigma_{\mathrm{s}}} [r]_G\,[s]_G\,dS ,
 ```
 
 with $\gamma_\phi$ = `--penalty`, so that the two sides of each cut carry the
-same distance before transport. A characteristic that reaches a cut continues
+same distance before transport. The Eikonal distance is computed on the chamber
+alone and misses the interface in the neighbouring copies, so near the cuts the
+correction reaches a third of $h$. The distance is therefore held at zero on
+$\Gamma$ during the projection: the correction only reconciles the traces
+away from the interface and never moves the interface the transport starts
+from. The printout reports this as the interface shift, which is zero. A characteristic that reaches a cut continues
 from its rotated partner, and the semi-Lagrangian update carries the same
 penalty on both sides, so a zero step leaves $\phi$ unchanged.
 
@@ -297,8 +302,21 @@ again. Two methods are available through `--reconstruction`.
 MMG discretises the advected level set at every iterate, with
 $h_{\mathrm{min}} = 0.1\,h$, $h_{\mathrm{max}} = 10\,h$, a Hausdorff tolerance of
 $0.1\,h^2$ and gradation 2, followed by an optimisation pass with the same
-settings. The outer boundary and the cuts are required geometry, and their
-labels and planarity are checked after every reconstruction.
+settings. The labels and planarity of the outer boundary and the cuts are
+checked after every reconstruction.
+
+Only the outer face, which $\Gamma$ never reaches, is required. The cut planes
+are not: $\Gamma$ meets them, and the cut must split their triangles there.
+When those triangles were required, the split left flat tetrahedra with all
+four vertices on a cut plane, which no later pass was allowed to remove; their
+quality fell to $10^{-9}$ and the gradient identification became too
+ill-conditioned to solve. MMG may therefore retriangulate each cut plane. With
+angle detection disabled it keeps a plane flat only if its borders are given
+as features, so every edge between two differently labelled faces, one of them
+the outer face or a cut, is handed to MMG as a ridge, and every vertex on three
+or more labels as a corner. This covers the lines where two faces of the
+chamber meet and the rim of $\Gamma$ on the cuts. The WNGIR background, which
+never carries an interface, keeps its cut triangles required.
 
 Each cut starts from a single material: before MMG sees the mesh, every cell is
 relabelled fluid and every face label other than the outer boundary and the
@@ -332,9 +350,7 @@ from. The adaptation applies to the initial sphere and to every iterate:
 | `--mmg-adapt-width` | Distance $w$ over which the size changes, in multiples of $h$ | 3 |
 | `--mmg-adapt-gradation` | Largest ratio between neighbouring sizes | 1.3 |
 
-The minimum size and the Hausdorff tolerance are those of the cut. The cut
-triangles remain required, so near the rim of $\Gamma$ on the cuts the size
-cannot drop below that of the existing cut triangulation. The option is
+The minimum size and the Hausdorff tolerance are those of the cut. The option is
 rejected with `--reconstruction=wngir`, whose background is fixed.
 
 #### Level-set snapping

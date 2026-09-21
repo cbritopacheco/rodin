@@ -63,10 +63,24 @@ namespace KelvinBall
        */
       void adapt(MMG::Mesh& mesh, Real h) const;
 
+      /**
+       * @brief Marks the fixed boundary for MMG and returns the number of
+       * required triangles.
+       *
+       * The outer face is always required. The cut planes are required only
+       * when @p cuts is set: a level-set cut splits their triangles where
+       * Gamma meets them, and required triangles there freeze the flat
+       * tetrahedra the split can leave on the plane. Otherwise MMG may
+       * retriangulate each plane, and with angle detection disabled it keeps
+       * the planes flat only if their borders are given as features: every
+       * edge between differently labelled faces, one of them a fixed face,
+       * becomes a reference edge, and a ridge unless both faces lie in the
+       * same plane; every vertex on three or more labels becomes a corner.
+       */
+      size_t protectFixedGeometry(MMG::Mesh& mesh, bool cuts) const;
+
     private:
       Mesh makeUniformChamber() const;
-
-      size_t protectFixedGeometry(MMG::Mesh& mesh) const;
 
       const Configuration& m_configuration;
   };

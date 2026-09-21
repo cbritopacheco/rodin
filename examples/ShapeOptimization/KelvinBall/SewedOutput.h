@@ -36,8 +36,8 @@ namespace KelvinBall
     public:
       using Mesh = Geometry::Mesh<Context::Local>;
 
-      SewedOutput(const Mesh& chamber,
-        const FlatSet<Attribute>& boundaryAttributes = {}, Real tolerance = 1e-10);
+      SewedOutput(const Mesh& chamber, const FlatSet<Attribute>& boundaryAttributes = {},
+        Real tolerance = 1e-10);
 
       const Mesh& getMesh() const;
 
@@ -129,8 +129,8 @@ namespace KelvinBall
             {
               const auto sourceDOFs =
                 family[sourceLoad]->getFiniteElementSpace().getDOFs(0, source.vertex);
-              value += rotation(load, sourceLoad) *
-                family[sourceLoad]->getData()(sourceDOFs(0));
+              value +=
+                rotation(load, sourceLoad) * family[sourceLoad]->getData()(sourceDOFs(0));
             }
           }
           output.getData()(targetDOFs(0)) = value / m_sources[vertex].size();

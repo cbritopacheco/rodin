@@ -66,12 +66,12 @@ namespace Rodin::Tests::Manufactured::StokesStabilized
   {
     const auto x = point.getPhysicalCoordinates();
     Math::SpatialVector<Real> value(3);
-    value(0) = M_PI * std::sin(M_PI * x(0)) *
-      (std::cos(M_PI * x(1)) - std::cos(M_PI * x(2)));
-    value(1) = M_PI * std::sin(M_PI * x(1)) *
-      (std::cos(M_PI * x(2)) - std::cos(M_PI * x(0)));
-    value(2) = M_PI * std::sin(M_PI * x(2)) *
-      (std::cos(M_PI * x(0)) - std::cos(M_PI * x(1)));
+    value(0) =
+      M_PI * std::sin(M_PI * x(0)) * (std::cos(M_PI * x(1)) - std::cos(M_PI * x(2)));
+    value(1) =
+      M_PI * std::sin(M_PI * x(1)) * (std::cos(M_PI * x(2)) - std::cos(M_PI * x(0)));
+    value(2) =
+      M_PI * std::sin(M_PI * x(2)) * (std::cos(M_PI * x(0)) - std::cos(M_PI * x(1)));
     return value;
   }
 
@@ -85,12 +85,12 @@ namespace Rodin::Tests::Manufactured::StokesStabilized
   {
     const auto x = point.getPhysicalCoordinates();
     Math::SpatialVector<Real> value = 2 * M_PI * M_PI * Mu * velocity(point);
-    value(0) += -M_PI * std::sin(M_PI * x(0)) * std::sin(M_PI * x(1)) *
-      std::sin(M_PI * x(2));
-    value(1) += M_PI * std::cos(M_PI * x(0)) * std::cos(M_PI * x(1)) *
-      std::sin(M_PI * x(2));
-    value(2) += M_PI * std::cos(M_PI * x(0)) * std::sin(M_PI * x(1)) *
-      std::cos(M_PI * x(2));
+    value(0) +=
+      -M_PI * std::sin(M_PI * x(0)) * std::sin(M_PI * x(1)) * std::sin(M_PI * x(2));
+    value(1) +=
+      M_PI * std::cos(M_PI * x(0)) * std::cos(M_PI * x(1)) * std::sin(M_PI * x(2));
+    value(2) +=
+      M_PI * std::cos(M_PI * x(0)) * std::sin(M_PI * x(1)) * std::cos(M_PI * x(2));
     return value;
   }
 
@@ -157,10 +157,9 @@ namespace Rodin::Tests::Manufactured::StokesStabilized
     const auto Dv = Real(0.5) * (Jacobian(v) + Jacobian(v).T());
 
     Problem stokes(u, p, lambda, v, q, eta);
-    stokes = Integral(Real(2) * Mu * Du, Dv) - Integral(p, Div(v)) -
-      Integral(Div(u), q) - Integral(tau * Grad(p), Grad(q)) +
-      Integral(lambda, q) + Integral(p, eta) - Integral(exactForce, v) +
-      DirichletBC(u, exactVelocity);
+    stokes = Integral(Real(2) * Mu * Du, Dv) - Integral(p, Div(v)) - Integral(Div(u), q) -
+      Integral(tau * Grad(p), Grad(q)) + Integral(lambda, q) + Integral(p, eta) -
+      Integral(exactForce, v) + DirichletBC(u, exactVelocity);
     stokes.assemble();
 
     Solver::SparseLU solver(stokes);
@@ -173,8 +172,7 @@ namespace Rodin::Tests::Manufactured::StokesStabilized
 
     GridFunction mean(sh);
     mean = p.getSolution() - exactPressure;
-    const Real shift =
-      Integral(mean).compute() / mesh.getMeasure(mesh.getDimension());
+    const Real shift = Integral(mean).compute() / mesh.getMeasure(mesh.getDimension());
     GridFunction pressureError(sh);
     pressureError = Pow((p.getSolution() - shift) - exactPressure, 2);
 
@@ -195,12 +193,12 @@ namespace Rodin::Tests::Manufactured::StokesStabilized
 
     const Real velocityRate = rate(medium.velocity, fine.velocity);
     const Real pressureRate = rate(medium.pressure, fine.pressure);
-    std::cout << "[RATES] graded=" << graded
-              << " stabilization=" << (stabilization == Stabilization::Cell ? "cell" : "background")
+    std::cout << "[RATES] graded=" << graded << " stabilization="
+              << (stabilization == Stabilization::Cell ? "cell" : "background")
               << " eU=" << coarse.velocity << ',' << medium.velocity << ','
-              << fine.velocity << " rateU=" << velocityRate
-              << " eP=" << coarse.pressure << ',' << medium.pressure << ','
-              << fine.pressure << " rateP=" << pressureRate << std::endl;
+              << fine.velocity << " rateU=" << velocityRate << " eP=" << coarse.pressure
+              << ',' << medium.pressure << ',' << fine.pressure
+              << " rateP=" << pressureRate << std::endl;
 
     // The pair is stabilized, not consistent, so the pressure carries the
     // O(tau) perturbation: first order is what it can deliver.
@@ -210,21 +208,25 @@ namespace Rodin::Tests::Manufactured::StokesStabilized
     EXPECT_LT(fine.pressure, medium.pressure);
   }
 
+  /// @brief Rates on a uniform mesh with a single background size in the stabilization.
   TEST(Manufactured_StokesStabilized, UniformMeshWithBackgroundSize)
   {
     expectConvergence(false, Stabilization::Background);
   }
 
+  /// @brief Rates on a uniform mesh with the size of each cell in the stabilization.
   TEST(Manufactured_StokesStabilized, UniformMeshWithCellSize)
   {
     expectConvergence(false, Stabilization::Cell);
   }
 
+  /// @brief Rates on a graded mesh with a single background size in the stabilization.
   TEST(Manufactured_StokesStabilized, GradedMeshWithBackgroundSize)
   {
     expectConvergence(true, Stabilization::Background);
   }
 
+  /// @brief Rates on a graded mesh with the size of each cell in the stabilization.
   TEST(Manufactured_StokesStabilized, GradedMeshWithCellSize)
   {
     expectConvergence(true, Stabilization::Cell);

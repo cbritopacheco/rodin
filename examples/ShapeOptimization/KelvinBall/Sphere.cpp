@@ -99,20 +99,73 @@ namespace KelvinBall
     return chamber;
   }
 
-  size_t Sphere::protectFixedGeometry(MMG::Mesh& mesh) const
+  size_t Sphere::protectFixedGeometry(MMG::Mesh& mesh, bool cuts) const
   {
     mesh.getRequiredTriangles().clear();
-    size_t count = 0;
+    mesh.getRidges().clear();
+    mesh.getCorners().clear();
     const FlatSet<Attribute> fixed{
       Outer, SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
-    for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+    const size_t faceDimension = mesh.getDimension() - 1;
+    size_t count = 0;
+    for (auto face = mesh.getPolytope(faceDimension); face; ++face)
     {
       const auto attribute = face->getAttribute();
-      if (attribute && fixed.contains(*attribute))
+      if (attribute && (*attribute == Outer || (cuts && fixed.contains(*attribute))))
       {
         mesh.setRequiredTriangle(face->getIndex());
         ++count;
       }
+    }
+    if (cuts)
+      return count;
+
+    // Edge labels returned by a previous MMG call describe the previous
+    // interface; only the features derived below are handed on.
+    mesh.getConnectivity().compute(faceDimension, 1);
+    for (auto edge = mesh.getPolytope(1); edge; ++edge)
+    {
+      if (edge->getAttribute())
+        mesh.setAttribute({1, edge->getIndex()}, {});
+    }
+    const auto& faceEdges = mesh.getConnectivity().getIncidence(faceDimension, 1);
+    std::map<Index, FlatSet<Attribute>> edgeLabels;
+    std::map<Index, FlatSet<Attribute>> vertexLabels;
+    for (auto face = mesh.getPolytope(faceDimension); face; ++face)
+    {
+      const auto attribute = face->getAttribute();
+      if (!attribute)
+        continue;
+      for (const Index edge : faceEdges.at(face->getIndex()))
+        edgeLabels[edge].insert(*attribute);
+      for (const Index vertex : face->getVertices())
+        vertexLabels[vertex].insert(*attribute);
+    }
+    const auto onFixedFace = [&](const FlatSet<Attribute>& labels) {
+      return std::any_of(labels.begin(), labels.end(),
+        [&](Attribute label) { return fixed.contains(label); });
+    };
+    // The two halves of the x = y cut lie in one plane. The line between them
+    // is a reference edge, which MMG keeps as a line of edges; a ridge there
+    // would join two identical normals and leave its tangent undefined.
+    const auto plane = [](Attribute label) {
+      return label == SigmaXYMinus ? SigmaXYPlus : label;
+    };
+    for (const auto& [edge, labels] : edgeLabels)
+    {
+      if (labels.size() < 2 || !onFixedFace(labels))
+        continue;
+      FlatSet<Attribute> planes;
+      for (const Attribute label : labels)
+        planes.insert(plane(label));
+      mesh.setAttribute({1, edge}, Ridge);
+      if (planes.size() >= 2)
+        mesh.setRidge(edge);
+    }
+    for (const auto& [vertex, labels] : vertexLabels)
+    {
+      if (labels.size() >= 3 && onFixedFace(labels))
+        mesh.setCorner(vertex);
     }
     return count;
   }
@@ -122,7 +175,7 @@ namespace KelvinBall
     const Real h = m_configuration.getH();
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
-    protectFixedGeometry(mesh);
+    protectFixedGeometry(mesh, false);
     const Real hmin = 0.1 * h;
     const Real hmax = 10 * h;
     const Real hausdorff = 0.1 * h * h;
@@ -148,7 +201,7 @@ namespace KelvinBall
     }
     else
     {
-      protectFixedGeometry(mesh);
+      protectFixedGeometry(mesh, false);
       MMG::Optimizer()
         .setHMin(hmin)
         .setHMax(hmax)
@@ -158,7 +211,7 @@ namespace KelvinBall
         .optimize(mesh);
       splitSelfPairedCut(mesh);
     }
-    const size_t requiredTriangles = protectFixedGeometry(mesh);
+    const size_t requiredTriangles = protectFixedGeometry(mesh, false);
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
@@ -172,7 +225,7 @@ namespace KelvinBall
     const Real hausdorff = m_configuration.backgroundHausdorff * h;
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
-    protectFixedGeometry(mesh);
+    protectFixedGeometry(mesh, true);
     MMG::Optimizer()
       .setHMin(hmin)
       .setHMax(hmax)
@@ -181,7 +234,7 @@ namespace KelvinBall
       .setAngleDetection(false)
       .optimize(mesh);
     splitSelfPairedCut(mesh);
-    const size_t requiredTriangles = protectFixedGeometry(mesh);
+    const size_t requiredTriangles = protectFixedGeometry(mesh, true);
 
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
@@ -206,7 +259,7 @@ namespace KelvinBall
       size[vertex] = interfaceSize + (farSize - interfaceSize) * ratio;
     }
 
-    protectFixedGeometry(mesh);
+    protectFixedGeometry(mesh, false);
     MMG::Adapt()
       .setHMin(0.1 * h)
       .setHMax(std::max(interfaceSize, farSize))

@@ -27,7 +27,10 @@ namespace KelvinBall
     public:
       RotatedCharacteristicContinuation(Real dt, const Mesh& mesh, const Locator& locator,
         const std::array<RotationPair, 2>& pairs)
-        : m_mesh(mesh), m_locator(locator), m_pairs(pairs), m_stop(dt, mesh)
+        : m_mesh(mesh),
+          m_locator(locator),
+          m_pairs(pairs),
+          m_stop(dt, mesh)
       {}
 
       bool operator()(const BoundaryHit& hit) const

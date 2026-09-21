@@ -37,6 +37,8 @@ namespace KelvinBall
   inline constexpr Attribute SigmaMinus = 32;
   inline constexpr Attribute SigmaXYPlus = 33;
   inline constexpr Attribute SigmaXYMinus = 35;
+  /// Label of the feature edges handed to MMG as ridges.
+  inline constexpr Attribute Ridge = 40;
 
   inline constexpr Real Mu = 1;
   inline constexpr Real DefaultNitschePenalty = 320;
@@ -105,8 +107,8 @@ namespace KelvinBall
     solver.solve();
     if (!solver.success())
     {
-      throw std::runtime_error(std::string(DirectSolverName) +
-        " failed with status " + std::to_string(solver.getInfo().status) + ".");
+      throw std::runtime_error(std::string(DirectSolverName) + " failed with status " +
+        std::to_string(solver.getInfo().status) + ".");
     }
   }
 }

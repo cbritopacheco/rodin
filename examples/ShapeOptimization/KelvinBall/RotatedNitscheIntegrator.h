@@ -137,8 +137,8 @@ namespace KelvinBall
         Real penalty, const FlatSet<Attribute>& fixedBoundaries) const;
 
       template <class ScalarSpace, class LinearSystem>
-      void assembleScalarTracePenalty(
-        const ScalarSpace& space, LinearSystem& system, Real penalty) const;
+      void assembleScalarTracePenalty(const ScalarSpace& space, LinearSystem& system,
+        Real penalty, const FlatSet<Attribute>& fixedBoundaries = {}) const;
 
       template <class ScalarSpace, class LinearSystem, class Reference>
       void assembleScalarTracePenalty(const ScalarSpace& space, LinearSystem& system,
@@ -607,12 +607,12 @@ namespace KelvinBall
   }
 
   template <class ScalarSpace, class LinearSystem>
-  void RotatedNitscheIntegrator::assembleScalarTracePenalty(
-    const ScalarSpace& space, LinearSystem& system, Real penalty) const
+  void RotatedNitscheIntegrator::assembleScalarTracePenalty(const ScalarSpace& space,
+    LinearSystem& system, Real penalty, const FlatSet<Attribute>& fixedBoundaries) const
   {
     const auto& mesh = space.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
-    const IndexSet fixed;
+    const IndexSet fixed = Internal::getFixedDOFs(space, fixedBoundaries);
     for (const RotationPair& pair : RotationPairs)
     {
       std::vector<Eigen::Triplet<Real>> entries;
@@ -787,7 +787,8 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
-            throw std::runtime_error("A rotated scalar diagnostic point was not located.");
+            throw std::runtime_error(
+              "A rotated scalar diagnostic point was not located.");
           residual =
             std::max(residual, std::abs(u.getValue(*mapped) - u.getValue(point)));
         }

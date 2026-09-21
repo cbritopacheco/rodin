@@ -43,8 +43,8 @@ namespace KelvinBall
     return rotations;
   }
 
-  SewedOutput::SewedOutput(const Mesh& chamber,
-    const FlatSet<Attribute>& boundaryAttributes, Real tolerance)
+  SewedOutput::SewedOutput(
+    const Mesh& chamber, const FlatSet<Attribute>& boundaryAttributes, Real tolerance)
     : m_rotations(getCubeRotations())
   {
     using Key = std::tuple<long long, long long, long long>;
