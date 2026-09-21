@@ -18,8 +18,6 @@
 #include "Fekete.h"
 #include "JacobiPolynomial.h"
 
-#define RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE 1e-14
-
 namespace Rodin::Variational
 {
   /**
@@ -178,8 +176,8 @@ namespace Rodin::Variational
        *
        * Mapping:
        *   b = 2y - 1
-       *   a = 2x/(1-y) - 1    if 1-y > tol
-       *   a = -1              otherwise (collapse at the top edge/vertex y=1)
+       *   a = 2x/(1-y) - 1    if y != 1
+       *   a = -1              at the collapsed vertex y=1
        *
        * @param[out] a First collapsed coordinate.
        * @param[out] b Second collapsed coordinate.
@@ -190,8 +188,9 @@ namespace Rodin::Variational
       {
         b = 2.0 * y - 1.0;
 
-        if (1.0 - y > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-          a = 2.0 * (x / (1.0 - y)) - 1.0;
+        const Real oneMinusY = 1.0 - y;
+        if (oneMinusY != 0.0)
+          a = 2.0 * (x / oneMinusY) - 1.0;
         else
           a = -1.0;
       }
@@ -443,8 +442,8 @@ namespace Rodin::Variational
       // Using a Duffy-type collapse:
       //
       //   c = 2 z - 1
-      //   b = 2 y / (1 - z) - 1          if 1 - z > tol
-      //   a = 2 x / (1 - y - z) - 1      if 1 - y - z > tol
+      //   b = 2 y / (1 - z) - 1          if z != 1
+      //   a = 2 x / (1 - y - z) - 1      if y + z != 1
       //
       /// @brief Maps reference coordinates to collapsed coordinates.
       static constexpr void getCollapsed(Real& a,
@@ -457,12 +456,12 @@ namespace Rodin::Variational
         c = 2.0 * z - 1.0;
 
         const Real oneMinusZ = 1.0 - z;
-        if (oneMinusZ > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+        if (oneMinusZ != 0.0)
         {
           b = 2.0 * (y / oneMinusZ) - 1.0;
 
           const Real oneMinusYz = 1.0 - y - z;
-          if (oneMinusYz > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+          if (oneMinusYz != 0.0)
             a = 2.0 * (x / oneMinusYz) - 1.0;
           else
             a = -1.0; // collapse along edge
