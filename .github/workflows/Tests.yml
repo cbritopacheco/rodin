@@ -32,9 +32,12 @@ jobs:
       # The optional direct solvers, built on the entries without a sanitizer:
       # MUMPS calls into MPI, whose implementations leak by design, and the
       # leak checker would report that as a failure of every one of them.
-      # ParU stays out: its C API needs SuiteSparse 7.10, newer than the
-      # runner image packages.
       RODIN_DIRECT_SOLVERS: ${{ (matrix.asan == 'OFF' && matrix.ubsan == 'OFF') && 'ON' || 'OFF' }}
+      # The runner image packages SuiteSparse 7.6, whose ParU has no ParU.h.
+      # The ParU solver needs the C API of SuiteSparse 7.10 or newer, so those
+      # entries build SuiteSparse themselves and configure against it.
+      SUITESPARSE_VERSION: "7.14.1"
+      SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
 
     steps:
       - uses: actions/checkout@v4
@@ -78,6 +81,28 @@ jobs:
           mpich
           lcov
 
+      - name: Restore SuiteSparse
+        if: env.RODIN_DIRECT_SOLVERS == 'ON'
+        id: suitesparse
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.SUITESPARSE_PREFIX }}
+          key: suitesparse-${{ env.SUITESPARSE_VERSION }}-${{ runner.os }}-${{ matrix.compiler }}
+
+      - name: Build SuiteSparse
+        if: env.RODIN_DIRECT_SOLVERS == 'ON' && steps.suitesparse.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
+          cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${SUITESPARSE_PREFIX}" \
+            -DSUITESPARSE_ENABLE_PROJECTS="suitesparse_config;amd;camd;colamd;ccolamd;cholmod;umfpack;spqr;paru" \
+            -DSUITESPARSE_USE_CUDA=OFF \
+            -DSUITESPARSE_USE_FORTRAN=OFF \
+            -DSUITESPARSE_DEMOS=OFF
+          cmake --build suitesparse-build
+          cmake --install suitesparse-build
+
       - name: Configure CMake
         run: >
           cmake -B ${{ github.workspace }}/build
@@ -86,8 +111,10 @@ jobs:
           -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
+          -DCMAKE_PREFIX_PATH=${{ env.RODIN_DIRECT_SOLVERS == 'ON' && env.SUITESPARSE_PREFIX || '' }}
           -DRODIN_USE_CHOLMOD=${{ env.RODIN_DIRECT_SOLVERS }}
           -DRODIN_USE_MUMPS=${{ env.RODIN_DIRECT_SOLVERS }}
+          -DRODIN_USE_PARU=${{ env.RODIN_DIRECT_SOLVERS }}
           -DRODIN_USE_SPQR=${{ env.RODIN_DIRECT_SOLVERS }}
           -DRODIN_USE_UMFPACK=${{ env.RODIN_DIRECT_SOLVERS }}
           -DRODIN_BUILD_DOC=OFF
