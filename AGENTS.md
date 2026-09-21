@@ -15,6 +15,8 @@ The knowledge base lives in `doc/agents/` and is hierarchical — index at
   code**: the typed graded expression algebra the library models, node
   patterns, minimality rules, surface style. And
   `doc/agents/conventions.md` — the hard rules.
+  Also read `doc/agents/writing.md` for scientific writing and
+  `doc/agents/reasoning.md` for reasoning and reflection norms.
 - Level 2 (orientation): `doc/agents/architecture.md` — the full module map.
 - Level 3 (per-domain, open what the task touches): `core.md` (vocabulary,
   Alert, Threads, Context, Math), `geometry.md` (mesh model),
