@@ -170,12 +170,12 @@ namespace KelvinBall
     return count;
   }
 
-  SphereDiscretization Sphere::discretize() const
+  SphereDiscretization Sphere::discretize(bool conformingCuts) const
   {
     const Real h = m_configuration.getH();
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
-    protectFixedGeometry(mesh, false);
+    protectFixedGeometry(mesh, conformingCuts);
     const Real hmin = 0.1 * h;
     const Real hmax = 10 * h;
     const Real hausdorff = 0.1 * h * h;
@@ -195,13 +195,13 @@ namespace KelvinBall
       .setAngleDetection(false);
     mesh = discretizer.discretize(sphere);
     splitSelfPairedCut(mesh);
-    if (m_configuration.adapt)
+    if (m_configuration.adapt && !conformingCuts)
     {
       adapt(mesh, h);
     }
     else
     {
-      protectFixedGeometry(mesh, false);
+      protectFixedGeometry(mesh, conformingCuts);
       MMG::Optimizer()
         .setHMin(hmin)
         .setHMax(hmax)
@@ -211,7 +211,7 @@ namespace KelvinBall
         .optimize(mesh);
       splitSelfPairedCut(mesh);
     }
-    const size_t requiredTriangles = protectFixedGeometry(mesh, false);
+    const size_t requiredTriangles = protectFixedGeometry(mesh, conformingCuts);
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};

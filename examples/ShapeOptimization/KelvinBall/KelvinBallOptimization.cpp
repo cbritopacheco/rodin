@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdio>
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -15,6 +16,7 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <stdexcept>
@@ -42,6 +44,7 @@
 #include "RotatedCharacteristicContinuation.h"
 #include "RotatedNitscheIntegrator.h"
 #include "SewedOutput.h"
+#include "Thickness.h"
 #include "Sphere.h"
 #include "../../WNGIRExampleParameters.h"
 
@@ -294,7 +297,19 @@ namespace KelvinBall
           << "   H1 smoothing length in multiples of h (default: 4)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
           << "             Advection time step in multiples of h (default: 0.1)."
-          << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
+          << Alert::NewLine << Alert::Notation("--level-set-penalty=<value>")
+          << " Rotated trace penalty of the level set (default: 1)." << Alert::NewLine
+          << Alert::Notation("--thickness-min=<value>")
+          << "      Minimum body thickness in h (default: 2; 0 disables it)." << Alert::NewLine
+          << Alert::Notation("--thickness-weight=<value>")
+          << "   Weight of the thickness penalty (default: 1)." << Alert::NewLine
+          << Alert::Notation("--motion-every=<count>")
+          << "      Write the rigid motion every count iterates (default: 0, off)."
+          << Alert::NewLine << Alert::Notation("--motion-force=<fx,fy,fz>")
+          << "  Force driving the motion (default: 0,0,1)." << Alert::NewLine
+          << Alert::Notation("--motion-frames=<count>")
+          << "     Frames over one revolution (default: 24)." << Alert::NewLine
+          << Alert::Notation("--advection-quadrature=<order>")
           << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
           << "  Interface reconstruction: mmg or wngir (default: mmg)." << Alert::NewLine
@@ -572,7 +587,9 @@ namespace KelvinBall
         const Real hmin = 0.1 * h;
         const Real hmax = 10 * h;
         const Real hausdorff = 0.1 * h * h;
-        const MeshDiagnostics inputDiagnostics = getMeshDiagnostics(mesh);
+        // A retried reconstruction receives the mesh the failed attempt already
+        // reduced to a single material, so the input need not be partitioned.
+        const MeshDiagnostics inputDiagnostics = getMeshDiagnostics(mesh, false);
 
         Alert::Info() << substageHeading("MMG input") << Alert::NewLine
                       << diagnosticLabel("Level-set minimum:")
@@ -813,7 +830,7 @@ namespace KelvinBall
       GradientDiagnostics identifyGradient(const Space& shapeSpace,
         const Density& density, const KelvinBall::RotatedNitscheIntegrator& coupling,
         Output& gradient, Real regularizationLength, Real nitschePenalty,
-        const char* name)
+        const char* name, const Math::Vector<Real>* additionalLoad = nullptr)
       {
         TrialFunction gradientTrial(shapeSpace);
         TestFunction testField(shapeSpace);
@@ -831,6 +848,8 @@ namespace KelvinBall
         coupling.assembleVector(shapeSpace, system,
           regularizationLength * regularizationLength, nitschePenalty,
           FlatSet<Attribute>{Outer});
+        if (additionalLoad)
+          system.getVector() += *additionalLoad;
         KelvinBall::solveDirect(identification);
         const Real linearResidual =
           (system.getOperator() * system.getSolution() - system.getVector()).norm() /
@@ -869,6 +888,15 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   bool stateOnly = false;
   Real regularizationFactor = 4.0;
   Real stepFactor = 0.1;
+  Real levelSetPenalty = 1;
+  Real thicknessFactor = 2;
+  Real thicknessWeight = 1;
+  size_t motionEvery = 0;
+  size_t motionFrames = 24;
+  Math::SpatialVector<Real> motionForce(3);
+  motionForce(0) = 0;
+  motionForce(1) = 0;
+  motionForce(2) = 1;
   size_t advectionQuadratureOrder = 8;
   std::string reconstructionMethod = "mmg";
   for (int argument = 1; argument < argc; ++argument)
@@ -882,6 +910,27 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       regularizationFactor = std::stod(std::string(mode.substr(17)));
     else if (mode.rfind("--step=", 0) == 0)
       stepFactor = std::stod(std::string(mode.substr(7)));
+    else if (mode.rfind("--level-set-penalty=", 0) == 0)
+      levelSetPenalty = std::stod(std::string(mode.substr(20)));
+    else if (mode.rfind("--thickness-min=", 0) == 0)
+      thicknessFactor = std::stod(std::string(mode.substr(16)));
+    else if (mode.rfind("--thickness-weight=", 0) == 0)
+      thicknessWeight = std::stod(std::string(mode.substr(19)));
+    else if (mode.rfind("--motion-every=", 0) == 0)
+      motionEvery = std::stoul(std::string(mode.substr(15)));
+    else if (mode.rfind("--motion-frames=", 0) == 0)
+      motionFrames = std::stoul(std::string(mode.substr(16)));
+    else if (mode.rfind("--motion-force=", 0) == 0)
+    {
+      std::istringstream components{std::string(mode.substr(15))};
+      std::string component;
+      for (Eigen::Index i = 0; i < 3; ++i)
+      {
+        if (!std::getline(components, component, ','))
+          throw std::runtime_error("--motion-force needs three components fx,fy,fz.");
+        motionForce(i) = std::stod(component);
+      }
+    }
     else if (mode.rfind("--advection-quadrature=", 0) == 0)
       advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
     else if (mode.rfind("--reconstruction=", 0) == 0)
@@ -916,6 +965,15 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The regularization factor must be positive.");
   if (!(stepFactor > 0))
     throw std::runtime_error("The advection step factor must be positive.");
+  if (!(levelSetPenalty > 0))
+    throw std::runtime_error("The level-set trace penalty must be positive.");
+  if (thicknessFactor < 0 || !(thicknessWeight > 0))
+    throw std::runtime_error("The thickness options must satisfy --thickness-min >= 0 "
+                             "and --thickness-weight > 0.");
+  if (motionFrames == 0)
+    throw std::runtime_error("The motion needs at least one frame.");
+  if (!(motionForce.norm() > 0))
+    throw std::runtime_error("The motion force must be nonzero.");
   if (advectionQuadratureOrder == 0)
     throw std::runtime_error("The advection quadrature order must be positive.");
   if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
@@ -950,6 +1008,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                     << Alert::NewLine << diagnosticLabel("Advection step:")
                     << Alert::Notation::Number(dt) << " = "
                     << Alert::Notation::Number(stepFactor) << " h" << Alert::NewLine
+                    << diagnosticLabel("Level-set trace penalty:")
+                    << Alert::Notation::Number(levelSetPenalty) << Alert::NewLine
                     << diagnosticLabel("Advection quadrature order:")
                     << Alert::Notation::Number(advectionQuadratureOrder) << Alert::NewLine
                     << diagnosticLabel("Reconstruction method:") << reconstructionMethod;
@@ -1246,8 +1306,34 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     reportStageTiming(5, stageSeconds[4]);
     const auto stage6Start = Clock::now();
     announce("Stage 6: Regularizing and constraining the shape direction.");
-    const GradientDiagnostics rhoGradientDiagnostics = identifyGradient(shapeSpace,
-      -rhoDensity, shapeCoupling, rhoGradient, hilbertLength, nitschePenalty, "Rho");
+    // The minimum-thickness penalty enters the ascent direction of
+    // rho - weight * P as an additional load of the rho identification.
+    Math::Vector<Real> thicknessLoad;
+    if (thicknessFactor > 0)
+    {
+      thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
+      mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
+      const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, thicknessFactor * h);
+      const Location::AABB<MMG::Mesh> chamberLocator(mesh);
+      const auto thickness = thicknessPenalty.evaluate(
+        mesh, chamberLocator, shapeSpace, thicknessWeight, thicknessLoad);
+      Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
+                    << diagnosticLabel("Minimum thickness:")
+                    << Alert::Notation::Number(thicknessFactor * h) << " = "
+                    << Alert::Notation::Number(thicknessFactor) << " h" << Alert::NewLine
+                    << diagnosticLabel("Weight:")
+                    << Alert::Notation::Number(thicknessWeight) << Alert::NewLine
+                    << diagnosticLabel("Penalty P:")
+                    << Alert::Notation::Number(thickness.penalty) << Alert::NewLine
+                    << diagnosticLabel("Rays leaving the body:")
+                    << Alert::Notation::Number(thickness.violating) << " of "
+                    << Alert::Notation::Number(thickness.rays) << Alert::NewLine
+                    << diagnosticLabel("Deepest exit:")
+                    << Alert::Notation::Number(thickness.deepest) << Alert::Raise;
+    }
+    const GradientDiagnostics rhoGradientDiagnostics =
+      identifyGradient(shapeSpace, -rhoDensity, shapeCoupling, rhoGradient, hilbertLength,
+        nitschePenalty, "Rho", thicknessFactor > 0 ? &thicknessLoad : nullptr);
     const GradientDiagnostics volumeGradientDiagnostics =
       identifyGradient(shapeSpace, RealFunction{-1}, shapeCoupling, volumeGradient,
         hilbertLength, nitschePenalty, "Volume");
@@ -1307,7 +1393,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       DirichletBC(periodicDistance, RealFunction(0)).on(Gamma);
     distanceProjection.assemble();
     shapeCoupling.assembleScalarTracePenalty(levelSetSpace,
-      distanceProjection.getLinearSystem(), nitschePenalty, FlatSet<Attribute>{Gamma});
+      distanceProjection.getLinearSystem(), levelSetPenalty, FlatSet<Attribute>{Gamma});
     Solver::CG(distanceProjection).solve();
     GridFunction distance(levelSetSpace);
     distance = periodicDistance.getSolution();
@@ -1434,6 +1520,86 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     sewedFluidOutput.add("Pressure_Rotation_1", sewedPR1, IO::XDMF::Center::Node);
     sewedFluidOutput.add("Pressure_Rotation_2", sewedPR2, IO::XDMF::Center::Node);
 
+    if (motionEvery > 0 &&
+      ((iteration + 1) % motionEvery == 0 || iteration + 1 == maxIterations))
+    {
+      // The body is free and pushed by F without torque, so R [Z; w] = [F; 0]
+      // with K = kI, C = cI, Q = qI gives a screw motion about F.
+      const Real determinant = k * q - c * c;
+      const Math::SpatialVector<Real> translation = (q / determinant) * motionForce;
+      const Math::SpatialVector<Real> angular = (-c / determinant) * motionForce;
+      const Real angularSpeed = angular.norm();
+      const Real period = angularSpeed > 0 ? 2 * M_PI / angularSpeed : Real(1);
+      Alert::Info() << substageHeading("Rigid motion") << Alert::NewLine
+                    << diagnosticLabel("Force:")
+                    << Alert::Notation::Print(motionForce.transpose()) << Alert::NewLine
+                    << diagnosticLabel("Translational velocity Z:")
+                    << Alert::Notation::Print(translation.transpose()) << Alert::NewLine
+                    << diagnosticLabel("Angular velocity omega:")
+                    << Alert::Notation::Print(angular.transpose()) << Alert::NewLine
+                    << diagnosticLabel("Period of one revolution:")
+                    << Alert::Notation::Number(period) << Alert::NewLine
+                    << diagnosticLabel("Pitch (travel per revolution):")
+                    << Alert::Notation::Number(translation.norm() * period)
+                    << Alert::Raise;
+
+      // Velocity of the fluid for that motion, by linearity of the states.
+      std::vector<Math::SpatialVector<Real>> motionVelocity(
+        sewedFluid.getMesh().getVertexCount(), Math::SpatialVector<Real>::Zero(3));
+      const auto sewedTranslations = std::array{&sewedUT0, &sewedUT1, &sewedUT2};
+      const auto sewedRotations = std::array{&sewedUR0, &sewedUR1, &sewedUR2};
+      for (Index vertex = 0; vertex < sewedFluid.getMesh().getVertexCount(); ++vertex)
+      {
+        const auto dofs = sewedVelocitySpace.getDOFs(0, vertex);
+        for (size_t load = 0; load < 3; ++load)
+          for (Eigen::Index component = 0; component < 3; ++component)
+            motionVelocity[vertex](component) +=
+              translation(load) * sewedTranslations[load]->getData()(dofs(component)) +
+              angular(load) * sewedRotations[load]->getData()(dofs(component));
+      }
+
+      char name[64];
+      std::snprintf(name, sizeof(name), "KelvinBallMotion-%06zu", iteration + 1);
+      IO::XDMF motionXdmf(name);
+      auto bodyOutput = motionXdmf.grid("Body");
+      auto fluidOutput = motionXdmf.grid("Fluid");
+      const Math::SpatialVector<Real> axis = angularSpeed > 0
+        ? Math::SpatialVector<Real>(angular / angularSpeed)
+        : Math::SpatialVector<Real>(motionForce / motionForce.norm());
+      for (size_t frame = 0; frame < motionFrames; ++frame)
+      {
+        const Real time =
+          period * static_cast<Real>(frame) / static_cast<Real>(motionFrames);
+        const Math::SpatialMatrix<Real> rotation = Eigen::AngleAxis<Real>(
+          angularSpeed * time, Eigen::Matrix<Real, 3, 1>(axis(0), axis(1), axis(2)))
+                                                     .toRotationMatrix();
+        const Math::SpatialVector<Real> shift = time * translation;
+        LocalMesh body = sewedDesign.getMesh();
+        for (Index vertex = 0; vertex < body.getVertexCount(); ++vertex)
+          body.setVertexCoordinates(
+            vertex, rotation * body.getVertexCoordinates(vertex) + shift);
+        LocalMesh moving = sewedFluid.getMesh();
+        for (Index vertex = 0; vertex < moving.getVertexCount(); ++vertex)
+          moving.setVertexCoordinates(
+            vertex, rotation * moving.getVertexCoordinates(vertex) + shift);
+        VelocitySpace movingSpace = makeVelocitySpace(moving);
+        GridFunction velocity(movingSpace);
+        for (Index vertex = 0; vertex < moving.getVertexCount(); ++vertex)
+        {
+          const auto dofs = movingSpace.getDOFs(0, vertex);
+          const Math::SpatialVector<Real> value = rotation * motionVelocity[vertex];
+          for (Eigen::Index component = 0; component < 3; ++component)
+            velocity.getData()(dofs(component)) = value(component);
+        }
+        bodyOutput.clear();
+        bodyOutput.setMesh(body, IO::XDMF::MeshPolicy::Transient);
+        fluidOutput.clear();
+        fluidOutput.setMesh(moving, IO::XDMF::MeshPolicy::Transient);
+        fluidOutput.add("Velocity", velocity, IO::XDMF::Center::Node);
+        motionXdmf.write(time).flush();
+      }
+    }
+
     if (iteration + 1 == maxIterations)
     {
       xdmf.write(static_cast<Real>(iteration)).flush();
@@ -1528,7 +1694,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     transport = Integral(advected, test) - transportedDistance;
     transport.assemble();
     advectionCoupling.assembleScalarTracePenalty(advectionLevelSetSpace,
-      transport.getLinearSystem(), nitschePenalty, advectionDistance);
+      transport.getLinearSystem(), levelSetPenalty, advectionDistance);
     Solver::CG(transport).solve();
     const auto& advectedDistance = advected.getSolution();
     const auto& transportSystem = transport.getLinearSystem();
@@ -1596,6 +1762,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         }
         catch (const std::exception& error)
         {
+          // Keep what MMG received, so that the failure can be reproduced.
+          const std::string failure = "mmg-failure-" + std::to_string(iteration + 1) +
+            "-" + std::to_string(attempt);
+          mesh.save(failure + ".mesh", IO::FileFormat::MEDIT);
+          advectedDistance.save(failure + ".sol", IO::FileFormat::MEDIT);
+          Alert::Warning() << "Saved the failed MMG input to " << failure << ".mesh and "
+                           << failure << ".sol." << Alert::Raise;
           if (attempt == configuration.mmgRetries)
             throw;
           Alert::Warning() << "MMG reconstruction failed at scale "

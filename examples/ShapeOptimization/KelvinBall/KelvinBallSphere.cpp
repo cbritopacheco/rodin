@@ -105,7 +105,7 @@ int KelvinBall::SphereValidation::run()
   const Parameters parameters{configuration.getH(), configuration.nitschePenalty,
     configuration.stabilizationFactor};
 
-  auto sphere = Sphere(configuration).discretize();
+  auto sphere = Sphere(configuration).discretize(true);
   auto& chamber = sphere.mesh;
   if (saveMesh)
     chamber.save("KelvinBallSphere.mesh", IO::FileFormat::MEDIT);

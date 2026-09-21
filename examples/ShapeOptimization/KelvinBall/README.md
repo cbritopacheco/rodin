@@ -160,6 +160,43 @@ Volume changes caused by the finite step, transport and reconstruction are
 reported at the next iterate; there is no range-space correction and no line
 search.
 
+### Minimum thickness
+
+The body is kept thicker than $d_{\min}$ = `--thickness-min` times $h$
+(default 2; 0 disables it) by the penalty of Allaire, Jouve and
+Michailidis,
+
+```math
+P(\Omega_{\mathrm{s}}) = \int_\Gamma \int_0^{d_{\min}} \bigl[d_+(s - \xi n(s))\bigr]^2\,d\xi\,ds ,
+```
+
+where $d$ is the signed distance to the interface, positive in the fluid. A
+ray entering the body from $s$ and leaving it before the length $d_{\min}$
+reports how far it has left. The update ascends $\rho - \beta P$ with
+$\beta$ = `--thickness-weight` (default 1), through the derivative
+
+```math
+dP(w) = \int_\Gamma \int_0^{d_{\min}} 2 d_+(x_m)\bigl(\nabla d(x_m)\cdot n(s)\,w(s) - w(y_m)\bigr)\,d\xi\,ds ,
+\qquad x_m = s - \xi n(s),
+```
+
+with $w$ the normal velocity and $y_m$ the point of $\Gamma$ nearest to
+$x_m$. The derivative omits two terms: the one from the rotation of the normal,
+as the authors do, and the mean-curvature term $H d_+^2$, which is smaller by a
+factor of order $\kappa d_{\min}$. The null-space step removes the volume
+change as before.
+
+The chamber carries one copy of the interface, and a thin part may cross a
+cut, so the distance is measured to the 24 rotated copies of the chamber
+interface, searched on a uniform grid of cell size $d_{\min}$. Whether a ray
+point is outside the body is read from the label of the chamber cell containing
+its rotated image. The rays are sampled at three points per interface triangle
+and eight Gauss points in $\xi$. Each iterate reports $P$, the number of rays
+that leave the body and the deepest exit. On the unit sphere with
+$d_{\min} = 2.5$, where every ray exits at the antipode after $\xi = 2$, the
+computed $P$ agrees with $4\pi(d_{\min} - 2)^3/3$ up to the radius of the
+discrete sphere.
+
 ### Transport
 
 The body is the negative region of a level set $\phi$,
@@ -278,13 +315,21 @@ projected into $W_h$ with the penalty
 j_h(r, s) = \gamma_\phi\, h_\Sigma \int_{\Sigma_{\mathrm{s}}} [r]_G\,[s]_G\,dS ,
 ```
 
-with $\gamma_\phi$ = `--penalty`, so that the two sides of each cut carry the
+with $\gamma_\phi$ = `--level-set-penalty` (default 1), so that the two sides of each cut carry the
 same distance before transport. The Eikonal distance is computed on the chamber
 alone and misses the interface in the neighbouring copies, so near the cuts the
 correction reaches a third of $h$. The distance is therefore held at zero on
 $\Gamma$ during the projection: the correction only reconciles the traces
 away from the interface and never moves the interface the transport starts
-from. The printout reports this as the interface shift, which is zero. A characteristic that reaches a cut continues
+from. The printout reports this as the interface shift, which is zero.
+
+The penalty only balances a mass term, so it is of order one, unlike the
+velocity penalty `--penalty`. The two triangulations of a pair of cuts differ,
+and a large $\gamma_\phi$ asks two independent piecewise-linear traces to
+agree pointwise, which only traces that barely change can do: it froze the
+level set on the cuts, and the interface there moved by 31–67% of the
+prescribed motion at $\gamma_\phi = 320$ against 92–102% at
+$\gamma_\phi = 1$. The same penalty acts in the transport below. A characteristic that reaches a cut continues
 from its rotated partner, and the semi-Lagrangian update carries the same
 penalty on both sides, so a zero step leaves $\phi$ unchanged.
 
@@ -384,7 +429,9 @@ iterate fails, the reconstruction is repeated on the same advected level set
 with every MMG size (minimum and maximum size, Hausdorff tolerance and
 adaptation sizes) computed from $h/2$, and halved again on a further failure,
 up to `--mmg-retries` times (default 2). The next iterate starts again from
-$h$. A retried mesh is finer, by up to a factor of 8 in cell count at $h/2$;
+$h$. Each failed attempt writes what MMG received, the mesh and the transported
+level set, to `mmg-failure-<iteration>-<attempt>.mesh` and `.sol` in the
+working directory, so that the failure can be reproduced. A retried mesh is finer, by up to a factor of 8 in cell count at $h/2$;
 with `--mmg-adapt` the next reconstruction coarsens it back. All MMG calls run
 with angle detection disabled, since the only sharp edges of the chamber are
 the protected intersections of its fixed faces.
@@ -471,6 +518,23 @@ Each iterate is written to three XDMF series.
 - `KelvinBallMMG.xdmf` or `KelvinBallWNGIR.xdmf` — the reconstructed mesh,
   before the next finite-element spaces are built.
 
+With `--motion-every=N`, every $N$-th iterate and the last one also write
+`KelvinBallMotion-<iterate>.xdmf`: the free motion of the body under a force
+$F$ = `--motion-force` (default $e_z$) without torque. Since
+$\mathcal R [Z;\omega] = [F; 0]$ with $K = kI$, $C = cI$, $Q = qI$,
+
+```math
+Z = \frac{q}{kq - c^2}\,F, \qquad \omega = -\frac{c}{kq - c^2}\,F ,
+```
+
+a screw motion about $F$. The series has `--motion-frames` frames (default 24)
+over one revolution $T = 2\pi/|\omega|$. The grid `Body` is the sewn design,
+whose cell labels separate body and fluid, and the grid `Fluid` carries the
+fluid velocity of that motion, $\sum_i Z_i u^T_i + \omega_i u^R_i$. Both move
+rigidly, $x \mapsto e^{t[\omega]_\times} x + Z t$, with the velocity rotated
+accordingly. The printout gives $Z$, $\omega$, the period and the pitch
+$|Z|\,T$, which is large while the coupling is weak.
+
 `kelvin-ball.csv` has one row per design: run parameters, mesh and material
 counts, tetrahedron quality, the reconstruction settings, $k$, $c$, $q$, $\rho$,
 the volume error, the predicted and realised changes of $\rho$ and of the
@@ -488,4 +552,5 @@ or a `--state-only` run are `nan`.
 | `RotatedCharacteristicContinuation` | Characteristics across the cuts |
 | `SewedOutput` | 24-copy reconstruction and field transport |
 | `KelvinBallOptimization` | The staged optimisation loop |
+| `Thickness` | Minimum-thickness penalty and its derivative |
 | `Common`, `Configuration` | Shared data, mesh preparation, options |
