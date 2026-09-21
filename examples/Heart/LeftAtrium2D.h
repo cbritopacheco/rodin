@@ -272,7 +272,7 @@ namespace Rodin::Examples::Heart
           Real inletBackflowStabilization = 1.0;
           Real outletBackflowStabilization = 1.0;
 
-          Real dt = 1.0e-3;
+          Real dt = 1.0e-2;
           /// @brief Cycle length (s). Checked against the waveform files.
           Real period = 0.8;
           /// @brief Cycles solved before the species are switched on.
@@ -297,6 +297,42 @@ namespace Rodin::Examples::Heart
           ///          these are the only terms in this example that no other
           ///          MPI example in the tree exercises.
           bool useVMS = true;
+
+          /// @brief IMEX lag of sqrt(tau_C) in the grad-div projection.
+          /// @details At true, the explicit projection uses the SAME tau that
+          ///          was implicit on the previous step,
+          ///            pi~^n = Pi[ sqrt(tau_C^n) div u^n ],
+          ///          with tau^{k} evaluated at the first-order extrapolation
+          ///          u^{*,k} = u^{k-1}. This is what the telescopic bound
+          ///          2<sqrt(tau^{n+1})u~^{n+1} - pi~^n, sqrt(tau^{n+1})u~^{n+1}>
+          ///          >= |sqrt(tau^{n+1})u~^{n+1}|^2 - |sqrt(tau^n)u~^n|^2
+          ///          requires. At false (default) both use tau(u^n).
+          bool lagGradDivTau = false;
+
+          /// @brief IMEX split of the viscous term.
+          /// @details div(2 mu eps(u)) = div(mu grad u) + div(mu grad u^T), and
+          ///          for div u = 0 the second is (grad u)^T grad mu. At true:
+          ///            implicit  int mu^{n+1} grad u^{n+1} : grad v
+          ///            explicit  int sqrt(mu^{n+1} mu^n) (grad u^n)^T : grad v
+          ///          with mu^{n+1} = mu(u^n), mu^n = mu(u^{n-1}) (first-order
+          ///          extrapolation, as for the velocity). The sqrt weighting
+          ///          makes the split telescopic, hence unconditionally stable.
+          ///          The explicit part is kept in weak form: on P1 grad mu is
+          ///          zero inside every cell, so (grad u^n)^T grad mu as a
+          ///          volume source would vanish and only the face jumps of mu
+          ///          -- which the weak form retains -- carry it.
+          ///          At false: the fully implicit 2 mu eps(u):eps(v).
+          bool imexViscous = true;
+
+          /// @brief Quasi-static instead of dynamic velocity subscales.
+          /// @details Dynamic (default): tau_K = s/(rho/dt + rho/tau_1) and
+          ///          u~^{n+1} = tau_K rho (u~^n/dt - P^perp[(grad u^n)u^n]).
+          ///          Quasi-static: the subscale time derivative is dropped,
+          ///          tau_K = s tau_1/rho and u~ = 0 in the explicit term, so
+          ///          the convective stabilisation is plain OSS,
+          ///            tau_K rho^2 ((grad u^{n+1})u^n - Pi[(grad u^n)u^n]).
+          ///          tau_C and tau_p depend on tau_1 only and do not change.
+          bool quasiStaticSubscales = false;
 
           /// @brief Weight of the transient and convective halves of the PSPG
           ///        momentum residual. 1 is the consistent method, 0 the
@@ -418,13 +454,20 @@ namespace Rodin::Examples::Heart
       ///          with the zero-shear plateau mu0 instead makes tau_1 too small
       ///          and tau_C = rho h^2 / (4 tau_1) too large by the same factor.
       Real viscosityAt(const Rodin::Geometry::Point& p) const;
+      Real viscosityAt(const Rodin::Geometry::Point& p,
+        const VectorGridFunctionType& u) const;
 
       /// @brief Codina tau_1, c1 = 4, c2 = 2, k = 1 (P1), on the local viscosity.
       Real tau1At(const Rodin::Geometry::Point& p) const;
+      Real tau1At(const Rodin::Geometry::Point& p,
+        const VectorGridFunctionType& u) const;
       /// @brief Convective VMS parameter.
       Real vmsTauAt(const Rodin::Geometry::Point& p) const;
       /// @brief Square root of the grad-div parameter.
       Real sqrtTauCAt(const Rodin::Geometry::Point& p) const;
+      /// @brief sqrt(tau_C) evaluated with an arbitrary velocity field.
+      Real sqrtTauCAt(const Rodin::Geometry::Point& p,
+        const VectorGridFunctionType& u) const;
       /// @brief Grad-div parameter, the exact square of the above.
       Real tauCAt(const Rodin::Geometry::Point& p) const;
       /// @brief PSPG parameter, tau_1/rho.
@@ -457,6 +500,8 @@ namespace Rodin::Examples::Heart
       VectorTestFunctionType m_v;
       ScalarTestFunctionType m_q;
       VectorGridFunctionType m_uOld;
+      /// @brief u^{n-1}, the extrapolation that defined tau^n (lagGradDivTau).
+      VectorGridFunctionType m_uOldOld;
 
       // ---- Reusable mass projections ---------------------------------------
       ScalarTrialFunctionType m_sTrial;
@@ -470,6 +515,7 @@ namespace Rodin::Examples::Heart
       ScalarCoefficientType m_tauFn;
       ScalarCoefficientType m_tauCFn;
       ScalarCoefficientType m_sqrtTauCFn;
+      ScalarCoefficientType m_sqrtTauCOldFn;
       ScalarCoefficientType m_tauPFn;
       ScalarGridFunctionType m_piTilde;
       VectorGridFunctionType m_convProjection;

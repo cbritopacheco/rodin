@@ -18,7 +18,10 @@
  * tree, coupled to a hyperelastic arterial wall (total Lagrangian, Newmark)
  * by the Robin-Robin loose coupling of Burman, Durst, Fernandez, Guzman &
  * Ruz (2025), incl. the interface convective stabilization and the
- * alpha = gamma sqrt(rho_s E) scaling.  0D heart model (CCMLC2014) at the
+ * alpha = gamma sqrt(rho_s E) scaling.  The interface fluid stress lambda
+ * is the one of the paper, eq. (18): lambda^k = lambda^{k-1} + alpha (u_f^k
+ * - u_s), i.e. the fluid variational residual (19); the pointwise -sigma_h n
+ * is only an output (verified in examples/FSITest).  0D heart model (CCMLC2014) at the
  * inlet.  Outlets: the R-mu intramyocardial closure of CoupledLV0DCoronary3D
  * -- Starling resistor on the transmural pressure p_tm, universal WRMS
  * apparent-viscosity table (Carreau-Yasuda or Quemada), and the arteriolar
@@ -1554,8 +1557,16 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction solidVelocityOld(dh);
     PETSc::Variational::GridFunction solidAccelerationOld(dh);
 
-    PETSc::Variational::GridFunction fluidTraction(dfh);
+    // lambda: fluid traction on the wall, -sigma_f n_f, DEFINED by the Robin
+    // update of Burman, Durst, Fernandez, Guzman & Ruz (2025), eq. (18):
+    //   lambda^{k} = lambda^{k-1} + alpha (u_f^{k} - u_s)   on Sigma,
+    // equivalently the fluid variational residual (eq. 19).  It is NOT the
+    // pointwise -sigma_h n (which the scheme does not converge with).
     PETSc::Variational::GridFunction tractionTransfer(dfh);
+    PETSc::Variational::GridFunction tractionNext(dfh);
+    // Interface velocity u_s of the Robin data, as a P1 trace (exact
+    // quadrature in the form, same values in the lambda update).
+    PETSc::Variational::GridFunction interfaceVelocityTrace(dfh);
     PETSc::Variational::GridFunction uWall(dfh);
 
     // Laplacian  trial/test.
@@ -1598,8 +1609,9 @@ int main(int argc, char** argv)
     aleDisp = zero;
     aleDispOld = zero;
     meshVelocity = zero;
-    fluidTraction = zero;
     tractionTransfer = zero;
+    tractionNext = zero;
+    interfaceVelocityTrace = zero;
     uWall = zero;
 
     uOld.setName("FluidVelocity");
@@ -1608,7 +1620,7 @@ int main(int argc, char** argv)
     dState.setName("Displacement");
     solidVelocity.setName("SolidVelocity");
     meshVelocity.setName("ALEMeshVelocity");
-    fluidTraction.setName("FluidTraction");
+    tractionTransfer.setName("FluidTraction");
     aleDisp.setName("ALEDisp");
 
     IO::XDMF xdmf_fluid(cfg.xdmfBasename + "fluid");
@@ -1616,7 +1628,7 @@ int main(int argc, char** argv)
     xdmf_fluid.add("FluidVelocity", uOld);
     xdmf_fluid.add("FluidPressure", pOld);
     xdmf_fluid.add("ALEMeshVelocity", meshVelocity);
-    xdmf_fluid.add("FluidTraction", fluidTraction);
+    xdmf_fluid.add("FluidTraction", tractionTransfer);
     xdmf_fluid.add("ALEDisp", aleDisp);
     xdmf_fluid.add("shearStress", shearWall);
     xdmf_fluid.write(0.0).flush();
@@ -1900,8 +1912,9 @@ int main(int argc, char** argv)
     const auto muFsi = cy.muInf +
       deltaMu * Pow(1.0 + Pow(cy.lambda * shearFsi, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
-    // PHYSICAL (unscaled) fluid traction t_f = -sigma_f n_f: the fluid's OWN
-    // lagged Robin datum sigma_f^{lag} n and the traction output field.
+    // PHYSICAL (unscaled) pointwise fluid traction t_f = -sigma_h n_f: an
+    // OUTPUT field (and the prestress seed of lambda, where u = 0).  The
+    // Robin datum is lambda (tractionTransfer), updated by eq. (18).
     const auto tractionFSI =
       (1.0 * pCur) * normalFluid - (1.0 * muFsi) * Mult(strainRateFsi, normalFluid);
 
@@ -2262,14 +2275,13 @@ int main(int argc, char** argv)
           .over(BoundaryFluid::Inlet) +
       cfg.inletTangentialDamping *
         BoundaryIntegral(Dot(duTangential, v)).over(BoundaryFluid::Inlet)
-      // Robin-Robin transmission (fluid side), Burman et al. (2025):
-      //   sigma_f n + alpha u = alpha d_dot_s + lambda^{k-1},
-      // with lambda^{k-1} = tractionFSI at the PREVIOUS correction (= the
-      // previous time step at the first correction, i.e. lambda^{n-1} in
-      // the loose kappa = 0 scheme).
+      // Robin-Robin transmission (fluid side), Burman et al. (2025), eq. (17):
+      //   sigma_f n + alpha u = alpha u_s - lambda^{k-1},
+      // lambda^{k-1} = tractionTransfer (-sigma_f n, eq. 18) at the PREVIOUS
+      // correction (= the previous time step at the first correction).
       + robinAlpha * BoundaryIntegral(u, v).over(BoundaryFluid::FSI) -
-      robinAlpha * BoundaryIntegral(interfaceSolidVelocity, v).over(BoundaryFluid::FSI) +
-      BoundaryIntegral(tractionFSI, v).over(BoundaryFluid::FSI)
+      robinAlpha * BoundaryIntegral(interfaceVelocityTrace, v).over(BoundaryFluid::FSI) +
+      BoundaryIntegral(tractionTransfer, v).over(BoundaryFluid::FSI)
       // Interface convective stabilization (Burman et al. 2025, eq. 13):
       // -(rho/2) (transportLag.n)(u.v) on Sigma
       - 0.5 * cfg.fluidDensity *
@@ -2279,6 +2291,56 @@ int main(int argc, char** argv)
       // the inlet/outlet caps is pinned to zero, consistent with the solid
       // ring clamp.
       + DirichletBC(u, zero).on(BoundaryFluid::FSIRing);
+
+    // Eq. (18): lambda^{k} = lambda^{k-1} + alpha (u_f^{k} - u_s).
+    const auto lambdaUpdate =
+      tractionTransfer + robinAlpha * (uCur - interfaceVelocityTrace);
+
+    // Velocity DOFs with the FSIRing Dirichlet condition (skipped when the
+    // explicit mass vector is added to the assembled right-hand side).
+    std::vector<PetscInt> ringVelocityDofs;
+    {
+      const size_t faceDim = meshFluid.getDimension() - 1;
+      for (auto it = meshFluid.getBoundary(); it; ++it)
+      {
+        if (it->getAttribute() != BoundaryFluid::FSIRing)
+          continue;
+        const size_t nloc = uh.getFiniteElement(faceDim, it->getIndex()).getCount();
+        for (size_t loc = 0; loc < nloc; ++loc)
+          ringVelocityDofs.push_back(
+            static_cast<PetscInt>(uh.getGlobalIndex({ faceDim, it->getIndex() }, loc)));
+      }
+      std::sort(ringVelocityDofs.begin(), ringVelocityDofs.end());
+      ringVelocityDofs.erase(
+        std::unique(ringVelocityDofs.begin(), ringVelocityDofs.end()), ringVelocityDofs.end());
+    }
+
+    // L2 projection onto the velocity trace on Sigma (consistent interface
+    // mass; a negligible volume mass eps (u, v) only fixes the interior
+    // DOFs).  Used to seed lambda from a traction field: a nodal projection of
+    // p n would take, at every vertex, the normal of ONE adjacent face.
+    PETSc::Variational::TrialFunction traceTrial(dfh);
+    PETSc::Variational::TestFunction traceTest(dfh);
+    for (const auto& [key, value] : {std::pair<const char*, const char*>{"-coronary_trace_ksp_type", "cg"},
+           std::pair<const char*, const char*>{"-coronary_trace_pc_type", "jacobi"},
+           std::pair<const char*, const char*>{"-coronary_trace_ksp_rtol", "1e-12"}})
+    {
+      PetscBool has = PETSC_FALSE;
+      PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, key, &has);
+      if (!has)
+        PetscOptionsSetValue(PETSC_NULLPTR, key, value);
+    }
+    auto projectOnTrace = [&](auto& target, const auto& fn) {
+      Problem traceProjection(traceTrial, traceTest);
+      traceProjection = BoundaryIntegral(traceTrial, traceTest).over(BoundaryFluid::FSI)
+        + 1.0e-6 * Integral(traceTrial, traceTest)
+        - BoundaryIntegral(fn, traceTest).over(BoundaryFluid::FSI);
+      traceProjection.assemble();
+      Solver::KSP ksp(traceProjection);
+      ksp.setPrefix("coronary_trace_");
+      ksp.solve();
+      target.setData(traceTrial.getSolution().getData());
+    };
 
     PETSc::Variational::TestFunction vMass(uh);
     LinearForm<VelocityFES, ::Vec> massOld(vMass);
@@ -2596,7 +2658,8 @@ int main(int argc, char** argv)
       // handoff; the dynamic ramp then takes the loads up to full par.
       pOld = p0;
       pCur = p0;
-      tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
+      // Seed lambda^0 = -sigma_f n (u = 0 here) in the trace space.
+      projectOnTrace(tractionTransfer, tractionFSI);
     }
 
     // Interface flux functional q_flux = \int_Gamma (u . n) for the RCR/0D
@@ -2779,6 +2842,10 @@ int main(int argc, char** argv)
 
           moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh, aleDisp);
 
+          // Robin datum u_s on the moved mesh (P1 trace).
+          interfaceVelocityTrace.project(
+            Region::Faces, interfaceSolidVelocity, BoundaryFluid::FSI);
+
           uConv = uOld;
           uConv -= meshVelocity;
           // Only the orthogonal-subscale projections are solved: the taus are
@@ -2799,8 +2866,11 @@ int main(int argc, char** argv)
             VecGetOwnershipRange(mOld, &lo, &hi);
             const PetscScalar* arr = nullptr;
             VecGetArrayRead(mOld, &arr);
+            // Dirichlet rows (FSIRing) already hold their imposed value:
+            // adding the mass entry there would shift it.
             for (PetscInt i = lo; i < hi; ++i)
-              if (arr[i - lo] != PetscScalar(0))
+              if (arr[i - lo] != PetscScalar(0) &&
+                !std::binary_search(ringVelocityDofs.begin(), ringVelocityDofs.end(), i))
                 VecSetValue(b, vOff + i, arr[i - lo], ADD_VALUES);
             VecRestoreArrayRead(mOld, &arr);
             VecAssemblyBegin(b);
@@ -2811,11 +2881,11 @@ int main(int argc, char** argv)
           uCur.setData(u.getSolution().getData());
           pCur.setData(p.getSolution().getData());
 
-          fluidTraction.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
-          // Native projections consumed by the NEXT solid solve (lagged
-          // Robin-Robin data): the FULL transferred fluid traction + wall
-          // velocity.
-          tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
+          // Lagged Robin-Robin data for the NEXT solid solve / correction:
+          // lambda by eq. (18) and the wall velocity.
+          tractionNext = tractionTransfer;
+          tractionNext.project(Region::Faces, lambdaUpdate, BoundaryFluid::FSI);
+          tractionTransfer.setData(tractionNext.getData());
           uWall.project(Region::Faces, uCur, BoundaryFluid::FSI);
         }
       }
@@ -2906,14 +2976,14 @@ int main(int argc, char** argv)
       // ---- Interface power (Robin-Robin energy consistency) -------------
       // E_Gamma = int_FSI (sigma_f . n_f) . (u_f - d_dot_s) dGamma, the rate
       // of work the fluid does against the kinematic mismatch on Gamma_FSI.
-      const auto sigmaFn = muFsi * Mult(strainRateFsi, normalFluid) - pCur * normalFluid;
-      flux = BoundaryIntegral(Dot(sigmaFn, uCur), qFlux).over(BoundaryFluid::FSI);
+      // sigma_f n_f = -lambda, with lambda the interface stress of eq. (18).
+      flux = BoundaryIntegral(Dot(tractionTransfer, uCur), qFlux).over(BoundaryFluid::FSI);
       flux.assemble();
-      const Real ePowerFluid = flux(one);
-      flux = BoundaryIntegral(Dot(sigmaFn, interfaceSolidVelocity), qFlux)
+      const Real ePowerFluid = -flux(one);
+      flux = BoundaryIntegral(Dot(tractionTransfer, interfaceVelocityTrace), qFlux)
                .over(BoundaryFluid::FSI);
       flux.assemble();
-      const Real ePowerSolid = flux(one);
+      const Real ePowerSolid = -flux(one);
       const Real eInterface = ePowerFluid - ePowerSolid;
 
       // ---- Interface slip diagnostic ------------------------------------

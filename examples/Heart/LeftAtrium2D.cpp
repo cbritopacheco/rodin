@@ -10,6 +10,8 @@
 //          -la2d_period, -la2d_flow_cycles, -la2d_species_cycles,
 //          -la2d_output_every, -la2d_vms_scale, -la2d_graddiv_scale,
 //          -la2d_pspg_scale, -la2d_pspg_residual, -la2d_vms,
+//          -la2d_graddiv_tau_lag, -la2d_viscous_imex,
+//          -la2d_quasistatic,
 //          -la2d_kinetics, -la2d_th_in, -la2d_inlet_impedance.
 #include <algorithm>
 #include <cassert>
@@ -174,11 +176,12 @@ namespace Rodin::Examples::Heart
       m_wallSet(makeWallSet(m_cfg)),
       m_vh(std::integral_constant<size_t, 1>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_sh(std::integral_constant<size_t, 1>{}, m_mesh),
-      m_u(m_vh), m_p(m_sh), m_v(m_vh), m_q(m_sh), m_uOld(m_vh),
+      m_u(m_vh), m_p(m_sh), m_v(m_vh), m_q(m_sh), m_uOld(m_vh), m_uOldOld(m_vh),
       m_sTrial(m_sh), m_sTest(m_sh), m_wTrial(m_vh), m_wTest(m_vh),
       m_tauFn([this](const Point& p) { return vmsTauAt(p); }),
       m_tauCFn([this](const Point& p) { return tauCAt(p); }),
       m_sqrtTauCFn([this](const Point& p) { return sqrtTauCAt(p); }),
+      m_sqrtTauCOldFn([this](const Point& p) { return sqrtTauCAt(p, m_uOldOld); }),
       m_tauPFn([this](const Point& p) { return tauPAt(p); }),
       m_piTilde(m_sh),
       m_convProjection(m_vh), m_sub(m_vh), m_subOld(m_vh),
@@ -311,11 +314,17 @@ namespace Rodin::Examples::Heart
 
   LeftAtrium2D::Real LeftAtrium2D::viscosityAt(const Point& p) const
   {
+    return viscosityAt(p, m_uOld);
+  }
+
+  LeftAtrium2D::Real LeftAtrium2D::viscosityAt(const Point& p,
+    const VectorGridFunctionType& u) const
+  {
     const auto& cy = m_cfg.viscosity;
 
     // Built from the same expression the momentum equation uses, so the two
     // cannot drift apart.
-    const auto sym = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
+    const auto sym = 0.5 * (Jacobian(u) + Transpose(Jacobian(u)));
     const Real shear = std::sqrt(cy.gammaRegularization * cy.gammaRegularization +
                                  2.0 * Dot(sym, sym).getValue(p));
 
@@ -326,9 +335,15 @@ namespace Rodin::Examples::Heart
 
   LeftAtrium2D::Real LeftAtrium2D::tau1At(const Point& p) const
   {
-    const auto uc = m_uOld.getValue(p);
+    return tau1At(p, m_uOld);
+  }
+
+  LeftAtrium2D::Real LeftAtrium2D::tau1At(const Point& p,
+    const VectorGridFunctionType& u) const
+  {
+    const auto uc = u.getValue(p);
     const Real h = cellSize(p);
-    const Real nu = viscosityAt(p) / m_cfg.rho;
+    const Real nu = viscosityAt(p, u) / m_cfg.rho;
     return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
   }
 
@@ -343,15 +358,23 @@ namespace Rodin::Examples::Heart
     // the integrators.
     if (!m_cfg.useVMS)
       return 0.0;
+    if (m_cfg.quasiStaticSubscales)
+      return m_cfg.vmsScale * tau1At(p) / m_cfg.rho;
     return m_cfg.vmsScale / (m_cfg.rho / m_cfg.dt + m_cfg.rho / tau1At(p));
   }
 
   LeftAtrium2D::Real LeftAtrium2D::sqrtTauCAt(const Point& p) const
   {
+    return sqrtTauCAt(p, m_uOld);
+  }
+
+  LeftAtrium2D::Real LeftAtrium2D::sqrtTauCAt(const Point& p,
+    const VectorGridFunctionType& u) const
+  {
     if (!m_cfg.useVMS)
       return 0.0;
     const Real h = cellSize(p);
-    return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
+    return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p, u)));
   }
 
   LeftAtrium2D::Real LeftAtrium2D::tauCAt(const Point& p) const
@@ -400,6 +423,7 @@ namespace Rodin::Examples::Heart
     const auto zeroVector = Math::SpatialVector<Real>{{0.0, 0.0}};
 
     m_uOld = zeroVector;
+    m_uOldOld = zeroVector;
     m_subOld = zeroVector;
     m_sub = zeroVector;
     m_convProjection = zeroVector;
@@ -527,6 +551,16 @@ namespace Rodin::Examples::Heart
       deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda),
                     (cy.n - 1.0) / cy.yasuda);
 
+    // mu^n = mu(u^{*,n}) = mu(u^{n-1}): the viscosity that was implicit on
+    // the previous step, needed by the IMEX transpose term below.
+    const auto symLagOld =
+      0.5 * (Jacobian(m_uOldOld) + Transpose(Jacobian(m_uOldOld)));
+    const auto shearLagOld = Sqrt(cy.gammaRegularization * cy.gammaRegularization +
+                                  2.0 * Dot(symLagOld, symLagOld));
+    const auto muLagOld = cy.muInf +
+      deltaMu * Pow(1.0 + Pow(cy.lambda * shearLagOld, cy.yasuda),
+                    (cy.n - 1.0) / cy.yasuda);
+
     const auto convU = Mult(Jacobian(m_u), m_uOld);
     const auto temam = Div(m_uOld) * Dot(m_u, m_v);
 
@@ -574,6 +608,18 @@ namespace Rodin::Examples::Heart
     RealFunction pInFn = [this](const Point&) { return m_pIn; };
     RealFunction pOutFn = [this](const Point&) { return m_pOut; };
 
+    // Viscous term, see Config::imexViscous. The form type is fixed at
+    // compile time, so the switch is a 0/1 weight on each branch.
+    //   IMEX (pseudostress + lagged transpose), mu^{n+1} = mu(u^n),
+    //   mu^n = mu(u^{n-1}):
+    //     < sqrt(mu^{n+1}) grad u^{n+1} + sqrt(mu^n) grad^T u^n,
+    //       sqrt(mu^{n+1}) grad v >
+    //   With v = u^{n+1}, a = sqrt(mu^{n+1}) grad u^{n+1} and
+    //   b = sqrt(mu^n) grad^T u^n, |b| = |sqrt(mu^n) grad u^n|, so
+    //   2<a + b, a> >= |a|^2 - |b|^2 telescopes: unconditionally stable.
+    const Real wImex = m_cfg.imexViscous ? 1.0 : 0.0;
+    const Real wImpl = 1.0 - wImex;
+
     m_flow = (rho / dt) * Integral(m_u, m_v)
            - (rho / dt) * Integral(m_uOld, m_v)
 
@@ -587,7 +633,10 @@ namespace Rodin::Examples::Heart
            + VMSGradDivBilinearIntegrator(m_u, m_v, m_tauCFn)
            - VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn)
 
-           + 2.0 * Integral(muLag * symU, symV)
+           + wImex * Integral(muLag * Jacobian(m_u), Jacobian(m_v))
+           + wImex * Integral(Sqrt(muLag * muLagOld) * Transpose(Jacobian(m_uOld)),
+                              Jacobian(m_v))
+           + (2.0 * wImpl) * Integral(muLag * symU, symV)
            - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q)
            + m_cfg.pressurePenalty * Integral(m_p, m_q)
 
@@ -811,24 +860,34 @@ namespace Rodin::Examples::Heart
       phase("VMS: projecting the convective term");
       projectVector(Mult(Jacobian(m_uOld), m_uOld), m_convProjection);
 
-      phase("VMS: projecting the dynamic subscale");
-      const size_t dim = m_mesh.getSpaceDimension();
-      projectVector(VectorFunction(dim,
-        [this, rho, dt, dim](const Point& p) -> Math::SpatialVector<Real> {
-          const auto conv = Mult(Jacobian(m_uOld), m_uOld).getValue(p);
-          const auto proj = m_convProjection.getValue(p);
-          const auto old = m_subOld.getValue(p);
-          const Real tau = vmsTauAt(p);
-          Math::SpatialVector<Real> out(dim);
-          for (Index c = 0; c < static_cast<Index>(dim); ++c)
-            out(c) = tau * rho * (old(c) / dt - (conv(c) - proj(c)));
-          return out;
-        }), m_sub);
+      // Quasi-static: no subscale history, m_sub stays at its initial zero,
+      // so the explicit term reduces to tau rho^2 Pi[(grad u^n)u^n].
+      if (!m_cfg.quasiStaticSubscales)
+      {
+        phase("VMS: projecting the dynamic subscale");
+        const size_t dim = m_mesh.getSpaceDimension();
+        projectVector(VectorFunction(dim,
+          [this, rho, dt, dim](const Point& p) -> Math::SpatialVector<Real> {
+            const auto conv = Mult(Jacobian(m_uOld), m_uOld).getValue(p);
+            const auto proj = m_convProjection.getValue(p);
+            const auto old = m_subOld.getValue(p);
+            const Real tau = vmsTauAt(p);
+            Math::SpatialVector<Real> out(dim);
+            for (Index c = 0; c < static_cast<Index>(dim); ++c)
+              out(c) = tau * rho * (old(c) / dt - (conv(c) - proj(c)));
+            return out;
+          }), m_sub);
+      }
 
-      // Same sqrt(tau_C) that multiplies div(v) in the linear term and whose
-      // square is the implicit coefficient.
+      // Default: the same sqrt(tau_C(u^n)) that multiplies div(v) in the
+      // linear term and whose square is the implicit coefficient.
+      // lagGradDivTau: pi~^n = Pi[sqrt(tau_C^n) div u^n], tau_C^n built on
+      // u^{*,n} = u^{n-1}, i.e. exactly the tau that was implicit last step.
       phase("VMS: projecting the grad-div residual");
-      project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
+      if (m_cfg.lagGradDivTau)
+        project(m_sqrtTauCOldFn * Div(m_uOld), m_piTilde);
+      else
+        project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
     }
 
     m_timing.vms = secondsSince(vmsStart);
@@ -870,6 +929,8 @@ namespace Rodin::Examples::Heart
                 << "  iterations = " << iterations << "  (" << m_timing.solve
                 << " s)" << Alert::Raise;
 
+    // u^{n-1} <- u^n before u^n <- u^{n+1}: tau^{n+1} was built on u^n.
+    m_uOldOld.setData(m_uOld.getData());
     m_uOld.setData(m_u.getSolution().getData());
     if (m_cfg.useVMS)
       m_subOld.setData(m_sub.getData());
@@ -1399,6 +1460,24 @@ int main(int argc, char** argv)
       PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_vms", &flag, &got);
       if (got)
         cfg.useVMS = (flag == PETSC_TRUE);
+
+      got = PETSC_FALSE;
+      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_graddiv_tau_lag",
+        &flag, &got);
+      if (got)
+        cfg.lagGradDivTau = (flag == PETSC_TRUE);
+
+      got = PETSC_FALSE;
+      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_viscous_imex",
+        &flag, &got);
+      if (got)
+        cfg.imexViscous = (flag == PETSC_TRUE);
+
+      got = PETSC_FALSE;
+      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_quasistatic",
+        &flag, &got);
+      if (got)
+        cfg.quasiStaticSubscales = (flag == PETSC_TRUE);
 
       got = PETSC_FALSE;
       PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-la2d_kinetics",

@@ -178,6 +178,26 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     target_link_libraries(LeftAtrium2D PUBLIC Rodin::Scotch)
   endif()
 
+  # Same 2D atrium and flow as LeftAtrium2D, with the precursor- and
+  # inhibitor-conserving P-T-A-G coagulation model (prothrombin, thrombin,
+  # antithrombin, fibrinogen), a nodal Patankar reaction step and a
+  # fibrin-dependent Brinkman drag in the momentum equation.
+  add_executable(LeftAtrium2DPTAG LeftAtrium2DPTAG.cpp)
+  target_link_libraries(LeftAtrium2DPTAG
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(LeftAtrium2DPTAG PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(LeftAtrium2DPTAG PUBLIC Rodin::Scotch)
+  endif()
+
   add_executable(CoronaryArtery
     CoronaryArtery.cpp
     CoronaryArtery/CoupledLV0DCoronary3D.cpp
