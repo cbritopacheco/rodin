@@ -72,8 +72,8 @@ namespace Rodin::Solver
    * @brief CTAD (Class Template Argument Deduction) guide for SimplicialLDLT
    */
   template <class LinearSystemType>
-  SimplicialLDLT(Variational::ProblemBase<LinearSystemType>&)
-    -> SimplicialLDLT<LinearSystemType>;
+  SimplicialLDLT(
+    Variational::ProblemBase<LinearSystemType>&) -> SimplicialLDLT<LinearSystemType>;
 
   /**
    * @ingroup SimplicialLDLTSpecializations

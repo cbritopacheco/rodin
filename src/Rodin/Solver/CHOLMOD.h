@@ -78,8 +78,8 @@ namespace Rodin::Solver::CHOLMOD
    * @brief CTAD (Class Template Argument Deduction) guide for SupernodalLLT
    */
   template <class LinearSystemType>
-  SupernodalLLT(Variational::ProblemBase<LinearSystemType>&)
-    -> SupernodalLLT<LinearSystemType>;
+  SupernodalLLT(
+    Variational::ProblemBase<LinearSystemType>&) -> SupernodalLLT<LinearSystemType>;
 
   /**
    * @brief CHOLMOD supernodal LLT Cholesky factorization solver.
@@ -161,6 +161,8 @@ namespace Rodin::Solver::CHOLMOD
       void solve(LinearSystemType& axb) override
       {
         m_info = Info{};
+        // Eigen requires compressed storage here, and asserts on it.
+        axb.getOperator().makeCompressed();
         m_solver.compute(axb.getOperator());
         if (!record())
         {

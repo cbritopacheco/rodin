@@ -17,7 +17,6 @@
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Solver/CHOLMOD.h"
 #include "Rodin/Solver/Info.h"
-#include "Rodin/Solver/LDLT.h"  // compiled here; its dense system has no Problem
 #include "Rodin/Solver/SPQR.h"
 #include "Rodin/Solver/SimplicialLDLT.h"
 #include "Rodin/Solver/SimplicialLLT.h"
@@ -31,8 +30,10 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit::Solver
 {
+  /// @brief Factorization stage reported by a solver.
   using Rodin::Solver::Factorization;
 
+  /// @brief Sparse linear system type solved throughout this file.
   using SparseSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
   /// @brief A symmetric positive definite system whose solution is (1, 2, 3).
@@ -47,6 +48,7 @@ namespace Rodin::Tests::Unit::Solver
     system.getOperator().insert(2, 1) = 2.0;
     system.getOperator().insert(1, 2) = 2.0;
     system.getOperator().insert(2, 2) = 6.0;
+    system.getOperator().makeCompressed();
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
     system.getVector() = system.getOperator() * expected;
@@ -60,6 +62,7 @@ namespace Rodin::Tests::Unit::Solver
     system.getOperator().resize(3, 3);
     system.getOperator().insert(0, 0) = 2.0;
     system.getOperator().insert(2, 2) = 4.0;
+    system.getOperator().makeCompressed();
     system.getVector().resize(3);
     system.getVector() << 1.0, 1.0, 1.0;
     // A sentinel the solver must not overwrite with a bogus solution.
@@ -105,6 +108,7 @@ namespace Rodin::Tests::Unit::Solver
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief A successful factorization is retained and reported.
   TEST_F(Rodin_Solver_Info, SparseQRReportsASuccessfulFactorization)
   {
     P1 vh(m_mesh);
@@ -117,6 +121,7 @@ namespace Rodin::Tests::Unit::Solver
     expectSolved(solver, system);
   }
 
+  /// @brief A successful factorization is reported, and a failing one refuses to solve.
   TEST_F(Rodin_Solver_Info, SimplicialLLTReportsBothOutcomes)
   {
     P1 vh(m_mesh);
@@ -132,6 +137,7 @@ namespace Rodin::Tests::Unit::Solver
     expectRefused(solver, singular);
   }
 
+  /// @brief A successful factorization is reported, and a failing one refuses to solve.
   TEST_F(Rodin_Solver_Info, SimplicialLDLTReportsBothOutcomes)
   {
     P1 vh(m_mesh);
@@ -148,6 +154,7 @@ namespace Rodin::Tests::Unit::Solver
   }
 
 #ifdef RODIN_USE_CHOLMOD
+  /// @brief A successful factorization is retained and reported.
   TEST_F(Rodin_Solver_Info, CholmodSupernodalLLTReportsASuccessfulFactorization)
   {
     P1 vh(m_mesh);
@@ -162,6 +169,7 @@ namespace Rodin::Tests::Unit::Solver
 #endif
 
 #ifdef RODIN_USE_SPQR
+  /// @brief A successful factorization is retained and reported.
   TEST_F(Rodin_Solver_Info, SPQRReportsASuccessfulFactorization)
   {
     P1 vh(m_mesh);
