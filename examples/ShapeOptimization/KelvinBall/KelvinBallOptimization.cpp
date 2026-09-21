@@ -212,7 +212,10 @@ namespace KelvinBall
         parameters.fixedBoundaryAttributes = {Outer};
         parameters.slipBoundaryAttributes =
           {SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
-        parameters.rigidStabilisationLevel = 0;
+        // Pinning the outer sphere removes every rigid mode, so no floor is
+        // needed; the option still overrides this default.
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-rigid-stabilisation", nullptr))
+          parameters.rigidStabilisationLevel = 0;
         Adaptation::WNGIR fitting(displacementTrial, displacementTest);
         fitting.setParameters(parameters);
 
@@ -299,8 +302,18 @@ namespace KelvinBall
           << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
           << "  Interface reconstruction: mmg or wngir (default: mmg)."
+          << Alert::NewLine << Alert::Notation("--background-hmin=<value>")
+          << "  WNGIR background minimum size, in h (default: 0.1)."
+          << Alert::NewLine << Alert::Notation("--background-hmax=<value>")
+          << "  WNGIR background maximum size, in h (default: 1)."
+          << Alert::NewLine << Alert::Notation("--background-hausdorff=<value>")
+          << " WNGIR background Hausdorff tolerance, in h (default: 0.05)."
+          << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
+          << " WNGIR background gradation (default: 2)."
           << Alert::NewLine << Alert::Notation("--wngir-*=<value>")
-          << "        WNGIR fitting parameters."
+          << "        WNGIR fitting parameters (--wngir-steps defaults to 12;"
+          << Alert::NewLine
+          << "                              also --trace, --j-safe, --j-ls, --j-min)."
           << Alert::NewLine << Alert::Notation("--geometry-only")
           << "             Stop after initial MMG reconstruction." << Alert::NewLine
           << Alert::Notation("--state-only")
@@ -744,7 +757,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
     else if (mode.rfind("--reconstruction=", 0) == 0)
       reconstructionMethod = std::string(mode.substr(17));
-    else if (mode.rfind("--wngir-", 0) == 0 || mode.rfind("--quad-order=", 0) == 0)
+    else if (mode.rfind("--wngir-", 0) == 0 || mode.rfind("--quad-order=", 0) == 0 ||
+      mode == "--trace" || mode.rfind("--trace=", 0) == 0 ||
+      mode.rfind("--j-safe=", 0) == 0 || mode.rfind("--j-ls=", 0) == 0 ||
+      mode.rfind("--j-min=", 0) == 0)
       continue;
     else if (mode == "--save-mesh")
       saveMeshDiagnostic = true;
@@ -780,7 +796,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   const Real h = configuration.getH();
   const Real hilbertLength = regularizationFactor * h;
   const Real dt = stepFactor * h;
-  Alert::Info() << substageHeading("Configuration") << Alert::NewLine
+  Alert::Info configurationInfo;
+  configurationInfo << substageHeading("Configuration") << Alert::NewLine
                 << diagnosticLabel("Grid points:") << Alert::Notation::Number(points)
                 << Alert::NewLine << diagnosticLabel("Outer radius:")
                 << Alert::Notation::Number(outerRadius) << Alert::NewLine
@@ -801,8 +818,19 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                 << " = " << Alert::Notation::Number(stepFactor) << " h"
                 << Alert::NewLine << diagnosticLabel("Advection quadrature order:")
                 << Alert::Notation::Number(advectionQuadratureOrder) << Alert::NewLine
-                << diagnosticLabel("Reconstruction method:") << reconstructionMethod
-                << Alert::Raise;
+                << diagnosticLabel("Reconstruction method:") << reconstructionMethod;
+  if (reconstructionMethod == "wngir")
+  {
+    configurationInfo << Alert::NewLine << diagnosticLabel("Background minimum size:")
+                      << Alert::Notation::Number(configuration.backgroundHMin) << " h"
+                      << Alert::NewLine << diagnosticLabel("Background maximum size:")
+                      << Alert::Notation::Number(configuration.backgroundHMax) << " h"
+                      << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
+                      << Alert::Notation::Number(configuration.backgroundHausdorff) << " h"
+                      << Alert::NewLine << diagnosticLabel("Background gradation:")
+                      << Alert::Notation::Number(configuration.backgroundGradation);
+  }
+  configurationInfo << Alert::Raise;
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
   announce(reconstructionMethod == "wngir"
