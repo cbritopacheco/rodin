@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 #include <stdexcept>
+#include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <Rodin/Advection/Lagrangian.h>
@@ -27,6 +29,7 @@
 #include <Rodin/Alert/Notation.h>
 #include <Rodin/Alert/Raise.h>
 #include <Rodin/Alert/Success.h>
+#include <Rodin/Alert/Warning.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Geometry.h>
@@ -322,6 +325,14 @@ namespace KelvinBall
           << "      Distance over which the size grows, in h (default: 3)."
           << Alert::NewLine << Alert::Notation("--mmg-adapt-gradation=<value>")
           << "  Adaptation gradation (default: 1.3)."
+          << Alert::NewLine << Alert::Notation("--mmg-snap=<value>")
+          << "         MMG path: snap edge crossings closer than this fraction"
+          << Alert::NewLine
+          << "                              of the edge to a vertex (default: 0, off)."
+          << Alert::NewLine << Alert::Notation("--mmg-retries=<count>")
+          << "      MMG path: retries of a failed reconstruction, each at half"
+          << Alert::NewLine
+          << "                              the previous MMG scale (default: 2)."
           << Alert::NewLine << Alert::Notation("--wngir-*=<value>")
           << "        WNGIR fitting parameters (--wngir-steps defaults to 12;"
           << Alert::NewLine
@@ -580,7 +591,7 @@ namespace KelvinBall
 
       template <class LevelSet>
       MMGReconstruction discretizeLevelSetMMG(MMG::Mesh& mesh,
-        const LevelSet& levelSet, Real h, const Sphere& sphere, bool adapt)
+        const LevelSet& levelSet, Real h, const Sphere& sphere, bool adapt, Real snap)
       {
         const size_t previousCells = mesh.getCellCount();
         const size_t requiredTriangles = protectFixedGeometry(mesh);
@@ -634,7 +645,116 @@ namespace KelvinBall
           .setBaseReferences(FlatSet<Attribute>{Fluid})
           .setBoundaryReference(Gamma)
           .setAngleDetection(false);
-        MMG::Mesh reconstructed = discretizer.discretize(levelSet);
+        // A crossed edge (i, j) is cut at t = phi_i / (phi_i - phi_j). A cut
+        // with t near 0 or 1 puts the new vertex next to an existing one and
+        // leaves a sliver. Snapping the near endpoint to zero instead makes the
+        // interface pass through that vertex, so every remaining cut satisfies
+        // snap <= t <= 1 - snap. For a distance-like level set the interface
+        // moves by at most snap times the edge length.
+        std::decay_t<LevelSet> sanitized(levelSet.getFiniteElementSpace());
+        sanitized.getData() = levelSet.getData();
+        const auto crossingFraction = [&](Index i, Index j) {
+          const Real a = sanitized[i], b = sanitized[j];
+          return (a < 0) != (b < 0) && a != 0 && b != 0
+            ? a / (a - b) : std::numeric_limits<Real>::quiet_NaN();
+        };
+        const auto scanCrossings = [&]() {
+          size_t edges = 0, nearVertex = 0;
+          Real minimum = 0.5;
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            const auto& vertices = cell->getVertices();
+            for (size_t a = 0; a < vertices.size(); ++a)
+              for (size_t b = a + 1; b < vertices.size(); ++b)
+              {
+                const Real t = crossingFraction(vertices[a], vertices[b]);
+                if (std::isnan(t))
+                  continue;
+                ++edges;
+                const Real distanceToVertex = std::min(t, 1 - t);
+                minimum = std::min(minimum, distanceToVertex);
+                if (distanceToVertex < Real(1e-3))
+                  ++nearVertex;
+              }
+          }
+          return std::tuple{edges, nearVertex, minimum};
+        };
+        const auto [cutEdges, nearVertexCuts, minimumCrossing] = scanCrossings();
+        Alert::Info crossingInfo;
+        crossingInfo << substageHeading("Level-set crossings") << Alert::NewLine
+                     << diagnosticLabel("Crossed cell edges:")
+                     << Alert::Notation::Number(cutEdges) << Alert::NewLine
+                     << diagnosticLabel("Crossings within 1e-3 of a vertex:")
+                     << Alert::Notation::Number(nearVertexCuts) << Alert::NewLine
+                     << diagnosticLabel("Minimum crossing fraction:")
+                     << Alert::Notation::Number(minimumCrossing);
+        if (snap > 0)
+        {
+          std::vector<Real> original(sanitized.getData().begin(), sanitized.getData().end());
+          std::vector<char> snapped(mesh.getVertexCount(), 0);
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            const auto& vertices = cell->getVertices();
+            for (size_t a = 0; a < vertices.size(); ++a)
+              for (size_t b = a + 1; b < vertices.size(); ++b)
+              {
+                const Index i = vertices[a], j = vertices[b];
+                const Real t = original[i] * original[j] < 0
+                  ? original[i] / (original[i] - original[j]) : Real(0.5);
+                if (t < snap)
+                  snapped[i] = 1;
+                else if (t > 1 - snap)
+                  snapped[j] = 1;
+              }
+          }
+          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+            if (snapped[vertex])
+              sanitized[vertex] = 0;
+          // MMG requires every tetrahedron to keep a vertex off the level set;
+          // the vertex farthest from it keeps its value.
+          size_t restored = 0;
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            const auto& vertices = cell->getVertices();
+            Index farthest = vertices[0];
+            bool allZero = true;
+            for (const Index vertex : vertices)
+            {
+              allZero = allZero && sanitized[vertex] == 0;
+              if (std::abs(original[vertex]) > std::abs(original[farthest]))
+                farthest = vertex;
+            }
+            if (allZero)
+            {
+              sanitized[farthest] = original[farthest];
+              ++restored;
+            }
+          }
+          Real displacement = 0;
+          size_t snappedVertices = 0;
+          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+          {
+            if (sanitized[vertex] == 0 && original[vertex] != 0)
+            {
+              ++snappedVertices;
+              displacement = std::max(displacement, std::abs(original[vertex]));
+            }
+          }
+          const auto [snappedEdges, snappedNearVertex, snappedMinimum] = scanCrossings();
+          crossingInfo << Alert::NewLine << diagnosticLabel("Snapping fraction:")
+                       << Alert::Notation::Number(snap) << Alert::NewLine
+                       << diagnosticLabel("Snapped vertices:")
+                       << Alert::Notation::Number(snappedVertices) << Alert::NewLine
+                       << diagnosticLabel("Restored in all-zero cells:")
+                       << Alert::Notation::Number(restored) << Alert::NewLine
+                       << diagnosticLabel("Maximum snapped level set:")
+                       << Alert::Notation::Number(displacement) << " = "
+                       << Alert::Notation::Number(displacement / h) << " h"
+                       << Alert::NewLine << diagnosticLabel("Minimum crossing after snapping:")
+                       << Alert::Notation::Number(snappedMinimum);
+        }
+        crossingInfo << Alert::Raise;
+        MMG::Mesh reconstructed = discretizer.discretize(sanitized);
 
         splitSelfPairedCut(reconstructed);
         const MeshDiagnostics reconstructionDiagnostics =
@@ -675,7 +795,7 @@ namespace KelvinBall
           protectFixedGeometry(reconstructed);
         if (adapt)
         {
-          sphere.adapt(reconstructed);
+          sphere.adapt(reconstructed, h);
         }
         else
         {
@@ -829,6 +949,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The reconstruction method must be mmg or wngir.");
   if (configuration.adapt && reconstructionMethod != "mmg")
     throw std::runtime_error("--mmg-adapt applies only to --reconstruction=mmg.");
+  if (configuration.mmgSnap > 0 && reconstructionMethod != "mmg")
+    throw std::runtime_error("--mmg-snap applies only to --reconstruction=mmg.");
   if (geometryOnly && stateOnly)
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
   const Real h = configuration.getH();
@@ -879,6 +1001,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                       << Alert::NewLine << diagnosticLabel("Adaptation gradation:")
                       << Alert::Notation::Number(configuration.adaptGradation);
   }
+  if (configuration.mmgSnap > 0)
+    configurationInfo << Alert::NewLine << diagnosticLabel("Level-set snapping fraction:")
+                      << Alert::Notation::Number(configuration.mmgSnap);
   configurationInfo << Alert::Raise;
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
@@ -1456,7 +1581,29 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         return fitLevelSetWNGIR(
           classified, classifiedLevelSet, h, outerRadius, argc, argv);
       }
-      return discretizeLevelSetMMG(mesh, advectedDistance, h, sphere, configuration.adapt);
+      // A failed MMG stage is retried on the same advected level set with
+      // every MMG size computed from half the scale; the next iteration
+      // starts again from h.
+      Real scale = h;
+      for (size_t attempt = 0;; ++attempt)
+      {
+        try
+        {
+          return discretizeLevelSetMMG(mesh, advectedDistance, scale, sphere,
+            configuration.adapt, configuration.mmgSnap);
+        }
+        catch (const std::exception& error)
+        {
+          if (attempt == configuration.mmgRetries)
+            throw;
+          Alert::Warning() << "MMG reconstruction failed at scale "
+                           << Alert::Notation::Number(scale / h) << " h: " << error.what()
+                           << Alert::NewLine << "Retrying at scale "
+                           << Alert::Notation::Number(scale / (2 * h)) << " h."
+                           << Alert::Raise;
+          scale /= 2;
+        }
+      }
     }();
     reconstruction = result.diagnostics;
     reconstructionOutput.clear();

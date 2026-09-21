@@ -37,6 +37,12 @@ namespace KelvinBall
       Real adaptFarSize = 1;
       Real adaptWidth = 3;
       Real adaptGradation = 1.3;
+      /// Crossing fraction below which the MMG cut snaps the near endpoint of
+      /// a crossed edge onto the level set; zero disables the snapping.
+      Real mmgSnap = 0;
+      /// Number of times a failed MMG reconstruction is retried with the MMG
+      /// sizes computed from half the previous scale.
+      size_t mmgRetries = 2;
       bool pointsSpecified = false;
       bool hSpecified = false;
 

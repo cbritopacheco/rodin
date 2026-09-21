@@ -48,6 +48,10 @@ namespace KelvinBall
       adaptWidth = std::stod(std::string(option.substr(18)));
     else if (option.rfind("--mmg-adapt-gradation=", 0) == 0)
       adaptGradation = std::stod(std::string(option.substr(22)));
+    else if (option.rfind("--mmg-snap=", 0) == 0)
+      mmgSnap = std::stod(std::string(option.substr(11)));
+    else if (option.rfind("--mmg-retries=", 0) == 0)
+      mmgRetries = std::stoul(std::string(option.substr(14)));
     else
       return false;
     return true;
@@ -85,6 +89,8 @@ namespace KelvinBall
       throw std::runtime_error("The adaptation width must be positive.");
     if (!(adaptGradation > 1))
       throw std::runtime_error("The adaptation gradation must exceed one.");
+    if (!(mmgSnap >= 0) || !(mmgSnap < 0.5))
+      throw std::runtime_error("The snapping fraction must satisfy 0 <= --mmg-snap < 0.5.");
   }
 
   Real Configuration::getH() const

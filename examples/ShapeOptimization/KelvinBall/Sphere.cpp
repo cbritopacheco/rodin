@@ -144,7 +144,7 @@ namespace KelvinBall
     splitSelfPairedCut(mesh);
     if (m_configuration.adapt)
     {
-      adapt(mesh);
+      adapt(mesh, h);
     }
     else
     {
@@ -188,9 +188,8 @@ namespace KelvinBall
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
   }
 
-  void Sphere::adapt(MMG::Mesh& mesh) const
+  void Sphere::adapt(MMG::Mesh& mesh, Real h) const
   {
-    const Real h = m_configuration.getH();
     const Real interfaceSize = m_configuration.adaptInterfaceSize * h;
     const Real farSize = m_configuration.adaptFarSize * h;
     const Real width = m_configuration.adaptWidth * h;

@@ -337,6 +337,42 @@ triangles remain required, so near the rim of $\Gamma$ on the cuts the size
 cannot drop below that of the existing cut triangulation. The option is
 rejected with `--reconstruction=wngir`, whose background is fixed.
 
+#### Level-set snapping
+
+A crossed edge $(i, j)$ is cut at the fraction
+
+```math
+t_{ij} = \frac{\phi_i}{\phi_i - \phi_j}.
+```
+
+The mesh is fitted to the previous interface and the step moves it by at most
+$0.1\,h$, so many crossings fall next to an existing vertex, $t_{ij} \approx 0$
+or $1$, and the cut leaves slivers. Every reconstruction reports the number of
+crossed edges, the crossings within $10^{-3}$ of a vertex and the smallest
+$\min(t_{ij}, 1 - t_{ij})$.
+
+With `--mmg-snap=`$\delta$ (default 0, off), the endpoint of any crossing with
+$t_{ij} < \delta$ or $t_{ij} > 1 - \delta$ is set to $\phi = 0$, so the
+interface passes through that vertex instead of next to it, and every remaining
+crossing satisfies $\delta \le t_{ij} \le 1 - \delta$. No tetrahedron is left
+with all four vertices at zero, which MMG does not accept: the vertex farthest
+from the interface keeps its value. For a distance-like level set the interface
+moves by at most $\delta$ times the edge length. That move should stay below
+the Hausdorff tolerance $0.1\,h^2$ and well below the step $0.1\,h$, which
+suggests $\delta \approx 0.005$ at the usual resolutions.
+
+#### Retrying a failed reconstruction
+
+If the level-set discretisation, the optimisation pass or the adaptation of an
+iterate fails, the reconstruction is repeated on the same advected level set
+with every MMG size (minimum and maximum size, Hausdorff tolerance and
+adaptation sizes) computed from $h/2$, and halved again on a further failure,
+up to `--mmg-retries` times (default 2). The next iterate starts again from
+$h$. A retried mesh is finer, by up to a factor of 8 in cell count at $h/2$;
+with `--mmg-adapt` the next reconstruction coarsens it back. All MMG calls run
+with angle detection disabled, since the only sharp edges of the chamber are
+the protected intersections of its fixed faces.
+
 ### WNGIR
 
 MMG is called **once**, before any interface exists, to optimise the

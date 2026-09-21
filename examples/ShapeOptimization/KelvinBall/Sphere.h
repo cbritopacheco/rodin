@@ -58,9 +58,10 @@ namespace KelvinBall
        * Replaces the MMG optimization pass after a level-set cut when
        * `--mmg-adapt` is given. The optimization pass keeps the edge lengths the
        * cut created, including its short edges; adaptation remeshes towards
-       * a size set by the distance to Gamma instead.
+       * a size set by the distance to Gamma instead. The sizes are multiples
+       * of @p h, which a retried reconstruction halves.
        */
-      void adapt(MMG::Mesh& mesh) const;
+      void adapt(MMG::Mesh& mesh, Real h) const;
 
     private:
       Mesh makeUniformChamber() const;
