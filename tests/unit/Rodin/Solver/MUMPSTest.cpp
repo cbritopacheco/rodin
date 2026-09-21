@@ -103,13 +103,14 @@ namespace Rodin::Tests::Unit::Solver
     return system;
   }
 
-  static void expectSolution(const LinearSystemType& system, const Math::Vector<Real>& expected)
+  static void expectSolution(
+    const LinearSystemType& system, const Math::Vector<Real>& expected)
   {
     EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
   }
 
-  static void expectResourceState(const MUMPSSolver& solver, bool initialized, bool symbolic,
-    bool numeric, Optional<Factorization> factorization)
+  static void expectResourceState(const MUMPSSolver& solver, bool initialized,
+    bool symbolic, bool numeric, Optional<Factorization> factorization)
   {
     EXPECT_EQ(solver.getResources().initialized, initialized);
     EXPECT_EQ(solver.getResources().symbolic, symbolic);
