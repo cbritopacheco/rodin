@@ -126,6 +126,52 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Computes the gradient of @f$\psi_{P,Q}@f$ in reference coordinates.
+       *
+       * The Duffy-coordinate factors cancel analytically before
+       * differentiation, so the returned derivative has a finite value at
+       * the collapsed vertex.
+       *
+       * @tparam P First modal index.
+       * @tparam Q Second modal index.
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param x First reference coordinate.
+       * @param y Second reference coordinate.
+       */
+      template <size_t P, size_t Q>
+      static constexpr void getReferenceGradient(
+        Real& dpsi_dx, Real& dpsi_dy, Real x, Real y)
+      {
+        static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
+
+        Real a, b;
+        getCollapsed(a, b, x, y);
+
+        Real Pa, dPa;
+        JacobiPolynomial<P>::getValue(Pa, dPa, 0.0, 0.0, a);
+
+        Real Pb, dPb;
+        JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
+
+        const Real s = 1.0 - y;
+        const Real sP = Math::pow(s, std::integral_constant<size_t, P>{});
+
+        if constexpr (P == 0)
+        {
+          dpsi_dx = 0.0;
+          dpsi_dy = 2.0 * Pa * dPb * sP;
+        }
+        else
+        {
+          const Real sPm1 = Math::pow(s, std::integral_constant<size_t, P - 1>{});
+          dpsi_dx = 2.0 * dPa * Pb * sPm1;
+          dpsi_dy = sPm1 * ((a + 1.0) * dPa - static_cast<Real>(P) * Pa) * Pb +
+            2.0 * Pa * dPb * sP;
+        }
+      }
+
+      /**
        * @brief Converts (x,y) on the reference triangle to collapsed coordinates (a,b) ∈ [-1,1]^2.
        *
        * Reference triangle vertices: (0,0), (1,0), (0,1).
@@ -328,6 +374,69 @@ namespace Rodin::Variational
             (-0.5);
 
         dpsi_dc = pA * pB * (dPC * scaleC + pC * dscaleCDc) * scaleB;
+      }
+
+      /**
+       * @brief Computes the gradient of @f$\psi_{P,Q,R}@f$ in reference coordinates.
+       *
+       * The Duffy-coordinate factors cancel analytically before
+       * differentiation, so the returned derivative has a finite value on
+       * the collapsed edge and at the collapsed vertex.
+       *
+       * @tparam P First modal index.
+       * @tparam Q Second modal index.
+       * @tparam R Third modal index.
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param[out] dpsi_dz Derivative with respect to @f$z@f$.
+       * @param x First reference coordinate.
+       * @param y Second reference coordinate.
+       * @param z Third reference coordinate.
+       */
+      template <size_t P, size_t Q, size_t R>
+      static constexpr void getReferenceGradient(
+        Real& dpsi_dx, Real& dpsi_dy, Real& dpsi_dz, Real x, Real y, Real z)
+      {
+        static_assert(P + Q + R <= K, "DubinerTetrahedron: P + Q + R must be <= K.");
+
+        Real a, b, c;
+        getCollapsed(a, b, c, x, y, z);
+
+        Real pA, dPA;
+        JacobiPolynomial<P>::getValue(pA, dPA, 0.0, 0.0, a);
+
+        Real pB, dPB;
+        JacobiPolynomial<Q>::getValue(pB, dPB, 2.0 * P + 1.0, 0.0, b);
+
+        Real pC, dPC;
+        JacobiPolynomial<R>::getValue(pC, dPC, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
+
+        const Real s1 = 1.0 - y - z;
+        const Real s2 = 1.0 - z;
+
+        const Real s1P = Math::pow(s1, std::integral_constant<size_t, P>{});
+        const Real F = pA * s1P;
+        Real dFdx = 0.0, dFdyz = 0.0;
+        if constexpr (P > 0)
+        {
+          const Real s1Pm1 = Math::pow(s1, std::integral_constant<size_t, P - 1>{});
+          dFdx = 2.0 * dPA * s1Pm1;
+          dFdyz = s1Pm1 * ((a + 1.0) * dPA - static_cast<Real>(P) * pA);
+        }
+
+        const Real s2Q = Math::pow(s2, std::integral_constant<size_t, Q>{});
+        const Real G = pB * s2Q;
+        Real dGdy = 0.0, dGdz = 0.0;
+        if constexpr (Q > 0)
+        {
+          const Real s2Qm1 = Math::pow(s2, std::integral_constant<size_t, Q - 1>{});
+          dGdy = 2.0 * dPB * s2Qm1;
+          dGdz = s2Qm1 * ((b + 1.0) * dPB - static_cast<Real>(Q) * pB);
+        }
+
+        dpsi_dx = dFdx * G * pC;
+        dpsi_dy = (dFdyz * G + F * dGdy) * pC;
+        dpsi_dz = (dFdyz * G + F * dGdz) * pC + 2.0 * F * G * dPC;
       }
 
       // Map reference tetra (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1) → (a,b,c) ∈ [-1,1]^3

@@ -3289,4 +3289,64 @@ namespace Rodin::Tests::Unit
       }
     }
   }
+
+  /// @brief Verifies simplex gradients at collapsed reference boundaries.
+  TEST(Rodin_Variational_RealH1Element, ReferenceGradientAtCollapsedBoundaries)
+  {
+    {
+      RealH1Element<1> element(Polytope::Type::Triangle);
+      const Math::SpatialPoint point{{0.0, 1.0}};
+      Real xDx = 0.0;
+      Real xDy = 0.0;
+      Real yDx = 0.0;
+      Real yDy = 0.0;
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        const Real dx = element.getBasis(local).getDerivative<1>(0)(point);
+        const Real dy = element.getBasis(local).getDerivative<1>(1)(point);
+        xDx += node.x() * dx;
+        xDy += node.x() * dy;
+        yDx += node.y() * dx;
+        yDy += node.y() * dy;
+      }
+      EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDy, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+
+    {
+      RealH1Element<1> element(Polytope::Type::Tetrahedron);
+      const Math::SpatialPoint point{{0.0, 0.0, 1.0}};
+      Real xDx = 0.0, xDy = 0.0, xDz = 0.0;
+      Real yDx = 0.0, yDy = 0.0, yDz = 0.0;
+      Real zDx = 0.0, zDy = 0.0, zDz = 0.0;
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        const Real dx = element.getBasis(local).getDerivative<1>(0)(point);
+        const Real dy = element.getBasis(local).getDerivative<1>(1)(point);
+        const Real dz = element.getBasis(local).getDerivative<1>(2)(point);
+        xDx += node.x() * dx;
+        xDy += node.x() * dy;
+        xDz += node.x() * dz;
+        yDx += node.y() * dx;
+        yDy += node.y() * dy;
+        yDz += node.y() * dz;
+        zDx += node.z() * dx;
+        zDy += node.z() * dy;
+        zDz += node.z() * dz;
+      }
+      EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDy, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDz, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
 }
