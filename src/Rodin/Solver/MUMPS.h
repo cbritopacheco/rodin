@@ -196,31 +196,31 @@ namespace Rodin::Solver
           /**
            * @brief Releases retained factorization resources.
            *
-           * MUMPS resources are released coarsely through destruction of the
-           * current instance. Consequently, clearing either retained stage
-           * destroys the MUMPS instance and drops any dependent retained
-           * state. Releasing Factorization::Symbolic also releases its
-           * dependent numeric factorization.
+           * Clearing Factorization::Numeric sends JOB=-4, which releases MUMPS
+           * factorization and solve data while retaining the initialized
+           * instance and its symbolic analysis. A later JOB=2 can therefore
+           * rebuild the numeric factorization without repeating analysis.
+           *
+           * Clearing Factorization::Symbolic destroys the MUMPS instance
+           * through JOB=-2 and consequently releases both retained stages.
            */
           void clear(Factorization factorization) noexcept
           {
-            if (!initialized)
-            {
-              numeric = false;
-              if (factorization == Factorization::Symbolic)
-                symbolic = false;
-              return;
-            }
-
             if (factorization == Factorization::Numeric)
             {
               if (!numeric)
+              {
+                numeric = false;
                 return;
-            }
-            else
-            {
-              if (!symbolic && !numeric)
-                return;
+              }
+
+              if (initialized)
+              {
+                instance.job = JobDiscardFactors;
+                dmumps_c(&instance);
+              }
+              numeric = false;
+              return;
             }
 
             destroy();
@@ -283,7 +283,6 @@ namespace Rodin::Solver
         {
           m_symmetry = symmetry;
           clear(Factorization::Symbolic);
-          m_resources.destroy();
           m_info = Info{};
         }
         return *this;
@@ -414,8 +413,10 @@ namespace Rodin::Solver
           dmumps_c(&instance);
           if (instance.infog[0] < 0)
           {
-            m_resources.clear(Factorization::Symbolic);
-            return record({});
+            const auto status = static_cast<Integer>(instance.infog[0]);
+            m_resources.destroy();
+            dropConvertedState();
+            return record(status, {});
           }
           m_resources.symbolic = true;
         }
@@ -464,18 +465,21 @@ namespace Rodin::Solver
       /**
        * @brief Releases a retained factorization stage.
        *
-       * Clearing Factorization::Numeric preserves symbolic analysis. Clearing
-       * Factorization::Symbolic also releases its dependent numeric
-       * factorization and the converted coordinate structure.
+       * Clearing Factorization::Numeric sends MUMPS JOB=-4, which releases
+       * factorization and solve data while retaining the initialized MUMPS
+       * instance and its symbolic analysis. A later @ref factorize call can
+       * therefore rebuild the numeric factorization without repeating
+       * analysis.
+       *
+       * Clearing Factorization::Symbolic sends MUMPS JOB=-2, releases both
+       * retained stages, and drops the converted coordinate structure.
        */
       void clear(Factorization factorization) noexcept
       {
         m_resources.clear(factorization);
         if (factorization == Factorization::Symbolic)
         {
-          m_rowIndices.resize(0);
-          m_columnIndices.resize(0);
-          m_values.resize(0);
+          dropConvertedState();
           m_info.factorization.reset();
         }
         else if (m_resources.symbolic)
@@ -532,6 +536,7 @@ namespace Rodin::Solver
     private:
       static constexpr MUMPS_INT JobInitialize = -1;
       static constexpr MUMPS_INT JobDestroy = -2;
+      static constexpr MUMPS_INT JobDiscardFactors = -4;
       static constexpr MUMPS_INT JobAnalyze = 1;
       static constexpr MUMPS_INT JobFactorize = 2;
       static constexpr MUMPS_INT JobSolve = 3;
@@ -651,6 +656,13 @@ namespace Rodin::Solver
         instance.icntl[13] = static_cast<MUMPS_INT>(m_workspacePercentage);
       }
 
+      void dropConvertedState()
+      {
+        m_rowIndices.resize(0);
+        m_columnIndices.resize(0);
+        m_values.resize(0);
+      }
+
       /**
        * @brief Records MUMPS's status and the stage that survived it.
        *
@@ -661,8 +673,13 @@ namespace Rodin::Solver
       void record(Optional<Factorization> factorization)
       {
         const auto& instance = m_resources.instance;
-        m_info.status = static_cast<Integer>(instance.infog[0]);
-        m_info.success = instance.infog[0] >= 0;
+        record(static_cast<Integer>(instance.infog[0]), factorization);
+      }
+
+      void record(Integer status, Optional<Factorization> factorization)
+      {
+        m_info.status = status;
+        m_info.success = status >= 0;
         m_info.factorization = factorization;
       }
 
