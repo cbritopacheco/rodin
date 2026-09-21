@@ -201,7 +201,7 @@ namespace Rodin::Variational
 
         const Real z = r.z();
         const Real q = Real(1) - z;
-        if (q <= RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE)
+        if (q == 0.0)
           return k == K ? Real(1) : Real(0);
 
         const size_t n = K - k;
@@ -220,7 +220,7 @@ namespace Rodin::Variational
 
         const Real z = r.z();
         const Real q = Real(1) - z;
-        if (q <= RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE)
+        if (q == 0.0)
           return 0;
 
         const size_t n = K - k;
