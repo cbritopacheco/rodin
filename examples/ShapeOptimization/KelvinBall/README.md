@@ -528,7 +528,9 @@ Z = \frac{q}{kq - c^2}\,F, \qquad \omega = -\frac{c}{kq - c^2}\,F ,
 ```
 
 a screw motion about $F$. The series has `--motion-frames` frames (default 24)
-over one revolution $T = 2\pi/|\omega|$. The grid `Body` is the sewn design,
+over one revolution $T = 2\pi/|\omega|$, indexed by the fraction of the
+revolution $t/T \in [0, 1)$ rather than by the time, which is large while the
+coupling is weak. The grid `Body` is the sewn design,
 whose cell labels separate body and fluid, and the grid `Fluid` carries the
 fluid velocity of that motion, $\sum_i Z_i u^T_i + \omega_i u^R_i$. Both move
 rigidly, $x \mapsto e^{t[\omega]_\times} x + Z t$, with the velocity rotated
@@ -539,8 +541,28 @@ $|Z|\,T$, which is large while the coupling is weak.
 counts, tetrahedron quality, the reconstruction settings, $k$, $c$, $q$, $\rho$,
 the volume error, the predicted and realised changes of $\rho$ and of the
 volume, the direction derivatives, the extension residuals and jumps, and the
-wall-clock time of each stage. Fields that do not exist for the initial design
-or a `--state-only` run are `nan`.
+wall-clock time of each stage. They are followed by:
+
+- the free motion under a unit force without torque: the translational,
+  coupling and rotational mobilities $q/(kq-c^2)$, $-c/(kq-c^2)$ and
+  $k/(kq-c^2)$, the period $2\pi(kq-c^2)/|c|$ of one revolution, the pitch
+  $2\pi q/|c|$ and the resistance length $\ell = \sqrt{q/k}$, with
+  pitch $= 2\pi\ell/\rho$;
+- the level-set penalty, and the thickness bound, weight, penalty, rays that
+  leave the body and deepest exit;
+- the identification across the cuts: the rotated jump of the Eikonal
+  distance and of its projection, the largest projection correction and the
+  interface shift;
+- the transport: the largest change of the level set and the rotated jump
+  after transport. A change well above the step flags a faulty
+  characteristic;
+- the reconstruction: the smallest crossing fraction before snapping, the
+  number of snapped vertices and the MMG scale used, in multiples of $h$
+  (1 unless a retry was needed).
+
+Fields that do not exist for the initial design or a `--state-only` run are
+`nan`. The reconstruction columns of the last row repeat those of the previous
+reconstruction, since the last design is not reconstructed.
 
 ## Source layout
 

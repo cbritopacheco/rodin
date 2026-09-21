@@ -300,8 +300,8 @@ namespace KelvinBall
           << Alert::NewLine << Alert::Notation("--level-set-penalty=<value>")
           << " Rotated trace penalty of the level set (default: 1)." << Alert::NewLine
           << Alert::Notation("--thickness-min=<value>")
-          << "      Minimum body thickness in h (default: 2; 0 disables it)." << Alert::NewLine
-          << Alert::Notation("--thickness-weight=<value>")
+          << "      Minimum body thickness in h (default: 2; 0 disables it)."
+          << Alert::NewLine << Alert::Notation("--thickness-weight=<value>")
           << "   Weight of the thickness penalty (default: 1)." << Alert::NewLine
           << Alert::Notation("--motion-every=<count>")
           << "      Write the rigid motion every count iterates (default: 0, off)."
@@ -681,6 +681,7 @@ namespace KelvinBall
                      << Alert::Notation::Number(nearVertexCuts) << Alert::NewLine
                      << diagnosticLabel("Minimum crossing fraction:")
                      << Alert::Notation::Number(minimumCrossing);
+        size_t snappedCount = 0;
         if (snap > 0)
         {
           std::vector<Real> original(
@@ -732,6 +733,7 @@ namespace KelvinBall
             if (sanitized[vertex] == 0 && original[vertex] != 0)
             {
               ++snappedVertices;
+              ++snappedCount;
               displacement = std::max(displacement, std::abs(original[vertex]));
             }
           }
@@ -821,9 +823,11 @@ namespace KelvinBall
           << diagnosticLabel("Mean element size:")
           << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize) << " -> "
           << Alert::Notation::Number(outputDiagnostics.meanElementSize) << Alert::Raise;
-        return {std::move(reconstructed),
-          {hmin, hmax, hausdorff, requiredTrianglesAfterOptimization, previousCells,
-            outputDiagnostics.cells}};
+        ReconstructionDiagnostics diagnostics{hmin, hmax, hausdorff,
+          requiredTrianglesAfterOptimization, previousCells, outputDiagnostics.cells};
+        diagnostics.minimumCrossing = minimumCrossing;
+        diagnostics.snappedVertices = static_cast<Real>(snappedCount);
+        return {std::move(reconstructed), diagnostics};
       }
 
       template <class Space, class Density, class Output>
@@ -1104,7 +1108,14 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "volume_gradient_jump,stage_1_seconds,stage_2_seconds,"
              "stage_3_seconds,stage_4_seconds,stage_5_seconds,"
              "stage_6_seconds,stage_7_seconds,stage_8_seconds,"
-             "stage_9_seconds\n";
+             "stage_9_seconds,"
+             "translational_mobility,coupling_mobility,rotational_mobility,"
+             "revolution_period,pitch,resistance_radius,"
+             "level_set_penalty,thickness_min,thickness_weight,thickness_penalty,"
+             "thickness_violating_rays,thickness_deepest_exit,"
+             "eikonal_rotated_jump,projected_rotated_jump,distance_correction,"
+             "interface_shift_max,advection_increment,advected_rotated_jump,"
+             "min_crossing_fraction,snapped_vertices,reconstruction_scale\n";
   IO::XDMF xdmf("KelvinBall");
   auto chamber = xdmf.grid("Chamber");
   chamber.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
@@ -1188,6 +1199,19 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real actualVolumeChange = previousVolume ? volume - *previousVolume : nan;
     const Real incomingPredictedVolumeChange =
       predictedVolumeChange ? *predictedVolumeChange : nan;
+    // Diagnostics of the later stages, filled as they run.
+    struct
+    {
+        Real thicknessPenalty = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessViolating = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessDeepest = std::numeric_limits<Real>::quiet_NaN();
+        Real eikonalJump = std::numeric_limits<Real>::quiet_NaN();
+        Real projectedJump = std::numeric_limits<Real>::quiet_NaN();
+        Real distanceCorrection = std::numeric_limits<Real>::quiet_NaN();
+        Real interfaceShift = std::numeric_limits<Real>::quiet_NaN();
+        Real advectionIncrement = std::numeric_limits<Real>::quiet_NaN();
+        Real advectedJump = std::numeric_limits<Real>::quiet_NaN();
+    } stageDiagnostics;
     const auto writeHistory = [&](Real nullSpaceMultiplier, Real xiRhoInfinityNorm,
                                 Real thetaInfinityNorm, Real dRhoTheta, Real dVolumeTheta,
                                 Real requiredDVolumeTheta,
@@ -1221,6 +1245,22 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << volumeGradientDiagnostics.jump;
       for (const Real seconds : stageSeconds)
         history << ',' << seconds;
+      // Free motion under a unit force without torque, R [Z; w] = [F; 0].
+      const Real determinant = k * q - c * c;
+      history << ',' << q / determinant << ',' << -c / determinant << ','
+              << k / determinant << ','
+              << (c != 0 ? 2 * M_PI * determinant / std::abs(c) : nan) << ','
+              << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
+              << ',' << levelSetPenalty << ',' << thicknessFactor * h << ','
+              << thicknessWeight << ',' << stageDiagnostics.thicknessPenalty << ','
+              << stageDiagnostics.thicknessViolating << ','
+              << stageDiagnostics.thicknessDeepest << ',' << stageDiagnostics.eikonalJump
+              << ',' << stageDiagnostics.projectedJump << ','
+              << stageDiagnostics.distanceCorrection << ','
+              << stageDiagnostics.interfaceShift << ','
+              << stageDiagnostics.advectionIncrement << ','
+              << stageDiagnostics.advectedJump << ',' << reconstruction.minimumCrossing
+              << ',' << reconstruction.snappedVertices << ',' << reconstruction.scale;
       history << '\n';
       history.flush();
     };
@@ -1317,6 +1357,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       const Location::AABB<MMG::Mesh> chamberLocator(mesh);
       const auto thickness = thicknessPenalty.evaluate(
         mesh, chamberLocator, shapeSpace, thicknessWeight, thicknessLoad);
+      stageDiagnostics.thicknessPenalty = thickness.penalty;
+      stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
+      stageDiagnostics.thicknessDeepest = thickness.deepest;
       Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
                     << diagnosticLabel("Minimum thickness:")
                     << Alert::Notation::Number(thicknessFactor * h) << " = "
@@ -1429,13 +1472,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real interfaceShiftRMS = interfaceVertices
       ? std::sqrt(interfaceShiftSquares / static_cast<Real>(interfaceVertices))
       : Real(0);
+    stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(eikonalDistance);
+    stageDiagnostics.projectedJump = shapeCoupling.scalarJump(distance);
+    stageDiagnostics.distanceCorrection = distanceProjectionCorrection;
+    stageDiagnostics.interfaceShift = interfaceShiftMaximum;
     Alert::Info() << substageHeading("Distance trace projection") << Alert::NewLine
                   << diagnosticLabel("Linear residual:")
                   << Alert::Notation::Number(distanceProjectionResidual) << Alert::NewLine
                   << diagnosticLabel("Eikonal rotated jump:")
-                  << Alert::Notation::Number(shapeCoupling.scalarJump(eikonalDistance))
+                  << Alert::Notation::Number(stageDiagnostics.eikonalJump)
                   << Alert::NewLine << diagnosticLabel("Projected rotated jump:")
-                  << Alert::Notation::Number(shapeCoupling.scalarJump(distance))
+                  << Alert::Notation::Number(stageDiagnostics.projectedJump)
                   << Alert::NewLine << diagnosticLabel("Infinity correction:")
                   << Alert::Notation::Number(distanceProjectionCorrection)
                   << Alert::NewLine << diagnosticLabel("Interface shift maximum:")
@@ -1596,7 +1643,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         fluidOutput.clear();
         fluidOutput.setMesh(moving, IO::XDMF::MeshPolicy::Transient);
         fluidOutput.add("Velocity", velocity, IO::XDMF::Center::Node);
-        motionXdmf.write(time).flush();
+        // The period is long while the coupling is weak, so the series is
+        // indexed by the fraction of a revolution rather than by time.
+        motionXdmf.write(time / period).flush();
       }
     }
 
@@ -1708,6 +1757,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         .lpNorm<Eigen::Infinity>();
     const Real distanceJump = advectionCoupling.scalarJump(advectionDistance);
     const Real advectedJump = advectionCoupling.scalarJump(advectedDistance);
+    stageDiagnostics.advectionIncrement = advectionIncrement;
+    stageDiagnostics.advectedJump = advectedJump;
     Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
                   << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
                   << Alert::NewLine << diagnosticLabel("Linear residual:")
@@ -1757,8 +1808,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       {
         try
         {
-          return discretizeLevelSetMMG(mesh, advectedDistance, scale, sphere,
-            configuration.adapt, configuration.mmgSnap);
+          auto reconstructed = discretizeLevelSetMMG(mesh, advectedDistance, scale,
+            sphere, configuration.adapt, configuration.mmgSnap);
+          reconstructed.diagnostics.scale = scale / h;
+          return reconstructed;
         }
         catch (const std::exception& error)
         {

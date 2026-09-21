@@ -9,6 +9,8 @@
 
 #include <Rodin/MMG.h>
 
+#include <limits>
+
 #include "Configuration.h"
 
 namespace KelvinBall
@@ -21,6 +23,11 @@ namespace KelvinBall
       size_t requiredBoundaryTriangles = 0;
       size_t cellsBefore = 0;
       size_t cellsAfter = 0;
+      /// Smallest crossing fraction before snapping, snapped vertices, and the
+      /// MMG scale in multiples of h; not a number where not applicable.
+      Real minimumCrossing = std::numeric_limits<Real>::quiet_NaN();
+      Real snappedVertices = std::numeric_limits<Real>::quiet_NaN();
+      Real scale = std::numeric_limits<Real>::quiet_NaN();
   };
 
   struct SphereDiscretization
