@@ -553,7 +553,7 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
         <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png" alt="Coronary FSI" width="100%">
       </a>
       <br />
-      Fluid-structure interaction simulation of a coronary artery 
+      Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
     </td>
         <td align="center" width="33%">
       <a href="">
