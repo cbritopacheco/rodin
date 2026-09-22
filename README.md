@@ -544,6 +544,34 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
   </tr>
 </table>
 
+### Biomechanics
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png" alt="Coronary FSI" width="100%">
+      </a>
+      <br />
+      Fluid-structure interaction simulation of a coronary artery 
+    </td>
+        <td align="center" width="33%">
+      <a href="">
+        <img src="" alt="Placeholder" width="100%">
+      </a>
+      <br />
+      Placeholder
+    </td>
+        <td align="center" width="33%">
+      <a href="">
+        <img src="" alt="Placeholder" width="100%">
+      </a>
+      <br />
+      Placeholder
+    </td>
+  </tr>
+</table>
+
 ## Support Rodin
 
 Rodin is developed and maintained as an open-source project. If you find it
