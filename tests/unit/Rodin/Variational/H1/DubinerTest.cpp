@@ -49,6 +49,20 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(s, 1.0, 1e-14);
   }
 
+  /// @brief A point close to, but not on, the collapsed vertex keeps its angular coordinate.
+  TEST(DubinerTriangle, CollapsedCoords_NearVertex)
+  {
+    constexpr Real epsilon = 1e-15;
+    const Real y = 1.0 - epsilon;
+    const Real x = 0.5 * (1.0 - y);
+
+    Real r, s;
+    DubinerTriangle<2>::getCollapsed(r, s, x, y);
+
+    EXPECT_NEAR(r, 0.0, 1e-14);
+    EXPECT_NEAR(s, 2.0 * y - 1.0, 1e-14);
+  }
+
   /// @brief (x,y) = (1/3, 1/3) -> midpoint of triangle.
   TEST(DubinerTriangle, CollapsedCoords_Center)
   {
@@ -260,6 +274,32 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c, 1.0, 1e-14);
     EXPECT_NEAR(b, -1.0, 1e-14);  // collapsed
     EXPECT_NEAR(a, -1.0, 1e-14);  // collapsed
+  }
+
+  /// @brief Points close to collapsed tetrahedron boundaries retain their non-collapsed coordinates.
+  TEST(DubinerTetrahedron, CollapsedCoords_NearBoundaries)
+  {
+    constexpr Real epsilon = 1e-15;
+
+    {
+      const Real z = 1.0 - epsilon;
+      const Real y = 0.5 * (1.0 - z);
+      Real a, b, c;
+      DubinerTetrahedron<2>::getCollapsed(a, b, c, 0.0, y, z);
+      EXPECT_NEAR(a, -1.0, 1e-14);
+      EXPECT_NEAR(b, 0.0, 1e-14);
+      EXPECT_NEAR(c, 2.0 * z - 1.0, 1e-14);
+    }
+
+    {
+      const Real y = 1.0 - epsilon;
+      const Real x = 0.5 * (1.0 - y);
+      Real a, b, c;
+      DubinerTetrahedron<2>::getCollapsed(a, b, c, x, y, 0.0);
+      EXPECT_NEAR(a, 0.0, 1e-14);
+      EXPECT_NEAR(b, 1.0, 1e-14);
+      EXPECT_NEAR(c, -1.0, 1e-14);
+    }
   }
 
   //==========================================================================

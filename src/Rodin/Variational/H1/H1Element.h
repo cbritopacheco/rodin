@@ -52,16 +52,6 @@
  */
 #define RODIN_VARIATIONAL_H1ELEMENT_MAX_VECTOR_DIMENSION 16
 
-/**
- * @ingroup RodinDirectives
- * @brief Tolerance for numerical computations in H1Element.
- *
- * This tolerance is used in the collapsed coordinate transformations
- * (Duffy transformation) to avoid division by zero near element boundaries.
- * Used when computing basis function gradients on triangles and tetrahedra.
- */
-#define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-14
-
 namespace Rodin::FormLanguage
 {
   /**
