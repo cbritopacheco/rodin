@@ -190,7 +190,6 @@ namespace KelvinBall
       .setHMax(hmax)
       .setHausdorff(hausdorff)
       .setGradation(2)
-      .setBaseReferences(FlatSet<Attribute>{Fluid})
       .setBoundaryReference(Gamma)
       .setAngleDetection(false);
     mesh = discretizer.discretize(sphere);

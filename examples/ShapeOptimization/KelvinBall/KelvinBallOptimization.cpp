@@ -640,12 +640,15 @@ namespace KelvinBall
         const size_t requiredTriangles = sphere.protectFixedGeometry(mesh, false);
 
         MMG::LevelSetDiscretizer discretizer;
+        // Under RMC, retain the body component attached to the chamber cuts;
+        // Fluid is a cell label, not a boundary-face base reference.
         discretizer.split(Fluid, {Obstacle, Fluid})
           .setHMin(hmin)
           .setHMax(hmax)
           .setHausdorff(hausdorff)
           .setGradation(remeshGradation)
-          .setBaseReferences(FlatSet<Attribute>{Fluid})
+          .setBaseReferences(FlatSet<Attribute>{
+            SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus})
           .setBoundaryReference(Gamma)
           .setRMC(1e-5)
           .setAngleDetection(false);
@@ -1392,9 +1395,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
       mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
       const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, thicknessFactor * h);
+      const auto projectedNormal = thicknessPenalty.projectNormal(
+        shapeSpace, shapeCoupling, hilbertLength, nitschePenalty);
       const Location::AABB<MMG::Mesh> chamberLocator(mesh);
       const auto thickness = thicknessPenalty.evaluate(
-        mesh, chamberLocator, shapeSpace, thicknessWeight, thicknessLoad);
+        mesh, chamberLocator, shapeSpace, projectedNormal, thicknessWeight, thicknessLoad);
       stageDiagnostics.thicknessPenalty = thickness.penalty;
       stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
       stageDiagnostics.thicknessDeepest = thickness.deepest;
@@ -1410,7 +1415,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                     << Alert::Notation::Number(thickness.violating) << " of "
                     << Alert::Notation::Number(thickness.rays) << Alert::NewLine
                     << diagnosticLabel("Deepest exit:")
-                    << Alert::Notation::Number(thickness.deepest) << Alert::Raise;
+                    << Alert::Notation::Number(thickness.deepest) << Alert::NewLine
+                    << diagnosticLabel("Minimum smoothed curvature:")
+                    << Alert::Notation::Number(thickness.minimumCurvature) << Alert::NewLine
+                    << diagnosticLabel("Maximum smoothed curvature:")
+                    << Alert::Notation::Number(thickness.maximumCurvature) << Alert::Raise;
     }
     const GradientDiagnostics rhoGradientDiagnostics =
       identifyGradient(shapeSpace, -rhoDensity, shapeCoupling, rhoGradient, hilbertLength,

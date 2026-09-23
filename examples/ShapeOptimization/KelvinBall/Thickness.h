@@ -7,8 +7,11 @@
 #ifndef KELVIN_BALL_THICKNESS_H
 #define KELVIN_BALL_THICKNESS_H
 
+#include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
+#include <stdexcept>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -34,13 +37,14 @@ namespace KelvinBall
    * reports how far it has left it. Its derivative in the normal velocity
    * \f$ w \f$ is
    * @f[
-   *   dP(w) = \int_\Gamma \int_0^{d_{\min}} 2 d_+(x_m)
-   *     \bigl(\nabla d(x_m) \cdot n(s)\,w(s) - w(y_m)\bigr)\,d\xi\,ds ,
+   *   dP(w) = \int_\Gamma \int_0^{d_{\min}}
+   *     \bigl[2 d_+(x_m)\bigl(\nabla d(x_m) \cdot n(s)\,w(s) - w(y_m)\bigr)
+   *       + H(s)d_+(x_m)^2w(s)\bigr]\,d\xi\,ds ,
    * @f]
    * with \f$ x_m = s - \xi n(s) \f$ and \f$ y_m \f$ its nearest point on the
-   * interface. As in the formula of the authors, the term from the rotation of
-   * the normal is omitted; the mean-curvature term \f$ H d_+^2 \f$, smaller by
-   * a factor of order \f$ \kappa d_{\min} \f$, is omitted as well.
+   * interface. Here \f$ H=\operatorname{div}_{\Gamma}n \f$. The discrete normal used by
+   * the rays is an H1 projection of the oriented interface normal, normalised
+   * pointwise; its curvature is obtained by differentiating that normalisation.
    *
    * The chamber carries only one copy of the interface, and a thin part may lie
    * across a cut, so the distance is measured to the 24 rotated copies of the
@@ -58,7 +62,43 @@ namespace KelvinBall
           Real deepest = 0;
           size_t rays = 0;
           size_t violating = 0;
+          Real minimumCurvature = std::numeric_limits<Real>::infinity();
+          Real maximumCurvature = -std::numeric_limits<Real>::infinity();
       };
+
+      /**
+       * @brief Extends and smooths the body normal in a vector H1 metric.
+       *
+       * The surface mass term anchors the extension to the piecewise-flat
+       * interface normal. Rotational Nitsche matching is applied before the
+       * solution is used on the chamber cuts. The returned field is unnormalised;
+       * its point values are normalised after interpolation.
+       */
+      template <class Space, class Coupling>
+      auto projectNormal(const Space& space, const Coupling& coupling,
+        Real length, Real nitschePenalty) const
+      {
+        TrialFunction projected(space);
+        TestFunction test(space);
+        auto fluidNormal = FaceNormal(space.getMesh());
+        fluidNormal.traceOf(Fluid);
+        Problem projection(projected, test);
+        projection = Integral(length * length * Jacobian(projected), Jacobian(test)) +
+          Integral(projected, test) +
+          length * FaceIntegral(projected, test).over(Gamma) +
+          length * FaceIntegral(fluidNormal, test).over(Gamma);
+        projection.assemble();
+        coupling.assembleVector(space, projection.getLinearSystem(), length * length,
+          nitschePenalty, FlatSet<Attribute>{});
+        solveDirect(projection);
+        const auto& system = projection.getLinearSystem();
+        const Real residual =
+          (system.getOperator() * system.getSolution() - system.getVector()).norm() /
+          std::max(system.getVector().norm(), Real(1));
+        if (!std::isfinite(residual) || residual > LinearResidualTolerance)
+          throw std::runtime_error("The thickness normal projection did not converge.");
+        return projected.getSolution();
+      }
 
       template <class ChamberMesh>
       ThicknessPenalty(const ChamberMesh& mesh, Real minimum)
@@ -95,9 +135,9 @@ namespace KelvinBall
        * @f$ -\beta\,dP(\phi_i) @f$ to @p load for every basis field
        * @f$ \phi_i @f$ of @p space, whose degrees of freedom are nodal.
        */
-      template <class ChamberMesh, class Locator, class Space, class Load>
+      template <class ChamberMesh, class Locator, class Space, class Normal, class Load>
       Result evaluate(const ChamberMesh& mesh, const Locator& locator, const Space& space,
-        Real weight, Load& load) const
+        const Normal& projectedNormal, Real weight, Load& load) const
       {
         static constexpr std::array<Real, 8> abscissae{0.0198550717512319,
           0.1016667612931866, 0.2372337950418355, 0.4082826787521751, 0.5917173212478249,
@@ -112,7 +152,8 @@ namespace KelvinBall
         const auto& rotations = SewedOutput::getCubeRotations();
         const Real multiplicity = static_cast<Real>(rotations.size());
         const size_t D = mesh.getDimension();
-        const auto& faceCells = mesh.getConnectivity().getIncidence(D - 1, D);
+        auto projectedJacobian = Jacobian(projectedNormal);
+        projectedJacobian.traceOf(Fluid);
         const auto deposit = [&](Index face, const std::array<Real, 3>& barycentric,
                                const Math::SpatialVector<Real>& normal, Real value) {
           const auto& vertices = mesh.getPolytope(D - 1, face)->getVertices();
@@ -133,15 +174,24 @@ namespace KelvinBall
           const Math::SpatialVector<Real> a = mesh.getVertexCoordinates(vertices[0]);
           const Math::SpatialVector<Real> b = mesh.getVertexCoordinates(vertices[1]);
           const Math::SpatialVector<Real> c = mesh.getVertexCoordinates(vertices[2]);
-          Math::SpatialVector<Real> normal = cross(b - a, c - a);
-          const Real area = normal.norm() / 2;
-          normal /= 2 * area;
-          if (normal.dot(fluidCentroid(mesh, faceCells.at(face->getIndex())) - a) < 0)
-            normal = -normal;
+          const Real area = cross(b - a, c - a).norm() / 2;
           for (const auto& point : quadrature)
           {
             const Math::SpatialVector<Real> s =
               point[0] * a + point[1] * b + point[2] * c;
+            const Geometry::Point surfacePoint(*face, s);
+            const Math::SpatialVector<Real> rawNormal =
+              projectedNormal.getValue(surfacePoint);
+            const Real normalMagnitude = rawNormal.norm();
+            if (!(std::isfinite(normalMagnitude) && normalMagnitude > Real(1e-12)))
+              throw std::runtime_error("The projected thickness normal vanishes.");
+            const Math::SpatialVector<Real> normal = rawNormal / normalMagnitude;
+            const auto gradientNormal = projectedJacobian.getValue(surfacePoint);
+            const Real curvature =
+              (gradientNormal.trace() - normal.dot(gradientNormal * normal)) /
+              normalMagnitude;
+            result.minimumCurvature = std::min(result.minimumCurvature, curvature);
+            result.maximumCurvature = std::max(result.maximumCurvature, curvature);
             for (size_t j = 0; j < abscissae.size(); ++j)
             {
               const Real xi = abscissae[j] * m_minimum;
@@ -157,14 +207,25 @@ namespace KelvinBall
               result.deepest = std::max(result.deepest, distance);
               result.penalty += measure * distance * distance;
               const Math::SpatialVector<Real> gradient = (ray - nearest) / distance;
-              // Local part at s: -beta * 2 d (grad d . n) w(s).
+              // Local part at s: -beta * [2 d (grad d . n) + H d^2] w(s).
               deposit(face->getIndex(), point, normal,
-                -weight * measure * 2 * distance * gradient.dot(normal));
+                -weight * measure *
+                  (2 * distance * gradient.dot(normal) + curvature * distance * distance));
               // Non-local part at the nearest point, returned to the chamber:
               // w(y) = theta(y_c) . n_c, so the load acts on the chamber face.
               const Triangle& hit = m_triangles[triangle];
-              deposit(hit.face, barycentric, faceNormal(mesh, faceCells, hit.face),
-                weight * measure * 2 * distance);
+              const auto& hitVertices = mesh.getPolytope(D - 1, hit.face)->getVertices();
+              const Math::SpatialVector<Real> hitPoint =
+                barycentric[0] * mesh.getVertexCoordinates(hitVertices[0]) +
+                barycentric[1] * mesh.getVertexCoordinates(hitVertices[1]) +
+                barycentric[2] * mesh.getVertexCoordinates(hitVertices[2]);
+              Math::SpatialVector<Real> hitNormal =
+                projectedNormal.getValue(
+                  Geometry::Point(*mesh.getPolytope(D - 1, hit.face), hitPoint));
+              if (!(hitNormal.norm() > Real(1e-12)))
+                throw std::runtime_error("The projected nearest-point normal vanishes.");
+              hitNormal.normalize();
+              deposit(hit.face, barycentric, hitNormal, weight * measure * 2 * distance);
             }
           }
         }
@@ -211,40 +272,6 @@ namespace KelvinBall
           hi[d] = index(max);
         }
         return {lo, hi};
-      }
-
-      template <class ChamberMesh, class Cells>
-      static Math::SpatialVector<Real> fluidCentroid(
-        const ChamberMesh& mesh, const Cells& cells)
-      {
-        const size_t D = mesh.getDimension();
-        for (const Index cell : cells)
-        {
-          if (mesh.getAttribute(D, cell) != Fluid)
-            continue;
-          Math::SpatialVector<Real> centroid = Math::SpatialVector<Real>::Zero(3);
-          const auto& vertices = mesh.getPolytope(D, cell)->getVertices();
-          for (const Index v : vertices)
-            centroid += mesh.getVertexCoordinates(v);
-          return centroid / static_cast<Real>(vertices.size());
-        }
-        throw std::runtime_error("An interface face has no adjacent fluid cell.");
-      }
-
-      template <class ChamberMesh, class Incidence>
-      static Math::SpatialVector<Real> faceNormal(
-        const ChamberMesh& mesh, const Incidence& faceCells, Index face)
-      {
-        const size_t D = mesh.getDimension();
-        const auto& vertices = mesh.getPolytope(D - 1, face)->getVertices();
-        const Math::SpatialVector<Real> a = mesh.getVertexCoordinates(vertices[0]);
-        Math::SpatialVector<Real> normal =
-          cross(mesh.getVertexCoordinates(vertices[1]) - a,
-            mesh.getVertexCoordinates(vertices[2]) - a);
-        normal.normalize();
-        if (normal.dot(fluidCentroid(mesh, faceCells.at(face)) - a) < 0)
-          normal = -normal;
-        return normal;
       }
 
       /// Whether a point lies in the fluid, read from the chamber cell that

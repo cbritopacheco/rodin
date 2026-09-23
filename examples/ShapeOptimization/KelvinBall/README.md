@@ -176,15 +176,18 @@ reports how far it has left. The update ascends $\rho - \beta P$ with
 $\beta$ = `--thickness-weight` (default 1), through the derivative
 
 ```math
-dP(w) = \int_\Gamma \int_0^{d_{\min}} 2 d_+(x_m)\bigl(\nabla d(x_m)\cdot n(s)\,w(s) - w(y_m)\bigr)\,d\xi\,ds ,
+dP(w) = \int_\Gamma \int_0^{d_{\min}} \left[2 d_+(x_m)\bigl(\nabla d(x_m)\cdot n(s)\,w(s) - w(y_m)\bigr) + H(s)d_+(x_m)^2w(s)\right]\,d\xi\,ds ,
 \qquad x_m = s - \xi n(s),
 ```
 
 with $w$ the normal velocity and $y_m$ the point of $\Gamma$ nearest to
-$x_m$. The derivative omits two terms: the one from the rotation of the normal,
-as the authors do, and the mean-curvature term $H d_+^2$, which is smaller by a
-factor of order $\kappa d_{\min}$. The null-space step removes the volume
-change as before.
+$x_m$, and $H=\operatorname{div}_{\Gamma}n$. The interface normal is extended
+and smoothed by a vector $H^1$ projection with a surface anchoring term and
+rotational matching across the chamber cuts. Its interpolated value is
+normalised pointwise before launching a ray or evaluating the derivative; the
+curvature is computed from the derivative of this unit normal. The term due to
+rotation of the normal is omitted, as in the authors' formulation. The
+null-space step removes the volume change as before.
 
 The chamber carries one copy of the interface, and a thin part may cross a
 cut, so the distance is measured to the 24 rotated copies of the chamber
