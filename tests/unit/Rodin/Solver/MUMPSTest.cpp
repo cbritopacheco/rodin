@@ -118,6 +118,49 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(solver.getInfo().factorization, factorization);
   }
 
+  TEST(Rodin_Solver_MUMPS, DestroysInstancesWithRetainedStages)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem problem(u, v);
+
+    LinearSystemType system = makeUnsymmetricSystem();
+    Math::Vector<Real> expected(3);
+    expected << 1.0, 2.0, 3.0;
+
+    // Destruction terminates an instance that still owns numeric factors.
+    {
+      MUMPSSolver solver(problem);
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      expectSolution(system, expected);
+      expectResourceState(solver, true, true, true, Factorization::Numeric);
+    }
+
+    // A new instance can initialize and solve after the first is destroyed.
+    // This time destruction follows JOB=-4, with symbolic analysis retained.
+    {
+      MUMPSSolver solver(problem);
+      EXPECT_FALSE(solver.getResources().initialized);
+      expected << -2.0, 1.0, 4.0;
+      system.getVector() = system.getOperator() * expected;
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      expectSolution(system, expected);
+      solver.clear(Factorization::Numeric);
+      expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    }
+
+    MUMPSSolver solver(problem);
+    EXPECT_FALSE(solver.getResources().initialized);
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, expected);
+  }
+
   TEST(Rodin_Solver_MUMPS, UnsymmetricLifecycleTracksRetainedStages)
   {
     Mesh mesh;

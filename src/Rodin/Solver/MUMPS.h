@@ -103,7 +103,8 @@ namespace Rodin::Solver
    *
    * MUMPS calls into MPI. When the host application has not initialized MPI,
    * the first factorization initializes it and leaves finalization to the
-   * host, so that a solver instance never outlives the MPI session it uses.
+   * host. Destroy every MUMPS solver before calling @c MPI_Finalize: its
+   * destructor terminates the MUMPS instance with JOB=-2, which uses MPI.
    *
    * The system matrix must outlive the solves that follow a factorization,
    * because its values may be shared with MUMPS rather than copied.
