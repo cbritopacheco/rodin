@@ -8,6 +8,10 @@
 #define RODIN_VARIATIONAL_P0_P0_H
 
 #include <boost/multi_array.hpp>
+#include <functional>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "Rodin/Types.h"
 
@@ -42,7 +46,7 @@ namespace Rodin::FormLanguage
   /// @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
   /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
-  struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
+  struct Traits<Variational::P0<Math::SpatialVector<Number>, Mesh>>
   {
       /// @brief Mesh type.
       using MeshType = Mesh;
@@ -66,7 +70,7 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref P0 "P0<Real, Mesh<Context::Local>>" | Scalar-valued local-mesh discontinuous piecewise constant space. |
+   * | @ref P0 "P0<Range, Mesh<Context::Local>>" | Real or complex scalar/vector local-mesh discontinuous piecewise constant space. |
    * | @ref P0 "P0<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh discontinuous piecewise constant space. |
    */
 
@@ -109,10 +113,11 @@ namespace Rodin::Variational
    *
    * @see P0Element, GridFunction
    */
-  template <>
-  class P0<Real, Geometry::Mesh<Context::Local>> final
+  template <class Scalar>
+    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+  class P0<Scalar, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
-        Geometry::Mesh<Context::Local>, P0<Real, Geometry::Mesh<Context::Local>>>
+        Geometry::Mesh<Context::Local>, P0<Scalar, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -120,7 +125,7 @@ namespace Rodin::Variational
 
     public:
       /// @brief Scalar value type.
-      using ScalarType = Real;
+      using ScalarType = Scalar;
 
       /// Range type of value
       using RangeType = ScalarType;
@@ -401,6 +406,136 @@ namespace Rodin::Variational
     private:
       std::vector<IndexArray> m_dofs;
       std::reference_wrapper<const MeshType> m_mesh;
+  };
+
+  /**
+   * @brief Cellwise constant vector space with independent component DOFs.
+   *
+   * Each cell owns @f$m@f$ DOFs for @f$[\mathbb P_0]^m@f$. The component
+   * count is independent of the physical mesh dimension.
+   */
+  template <class Scalar>
+    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+  class P0<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>> final
+    : public FiniteElementSpace<
+        Geometry::Mesh<Context::Local>,
+        P0<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>>
+  {
+    public:
+      using ScalarType = Scalar;
+      using RangeType = Math::SpatialVector<Scalar>;
+      using ContextType = Context::Local;
+      using MeshType = Geometry::Mesh<ContextType>;
+      using ElementType = P0Element<RangeType>;
+      using Parent = FiniteElementSpace<MeshType, P0<RangeType, MeshType>>;
+
+      template <class Callable>
+      class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
+      {
+        public:
+          template <class Function>
+          Pullback(const Geometry::Polytope& polytope, Function&& function)
+            : m_polytope(polytope), m_function(std::forward<Function>(function))
+          {}
+
+          auto operator()(const Math::SpatialPoint& reference) const
+          {
+            return m_function(Geometry::Point(m_polytope, reference));
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          Callable m_function;
+      };
+
+      template <class Callable>
+      class Pushforward
+        : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      {
+        public:
+          template <class Function>
+          explicit Pushforward(Function&& function)
+            : m_function(std::forward<Function>(function))
+          {}
+
+          auto operator()(const Geometry::Point& point) const
+          {
+            return m_function(point.getReferenceCoordinates());
+          }
+
+        private:
+          Callable m_function;
+      };
+
+      explicit P0(const MeshType& mesh, size_t vdim)
+        : m_mesh(mesh), m_vdim(vdim)
+      {
+        assert(m_vdim > 0);
+        m_dofs.reserve(mesh.getCellCount());
+        for (size_t cell = 0; cell < mesh.getCellCount(); ++cell)
+        {
+          IndexArray dofs(m_vdim);
+          for (size_t component = 0; component < m_vdim; ++component)
+            dofs[component] = cell * m_vdim + component;
+          m_dofs.push_back(std::move(dofs));
+        }
+      }
+
+      template <size_t VDim>
+      explicit P0(std::integral_constant<size_t, VDim>, const MeshType& mesh)
+        : P0(mesh, VDim)
+      {}
+
+      P0(const P0&) = default;
+      P0(P0&&) = default;
+      ~P0() override = default;
+
+      size_t getSize() const override { return m_mesh.get().getCellCount() * m_vdim; }
+      size_t getVectorDimension() const override { return m_vdim; }
+      const MeshType& getMesh() const override { return m_mesh.get(); }
+
+      const ElementType& getFiniteElement(size_t d, Index i) const
+      {
+        const auto geometry = getMesh().getGeometry(d, i);
+        static thread_local ElementType element(Geometry::Polytope::Type::Segment, 1);
+        if (element.getGeometry() != geometry || element.getCount() != m_vdim)
+          element = ElementType(geometry, m_vdim);
+        return element;
+      }
+
+      const IndexArray& getDOFs(size_t d, Index i) const override
+      {
+        assert(d == getMesh().getDimension());
+        return m_dofs.at(i);
+      }
+
+      Index getGlobalIndex(
+        const std::pair<size_t, Index>& idx, Index local) const override
+      {
+        assert(idx.first == getMesh().getDimension());
+        assert(static_cast<size_t>(local) < m_vdim);
+        return idx.second * m_vdim + local;
+      }
+
+      template <class Callable>
+      auto getPullback(const std::pair<size_t, Index>& idx, Callable&& function) const
+      {
+        return Pullback<Callable>(
+          *getMesh().getPolytope(idx.first, idx.second),
+          std::forward<Callable>(function));
+      }
+
+      template <class Callable>
+      auto getPushforward(
+        const std::pair<size_t, Index>&, Callable&& function) const
+      {
+        return Pushforward<Callable>(std::forward<Callable>(function));
+      }
+
+    private:
+      std::reference_wrapper<const MeshType> m_mesh;
+      size_t m_vdim;
+      std::vector<IndexArray> m_dofs;
   };
 
   /**

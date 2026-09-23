@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cstddef>
 #include <functional>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -45,7 +46,7 @@
 namespace Rodin::Variational
 {
   // --------------------------------------------------------------------------
-  // Scalar P0g<Real, Mesh<Context::MPI>>
+  // Scalar P0g<Real or Complex, Mesh<Context::MPI>>
   // --------------------------------------------------------------------------
 
   /**
@@ -54,15 +55,16 @@ namespace Rodin::Variational
    * Wraps a local shard scalar P0g space and provides the distributed
    * interface.  All ranks see the same single global DOF (index 0).
    */
-  template <>
-  class P0g<Real, Geometry::Mesh<Context::MPI>> final
+  template <class Scalar>
+    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+  class P0g<Scalar, Geometry::Mesh<Context::MPI>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::MPI>,
-        P0g<Real, Geometry::Mesh<Context::MPI>>>
+        P0g<Scalar, Geometry::Mesh<Context::MPI>>>
   {
     public:
       /// @brief Scalar coefficient type.
-      using ScalarType  = Real;
+      using ScalarType  = Scalar;
       /// @brief Value type represented by the finite element space.
       using RangeType   = ScalarType;
       /// @brief Execution context type.
@@ -73,7 +75,7 @@ namespace Rodin::Variational
       using ElementType = P0gElement<RangeType>;
 
       /// Underlying local shard finite element space type.
-      using FESType = P0g<Real, Geometry::Mesh<Context::Local>>;
+      using FESType = P0g<Scalar, Geometry::Mesh<Context::Local>>;
 
       /// Parent class.
       using Parent = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
@@ -263,7 +265,7 @@ namespace Rodin::Variational
   };
 
   // --------------------------------------------------------------------------
-  // Vector P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>>
+  // Vector P0g<Math::SpatialVector<Real or Complex>, Mesh<Context::MPI>>
   // --------------------------------------------------------------------------
 
   /**
@@ -273,17 +275,18 @@ namespace Rodin::Variational
    * interface.  All ranks see the same @p vdim global DOFs (indices 0 to
    * @p vdim - 1).
    */
-  template <>
-  class P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>> final
+  template <class Scalar>
+    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+  class P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::MPI>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::MPI>,
-        P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>>
+        P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::MPI>>>
   {
     public:
       /// @brief Scalar coefficient type.
-      using ScalarType  = Real;
+      using ScalarType  = Scalar;
       /// @brief Vector value type represented by the finite element space.
-      using RangeType   = Math::SpatialVector<Real>;
+      using RangeType   = Math::SpatialVector<Scalar>;
       /// @brief Execution context type.
       using ContextType = Context::MPI;
       /// @brief Distributed mesh type.
@@ -292,10 +295,10 @@ namespace Rodin::Variational
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
 
       /// Underlying local shard finite element space type.
-      using FESType = P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>;
+      using FESType = P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>;
 
       /// Parent class.
-      using Parent = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Scalar>, MeshType>>;
 
       using Parent::getGlobalIndex;
 

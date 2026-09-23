@@ -1,1 +1,2 @@
-# Combined mesh-size and polynomial-degree convergence tests are added here.
+add_subdirectory(Poisson)
+add_subdirectory(Helmholtz)

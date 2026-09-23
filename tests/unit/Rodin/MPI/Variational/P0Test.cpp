@@ -443,6 +443,58 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(combined.size(), globalCells);
     }
   }
+
+  /** Scalar and component-wise vector P0 map owned and ghost DOFs identically. */
+  TEST(MPIP0Space, RealAndComplexValueTypesUseConsistentCellDOFs)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    for (auto type : {Polytope::Type::Segment,
+           Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral,
+           Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(polytopeName(type));
+      const size_t dim = Polytope::Traits(type).getDimension();
+      auto mesh = dim == 1
+        ? distributeFromRoot(ctx, type, {5})
+        : dim == 2
+          ? distributeFromRoot(ctx, type, {4, 4})
+          : distributeFromRoot(ctx, type, {4, 3, 3});
+      P0<Real, Mesh<Context::MPI>> realScalar(mesh);
+      P0<Complex, Mesh<Context::MPI>> complexScalar(mesh);
+      P0<Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(mesh, 2);
+      P0<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(mesh, 2);
+      const size_t cells = mesh.getCellCount();
+      EXPECT_EQ(realScalar.getSize(), cells);
+      EXPECT_EQ(complexScalar.getSize(), cells);
+      EXPECT_EQ(realVector.getSize(), 2 * cells);
+      EXPECT_EQ(complexVector.getSize(), 2 * cells);
+      const auto& shard = mesh.getShard();
+      for (Index i = 0; i < shard.getCellCount(); ++i)
+      {
+        const auto& rs = realScalar.getDOFs(dim, i);
+        const auto& cs = complexScalar.getDOFs(dim, i);
+        const auto& rv = realVector.getDOFs(dim, i);
+        const auto& cv = complexVector.getDOFs(dim, i);
+        ASSERT_EQ(rs.size(), 1u);
+        ASSERT_EQ(cs.size(), 1u);
+        ASSERT_EQ(rv.size(), 2u);
+        ASSERT_EQ(cv.size(), 2u);
+        EXPECT_EQ(rs[0], cs[0]);
+        EXPECT_EQ(rv[0], cv[0]);
+        EXPECT_EQ(rv[1], cv[1]);
+        EXPECT_EQ(rv[0], 2 * rs[0]);
+        EXPECT_EQ(rv[1], rv[0] + 1);
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

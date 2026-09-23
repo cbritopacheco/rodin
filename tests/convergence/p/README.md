@@ -6,4 +6,5 @@ the error decreases algebraically with `K`; for analytic solutions it decreases
 exponentially until conditioning and floating-point error dominate. Each suite
 states the solution regularity, norm, and expected degree dependence. The first
 suite, `Poisson`, validates exact polynomial reproduction and exponential decay
-for an analytic manufactured solution.
+for an analytic manufactured solution. `Helmholtz` tests successive complex
+degrees one through four for an analytic plane wave on all seven geometries.

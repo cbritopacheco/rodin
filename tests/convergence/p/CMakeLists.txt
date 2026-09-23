@@ -5,3 +5,4 @@ target_link_libraries(RodinConvergenceP
 )
 
 add_subdirectory(Poisson)
+add_subdirectory(Helmholtz)

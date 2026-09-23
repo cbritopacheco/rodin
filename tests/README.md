@@ -10,3 +10,8 @@ element rates. Enable it with `RODIN_BUILD_CONVERGENCE_TESTS`; tests carry the
 and acceptance rules.
 
 ## Benchmarks
+
+`nafems/` is reserved for published numerical verification cases and the
+Rodin Verification Manual. It is distinct from `benchmarks/`, which measures
+performance. The NAFEMS case catalog currently lists candidates only; no
+NAFEMS result is claimed yet.

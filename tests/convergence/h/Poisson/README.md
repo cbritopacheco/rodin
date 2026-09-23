@@ -2,18 +2,18 @@
 
 The tests solve
 
-\[
+$$
   -\Delta u=f \quad\hbox{in }\Omega=(0,1)^d, \qquad
   u=g \quad\hbox{on }\partial\Omega
-\]
+$$
 
 with conforming elements of degree `K=1,2,3`. The Galerkin approximation is
 expected to satisfy
 
-\[
+$$
   \lVert u-u_h\rVert_{H^1}=O(h^K), \qquad
   \lVert u-u_h\rVert_{L^2}=O(h^{K+1})
-\]
+$$
 
 for the smooth manufactured solutions below. Errors are integrated directly at
 high quadrature order; this avoids making the convergence oracle depend on an
@@ -36,9 +36,9 @@ The Dirichlet suite contains five complementary validations:
 
 `BoundaryConditions.cpp` uses the smooth manufactured field
 
-\[
+$$
   u=\exp\left(\sum_i x_i\right), \qquad f=-d u,
-\]
+$$
 
 and partitions the unit-box boundary into the face `x_0=0` and its complement.
 It validates three weak boundary formulations for P1, P2, and P3:

@@ -51,6 +51,7 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <utility>
+#include <atomic>
 #include <fstream>
 #include <functional>
 #include <vector>
@@ -367,7 +368,8 @@ namespace Rodin::Variational
        */
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
-          m_fes(std::cref(fes))
+          m_fes(std::cref(fes)),
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -377,7 +379,8 @@ namespace Rodin::Variational
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(other.m_name),
-          m_fes(other.m_fes)
+          m_fes(other.m_fes),
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -387,7 +390,8 @@ namespace Rodin::Variational
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(std::move(other.m_name)),
-          m_fes(std::move(other.m_fes))
+          m_fes(std::move(other.m_fes)),
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -758,7 +762,13 @@ namespace Rodin::Variational
         const auto& basisValues = getCachedBasisValues(d, i, ip);
         for (Index local = 0; local < basisValues.size(); ++local)
         {
-          const auto k = this->operator[](dofs[local]) * basisValues[local];
+          const auto k = [&]
+          {
+            if constexpr (requires { this->operator[](dofs[local]) * basisValues[local]; })
+              return this->operator[](dofs[local]) * basisValues[local];
+            else
+              return basisValues[local] * this->operator[](dofs[local]);
+          }();
           if (local == 0)
             res = k;
           else
@@ -1144,6 +1154,7 @@ namespace Rodin::Variational
       struct EvaluationCache
       {
         const GridFunctionBase* owner = nullptr;
+        size_t ownerIdentity = static_cast<size_t>(-1);
         const FES* fes = nullptr;
         // Distinguishes geometry-specific static elements when stack addresses
         // for successive grid functions and spaces are reused.
@@ -1169,11 +1180,13 @@ namespace Rodin::Variational
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
-        if (cache.owner != this || cache.fes != fes || cache.element != element ||
+        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
+          cache.fes != fes || cache.element != element ||
           cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
+          cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
           cache.element = element;
           cache.d = d;
@@ -1193,7 +1206,8 @@ namespace Rodin::Variational
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
-        if (!cache.hasBasisValues || cache.owner != this || cache.fes != fes ||
+        if (!cache.hasBasisValues || cache.owner != this ||
+          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
           cache.element != element || cache.d != d || cache.i != i ||
           cache.qf != ip.getQuadratureFormula() ||
           cache.qp != ip.getIndex())
@@ -1203,6 +1217,7 @@ namespace Rodin::Variational
           const auto& p = ip.getPoint();
 
           cache.owner = this;
+          cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
           cache.element = element;
           cache.d = d;
@@ -1222,6 +1237,8 @@ namespace Rodin::Variational
 
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
+      inline static std::atomic<size_t> s_nextCacheIdentity{0};
+      const size_t m_cacheIdentity;
 
   };
 

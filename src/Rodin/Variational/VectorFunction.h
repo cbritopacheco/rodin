@@ -525,11 +525,16 @@ namespace Rodin::Variational
    * @brief Vector function backed by a callable.
    */
   template <class F>
-  class VectorFunction<F> final : public VectorFunctionBase<Real, VectorFunction<F>>
+  class VectorFunction<F> final
+    : public VectorFunctionBase<
+        typename FormLanguage::Traits<
+          std::decay_t<std::invoke_result_t<F, const Geometry::Point&>>>::ScalarType,
+        VectorFunction<F>>
   {
     public:
       /// @brief Scalar value type.
-      using ScalarType = Real;
+      using ScalarType = typename FormLanguage::Traits<
+        std::decay_t<std::invoke_result_t<F, const Geometry::Point&>>>::ScalarType;
 
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;

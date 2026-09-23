@@ -81,15 +81,16 @@ namespace Rodin::Variational
   // Scalar P0g<Real, Mesh<Local>>
   // --------------------------------------------------------------------------
   /// @brief Cellwise-constant scalar finite element space with a global basis.
-  template <>
-  class P0g<Real, Geometry::Mesh<Context::Local>> final
+  template <class Scalar>
+    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+  class P0g<Scalar, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>,
-        P0g<Real, Geometry::Mesh<Context::Local>>>
+        P0g<Scalar, Geometry::Mesh<Context::Local>>>
   {
     public:
       /// @brief Scalar value type.
-      using ScalarType  = Real;
+      using ScalarType  = Scalar;
       /// @brief Range (evaluation value) type.
       using RangeType   = ScalarType;
       /// @brief Execution context type.
@@ -275,17 +276,18 @@ namespace Rodin::Variational
   // Vector P0g<Math::SpatialVector<Real>, Mesh<Local>>
   // --------------------------------------------------------------------------
   /// @brief Cellwise-constant vector-valued finite element space with a global basis.
-  template <>
-  class P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> final
+  template <class Scalar>
+    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+  class P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>,
-        P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>>
+        P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>>
   {
     public:
       /// @brief Scalar value type.
-      using ScalarType  = Real;
+      using ScalarType  = Scalar;
       /// @brief Range (evaluation value) type.
-      using RangeType   = Math::SpatialVector<Real>;
+      using RangeType   = Math::SpatialVector<Scalar>;
       /// @brief Execution context type.
       using ContextType = Context::Local;
       /// @brief Mesh type.
@@ -293,7 +295,7 @@ namespace Rodin::Variational
       /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
       /// @brief Parent class type.
-      using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
+      using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
 
       /// @brief Pullback of a vector-valued P0g function to the reference element.
       template <class Callable>

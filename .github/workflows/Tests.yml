@@ -14,6 +14,116 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  Convergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev
+          libsuitesparse-dev
+          libeigen3-dev
+          libscotch-dev
+          libmetis-dev
+          libhdf5-dev
+          libomp-dev
+
+      - name: Configure convergence build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=OFF
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_USE_MPI=OFF
+          -DRODIN_USE_PETSC=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+
+      - name: Build convergence suites
+        run: cmake --build build -j 2
+
+      - name: Run convergence suites
+        run: >-
+          ctest --test-dir build/tests -L convergence
+          --output-on-failure -j 2
+
+  PETScConvergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev
+          libsuitesparse-dev
+          libeigen3-dev
+          libscotch-dev
+          libmetis-dev
+          libhdf5-dev
+          petsc-dev
+          mpich
+
+      - name: Configure PETSc convergence build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=OFF
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_MULTITHREADED=OFF
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
+
+      - name: Build PETSc convergence suite
+        run: >-
+          cmake --build build -j 2 --target
+          RodinConvergenceHPETScPoisson
+          RodinConvergenceHPETScMPIPoisson
+
+      - name: Run PETSc convergence suite
+        run: >-
+          ctest --test-dir build/tests -R RodinConvergenceHPETSc
+          --output-on-failure -j 1
+
   Unit:
     runs-on: ubuntu-latest
     strategy:

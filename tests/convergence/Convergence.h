@@ -141,6 +141,41 @@ namespace Rodin::Tests::Convergence
       std::vector<Sample> m_samples;
   };
 
+  /** @brief History for a single norm, such as the P0 projection L2 error. */
+  class NormHistory
+  {
+    public:
+      struct Sample
+      {
+        Real parameter;
+        Real error;
+      };
+
+      NormHistory& append(Real parameter, Real error)
+      {
+        m_samples.push_back({parameter, error});
+        return *this;
+      }
+
+      size_t getSize() const { return m_samples.size(); }
+
+      const Sample& getSample(size_t i) const { return m_samples.at(i); }
+
+      Real getAlgebraicRate(size_t fineSample) const
+      {
+        assert(fineSample > 0 && fineSample < m_samples.size());
+        const auto& coarse = m_samples[fineSample - 1];
+        const auto& fine = m_samples[fineSample];
+        assert(coarse.parameter > fine.parameter);
+        assert(coarse.error > 0 && fine.error > 0);
+        return std::log(coarse.error / fine.error)
+          / std::log(coarse.parameter / fine.parameter);
+      }
+
+    private:
+      std::vector<Sample> m_samples;
+  };
+
   /**
    * @brief Unit-box UniformGrid factory shared by refinement strategies.
    */
@@ -274,6 +309,31 @@ namespace Rodin::Tests::Convergence
   class ErrorNorm
   {
     public:
+      /** @brief Integrates scalar or vector value error with a complex modulus. */
+      template <class GF, class Exact>
+      static Real computeL2(
+        const Geometry::LocalMesh& mesh,
+        const GF& uh,
+        const Exact& exact,
+        size_t quadratureOrder = 8)
+      {
+        Real squared = 0;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+            quadratureOrder, cell->getGeometry());
+          const auto& quadrature = cell->getQuadrature(qf);
+          for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+          {
+            const auto& p = quadrature.getPoint(qp);
+            const Variational::IntegrationPoint ip(p, &qf, qp);
+            squared += qf.getWeight(qp) * p.getDistortion()
+              * squaredMagnitude(uh(ip) - evaluate(exact, ip));
+          }
+        }
+        return std::sqrt(squared);
+      }
+
       template <class GF, class Exact, class ExactGradient>
       static ErrorNorms compute(
         const Geometry::LocalMesh& mesh,
