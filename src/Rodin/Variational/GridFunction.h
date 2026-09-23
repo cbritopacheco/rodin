@@ -51,6 +51,7 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <atomic>
+#include <algorithm>
 #include <cstdint>
 #include <utility>
 #include <fstream>
@@ -754,6 +755,11 @@ namespace Rodin::Variational
       constexpr
       void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
+        if (ip.getQuadratureFormula() == nullptr)
+        {
+          static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
+          return;
+        }
         const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
@@ -1168,6 +1174,7 @@ namespace Rodin::Variational
           bool hasBasisValues = false;
           const QF::QuadratureFormulaBase* qf = nullptr;
           size_t qp = static_cast<size_t>(-1);
+          std::vector<Real> referenceCoordinates;
           std::vector<RangeType> basisValues;
       };
 
@@ -1201,9 +1208,16 @@ namespace Rodin::Variational
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
+        const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
+        const size_t referenceCoordinateCount =
+          static_cast<size_t>(referenceCoordinates.size());
+        bool sameReferenceCoordinates =
+          cache.referenceCoordinates.size() == referenceCoordinateCount;
+        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinateCount; ++j)
+          sameReferenceCoordinates = cache.referenceCoordinates[j] == referenceCoordinates(j);
         if (!cache.hasBasisValues || cache.owner != m_identity || cache.d != d ||
           cache.i != i || cache.qf != ip.getQuadratureFormula() ||
-          cache.qp != ip.getIndex())
+          cache.qp != ip.getIndex() || !sameReferenceCoordinates)
         {
           const auto* fes = &this->getFiniteElementSpace();
           const auto& fe = fes->getFiniteElement(d, i);
@@ -1216,6 +1230,9 @@ namespace Rodin::Variational
           cache.i = i;
           cache.qf = ip.getQuadratureFormula();
           cache.qp = ip.getIndex();
+          cache.referenceCoordinates.resize(referenceCoordinateCount);
+          for (size_t j = 0; j < cache.referenceCoordinates.size(); ++j)
+            cache.referenceCoordinates[j] = referenceCoordinates(j);
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)
           {

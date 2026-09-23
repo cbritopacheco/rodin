@@ -1014,6 +1014,9 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Combines a bilinear form and a local bilinear form integrator.
+   */
   template <class OperatorType, class RHSScalar>
   auto operator+(const BilinearFormBase<OperatorType>& bf,
     const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
