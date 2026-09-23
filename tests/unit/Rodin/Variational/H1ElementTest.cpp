@@ -3334,7 +3334,7 @@ namespace Rodin::Tests::Unit
         for (size_t derivative = 0; derivative < dimension; ++derivative)
         {
           const Real basisDerivative =
-            element.getBasis(local).getDerivative<1>(derivative)(point);
+            element.getBasis(local).template getDerivative<1>(derivative)(point);
           gradient[0][derivative] += node.x() * basisDerivative;
           gradient[1][derivative] += node.y() * basisDerivative;
           if (dimension == 3)
