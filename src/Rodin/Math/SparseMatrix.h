@@ -15,12 +15,24 @@
 #ifndef RODIN_MATH_SPARSEMATRIX_H
 #define RODIN_MATH_SPARSEMATRIX_H
 
+#include <cstdint>
+
 #include <Eigen/Sparse>
 
 #include "Rodin/FormLanguage/Traits.h"
 
 namespace Rodin::Math
 {
+  /// Signed 32-bit index type used by sparse matrix storage.
+  using SparseIndex = std::int32_t;
+
+  /**
+   * @brief Sparse matrix entry used during assembly.
+   * @tparam ScalarType The entry value type.
+   */
+  template <class ScalarType>
+  using SparseTriplet = Eigen::Triplet<ScalarType, SparseIndex>;
+
   /**
    * @brief Sparse matrix type.
    *
@@ -33,8 +45,8 @@ namespace Rodin::Math
    * Eigen's SparseMatrix uses Compressed Column Storage (CCS), also known as
    * Compressed Sparse Column (CSC) format, which stores:
    * - Non-zero values
-   * - Row indices for each non-zero value
-   * - Column pointers indicating where each column starts
+   * - Signed 32-bit row indices for each non-zero value
+   * - Signed 32-bit column pointers indicating where each column starts
    *
    * ## Typical Applications
    * - Stiffness matrices: @f$ K @f$ in @f$ Ku = f @f$
@@ -44,7 +56,7 @@ namespace Rodin::Math
    * @tparam ScalarType The element type (e.g., Real, Complex)
    */
   template <class ScalarType>
-  using SparseMatrix = Eigen::SparseMatrix<ScalarType>;
+  using SparseMatrix = Eigen::SparseMatrix<ScalarType, Eigen::ColMajor, SparseIndex>;
 
   /**
    * @brief Performs the AXPY operation on sparse matrices.
@@ -80,4 +92,3 @@ namespace Rodin::FormLanguage
 }
 
 #endif
-

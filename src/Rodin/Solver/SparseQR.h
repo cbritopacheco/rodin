@@ -47,6 +47,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 #include "LinearSolver.h"
 
 namespace Rodin::FormLanguage
@@ -92,8 +93,9 @@ namespace Rodin::Solver
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
   template <class Scalar>
-  class SparseQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+  class SparseQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    final : public LinearSolverBase<
+              Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// Type of scalar values in the system
@@ -150,8 +152,39 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
+        m_info = Info{};
+        // Eigen requires compressed storage here, and asserts on it.
+        axb.getOperator().makeCompressed();
         m_solver.compute(axb.getOperator());
+        if (!record())
+        {
+          // A failed factorization is unusable, so the solve is skipped and
+          // the solution vector is left untouched.
+          return;
+        }
+        m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
+        record();
+      }
+
+      /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -165,6 +198,17 @@ namespace Rodin::Solver
 
     private:
       /// Underlying Eigen SparseQR solver with COLAMD ordering
+      /// @brief Records the Eigen status, and returns whether it succeeded.
+      Boolean record()
+      {
+        m_info.status = static_cast<Integer>(m_solver.info());
+        m_info.success = m_solver.info() == Eigen::Success;
+        return m_info.success;
+      }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
+
       Eigen::SparseQR<OperatorType, Eigen::COLAMDOrdering<int>> m_solver;
   };
 }

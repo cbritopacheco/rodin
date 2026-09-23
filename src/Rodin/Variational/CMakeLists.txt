@@ -84,6 +84,8 @@ target_link_libraries(RodinVariational
     Rodin::Assembly
     Rodin::Geometry
     Rodin::FormLanguage
+    # Problem.h, a public header, includes the solver interface.
+    Rodin::Solver
 )
 
 # ---- Install ---------------------------------------------------------------
