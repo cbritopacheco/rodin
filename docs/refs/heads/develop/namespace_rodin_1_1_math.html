@@ -81,13 +81,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md557">Types</a></li>
-            <li><a href="#autotoc_md558">Constants</a></li>
-            <li><a href="#autotoc_md559">Mathematical Functions</a></li>
-            <li><a href="#autotoc_md560">Unit Types</a></li>
-            <li><a href="#autotoc_md561">Runge-Kutta Schemes</a></li>
-            <li><a href="#autotoc_md562">Root Finding</a></li>
-            <li><a href="#autotoc_md563">Linear Algebra Utilities</a></li>
+            <li><a href="#autotoc_md559">Types</a></li>
+            <li><a href="#autotoc_md560">Constants</a></li>
+            <li><a href="#autotoc_md561">Mathematical Functions</a></li>
+            <li><a href="#autotoc_md562">Unit Types</a></li>
+            <li><a href="#autotoc_md563">Runge-Kutta Schemes</a></li>
+            <li><a href="#autotoc_md564">Root Finding</a></li>
+            <li><a href="#autotoc_md565">Linear Algebra Utilities</a></li>
             <li>
               Reference
               <ul>
@@ -98,7 +98,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Math</p><p>Module for general mathematical operations.</p><p>Provides mathematical types, constants, and utility functions used throughout the Rodin framework.</p><section id="autotoc_md557"><h3><a href="#autotoc_md557">Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;T&gt;</a></td><td>Dense column vector (Eigen-based)</td></tr><tr><td><a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix&lt;T&gt;</a></td><td>Dense matrix (Eigen-based)</td></tr><tr><td><a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix&lt;T&gt;</a></td><td>Compressed sparse column matrix</td></tr><tr><td><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector&lt;T&gt;</a></td><td>Small fixed-size vector for physical coordinates</td></tr><tr><td><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix&lt;T&gt;</a></td><td>Small fixed-size matrix (e.g. Jacobians, stress tensors)</td></tr><tr><td><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a></td><td>Couples operator matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<p>Directory src/Rodin/Math</p><p>Module for general mathematical operations.</p><p>Provides mathematical types, constants, and utility functions used throughout the Rodin framework.</p><section id="autotoc_md559"><h3><a href="#autotoc_md559">Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector&lt;T&gt;</a></td><td>Dense column vector (Eigen-based)</td></tr><tr><td><a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix&lt;T&gt;</a></td><td>Dense matrix (Eigen-based)</td></tr><tr><td><a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix&lt;T&gt;</a></td><td>Compressed sparse column matrix</td></tr><tr><td><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector&lt;T&gt;</a></td><td>Small fixed-size vector for physical coordinates</td></tr><tr><td><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix&lt;T&gt;</a></td><td>Small fixed-size matrix (e.g. Jacobians, stress tensors)</td></tr><tr><td><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a></td><td>Couples operator matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -128,7 +128,7 @@ $ x $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-120'/>
 </g>
-</svg></td></tr></tbody></table></section><section id="autotoc_md558"><h3><a href="#autotoc_md558">Constants</a></h3><p><code>Math::Constants::pi()</code> — <svg class="m-math" style="width: 0.736em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.069273 5.147373">
+</svg></td></tr></tbody></table></section><section id="autotoc_md560"><h3><a href="#autotoc_md560">Constants</a></h3><p><code>Math::Constants::pi()</code> — <svg class="m-math" style="width: 0.736em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.069273 5.147373">
 <title>
 $ \pi $
 </title>
@@ -138,7 +138,7 @@ $ \pi $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-25'/>
 </g>
-</svg></p></section><section id="autotoc_md559"><h3><a href="#autotoc_md559">Mathematical Functions</a></h3><table class="m-table"><thead><tr><th>Function</th><th>Signature</th><th>Domain</th></tr></thead><tbody><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">abs</a></td><td><code>abs(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">exp</a></td><td><code>exp(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">sqrt</a></td><td><code>sqrt(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">pow</a></td><td><code>pow(base, exp)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">pow2</a></td><td><code>pow2(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">log</a></td><td><code>log(x)</code></td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">log2</a></td><td><code>log2(x)</code></td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">log10</a></td><td><code>log10(x)</code></td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">sin, cos, tan</a></td><td>Trigonometric</td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">asin, acos, atan</a></td><td>Inverse trig</td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">atan2</a></td><td><code>atan2(y, x)</code></td><td>Two-argument arctangent</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">sinh, cosh, tanh</a></td><td>Hyperbolic</td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">min, max</a></td><td>Element-wise</td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">clamp</a></td><td><code>clamp(x, lo, hi)</code></td><td>Scalar</td></tr></tbody></table></section><section id="autotoc_md560"><h3><a href="#autotoc_md560">Unit Types</a></h3><ul><li><code>Math::Rad</code> — Radian wrapper with implicit <code>Real</code> conversion</li><li><code>Math::Deg</code> — Degree wrapper with conversion to <code>Rad</code></li></ul></section><section id="autotoc_md561"><h3><a href="#autotoc_md561">Runge-Kutta Schemes</a></h3><ul><li><code>Math::RungeKutta::RK2</code> — Second-order Runge-Kutta (midpoint)</li><li><code>Math::RungeKutta::RK4</code> — Classical fourth-order Runge-Kutta</li></ul></section><section id="autotoc_md562"><h3><a href="#autotoc_md562">Root Finding</a></h3><ul><li><code>Math::RootFinding::Bisection</code> — Bisection method for scalar root finding</li></ul></section><section id="autotoc_md563"><h3><a href="#autotoc_md563">Linear Algebra Utilities</a></h3><ul><li><code>dot(a, b)</code> — Inner product</li><li><code>cross(a, b)</code> — Cross product (3D)</li><li><code>sum</code>, <code>minus</code>, <code>mult</code>, <code>division</code> — Element-wise operations</li><li><code>conj</code> — Complex conjugate</li><li><code>nan&lt;T&gt;()</code> — NaN sentinel</li></ul></section>
+</svg></p></section><section id="autotoc_md561"><h3><a href="#autotoc_md561">Mathematical Functions</a></h3><table class="m-table"><thead><tr><th>Function</th><th>Signature</th><th>Domain</th></tr></thead><tbody><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">abs</a></td><td><code>abs(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">exp</a></td><td><code>exp(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">sqrt</a></td><td><code>sqrt(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">pow</a></td><td><code>pow(base, exp)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">pow2</a></td><td><code>pow2(x)</code></td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">log</a></td><td><code>log(x)</code></td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">log2</a></td><td><code>log2(x)</code></td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">log10</a></td><td><code>log10(x)</code></td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">sin, cos, tan</a></td><td>Trigonometric</td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">asin, acos, atan</a></td><td>Inverse trig</td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">atan2</a></td><td><code>atan2(y, x)</code></td><td>Two-argument arctangent</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">sinh, cosh, tanh</a></td><td>Hyperbolic</td><td>Scalar or matrix</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">min, max</a></td><td>Element-wise</td><td>Scalar</td></tr><tr><td><a href="namespace_rodin_1_1_math.html" class="m-doc">clamp</a></td><td><code>clamp(x, lo, hi)</code></td><td>Scalar</td></tr></tbody></table></section><section id="autotoc_md562"><h3><a href="#autotoc_md562">Unit Types</a></h3><ul><li><code>Math::Rad</code> — Radian wrapper with implicit <code>Real</code> conversion</li><li><code>Math::Deg</code> — Degree wrapper with conversion to <code>Rad</code></li></ul></section><section id="autotoc_md563"><h3><a href="#autotoc_md563">Runge-Kutta Schemes</a></h3><ul><li><code>Math::RungeKutta::RK2</code> — Second-order Runge-Kutta (midpoint)</li><li><code>Math::RungeKutta::RK4</code> — Classical fourth-order Runge-Kutta</li></ul></section><section id="autotoc_md564"><h3><a href="#autotoc_md564">Root Finding</a></h3><ul><li><code>Math::RootFinding::Bisection</code> — Bisection method for scalar root finding</li></ul></section><section id="autotoc_md565"><h3><a href="#autotoc_md565">Linear Algebra Utilities</a></h3><ul><li><code>dot(a, b)</code> — Inner product</li><li><code>cross(a, b)</code> — Cross product (3D)</li><li><code>sum</code>, <code>minus</code>, <code>mult</code>, <code>division</code> — Element-wise operations</li><li><code>conj</code> — Complex conjugate</li><li><code>nan&lt;T&gt;()</code> — NaN sentinel</li></ul></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -230,8 +230,17 @@ $ Ax = b $
             </dt>
             <dd>Fixed-size matrix type.</dd>
             <dt>
+              using <a href="#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc">SparseIndex</a> = std::int32_t
+            </dt>
+            <dd>Signed 32-bit index type used by sparse matrix storage.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
-              using <a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a> = Eigen::SparseMatrix&lt;ScalarType&gt;
+              using <a href="#aad7715489debc7072630c6f58b5ee6eb" class="m-doc">SparseTriplet</a> = Eigen::Triplet&lt;ScalarType, <a href="#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc">SparseIndex</a>&gt;
+            </dt>
+            <dd>Sparse matrix entry used during assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
+              using <a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">SparseMatrix</a> = Eigen::SparseMatrix&lt;ScalarType, Eigen::ColMajor, <a href="#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc">SparseIndex</a>&gt;
             </dt>
             <dd>Sparse matrix type.</dd>
             <dt>
@@ -628,9 +637,9 @@ $ b $
             <dd>Structured-binding accessor (const rvalue overload); see get(LinearSystem&amp;&amp;).</dd>
             <dt>
               <div class="m-doc-template">template&lt;class AScalarType, class YScalarType, class XScalarType&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a8ddac5818d636a9c9993c5b89086d4c8" class="m-doc">axpy</a>(</span><span class="m-doc-wrap"><a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a>&lt;YScalarType&gt;&amp; y,
+              <span class="m-doc-wrap-bumper">void <a href="#a8ddac5818d636a9c9993c5b89086d4c8" class="m-doc">axpy</a>(</span><span class="m-doc-wrap"><a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">SparseMatrix</a>&lt;YScalarType&gt;&amp; y,
               AScalarType alpha,
-              const <a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a>&lt;XScalarType&gt;&amp; x)</span>
+              const <a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">SparseMatrix</a>&lt;XScalarType&gt;&amp; x)</span>
             </dt>
             <dd>Performs the AXPY operation on sparse matrices.</dd>
             <dt>
@@ -873,13 +882,41 @@ $ b $
             </table>
 <p>A compile-time fixed-size matrix. Both dimensions are known at compile time, enabling optimizations and stack allocation.</p><p>Example uses:</p><ul><li>2×2 rotation matrices</li><li>3×3 transformation matrices</li><li>Small dense blocks in larger systems</li></ul>
           </div></section>
-          <section class="m-doc-details" id="ad869d53f77679c9faf8eed668f4ba02c"><div>
+          <section class="m-doc-details" id="a2640f04f6274aebfc8f935c13e80f9a6"><div>
+            <h3>
+              using Rodin::<wbr />Math::<wbr /><a href="#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc-self">SparseIndex</a> = std::int32_t
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sparse_matrix_8h.html">&lt;Rodin/Math/SparseMatrix.h&gt;</a></div>
+            </h3>
+            <p>Signed 32-bit index type used by sparse matrix storage.</p>
+          </div></section>
+          <section class="m-doc-details" id="aad7715489debc7072630c6f58b5ee6eb"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sparse_matrix_8h.html">&lt;Rodin/Math/SparseMatrix.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class ScalarType&gt;
               </div>
-              using Rodin::<wbr />Math::<wbr /><a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc-self">SparseMatrix</a> = Eigen::SparseMatrix&lt;ScalarType&gt;
+              using Rodin::<wbr />Math::<wbr /><a href="#aad7715489debc7072630c6f58b5ee6eb" class="m-doc-self">SparseTriplet</a> = Eigen::Triplet&lt;ScalarType, <a href="#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc">SparseIndex</a>&gt;
+            </h3>
+            <p>Sparse matrix entry used during assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ScalarType</td>
+                  <td>The entry value type.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1e9568d1308feaaa6f2f6a695857876f"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_sparse_matrix_8h.html">&lt;Rodin/Math/SparseMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              using Rodin::<wbr />Math::<wbr /><a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc-self">SparseMatrix</a> = Eigen::SparseMatrix&lt;ScalarType, Eigen::ColMajor, <a href="#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc">SparseIndex</a>&gt;
             </h3>
             <p>Sparse matrix type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -893,7 +930,7 @@ $ b $
                 </tr>
               </tbody>
             </table>
-<p>A sparse matrix stores only the non-zero elements, making it memory-efficient for large matrices arising from finite element discretizations where most entries are zero. The matrix uses compressed column storage (CCS) format by default.</p><h5 id="autotoc_md170">Storage Format</h5><p>Eigen&#x27;s SparseMatrix uses Compressed Column Storage (CCS), also known as Compressed Sparse Column (CSC) format, which stores:</p><ul><li>Non-zero values</li><li>Row indices for each non-zero value</li><li>Column pointers indicating where each column starts</li></ul><h5 id="autotoc_md171">Typical Applications</h5><ul><li>Stiffness matrices: <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>A sparse matrix stores only the non-zero elements, making it memory-efficient for large matrices arising from finite element discretizations where most entries are zero. The matrix uses compressed column storage (CCS) format by default.</p><h5 id="autotoc_md172">Storage Format</h5><p>Eigen&#x27;s SparseMatrix uses Compressed Column Storage (CCS), also known as Compressed Sparse Column (CSC) format, which stores:</p><ul><li>Non-zero values</li><li>Signed 32-bit row indices for each non-zero value</li><li>Signed 32-bit column pointers indicating where each column starts</li></ul><h5 id="autotoc_md173">Typical Applications</h5><ul><li>Stiffness matrices: <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -5182,9 +5219,9 @@ $ x $
               <div class="m-doc-template">
                 template&lt;class AScalarType, class YScalarType, class XScalarType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ddac5818d636a9c9993c5b89086d4c8" class="m-doc-self">axpy</a>(</span><span class="m-doc-wrap"><a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a>&lt;YScalarType&gt;&amp; y,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ddac5818d636a9c9993c5b89086d4c8" class="m-doc-self">axpy</a>(</span><span class="m-doc-wrap"><a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">SparseMatrix</a>&lt;YScalarType&gt;&amp; y,
               AScalarType alpha,
-              const <a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a>&lt;XScalarType&gt;&amp; x)</span></span>
+              const <a href="#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">SparseMatrix</a>&lt;XScalarType&gt;&amp; x)</span></span>
             </h3>
             <p>Performs the AXPY operation on sparse matrices.</p>
             <table class="m-table m-fullwidth m-flat">

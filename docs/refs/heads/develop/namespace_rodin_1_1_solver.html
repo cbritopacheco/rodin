@@ -85,6 +85,7 @@
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
               </ul>
             </li>
           </ul>
@@ -327,6 +328,10 @@ $ u^{k+1} = u^k + \delta u^k $
             </dt>
             <dd>IDRstab(l) solver for sparse systems.</dd>
             <dt>
+              struct <a href="struct_rodin_1_1_solver_1_1_info.html" class="m-doc">Info</a>
+            </dt>
+            <dd>Outcome of the most recent operation of a factorization-based solver.</dd>
+            <dt>
               class <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>
             </dt>
             <dd>PETSc KSP (Krylov subspace) linear solver wrapper.</dd>
@@ -440,6 +445,27 @@ $ u^{k+1} = u^k + \delta u^k $
             </dt>
             <dd>Sparse QR factorization with numerical column pivoting.</dd>
           </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#aac065895145457f56c1eb01b7abeb96e" class="m-doc">Factorization</a> { </span><span class="m-doc-wrap"><a href="#aac065895145457f56c1eb01b7abeb96eaaddee1396a3e20ceea8071ed6da54866" class="m-doc">Symbolic</a>,
+              <a href="#aac065895145457f56c1eb01b7abeb96ea87322391cc6e8948ce9fd5d6cb84fced" class="m-doc">Numeric</a> }</span>
+            </dt>
+            <dd>Stage of a factorization.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="aac065895145457f56c1eb01b7abeb96e"><div>
+            <h3>
+              enum class Rodin::<wbr />Solver::<wbr /><a href="#aac065895145457f56c1eb01b7abeb96e" class="m-doc-self">Factorization</a>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_solver_2_info_8h.html">&lt;Rodin/Solver/Info.h&gt;</a></div>
+            </h3>
+            <p>Stage of a factorization.</p>
+<p>Symbolic analysis depends only on the sparsity pattern, whereas the numeric factorization also depends on the values. A solver that retains Factorization::Numeric therefore retains Factorization::Symbolic too.</p>
+          </div></section>
         </section>
       </div>
     </div>
