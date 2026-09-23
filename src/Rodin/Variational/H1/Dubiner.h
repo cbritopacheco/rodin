@@ -146,7 +146,7 @@ namespace Rodin::Variational
         Real a, b;
         getCollapsed(a, b, x, y);
 
-        getReferenceGradientFromCollapsed(dpsi_dx, dpsi_dy, a, b, 1.0 - y);
+        getReferenceGradientFromCollapsed<P, Q>(dpsi_dx, dpsi_dy, a, b, 1.0 - y);
       }
 
       /**
@@ -421,7 +421,7 @@ namespace Rodin::Variational
         Real a, b, c;
         getCollapsed(a, b, c, x, y, z);
 
-        getReferenceGradientFromCollapsed(
+        getReferenceGradientFromCollapsed<P, Q, R>(
           dpsi_dx, dpsi_dy, dpsi_dz, a, b, c, 1.0 - y - z, 1.0 - z);
       }
 
