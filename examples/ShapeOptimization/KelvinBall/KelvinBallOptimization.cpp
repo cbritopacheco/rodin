@@ -647,6 +647,7 @@ namespace KelvinBall
           .setGradation(remeshGradation)
           .setBaseReferences(FlatSet<Attribute>{Fluid})
           .setBoundaryReference(Gamma)
+          .setRMC(1e-5)
           .setAngleDetection(false);
         // A crossed edge (i, j) is cut at t = phi_i / (phi_i - phi_j). A cut
         // with t near 0 or 1 puts the new vertex next to an existing one and
