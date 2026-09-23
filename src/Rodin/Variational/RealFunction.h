@@ -27,7 +27,7 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::RealFunctionBase<Derived>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Real;
       /// @brief Derived CRTP function type.
       using DerivedType = Derived;
@@ -39,7 +39,14 @@ namespace Rodin::Variational
   /**
    * @defgroup RealFunctionSpecializations RealFunction Template Specializations
    * @brief Template specializations of the RealFunction class.
-   * @see RealFunction
+   * @see <a href="_real_function_8h.html">RealFunction</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref RealFunction "RealFunction<FunctionBase<NestedDerived>>" | Real-valued wrapper around a nested function. |
+   * | @ref RealFunction "RealFunction<Real>" | Constant real-valued function. |
+   * | @ref RealFunction "RealFunction<Integer>" | Constant real-valued function initialized from an integer. |
+   * | @ref RealFunction "RealFunction<F>" | Real function constructed from an arbitrary scalar callable. |
    */
 
   /**
@@ -63,7 +70,8 @@ namespace Rodin::Variational
    * );
    * ```
    *
-   * @see ScalarFunctionBase, RealFunction
+   * @see <a href="_scalar_function_8h.html">ScalarFunctionBase</a>
+   * @see <a href="_real_function_8h.html">RealFunction</a>
    */
   template <class Derived>
   class RealFunctionBase : public ScalarFunctionBase<Real, RealFunctionBase<Derived>>
@@ -130,8 +138,10 @@ namespace Rodin::Variational
       /**
        * @brief Sets the trace domain for the function.
        *
+       * The arguments specify the trace domain; they are forwarded to the
+       * derived class.
+       *
        * @tparam Args Variadic template for trace domain specification
-       * @param[in] args Arguments specifying the trace domain
        * @returns Reference to derived object (for method chaining)
        */
       template <class ... Args>

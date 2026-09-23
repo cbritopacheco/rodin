@@ -16,7 +16,8 @@
  * general (non-symmetric) linear systems
  * @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
- * @see Rodin::Solver::KSP, Rodin::PETSc::Solver::CG
+ * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+ * @see <a href="class_rodin_1_1_solver_1_1_c_g_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::PETSc::Solver::CG</a>
  */
 
 #include <petscksp.h>
@@ -38,7 +39,8 @@ namespace Rodin::Solver
    * algorithm to `KSPGMRES`.  Suitable for non-symmetric and
    * indefinite systems.
    *
-   * @see Rodin::Solver::KSP, Rodin::PETSc::Solver::GMRES
+   * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+   * @see <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html">Rodin::PETSc::Solver::GMRES</a>
    */
   template <>
   class GMRES<PETSc::Math::LinearSystem> final : public KSP

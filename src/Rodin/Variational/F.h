@@ -20,7 +20,6 @@
 
 #include "RealFunction.h"
 
-
 /**
  * @brief Contains built-in coordinate functions
  *
@@ -28,7 +27,6 @@
  * spatial coordinates, enabling convenient construction of position-dependent
  * expressions in variational formulations.
  */
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational::F
 {
   /**
@@ -74,6 +72,7 @@ namespace Rodin::Variational::F
         return p.x();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -149,6 +148,7 @@ namespace Rodin::Variational::F
         return p.y();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -224,6 +224,7 @@ namespace Rodin::Variational::F
         return p.z();
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -257,5 +258,4 @@ namespace Rodin::Variational::F
   static const Z z;
 }
 
-/// @endcond
 #endif

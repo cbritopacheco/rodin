@@ -84,7 +84,7 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::Matrix<Number>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
   };
 }

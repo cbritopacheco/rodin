@@ -32,7 +32,8 @@ namespace Rodin::IO
    *       GridFunctionBase::load() remain compilable while still producing a
    *       clear error at runtime.
    *
-   * @see Loader, GridFunctionPrinter
+   * @see <a href="class_rodin_1_1_i_o_1_1_loader.html">Loader</a>
+   * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionLoader : public IO::Loader<Variational::GridFunction<FES, Data>>

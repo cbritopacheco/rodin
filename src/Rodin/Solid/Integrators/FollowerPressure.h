@@ -150,7 +150,7 @@ namespace Rodin::Solid
         Math::SpatialMatrix<Real> Xjac; ///< Reference geometric Jacobian X_{,xi}
         Real orientation;               ///< +-1: makes the cross point OUTWARD
 
-      /// @brief Initializes the geometric data associated with a boundary face.
+        /// @brief Initializes the geometric data associated with a boundary face.
         void setFace(const Geometry::Polytope& face)
         {
           const auto& mesh = face.getMesh();
@@ -160,9 +160,9 @@ namespace Rodin::Solid
           vertices.assign(vs.begin(), vs.end());
           nv = vertices.size();
 
-        // Reference tangents from the (affine) vertex coordinates:
-        // X_{,xi_j} = X_{j+1} - X_0 for the unit simplex parametrization,
-        // consistent with p1FaceBasis/p1FaceBasisGrad above.
+          // Reference tangents from the (affine) vertex coordinates:
+          // X_{,xi_j} = X_{j+1} - X_0 for the unit simplex parametrization,
+          // consistent with p1FaceBasis/p1FaceBasisGrad above.
           Xjac.resize(sdim, faceDim);
           const auto X0 = mesh.getVertexCoordinates(vertices[0]);
           for (size_t j = 0; j < faceDim; ++j)
@@ -172,9 +172,9 @@ namespace Rodin::Solid
               Xjac(c, j) = Xj(c) - X0(c);
           }
 
-        // Orientation: sign such that surfaceCross points away from the
-        // incident cell centroid (outward of the solid), evaluated on the
-        // REFERENCE configuration (orientation is topological and constant).
+          // Orientation: sign such that surfaceCross points away from the
+          // incident cell centroid (outward of the solid), evaluated on the
+          // REFERENCE configuration (orientation is topological and constant).
           Math::SpatialVector<Real> t1(sdim), t2(sdim), cr;
           for (size_t c = 0; c < sdim; ++c)
           {
@@ -198,13 +198,13 @@ namespace Rodin::Solid
           orientation = (dot > 0.0) ? -1.0 : 1.0;
         }
 
-      /// Nodal displacement of face vertex a, component c.
+        /// Nodal displacement of face vertex a, component c.
         Real nodal(const StateFES& fes, const State& d, size_t a, size_t c) const
         {
           return d[fes.getGlobalIndex({0, vertices[a]}, c)];
         }
 
-      /// Deformed tangents at this face (P1: constant over the face).
+        /// Deformed tangents at this face (P1: constant over the face).
         void deformedTangents(
           Math::SpatialMatrix<Real>& xjac, const StateFES& fes, const State& d) const
         {

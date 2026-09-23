@@ -116,6 +116,12 @@ python3 dev/check_clang_tidy.py --build-dir build   # identifier naming
 python3 dev/check_doxygen_warnings.py               # needs doxygen 1.14.0 exactly
 ```
 
+For documentation changes, also preserve the rendered Doxygen/m.css contract:
+class pages that document multiple supported specializations include a complete
+`Specialization` / `Description` table with linked specialization entries, and
+public class/template/header references in `@see` blocks or prose lists are
+explicit `@ref` references or generated-page HTML links, not bare names.
+
 Every check is a **ratchet** measured against a committed baseline in `dev/`:
 
 - **A baseline may only shrink.** Never add an entry to
@@ -139,7 +145,7 @@ selectors CI uses. (`ctest --test-dir build/tests --print-labels` if in doubt.)
 
 ```sh
 git submodule update --init --recursive     # first time only
-git lfs pull                                # if examples/full resources are needed
+git lfs pull                                # required when resources are needed
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   -DRODIN_BUILD_SRC=ON -DRODIN_BUILD_UNIT_TESTS=ON \
@@ -171,11 +177,10 @@ cmake --build build -j2                     # match the machine; never a bare -j
   `RODIN_INSTALL_RESOURCES=OFF bash tests/installation/test_installation.sh`.
 - Examples write `*.h5`/`*.xdmf`/`*.log` into the CWD — run them from a scratch
   directory and never commit the artifacts.
-- Large example/demo meshes and bulky files under `resources/` are Git LFS
-  objects. Small test and benchmark fixtures stay in regular Git so CI can run
-  with `lfs: false`. Before adding or replacing a resource, check
-  `git check-attr filter -- <path>`; use `git lfs track <path>` for large
-  resource payloads and verify with `git lfs status` before pushing.
+- Every file under `resources/` is a Git LFS object. Before adding or replacing
+  a resource, check `git check-attr filter -- <path>` and verify with
+  `git lfs status` before pushing. Resource-dependent jobs must hydrate the
+  files they consume.
 
 ## 5. Verification discipline
 

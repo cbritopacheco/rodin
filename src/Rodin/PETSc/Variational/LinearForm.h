@@ -19,8 +19,9 @@
  *
  * ## Mathematical Background
  *
- * A linear form @f$ L : V_h \to \mathbb{R} @f$ is a mapping that takes
- * a test function @f$ v \in V_h @f$ and produces a scalar.  After
+ * A form @f$ L : V_h \to \mathbb{K} @f$ takes a test function @f$ v \in V_h
+ * @f$ and produces a scalar. It is linear over the reals and conjugate-linear
+ * over the complex numbers. After
  * discretisation the action of @f$ L @f$ on the basis functions
  * yields a load vector:
  * @f[
@@ -28,11 +29,11 @@
  * @f]
  *
  * This specialization stores @f$ \mathbf{b} @f$ in a PETSc @c Vec and
- * evaluates @f$ L(u_h) = \mathbf{b}^\top \mathbf{u} @f$ via `VecDot`.
+ * evaluates @f$ L(u_h) = \mathbf{u}^* \mathbf{b} @f$ via `VecDot`.
  *
- * @see Rodin::PETSc::Variational::TestFunction,
- *      Rodin::PETSc::Variational::BilinearForm,
- *      Rodin::PETSc::Variational::Problem
+ * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::PETSc::Variational::TestFunction</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::PETSc::Variational::BilinearForm</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::PETSc::Variational::Problem</a>
  */
 
 #include <petscsystypes.h>
@@ -53,8 +54,8 @@ namespace Rodin::Variational
    *
    * @tparam FES Finite element space type of the associated test function.
    *
-   * @see Rodin::Variational::LinearFormBase,
-   *      Rodin::PETSc::Variational::LinearForm
+   * @see <a href="_variational_2_linear_form_8h.html">Rodin::Variational::LinearFormBase</a>
+   * @see <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html">Rodin::PETSc::Variational::LinearForm</a>
    */
   template <class FES>
   class LinearForm<FES, ::Vec> final
@@ -86,6 +87,7 @@ namespace Rodin::Variational
       /// @brief Parent class providing the generic `LinearFormBase<Vec>` interface.
       using Parent = LinearFormBase<VectorType>;
 
+      /// @brief Replaces the integrators of the form.
       using Parent::operator=;
 
       using Parent::operator+=;
@@ -203,8 +205,8 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the linear form at a grid function @f$ u_h @f$.
        *
-       * Computes the action @f$ L(u_h) = \mathbf{b}^\top \mathbf{u} @f$
-       * via `VecDot(b, u, &result)`.
+       * Computes the action @f$ L(u_h) = \mathbf{u}^* \mathbf{b} @f$
+       * via `VecDot(u, b, &result)`.
        *
        * @param[in] u The grid function @f$ u_h @f$ to evaluate at.
        * @returns The scalar value @f$ L(u_h) @f$.
@@ -213,7 +215,7 @@ namespace Rodin::Variational
       {
         ScalarType result;
         PetscErrorCode ierr;
-        ierr = VecDot(this->getVector(), u.getData(), &result);
+        ierr = VecDot(u.getData(), this->getVector(), &result);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
         return result;

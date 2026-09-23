@@ -34,28 +34,28 @@ namespace Rodin::Geometry
       /// @brief A weighted graph edge between two cells.
       struct Edge
       {
-        /// @brief Index of the first incident cell.
+          /// @brief Index of the first incident cell.
           Index first;
-        /// @brief Index of the second incident cell.
+          /// @brief Index of the second incident cell.
           Index second;
-        /// @brief Edge capacity (pairwise smoothing weight).
+          /// @brief Edge capacity (pairwise smoothing weight).
           Real capacity;
-        /// @brief Optional index of this edge in the caller's edge list.
+          /// @brief Optional index of this edge in the caller's edge list.
           Index index = InvalidIndex;
       };
 
       /// @brief Result of a classification: per-cell labels and cut data.
       struct Result
       {
-        /// @brief Per-cell label (Inside or Outside).
+          /// @brief Per-cell label (Inside or Outside).
           std::vector<int> labels;
-        /// @brief Indices of the cells labeled Inside.
+          /// @brief Indices of the cells labeled Inside.
           std::vector<Index> insideCells;
-        /// @brief Indices of the cells labeled Outside.
+          /// @brief Indices of the cells labeled Outside.
           std::vector<Index> outsideCells;
-        /// @brief Edges crossing the cut (the interface skeleton).
+          /// @brief Edges crossing the cut (the interface skeleton).
           std::vector<Edge> cutEdges;
-        /// @brief Total energy (cut cost) of the solution.
+          /// @brief Total energy (cut cost) of the solution.
           Real energy = 0;
       };
 
@@ -69,28 +69,28 @@ namespace Rodin::Geometry
        */
       struct Options
       {
-        /// Multiplicative scale applied to every pairwise capacity
-        /// (Potts smoothing strength lambda).
+          /// Multiplicative scale applied to every pairwise capacity
+          /// (Potts smoothing strength lambda).
           Real lambdaScale = 1;
 
-        /// Multiplicative scale applied to every unary cost.
+          /// Multiplicative scale applied to every unary cost.
           Real unaryScale = 1;
 
-        /// If `|moment[i]| >= farFieldThreshold` the cell `i` is pinned
-        /// to `sign(-moment[i])` by injecting a large unary on the
-        /// opposite terminal. Disabled when negative.
+          /// If `|moment[i]| >= farFieldThreshold` the cell `i` is pinned
+          /// to `sign(-moment[i])` by injecting a large unary on the
+          /// opposite terminal. Disabled when negative.
           Real farFieldThreshold = -1;
 
-        /// Per-edge multiplier replacing `lambdaScale` on the i-th edge.
-        /// Use for zero-level-aware facet weighting (e.g. down-weight
-        /// pairwise term where |phi| is small so the cut prefers to
-        /// align with the actual interface).
-        /// Size must be `edges.size()` or `0` (disabled).
+          /// Per-edge multiplier replacing `lambdaScale` on the i-th edge.
+          /// Use for zero-level-aware facet weighting (e.g. down-weight
+          /// pairwise term where |phi| is small so the cut prefers to
+          /// align with the actual interface).
+          /// Size must be `edges.size()` or `0` (disabled).
           std::vector<Real> perEdgeLambda;
 
-        /// Per-cell free/fixed mask. `cellInBand[i] == false` pins cell
-        /// `i` to `sign(-moment[i])` via a large unary. Size must be
-        /// `volumes.size()` or `0` (disabled, all cells free).
+          /// Per-cell free/fixed mask. `cellInBand[i] == false` pins cell
+          /// `i` to `sign(-moment[i])` via a large unary. Size must be
+          /// `volumes.size()` or `0` (disabled, all cells free).
           std::vector<Boolean> cellInBand;
       };
 

@@ -150,7 +150,7 @@ namespace Rodin::Solid
        * @c commit(), never during assembly, so a caller controls exactly when
        * derived quantities are taken.
        *
-       * @see Solid::Output
+       * @see <a href="class_rodin_1_1_solid_1_1_output.html">Solid::Output</a>
        */
       InternalVirtualWork& setOutput(OutputFunctionType output)
       {

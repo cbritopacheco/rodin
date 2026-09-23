@@ -48,7 +48,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::DGMRES<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -58,7 +58,12 @@ namespace Rodin::Solver
   /**
    * @defgroup DGMRESSpecializations DGMRES Template Specializations
    * @brief Template specializations of the DGMRES class.
-   * @see DGMRES
+   * @see @ref DGMRES
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref DGMRES "DGMRES<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Iterative DGMRES solver for sparse systems. |
+   * | @ref DGMRES "DGMRES<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Iterative DGMRES solver for dense systems. |
    */
 
   /**

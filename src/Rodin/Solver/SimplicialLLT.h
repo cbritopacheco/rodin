@@ -35,7 +35,7 @@
  * solver.solve();
  * ```
  *
- * @see SimplicialLLT for the solver implementation
+ * @see <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html">SimplicialLLT</a> for the solver implementation
  */
 #ifndef RODIN_SOLVER_SIMPLICIALLLT_H
 #define RODIN_SOLVER_SIMPLICIALLLT_H
@@ -55,7 +55,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::SimplicialLLT<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -65,7 +65,7 @@ namespace Rodin::Solver
   /**
    * @defgroup SimplicialLLTSpecializations SimplicialLLT Template Specializations
    * @brief Template specializations of the SimplicialLLT class.
-   * @see SimplicialLLT
+   * @see @ref SimplicialLLT
    */
 
   /**

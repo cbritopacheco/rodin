@@ -21,7 +21,9 @@
  * For H1<K> elements, partial derivatives are polynomial of degree K-1 on
  * each element.
  *
- * @see Derivative, Grad, H1
+ * @see <a href="_derivative_8h.html">Derivative</a>
+ * @see <a href="_grad_8h.html">Grad</a>
+ * @see <a href="_variational_2_h1_8h.html">H1</a>
  */
 
 #include "Rodin/Geometry/Mesh.h"
@@ -34,19 +36,20 @@
 #include "ForwardDecls.h"
 #include "H1Element.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
+  /// element space, the operand type and the range type.
   template <size_t K, class Scalar, class Mesh, class Data>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
-    /// @brief Finite element space type.
+      /// @brief Finite element space type.
       using FESType = Variational::H1<K, Scalar, Mesh>;
 
-    /// @brief Operand type.
+      /// @brief Operand type.
       using OperandType = Variational::GridFunction<FESType, Data>;
 
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Scalar;
   };
 }
@@ -82,6 +85,7 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
@@ -116,6 +120,7 @@ namespace Rodin::Variational
           m_i(other.m_i)
       {}
 
+      /// @brief Interpolates at an integration point.
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -233,6 +238,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Returns the polynomial order used on a mesh entity.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -240,6 +246,7 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
+      /// @brief Creates a polymorphic copy.
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);
@@ -258,5 +265,4 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>;
 }
 
-/// @endcond
 #endif

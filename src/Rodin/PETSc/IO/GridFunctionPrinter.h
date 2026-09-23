@@ -14,7 +14,7 @@
  * The concrete specializations are provided in the format-specific headers
  * (HDF5.h, MFEM.h, MEDIT.h).
  *
- * @see Rodin::IO::GridFunctionPrinter
+ * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">Rodin::IO::GridFunctionPrinter</a>
  */
 
 #include <petscvec.h>

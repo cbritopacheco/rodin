@@ -3,6 +3,7 @@ set(RodinBenchmarks_SRCS
   P1.cpp
   Poisson.cpp
   NamedForms.cpp
+  RankOneJacobian.cpp
   MeshIO.cpp
   UniformGrid.cpp
   Connectivity.cpp

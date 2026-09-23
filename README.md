@@ -1,6 +1,6 @@
 [![Rodin](doc/Images/README_Header.png)](https://github.com/cbritopacheco/rodin/releases)
 
-# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
+# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cbritopacheco)
 
 Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
 
@@ -36,6 +36,7 @@ New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbrito
 8. [CMake options](#cmake-options)
 9. [Development](#development)
 10. [Gallery](#gallery)
+11. [Support Rodin](#support-rodin)
 
 ## Installation
 
@@ -48,7 +49,7 @@ Rodin can be easily installed from source on Linux and macOS systems.
 - C++20 compatible compiler (GCC 12+, Clang 14+, or AppleClang)
 - Boost 1.74+
 - Eigen3
-- Git LFS, if you need the large example/resource meshes
+- Git LFS, required for the resource tree
 
 **Optional:**
 - OpenMP (for parallel execution)
@@ -64,7 +65,7 @@ cd rodin
 
 git lfs install
 
-# Fetch large example/resource meshes
+# Fetch the resource tree
 git lfs pull
 
 # Configure and build
@@ -76,13 +77,12 @@ make -j4
 sudo make install
 ```
 
-If you only need the library and headers, skip the large resource payloads with
+If you only need the library and headers, skip resource hydration with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
 
-Large meshes and bulky resource payloads are tracked through Git LFS. Small
-test and benchmark fixtures stay in regular Git so CI and lightweight clones do
-not have to hydrate LFS objects. If an example fails while reading a mesh, run
-`git lfs pull` from the repository root and retry.
+All files under `resources/` are tracked through Git LFS, including test and
+benchmark fixtures. If an example or resource-dependent test fails while
+reading a file, run `git lfs pull` from the repository root and retry.
 
 ### User-Local Installation
 
@@ -145,13 +145,13 @@ make
 **Ubuntu/Debian:**
 ```bash
 sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
-sudo apt-get install git-lfs  # needed for large example/resource meshes
+sudo apt-get install git-lfs  # needed for resources
 ```
 
 **macOS (Homebrew):**
 ```bash
 brew install cmake boost eigen libomp
-brew install git-lfs  # needed for large example/resource meshes
+brew install git-lfs  # needed for resources
 ```
 
 ### Troubleshooting
@@ -495,14 +495,23 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
         <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever2D/Preview.png" alt="Shape optimization of a cantilever in 2D" width="100%">
       </a>
       <br />
-      Shape optimization of a cantilever in 2D
+      Minimization of linear-elastic compliance in 2D
     </td>
-        <td align="center" width="50%">
+    <td align="center" width="50%">
       <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/LevelSetCantilever3D.webm">
         <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/LevelSetCantilever3D/Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
       </a>
       <br />
-     Shape optimization of a cantilever in 3D
+     Minimization of linear-elastic compliance in 3D
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/KelvinShapes/Cubic_024_Preview.png" alt="Shape optimization of a cantilever in 3D" width="100%">
+      </a>
+      <br />
+      Translational-rotational coupling optimization in Stokes flow (by <a href="https://kazusa000.github.io/">J. Wang</a>)
     </td>
   </tr>
 </table>
@@ -516,7 +525,7 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
         <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png" alt="Density Poisson" width="100%">
       </a>
       <br />
-      Density optimization for Poisson
+      Minimization of temperature over a 2D plaque
     </td>
         <td align="center" width="33%">
       <a href="">
@@ -534,3 +543,12 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
     </td>
   </tr>
 </table>
+
+## Support Rodin
+
+Rodin is developed and maintained as an open-source project. If you find it
+useful for research, teaching, or engineering, you can support its continued
+development by [Buying me a Coffee](https://www.buymeacoffee.com/cbritopacheco).
+
+Support helps fund continued development, documentation, testing, and
+maintenance.

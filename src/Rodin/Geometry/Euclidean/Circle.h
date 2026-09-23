@@ -47,7 +47,9 @@ namespace Rodin::Geometry::Euclidean
    * - Intersection with other geometric objects
    * - Distance computations
    *
-   * @see Point2D, Line2D, LineSegment2D
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html">Point2D</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html">Line2D</a>
+   * @see <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html">LineSegment2D</a>
    */
   template <class T>
   class Circle : public Base<Circle<T>, T>

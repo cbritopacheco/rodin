@@ -69,6 +69,15 @@ namespace Rodin::Assembly
    *
    * Concrete behavior is provided by partial specializations for supported
    * operand types.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref MPI "MPI<IndexMap<Scalar>, DirichletBC<TrialFunction, FunctionBase>>" | Distributed scalar Dirichlet elimination-map assembly on MPI mesh shards. |
+   * | @ref MPI "MPI<IndexMap<pair<IndexArray, Vector>>, DirichletBC<TrialFunction, ShapeFunctionBase>>" | Distributed identification-style Dirichlet constraint assembly. |
+   * | @ref MPI "MPI<Vec, LinearForm<FES, Vec>>" | PETSc/MPI linear-form assembly. |
+   * | @ref MPI "MPI<Mat, BilinearForm<..., Mat>>" | PETSc/MPI bilinear-form assembly. |
+   * | @ref MPI "MPI<PETSc::Math::LinearSystem, Problem<PETSc::Math::LinearSystem, U, V>>" | PETSc/MPI single-field problem assembly. |
+   * | @ref MPI "MPI<PETSc::Math::LinearSystem, Problem<PETSc::Math::LinearSystem, U1, U2, U3, Us...>>" | PETSc/MPI mixed multi-field problem assembly. |
    */
   template <class LinearAlgebraType, class Operand>
   class MPI;

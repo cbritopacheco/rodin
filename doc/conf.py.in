@@ -19,6 +19,7 @@ LINKS_NAVBAR1 = [
         ('Examples and tutorials', 'examples-index'),
         ('Gallery', 'gallery'),
         ('I/O in Rodin', 'guides-io'),
+        ('Source headers', 'source-headers'),
         ('Notation', 'notation-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [

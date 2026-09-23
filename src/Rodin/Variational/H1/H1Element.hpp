@@ -38,20 +38,25 @@
 #include "GLL.h"
 #include "LegendrePolynomial.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
+  /// @brief Indexing of the tensor-product modes on the reference pyramid.
   template <size_t K>
   struct PyramidIndex
   {
+      /// @brief Number of entries.
       static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
+      /// @brief Pair of tensor-product indices of a pyramid mode.
       struct IJ
       {
+          /// @brief Index of the cached polytope.
           size_t i;
+          /// @brief Second tensor-product index.
           size_t j;
       };
 
+      /// @brief Gets the index offset of a pyramid layer.
       static constexpr size_t getLayerOffset(size_t layer)
       {
         size_t out = 0;
@@ -63,12 +68,14 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the linear index of a tensor-product mode.
       static constexpr size_t getIndex(size_t i, size_t j, size_t k)
       {
         const size_t n = K - k + 1;
         return getLayerOffset(k) + j * n + i;
       }
 
+      /// @brief Decodes a linear index into its tensor-product indices.
       static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
       {
         size_t rem = idx;
@@ -88,6 +95,7 @@ namespace Rodin::Variational
         i = j = k = 0;
       }
 
+      /// @brief Gets the number of modes on a triangular lattice.
       static constexpr IJ getTriangleLattice(size_t alpha)
       {
         size_t pos = 0;
@@ -102,6 +110,7 @@ namespace Rodin::Variational
         return IJ{0, 0};
       }
 
+      /// @brief Gets the index of a mode on a pyramid side.
       static constexpr size_t getSideIndex(size_t local, size_t alpha)
       {
         const auto ij = getTriangleLattice(alpha);
@@ -125,10 +134,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Bernstein basis on the reference pyramid.
   template <size_t K>
   class BernsteinPyramid
   {
     public:
+      /// @brief Gets a binomial coefficient.
       static Real getBinomial(size_t n, size_t k)
       {
         if (k > n)
@@ -145,6 +156,7 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the basis function of a local degree of freedom.
       static Real getBasis(size_t n, size_t i, Real x)
       {
         if (i > n)
@@ -158,6 +170,7 @@ namespace Rodin::Variational
         return out;
       }
 
+      /// @brief Gets the derivative of the basis function.
       static Real getDerivative(size_t n, size_t i, Real x)
       {
         if (n == 0)
@@ -175,10 +188,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Modal basis on the reference pyramid.
   template <size_t K>
   class PyramidModal
   {
     public:
+      /// @brief Gets the basis function of a local degree of freedom.
       static Real getBasis(size_t mode, const Math::SpatialPoint& r)
       {
         size_t i, j, k;
@@ -186,7 +201,7 @@ namespace Rodin::Variational
 
         const Real z = r.z();
         const Real q = Real(1) - z;
-        if (q <= RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE)
+        if (q == 0.0)
           return k == K ? Real(1) : Real(0);
 
         const size_t n = K - k;
@@ -197,6 +212,7 @@ namespace Rodin::Variational
           BernsteinPyramid<K>::getBasis(n, j, b) * BernsteinPyramid<K>::getBasis(K, k, z);
       }
 
+      /// @brief Gets the derivative of the basis function.
       static Real getDerivative(size_t mode, size_t deriv, const Math::SpatialPoint& r)
       {
         size_t i, j, k;
@@ -204,7 +220,7 @@ namespace Rodin::Variational
 
         const Real z = r.z();
         const Real q = Real(1) - z;
-        if (q <= RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE)
+        if (q == 0.0)
           return 0;
 
         const size_t n = K - k;
@@ -228,10 +244,12 @@ namespace Rodin::Variational
       }
   };
 
+  /// @brief Vandermonde matrix of the modal basis on the reference pyramid.
   template <size_t K>
   class VandermondePyramid
   {
     public:
+      /// @brief Gets the underlying matrix.
       static const Math::Matrix<Real>& getMatrix()
       {
         static const Math::Matrix<Real> s_vandermonde = [] {
@@ -251,6 +269,7 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
+      /// @brief Gets the inverse of the matrix.
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {
@@ -669,15 +688,11 @@ namespace Rodin::Variational
 
         case Geometry::Polytope::Type::Triangle:
         {
-          // Dubiner modal gradients + chain rule (r,s) → (x,y)
+          // Dubiner modal gradients in reference coordinates.
           const auto& Vinv = VandermondeTriangle<K>::getInverse();
-
-          Scalar rc, sc;
-          DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
-
-          const Scalar x = r.x();
-          const Scalar y = r.y();
-          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+          Real a, b;
+          DubinerTriangle<K>::getCollapsed(a, b, r.x(), r.y());
+          const Real s = 1.0 - r.y();
 
           Scalar result = Scalar(0);
           size_t modeIdx = 0;
@@ -687,23 +702,9 @@ namespace Rodin::Variational
             Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
               constexpr size_t Q = qIdx.value;
 
-              Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
-              DubinerTriangle<K>::template getGradient<P, Q>(dpsi_dr, dpsi_ds, rc, sc);
-
-              Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
-
-              // r = 2x/(1-y) - 1, s = 2y - 1
-              if (Math::abs(Scalar(1) - y) > eps)
-              {
-                const Scalar denom = Scalar(1) - y;
-                const Scalar dr_dx = Scalar(2) / denom;
-                const Scalar dr_dy = Scalar(2) * x / (denom * denom);
-                const Scalar ds_dx = Scalar(0);
-                const Scalar ds_dy = Scalar(2);
-
-                dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
-                dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
-              }
+              Real dpsi_dx = 0.0, dpsi_dy = 0.0;
+              DubinerTriangle<K>::template getReferenceGradientFromCollapsed<P, Q>(
+                dpsi_dx, dpsi_dy, a, b, s);
 
               if (m_i == 0) // \partial/\partialx
                 result += Vinv(modeIdx, m_local) * dpsi_dx;
@@ -738,17 +739,12 @@ namespace Rodin::Variational
 
         case Geometry::Polytope::Type::Tetrahedron:
         {
-          // Dubiner modal gradients + chain rule (a,b,c) → (x,y,z)
+          // Dubiner modal gradients in reference coordinates.
           const auto& Vinv = VandermondeTetrahedron<K>::getInverse();
-
-          Scalar ac, bc, cc;
-          DubinerTetrahedron<K>::getCollapsed(
-              ac, bc, cc, r.x(), r.y(), r.z());
-
-          const Scalar x = r.x();
-          const Scalar y = r.y();
-          const Scalar z = r.z();
-          const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+          Real a, b, c;
+          DubinerTetrahedron<K>::getCollapsed(a, b, c, r.x(), r.y(), r.z());
+          const Real s1 = 1.0 - r.y() - r.z();
+          const Real s2 = 1.0 - r.z();
 
           Scalar result = Scalar(0);
           size_t modeIdx = 0;
@@ -760,42 +756,11 @@ namespace Rodin::Variational
               Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
                 constexpr size_t R = rIdx.value;
 
-                Scalar dpsi_da = Scalar(0);
-                Scalar dpsi_db = Scalar(0);
-                Scalar dpsi_dc = Scalar(0);
-                DubinerTetrahedron<K>::template getGradient<P, Q, R>(
-                  dpsi_da, dpsi_db, dpsi_dc, ac, bc, cc);
-
-                Scalar dpsi_dx = Scalar(0);
-                Scalar dpsi_dy = Scalar(0);
-                Scalar dpsi_dz = Scalar(0);
-
-                const Scalar denom2 = Scalar(1) - z; // 1 - z
-                const Scalar denom3 = Scalar(1) - y - z; // 1 - y - z
-
-                if (Math::abs(denom2) > eps && Math::abs(denom3) > eps)
-                {
-                  // a = 2x / (1 - y - z) - 1
-                  const Scalar da_dx = Scalar(2) / denom3;
-                  const Scalar da_dy = Scalar(2) * x / (denom3 * denom3);
-                  const Scalar da_dz = da_dy;
-
-                  // b = 2y / (1 - z) - 1
-                  const Scalar db_dx = Scalar(0);
-                  const Scalar db_dy = Scalar(2) / denom2;
-                  const Scalar db_dz = Scalar(2) * y / (denom2 * denom2);
-
-                  // c = 2z - 1
-                  const Scalar dc_dx = Scalar(0);
-                  const Scalar dc_dy = Scalar(0);
-                  const Scalar dc_dz = Scalar(2);
-
-                  dpsi_dx = dpsi_da * da_dx + dpsi_db * db_dx + dpsi_dc * dc_dx;
-
-                  dpsi_dy = dpsi_da * da_dy + dpsi_db * db_dy + dpsi_dc * dc_dy;
-
-                  dpsi_dz = dpsi_da * da_dz + dpsi_db * db_dz + dpsi_dc * dc_dz;
-                }
+                Real dpsi_dx = 0.0;
+                Real dpsi_dy = 0.0;
+                Real dpsi_dz = 0.0;
+                DubinerTetrahedron<K>::template getReferenceGradientFromCollapsed<P, Q,
+                  R>(dpsi_dx, dpsi_dy, dpsi_dz, a, b, c, s1, s2);
 
                 if (m_i == 0) // \partial/\partialx
                   result += Vinv(modeIdx, m_local) * dpsi_dx;
@@ -837,15 +802,11 @@ namespace Rodin::Variational
 
           if (m_i < 2) // \partial/\partialx or \partial/\partialy
           {
-            // --- triangle gradient (same as Triangle case, but index = alpha) ---
+            // --- triangle gradient in reference coordinates ---
             const auto& Vinv = VandermondeTriangle<K>::getInverse();
-
-            Scalar rc, sc;
-            DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
-
-            const Scalar x   = r.x();
-            const Scalar y   = r.y();
-            const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
+            Real a, b;
+            DubinerTriangle<K>::getCollapsed(a, b, r.x(), r.y());
+            const Real s = 1.0 - r.y();
 
             Scalar triDeriv = Scalar(0);
             size_t modeIdx = 0;
@@ -855,23 +816,9 @@ namespace Rodin::Variational
               Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
                 constexpr size_t Q = qIdx.value;
 
-                Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
-                DubinerTriangle<K>::template getGradient<P, Q>(dpsi_dr, dpsi_ds, rc, sc);
-
-                Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
-
-                // r = 2x/(1-y) - 1, s = 2y - 1
-                if (Math::abs(Scalar(1) - y) > eps)
-                {
-                  const Scalar denom = Scalar(1) - y;
-                  const Scalar dr_dx = Scalar(2) / denom;
-                  const Scalar dr_dy = Scalar(2) * x / (denom * denom);
-                  const Scalar ds_dx = Scalar(0);
-                  const Scalar ds_dy = Scalar(2);
-
-                  dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
-                  dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
-                }
+                Real dpsi_dx = 0.0, dpsi_dy = 0.0;
+                DubinerTriangle<K>::template getReferenceGradientFromCollapsed<P, Q>(
+                  dpsi_dx, dpsi_dy, a, b, s);
 
                 if (m_i == 0) // \partial/\partialx
                   triDeriv += Vinv(modeIdx, alpha) * dpsi_dx;
@@ -957,5 +904,4 @@ namespace Rodin::Variational
   }
 }
 
-/// @endcond
 #endif

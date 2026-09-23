@@ -20,9 +20,15 @@ namespace Rodin::Variational
    * @tparam Range Range value type
    *
    * @note For an overview of all the possible specializations of the
-   * P0 class, please see `P0Specializations`.
+   * P0 class, please see
+   * <a href="_variational_2_p0_8h.html">P0Specializations</a>.
    *
-   * @see P0ElementSpecializations
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P0Element "P0Element<Scalar>" | Scalar-valued discontinuous piecewise constant element. |
+   * | @ref P0Element "P0Element<SpatialVector<Scalar>>" | Vector-valued discontinuous piecewise constant element. |
+   *
+   * @see <a href="_p0_element_8h.html">P0ElementSpecializations</a>
    */
   template <class Range>
   class P0Element;
@@ -41,9 +47,15 @@ namespace Rodin::Variational
    * for a given vector dimension @f$ d \in \mathbb{N} @f$.
    *
    * @note For an overview of all the possible specializations of the
-   * P0 class, please see `P0Specializations`.
+   * P0 class, please see
+   * <a href="_variational_2_p0_8h.html">P0Specializations</a>.
    *
-   * @see `P0Specializations`
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P0 "P0<Real, Mesh<Context::Local>>" | Scalar-valued local-mesh discontinuous piecewise constant space. |
+   * | @ref P0 "P0<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh discontinuous piecewise constant space. |
+   *
+   * @see <a href="_variational_2_p0_8h.html">P0Specializations</a>
    */
   template <class Range, class Mesh>
   class P0;
@@ -76,4 +88,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

@@ -48,7 +48,9 @@ namespace Rodin::Solid
    * modulus @f$ \kappa @f$. The small-strain shear modulus is
    * @f$ \mu = 2 c_1 @f$; @f$ c_2, c_3 @f$ control the strain-stiffening.
    *
-   * @see HyperElasticLaw, MooneyRivlin, NeoHookean
+   * @see <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html">HyperElasticLaw</a>
+   * @see <a href="class_rodin_1_1_solid_1_1_mooney_rivlin.html">MooneyRivlin</a>
+   * @see <a href="class_rodin_1_1_solid_1_1_neo_hookean.html">NeoHookean</a>
    */
   class Yeoh final : public HyperElasticLaw<Yeoh>
   {

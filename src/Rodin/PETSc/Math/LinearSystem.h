@@ -24,9 +24,9 @@
  * such as @ref Rodin::Solver::KSP receive a reference to the linear
  * system through the `solve(LinearSystem&)` interface.
  *
- * @see Rodin::PETSc::Math::LinearSystem (convenience alias),
- *      Rodin::Solver::KSP,
- *      Rodin::PETSc::Variational::Problem
+ * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a> convenience alias
+ * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
+ * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::PETSc::Variational::Problem</a>
  */
 
 #include <petsc.h>
@@ -63,8 +63,8 @@ namespace Rodin::Math
    * (`IS`) that can be passed to `PCFIELDSPLIT` for block
    * preconditioning of multi-field systems.
    *
-   * @see Rodin::PETSc::Math::LinearSystem (convenience alias),
-   *      Rodin::Solver::KSP
+   * @see <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::PETSc::Math::LinearSystem</a> convenience alias
+   * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
    */
   template <>
   class LinearSystem<::Mat, ::Vec>
@@ -94,7 +94,7 @@ namespace Rodin::Math
        * The class takes ownership of the `IS` handles and destroys them
        * in its destructor.
        *
-       * @see Rodin::PETSc::Variational::Problem::setFieldSplits
+       * @see <a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u1_00_01_u2_00_01_u3_00_01_us_8_8_8_01_4.html">Rodin::PETSc::Variational::Problem::setFieldSplits</a>
        */
       class FieldSplits
       {
@@ -447,7 +447,7 @@ namespace Rodin::PETSc::Math
   /**
    * @brief Convenient alias for the PETSc linear system specialization.
    *
-   * @see Rodin::Math::LinearSystem
+   * @see <a href="class_rodin_1_1_math_1_1_linear_system.html">Rodin::Math::LinearSystem</a>
    */
   using LinearSystem = Rodin::Math::LinearSystem<Matrix, Vector>;
 }

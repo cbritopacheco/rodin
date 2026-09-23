@@ -46,7 +46,7 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::IDRSTABL<LinearSystem>>
   {
-    /// @brief Linear system type.
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
   };
 }
@@ -56,7 +56,12 @@ namespace Rodin::Solver
   /**
    * @defgroup IDRSTABLSpecializations IDRSTABL Template Specializations
    * @brief Template specializations of the IDRSTABL class.
-   * @see IDRSTABL
+   * @see @ref IDRSTABL
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref IDRSTABL "IDRSTABL<LinearSystem<SparseMatrix<Scalar>, Vector<Scalar>>>" | Stabilized IDR(s) solver for sparse systems. |
+   * | @ref IDRSTABL "IDRSTABL<LinearSystem<Matrix<Scalar>, Vector<Scalar>>>" | Stabilized IDR(s) solver for dense systems. |
    */
 
   /**

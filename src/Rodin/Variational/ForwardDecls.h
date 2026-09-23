@@ -28,7 +28,6 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -326,9 +325,11 @@ namespace Rodin::Variational
   template <class Number, class Derived>
   class BilinearFormIntegratorBase;
 
+  /// @brief Base class for bilinear form integrators local to a single polytope.
   template <class Number>
   class LocalBilinearFormIntegratorBase;
 
+  /// @brief Base class for bilinear form integrators coupling two polytopes.
   template <class Number>
   class GlobalBilinearFormIntegratorBase;
 
@@ -1097,6 +1098,8 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
+  /// @brief Accumulated bilinear forms, linear forms and boundary conditions of a
+  /// Problem.
   template <class Operator, class Vector, class Scalar>
   class ProblemBody;
 
@@ -1129,5 +1132,4 @@ namespace Rodin::Variational
   > class Flow;
 }
 
-/// @endcond
 #endif

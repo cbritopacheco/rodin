@@ -35,7 +35,6 @@
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -45,6 +44,7 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Pointwise greater-or-equal comparison of two function expressions.
    * @ingroup GEQSpecializations
    */
   template <class LHSDerived, class RHSDerived>
@@ -61,39 +61,46 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
+      /// @brief Constructs the expression from its left and right operands.
       GEQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
+      /// @brief Copy constructor.
       GEQ(const GEQ& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /// @brief Move constructor.
       GEQ(GEQ&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
       {}
 
+      /// @brief Evaluates the expression at a geometric point.
       constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) >= getRHS().getValue(p);
       }
 
+      /// @brief Evaluates the expression at an integration point.
       constexpr
       Boolean getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) >= getRHS().getValue(ip);
       }
 
+      /// @brief Gets the left-hand side operand.
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /// @brief Gets the right-hand side operand.
       const auto& getRHS() const
       {
         assert(m_rhs);
@@ -118,31 +125,30 @@ namespace Rodin::Variational
     -> GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  constexpr
-  auto
+  constexpr auto
+  /// @brief Greater-or-equal comparison of two function expressions.
   operator>=(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return GEQ(lhs, rhs);
   }
 
   template <class Number, class RHSDerived,
-           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  constexpr
-  auto
+    typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  constexpr auto
+  /// @brief Greater-or-equal comparison of two function expressions.
   operator>=(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return GEQ(RealFunction(lhs), rhs);
   }
 
   template <class LHSDerived, class Number,
-           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  constexpr
-  auto
+    typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  constexpr auto
+  /// @brief Greater-or-equal comparison of two function expressions.
   operator>=(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return GEQ(lhs, RealFunction(rhs));
   }
 }
 
-/// @endcond
 #endif

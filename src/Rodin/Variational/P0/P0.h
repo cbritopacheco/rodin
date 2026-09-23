@@ -20,36 +20,39 @@
 #include "ForwardDecls.h"
 #include "P0Element.h"
 
-/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Number, Mesh>>
   {
-    /// @brief Mesh type.
+      /// @brief Mesh type.
       using MeshType = Mesh;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
-    /// @brief Execution context type.
+      /// @brief Execution context type.
       using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-    /// @brief Finite element type.
+      /// @brief Finite element type.
       using ElementType = Variational::P0Element<RangeType>;
   };
 
+  /// @brief Type traits for @c P0: exposes the mesh type, the scalar type, the range
+  /// type, the execution context and the finite element type.
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
   {
-    /// @brief Mesh type.
+      /// @brief Mesh type.
       using MeshType = Mesh;
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
-    /// @brief Range (evaluation value) type.
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
-    /// @brief Execution context type.
+      /// @brief Execution context type.
       using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-    /// @brief Finite element type.
+      /// @brief Finite element type.
       using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
   };
 }
@@ -59,7 +62,12 @@ namespace Rodin::Variational
   /**
    * @defgroup P0Specializations P0 Template Specializations
    * @brief Template specializations of the P0 class.
-   * @see P0
+   * @see <a href="class_rodin_1_1_variational_1_1_p0.html">P0</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref P0 "P0<Real, Mesh<Context::Local>>" | Scalar-valued local-mesh discontinuous piecewise constant space. |
+   * | @ref P0 "P0<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh discontinuous piecewise constant space. |
    */
 
   template <class Range, class Mesh = Geometry::Mesh<Context::Local>>
@@ -129,20 +137,25 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, P0<RangeType, MeshType>>;
 
+      /// @brief Pullback of a P0 function to the reference element.
       template <class Callable>
       class Pullback :
         public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /// @brief Constructs the pullback of a function on a polytope.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pullback(const Pullback&) = default;
 
+          /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -154,11 +167,13 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /// @brief Pushforward of a P0 function to the physical element.
       template <class Callable>
       class Pushforward :
         public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
           /**
@@ -170,8 +185,10 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
+          /// @brief Evaluates at a geometric point.
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -402,5 +419,4 @@ namespace Rodin::Variational
   using ComplexP0 = P0<Complex, Mesh>;
 }
 
-/// @endcond
 #endif

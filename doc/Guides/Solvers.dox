@@ -19,6 +19,12 @@
   covers all available solvers, explains when to use each, and shows how to
   configure them for best performance.
 
+  Solver behavior depends on the numerical contracts established by assembly:
+  sign conventions, constraint elimination, system lifetime, and residual/
+  tangent consistency are summarized in
+  @ref guides-numerical-contracts "Numerical contracts". Backend-specific
+  solver/storage choices are summarized in @ref guides-backends "Backends".
+
   @section guides-solvers-available Available Solvers
 
   Rodin provides a wide range of solvers. They are organized into direct
@@ -456,6 +462,8 @@
   - @ref Rodin::PETSc "PETSc module"
   - @ref guides-weak-formulations "Weak formulations"
   - @ref guides-boundary-conditions "Boundary conditions"
+  - @ref guides-numerical-contracts "Numerical contracts"
+  - @ref guides-backends "Backends"
   - @ref examples-pdes-poisson "Poisson example"
 
   */

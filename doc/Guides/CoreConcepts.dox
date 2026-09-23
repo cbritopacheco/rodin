@@ -9,6 +9,11 @@
   This section provides a deeper understanding of the core concepts in Rodin,
   building on what you learned in the previous sections.
 
+  @note Before relying on finite element coefficient values, solver reuse, or
+  constraint behavior, read @ref guides-numerical-contracts "Numerical
+  contracts". It explains where interpolation, `L2` projection, assembly signs,
+  and solver lifetimes differ.
+
   @section guides-getting-started-core-concepts-geometry Geometry and Meshes
 
   @subsection guides-getting-started-core-concepts-mesh The Mesh Object
@@ -52,7 +57,7 @@
   Mesh tet_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
   @endcode
 
-  @subsection guides-getting-started-core-concepts-connectivity Connectivity
+  @section guides-getting-started-core-concepts-connectivity Connectivity
 
   Connectivity describes the relationships between polytopes of different
   dimensions. You need to compute connectivity before certain operations.
@@ -364,7 +369,12 @@
 
   A `GridFunction` represents a discrete
   function in a finite element space — it stores the actual coefficient values
-  (degrees of freedom) and provides evaluation, projection, and I/O.
+  (degrees of freedom) and provides assignment, evaluation, and I/O.
+
+  Assignment from a function expression interpolates values into the finite
+  element space by applying the space's DOF functionals. This is different from
+  an `L2` projection, which is a variational problem solved through a mass
+  matrix; see @ref guides-numerical-contracts "Numerical contracts".
 
   @subsection guides-getting-started-core-concepts-gf-create Creating Grid Functions
 
@@ -374,10 +384,10 @@
   // Create a grid function in the space (coefficients initialized to zero)
   GridFunction u(Vh);
 
-  // Project a lambda expression onto the space
+  // Interpolate a lambda expression into the space
   u = [](const Geometry::Point& p) { return p.x() * p.y(); };
 
-  // Project a RealFunction
+  // Use the project() convenience API for the same DOF assignment
   RealFunction f = 1;
   GridFunction v(Vh);
   v.project(f);
@@ -668,7 +678,8 @@
   @note The kernel @f$ K(\mathbf{x}, \mathbf{y}) @f$ is singular when
   @f$ \mathbf{x} = \mathbf{y} @f$. The small regularization term
   @f$ \varepsilon \int \nabla u \cdot \nabla v @f$ stabilizes the formulation.
-  See the `examples/IntegralEquations/` directory for complete implementations.
+  See the [IntegralEquations examples](https://github.com/cbritopacheco/rodin/tree/develop/examples/IntegralEquations)
+  directory for complete implementations.
 
   @subsection guides-getting-started-core-concepts-trace TraceOperator
 

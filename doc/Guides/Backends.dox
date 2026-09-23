@@ -1,0 +1,96 @@
+/**
+  @page guides-backends Backends and supported configurations
+  @brief How Rodin varies execution, storage, and solver backends
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Rodin exposes one mathematical surface and selects concrete behavior through
+  template specializations. The main axes are mesh context, assembly strategy,
+  linear algebra storage, and solver backend.
+
+  @section guides-backends-map Backend Map
+
+  | Axis | Local Eigen | OpenMP | MPI | PETSc |
+  |------|-------------|--------|-----|-------|
+  | Context | `Context::Local` | `Context::Local` | `Context::MPI` | Local or MPI |
+  | Mesh | `Mesh<Context::Local>` | same | `Mesh<Context::MPI>` | same mesh contexts |
+  | Assembly | `Assembly::Sequential` | `Assembly::OpenMP` | `Assembly::MPI` | PETSc assembly specializations |
+  | Linear algebra | `Math::SparseMatrix`, `Math::Matrix`, `Math::Vector` | same | usually PETSc for distributed solves | PETSc `Mat`/`Vec` wrappers |
+  | Solvers | Eigen and SuiteSparse wrappers | same after assembly | usually PETSc KSP/SNES | `Solver::KSP`, PETSc `CG`, `GMRES`, `SNES` |
+  | I/O | MFEM, MEDIT, HDF5, XDMF | same | HDF5/XDMF shard-aware paths | PETSc grid-function data paths |
+
+  @section guides-backends-local Local Eigen Path
+
+  The local path is the default. It uses
+  @ref Rodin::Geometry::Mesh "Mesh<Context::Local>",
+  `TrialFunction`, `TestFunction`, local
+  @ref Rodin::Math "Math" matrices and vectors, and the native
+  @ref Rodin::Solver "Solver" wrappers.
+
+  This is the best path for examples, small and medium problems, unit tests,
+  and backend-independent feature development.
+
+  @section guides-backends-openmp OpenMP Assembly
+
+  When Rodin is built with OpenMP support, `Assembly::Default` can select
+  shared-memory assembly for local meshes. OpenMP changes the assembly
+  iteration strategy, not the mathematical problem or the linear algebra
+  objects.
+
+  OpenMP support should preserve deterministic results within floating-point
+  accumulation expectations. A feature that supports local assembly should be
+  checked under OpenMP if it changes element iteration, thread-local storage,
+  or merge behavior.
+
+  @section guides-backends-mpi MPI Mesh Context
+
+  The MPI path uses @ref Rodin::Context::MPI "Context::MPI" and
+  @ref Rodin::Geometry::MPIMesh "Mesh<Context::MPI>". A distributed mesh stores
+  a rank-local @ref Rodin::Geometry::Shard "Shard" with owned, shared, and
+  ghost entities.
+
+  Distributed algorithms must respect ownership and reconciliation:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(2, 3);
+  mesh.reconcile(2);
+  @endcode
+
+  See @ref guides-mpi "MPI" for the full mesh distribution workflow.
+
+  @section guides-backends-petsc PETSc Storage and Solvers
+
+  PETSc support is activated by using PETSc-backed trial and test functions:
+
+  @code{.cpp}
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+  @endcode
+
+  This selects PETSc-backed grid functions, forms, assembly, and
+  @ref Rodin::PETSc::Math "PETSc linear algebra" where appropriate. PETSc can
+  be used with local meshes or MPI meshes. For large distributed problems,
+  PETSc is the standard solver backend.
+
+  @section guides-backends-support What Complete Support Means
+
+  A feature may support only part of the backend matrix. That is fine, but the
+  documentation and tests should say so explicitly.
+
+  | Feature | Minimum support to claim it |
+  |---------|-----------------------------|
+  | Form-language operator | Traits, expression class, and assembly/evaluation path for every advertised grade/range |
+  | Finite element space | DOF layout, point evaluation, GridFunction assignment, and required differential operators |
+  | Assembly feature | Sequential implementation plus OpenMP/MPI/PETSc mirrors when advertised |
+  | Solver | Specialization for each advertised linear-system type |
+  | IO format | Loader/printer specialization for each advertised mesh, FES, and data backend |
+
+  @section guides-backends-see-also See Also
+
+  - @ref guides-mpi "MPI"
+  - @ref guides-petsc "PETSc"
+  - @ref guides-solvers "Solvers"
+  - @ref guides-numerical-contracts "Numerical contracts"
+*/

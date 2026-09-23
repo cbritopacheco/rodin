@@ -9,11 +9,22 @@ Hierarchical: read top-down, stop at the depth your task needs.
   surface style. **Read before writing any code.**
 - [conventions.md](conventions.md) — hard rules: scope discipline, error
   handling, design preferences, testing conventions.
+- [writing.md](writing.md) — scientific writing: impersonal explanatory voice,
+  mathematical exposition, claim status, numerical reporting, and editing.
+- [reasoning.md](reasoning.md) — reasoning and reflection: problem framing,
+  dependencies, comparisons, independent checks, simplifications, and limits.
 
 ## Level 2 — orientation
 
 - [architecture.md](architecture.md) — the module map: every directory under
   `src/Rodin/`, what it is, how the layers stack.
+- [workflows.md](workflows.md) — operational checklists for extending nodes,
+  finite element spaces, assembly, solvers, IO, and Solid terms.
+- [backend-support.md](backend-support.md) — what "supported" means across
+  local Eigen, OpenMP, MPI, and PETSc code paths.
+- [numerical-contracts.md](numerical-contracts.md) — interpolation vs `L2`
+  projection, problem signs, linear-system lifetimes, quadrature, and
+  residual/tangent consistency.
 
 ## Level 3 — per-domain detail (open the one your task touches)
 
