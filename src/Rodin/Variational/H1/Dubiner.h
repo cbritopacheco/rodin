@@ -146,13 +146,33 @@ namespace Rodin::Variational
         Real a, b;
         getCollapsed(a, b, x, y);
 
+        getReferenceGradientFromCollapsed(dpsi_dx, dpsi_dy, a, b, 1.0 - y);
+      }
+
+      /**
+       * @brief Computes the gradient of @f$\psi_{P,Q}@f$ from precomputed collapsed coordinates.
+       *
+       * This overload avoids repeated Duffy-coordinate transformations while
+       * tabulating all modes at the same reference point.
+       *
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param a First collapsed coordinate.
+       * @param b Second collapsed coordinate.
+       * @param s Value of @f$1-y@f$.
+       */
+      template <size_t P, size_t Q>
+      static constexpr void getReferenceGradientFromCollapsed(
+        Real& dpsi_dx, Real& dpsi_dy, Real a, Real b, Real s)
+      {
+        static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
+
         Real Pa, dPa;
         JacobiPolynomial<P>::getValue(Pa, dPa, 0.0, 0.0, a);
 
         Real Pb, dPb;
         JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
 
-        const Real s = 1.0 - y;
         const Real sP = Math::pow(s, std::integral_constant<size_t, P>{});
 
         if constexpr (P == 0)
@@ -401,6 +421,31 @@ namespace Rodin::Variational
         Real a, b, c;
         getCollapsed(a, b, c, x, y, z);
 
+        getReferenceGradientFromCollapsed(
+          dpsi_dx, dpsi_dy, dpsi_dz, a, b, c, 1.0 - y - z, 1.0 - z);
+      }
+
+      /**
+       * @brief Computes the gradient of @f$\psi_{P,Q,R}@f$ from precomputed collapsed coordinates.
+       *
+       * This overload avoids repeated Duffy-coordinate transformations while
+       * tabulating all modes at the same reference point.
+       *
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param[out] dpsi_dz Derivative with respect to @f$z@f$.
+       * @param a First collapsed coordinate.
+       * @param b Second collapsed coordinate.
+       * @param c Third collapsed coordinate.
+       * @param s1 Value of @f$1-y-z@f$.
+       * @param s2 Value of @f$1-z@f$.
+       */
+      template <size_t P, size_t Q, size_t R>
+      static constexpr void getReferenceGradientFromCollapsed(Real& dpsi_dx,
+        Real& dpsi_dy, Real& dpsi_dz, Real a, Real b, Real c, Real s1, Real s2)
+      {
+        static_assert(P + Q + R <= K, "DubinerTetrahedron: P + Q + R must be <= K.");
+
         Real pA, dPA;
         JacobiPolynomial<P>::getValue(pA, dPA, 0.0, 0.0, a);
 
@@ -409,9 +454,6 @@ namespace Rodin::Variational
 
         Real pC, dPC;
         JacobiPolynomial<R>::getValue(pC, dPC, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
-
-        const Real s1 = 1.0 - y - z;
-        const Real s2 = 1.0 - z;
 
         const Real s1P = Math::pow(s1, std::integral_constant<size_t, P>{});
         const Real F = pA * s1P;

@@ -690,6 +690,9 @@ namespace Rodin::Variational
         {
           // Dubiner modal gradients in reference coordinates.
           const auto& Vinv = VandermondeTriangle<K>::getInverse();
+          Real a, b;
+          DubinerTriangle<K>::getCollapsed(a, b, r.x(), r.y());
+          const Real s = 1.0 - r.y();
 
           Scalar result = Scalar(0);
           size_t modeIdx = 0;
@@ -699,9 +702,9 @@ namespace Rodin::Variational
             Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
               constexpr size_t Q = qIdx.value;
 
-              Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
-              DubinerTriangle<K>::template getReferenceGradient<P, Q>(
-                dpsi_dx, dpsi_dy, r.x(), r.y());
+              Real dpsi_dx = 0.0, dpsi_dy = 0.0;
+              DubinerTriangle<K>::template getReferenceGradientFromCollapsed<P, Q>(
+                dpsi_dx, dpsi_dy, a, b, s);
 
               if (m_i == 0) // \partial/\partialx
                 result += Vinv(modeIdx, m_local) * dpsi_dx;
@@ -738,6 +741,10 @@ namespace Rodin::Variational
         {
           // Dubiner modal gradients in reference coordinates.
           const auto& Vinv = VandermondeTetrahedron<K>::getInverse();
+          Real a, b, c;
+          DubinerTetrahedron<K>::getCollapsed(a, b, c, r.x(), r.y(), r.z());
+          const Real s1 = 1.0 - r.y() - r.z();
+          const Real s2 = 1.0 - r.z();
 
           Scalar result = Scalar(0);
           size_t modeIdx = 0;
@@ -749,11 +756,11 @@ namespace Rodin::Variational
               Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
                 constexpr size_t R = rIdx.value;
 
-                Scalar dpsi_dx = Scalar(0);
-                Scalar dpsi_dy = Scalar(0);
-                Scalar dpsi_dz = Scalar(0);
-                DubinerTetrahedron<K>::template getReferenceGradient<P, Q, R>(
-                  dpsi_dx, dpsi_dy, dpsi_dz, r.x(), r.y(), r.z());
+                Real dpsi_dx = 0.0;
+                Real dpsi_dy = 0.0;
+                Real dpsi_dz = 0.0;
+                DubinerTetrahedron<K>::template getReferenceGradientFromCollapsed<P, Q,
+                  R>(dpsi_dx, dpsi_dy, dpsi_dz, a, b, c, s1, s2);
 
                 if (m_i == 0) // \partial/\partialx
                   result += Vinv(modeIdx, m_local) * dpsi_dx;
@@ -797,6 +804,9 @@ namespace Rodin::Variational
           {
             // --- triangle gradient in reference coordinates ---
             const auto& Vinv = VandermondeTriangle<K>::getInverse();
+            Real a, b;
+            DubinerTriangle<K>::getCollapsed(a, b, r.x(), r.y());
+            const Real s = 1.0 - r.y();
 
             Scalar triDeriv = Scalar(0);
             size_t modeIdx = 0;
@@ -806,9 +816,9 @@ namespace Rodin::Variational
               Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
                 constexpr size_t Q = qIdx.value;
 
-                Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
-                DubinerTriangle<K>::template getReferenceGradient<P, Q>(
-                  dpsi_dx, dpsi_dy, r.x(), r.y());
+                Real dpsi_dx = 0.0, dpsi_dy = 0.0;
+                DubinerTriangle<K>::template getReferenceGradientFromCollapsed<P, Q>(
+                  dpsi_dx, dpsi_dy, a, b, s);
 
                 if (m_i == 0) // \partial/\partialx
                   triDeriv += Vinv(modeIdx, alpha) * dpsi_dx;

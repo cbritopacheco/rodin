@@ -3293,29 +3293,77 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies Dubiner modal gradients at their collapsed boundaries.
   TEST(Rodin_Variational_RealH1Element, DubinerReferenceGradientsAtCollapsedBoundaries)
   {
+    constexpr Real tolerance = 1e-12;
     {
       Real dx = 0.0, dy = 0.0;
       DubinerTriangle<2>::getReferenceGradient<1, 0>(dx, dy, 0.0, 1.0);
-      EXPECT_NEAR(dx, 2.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(dy, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(dx, 2.0, tolerance);
+      EXPECT_NEAR(dy, 1.0, tolerance);
 
       DubinerTriangle<2>::getReferenceGradient<0, 1>(dx, dy, 0.0, 1.0);
-      EXPECT_NEAR(dx, 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(dy, 3.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(dx, 0.0, tolerance);
+      EXPECT_NEAR(dy, 3.0, tolerance);
     }
 
     {
       Real dx = 0.0, dy = 0.0, dz = 0.0;
       DubinerTetrahedron<2>::getReferenceGradient<1, 0, 0>(dx, dy, dz, 0.0, 0.5, 0.5);
-      EXPECT_NEAR(dx, 2.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(dy, 1.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(dz, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(dx, 2.0, tolerance);
+      EXPECT_NEAR(dy, 1.0, tolerance);
+      EXPECT_NEAR(dz, 1.0, tolerance);
 
       DubinerTetrahedron<2>::getReferenceGradient<0, 1, 0>(dx, dy, dz, 0.0, 0.0, 1.0);
-      EXPECT_NEAR(dx, 0.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(dy, 3.0, RODIN_FUZZY_CONSTANT);
-      EXPECT_NEAR(dz, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(dx, 0.0, tolerance);
+      EXPECT_NEAR(dy, 3.0, tolerance);
+      EXPECT_NEAR(dz, 1.0, tolerance);
     }
+  }
+
+  /// @brief Verifies collapsed-boundary coordinate gradients for all supported H1 orders.
+  TEST(
+    Rodin_Variational_RealH1Element, ReferenceGradientAtCollapsedBoundariesAcrossOrders)
+  {
+    constexpr Real tolerance = 1e-9;
+    auto checkReferenceGradient = [&]<size_t K>(Polytope::Type geometry,
+                                    const Math::SpatialPoint& point, size_t dimension) {
+      RealH1Element<K> element(geometry);
+      Real gradient[3][3] = {};
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
+          const Real basisDerivative =
+            element.getBasis(local).getDerivative<1>(derivative)(point);
+          gradient[0][derivative] += node.x() * basisDerivative;
+          gradient[1][derivative] += node.y() * basisDerivative;
+          if (dimension == 3)
+            gradient[2][derivative] += node.z() * basisDerivative;
+        }
+      }
+
+      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+          EXPECT_NEAR(gradient[coordinate][derivative],
+            coordinate == derivative ? 1.0 : 0.0, tolerance)
+            << "H1<" << K << "> geometry " << static_cast<int>(geometry);
+    };
+
+    Rodin::Utility::ForIndex<6>([&](auto order) {
+      constexpr size_t K = order.value + 1;
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.0, 1.0}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.0}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 1.0}}, 3);
+    });
   }
 
   /// @brief Verifies every quartic Dubiner gradient approaches its collapsed-boundary limit.
@@ -3562,5 +3610,40 @@ namespace Rodin::Tests::Unit
         for (const Real z : {0.0, 1.0})
           checkTensorGradient(
             Polytope::Type::Hexahedron, Math::SpatialPoint{{x, y, z}}, 3);
+  }
+
+  /// @brief Verifies complex H1 simplex derivatives instantiate and reproduce coordinates at collapse.
+  TEST(Rodin_Variational_ComplexH1Element, ReferenceGradientAtCollapsedBoundaries)
+  {
+    constexpr Real tolerance = 1e-12;
+    auto checkReferenceGradient = [&](Polytope::Type geometry,
+                                    const Math::SpatialPoint& point, size_t dimension) {
+      ComplexH1Element<1> element(geometry);
+      Complex gradient[3][3] = {};
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
+          const Complex basisDerivative =
+            element.getBasis(local).getDerivative<1>(derivative)(point);
+          gradient[0][derivative] += node.x() * basisDerivative;
+          gradient[1][derivative] += node.y() * basisDerivative;
+          if (dimension == 3)
+            gradient[2][derivative] += node.z() * basisDerivative;
+        }
+      }
+
+      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+          EXPECT_NEAR(std::abs(gradient[coordinate][derivative] -
+                        Complex(coordinate == derivative ? 1.0 : 0.0, 0.0)),
+            0.0, tolerance);
+    };
+
+    checkReferenceGradient(Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);
+    checkReferenceGradient(
+      Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
+    checkReferenceGradient(Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
   }
 }
