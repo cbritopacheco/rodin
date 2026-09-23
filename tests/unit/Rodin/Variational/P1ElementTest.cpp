@@ -1318,4 +1318,30 @@ namespace Rodin::Tests::Unit
     checkReferenceGradient(Polytope::Type::Pyramid,
       Math::SpatialPoint{{0.25 * q, 0.50 * q, 1.0 - epsilon}}, 3);
   }
+
+  /// @brief Verifies distinct directional limits of a rational pyramid gradient.
+  TEST(Rodin_Variational_RealP1Element, PyramidGradientNearApexDependsOnDirection)
+  {
+    RealP1Element element(Polytope::Type::Pyramid);
+    constexpr Real a = 0.25;
+    for (const Real epsilon : {1e-8, 1e-15})
+    {
+      const Real z = 1.0 - epsilon;
+      const Real q = 1.0 - z;
+      ASSERT_GT(q, 0.0);
+      for (const Real b : {0.25, 0.75})
+      {
+        const Math::SpatialPoint point{{a * q, b * q, z}};
+        const auto& basis = element.getBasis(0);
+        EXPECT_NEAR(basis(point) / q, (1.0 - a) * (1.0 - b), 1e-12);
+        EXPECT_NEAR(basis.getDerivative<1>(0)(point), b - 1.0, 1e-12);
+        EXPECT_NEAR(basis.getDerivative<1>(1)(point), a - 1.0, 1e-12);
+        EXPECT_NEAR(basis.getDerivative<1>(2)(point), a * b - 1.0, 1e-12);
+      }
+    }
+
+    const Math::SpatialPoint apex{{0.0, 0.0, 1.0}};
+    EXPECT_EQ(element.getBasis(0)(apex), 0.0);
+    EXPECT_EQ(element.getBasis(4)(apex), 1.0);
+  }
 }

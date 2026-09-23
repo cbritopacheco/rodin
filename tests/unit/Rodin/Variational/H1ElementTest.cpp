@@ -3564,6 +3564,44 @@ namespace Rodin::Tests::Unit
         element.getBasis(local)(apex), local == 4 ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies rational pyramid modal gradients retain directional limits near the apex.
+  TEST(Rodin_Variational_RealH1Element, PyramidModalGradientNearApexAcrossOrders)
+  {
+    Rodin::Utility::ForIndex<6>([](auto order) {
+      constexpr size_t K = order.value + 1;
+      constexpr size_t mode = PyramidIndex<K>::getIndex(0, 0, K - 1);
+      constexpr Real a = 0.25;
+      for (const Real epsilon : {1e-8, 1e-15})
+      {
+        const Real z = 1.0 - epsilon;
+        const Real q = 1.0 - z;
+        ASSERT_GT(q, 0.0);
+
+        Real factor = static_cast<Real>(K);
+        for (size_t i = 1; i < K; ++i)
+          factor *= z;
+
+        for (const Real b : {0.25, 0.75})
+        {
+          const Math::SpatialPoint point{{a * q, b * q, z}};
+          EXPECT_NEAR(PyramidModal<K>::getBasis(mode, point) / q,
+            factor * (1.0 - a) * (1.0 - b), 1e-12);
+          EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 0, point),
+            factor * (b - 1.0), 1e-12);
+          EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 1, point),
+            factor * (a - 1.0), 1e-12);
+          EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 2, point),
+            factor * (a * b - 1.0)
+              + factor * static_cast<Real>(K - 1) * q / z * (1.0 - a) * (1.0 - b),
+            1e-12);
+        }
+      }
+
+      const Math::SpatialPoint apex{{0.0, 0.0, 1.0}};
+      EXPECT_EQ(PyramidModal<K>::getBasis(mode, apex), 0.0);
+    });
+  }
+
   /// @brief Verifies tensor-product elements remain regular at every reference vertex.
   TEST(Rodin_Variational_RealH1Element, TensorProductReferenceGradientsAtVertices)
   {
