@@ -21,6 +21,7 @@ namespace Rodin::Tests::Unit::Solver
 
   using LinearSystemType =
     Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+  using MUMPSSolver = Rodin::Solver::MUMPS<LinearSystemType>;
 
   static Mesh<Context::Local> makeMesh(Polytope::Type geometry)
   {
@@ -85,7 +86,39 @@ namespace Rodin::Tests::Unit::Solver
     return system;
   }
 
-  TEST(Rodin_Solver_MUMPS, SolvesRawLinearSystem)
+  /// @brief A symmetric positive definite system whose solution is (1, 2, 3).
+  static LinearSystemType makePositiveDefiniteSystem()
+  {
+    LinearSystemType system;
+    system.getOperator().resize(3, 3);
+    system.getOperator().insert(0, 0) = 4.0;
+    system.getOperator().insert(1, 0) = 1.0;
+    system.getOperator().insert(0, 1) = 1.0;
+    system.getOperator().insert(1, 1) = 5.0;
+    system.getOperator().insert(2, 1) = 2.0;
+    system.getOperator().insert(1, 2) = 2.0;
+    system.getOperator().insert(2, 2) = 6.0;
+    system.getVector().resize(3);
+    system.getVector() << 6.0, 17.0, 22.0;
+    return system;
+  }
+
+  static void expectSolution(
+    const LinearSystemType& system, const Math::Vector<Real>& expected)
+  {
+    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+  }
+
+  static void expectResourceState(const MUMPSSolver& solver, bool initialized,
+    bool symbolic, bool numeric, Optional<Factorization> factorization)
+  {
+    EXPECT_EQ(solver.getResources().initialized, initialized);
+    EXPECT_EQ(solver.getResources().symbolic, symbolic);
+    EXPECT_EQ(solver.getResources().numeric, numeric);
+    EXPECT_EQ(solver.getInfo().factorization, factorization);
+  }
+
+  TEST(Rodin_Solver_MUMPS, DestroysInstancesWithRetainedStages)
   {
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
@@ -94,12 +127,58 @@ namespace Rodin::Tests::Unit::Solver
     TestFunction v(vh);
     Problem problem(u, v);
 
-    Rodin::Solver::MUMPS solver(problem);
+    LinearSystemType system = makeUnsymmetricSystem();
+    Math::Vector<Real> expected(3);
+    expected << 1.0, 2.0, 3.0;
+
+    // Destruction terminates an instance that still owns numeric factors.
+    {
+      MUMPSSolver solver(problem);
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      expectSolution(system, expected);
+      expectResourceState(solver, true, true, true, Factorization::Numeric);
+    }
+
+    // A new instance can initialize and solve after the first is destroyed.
+    // This time destruction follows JOB=-4, with symbolic analysis retained.
+    {
+      MUMPSSolver solver(problem);
+      EXPECT_FALSE(solver.getResources().initialized);
+      expected << -2.0, 1.0, 4.0;
+      system.getVector() = system.getOperator() * expected;
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      expectSolution(system, expected);
+      solver.clear(Factorization::Numeric);
+      expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    }
+
+    MUMPSSolver solver(problem);
+    EXPECT_FALSE(solver.getResources().initialized);
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, expected);
+  }
+
+  TEST(Rodin_Solver_MUMPS, UnsymmetricLifecycleTracksRetainedStages)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem problem(u, v);
+
+    MUMPSSolver solver(problem);
     using enum decltype(solver)::Factorization;
     LinearSystemType system = makeUnsymmetricSystem();
+    Math::Vector<Real> expected(3);
+
+    expectResourceState(solver, false, false, false, {});
 
     solver.setOrdering(decltype(solver)::Ordering::AMD).factorize(system);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
 
     // The system type is process-local, so the solve must be private to this
@@ -108,17 +187,17 @@ namespace Rodin::Tests::Unit::Solver
       static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF)));
     solver.solve(system);
 
-    Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    expectSolution(system, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
 
     // A new right-hand side reuses the retained numeric factorization.
     expected << -2.0, 1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
-    EXPECT_TRUE(solver.success());
     solver.solve(system);
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    EXPECT_TRUE(solver.success());
+    expectSolution(system, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
 
     // A value-only change keeps the sparsity pattern and reuses analysis, but
     // must rebuild the numeric factorization.
@@ -126,14 +205,27 @@ namespace Rodin::Tests::Unit::Solver
     expected << 2.0, -1.0, 4.0;
     system.getVector() = system.getOperator() * expected;
     solver.factorize(system);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
     solver.solve(system);
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    expectSolution(system, expected);
+
+    solver.clear(Numeric);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    EXPECT_EQ(solver.getResources().instance.comm_fortran,
+      static_cast<MUMPS_INT>(MPI_Comm_c2f(MPI_COMM_SELF)));
+
+    solver.clear(Numeric);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+
+    solver.solve(system);
+    EXPECT_TRUE(solver.success());
+    expectSolution(system, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
 
     // A structural change requires explicitly clearing symbolic analysis.
     solver.clear(Symbolic);
-    EXPECT_FALSE(solver.getInfo().factorization.has_value());
+    expectResourceState(solver, false, false, false, {});
     system.getOperator().setZero();
     system.getOperator().insert(0, 0) = 2.0;
     system.getOperator().insert(1, 1) = 3.0;
@@ -141,29 +233,30 @@ namespace Rodin::Tests::Unit::Solver
     expected << -1.0, 3.0, 2.0;
     system.getVector() = system.getOperator() * expected;
     solver.factorize(system);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
     solver.solve(system);
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    expectSolution(system, expected);
+
+    solver.clear(Numeric);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    solver.clear(Symbolic);
+    expectResourceState(solver, false, false, false, {});
+    solver.solve(system);
+    EXPECT_TRUE(solver.success());
+    expectSolution(system, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
 
     // Ordering participates in symbolic analysis and therefore invalidates it.
     solver.setOrdering(decltype(solver)::Ordering::Automatic);
-    EXPECT_NE(solver.getInfo().factorization, Factorization::Numeric);
+    expectResourceState(solver, false, false, false, {});
     solver.solve(system);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
-
-    solver.clear(Numeric);
-    EXPECT_NE(solver.getInfo().factorization, Factorization::Numeric);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Symbolic);
-    solver.solve(system);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
-    EXPECT_TRUE(solver.success());
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    expectSolution(system, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
   }
 
-  TEST(Rodin_Solver_MUMPS, SymmetricFactorizationMatchesUnsymmetric)
+  TEST(Rodin_Solver_MUMPS, SymmetricLifecycleAndSymmetryChanges)
   {
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
@@ -171,6 +264,7 @@ namespace Rodin::Tests::Unit::Solver
     TrialFunction u(vh);
     TestFunction v(vh);
     Problem problem(u, v);
+    using enum Factorization;
 
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
@@ -183,21 +277,41 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_NEAR((unsymmetric.getSolution() - expected).norm(), 0.0, 1e-12);
 
     LinearSystemType symmetric = makeSymmetricSystem();
-    Rodin::Solver::MUMPS solver(problem);
+    MUMPSSolver solver(problem);
     solver.setSymmetric(decltype(solver)::Symmetry::General);
     EXPECT_EQ(solver.getSymmetric(), decltype(solver)::Symmetry::General);
+    expectResourceState(solver, false, false, false, {});
     solver.solve(symmetric);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
-    EXPECT_NEAR((symmetric.getSolution() - expected).norm(), 0.0, 1e-12);
+    expectSolution(symmetric, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
+
+    solver.clear(Numeric);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    solver.clear(Numeric);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    solver.solve(symmetric);
+    EXPECT_TRUE(solver.success());
+    expectSolution(symmetric, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
+
+    solver.clear(Numeric);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    solver.clear(Symbolic);
+    expectResourceState(solver, false, false, false, {});
+    solver.solve(symmetric);
+    EXPECT_TRUE(solver.success());
+    expectSolution(symmetric, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
 
     // Symmetry selects the factorization itself, so changing it releases the
     // retained factorization and the converted structure.
     solver.setSymmetric(decltype(solver)::Symmetry::Unsymmetric);
-    EXPECT_NE(solver.getInfo().factorization, Factorization::Numeric);
-    EXPECT_FALSE(solver.getInfo().factorization.has_value());
+    expectResourceState(solver, false, false, false, {});
     solver.solve(symmetric);
-    EXPECT_NEAR((symmetric.getSolution() - expected).norm(), 0.0, 1e-12);
+    EXPECT_TRUE(solver.success());
+    expectSolution(symmetric, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
   }
 
   TEST(Rodin_Solver_MUMPS, SolvesPositiveDefiniteSystem)
@@ -209,24 +323,65 @@ namespace Rodin::Tests::Unit::Solver
     TestFunction v(vh);
     Problem problem(u, v);
 
-    LinearSystemType system;
-    system.getOperator().resize(3, 3);
-    system.getOperator().insert(0, 0) = 4.0;
-    system.getOperator().insert(1, 0) = 1.0;
-    system.getOperator().insert(0, 1) = 1.0;
-    system.getOperator().insert(1, 1) = 5.0;
-    system.getOperator().insert(2, 1) = 2.0;
-    system.getOperator().insert(1, 2) = 2.0;
-    system.getOperator().insert(2, 2) = 6.0;
+    LinearSystemType system = makePositiveDefiniteSystem();
     Math::Vector<Real> expected(3);
     expected << 1.0, 2.0, 3.0;
-    system.getVector() = system.getOperator() * expected;
 
-    Rodin::Solver::MUMPS solver(problem);
+    MUMPSSolver solver(problem);
     solver.setSymmetric(decltype(solver)::Symmetry::PositiveDefinite).solve(system);
-    EXPECT_EQ(solver.getInfo().factorization, Factorization::Numeric);
     EXPECT_TRUE(solver.success());
-    EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    expectSolution(system, expected);
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
+  }
+
+  TEST(Rodin_Solver_MUMPS, FailedRefactorizationNeverReusesInvalidNumericFactors)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem problem(u, v);
+
+    MUMPSSolver solver(problem);
+    using enum decltype(solver)::Factorization;
+    LinearSystemType system = makePositiveDefiniteSystem();
+    Math::Vector<Real> expected(3);
+    expected << 1.0, 2.0, 3.0;
+
+    solver.setSymmetric(decltype(solver)::Symmetry::PositiveDefinite).factorize(system);
+    ASSERT_TRUE(solver.success());
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, expected);
+
+    // Same sparsity pattern, but now singular: symbolic analysis remains valid,
+    // whereas the new numeric factorization must fail and must not leave the
+    // old factors available.
+    system.getOperator().coeffRef(0, 0) = 1.0;
+    system.getOperator().coeffRef(1, 0) = 1.0;
+    system.getOperator().coeffRef(0, 1) = 1.0;
+    system.getOperator().coeffRef(1, 1) = 2.0;
+    system.getOperator().coeffRef(2, 1) = 1.0;
+    system.getOperator().coeffRef(1, 2) = 1.0;
+    system.getOperator().coeffRef(2, 2) = 1.0;
+    expected << 2.0, -1.0, 3.0;
+    system.getVector() = system.getOperator() * expected;
+    solver.factorize(system);
+    EXPECT_FALSE(solver.success());
+    EXPECT_NE(solver.getInfo().status, 0);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+
+    system.getSolution().resize(3);
+    system.getSolution() << 7.0, 7.0, 7.0;
+    solver.solve(system);
+    EXPECT_FALSE(solver.success());
+    EXPECT_NE(solver.getInfo().status, 0);
+    expectResourceState(solver, true, true, false, Factorization::Symbolic);
+    EXPECT_EQ(system.getSolution()(0), 7.0);
+    EXPECT_EQ(system.getSolution()(1), 7.0);
+    EXPECT_EQ(system.getSolution()(2), 7.0);
   }
 
   TEST(Rodin_Solver_MUMPS, ReportsUnusableRequests)
