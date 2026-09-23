@@ -3289,4 +3289,399 @@ namespace Rodin::Tests::Unit
       }
     }
   }
+
+  /// @brief Verifies Dubiner modal gradients at their collapsed boundaries.
+  TEST(Rodin_Variational_RealH1Element, DubinerReferenceGradientsAtCollapsedBoundaries)
+  {
+    constexpr Real tolerance = 1e-12;
+    {
+      Real dx = 0.0, dy = 0.0;
+      DubinerTriangle<2>::getReferenceGradient<1, 0>(dx, dy, 0.0, 1.0);
+      EXPECT_NEAR(dx, 2.0, tolerance);
+      EXPECT_NEAR(dy, 1.0, tolerance);
+
+      DubinerTriangle<2>::getReferenceGradient<0, 1>(dx, dy, 0.0, 1.0);
+      EXPECT_NEAR(dx, 0.0, tolerance);
+      EXPECT_NEAR(dy, 3.0, tolerance);
+    }
+
+    {
+      Real dx = 0.0, dy = 0.0, dz = 0.0;
+      DubinerTetrahedron<2>::getReferenceGradient<1, 0, 0>(dx, dy, dz, 0.0, 0.5, 0.5);
+      EXPECT_NEAR(dx, 2.0, tolerance);
+      EXPECT_NEAR(dy, 1.0, tolerance);
+      EXPECT_NEAR(dz, 1.0, tolerance);
+
+      DubinerTetrahedron<2>::getReferenceGradient<0, 1, 0>(dx, dy, dz, 0.0, 0.0, 1.0);
+      EXPECT_NEAR(dx, 0.0, tolerance);
+      EXPECT_NEAR(dy, 3.0, tolerance);
+      EXPECT_NEAR(dz, 1.0, tolerance);
+    }
+  }
+
+  /// @brief Verifies collapsed-boundary coordinate gradients for all supported H1 orders.
+  TEST(
+    Rodin_Variational_RealH1Element, ReferenceGradientAtCollapsedBoundariesAcrossOrders)
+  {
+    constexpr Real tolerance = 1e-9;
+    auto checkReferenceGradient = [&]<size_t K>(Polytope::Type geometry,
+                                    const Math::SpatialPoint& point, size_t dimension) {
+      RealH1Element<K> element(geometry);
+      Real gradient[3][3] = {};
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
+          const Real basisDerivative =
+            element.getBasis(local).template getDerivative<1>(derivative)(point);
+          gradient[0][derivative] += node.x() * basisDerivative;
+          gradient[1][derivative] += node.y() * basisDerivative;
+          if (dimension == 3)
+            gradient[2][derivative] += node.z() * basisDerivative;
+        }
+      }
+
+      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+          EXPECT_NEAR(gradient[coordinate][derivative],
+            coordinate == derivative ? 1.0 : 0.0, tolerance)
+            << "H1<" << K << "> geometry " << static_cast<int>(geometry);
+    };
+
+    Rodin::Utility::ForIndex<6>([&](auto order) {
+      constexpr size_t K = order.value + 1;
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.0, 1.0}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.0}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
+      checkReferenceGradient.template operator()<K>(
+        Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 1.0}}, 3);
+    });
+  }
+
+  /// @brief Verifies every quartic Dubiner gradient approaches its collapsed-boundary limit.
+  TEST(
+    Rodin_Variational_RealH1Element, DubinerReferenceGradientLimitsAtCollapsedBoundaries)
+  {
+    constexpr Real epsilon = 1e-10;
+    constexpr Real tolerance = 1e-7;
+
+    Rodin::Utility::ForIndex<5>([](auto pIndex) {
+      constexpr size_t P = pIndex.value;
+      Rodin::Utility::ForIndex<5 - P>([](auto qIndex) {
+        constexpr size_t Q = qIndex.value;
+        Real boundaryX = 0.0, boundaryY = 0.0;
+        DubinerTriangle<4>::getReferenceGradient<P, Q>(boundaryX, boundaryY, 0.0, 1.0);
+
+        Real interiorX = 0.0, interiorY = 0.0;
+        DubinerTriangle<4>::getReferenceGradient<P, Q>(
+          interiorX, interiorY, 0.25 * epsilon, 1.0 - epsilon);
+        EXPECT_NEAR(interiorX, boundaryX, tolerance);
+        EXPECT_NEAR(interiorY, boundaryY, tolerance);
+      });
+    });
+
+    Rodin::Utility::ForIndex<5>([](auto pIndex) {
+      constexpr size_t P = pIndex.value;
+      Rodin::Utility::ForIndex<5 - P>([](auto qIndex) {
+        constexpr size_t Q = qIndex.value;
+        Rodin::Utility::ForIndex<5 - P - Q>([](auto rIndex) {
+          constexpr size_t R = rIndex.value;
+          Real boundaryX = 0.0, boundaryY = 0.0, boundaryZ = 0.0;
+          DubinerTetrahedron<4>::getReferenceGradient<P, Q, R>(
+            boundaryX, boundaryY, boundaryZ, 0.0, 0.25, 0.75);
+
+          Real interiorX = 0.0, interiorY = 0.0, interiorZ = 0.0;
+          DubinerTetrahedron<4>::getReferenceGradient<P, Q, R>(
+            interiorX, interiorY, interiorZ, 0.25 * epsilon, 0.25 - epsilon, 0.75);
+          EXPECT_NEAR(interiorX, boundaryX, tolerance);
+          EXPECT_NEAR(interiorY, boundaryY, tolerance);
+          EXPECT_NEAR(interiorZ, boundaryZ, tolerance);
+
+          DubinerTetrahedron<4>::getReferenceGradient<P, Q, R>(
+            boundaryX, boundaryY, boundaryZ, 0.0, 0.0, 1.0);
+          DubinerTetrahedron<4>::getReferenceGradient<P, Q, R>(interiorX, interiorY,
+            interiorZ, 0.25 * epsilon, 0.50 * epsilon, 1.0 - epsilon);
+          EXPECT_NEAR(interiorX, boundaryX, tolerance);
+          EXPECT_NEAR(interiorY, boundaryY, tolerance);
+          EXPECT_NEAR(interiorZ, boundaryZ, tolerance);
+        });
+      });
+    });
+  }
+
+  /// @brief Verifies nodal gradients reproduce reference coordinates at collapsed boundaries.
+  TEST(Rodin_Variational_RealH1Element, ReferenceGradientAtCollapsedBoundaries)
+  {
+    auto checkTriangleGradient = [](const Math::SpatialPoint& point) {
+      RealH1Element<2> element(Polytope::Type::Triangle);
+      Real xDx = 0.0, xDy = 0.0, yDx = 0.0, yDy = 0.0;
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        const Real dx = element.getBasis(local).getDerivative<1>(0)(point);
+        const Real dy = element.getBasis(local).getDerivative<1>(1)(point);
+        xDx += node.x() * dx;
+        xDy += node.x() * dy;
+        yDx += node.y() * dx;
+        yDy += node.y() * dy;
+      }
+      EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDy, 1.0, RODIN_FUZZY_CONSTANT);
+    };
+
+    auto checkTetrahedronGradient = [](const Math::SpatialPoint& point) {
+      RealH1Element<2> element(Polytope::Type::Tetrahedron);
+      Real xDx = 0.0, xDy = 0.0, xDz = 0.0;
+      Real yDx = 0.0, yDy = 0.0, yDz = 0.0;
+      Real zDx = 0.0, zDy = 0.0, zDz = 0.0;
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        const Real dx = element.getBasis(local).getDerivative<1>(0)(point);
+        const Real dy = element.getBasis(local).getDerivative<1>(1)(point);
+        const Real dz = element.getBasis(local).getDerivative<1>(2)(point);
+        xDx += node.x() * dx;
+        xDy += node.x() * dy;
+        xDz += node.x() * dz;
+        yDx += node.y() * dx;
+        yDy += node.y() * dy;
+        yDz += node.y() * dz;
+        zDx += node.z() * dx;
+        zDy += node.z() * dy;
+        zDz += node.z() * dz;
+      }
+      EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDy, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDz, 1.0, RODIN_FUZZY_CONSTANT);
+    };
+
+    auto checkWedgeGradient = [](const Math::SpatialPoint& point) {
+      RealH1Element<2> element(Polytope::Type::Wedge);
+      Real xDx = 0.0, xDy = 0.0, xDz = 0.0;
+      Real yDx = 0.0, yDy = 0.0, yDz = 0.0;
+      Real zDx = 0.0, zDy = 0.0, zDz = 0.0;
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        const Real dx = element.getBasis(local).getDerivative<1>(0)(point);
+        const Real dy = element.getBasis(local).getDerivative<1>(1)(point);
+        const Real dz = element.getBasis(local).getDerivative<1>(2)(point);
+        xDx += node.x() * dx;
+        xDy += node.x() * dy;
+        xDz += node.x() * dz;
+        yDx += node.y() * dx;
+        yDy += node.y() * dy;
+        yDz += node.y() * dz;
+        zDx += node.z() * dx;
+        zDy += node.z() * dy;
+        zDz += node.z() * dz;
+      }
+      EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDy, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDz, 1.0, RODIN_FUZZY_CONSTANT);
+    };
+
+    checkTriangleGradient(Math::SpatialPoint{{0.0, 1.0}});
+    checkTriangleGradient(Math::SpatialPoint{{5e-16, 1.0 - 1e-15}});
+    checkTetrahedronGradient(Math::SpatialPoint{{0.0, 0.0, 1.0}});
+    checkTetrahedronGradient(Math::SpatialPoint{{0.0, 0.25, 0.75}});
+    checkTetrahedronGradient(Math::SpatialPoint{{2.5e-16, 0.5 * (1.0 - 1e-15), 0.5}});
+    checkWedgeGradient(Math::SpatialPoint{{0.0, 1.0, 0.0}});
+    checkWedgeGradient(Math::SpatialPoint{{0.0, 1.0, 0.5}});
+    checkWedgeGradient(Math::SpatialPoint{{0.0, 1.0, 1.0}});
+  }
+
+  /// @brief Verifies rational pyramid basis values and gradients just below the apex.
+  TEST(Rodin_Variational_RealH1Element, PyramidNearApexReferenceGradient)
+  {
+    auto checkReferenceGradient = [](const Math::SpatialPoint& point) {
+      RealH1Element<1> element(Polytope::Type::Pyramid);
+      Real basisSum = 0.0;
+      Real xDx = 0.0, xDy = 0.0, xDz = 0.0;
+      Real yDx = 0.0, yDy = 0.0, yDz = 0.0;
+      Real zDx = 0.0, zDy = 0.0, zDz = 0.0;
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        const Real value = element.getBasis(local)(point);
+        const Real dx = element.getBasis(local).getDerivative<1>(0)(point);
+        const Real dy = element.getBasis(local).getDerivative<1>(1)(point);
+        const Real dz = element.getBasis(local).getDerivative<1>(2)(point);
+        basisSum += value;
+        xDx += node.x() * dx;
+        xDy += node.x() * dy;
+        xDz += node.x() * dz;
+        yDx += node.y() * dx;
+        yDy += node.y() * dy;
+        yDz += node.y() * dz;
+        zDx += node.z() * dx;
+        zDy += node.z() * dy;
+        zDz += node.z() * dz;
+      }
+      EXPECT_NEAR(basisSum, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(xDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDy, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(yDz, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDx, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDy, 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(zDz, 1.0, RODIN_FUZZY_CONSTANT);
+    };
+
+    constexpr Real epsilon = 1e-15;
+    const Real q = 1.0 - (1.0 - epsilon);
+    checkReferenceGradient(Math::SpatialPoint{{0.25 * q, 0.50 * q, 1.0 - epsilon}});
+    checkReferenceGradient(Math::SpatialPoint{{0.80 * q, 0.10 * q, 1.0 - epsilon}});
+
+    RealH1Element<1> element(Polytope::Type::Pyramid);
+    const Math::SpatialPoint apex{{0.0, 0.0, 1.0}};
+    for (size_t local = 0; local < element.getCount(); ++local)
+      EXPECT_NEAR(
+        element.getBasis(local)(apex), local == 4 ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /// @brief Verifies rational pyramid modal gradients retain directional limits near the apex.
+  TEST(Rodin_Variational_RealH1Element, PyramidModalGradientNearApexAcrossOrders)
+  {
+    Rodin::Utility::ForIndex<6>([](auto order) {
+      constexpr size_t K = order.value + 1;
+      constexpr size_t mode = PyramidIndex<K>::getIndex(0, 0, K - 1);
+      constexpr Real a = 0.25;
+      for (const Real epsilon : {1e-8, 1e-15})
+      {
+        const Real z = 1.0 - epsilon;
+        const Real q = 1.0 - z;
+        ASSERT_GT(q, 0.0);
+
+        Real factor = static_cast<Real>(K);
+        for (size_t i = 1; i < K; ++i)
+          factor *= z;
+
+        for (const Real b : {0.25, 0.75})
+        {
+          const Math::SpatialPoint point{{a * q, b * q, z}};
+          EXPECT_NEAR(PyramidModal<K>::getBasis(mode, point) / q,
+            factor * (1.0 - a) * (1.0 - b), 1e-12);
+          EXPECT_NEAR(
+            PyramidModal<K>::getDerivative(mode, 0, point), factor * (b - 1.0), 1e-12);
+          EXPECT_NEAR(
+            PyramidModal<K>::getDerivative(mode, 1, point), factor * (a - 1.0), 1e-12);
+          EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 2, point),
+            factor * (a * b - 1.0) +
+              factor * static_cast<Real>(K - 1) * q / z * (1.0 - a) * (1.0 - b),
+            1e-12);
+        }
+      }
+
+      const Math::SpatialPoint apex{{0.0, 0.0, 1.0}};
+      EXPECT_EQ(PyramidModal<K>::getBasis(mode, apex), 0.0);
+    });
+  }
+
+  /// @brief Verifies tensor-product elements remain regular at every reference vertex.
+  TEST(Rodin_Variational_RealH1Element, TensorProductReferenceGradientsAtVertices)
+  {
+    {
+      RealH1Element<1> element(Polytope::Type::Segment);
+      for (const Real x : {0.0, 1.0})
+      {
+        Real xDx = 0.0;
+        for (size_t local = 0; local < element.getCount(); ++local)
+          xDx += element.getNode(local).x() *
+            element.getBasis(local).getDerivative<1>(0)(Math::SpatialPoint{{x}});
+        EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+
+    auto checkTensorGradient = [](auto geometry, const Math::SpatialPoint& point,
+                                 size_t dimension) {
+      RealH1Element<1> element(geometry);
+      Real gradient[3][3] = {};
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
+          const Real value = element.getBasis(local).getDerivative<1>(derivative)(point);
+          gradient[0][derivative] += node.x() * value;
+          gradient[1][derivative] += node.y() * value;
+          if (dimension == 3)
+            gradient[2][derivative] += node.z() * value;
+        }
+      }
+      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+          EXPECT_NEAR(gradient[coordinate][derivative],
+            coordinate == derivative ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
+    };
+
+    for (const Real x : {0.0, 1.0})
+      for (const Real y : {0.0, 1.0})
+        checkTensorGradient(Polytope::Type::Quadrilateral, Math::SpatialPoint{{x, y}}, 2);
+
+    for (const Real x : {0.0, 1.0})
+      for (const Real y : {0.0, 1.0})
+        for (const Real z : {0.0, 1.0})
+          checkTensorGradient(
+            Polytope::Type::Hexahedron, Math::SpatialPoint{{x, y, z}}, 3);
+  }
+
+  /// @brief Verifies complex H1 simplex derivatives instantiate and reproduce coordinates at collapse.
+  TEST(Rodin_Variational_ComplexH1Element, ReferenceGradientAtCollapsedBoundaries)
+  {
+    constexpr Real tolerance = 1e-12;
+    auto checkReferenceGradient = [&](Polytope::Type geometry,
+                                    const Math::SpatialPoint& point, size_t dimension) {
+      ComplexH1Element<1> element(geometry);
+      Complex gradient[3][3] = {};
+      for (size_t local = 0; local < element.getCount(); ++local)
+      {
+        const auto& node = element.getNode(local);
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
+          const Complex basisDerivative =
+            element.getBasis(local).getDerivative<1>(derivative)(point);
+          gradient[0][derivative] += node.x() * basisDerivative;
+          gradient[1][derivative] += node.y() * basisDerivative;
+          if (dimension == 3)
+            gradient[2][derivative] += node.z() * basisDerivative;
+        }
+      }
+
+      for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        for (size_t derivative = 0; derivative < dimension; ++derivative)
+          EXPECT_NEAR(std::abs(gradient[coordinate][derivative] -
+                        Complex(coordinate == derivative ? 1.0 : 0.0, 0.0)),
+            0.0, tolerance);
+    };
+
+    checkReferenceGradient(Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);
+    checkReferenceGradient(
+      Polytope::Type::Tetrahedron, Math::SpatialPoint{{0.0, 0.25, 0.75}}, 3);
+    checkReferenceGradient(Polytope::Type::Wedge, Math::SpatialPoint{{0.0, 1.0, 0.5}}, 3);
+  }
 }
