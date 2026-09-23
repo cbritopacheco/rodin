@@ -3586,13 +3586,13 @@ namespace Rodin::Tests::Unit
           const Math::SpatialPoint point{{a * q, b * q, z}};
           EXPECT_NEAR(PyramidModal<K>::getBasis(mode, point) / q,
             factor * (1.0 - a) * (1.0 - b), 1e-12);
-          EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 0, point),
-            factor * (b - 1.0), 1e-12);
-          EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 1, point),
-            factor * (a - 1.0), 1e-12);
+          EXPECT_NEAR(
+            PyramidModal<K>::getDerivative(mode, 0, point), factor * (b - 1.0), 1e-12);
+          EXPECT_NEAR(
+            PyramidModal<K>::getDerivative(mode, 1, point), factor * (a - 1.0), 1e-12);
           EXPECT_NEAR(PyramidModal<K>::getDerivative(mode, 2, point),
-            factor * (a * b - 1.0)
-              + factor * static_cast<Real>(K - 1) * q / z * (1.0 - a) * (1.0 - b),
+            factor * (a * b - 1.0) +
+              factor * static_cast<Real>(K - 1) * q / z * (1.0 - a) * (1.0 - b),
             1e-12);
         }
       }
