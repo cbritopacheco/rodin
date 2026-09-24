@@ -51,12 +51,41 @@
 #include <optional>
 #include <functional>
 
+#include <type_traits>
+
+#include <SuiteSparseQR.hpp>
+
+/**
+ * @brief Compatibility overload for SuiteSparse 7 and later.
+ *
+ * Eigen calls @c SuiteSparseQR<Scalar>(...) passing the column count as
+ * @c Eigen::Index while its own @c m_E is @c SuiteSparse_long. SuiteSparse 7
+ * deduces its @c Int template parameter from both, so on a platform where the
+ * two types differ, such as macOS where @c SuiteSparse_long is @c long @c long
+ * and @c Eigen::Index is @c long, the deduction conflicts and no candidate is
+ * viable. This overload accepts the mixed pair and forwards with @c Int fixed.
+ *
+ * It is a free function because it interposes on an external C++ API that
+ * Eigen reaches through argument-dependent lookup. It removes itself where the
+ * two types agree, leaving SuiteSparse's own declaration to be selected.
+ */
+template <typename Entry, typename EconIndex,
+  std::enable_if_t<!std::is_same_v<EconIndex, SuiteSparse_long>, int> = 0>
+SuiteSparse_long SuiteSparseQR(int ordering, double tol, EconIndex econ,
+  cholmod_sparse* A, cholmod_sparse** R, SuiteSparse_long** E, cholmod_sparse** H,
+  SuiteSparse_long** HPinv, cholmod_dense** HTau, cholmod_common* cc)
+{
+  return SuiteSparseQR<Entry, SuiteSparse_long>(
+    ordering, tol, static_cast<SuiteSparse_long>(econ), A, R, E, H, HPinv, HTau, cc);
+}
+
 #include <Eigen/SPQRSupport>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 #include "LinearSolver.h"
 
 namespace Rodin::FormLanguage
@@ -102,7 +131,8 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class SPQR<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// Type of scalar values in the system
@@ -161,8 +191,39 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
+        m_info = Info{};
+        // Eigen requires compressed storage here, and asserts on it.
+        axb.getOperator().makeCompressed();
         m_solver.compute(axb.getOperator());
+        if (!record())
+        {
+          // A failed factorization is unusable, so the solve is skipped and
+          // the solution vector is left untouched.
+          return;
+        }
+        m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
+        record();
+      }
+
+      /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -198,6 +259,17 @@ namespace Rodin::Solver
 
     private:
       /// Underlying Eigen SPQR solver
+      /// @brief Records the Eigen status, and returns whether it succeeded.
+      Boolean record()
+      {
+        m_info.status = static_cast<Integer>(m_solver.info());
+        m_info.success = m_solver.info() == Eigen::Success;
+        return m_info.success;
+      }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
+
       Eigen::SPQR<OperatorType> m_solver;
   };
 }

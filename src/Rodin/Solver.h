@@ -24,6 +24,7 @@
  * @see <a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a> namespace for all solver classes
  */
 
+#include "Solver/Info.h"
 #include "Solver/LinearSolver.h"
 #include "Solver/NewtonSolver.h"
 
@@ -43,6 +44,8 @@
 
 // SuiteSparse solvers
 #include "Solver/UMFPack.h"
+#include "Solver/ParU.h"
+#include "Solver/MUMPS.h"
 #include "Solver/SPQR.h"
 #include "Solver/CHOLMOD.h"
 
