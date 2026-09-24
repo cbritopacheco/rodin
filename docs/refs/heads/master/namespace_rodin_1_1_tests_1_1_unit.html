@@ -6812,6 +6812,11 @@ $ u_s - u_s = 0 $
               CollapsedCoords_Vertex_Y1)</span>
             </dt>
             <dd>(x,y) = (0,1) -&gt; (r,s) = (-1, 1) (collapsed at top).</dd>
+            <dt id="adee8e4bc7e1793eb0f47250540dd2bb4">
+              <span class="m-doc-wrap-bumper"><a href="#adee8e4bc7e1793eb0f47250540dd2bb4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dubiner_triangle.html" class="m-doc">DubinerTriangle</a>,
+              CollapsedCoords_NearVertex)</span>
+            </dt>
+            <dd>A point close to, but not on, the collapsed vertex keeps its angular coordinate.</dd>
             <dt id="a7dfd8b6d8b194bfbee1871f81ddcf5c2">
               <span class="m-doc-wrap-bumper"><a href="#a7dfd8b6d8b194bfbee1871f81ddcf5c2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dubiner_triangle.html" class="m-doc">DubinerTriangle</a>,
               CollapsedCoords_Center)</span>
@@ -6916,6 +6921,11 @@ $ \Psi_{0,0}=1 $
               CollapsedCoords_Vertex_Z1)</span>
             </dt>
             <dd>(x,y,z) = (0,0,1) -&gt; (a,b,c).</dd>
+            <dt id="a2e789bae09aebe228d3dcf730c9c43e5">
+              <span class="m-doc-wrap-bumper"><a href="#a2e789bae09aebe228d3dcf730c9c43e5" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dubiner_tetrahedron.html" class="m-doc">DubinerTetrahedron</a>,
+              CollapsedCoords_NearBoundaries)</span>
+            </dt>
+            <dd>Points close to collapsed tetrahedron boundaries retain their non-collapsed coordinates.</dd>
             <dt id="a3b7820bc143298b7361e7094c75711cb">
               <span class="m-doc-wrap-bumper"><a href="#a3b7820bc143298b7361e7094c75711cb" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dubiner_tetrahedron.html" class="m-doc">DubinerTetrahedron</a>,
               Basis_P0Q0R0)</span>
@@ -10144,6 +10154,46 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               GradientInterpolationConsistency_K2_K3)</span>
             </dt>
             <dd>Test that gradient of interpolant matches derivative of function.</dd>
+            <dt id="a0b1f52f20e874afafe0e4fc5654dd4ae">
+              <span class="m-doc-wrap-bumper"><a href="#a0b1f52f20e874afafe0e4fc5654dd4ae" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              DubinerReferenceGradientsAtCollapsedBoundaries)</span>
+            </dt>
+            <dd>Verifies Dubiner modal gradients at their collapsed boundaries.</dd>
+            <dt id="a5e7994327b6d9311e6f19e0436fa2e65">
+              <span class="m-doc-wrap-bumper"><a href="#a5e7994327b6d9311e6f19e0436fa2e65" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              ReferenceGradientAtCollapsedBoundariesAcrossOrders)</span>
+            </dt>
+            <dd>Verifies collapsed-boundary coordinate gradients for all supported H1 orders.</dd>
+            <dt id="af7525fa046c5790208e318ca4cc3d829">
+              <span class="m-doc-wrap-bumper"><a href="#af7525fa046c5790208e318ca4cc3d829" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              DubinerReferenceGradientLimitsAtCollapsedBoundaries)</span>
+            </dt>
+            <dd>Verifies every quartic Dubiner gradient approaches its collapsed-boundary limit.</dd>
+            <dt id="a344dcd158f4d944fb52c55f1eee1cb21">
+              <span class="m-doc-wrap-bumper"><a href="#a344dcd158f4d944fb52c55f1eee1cb21" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              ReferenceGradientAtCollapsedBoundaries)</span>
+            </dt>
+            <dd>Verifies nodal gradients reproduce reference coordinates at collapsed boundaries.</dd>
+            <dt id="a96c351d6ceec0cd062ef62e865bf1663">
+              <span class="m-doc-wrap-bumper"><a href="#a96c351d6ceec0cd062ef62e865bf1663" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              PyramidNearApexReferenceGradient)</span>
+            </dt>
+            <dd>Verifies rational pyramid basis values and gradients just below the apex.</dd>
+            <dt id="ad09b9f0c582ace8527fff390a2d45776">
+              <span class="m-doc-wrap-bumper"><a href="#ad09b9f0c582ace8527fff390a2d45776" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              PyramidModalGradientNearApexAcrossOrders)</span>
+            </dt>
+            <dd>Verifies rational pyramid modal gradients retain directional limits near the apex.</dd>
+            <dt id="a47292206dec30f21565e9878b9b6862d">
+              <span class="m-doc-wrap-bumper"><a href="#a47292206dec30f21565e9878b9b6862d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealH1Element,
+              TensorProductReferenceGradientsAtVertices)</span>
+            </dt>
+            <dd>Verifies tensor-product elements remain regular at every reference vertex.</dd>
+            <dt id="af2699611742a414b66b94f15ce236829">
+              <span class="m-doc-wrap-bumper"><a href="#af2699611742a414b66b94f15ce236829" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_ComplexH1Element,
+              ReferenceGradientAtCollapsedBoundaries)</span>
+            </dt>
+            <dd>Verifies complex H1 simplex derivatives instantiate and reproduce coordinates at collapse.</dd>
             <dt id="aca3bb8d2736d8e16ab74968ee85b00b2">
               <span class="m-doc-wrap-bumper"><a href="#aca3bb8d2736d8e16ab74968ee85b00b2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_H1QuadratureRule,
               MixedOrder_GradGrad_Assembles)</span>
@@ -11950,6 +12000,16 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               GradientInterpolationConsistency)</span>
             </dt>
             <dd>Test that gradient of interpolant matches expected gradient.</dd>
+            <dt id="a1f93eeba44bbdf3a02437393fbe35589">
+              <span class="m-doc-wrap-bumper"><a href="#a1f93eeba44bbdf3a02437393fbe35589" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealP1Element,
+              ReferenceGradientAtCollapsedBoundaries)</span>
+            </dt>
+            <dd>Verifies P1 coordinate gradients at collapsed and near-collapsed reference boundaries.</dd>
+            <dt id="a7a18fa7b04294df147f4fb581dbc2462">
+              <span class="m-doc-wrap-bumper"><a href="#a7a18fa7b04294df147f4fb581dbc2462" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_RealP1Element,
+              PyramidGradientNearApexDependsOnDirection)</span>
+            </dt>
+            <dd>Verifies distinct directional limits of a rational pyramid gradient.</dd>
             <dt id="abb88e2b0c04c11082d134551f22dfea8">
               <span class="m-doc-wrap-bumper"><a href="#abb88e2b0c04c11082d134551f22dfea8" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1QuadratureRule,
               LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)</span>

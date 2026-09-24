@@ -172,7 +172,7 @@ $ O(nnz) $
 <use x='27.798785' y='0' xlink:href='#eq5-g0-122'/>
 <use x='33.769391' y='0' xlink:href='#eq5-g1-41'/>
 </g>
-</svg> for the factorization</li><li><strong>Complexity</strong>: Depends on sparsity pattern and fill-in</li></ul>
+</svg> for the factorization</li><li><strong>Complexity</strong>: Depends on sparsity pattern and fill-in</li></ul><p>Info::status holds the <code>Eigen::ComputationInfo</code> of the most recent operation, and getLastErrorMessage() its diagnostic.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -195,7 +195,7 @@ $ O(nnz) $
             </dt>
             <dd>Type of solution and right-hand side vectors.</dd>
             <dt id="ab63ab6eaeaaa03f9e1f192bccb16d69e">
-              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Type of system matrix (operator)</dd>
             <dt id="a67d1c43c805caee8285834ec30abf729">
@@ -236,6 +236,18 @@ $ O(nnz) $
               <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the linear system using sparse LU factorization.</dd>
+            <dt id="aefa155a4a38227cb9efabf26972f5f99">
+              <span class="m-doc-wrap-bumper">auto <a href="#aefa155a4a38227cb9efabf26972f5f99" class="m-doc-self">getLastErrorMessage</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
+            </dt>
+            <dd>Returns the diagnostic of the most recent failure, if any.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5cabb0e6659d19a148a5d3ac3cb9d3ed" class="m-doc">getInfo</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_solver_1_1_info.html" class="m-doc">Info</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the outcome of the most recent operation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a20276f61f034a238ea637326e9de82ea" class="m-doc">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Checks whether the most recent operation succeeded.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7f25b819e718ee132d1df4be566584bd" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -332,6 +344,33 @@ $ O(nnz) $
               </tbody>
             </table>
 <p>This method computes the LU factorization of the system matrix and uses forward and backward substitution to solve for the solution vector.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5cabb0e6659d19a148a5d3ac3cb9d3ed"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_solver_1_1_info.html" class="m-doc">Info</a>&amp; Rodin::<wbr />Solver::<wbr />SparseLU&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cabb0e6659d19a148a5d3ac3cb9d3ed" class="m-doc-self">getInfo</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the outcome of the most recent operation.</p>
+<p>Updated by every factorization and every solve, so a caller reads it after the call it wants to check.</p>
+          </div></section>
+          <section class="m-doc-details" id="a20276f61f034a238ea637326e9de82ea"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Solver::<wbr />SparseLU&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20276f61f034a238ea637326e9de82ea" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Checks whether the most recent operation succeeded.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>true if the solver succeeded, false otherwise.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a7f25b819e718ee132d1df4be566584bd"><div>
             <h3>
