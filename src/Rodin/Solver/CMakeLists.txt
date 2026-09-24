@@ -6,6 +6,7 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 
 set(RodinSolver_HEADERS
+  Info.h
   LinearSolver.h
   NewtonSolver.h
   CG.h
@@ -25,6 +26,15 @@ endif()
 # ---- SuiteSparse -----------------------------------------------------------
 if (RODIN_USE_UMFPACK)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::UMFPACK)
+endif()
+
+if (RODIN_USE_PARU)
+  target_link_libraries(RodinSolver INTERFACE SuiteSparse::ParU)
+endif()
+
+# ---- MUMPS -----------------------------------------------------------------
+if (RODIN_USE_MUMPS)
+  target_link_libraries(RodinSolver INTERFACE MUMPS::MUMPS)
 endif()
 
 if (RODIN_USE_SPQR)

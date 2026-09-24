@@ -417,12 +417,11 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
-        std::vector<Eigen::Triplet<ScalarType>> triplets;
-        Sequential<
-          std::vector<Eigen::Triplet<ScalarType>>,
-          Variational::BilinearForm<
-            Solution, TrialFES, TestFES,
-            std::vector<Eigen::Triplet<ScalarType>>>> assembly;
+        std::vector<Math::SparseTriplet<ScalarType>> triplets;
+        Sequential<std::vector<Math::SparseTriplet<ScalarType>>,
+          Variational::BilinearForm<Solution, TrialFES, TestFES,
+            std::vector<Math::SparseTriplet<ScalarType>>>>
+          assembly;
         assembly.execute(triplets, {
           input.getTrialFES(), input.getTestFES(),
           input.getLocalBFIs(), input.getGlobalBFIs() });
@@ -444,26 +443,21 @@ namespace Rodin::Assembly
    * @brief Sequential bilinear form assembly into Eigen triplets.
    */
   template <class Solution, class TrialFES, class TestFES>
-  class Sequential<
-    std::vector<Eigen::Triplet<
-      typename FormLanguage::Dot<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
+  class Sequential<std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
+                     typename FormLanguage::Traits<TrialFES>::ScalarType,
+                     typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
     Variational::BilinearForm<Solution, TrialFES, TestFES,
-      std::vector<Eigen::Triplet<
-        typename FormLanguage::Dot<
-          typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>> final
-    : public AssemblyBase<
-        std::vector<Eigen::Triplet<
-          typename FormLanguage::Dot<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
+      std::vector<Math::SparseTriplet<
+        typename FormLanguage::Dot<typename FormLanguage::Traits<TrialFES>::ScalarType,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
+    final
+    : public AssemblyBase<std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
+                            typename FormLanguage::Traits<TrialFES>::ScalarType,
+                            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>,
         Variational::BilinearForm<Solution, TrialFES, TestFES,
-          std::vector<Eigen::Triplet<
-            typename FormLanguage::Dot<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
+          std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
+            typename FormLanguage::Traits<TrialFES>::ScalarType,
+            typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
   {
     public:
       /// @brief Scalar value type.
@@ -473,7 +467,7 @@ namespace Rodin::Assembly
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
       /// @brief Assembled operator type.
-      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
+      using OperatorType = std::vector<Math::SparseTriplet<ScalarType>>;
 
       /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType =
@@ -609,20 +603,20 @@ namespace Rodin::Assembly
   /**
    * @brief Sequential block bilinear form assembly into Eigen triplets.
    */
-  template <class ... Solution, class ... TrialFES, class ... TestFES>
-  class Sequential<
-    std::vector<Eigen::Triplet<Real>>,
-    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>> final
-      : public AssemblyBase<
-          std::vector<Eigen::Triplet<Real>>,
-          Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
+  template <class... Solution, class... TrialFES, class... TestFES>
+  class Sequential<std::vector<Math::SparseTriplet<Real>>,
+    Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
+      std::vector<Math::SparseTriplet<Real>>>...>>
+    final : public AssemblyBase<std::vector<Math::SparseTriplet<Real>>,
+              Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
+                std::vector<Math::SparseTriplet<Real>>>...>>
   {
     public:
       /// @brief Scalar value type.
       using ScalarType = Real;
 
       /// @brief Assembled operator type.
-      using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
+      using OperatorType = std::vector<Math::SparseTriplet<ScalarType>>;
 
       /// @brief Tuple of bilinear forms assembled by this backend.
       using TupleType =
@@ -663,16 +657,16 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
-        using AssemblyTuple =
-          Tuple<Sequential<std::vector<Eigen::Triplet<Real>>,
-          Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>>...>;
+        using AssemblyTuple = Tuple<Sequential<std::vector<Math::SparseTriplet<Real>>,
+          Variational::BilinearForm<Solution, TrialFES, TestFES,
+            std::vector<Math::SparseTriplet<Real>>>>...>;
 
         AssemblyTuple assembly;
 
         const auto& t = input.getTuple();
 
         // Compute each block of triplets
-        std::array<std::vector<Eigen::Triplet<Real>>, AssemblyTuple::Size> ts;
+        std::array<std::vector<Math::SparseTriplet<Real>>, AssemblyTuple::Size> ts;
         assembly.zip(t).iapply(
             [&](const Index i, auto& p)
             {
@@ -691,7 +685,7 @@ namespace Rodin::Assembly
         const Offsets& offsets = input.getOffsets();
         for (size_t i = 0; i < ts.size(); i++)
         {
-          for (const Eigen::Triplet<Real>& t : ts[i])
+          for (const Math::SparseTriplet<Real>& t : ts[i])
           {
             res.emplace_back(
                 t.row() + offsets[i].second(), t.col() + offsets[i].first(), t.value());
@@ -753,13 +747,12 @@ namespace Rodin::Assembly
          */
         void execute(OperatorType& res, const InputType& input) const override
         {
-          Sequential<
-            std::vector<Eigen::Triplet<Real>>,
-            Tuple<
-              Variational::BilinearForm<Solution, TrialFES, TestFES,
-              std::vector<Eigen::Triplet<Real>>>...>> assembly;
+          Sequential<std::vector<Math::SparseTriplet<Real>>,
+            Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
+              std::vector<Math::SparseTriplet<Real>>>...>>
+            assembly;
           res.resize(input.getRows(), input.getColumns());
-          std::vector<Eigen::Triplet<Real>> triplets;
+          std::vector<Math::SparseTriplet<Real>> triplets;
           assembly.execute(triplets, input);
           res.setFromTriplets(triplets.begin(), triplets.end());
         }
@@ -912,7 +905,7 @@ namespace Rodin::Assembly
             A.setZero();
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> triplets;
+          std::vector<Math::SparseTriplet<ScalarType>> triplets;
 
           const auto findTrialBlock = [&](const auto& uuid) -> size_t {
             auto it = trialUUIDMap.left.find(uuid);
@@ -1574,7 +1567,7 @@ namespace Rodin::Assembly
           // ------------------------------------------------------------
           // Matrix init
           // ------------------------------------------------------------
-          std::vector<Eigen::Triplet<ScalarType>> triplets;
+          std::vector<Math::SparseTriplet<ScalarType>> triplets;
           if (doMatrix)
           {
             if constexpr (!IsSparse)

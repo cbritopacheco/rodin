@@ -39,12 +39,15 @@
 #ifndef RODIN_SOLVER_SPARSELU_H
 #define RODIN_SOLVER_SPARSELU_H
 
+#include <string>
+
 #include <Eigen/SparseLU>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
+#include "Info.h"
 #include "LinearSolver.h"
 
 namespace Rodin::FormLanguage
@@ -89,11 +92,15 @@ namespace Rodin::Solver
    * - **Memory**: @f$ O(nnz) @f$ for the factorization
    * - **Complexity**: Depends on sparsity pattern and fill-in
    *
+   * Info::status holds the `Eigen::ComputationInfo` of the most recent
+   * operation, and getLastErrorMessage() its diagnostic.
+   *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
   template <class Scalar>
-  class SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+  class SparseLU<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    final : public LinearSolverBase<
+              Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// Type of scalar values in the system
@@ -150,8 +157,44 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
+        m_info = Info{};
         m_solver.compute(axb.getOperator());
+        if (!record())
+        {
+          // Eigen guards its solve with an assertion that a release build
+          // compiles out, so solving with a failed factorization reads
+          // uninitialized state. Leave the solution untouched instead.
+          return;
+        }
+        m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
+        record();
+      }
+
+      /// @brief Returns the diagnostic of the most recent failure, if any.
+      std::string getLastErrorMessage() const
+      {
+        return m_solver.lastErrorMessage();
+      }
+
+      /**
+       * @brief Returns the outcome of the most recent operation.
+       *
+       * Updated by every factorization and every solve, so a caller reads it
+       * after the call it wants to check.
+       */
+      const Info& getInfo() const noexcept
+      {
+        return m_info;
+      }
+
+      /**
+       * @brief Checks whether the most recent operation succeeded.
+       * @returns true if the solver succeeded, false otherwise.
+       */
+      Boolean success() const noexcept
+      {
+        return m_info.success;
       }
 
       /**
@@ -164,6 +207,17 @@ namespace Rodin::Solver
       }
 
     private:
+      /// @brief Records the Eigen status, and returns whether it succeeded.
+      Boolean record()
+      {
+        m_info.status = static_cast<Integer>(m_solver.info());
+        m_info.success = m_solver.info() == Eigen::Success;
+        return m_info.success;
+      }
+
+      /// @brief Outcome of the most recent operation.
+      Info m_info;
+
       /// Underlying Eigen SparseLU solver
       Eigen::SparseLU<OperatorType> m_solver;
   };

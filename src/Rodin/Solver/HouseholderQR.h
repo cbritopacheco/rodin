@@ -80,8 +80,9 @@ namespace Rodin::Solver
    * for use with Math::SparseMatrix and Math::Vector.
    */
   template <class Scalar>
-  class HouseholderQR<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+  class HouseholderQR<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    final : public LinearSolverBase<
+              Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
@@ -122,6 +123,10 @@ namespace Rodin::Solver
       /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
+        // Eigen reports no status for HouseholderQR, so this solver has no
+        // getInfo() or success() to offer: a caller that needs to know whether
+        // the operator was usable checks the residual, or picks a solver that
+        // reports one.
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
