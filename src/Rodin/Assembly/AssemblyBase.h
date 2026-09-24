@@ -9,6 +9,7 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Tuple.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Input.h"
@@ -67,6 +68,42 @@ namespace Rodin::Assembly
        * @brief Creates a polymorphic copy of this assembly object.
        * 
        * @return AssemblyBase* Pointer to a new copy of this object
+       */
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  /**
+   * @brief Base class for the assembly of a named bilinear form.
+   *
+   * Unlike the generic bilinear form, a named form carries its own local
+   * kernel, so the assembly is handed the form itself rather than a
+   * BilinearFormAssemblyInput: it needs the kernel, the region and the
+   * attributes the form integrates over.
+   *
+   * @tparam OperatorType Matrix type for the assembled operator.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
+   */
+  template <class OperatorType, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class AssemblyBase<OperatorType, Form> : public FormLanguage::Base
+  {
+    public:
+      /// @brief Input data type for the assembly, the named form itself.
+      using InputType = Form;
+
+      /// @brief Virtual destructor.
+      virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Executes the assembly operation.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
+       */
+      virtual void execute(OperatorType& out, const InputType& input) const = 0;
+
+      /**
+       * @brief Creates a polymorphic copy of this assembly object.
+       * @returns Pointer to a new copy of this object.
        */
       virtual AssemblyBase* copy() const noexcept = 0;
   };

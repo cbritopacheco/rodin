@@ -579,4 +579,50 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], 0.0, RODIN_FUZZY_CONSTANT);
     }
   }
+  /// @brief Verifies a grid function never reads the evaluation cache left by a destroyed grid function built in the same storage.
+  TEST(Rodin_Variational_GridFunction, EvaluationCacheDoesNotOutliveItsGridFunction)
+  {
+    // Each iteration builds its mesh, space and grid function in the storage
+    // the previous iteration's vacated. The hexahedral grid has a single
+    // cell, so the last polytope evaluated in the first iteration is cell 0,
+    // which is also the first one evaluated in the second.
+    for (auto geometry : {Polytope::Type::Hexahedron, Polytope::Type::Pyramid})
+    {
+      LocalMesh mesh = LocalMesh::UniformGrid(geometry, {2, 2, 2});
+      mesh.getConnectivity().compute(3, 0);
+      P1 fes(mesh);
+      GridFunction gf(fes);
+      // Linear, so that P1 reproduces it on every geometry, and with weights
+      // that give every vertex of the grid a distinct value, so that reading
+      // any other polytope's DOFs changes the result.
+      gf.project(
+        RealFunction([](const Point& p) { return p.x() + 10 * p.y() + 100 * p.z(); }));
+
+      const Polytope cell(mesh.getDimension(), 0, mesh);
+      const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(qf);
+      for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+      {
+        const auto& point = quadrature.getPoint(qp);
+        const Real expected = point.x() + 10 * point.y() + 100 * point.z();
+        EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, qp)), expected, 1e-10)
+          << "geometry " << static_cast<int>(geometry) << ", quadrature point " << qp;
+      }
+    }
+  }
+
+  /// @brief Verifies pointwise integration points do not reuse cached basis values.
+  TEST(Rodin_Variational_GridFunction, PointwiseIntegrationPointsUseTheirCoordinates)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    gf.project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
+
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    const Point p1(cell, Math::SpatialPoint{0.2, 0.3});
+    const Point p2(cell, Math::SpatialPoint{0.6, 0.1});
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(p1)), 3.2, 1e-12);
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(p2)), 1.6, 1e-12);
+  }
 }
