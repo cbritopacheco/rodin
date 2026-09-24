@@ -139,6 +139,16 @@ jobs:
       MAKEFLAGS: "-j2"
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 2
+      # A standalone Ubuntu/Open MPI repro reports PMIx leaks under ASan even
+      # without MUMPS, including when MPI_Finalize is called. Keep MUMPS out
+      # of ASan jobs while testing it under UBSan and the SuiteSparse solvers
+      # under both sanitizers.
+      RODIN_MUMPS: ${{ matrix.asan == 'OFF' && 'ON' || 'OFF' }}
+      # The runner image packages SuiteSparse 7.6, whose ParU has no ParU.h.
+      # The ParU solver needs the C API of SuiteSparse 7.10 or newer, so those
+      # entries build SuiteSparse themselves and configure against it.
+      SUITESPARSE_VERSION: "7.14.1"
+      SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
 
     steps:
       - uses: actions/checkout@v4
@@ -173,10 +183,35 @@ jobs:
           libscotch-dev
           libmetis-dev
           libhdf5-dev
+          libmumps-dev
+          libmumps-headers-dev
           libomp-dev
+          mpi-default-bin
+          mpi-default-dev
           petsc-dev
           mpich
           lcov
+
+      - name: Restore SuiteSparse
+        id: suitesparse
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.SUITESPARSE_PREFIX }}
+          key: suitesparse-${{ env.SUITESPARSE_VERSION }}-${{ runner.os }}-${{ matrix.compiler }}
+
+      - name: Build SuiteSparse
+        if: steps.suitesparse.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v${SUITESPARSE_VERSION}.tar.gz" | tar xz
+          cmake -S "SuiteSparse-${SUITESPARSE_VERSION}" -B suitesparse-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${SUITESPARSE_PREFIX}" \
+            -DSUITESPARSE_ENABLE_PROJECTS="suitesparse_config;amd;camd;colamd;ccolamd;cholmod;umfpack;spqr;paru" \
+            -DSUITESPARSE_USE_CUDA=OFF \
+            -DSUITESPARSE_USE_FORTRAN=OFF \
+            -DSUITESPARSE_DEMOS=OFF
+          cmake --build suitesparse-build
+          cmake --install suitesparse-build
 
       - name: Configure CMake
         run: >
@@ -186,6 +221,12 @@ jobs:
           -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
+          -DCMAKE_PREFIX_PATH=${{ env.SUITESPARSE_PREFIX }}
+          -DRODIN_USE_CHOLMOD=ON
+          -DRODIN_USE_MUMPS=${{ env.RODIN_MUMPS }}
+          -DRODIN_USE_PARU=ON
+          -DRODIN_USE_SPQR=ON
+          -DRODIN_USE_UMFPACK=ON
           -DRODIN_BUILD_DOC=OFF
           -DRODIN_INSTALL_RESOURCES=OFF
           -DRODIN_USE_MCSS=OFF

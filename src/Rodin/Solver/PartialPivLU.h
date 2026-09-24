@@ -74,7 +74,8 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class PartialPivLU<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// @brief Scalar value type.
@@ -118,8 +119,9 @@ namespace Rodin::Solver
 
         m_solver.compute(A);
 
-        // Eigen documents that info() is always Success for PartialPivLU,
-        // so this does not certify invertibility. It only reflects API consistency.
+        // Eigen reports no status for PartialPivLU, and a singular operator
+        // goes undetected, so this solver has no getInfo() or success() to
+        // offer: neither would certify invertibility.
         axb.getSolution() = m_solver.solve(b);
       }
 

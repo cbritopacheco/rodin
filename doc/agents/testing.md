@@ -90,6 +90,9 @@ Two rules that make the difference between coverage and theatre:
   have happened).
 - **Manufactured solutions** for operators/solvers: pick exact u, derive
   f, assert convergence order.
+- **All-geometry coverage** for every new solver backend: exercise an
+  assembled problem on Segment, Triangle, Quadrilateral, Tetrahedron,
+  Hexahedron, Pyramid, and Wedge meshes.
 - **Identity checks** for algebraic structure: R = M·u, symmetry, energy
   identities (R·u = 2E) — these hold exactly for consistent quadrature,
   independent of resolution.
