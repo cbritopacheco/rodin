@@ -195,7 +195,8 @@ that every supported space or physical context is certified; the suite
 READMEs and test sources give all case-specific sequences and bounds.
 Distributed P2 Poisson remains uncertified because an exploratory
 three-rank tetrahedral run produced a rank-dependent error at one refinement
-level; the observation and reproduction levels are recorded in the
+level. The constrained system has four fewer owned Dirichlet DOFs than the
+one-rank system; the observation and reproduction levels are recorded in the
 `h/PETScMPIPoisson` README.
 
 Configure with `-DRODIN_BUILD_CONVERGENCE_TESTS=ON` and run with
