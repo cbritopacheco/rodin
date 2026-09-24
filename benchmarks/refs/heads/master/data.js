@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1790108574478,
+  "lastUpdate": 1790247330508,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -36642,6 +36642,2184 @@ window.BENCHMARK_DATA = {
             "value": 1219.3102148096125,
             "unit": "ns/iter",
             "extra": "iterations: 229412\ncpu: 1219.2625669101735 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7cf11a8d4e51c692430916585de8dd53d10c2d00",
+          "message": "Merge pull request #350 from cbritopacheco/develop\n\nMerge develop into master with shared history",
+          "timestamp": "2026-09-24T10:44:47+02:00",
+          "tree_id": "b9f3b07312037c24d816ebb221b2bcd3d55ff090",
+          "url": "https://github.com/cbritopacheco/rodin/commit/7cf11a8d4e51c692430916585de8dd53d10c2d00"
+        },
+        "date": 1790247318975,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+            "value": 17.3044326245257,
+            "unit": "ns/iter",
+            "extra": "iterations: 16497946\ncpu: 17.303420680368333 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+            "value": 9.690583112669298,
+            "unit": "ns/iter",
+            "extra": "iterations: 29186778\ncpu: 9.690547480095267 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarReferenceExpansion",
+            "value": 9.183543733542676,
+            "unit": "ns/iter",
+            "extra": "iterations: 30965590\ncpu: 9.182495311731508 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarSpaceExpansion",
+            "value": 8.024085762330005,
+            "unit": "ns/iter",
+            "extra": "iterations: 34591224\ncpu: 8.022920466763471 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarMappedBasis",
+            "value": 14.516059871078486,
+            "unit": "ns/iter",
+            "extra": "iterations: 19125963\ncpu: 14.514991950993512 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorMappedBasis",
+            "value": 39.77070900027623,
+            "unit": "ns/iter",
+            "extra": "iterations: 7059165\ncpu: 39.76671886830805 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+            "value": 39.32322188040292,
+            "unit": "ns/iter",
+            "extra": "iterations: 7129737\ncpu: 39.32090356208086 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+            "value": 36.32805326819936,
+            "unit": "ns/iter",
+            "extra": "iterations: 8044724\ncpu: 36.3254219784296 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarMappedBasis",
+            "value": 35.656282959416465,
+            "unit": "ns/iter",
+            "extra": "iterations: 7546213\ncpu: 35.65261317166638 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorMappedBasis",
+            "value": 106.62510113061688,
+            "unit": "ns/iter",
+            "extra": "iterations: 2594417\ncpu: 106.61577148160846 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.23887238941005653,
+            "unit": "ns/iter",
+            "extra": "iterations: 1263944639\ncpu: 0.23884890341308695 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.22220840739147993,
+            "unit": "ns/iter",
+            "extra": "iterations: 1263625892\ncpu: 0.22217989420558693 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.2298077420195074,
+            "unit": "ns/iter",
+            "extra": "iterations: 1224615953\ncpu: 0.2298044030135217 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.2292196965902141,
+            "unit": "ns/iter",
+            "extra": "iterations: 1223122324\ncpu: 0.22918828681275896 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 254.06700260226268,
+            "unit": "ns/iter",
+            "extra": "iterations: 1100211\ncpu: 254.04883245123025 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 52879.37464306435,
+            "unit": "ns/iter",
+            "extra": "iterations: 5253\ncpu: 52873.96344945732 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 214239.81018518523,
+            "unit": "ns/iter",
+            "extra": "iterations: 1296\ncpu: 214210.0679012347 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 440.8047303364304,
+            "unit": "ns/iter",
+            "extra": "iterations: 624649\ncpu: 440.7688814037962 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 91827.55486610635,
+            "unit": "ns/iter",
+            "extra": "iterations: 3062\ncpu: 91821.56205094692 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 409812.78063541715,
+            "unit": "ns/iter",
+            "extra": "iterations: 661\ncpu: 409744.62481089286 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 77838.59871121107,
+            "unit": "ns/iter",
+            "extra": "iterations: 3414\ncpu: 77834.38664323385 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 83073.0316567884,
+            "unit": "ns/iter",
+            "extra": "iterations: 3380\ncpu: 83054.6603550294 ns\nthreads: 1"
+          },
+          {
+            "name": "P1RankOneSpecialized",
+            "value": 351256.78281071404,
+            "unit": "ns/iter",
+            "extra": "iterations: 861\ncpu: 351254.66782810714 ns\nthreads: 1"
+          },
+          {
+            "name": "P1RankOneGeneric",
+            "value": 1274708.0409088663,
+            "unit": "ns/iter",
+            "extra": "iterations: 220\ncpu: 1274423.96818182 ns\nthreads: 1"
+          },
+          {
+            "name": "H1P2RankOneSpecialized",
+            "value": 1961538.781954955,
+            "unit": "ns/iter",
+            "extra": "iterations: 133\ncpu: 1960960.1954887186 ns\nthreads: 1"
+          },
+          {
+            "name": "H1P2RankOneGeneric",
+            "value": 12318945.347824013,
+            "unit": "ns/iter",
+            "extra": "iterations: 23\ncpu: 12316887.5217391 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 9674.667659997931,
+            "unit": "ns/iter",
+            "extra": "iterations: 28188\ncpu: 9673.582198098484 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 3374394.639534827,
+            "unit": "ns/iter",
+            "extra": "iterations: 86\ncpu: 3373958.2325581415 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 60778.26817690143,
+            "unit": "ns/iter",
+            "extra": "iterations: 4635\ncpu: 60777.74973031256 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 1152743.9680003226,
+            "unit": "ns/iter",
+            "extra": "iterations: 250\ncpu: 1152574.2000000037 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 5177691.352940326,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 5176466.450980385 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 60280896.599988416,
+            "unit": "ns/iter",
+            "extra": "iterations: 5\ncpu: 60276779.60000019 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 374168760.9999644,
+            "unit": "ns/iter",
+            "extra": "iterations: 1\ncpu: 374070193.00000143 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_AllPairs",
+            "value": 574918.1419621279,
+            "unit": "ns/iter",
+            "extra": "iterations: 479\ncpu: 574940.2338205286 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_AllPairs",
+            "value": 9.135056582160393,
+            "unit": "ns/iter",
+            "extra": "iterations: 30018648\ncpu: 9.127355702362056 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+            "value": 564575.4808079397,
+            "unit": "ns/iter",
+            "extra": "iterations: 495\ncpu: 564519.7232323559 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_1",
+            "value": 409017.09262020036,
+            "unit": "ns/iter",
+            "extra": "iterations: 691\ncpu: 408905.92474675755 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_0",
+            "value": 150058.01822098874,
+            "unit": "ns/iter",
+            "extra": "iterations: 1921\ncpu: 149915.91827175242 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_1",
+            "value": 406342.9154286066,
+            "unit": "ns/iter",
+            "extra": "iterations: 674\ncpu: 406255.8293768494 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_0",
+            "value": 2.0424082153781318,
+            "unit": "ns/iter",
+            "extra": "iterations: 137492204\ncpu: 2.041602715161936 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_1",
+            "value": 2.0167084978767016,
+            "unit": "ns/iter",
+            "extra": "iterations: 127004056\ncpu: 2.0165841160222606 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_0",
+            "value": 1.4317662762275372,
+            "unit": "ns/iter",
+            "extra": "iterations: 203465995\ncpu: 1.4317536844424552 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_1",
+            "value": 1.9562579923619525,
+            "unit": "ns/iter",
+            "extra": "iterations: 138761395\ncpu: 1.9551986775572558 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_AllPairs",
+            "value": 4602505.213109102,
+            "unit": "ns/iter",
+            "extra": "iterations: 61\ncpu: 4602661.573770439 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_AllPairs",
+            "value": 20.434880145077607,
+            "unit": "ns/iter",
+            "extra": "iterations: 13964466\ncpu: 20.431424087394443 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_1",
+            "value": 2882868.567009665,
+            "unit": "ns/iter",
+            "extra": "iterations: 97\ncpu: 2882101.257731813 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_2",
+            "value": 3224847.252867242,
+            "unit": "ns/iter",
+            "extra": "iterations: 87\ncpu: 3224496.8965518596 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_2",
+            "value": 1134774.596775034,
+            "unit": "ns/iter",
+            "extra": "iterations: 248\ncpu: 1134766.9516128676 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_1",
+            "value": 4047490.6571408347,
+            "unit": "ns/iter",
+            "extra": "iterations: 70\ncpu: 4046356.9857142344 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_1",
+            "value": 2.1638103287241517,
+            "unit": "ns/iter",
+            "extra": "iterations: 130086498\ncpu: 2.162877641613513 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_2",
+            "value": 2.2468134902050068,
+            "unit": "ns/iter",
+            "extra": "iterations: 126335011\ncpu: 2.246700655291809 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_2",
+            "value": 1.9269627450398412,
+            "unit": "ns/iter",
+            "extra": "iterations: 145445814\ncpu: 1.9263496438611734 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_1",
+            "value": 2.5404156996447043,
+            "unit": "ns/iter",
+            "extra": "iterations: 111024776\ncpu: 2.540293654814475 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Build_1",
+            "value": 2070536.2101430313,
+            "unit": "ns/iter",
+            "extra": "iterations: 138\ncpu: 2070262.739130214 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Build_1",
+            "value": 758917.3116526473,
+            "unit": "ns/iter",
+            "extra": "iterations: 369\ncpu: 758670.0406503706 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Transpose_1_2",
+            "value": 1114540.5275517693,
+            "unit": "ns/iter",
+            "extra": "iterations: 254\ncpu: 1114203.0748030085 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Transpose_1_2",
+            "value": 282926.9938137465,
+            "unit": "ns/iter",
+            "extra": "iterations: 970\ncpu: 282949.02164941194 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_2_2_via_0",
+            "value": 1119856.5287349643,
+            "unit": "ns/iter",
+            "extra": "iterations: 261\ncpu: 1119496.770114917 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_2_2_via_0",
+            "value": 595091.2542369155,
+            "unit": "ns/iter",
+            "extra": "iterations: 472\ncpu: 595130.372881307 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_1_1_via_0",
+            "value": 1752152.3024731355,
+            "unit": "ns/iter",
+            "extra": "iterations: 162\ncpu: 1751816.728394849 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_1_1_via_0",
+            "value": 866283.1373178404,
+            "unit": "ns/iter",
+            "extra": "iterations: 335\ncpu: 866140.447761219 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_AllPairs",
+            "value": 2966904.775504116,
+            "unit": "ns/iter",
+            "extra": "iterations: 98\ncpu: 2966383.4591835365 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_AllPairs",
+            "value": 21.114955951355405,
+            "unit": "ns/iter",
+            "extra": "iterations: 13125036\ncpu: 21.111442284805925 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_1",
+            "value": 1651270.2071003811,
+            "unit": "ns/iter",
+            "extra": "iterations: 169\ncpu: 1651249.384615343 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_2",
+            "value": 1931622.7733323406,
+            "unit": "ns/iter",
+            "extra": "iterations: 150\ncpu: 1931417.8066666445 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_2",
+            "value": 597070.2440080397,
+            "unit": "ns/iter",
+            "extra": "iterations: 459\ncpu: 596851.4727669633 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_1",
+            "value": 2365590.9075647024,
+            "unit": "ns/iter",
+            "extra": "iterations: 119\ncpu: 2365186.714285535 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_1",
+            "value": 2.17366209685892,
+            "unit": "ns/iter",
+            "extra": "iterations: 128772233\ncpu: 2.1734443713498375 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_2",
+            "value": 2.5229298731969125,
+            "unit": "ns/iter",
+            "extra": "iterations: 125947949\ncpu: 2.5226423337787027 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+            "value": 2.037233333690448,
+            "unit": "ns/iter",
+            "extra": "iterations: 136501261\ncpu: 2.037217700135402 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_1",
+            "value": 2.5571308148761087,
+            "unit": "ns/iter",
+            "extra": "iterations: 108470324\ncpu: 2.556758980456272 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Build_1",
+            "value": 1329902.1506900443,
+            "unit": "ns/iter",
+            "extra": "iterations: 219\ncpu: 1329725.2328765471 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Build_1",
+            "value": 539969.2407029541,
+            "unit": "ns/iter",
+            "extra": "iterations: 511\ncpu: 540047.2133073899 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Transpose_1_2",
+            "value": 767296.9405388285,
+            "unit": "ns/iter",
+            "extra": "iterations: 370\ncpu: 767289.1999997983 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Transpose_1_2",
+            "value": 201727.84719084259,
+            "unit": "ns/iter",
+            "extra": "iterations: 1407\ncpu: 201882.3212508165 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_2_2_via_0",
+            "value": 549993.7560039144,
+            "unit": "ns/iter",
+            "extra": "iterations: 500\ncpu: 549937.6820002482 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_2_2_via_0",
+            "value": 269778.335622758,
+            "unit": "ns/iter",
+            "extra": "iterations: 1019\ncpu: 269836.57899911253 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_1_1_via_0",
+            "value": 1194097.742970725,
+            "unit": "ns/iter",
+            "extra": "iterations: 249\ncpu: 1194027.6787147769 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_1_1_via_0",
+            "value": 517543.8185174412,
+            "unit": "ns/iter",
+            "extra": "iterations: 540\ncpu: 517639.7685184129 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_AllPairs",
+            "value": 53448647.19997986,
+            "unit": "ns/iter",
+            "extra": "iterations: 5\ncpu: 53435003.19999777 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_AllPairs",
+            "value": 37.79044283702845,
+            "unit": "ns/iter",
+            "extra": "iterations: 7658235\ncpu: 37.787733727157956 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_1",
+            "value": 15400454.36364711,
+            "unit": "ns/iter",
+            "extra": "iterations: 22\ncpu: 15400627.409092234 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_2",
+            "value": 14986721.76469828,
+            "unit": "ns/iter",
+            "extra": "iterations: 17\ncpu: 14985584.764706396 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_2_3",
+            "value": 15838718.55556001,
+            "unit": "ns/iter",
+            "extra": "iterations: 18\ncpu: 15837474.111112075 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_3",
+            "value": 5749674.063837757,
+            "unit": "ns/iter",
+            "extra": "iterations: 47\ncpu: 5749425.531914924 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_1",
+            "value": 2.155053509595648,
+            "unit": "ns/iter",
+            "extra": "iterations: 130701137\ncpu: 2.1550206483666794 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_2",
+            "value": 2.270680417961836,
+            "unit": "ns/iter",
+            "extra": "iterations: 125481035\ncpu: 2.26835620219423 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_2_3",
+            "value": 2.2645237935828506,
+            "unit": "ns/iter",
+            "extra": "iterations: 123306696\ncpu: 2.2643582794562995 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_3",
+            "value": 2.0848773662546742,
+            "unit": "ns/iter",
+            "extra": "iterations: 143664413\ncpu: 2.0838816012146335 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_1",
+            "value": 6611987.838709865,
+            "unit": "ns/iter",
+            "extra": "iterations: 31\ncpu: 6610018.000000284 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_1",
+            "value": 4151858.941180067,
+            "unit": "ns/iter",
+            "extra": "iterations: 68\ncpu: 4151376.3088240256 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_2",
+            "value": 8941542.225813698,
+            "unit": "ns/iter",
+            "extra": "iterations: 31\ncpu: 8941234.354838591 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_2",
+            "value": 3405852.8292683973,
+            "unit": "ns/iter",
+            "extra": "iterations: 82\ncpu: 3404657.036585616 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Transpose_2_3",
+            "value": 5464286.2142933225,
+            "unit": "ns/iter",
+            "extra": "iterations: 56\ncpu: 5462927.357143218 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Transpose_2_3",
+            "value": 1021044.0820909543,
+            "unit": "ns/iter",
+            "extra": "iterations: 268\ncpu: 1020656.8843281467 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_0",
+            "value": 6250266.434787847,
+            "unit": "ns/iter",
+            "extra": "iterations: 46\ncpu: 6247884.260869858 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_0",
+            "value": 4165357.738476744,
+            "unit": "ns/iter",
+            "extra": "iterations: 65\ncpu: 4164177.4000000763 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_2",
+            "value": 5070639.081969737,
+            "unit": "ns/iter",
+            "extra": "iterations: 61\ncpu: 5069895.803278769 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_2",
+            "value": 1087903.4208598058,
+            "unit": "ns/iter",
+            "extra": "iterations: 278\ncpu: 1087755.6007194857 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_AllPairs",
+            "value": 10545223.518508665,
+            "unit": "ns/iter",
+            "extra": "iterations: 27\ncpu: 10545390.185185703 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_AllPairs",
+            "value": 39.714641491835444,
+            "unit": "ns/iter",
+            "extra": "iterations: 6979883\ncpu: 39.71051663759997 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_1",
+            "value": 2870006.649474592,
+            "unit": "ns/iter",
+            "extra": "iterations: 97\ncpu: 2870049.742268329 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_2",
+            "value": 2477497.6324726953,
+            "unit": "ns/iter",
+            "extra": "iterations: 117\ncpu: 2476723.3846153165 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_2_3",
+            "value": 2817616.058259817,
+            "unit": "ns/iter",
+            "extra": "iterations: 103\ncpu: 2817262.4077669187 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_3",
+            "value": 777319.7685989767,
+            "unit": "ns/iter",
+            "extra": "iterations: 363\ncpu: 777198.7741047048 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_1",
+            "value": 2.3130080837541085,
+            "unit": "ns/iter",
+            "extra": "iterations: 119688190\ncpu: 2.312906319328568 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_2",
+            "value": 2.3277411824359704,
+            "unit": "ns/iter",
+            "extra": "iterations: 125394983\ncpu: 2.327637270782961 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_2_3",
+            "value": 2.4512082125782504,
+            "unit": "ns/iter",
+            "extra": "iterations: 114987712\ncpu: 2.450857688167597 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_3",
+            "value": 2.0670710258884526,
+            "unit": "ns/iter",
+            "extra": "iterations: 135520754\ncpu: 2.0668201122906935 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_1",
+            "value": 2202313.256002526,
+            "unit": "ns/iter",
+            "extra": "iterations: 125\ncpu: 2202142.5519998274 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_1",
+            "value": 2106987.099136271,
+            "unit": "ns/iter",
+            "extra": "iterations: 232\ncpu: 2107560.8922415306 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_2",
+            "value": 1813606.140125453,
+            "unit": "ns/iter",
+            "extra": "iterations: 157\ncpu: 1812950.2802547854 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_2",
+            "value": 725169.4587619137,
+            "unit": "ns/iter",
+            "extra": "iterations: 388\ncpu: 725111.6701032717 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Transpose_2_3",
+            "value": 973255.3566869063,
+            "unit": "ns/iter",
+            "extra": "iterations: 314\ncpu: 973088.484076524 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Transpose_2_3",
+            "value": 258371.39468904457,
+            "unit": "ns/iter",
+            "extra": "iterations: 1092\ncpu: 258412.02106234306 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_0",
+            "value": 657076.8290377102,
+            "unit": "ns/iter",
+            "extra": "iterations: 427\ncpu: 657011.6814989243 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_0",
+            "value": 426935.9379732646,
+            "unit": "ns/iter",
+            "extra": "iterations: 661\ncpu: 427006.31013594026 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_2",
+            "value": 941975.527779512,
+            "unit": "ns/iter",
+            "extra": "iterations: 252\ncpu: 941649.88492083 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_2",
+            "value": 218919.64439401982,
+            "unit": "ns/iter",
+            "extra": "iterations: 1302\ncpu: 219031.05606764203 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_AllPairs",
+            "value": 18198216.53331625,
+            "unit": "ns/iter",
+            "extra": "iterations: 15\ncpu: 18192175.666666325 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_AllPairs",
+            "value": 39.87682391419729,
+            "unit": "ns/iter",
+            "extra": "iterations: 7119921\ncpu: 39.86690456256513 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_1",
+            "value": 4712434.882348509,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 4712237.549020303 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_2",
+            "value": 4943115.0535659585,
+            "unit": "ns/iter",
+            "extra": "iterations: 56\ncpu: 4941786.964285758 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_2_3",
+            "value": 5640855.156865226,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 5640775.05882405 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_3",
+            "value": 1553137.252809837,
+            "unit": "ns/iter",
+            "extra": "iterations: 178\ncpu: 1552994.3089892813 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_1",
+            "value": 2.29819291347656,
+            "unit": "ns/iter",
+            "extra": "iterations: 121080976\ncpu: 2.2980841432926216 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_2",
+            "value": 2.279835875693178,
+            "unit": "ns/iter",
+            "extra": "iterations: 122027263\ncpu: 2.279749460577585 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_2_3",
+            "value": 2.376304414882248,
+            "unit": "ns/iter",
+            "extra": "iterations: 124198790\ncpu: 2.3761881979688475 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_3",
+            "value": 2.0364649132934876,
+            "unit": "ns/iter",
+            "extra": "iterations: 137329848\ncpu: 2.036396748942649 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_1",
+            "value": 3097468.9222274623,
+            "unit": "ns/iter",
+            "extra": "iterations: 90\ncpu: 3096608.122221451 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_1",
+            "value": 2034387.3750003166,
+            "unit": "ns/iter",
+            "extra": "iterations: 144\ncpu: 2034282.6736116214 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_2",
+            "value": 3674474.207793372,
+            "unit": "ns/iter",
+            "extra": "iterations: 77\ncpu: 3673846.7012987905 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_2",
+            "value": 1331170.3381595036,
+            "unit": "ns/iter",
+            "extra": "iterations: 207\ncpu: 1331165.5362330894 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Transpose_2_3",
+            "value": 1592749.4819323558,
+            "unit": "ns/iter",
+            "extra": "iterations: 166\ncpu: 1592310.2891567359 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Transpose_2_3",
+            "value": 395620.22865464527,
+            "unit": "ns/iter",
+            "extra": "iterations: 691\ncpu: 395617.42547020526 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_0",
+            "value": 1323432.3285009607,
+            "unit": "ns/iter",
+            "extra": "iterations: 207\ncpu: 1323245.3816423747 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_0",
+            "value": 967678.6917832767,
+            "unit": "ns/iter",
+            "extra": "iterations: 292\ncpu: 967624.0342468438 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_2",
+            "value": 1666543.7751470504,
+            "unit": "ns/iter",
+            "extra": "iterations: 169\ncpu: 1666091.331360914 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_2",
+            "value": 388777.6738496732,
+            "unit": "ns/iter",
+            "extra": "iterations: 696\ncpu: 388864.1149426489 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/BasisLoad",
+            "value": 7908.502090514799,
+            "unit": "ns/iter",
+            "extra": "iterations: 35398\ncpu: 7907.936691338488 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/SourceLoad",
+            "value": 6969.867878876127,
+            "unit": "ns/iter",
+            "extra": "iterations: 40917\ncpu: 6968.954664320505 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericFluxLoad",
+            "value": 14199.989791791704,
+            "unit": "ns/iter",
+            "extra": "iterations: 19788\ncpu: 14198.620375985383 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/Mass",
+            "value": 11624.915847892435,
+            "unit": "ns/iter",
+            "extra": "iterations: 24325\ncpu: 11623.552271325485 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedMass",
+            "value": 13910.844403599714,
+            "unit": "ns/iter",
+            "extra": "iterations: 20129\ncpu: 13910.739182274541 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/OuterWeightedMass",
+            "value": 14990.483895173853,
+            "unit": "ns/iter",
+            "extra": "iterations: 18659\ncpu: 14988.569430301699 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GridFunctionWeightedMass",
+            "value": 28633.424941324258,
+            "unit": "ns/iter",
+            "extra": "iterations: 9799\ncpu: 28627.114603530663 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GradGrad",
+            "value": 11113.354870893583,
+            "unit": "ns/iter",
+            "extra": "iterations: 25057\ncpu: 11111.878596799017 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedGradGrad",
+            "value": 15669.270147041969,
+            "unit": "ns/iter",
+            "extra": "iterations: 17546\ncpu: 15665.821383790824 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorMass",
+            "value": 33723.63465956785,
+            "unit": "ns/iter",
+            "extra": "iterations: 8269\ncpu: 33722.214173418375 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorSourceLoad",
+            "value": 18554.02677073776,
+            "unit": "ns/iter",
+            "extra": "iterations: 15502\ncpu: 18551.8916913948 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/AnisotropicMass",
+            "value": 51164.69526573601,
+            "unit": "ns/iter",
+            "extra": "iterations: 5513\ncpu: 51157.799201887305 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/JacobianJacobian",
+            "value": 34567.75175262999,
+            "unit": "ns/iter",
+            "extra": "iterations: 7988\ncpu: 34563.459439159116 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/WeightedJacobianJacobian",
+            "value": 46075.30783486887,
+            "unit": "ns/iter",
+            "extra": "iterations: 5935\ncpu: 46073.03976411032 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/Advection",
+            "value": 35401.0305660359,
+            "unit": "ns/iter",
+            "extra": "iterations: 7950\ncpu: 35397.55849056516 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GridFunctionAdvection",
+            "value": 70026.53253716692,
+            "unit": "ns/iter",
+            "extra": "iterations: 4103\ncpu: 70023.14306604919 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/DivPressure",
+            "value": 10699.68039954566,
+            "unit": "ns/iter",
+            "extra": "iterations: 26530\ncpu: 10698.481417263354 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/PressureDiv",
+            "value": 11743.16950852613,
+            "unit": "ns/iter",
+            "extra": "iterations: 22931\ncpu: 11742.349832105294 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericDivDiv",
+            "value": 30576.192441726194,
+            "unit": "ns/iter",
+            "extra": "iterations: 9182\ncpu: 30573.428229144043 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GenericElasticity",
+            "value": 132278.18714822453,
+            "unit": "ns/iter",
+            "extra": "iterations: 2132\ncpu: 132269.92917448422 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/BasisLoad",
+            "value": 6597.899101181422,
+            "unit": "ns/iter",
+            "extra": "iterations: 42389\ncpu: 6597.554412701317 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/SourceLoad",
+            "value": 6820.617021274476,
+            "unit": "ns/iter",
+            "extra": "iterations: 42582\ncpu: 6819.815109670781 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericFluxLoad",
+            "value": 11996.766163692662,
+            "unit": "ns/iter",
+            "extra": "iterations: 21870\ncpu: 11995.34508459101 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/Mass",
+            "value": 13058.708333335215,
+            "unit": "ns/iter",
+            "extra": "iterations: 19872\ncpu: 13057.222373188732 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedMass",
+            "value": 12418.559730888515,
+            "unit": "ns/iter",
+            "extra": "iterations: 22593\ncpu: 12416.752976585552 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/OuterWeightedMass",
+            "value": 12528.106862438062,
+            "unit": "ns/iter",
+            "extra": "iterations: 22543\ncpu: 12528.015171006571 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GridFunctionWeightedMass",
+            "value": 29285.336607054196,
+            "unit": "ns/iter",
+            "extra": "iterations: 9673\ncpu: 29281.688514421618 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GradGrad",
+            "value": 11907.794212902076,
+            "unit": "ns/iter",
+            "extra": "iterations: 23466\ncpu: 11906.733358902091 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedGradGrad",
+            "value": 11921.45460597316,
+            "unit": "ns/iter",
+            "extra": "iterations: 24034\ncpu: 11920.456852791576 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/VectorMass",
+            "value": 21133.14606479754,
+            "unit": "ns/iter",
+            "extra": "iterations: 12871\ncpu: 21131.984461191652 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/VectorSourceLoad",
+            "value": 7752.720114432202,
+            "unit": "ns/iter",
+            "extra": "iterations: 36004\ncpu: 7752.672591934026 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/AnisotropicMass",
+            "value": 28293.66364100499,
+            "unit": "ns/iter",
+            "extra": "iterations: 9805\ncpu: 28291.95502294748 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/JacobianJacobian",
+            "value": 21992.65272097381,
+            "unit": "ns/iter",
+            "extra": "iterations: 12716\ncpu: 21990.3627713116 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/WeightedJacobianJacobian",
+            "value": 21191.016628000652,
+            "unit": "ns/iter",
+            "extra": "iterations: 12930\ncpu: 21186.853905645818 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/Advection",
+            "value": 20057.66700000322,
+            "unit": "ns/iter",
+            "extra": "iterations: 10000\ncpu: 20056.11790000046 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GridFunctionAdvection",
+            "value": 63146.2959602392,
+            "unit": "ns/iter",
+            "extra": "iterations: 4629\ncpu: 63142.80686973276 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/DivPressure",
+            "value": 13514.997241637171,
+            "unit": "ns/iter",
+            "extra": "iterations: 21027\ncpu: 13514.04070956386 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/PressureDiv",
+            "value": 14494.997937960605,
+            "unit": "ns/iter",
+            "extra": "iterations: 22793\ncpu: 14494.8839994736 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericDivDiv",
+            "value": 33395.7211371969,
+            "unit": "ns/iter",
+            "extra": "iterations: 8090\ncpu: 33392.82496909705 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P1/D2/GenericElasticity",
+            "value": 152544.0144694152,
+            "unit": "ns/iter",
+            "extra": "iterations: 1866\ncpu: 151877.50589496607 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/BasisLoad",
+            "value": 8295.417418288222,
+            "unit": "ns/iter",
+            "extra": "iterations: 34481\ncpu: 8294.040486064707 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/SourceLoad",
+            "value": 8801.839301143411,
+            "unit": "ns/iter",
+            "extra": "iterations: 31251\ncpu: 8801.12988384359 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericFluxLoad",
+            "value": 15160.19804497859,
+            "unit": "ns/iter",
+            "extra": "iterations: 17698\ncpu: 15160.058198666538 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/Mass",
+            "value": 32794.0664393187,
+            "unit": "ns/iter",
+            "extra": "iterations: 8504\ncpu: 32790.72812793994 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedMass",
+            "value": 58793.34072580156,
+            "unit": "ns/iter",
+            "extra": "iterations: 5456\ncpu: 58786.919904692484 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/OuterWeightedMass",
+            "value": 36956.52452602486,
+            "unit": "ns/iter",
+            "extra": "iterations: 6646\ncpu: 36953.043183870665 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GridFunctionWeightedMass",
+            "value": 127947.6358167194,
+            "unit": "ns/iter",
+            "extra": "iterations: 2161\ncpu: 127933.23322536456 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GradGrad",
+            "value": 31789.525845040585,
+            "unit": "ns/iter",
+            "extra": "iterations: 8609\ncpu: 31789.387501452144 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedGradGrad",
+            "value": 34887.266037965965,
+            "unit": "ns/iter",
+            "extra": "iterations: 8059\ncpu: 34885.345452289555 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/VectorMass",
+            "value": 65578.78671983806,
+            "unit": "ns/iter",
+            "extra": "iterations: 4262\ncpu: 65572.56358516891 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/VectorSourceLoad",
+            "value": 14419.592244651567,
+            "unit": "ns/iter",
+            "extra": "iterations: 20012\ncpu: 14418.177843293768 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/AnisotropicMass",
+            "value": 117653.43054394674,
+            "unit": "ns/iter",
+            "extra": "iterations: 2390\ncpu: 117646.5728033495 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/JacobianJacobian",
+            "value": 69472.00099155391,
+            "unit": "ns/iter",
+            "extra": "iterations: 4034\ncpu: 69467.65071889135 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/WeightedJacobianJacobian",
+            "value": 68996.48813642701,
+            "unit": "ns/iter",
+            "extra": "iterations: 4046\ncpu: 68995.89199209027 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/Advection",
+            "value": 90979.27678279788,
+            "unit": "ns/iter",
+            "extra": "iterations: 3071\ncpu: 90973.18463041294 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GridFunctionAdvection",
+            "value": 304829.8435814307,
+            "unit": "ns/iter",
+            "extra": "iterations: 927\ncpu: 304819.97626753006 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/DivPressure",
+            "value": 46045.20039585296,
+            "unit": "ns/iter",
+            "extra": "iterations: 6063\ncpu: 46043.157347847846 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/PressureDiv",
+            "value": 50652.34046408984,
+            "unit": "ns/iter",
+            "extra": "iterations: 5516\ncpu: 50643.76160260948 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericDivDiv",
+            "value": 97703.91558441712,
+            "unit": "ns/iter",
+            "extra": "iterations: 2926\ncpu: 97703.23991797944 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/GenericElasticity",
+            "value": 1417727.949494678,
+            "unit": "ns/iter",
+            "extra": "iterations: 198\ncpu: 1417574.853535388 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/BasisLoad",
+            "value": 10029.532701591948,
+            "unit": "ns/iter",
+            "extra": "iterations: 27965\ncpu: 10028.459932057754 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/SourceLoad",
+            "value": 10763.596728776503,
+            "unit": "ns/iter",
+            "extra": "iterations: 25923\ncpu: 10763.127030050682 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericFluxLoad",
+            "value": 56453.354918808865,
+            "unit": "ns/iter",
+            "extra": "iterations: 5235\ncpu: 56449.43381088888 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/Mass",
+            "value": 95189.07540085782,
+            "unit": "ns/iter",
+            "extra": "iterations: 2931\ncpu: 95183.76936198969 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedMass",
+            "value": 152245.15869440863,
+            "unit": "ns/iter",
+            "extra": "iterations: 1777\ncpu: 152222.0405177268 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/OuterWeightedMass",
+            "value": 121265.97099569306,
+            "unit": "ns/iter",
+            "extra": "iterations: 2310\ncpu: 121249.03160173321 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GridFunctionWeightedMass",
+            "value": 665458.2884160992,
+            "unit": "ns/iter",
+            "extra": "iterations: 423\ncpu: 665358.4751772925 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GradGrad",
+            "value": 93986.04877228351,
+            "unit": "ns/iter",
+            "extra": "iterations: 2973\ncpu: 93976.16481668148 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedGradGrad",
+            "value": 123512.01888453013,
+            "unit": "ns/iter",
+            "extra": "iterations: 2277\ncpu: 123511.22485726682 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/VectorMass",
+            "value": 197751.09135628908,
+            "unit": "ns/iter",
+            "extra": "iterations: 1423\ncpu: 197725.69992972174 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/VectorSourceLoad",
+            "value": 26707.51248179403,
+            "unit": "ns/iter",
+            "extra": "iterations: 10295\ncpu: 26703.88450704216 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/AnisotropicMass",
+            "value": 479682.3367697436,
+            "unit": "ns/iter",
+            "extra": "iterations: 582\ncpu: 479611.7766322964 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/JacobianJacobian",
+            "value": 245655.27888799144,
+            "unit": "ns/iter",
+            "extra": "iterations: 1151\ncpu: 245653.1581233714 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/WeightedJacobianJacobian",
+            "value": 207988.89760830865,
+            "unit": "ns/iter",
+            "extra": "iterations: 1338\ncpu: 207963.17713004793 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/Advection",
+            "value": 297315.6940297699,
+            "unit": "ns/iter",
+            "extra": "iterations: 938\ncpu: 297297.83901919203 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GridFunctionAdvection",
+            "value": 1644378.8058823242,
+            "unit": "ns/iter",
+            "extra": "iterations: 170\ncpu: 1644135.3176470925 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/DivPressure",
+            "value": 158542.86951569136,
+            "unit": "ns/iter",
+            "extra": "iterations: 1755\ncpu: 158534.5475783428 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/PressureDiv",
+            "value": 155704.42151967296,
+            "unit": "ns/iter",
+            "extra": "iterations: 1803\ncpu: 155698.65113699657 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericDivDiv",
+            "value": 447780.1872000782,
+            "unit": "ns/iter",
+            "extra": "iterations: 625\ncpu: 447721.8367999967 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3/D2/GenericElasticity",
+            "value": 7444134.108110317,
+            "unit": "ns/iter",
+            "extra": "iterations: 37\ncpu: 7444080.216216463 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/BasisLoad",
+            "value": 8637.911352650766,
+            "unit": "ns/iter",
+            "extra": "iterations: 32477\ncpu: 8637.008313575752 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/SourceLoad",
+            "value": 7385.0962282509645,
+            "unit": "ns/iter",
+            "extra": "iterations: 37993\ncpu: 7384.529834443435 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericFluxLoad",
+            "value": 22684.235077210422,
+            "unit": "ns/iter",
+            "extra": "iterations: 13017\ncpu: 22682.09633556041 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/Mass",
+            "value": 14202.579902631289,
+            "unit": "ns/iter",
+            "extra": "iterations: 18898\ncpu: 14202.440046565518 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedMass",
+            "value": 20370.39815554563,
+            "unit": "ns/iter",
+            "extra": "iterations: 13771\ncpu: 20368.797618182878 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/OuterWeightedMass",
+            "value": 24740.900815573972,
+            "unit": "ns/iter",
+            "extra": "iterations: 11403\ncpu: 24739.694817153664 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GridFunctionWeightedMass",
+            "value": 44845.343129453286,
+            "unit": "ns/iter",
+            "extra": "iterations: 6295\ncpu: 44839.38745035635 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GradGrad",
+            "value": 14415.112790043182,
+            "unit": "ns/iter",
+            "extra": "iterations: 19523\ncpu: 14414.144649899843 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedGradGrad",
+            "value": 22366.556041342068,
+            "unit": "ns/iter",
+            "extra": "iterations: 12580\ncpu: 22365.7072337045 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorMass",
+            "value": 109559.22436907314,
+            "unit": "ns/iter",
+            "extra": "iterations: 2536\ncpu: 109553.36119873833 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorSourceLoad",
+            "value": 23988.463908598696,
+            "unit": "ns/iter",
+            "extra": "iterations: 11554\ncpu: 23987.26345854272 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/AnisotropicMass",
+            "value": 189931.0033921209,
+            "unit": "ns/iter",
+            "extra": "iterations: 1474\ncpu: 189912.70352781046 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/JacobianJacobian",
+            "value": 154685.70390755244,
+            "unit": "ns/iter",
+            "extra": "iterations: 1817\ncpu: 154667.13428728597 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/WeightedJacobianJacobian",
+            "value": 205293.7986774428,
+            "unit": "ns/iter",
+            "extra": "iterations: 1361\ncpu: 205279.16825863378 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/Advection",
+            "value": 94783.25660863555,
+            "unit": "ns/iter",
+            "extra": "iterations: 3102\ncpu: 94782.34364925686 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GridFunctionAdvection",
+            "value": 230705.9753288972,
+            "unit": "ns/iter",
+            "extra": "iterations: 1216\ncpu: 230672.4070723719 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/DivPressure",
+            "value": 18835.968193730536,
+            "unit": "ns/iter",
+            "extra": "iterations: 14494\ncpu: 18834.874292810855 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/PressureDiv",
+            "value": 23749.850918011845,
+            "unit": "ns/iter",
+            "extra": "iterations: 11819\ncpu: 23745.87427024293 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericDivDiv",
+            "value": 56397.192564151475,
+            "unit": "ns/iter",
+            "extra": "iterations: 4949\ncpu: 56391.67205495965 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GenericElasticity",
+            "value": 401675.81341108703,
+            "unit": "ns/iter",
+            "extra": "iterations: 686\ncpu: 401659.9970845425 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/BasisLoad",
+            "value": 10300.394384401243,
+            "unit": "ns/iter",
+            "extra": "iterations: 27851\ncpu: 10299.46676959532 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/SourceLoad",
+            "value": 11346.776871814533,
+            "unit": "ns/iter",
+            "extra": "iterations: 25510\ncpu: 11346.654723637826 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericFluxLoad",
+            "value": 34680.41991773632,
+            "unit": "ns/iter",
+            "extra": "iterations: 8023\ncpu: 34677.11940670699 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/Mass",
+            "value": 108838.30208334117,
+            "unit": "ns/iter",
+            "extra": "iterations: 2592\ncpu: 108830.93171296407 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedMass",
+            "value": 123785.54477611482,
+            "unit": "ns/iter",
+            "extra": "iterations: 2278\ncpu: 123779.91527656213 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/OuterWeightedMass",
+            "value": 160828.22388922746,
+            "unit": "ns/iter",
+            "extra": "iterations: 1733\ncpu: 160826.66762838385 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GridFunctionWeightedMass",
+            "value": 639781.3021581303,
+            "unit": "ns/iter",
+            "extra": "iterations: 417\ncpu: 639754.5419664296 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GradGrad",
+            "value": 86914.1189042928,
+            "unit": "ns/iter",
+            "extra": "iterations: 3322\ncpu: 86906.68422636953 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedGradGrad",
+            "value": 124134.27098739074,
+            "unit": "ns/iter",
+            "extra": "iterations: 2299\ncpu: 124125.82079164815 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/VectorMass",
+            "value": 376585.4560217974,
+            "unit": "ns/iter",
+            "extra": "iterations: 739\ncpu: 376558.3017591345 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/VectorSourceLoad",
+            "value": 37388.00854936,
+            "unit": "ns/iter",
+            "extra": "iterations: 7252\ncpu: 37384.5179260878 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/AnisotropicMass",
+            "value": 890111.4967949879,
+            "unit": "ns/iter",
+            "extra": "iterations: 312\ncpu: 890050.1185897234 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/JacobianJacobian",
+            "value": 372401.27165362146,
+            "unit": "ns/iter",
+            "extra": "iterations: 762\ncpu: 372371.3083989549 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/WeightedJacobianJacobian",
+            "value": 367477.29933773633,
+            "unit": "ns/iter",
+            "extra": "iterations: 755\ncpu: 367459.80662251124 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/Advection",
+            "value": 444653.1435564014,
+            "unit": "ns/iter",
+            "extra": "iterations: 613\ncpu: 444617.20880913443 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GridFunctionAdvection",
+            "value": 1696023.6060606004,
+            "unit": "ns/iter",
+            "extra": "iterations: 165\ncpu: 1696019.1030302907 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/DivPressure",
+            "value": 227234.83876225722,
+            "unit": "ns/iter",
+            "extra": "iterations: 1228\ncpu: 227233.02687296932 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/PressureDiv",
+            "value": 210799.01141550916,
+            "unit": "ns/iter",
+            "extra": "iterations: 1314\ncpu: 210778.93683409912 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericDivDiv",
+            "value": 323908.66782820655,
+            "unit": "ns/iter",
+            "extra": "iterations: 861\ncpu: 323884.3333333342 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/GenericElasticity",
+            "value": 11095772.399999077,
+            "unit": "ns/iter",
+            "extra": "iterations: 25\ncpu: 11094861.759999616 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReassemblyMass",
+            "value": 21020.405460581344,
+            "unit": "ns/iter",
+            "extra": "iterations: 15676\ncpu: 21019.253763715715 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReassemblyGradGrad",
+            "value": 17667.074396909637,
+            "unit": "ns/iter",
+            "extra": "iterations: 16291\ncpu: 17666.120802897014 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ReactionDiffusion",
+            "value": 35924.66463944207,
+            "unit": "ns/iter",
+            "extra": "iterations: 8057\ncpu: 35919.90592031852 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ColdMass",
+            "value": 18358.89530345591,
+            "unit": "ns/iter",
+            "extra": "iterations: 14862\ncpu: 18355.588884403365 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/ColdGradGrad",
+            "value": 18238.71606277111,
+            "unit": "ns/iter",
+            "extra": "iterations: 15676\ncpu: 18236.384281704442 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/Elasticity",
+            "value": 200776.01089328376,
+            "unit": "ns/iter",
+            "extra": "iterations: 1377\ncpu: 200775.2752360151 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReassemblyMass",
+            "value": 58034.44623884641,
+            "unit": "ns/iter",
+            "extra": "iterations: 4706\ncpu: 58033.89715257041 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReassemblyGradGrad",
+            "value": 61402.03753653593,
+            "unit": "ns/iter",
+            "extra": "iterations: 4449\ncpu: 61394.063834569904 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ReactionDiffusion",
+            "value": 121969.13985720578,
+            "unit": "ns/iter",
+            "extra": "iterations: 2381\ncpu: 121936.94834103451 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ColdMass",
+            "value": 59929.90142386077,
+            "unit": "ns/iter",
+            "extra": "iterations: 4565\ncpu: 59926.72354874188 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/ColdGradGrad",
+            "value": 61025.42478069944,
+            "unit": "ns/iter",
+            "extra": "iterations: 4560\ncpu: 61020.53070175459 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/Elasticity",
+            "value": 1757097.36942669,
+            "unit": "ns/iter",
+            "extra": "iterations: 157\ncpu: 1757006.7070063646 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReassemblyMass",
+            "value": 155109.64611110013,
+            "unit": "ns/iter",
+            "extra": "iterations: 1800\ncpu: 155092.51999999504 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReassemblyGradGrad",
+            "value": 173849.2144996817,
+            "unit": "ns/iter",
+            "extra": "iterations: 1669\ncpu: 173830.234272018 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ReactionDiffusion",
+            "value": 316200.41742090153,
+            "unit": "ns/iter",
+            "extra": "iterations: 884\ncpu: 316178.510180998 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ColdMass",
+            "value": 168037.12874777894,
+            "unit": "ns/iter",
+            "extra": "iterations: 1701\ncpu: 168028.79247501024 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/ColdGradGrad",
+            "value": 164255.29404759096,
+            "unit": "ns/iter",
+            "extra": "iterations: 1680\ncpu: 164254.26666666777 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P3/D2/Elasticity",
+            "value": 8743378.484847529,
+            "unit": "ns/iter",
+            "extra": "iterations: 33\ncpu: 8742408.87878798 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReassemblyMass",
+            "value": 25873.9322663543,
+            "unit": "ns/iter",
+            "extra": "iterations: 10497\ncpu: 25870.122892254767 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReassemblyGradGrad",
+            "value": 23706.99075708767,
+            "unit": "ns/iter",
+            "extra": "iterations: 11901\ncpu: 23705.231829257966 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ReactionDiffusion",
+            "value": 53175.029450383205,
+            "unit": "ns/iter",
+            "extra": "iterations: 5331\ncpu: 53169.85462389829 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ColdMass",
+            "value": 29599.61508991844,
+            "unit": "ns/iter",
+            "extra": "iterations: 9397\ncpu: 29599.417792911332 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/ColdGradGrad",
+            "value": 25572.70520553503,
+            "unit": "ns/iter",
+            "extra": "iterations: 10777\ncpu: 25572.499025701767 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/Elasticity",
+            "value": 533862.3423598025,
+            "unit": "ns/iter",
+            "extra": "iterations: 517\ncpu: 533857.1818182018 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReassemblyMass",
+            "value": 169070.13264685296,
+            "unit": "ns/iter",
+            "extra": "iterations: 1651\ncpu: 169040.11508176415 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReassemblyGradGrad",
+            "value": 159268.2027102774,
+            "unit": "ns/iter",
+            "extra": "iterations: 1771\ncpu: 159239.63918690025 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ReactionDiffusion",
+            "value": 326482.0921819084,
+            "unit": "ns/iter",
+            "extra": "iterations: 857\ncpu: 326480.4177362983 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ColdMass",
+            "value": 173904.47866423696,
+            "unit": "ns/iter",
+            "extra": "iterations: 1617\ncpu: 173903.1286332675 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/ColdGradGrad",
+            "value": 160121.24501426207,
+            "unit": "ns/iter",
+            "extra": "iterations: 1755\ncpu: 160068.02165241766 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D3/Elasticity",
+            "value": 13164768.714286115,
+            "unit": "ns/iter",
+            "extra": "iterations: 21\ncpu: 13163374.80952392 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/BoundaryMass",
+            "value": 4467.496349308504,
+            "unit": "ns/iter",
+            "extra": "iterations: 62180\ncpu: 4467.206674171834 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D2/BoundaryLoad",
+            "value": 2779.6115023940747,
+            "unit": "ns/iter",
+            "extra": "iterations: 101944\ncpu: 2779.487738366109 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/BoundaryMass",
+            "value": 6734.038607809831,
+            "unit": "ns/iter",
+            "extra": "iterations: 41546\ncpu: 6733.994704664747 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/H1P2/D2/BoundaryLoad",
+            "value": 2564.1543501195165,
+            "unit": "ns/iter",
+            "extra": "iterations: 108066\ncpu: 2564.1362870837843 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/BoundaryMass",
+            "value": 14810.7867054728,
+            "unit": "ns/iter",
+            "extra": "iterations: 19241\ncpu: 14809.228418480503 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Assembly/P1/D3/BoundaryLoad",
+            "value": 7066.846188828289,
+            "unit": "ns/iter",
+            "extra": "iterations: 39581\ncpu: 7066.530102827576 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D2/Mass",
+            "value": 6130.7910470665165,
+            "unit": "ns/iter",
+            "extra": "iterations: 45594\ncpu: 6130.214326446677 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D2/SourceLoad",
+            "value": 5896.4596100273875,
+            "unit": "ns/iter",
+            "extra": "iterations: 47388\ncpu: 5896.193023550157 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D3/Mass",
+            "value": 6265.667159436432,
+            "unit": "ns/iter",
+            "extra": "iterations: 45322\ncpu: 6265.3838312520675 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P0/D3/SourceLoad",
+            "value": 5807.581321110043,
+            "unit": "ns/iter",
+            "extra": "iterations: 48868\ncpu: 5806.934169600032 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/GlobalPotential",
+            "value": 5122123.777777301,
+            "unit": "ns/iter",
+            "extra": "iterations: 54\ncpu: 5121723.944444372 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/GlobalPotential",
+            "value": 736839.7572560025,
+            "unit": "ns/iter",
+            "extra": "iterations: 379\ncpu: 736799.0026385345 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D2/VectorGlobalPotential",
+            "value": 16076460.882352289,
+            "unit": "ns/iter",
+            "extra": "iterations: 17\ncpu: 16075625.70588156 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/D3/VectorGlobalPotential",
+            "value": 4327976.200000614,
+            "unit": "ns/iter",
+            "extra": "iterations: 65\ncpu: 4327804.723077231 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D2/Mass",
+            "value": 22662.348558472768,
+            "unit": "ns/iter",
+            "extra": "iterations: 12348\ncpu: 22662.197683835362 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D2/GradGrad",
+            "value": 15093.41242817708,
+            "unit": "ns/iter",
+            "extra": "iterations: 18796\ncpu: 15090.438391147569 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3-P2/D2/Mass",
+            "value": 70162.06001502274,
+            "unit": "ns/iter",
+            "extra": "iterations: 3999\ncpu: 70150.2155538887 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P3-P2/D2/GradGrad",
+            "value": 61891.89430893433,
+            "unit": "ns/iter",
+            "extra": "iterations: 4551\ncpu: 61888.09294660348 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D3/Mass",
+            "value": 54846.542306179945,
+            "unit": "ns/iter",
+            "extra": "iterations: 5082\ncpu: 54845.91617473556 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2-P1/D3/GradGrad",
+            "value": 26870.907467538374,
+            "unit": "ns/iter",
+            "extra": "iterations: 10472\ncpu: 26869.863158900847 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/1",
+            "value": 524.5651652286069,
+            "unit": "ns/iter",
+            "extra": "iterations: 530114\ncpu: 524.5424040866973 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/2",
+            "value": 11600.2068277304,
+            "unit": "ns/iter",
+            "extra": "iterations: 24049\ncpu: 11598.049440724235 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/3",
+            "value": 9844.18483445448,
+            "unit": "ns/iter",
+            "extra": "iterations: 28512\ncpu: 9843.149621211507 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/4",
+            "value": 14253.366846444926,
+            "unit": "ns/iter",
+            "extra": "iterations: 19654\ncpu: 14252.684389945824 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/6",
+            "value": 33751.70034121375,
+            "unit": "ns/iter",
+            "extra": "iterations: 8206\ncpu: 33751.53509627293 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/7",
+            "value": 16221.370826526592,
+            "unit": "ns/iter",
+            "extra": "iterations: 17132\ncpu: 16219.268853607577 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/Mass/5",
+            "value": 28786.415150572455,
+            "unit": "ns/iter",
+            "extra": "iterations: 9729\ncpu: 28665.746017061607 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/1",
+            "value": 629.5651063268465,
+            "unit": "ns/iter",
+            "extra": "iterations: 440011\ncpu: 629.4924558704171 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/2",
+            "value": 11054.678245612462,
+            "unit": "ns/iter",
+            "extra": "iterations: 25650\ncpu: 11054.302261208584 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/3",
+            "value": 15310.728097371544,
+            "unit": "ns/iter",
+            "extra": "iterations: 17418\ncpu: 15309.931737283045 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/4",
+            "value": 14471.203859326108,
+            "unit": "ns/iter",
+            "extra": "iterations: 19278\ncpu: 14470.575007780819 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/6",
+            "value": 64794.20468228861,
+            "unit": "ns/iter",
+            "extra": "iterations: 4485\ncpu: 64779.599554072745 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/7",
+            "value": 23841.17500842857,
+            "unit": "ns/iter",
+            "extra": "iterations: 11868\ncpu: 23839.048365352726 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/P1/Geometry/GradGrad/5",
+            "value": 51414.66060605845,
+            "unit": "ns/iter",
+            "extra": "iterations: 5445\ncpu: 51409.33921028915 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/CurvedMass",
+            "value": 32402.612189981784,
+            "unit": "ns/iter",
+            "extra": "iterations: 8548\ncpu: 32400.246256433813 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D2/CurvedGradGrad",
+            "value": 32433.11862438026,
+            "unit": "ns/iter",
+            "extra": "iterations: 8607\ncpu: 32432.89857093121 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/CurvedMass",
+            "value": 103351.86813598177,
+            "unit": "ns/iter",
+            "extra": "iterations: 2677\ncpu: 103345.49308927782 ns\nthreads: 1"
+          },
+          {
+            "name": "Integrator/Kernel/H1P2/D3/CurvedGradGrad",
+            "value": 84046.70125882441,
+            "unit": "ns/iter",
+            "extra": "iterations: 3257\ncpu: 84039.87288916131 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/2",
+            "value": 3.9665134744255477,
+            "unit": "ns/iter",
+            "extra": "iterations: 71835013\ncpu: 3.9663343556434874 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/4",
+            "value": 3.5761363870454552,
+            "unit": "ns/iter",
+            "extra": "iterations: 76941325\ncpu: 3.5757114658474127 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/6",
+            "value": 2.7418176773763876,
+            "unit": "ns/iter",
+            "extra": "iterations: 97800348\ncpu: 2.7417995588318416 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/0/8",
+            "value": 2.922187620692015,
+            "unit": "ns/iter",
+            "extra": "iterations: 95511512\ncpu: 2.92203692681559 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/2",
+            "value": 2.7059731324978467,
+            "unit": "ns/iter",
+            "extra": "iterations: 103843670\ncpu: 2.705859952754035 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/4",
+            "value": 2.523744309095951,
+            "unit": "ns/iter",
+            "extra": "iterations: 112461474\ncpu: 2.5234995675051883 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/6",
+            "value": 3.1772467143651317,
+            "unit": "ns/iter",
+            "extra": "iterations: 89560261\ncpu: 3.1767956326075355 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/1/8",
+            "value": 3.1822712124424966,
+            "unit": "ns/iter",
+            "extra": "iterations: 86009638\ncpu: 3.182010137050077 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/2",
+            "value": 3.415621065819055,
+            "unit": "ns/iter",
+            "extra": "iterations: 81556855\ncpu: 3.415493056960377 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/4",
+            "value": 3.2930138618797646,
+            "unit": "ns/iter",
+            "extra": "iterations: 86549663\ncpu: 3.292984479904908 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/6",
+            "value": 2.492688192466757,
+            "unit": "ns/iter",
+            "extra": "iterations: 111636828\ncpu: 2.492669712901325 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/2/8",
+            "value": 2.8175825354014026,
+            "unit": "ns/iter",
+            "extra": "iterations: 103474599\ncpu: 2.8172833218712303 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/2",
+            "value": 2.852273859343875,
+            "unit": "ns/iter",
+            "extra": "iterations: 93232152\ncpu: 2.8519741987719716 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/4",
+            "value": 3.0747983331061293,
+            "unit": "ns/iter",
+            "extra": "iterations: 90737129\ncpu: 3.074456268062045 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/6",
+            "value": 3.132211198286623,
+            "unit": "ns/iter",
+            "extra": "iterations: 86571933\ncpu: 3.132086943235887 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureAccess/3/8",
+            "value": 3.394799628507341,
+            "unit": "ns/iter",
+            "extra": "iterations: 82525412\ncpu: 3.394769080340827 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/2",
+            "value": 22.806014028406278,
+            "unit": "ns/iter",
+            "extra": "iterations: 12361631\ncpu: 22.804729165593695 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/4",
+            "value": 44.43955896822446,
+            "unit": "ns/iter",
+            "extra": "iterations: 6303582\ncpu: 44.436249262721844 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/6",
+            "value": 88.43882735572535,
+            "unit": "ns/iter",
+            "extra": "iterations: 3131555\ncpu: 88.42816907256021 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/0/8",
+            "value": 125.10098251982181,
+            "unit": "ns/iter",
+            "extra": "iterations: 2154155\ncpu: 125.08978323287093 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/2",
+            "value": 57.516445274544104,
+            "unit": "ns/iter",
+            "extra": "iterations: 4890493\ncpu: 57.51231460713681 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/4",
+            "value": 167.33476408893458,
+            "unit": "ns/iter",
+            "extra": "iterations: 1649711\ncpu: 167.33381483180807 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/6",
+            "value": 329.9628557291954,
+            "unit": "ns/iter",
+            "extra": "iterations: 844814\ncpu: 329.95934844828594 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/1/8",
+            "value": 623.627354408778,
+            "unit": "ns/iter",
+            "extra": "iterations: 449529\ncpu: 623.5711667099854 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/2",
+            "value": 101.33735424815393,
+            "unit": "ns/iter",
+            "extra": "iterations: 2762058\ncpu: 101.32662167122548 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/4",
+            "value": 267.18133134702873,
+            "unit": "ns/iter",
+            "extra": "iterations: 1048517\ncpu: 267.1577895255702 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/6",
+            "value": 631.9427943985543,
+            "unit": "ns/iter",
+            "extra": "iterations: 443523\ncpu: 631.937694324741 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/2/8",
+            "value": 1135.2244126399194,
+            "unit": "ns/iter",
+            "extra": "iterations: 246782\ncpu: 1135.1484143900523 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/2",
+            "value": 81.85312710903395,
+            "unit": "ns/iter",
+            "extra": "iterations: 3366496\ncpu: 81.84557860754444 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/4",
+            "value": 156.86473282052276,
+            "unit": "ns/iter",
+            "extra": "iterations: 1789939\ncpu: 156.84868981568786 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/6",
+            "value": 350.15981860190334,
+            "unit": "ns/iter",
+            "extra": "iterations: 799788\ncpu: 350.13378045182026 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_QuadratureSweep/3/8",
+            "value": 700.2374073816964,
+            "unit": "ns/iter",
+            "extra": "iterations: 417169\ncpu: 700.2095337860794 ns\nthreads: 1"
           }
         ]
       }
