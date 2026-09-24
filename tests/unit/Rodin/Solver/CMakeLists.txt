@@ -38,3 +38,87 @@ gtest_discover_tests(RodinSolverConceptTest
    PROPERTIES
      LABELS unit
  )
+
+if (RODIN_USE_PARU)
+  add_executable(RodinParUTest ParUTest.cpp)
+  target_link_libraries(RodinParUTest
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  gtest_discover_tests(RodinParUTest
+    PROPERTIES
+      LABELS unit
+  )
+endif()
+
+if (RODIN_USE_MUMPS)
+  add_executable(RodinMUMPSTest MUMPSTest.cpp)
+  target_link_libraries(RodinMUMPSTest
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  gtest_discover_tests(RodinMUMPSTest
+    PROPERTIES
+      LABELS unit
+  )
+endif()
+
+add_executable(RodinDenseSolverTest DenseSolverTest.cpp)
+target_link_libraries(RodinDenseSolverTest
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinDenseSolverTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinInfoTest InfoTest.cpp)
+target_link_libraries(RodinInfoTest
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinInfoTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinSparseLUTest SparseLUTest.cpp)
+target_link_libraries(RodinSparseLUTest
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinSparseLUTest
+  PROPERTIES
+    LABELS unit
+)
+
+if (RODIN_USE_UMFPACK)
+  add_executable(RodinUMFPackTest UMFPackTest.cpp)
+  target_link_libraries(RodinUMFPackTest
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  gtest_discover_tests(RodinUMFPackTest
+    PROPERTIES
+      LABELS unit
+  )
+endif()
