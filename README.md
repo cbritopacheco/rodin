@@ -37,6 +37,7 @@ New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbrito
 9. [Development](#development)
 10. [Gallery](#gallery)
 11. [Support Rodin](#support-rodin)
+12. [License](#license)
 
 ## Installation
 
@@ -543,6 +544,54 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
     </td>
   </tr>
 </table>
+
+### Biomechanics
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI.mp4">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/Biomechanics/CoronaryFSI_Preview.png" alt="Coronary FSI" width="100%">
+      </a>
+      <br />
+      Fluid-structure interaction simulation of a coronary artery (by <a href="https://www.researchgate.net/profile/Oscar-Ruz-2">O. Ruz</a>)
+    </td>
+        <td align="center" width="33%">
+      <a href="">
+        <img src="" alt="Placeholder" width="100%">
+      </a>
+      <br />
+      Placeholder
+    </td>
+        <td align="center" width="33%">
+      <a href="">
+        <img src="" alt="Placeholder" width="100%">
+      </a>
+      <br />
+      Placeholder
+    </td>
+  </tr>
+</table>
+
+## License
+
+Rodin is distributed under the [Boost Software License 1.0](LICENSE), a permissive open-source license.
+
+The choice of this license is intentional. Rodin is intended to be useful both as a research code and as a general-purpose finite element framework. The Boost Software License allows Rodin to be freely used, modified, and redistributed, including in academic, industrial, commercial, and proprietary projects.
+
+**Using Rodin does not mean that your own project must be licensed under the Boost Software License.** In particular, software that uses or links against Rodin may be distributed under a different open-source license or under a proprietary license. The Boost Software License is not a copyleft license and does not require you to release the source code of software built using Rodin.
+
+If Rodin source code, or modified portions of it, are redistributed in source form, the original copyright notices and the Boost Software License notice must be preserved as required by the license. This requirement applies to the Rodin code being redistributed; it does not require the rest of your project to adopt the Boost Software License.
+
+The aim of this choice is to place as few restrictions as possible on how Rodin may be used, while allowing it to be incorporated into research software, other open-source projects, and proprietary applications.
+
+### Acknowledgement
+
+The license does not require users to acknowledge Rodin in publications or projects. Nevertheless, if Rodin contributes to your research, software, or other work, an acknowledgement is greatly appreciated.
+
+Please consider mentioning that your project uses **Rodin** and, where appropriate, providing a link to the project repository. For academic work, citing the corresponding Rodin publication (coming soon!) or software reference, is also appreciated.
+
+Such acknowledgements are not a licensing requirement, but they help make the use of Rodin visible and support the continued development of the project.
 
 ## Support Rodin
 

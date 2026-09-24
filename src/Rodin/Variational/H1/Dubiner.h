@@ -18,8 +18,6 @@
 #include "Fekete.h"
 #include "JacobiPolynomial.h"
 
-#define RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE 1e-14
-
 namespace Rodin::Variational
 {
   /**
@@ -126,14 +124,80 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Computes the gradient of @f$\psi_{P,Q}@f$ in reference coordinates.
+       *
+       * The Duffy-coordinate factors cancel analytically before
+       * differentiation, so the returned derivative has a finite value at
+       * the collapsed vertex.
+       *
+       * @tparam P First modal index.
+       * @tparam Q Second modal index.
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param x First reference coordinate.
+       * @param y Second reference coordinate.
+       */
+      template <size_t P, size_t Q>
+      static constexpr void getReferenceGradient(
+        Real& dpsi_dx, Real& dpsi_dy, Real x, Real y)
+      {
+        static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
+
+        Real a, b;
+        getCollapsed(a, b, x, y);
+
+        getReferenceGradientFromCollapsed<P, Q>(dpsi_dx, dpsi_dy, a, b, 1.0 - y);
+      }
+
+      /**
+       * @brief Computes the gradient of @f$\psi_{P,Q}@f$ from precomputed collapsed coordinates.
+       *
+       * This overload avoids repeated Duffy-coordinate transformations while
+       * tabulating all modes at the same reference point.
+       *
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param a First collapsed coordinate.
+       * @param b Second collapsed coordinate.
+       * @param s Value of @f$1-y@f$.
+       */
+      template <size_t P, size_t Q>
+      static constexpr void getReferenceGradientFromCollapsed(
+        Real& dpsi_dx, Real& dpsi_dy, Real a, Real b, Real s)
+      {
+        static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
+
+        Real Pa, dPa;
+        JacobiPolynomial<P>::getValue(Pa, dPa, 0.0, 0.0, a);
+
+        Real Pb, dPb;
+        JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
+
+        const Real sP = Math::pow(s, std::integral_constant<size_t, P>{});
+
+        if constexpr (P == 0)
+        {
+          dpsi_dx = 0.0;
+          dpsi_dy = 2.0 * Pa * dPb * sP;
+        }
+        else
+        {
+          const Real sPm1 = Math::pow(s, std::integral_constant<size_t, P - 1>{});
+          dpsi_dx = 2.0 * dPa * Pb * sPm1;
+          dpsi_dy = sPm1 * ((a + 1.0) * dPa - static_cast<Real>(P) * Pa) * Pb +
+            2.0 * Pa * dPb * sP;
+        }
+      }
+
+      /**
        * @brief Converts (x,y) on the reference triangle to collapsed coordinates (a,b) ∈ [-1,1]^2.
        *
        * Reference triangle vertices: (0,0), (1,0), (0,1).
        *
        * Mapping:
        *   b = 2y - 1
-       *   a = 2x/(1-y) - 1    if 1-y > tol
-       *   a = -1              otherwise (collapse at the top edge/vertex y=1)
+       *   a = 2x/(1-y) - 1    if y != 1
+       *   a = -1              at the collapsed vertex y=1
        *
        * @param[out] a First collapsed coordinate.
        * @param[out] b Second collapsed coordinate.
@@ -144,8 +208,9 @@ namespace Rodin::Variational
       {
         b = 2.0 * y - 1.0;
 
-        if (1.0 - y > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-          a = 2.0 * (x / (1.0 - y)) - 1.0;
+        const Real oneMinusY = 1.0 - y;
+        if (oneMinusY != 0.0)
+          a = 2.0 * (x / oneMinusY) - 1.0;
         else
           a = -1.0;
       }
@@ -330,12 +395,97 @@ namespace Rodin::Variational
         dpsi_dc = pA * pB * (dPC * scaleC + pC * dscaleCDc) * scaleB;
       }
 
+      /**
+       * @brief Computes the gradient of @f$\psi_{P,Q,R}@f$ in reference coordinates.
+       *
+       * The Duffy-coordinate factors cancel analytically before
+       * differentiation, so the returned derivative has a finite value on
+       * the collapsed edge and at the collapsed vertex.
+       *
+       * @tparam P First modal index.
+       * @tparam Q Second modal index.
+       * @tparam R Third modal index.
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param[out] dpsi_dz Derivative with respect to @f$z@f$.
+       * @param x First reference coordinate.
+       * @param y Second reference coordinate.
+       * @param z Third reference coordinate.
+       */
+      template <size_t P, size_t Q, size_t R>
+      static constexpr void getReferenceGradient(
+        Real& dpsi_dx, Real& dpsi_dy, Real& dpsi_dz, Real x, Real y, Real z)
+      {
+        static_assert(P + Q + R <= K, "DubinerTetrahedron: P + Q + R must be <= K.");
+
+        Real a, b, c;
+        getCollapsed(a, b, c, x, y, z);
+
+        getReferenceGradientFromCollapsed<P, Q, R>(
+          dpsi_dx, dpsi_dy, dpsi_dz, a, b, c, 1.0 - y - z, 1.0 - z);
+      }
+
+      /**
+       * @brief Computes the gradient of @f$\psi_{P,Q,R}@f$ from precomputed collapsed coordinates.
+       *
+       * This overload avoids repeated Duffy-coordinate transformations while
+       * tabulating all modes at the same reference point.
+       *
+       * @param[out] dpsi_dx Derivative with respect to @f$x@f$.
+       * @param[out] dpsi_dy Derivative with respect to @f$y@f$.
+       * @param[out] dpsi_dz Derivative with respect to @f$z@f$.
+       * @param a First collapsed coordinate.
+       * @param b Second collapsed coordinate.
+       * @param c Third collapsed coordinate.
+       * @param s1 Value of @f$1-y-z@f$.
+       * @param s2 Value of @f$1-z@f$.
+       */
+      template <size_t P, size_t Q, size_t R>
+      static constexpr void getReferenceGradientFromCollapsed(Real& dpsi_dx,
+        Real& dpsi_dy, Real& dpsi_dz, Real a, Real b, Real c, Real s1, Real s2)
+      {
+        static_assert(P + Q + R <= K, "DubinerTetrahedron: P + Q + R must be <= K.");
+
+        Real pA, dPA;
+        JacobiPolynomial<P>::getValue(pA, dPA, 0.0, 0.0, a);
+
+        Real pB, dPB;
+        JacobiPolynomial<Q>::getValue(pB, dPB, 2.0 * P + 1.0, 0.0, b);
+
+        Real pC, dPC;
+        JacobiPolynomial<R>::getValue(pC, dPC, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
+
+        const Real s1P = Math::pow(s1, std::integral_constant<size_t, P>{});
+        const Real F = pA * s1P;
+        Real dFdx = 0.0, dFdyz = 0.0;
+        if constexpr (P > 0)
+        {
+          const Real s1Pm1 = Math::pow(s1, std::integral_constant<size_t, P - 1>{});
+          dFdx = 2.0 * dPA * s1Pm1;
+          dFdyz = s1Pm1 * ((a + 1.0) * dPA - static_cast<Real>(P) * pA);
+        }
+
+        const Real s2Q = Math::pow(s2, std::integral_constant<size_t, Q>{});
+        const Real G = pB * s2Q;
+        Real dGdy = 0.0, dGdz = 0.0;
+        if constexpr (Q > 0)
+        {
+          const Real s2Qm1 = Math::pow(s2, std::integral_constant<size_t, Q - 1>{});
+          dGdy = 2.0 * dPB * s2Qm1;
+          dGdz = s2Qm1 * ((b + 1.0) * dPB - static_cast<Real>(Q) * pB);
+        }
+
+        dpsi_dx = dFdx * G * pC;
+        dpsi_dy = (dFdyz * G + F * dGdy) * pC;
+        dpsi_dz = (dFdyz * G + F * dGdz) * pC + 2.0 * F * G * dPC;
+      }
+
       // Map reference tetra (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1) → (a,b,c) ∈ [-1,1]^3
       // Using a Duffy-type collapse:
       //
       //   c = 2 z - 1
-      //   b = 2 y / (1 - z) - 1          if 1 - z > tol
-      //   a = 2 x / (1 - y - z) - 1      if 1 - y - z > tol
+      //   b = 2 y / (1 - z) - 1          if z != 1
+      //   a = 2 x / (1 - y - z) - 1      if y + z != 1
       //
       /// @brief Maps reference coordinates to collapsed coordinates.
       static constexpr void getCollapsed(Real& a,
@@ -348,12 +498,12 @@ namespace Rodin::Variational
         c = 2.0 * z - 1.0;
 
         const Real oneMinusZ = 1.0 - z;
-        if (oneMinusZ > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+        if (oneMinusZ != 0.0)
         {
           b = 2.0 * (y / oneMinusZ) - 1.0;
 
           const Real oneMinusYz = 1.0 - y - z;
-          if (oneMinusYz > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+          if (oneMinusYz != 0.0)
             a = 2.0 * (x / oneMinusYz) - 1.0;
           else
             a = -1.0; // collapse along edge
