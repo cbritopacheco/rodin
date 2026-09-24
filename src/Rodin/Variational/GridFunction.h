@@ -1214,7 +1214,8 @@ namespace Rodin::Variational
         bool sameReferenceCoordinates =
           cache.referenceCoordinates.size() == referenceCoordinateCount;
         for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinateCount; ++j)
-          sameReferenceCoordinates = cache.referenceCoordinates[j] == referenceCoordinates(j);
+          sameReferenceCoordinates =
+            cache.referenceCoordinates[j] == referenceCoordinates(j);
         if (!cache.hasBasisValues || cache.owner != m_identity || cache.d != d ||
           cache.i != i || cache.qf != ip.getQuadratureFormula() ||
           cache.qp != ip.getIndex() || !sameReferenceCoordinates)
