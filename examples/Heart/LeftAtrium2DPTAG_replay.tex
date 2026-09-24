@@ -1,0 +1,110 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[spanish,es-noquoting,es-nodecimaldot]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb,bm,booktabs,siunitx,enumitem}
+\usepackage[hidelinks]{hyperref}
+\sisetup{per-mode=symbol}
+\newcommand{\bu}{\bm{u}}
+
+\title{\vspace{-1.5em}Cómo llevar el modelo a la aurícula real sin resolver el flujo 32\,000 veces\\[3pt]
+\large Estrategia de repetición de ciclo (\emph{replay}) con actualización del flujo bajo demanda}
+\author{Nota de trabajo}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{El problema}
+
+La química necesita minutos de tiempo físico (2--5 min para que aparezca gel en un bolsillo estancado; 300--400 ciclos). El flujo cuesta entre 10 y 100 veces más por paso que las cuatro ecuaciones de transporte, y en 3D con FSI mucho más. Resolver el flujo en cada uno de los 32\,000 pasos es pagar por algo que no cambia.
+
+\section{La idea}
+
+Hay una separación de escalas que se puede explotar sin aproximar nada mientras no haya gel:
+\begin{itemize}[leftmargin=1.4em]
+\item El flujo es \textbf{periódico} después de 2--3 ciclos de calentamiento.
+\item Las especies \textbf{no actúan sobre el flujo} hasta que $F$ se acerca al umbral de gel $K_F$ (el arrastre de Brinkman es $\sigma_B\propto F^2/(K_F^2+F^2)$, cero en la práctica mientras $F\ll K_F$).
+\item La fibrina, cuando aparece, evoluciona en \textbf{decenas de ciclos}; el flujo se adapta a ella en 1--2 ciclos.
+\end{itemize}
+Por tanto: se resuelve el flujo una vez, se guarda un ciclo, y se repite ese ciclo para transportar las especies. El flujo se vuelve a resolver sólo cuando la fibrina ha cambiado lo suficiente para modificarlo. Hasta el primer gel el resultado es \emph{idéntico} al acoplado paso a paso; después, el error es el retardo de un ciclo en un campo que cambia en decenas de ciclos.
+
+\section{Qué se hace, en cuatro pasos}
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Calentamiento.} Flujo (FSI) durante $n_{\rm flow}=2$--3 ciclos hasta periodicidad. En el último ciclo se guarda una instantánea por paso: $\bu^n$ y, si la malla se mueve, $\bm w^n$ y la posición de la malla. Al cerrar ese ciclo se calculan TAWSS, OSI y $E$.
+\item \textbf{Repetición.} Para cada paso $n$ del ciclo $c$: cargar la instantánea $k=n\bmod N$ ($\bu^n\leftarrow\bu_k$, $\bu^{n-1}\leftarrow\bu_{k-1}$), resolver los cuatro transportes con esa velocidad, hacer el paso de reacción nodal, escribir diagnósticos. Sin resolver flujo ni cizalle. $E$ queda congelado.
+\item \textbf{Prueba de actualización}, al final de cada ciclo repetido: si $\max F>K_F/2$ \emph{y} la masa de fibrina $\int_\Omega F\,\mathrm dV$ ha crecido más de un 20\,\% desde el ciclo almacenado, se activa una actualización.
+\item \textbf{Actualización.} Se resuelven $n_{\rm refresh}=2$ ciclos completos (flujo con $\sigma_B(F)$, cizalle, especies), se guarda el último y se recalcula $E$ con él. Se vuelve al paso 2.
+\end{enumerate}
+En el ejemplo 2D esto es \texttt{-ptag\_replay true}; el criterio y el número de ciclos de actualización son \texttt{-ptag\_replay\_refresh} y \texttt{-ptag\_replay\_flow\_cycles}. El registro imprime cuántos pasos de flujo se resolvieron en total.
+
+\section{Consistencia y error}
+
+\begin{itemize}[leftmargin=1.4em]
+\item \textbf{Antes del gel} ($\sigma_B=0$): el flujo repetido es el mismo flujo que se resolvería; la única diferencia es el redondeo de la copia. La verificación en 2D es correr 40 ciclos con y sin \emph{replay} sin Brinkman: los CSV deben coincidir.
+\item \textbf{Después del gel}: el flujo que ve la química corresponde a la fibrina de hace $m$ ciclos, con $m$ el número de ciclos entre actualizaciones. Si la masa de fibrina crece un 20\,\% entre actualizaciones, el arrastre que se está usando es a lo sumo un 20\,\% menor que el actual durante ese intervalo. El error es de primer orden en ese porcentaje y se controla con \texttt{replay\_refresh}: 0.1 es más exacto y más caro, 0.5 más barato. Comparar dos valores es la prueba de convergencia.
+\item \textbf{Lo que se congela con sentido físico}: $E$ cambia en horas (fenotipo endotelial); congelarlo entre actualizaciones es más fiel que recalcularlo cada ciclo. La estabilización y las viscosidades se evalúan con la velocidad repetida, exactamente como en el paso original.
+\item \textbf{Lo que no se toca}: ni la cinética, ni $\Delta t$, ni la malla. No se acelera ninguna constante: el tiempo físico es el mismo.
+\end{itemize}
+
+\section{Cuánto cuesta}
+
+Sea $c_f$ el costo de un paso de flujo y $c_s$ el de un paso de especies ($c_s/c_f\approx0.05$--0.1 con transporte iterativo). Para 400 ciclos de química con $N=80$ pasos por ciclo:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Estrategia & Pasos de flujo & Costo relativo \\
+\midrule
+Acoplado paso a paso & $403\times80=32\,240$ & $1$ \\
+\emph{Replay} sin gel (iniciación y lavado) & $3\times80=240$ & $\approx0.01+0.08=0.09$ \\
+\emph{Replay} con 4 actualizaciones (Brinkman) & $(3+4\times2)\times80=880$ & $\approx0.03+0.08=0.11$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Es decir, diez veces más barato, y el ahorro crece con el costo del flujo: en 3D con FSI la fracción $c_s/c_f$ es menor y el \emph{replay} se acerca al costo de las especies solas.
+
+\section{Para la aurícula 3D con FSI}
+
+\begin{itemize}[leftmargin=1.4em]
+\item Guardar por instantánea: velocidad $\bu$, velocidad de malla $\bm w$ y posición de la malla (o el desplazamiento de pared). En la repetición se mueve la malla a la posición guardada y se transporta con $\bu-\bm w$: la ley de conservación geométrica se cumple porque se repite exactamente el mismo movimiento discreto.
+\item Memoria: $N$ instantáneas de 3 vectores. Para $10^6$ nodos y $N=80$: $80\times3\times3\times10^6\times8\,$B $\approx6\,$GB en doble precisión; en disco o en RAM distribuida. Con $N=40$ e interpolación lineal en el tiempo entre instantáneas se reduce a la mitad sin pérdida apreciable (la química no ve la escala de 10\,ms).
+\item Las especies se pueden transportar en la misma malla del fluido con el mismo $\Delta t$; no hace falta submalla ni subdominio. Si se quisiera restringir la química a la orejuela, habría que imponer la composición en el ostium, que tiene flujo inverso: no lo recomiendo.
+\item Antes de cualquier corrida 3D, el modelo de caja 0D con $\omega=Q_{\rm LAA}/V_{\rm LAA}$ medido del ciclo guardado y $s=j_0\bar E|\Gamma_w|/V$ dice en segundos si el caso está en régimen de activación o de lavado. Sólo los casos cerca de la frontera necesitan la corrida larga.
+\end{itemize}
+
+\section{Sub-pasos de la química}
+
+El número de pasos de reloj es tiempo físico sobre $\Delta t$ y no baja: 400 ciclos a 10\,ms son 32\,000 pasos. Lo que baja es cuántos de ellos resuelven algo. Con \emph{replay} el flujo se resuelve en unos 240--900; y como la cinética tiene constantes de tiempo de 10--50\,s y el transporte es implícito, las especies pueden avanzar cada $k$ pasos con $\Delta t_q=k\,\Delta t$ sobre las instantáneas submuestreadas (\texttt{-ptag\_species\_substeps k}). Con $k=4$ hay 20 resoluciones de química por ciclo en vez de 80, y un paso de reloj sin flujo ni química no cuesta nada. Es un estudio de paso de tiempo, no de estabilidad: comparar $k=1,2,4$ en 40 ciclos y quedarse con el mayor que no cambie $t(T>T_{\rm th})$ ni $\max F$. La región que decide es la orejuela, donde el número de Courant a $k=4$ es de orden 3; en el cuerpo de la aurícula es mayor, pero allí no hay especies que transportar. El log termina con la cuenta real: pasos de reloj, pasos con flujo y pasos con química.
+
+\section{Comandos (2D, plantilla)}
+
+Verificación de equivalencia (sin Brinkman; debe coincidir con la corrida sin \emph{replay}):
+\begin{verbatim}
+mpirun -n 7 ./examples/Heart/LeftAtrium2DPTAG \
+  -ptag_quasistatic true -ptag_graddiv_tau_lag true -ptag_pspg_residual 0 \
+  -ptag_dt 1e-2 -ptag_flow_cycles 2 -ptag_species_cycles 40 -ptag_output_every 80 \
+  -ptag_brinkman false -ptag_transport_iterative true -ptag_replay true
+\end{verbatim}
+Estudio largo con Brinkman y actualización bajo demanda:
+\begin{verbatim}
+mpirun -n 7 ./examples/Heart/LeftAtrium2DPTAG \
+  -ptag_quasistatic true -ptag_graddiv_tau_lag true -ptag_pspg_residual 0 \
+  -ptag_dt 1e-2 -ptag_flow_cycles 3 -ptag_species_cycles 400 -ptag_output_every 400 \
+  -ptag_brinkman true -ptag_transport_iterative true \
+  -ptag_replay true -ptag_replay_refresh 0.2 -ptag_replay_flow_cycles 2
+\end{verbatim}
+Prueba de convergencia del criterio: repetir con \texttt{-ptag\_replay\_refresh 0.1} y comparar $t_{\rm gel}$ y $\max\sigma_B$.
+
+Corrida con el menor número de resoluciones (ciclos ajustados a un $t_{\rm gel}$ ya observado de $\sim$2\,min, química cada 4 pasos):
+\begin{verbatim}
+mpirun -n 7 ./examples/Heart/LeftAtrium2DPTAG \
+  -ptag_quasistatic true -ptag_graddiv_tau_lag true -ptag_pspg_residual 0 \
+  -ptag_dt 1e-2 -ptag_flow_cycles 3 -ptag_species_cycles 150 -ptag_output_every 400 \
+  -ptag_brinkman true -ptag_transport_iterative true \
+  -ptag_replay true -ptag_replay_refresh 0.2 -ptag_replay_flow_cycles 2 \
+  -ptag_species_substeps 4
+\end{verbatim}
+Cuenta: 12\,240 pasos de reloj; flujo en 240 más 160 por actualización; química en 3\,000.
+\end{document}

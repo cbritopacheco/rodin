@@ -1,0 +1,299 @@
+% =====================================================================
+%  ABME manuscript -- Section: "A reduced poroelastic model of the
+%  perfused ventricle".  Standalone-compilable draft; the section body
+%  between the two %%% markers can be pasted into the manuscript.
+%  Citation keys are placeholders: verify each against the reference
+%  list before submission.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,bm}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+
+\newcommand{\bF}{\mathbf F}
+\newcommand{\bP}{\mathbf P}
+\newcommand{\bI}{\mathbf I}
+\newcommand{\bv}{\mathbf v}
+\newcommand{\be}{\mathbf e}
+\newcommand{\bq}{\mathbf q}
+\newcommand{\bn}{\mathbf n}
+\newcommand{\bfib}{\mathbf f}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\Div}{\operatorname{Div}}
+\newcommand{\Grad}{\nabla_{\!0}}
+\newcommand{\Rin}{R_{\mathrm{in}}}
+\newcommand{\Rout}{R_{\mathrm{out}}}
+\newcommand{\rin}{r_{\mathrm{in}}}
+\newcommand{\lt}{\lambda_\theta}
+\newcommand{\lr}{\lambda_r}
+\newcommand{\lb}{\bar\lambda}
+\newcommand{\pf}{\tilde p}
+\newcommand{\Vw}{V_{w0}}
+\newcommand{\sig}{\sigma_{1D}}
+\newcommand{\Pm}{\bP_{\!M}}
+
+\begin{document}
+
+%%% ---------------- BEGIN SECTION BODY ----------------
+
+\section{A reduced poroelastic model of the perfused ventricle}
+\label{sec:0dporo}
+
+The coronary arteries perfuse the ventricular wall, delivering the oxygen and metabolic substrates that sustain the energy-dependent contraction of the myocardium. The wall, in turn, acts on its own blood supply: during systole the contracting muscle compresses the intramural microvasculature, raises the interstitial pressure and impedes, or even reverses, arterial inflow, so that most left coronary flow takes place in diastole~\cite{Westerhof2006}. Coronary hemodynamics is therefore not a problem of a vessel network draining into a passive downstream bed, but a two-way poromechanical interaction between the vessels and the deformable, perfused tissue that surrounds them.
+
+A fully consistent description of this interaction couples the three-dimensional equations of the coronary vessels to the three-dimensional poroelastic equations of the myocardium~\cite{Chapelle2010,DiGregorio2021}. Such a model is complete, but strongly nonlinear---large-strain hyperelasticity, active contraction, incompressibility and porous flow are all coupled---and its cost and complexity place it beyond routine use, particularly when several pathological scenarios or parameter variations are of interest. At the other extreme, the lumped outlet models adopted in patient-specific coronary simulations~\cite{Kim2010,Mynard2014} represent the myocardium by a resistance--compliance network in which the intramyocardial pressure is prescribed, typically as a fixed fraction of the ventricular pressure. This is fast and often adequate, but it is a one-way, empirically scaled surrogate: the intramyocardial pressure does not respond to the mechanical state of the wall, to the blood stored in it, or to changes in contractility, stiffness or loading---which is precisely what a pathological condition alters.
+
+What is needed is a model that retains the poroelastic quantities governing the coupling---the deformation of the wall, the blood volume it stores, and the interstitial pressure that results from both---at a cost comparable to that of a lumped model. We propose a zero-dimensional poroelastic ventricle for this purpose. It is not a phenomenological circuit but a reduction of the three-dimensional poroelastic equations, obtained by projecting them onto the exact kinematics of a thick, radially deforming, solid-incompressible spherical wall under a single assumption: that the porosity is uniform across the wall. The reduction yields two scalar equilibrium equations rather than one---a pressure--volume law giving the cavity pressure, and an averaged incompressibility multiplier giving the interstitial pressure---both derived from the same stress field, so that the systolic impediment of coronary flow emerges from the mechanics rather than being imposed. The model thereby closes the three-dimensional coronary problem at both ends: at the inlet, through the aortic pressure of a Windkessel and a reduced valve model, and at the distal outlets, through the interstitial pressure the branches discharge into, with the coronary flow feeding back into the blood stored in the wall. In the thin-wall limit it reduces exactly to the reduced ventricular model of Caruel et al.~\cite{Caruel2014}, so both models share one parameter set.
+
+In what follows we first derive the reduced model for an arbitrary constitutive law of the wall, and then specialize it to a nonlinear porous myocardium in which the passive response follows the Holzapfel--Ogden law~\cite{Holzapfel2009}, the active contraction follows the Bestel--Cl\'ement--Sorine model~\cite{Bestel2001}, and the two are combined through the Hill--Maxwell rheology of~\cite{Chapelle2012}.
+
+% ---------------------------------------------------------------------
+\subsection{Three-dimensional starting point}
+\label{sec:3d}
+
+Let $\Omega_0$ be the reference (unloaded) configuration of the wall, $\mathbf u$ the displacement, $\bF=\bI+\Grad\mathbf u$ the deformation gradient and $J=\det\bF$. The wall is a porous solid whose pores are filled with blood; we describe the fluid content by the \emph{Lagrangian porosity} $\Phi$, the fluid volume per unit reference volume of tissue, with resting value $\phi_0$. The solid skeleton is incompressible, so the only way the tissue can change volume is by taking in or expelling blood:
+\begin{equation}
+  J-\Phi = 1-\phi_0 .
+  \label{eq:incomp}
+\end{equation}
+The mechanical (effective) stress of the skeleton is the sum of passive, viscous and active contributions,
+$\Pm=\bP^{\mathrm{pas}}(\bF)+\bP^{\mathrm{v}}(\bF,\dot\bF)+\bP^{\mathrm{act}}$,
+and the constraint~\eqref{eq:incomp} is enforced by a Lagrange multiplier $\lambda$, the hydrostatic reaction of the solid, so that the total first Piola--Kirchhoff stress is
+\begin{equation}
+  \bP=\Pm+\lambda J\bF^{-T}.
+  \label{eq:totalstress}
+\end{equation}
+Neglecting inertia, the wall is in equilibrium under the cavity pressure $p_v$ on the endocardium $\Gamma_{\mathrm{in}}$ and a free epicardium: for every admissible virtual velocity $\bv$,
+\begin{equation}
+  \int_{\Omega_0}\bP:\Grad\bv\,\dd V
+  =\int_{\Gamma_{\mathrm{in}}} p_v\, J\bF^{-T}\bn_0\cdot\bv\,\dd A ,
+  \label{eq:vw}
+\end{equation}
+with $\bn_0$ the reference normal pointing into the cavity. The fluid is stored in the pores with a storage energy $\Psi_P(\Phi)$, and its pressure is the conjugate of the porosity in the total energy $W(\bF)+\Psi_P(\Phi)+\lambda\,(J-\Phi-1+\phi_0)$:
+\begin{equation}
+  \pf=\Psi_P'(\Phi)-\lambda .
+  \label{eq:pf3d}
+\end{equation}
+Equation~\eqref{eq:pf3d} is the poromechanical coupling in one line: when the muscle squeezes, the solid reaction $\lambda$ becomes negative and the blood in the pores is pressurized. With $\Psi_P=0$ it is Terzaghi's principle, $\pf=-\lambda$; with $\Psi_P=\tfrac12 K_\Phi(\Phi-\phi_0)^2$ the microvasculature also has a compliance of its own. Finally, fluid mass is conserved: for every admissible virtual porosity $\Phi^*$,
+\begin{equation}
+  \int_{\Omega_0}\dot\Phi\,\Phi^*\,\dd V
+  -\int_{\Omega_0}\bq\cdot\Grad\Phi^*\,\dd V
+  =\int_{\Omega_0}\big(s_{\mathrm{ar}}-s_{\mathrm{ven}}\big)\Phi^*\,\dd V ,
+  \label{eq:mass3d}
+\end{equation}
+where $\bq$ is the Darcy flux driven by gradients of $\pf$, and $s_{\mathrm{ar}}$, $s_{\mathrm{ven}}$ are the distributed arterial inflow and venous outflow per unit reference volume. Equations~\eqref{eq:incomp}--\eqref{eq:mass3d} are the equations that a three-dimensional coupling would have to solve.
+
+% ---------------------------------------------------------------------
+\subsection{The reduction: exact kinematics of a thick incompressible sphere}
+\label{sec:kin}
+
+We now take the wall to be a spherical shell of reference inner radius $\Rin$, thickness $d_0$ and outer radius $\Rout=\Rin+d_0$, deforming radially: a material shell at reference radius $R\in[\Rin,\Rout]$ moves to $r(R,t)$. The deformation gradient is diagonal,
+\begin{equation}
+  \bF=\operatorname{diag}(\lr,\lt,\lt),\qquad
+  \lt=\frac{r}{R},\qquad
+  \lr=\frac{\partial r}{\partial R},\qquad
+  J=\lr\lt^2 .
+  \label{eq:F}
+\end{equation}
+The reduction rests on one assumption: \emph{the porosity is uniform across the wall}, $\Phi=\Phi(t)$. Then by~\eqref{eq:incomp} the volume ratio $J(t)=1-\phi_0+\Phi(t)$ is uniform too, and $\partial_R(r^3)=3JR^2$ integrates exactly from the endocardium:
+\begin{equation}
+  \boxed{\;
+  r^3(R,t)=\rin^3(t)+J(t)\big(R^3-\Rin^3\big),\qquad
+  \lt=\frac{r}{R},\qquad
+  \lr=\frac{J}{\lt^2}\;}
+  \label{eq:kin}
+\end{equation}
+with $\rin=\Rin+y$. The whole motion of the wall is thus fixed by two scalars, the endocardial displacement $y$ and the porosity $\Phi$: nothing is approximated in the kinematics, and the hoop stretch varies through the thickness as it should ($\lt$ is largest at the endocardium). The admissible virtual velocities are the tangent fields of~\eqref{eq:kin}, i.e.\ the radial fields obtained by varying $y$ and $\Phi$ respectively,
+\begin{equation}
+  v_1=\frac{\partial r}{\partial y}=\frac{\rin^2}{r^2}
+  \quad\text{(cavity inflates, wall volume fixed)},\qquad
+  v_2=\frac{\partial r}{\partial\Phi}=\frac{R^3-\Rin^3}{3r^2}
+  \quad\text{(wall swells, endocardium fixed)},
+  \label{eq:tangent}
+\end{equation}
+and the material rates follow from $\dot r=v_1\dot y+v_2\dot\Phi$, namely $\dot\lt=\dot r/R$ and $\dot\lr=\dot\Phi/\lt^2-2J\dot\lt/\lt^3$.
+
+% ---------------------------------------------------------------------
+\subsection{Projected equilibrium: two scalar equations from one stress field}
+\label{sec:proj}
+
+For a radial field $v(R)$ the contraction in~\eqref{eq:vw} reduces to $\bP:\Grad\bv=P_{RR}\,v'+2P_{\theta\theta}\,v/R$ and $\dd V=4\pi R^2\dd R$. The key observation is what the multiplier term does under each tangent field. Since $J\bF^{-T}:\Grad\bv=\delta J$ is the variation of the volume ratio, and~\eqref{eq:kin} gives $\delta J=0$ along $v_1$ and $\delta J=1$ (uniformly) along $v_2$, the reaction $\lambda$ does no work in the first projection and enters the second only through its reference-volume average $\lb$. Two scalar equations therefore follow from~\eqref{eq:vw}.
+
+\paragraph{Projection on $v_1$: the pressure--volume law.}
+The endocardial work is $4\pi\rin^2 p_v\,v_1(\Rin)=4\pi\rin^2p_v$, and
+\begin{equation}
+  \boxed{\;
+  p_v=P_v(y,\Phi,\dot y,\dot\Phi,\ldots)
+  \equiv\frac{1}{\rin^2}\int_{\Rin}^{\Rout}
+  \Big[P_{RR}\,v_1'+2P_{\theta\theta}\,\frac{v_1}{R}\Big]R^2\,\dd R\; }
+  \label{eq:Pv}
+\end{equation}
+is the cavity pressure the wall can sustain in its current state, evaluated with the mechanical stress~$\Pm$ only. This is the exact first integral $P_v=\int_{\rin}^{r_{\mathrm{out}}}2(\sigma_{\theta\theta}-\sigma_{rr})\,\dd r/r$ of radial equilibrium of a thick sphere, now extended to a swelling wall ($J\neq1$). For a hyperelastic passive law it can be written in the familiar Green--Ogden form
+\begin{equation}
+  P_v^{\mathrm{pas}}=\int_{\lt(\Rout)}^{\lt(\Rin)}
+  \frac{\hat w'(\lt;J)}{\lt^3-J}\,\dd\lt ,\qquad
+  \hat w(\lt;J)=W\big(J/\lt^2,\lt,\lt\big),
+  \label{eq:GreenOgden}
+\end{equation}
+which recovers the classical incompressible thick-sphere formula at $J=1$.
+
+\paragraph{Projection on $v_2$: the averaged multiplier.}
+Along $v_2$ the endocardium does not move, $v_2(\Rin)=0$, the epicardium is free, and $\int_{\Omega_0}\lambda\,\delta J\,\dd V=\lb\,\Vw$ with $\Vw=\tfrac{4\pi}{3}(\Rout^3-\Rin^3)$ the reference wall volume. Hence
+\begin{equation}
+  \boxed{\;
+  \lb=-\frac{3}{\Rout^3-\Rin^3}\int_{\Rin}^{\Rout}
+  \Big[P_{RR}\,v_2'+2P_{\theta\theta}\,\frac{v_2}{R}\Big]R^2\,\dd R\; }
+  \label{eq:lb}
+\end{equation}
+Equivalently, $\lb=-\langle\sigma_{M,rr}\rangle_{\Omega_0}$ plus a transmural correction proportional to $\sigma_{M,\theta\theta}-\sigma_{M,rr}$: the hydrostatic reaction of the wall is, to leading order, minus its mean radial mechanical stress. This is the quantity the classical thin-shell model does not compute---there $\sigma_{rr}=0$ is declared everywhere---and it is precisely what the fluid feels.
+
+% ---------------------------------------------------------------------
+\subsection{Projected fluid balance and interstitial pressure}
+\label{sec:fluid}
+
+With $\Phi$ uniform, testing~\eqref{eq:mass3d} with $\Phi^*=1$ makes the Darcy term inert (the interstitial pressure is uniform in this reduction) and integrates the sources into total flows:
+\begin{equation}
+  \boxed{\;
+  \Vw\,\dot\Phi=Q_{\mathrm{in}}-Q_{\mathrm{out}},\qquad
+  \pf=\Psi_P'(\Phi)-\lb=K_\Phi(\Phi-\phi_0)-\lb\; }
+  \label{eq:fluid0d}
+\end{equation}
+Here $Q_{\mathrm{in}}$ is the arterial inflow delivered to the wall and $Q_{\mathrm{out}}=\gamma_{\mathrm{ven}}(\pf-p_{\mathrm{sv}})$ the venous drainage towards the systemic venous pressure $p_{\mathrm{sv}}$. In a standalone setting the arterial side is likewise lumped, $Q_{\mathrm{in}}=\gamma_{\mathrm{ar}}(p_{\mathrm{ar}}-\pf)$; in the coupled setting of this work $Q_{\mathrm{in}}$ is the total outflow of the three-dimensional coronary model, whose inlet is driven by $p_{\mathrm{ar}}$ and whose distal outlets discharge against~$\pf$ through their terminal resistances. Equation~\eqref{eq:fluid0d} thus makes the two-way coupling explicit: contraction lowers $\lb$, raises $\pf$, and throttles $Q_{\mathrm{in}}$; the blood that does enter changes $\Phi$, hence $J$, hence the kinematics~\eqref{eq:kin} and the stresses in~\eqref{eq:Pv}--\eqref{eq:lb}.
+
+% ---------------------------------------------------------------------
+\subsection{The general reduced model}
+\label{sec:general}
+
+\begin{tcolorbox}[title=Reduced poroelastic ventricle (constitutive law unspecified)]
+Unknowns: $y(t)$, $\Phi(t)$; explicit by-products $J=1-\phi_0+\Phi$, $\lb$, $\pf$, $V=\tfrac{4\pi}{3}(\Rin+y)^3$.
+\begin{align}
+  &\text{kinematics:} && r^3=\rin^3+J(R^3-\Rin^3),\ \lt=r/R,\ \lr=J/\lt^2 \tag{\ref{eq:kin}}\\
+  &\text{wall equilibrium:} && P_v(y,\Phi,\dot y,\dot\Phi,\ldots)-p_v=0 \tag{\ref{eq:Pv}}\\
+  &\text{reaction and interstitial pressure:} && \lb \text{ from~\eqref{eq:lb}},\quad \pf=\Psi_P'(\Phi)-\lb \tag{\ref{eq:fluid0d}}\\
+  &\text{fluid mass:} && \Vw\dot\Phi=Q_{\mathrm{in}}-Q_{\mathrm{out}} \tag{\ref{eq:fluid0d}}
+\end{align}
+Any stress law $\Pm(\bF,\dot\bF,\text{internal variables})$ may be inserted in the two transmural integrals; the wall equilibrium is algebraic in $y$ if $\Pm$ is rate-independent and a first-order equation otherwise.
+\end{tcolorbox}
+
+Two limits fix ideas. At $J=1$ with a neo-Hookean $W$, \eqref{eq:Pv} returns the Green--Ogden inflation formula of a thick incompressible sphere. As $d_0/\Rin\to0$ at $J=1$, $P_v\to(d_0/\Rin)\,\Sigma_{\mathrm{sph}}/\sqrt C$ with $\Sigma_{\mathrm{sph}}$ the membrane stress and $C=\lt^2$, which is the pressure--volume law of~\cite{Caruel2014}; the thick-wall model is therefore a strict generalization of the thin-wall one, not an analogue.
+
+% ---------------------------------------------------------------------
+\subsection{Specialization to the nonlinear active myocardium}
+\label{sec:specific}
+
+We now specify $\Pm$. Following the Hill--Maxwell rheology~\cite{Chapelle2012,Caruel2014}, the tissue is a three-dimensional passive branch (hyperelastic in parallel with viscous) in parallel with a one-dimensional active branch along the fibres, in which a contractile element is in series with a linear elastic element:
+\begin{equation}
+  \Pm=\bP^{\mathrm{pas}}+\bP^{\mathrm{v}}+\bP^{\mathrm{act}},\qquad
+  \bP^{\mathrm{act}}=\bF\,\boldsymbol\Sigma^{\mathrm{act}},\quad
+  \boldsymbol\Sigma^{\mathrm{act}}=\sig\,\bfib\otimes\bfib .
+  \label{eq:hillmaxwell}
+\end{equation}
+
+\paragraph{Passive: Holzapfel--Ogden.}
+The passive energy is the reduced-invariant form of the Holzapfel--Ogden law used in~\cite{Caruel2014},
+\begin{equation}
+  W=\mu_1J_1+\mu_2J_2+C_0\,e^{C_1(J_1-3)^2}+C_2\,e^{C_3(J_4-1)^2},
+  \label{eq:holzapfel}
+\end{equation}
+with the isochoric invariants and the in-plane fibre invariant evaluated on~\eqref{eq:F},
+\begin{equation}
+  J_1=I_1J^{-2/3}=\lr^{4/3}\lt^{-4/3}+2\lr^{-2/3}\lt^{2/3},\qquad
+  J_2=I_2J^{-4/3}=2\lr^{2/3}\lt^{-2/3}+\lr^{-4/3}\lt^{4/3},\qquad
+  J_4=\lt^2 .
+  \label{eq:invariants}
+\end{equation}
+The fibres are taken in-plane with uniformly distributed orientation, so $J_4$ is the hoop stretch squared. With $\widehat W(\lr,\lt)=W(J_1,J_2,J_4)$ the Piola components are
+\begin{equation}
+  P_{RR}^{\mathrm{pas}}=\frac{\partial\widehat W}{\partial\lr},\qquad
+  P_{\theta\theta}^{\mathrm{pas}}=\frac12\,\frac{\partial\widehat W}{\partial\lt}.
+  \label{eq:Ppas}
+\end{equation}
+The volumetric response of the tissue is carried entirely by the constraint~\eqref{eq:incomp}, not by $W$.
+
+\paragraph{Viscous.}
+$\boldsymbol\Sigma^{\mathrm v}=\eta\,\dot{\mathbf e}$ in terms of the Green--Lagrange strain rate, i.e.
+\begin{equation}
+  P_{RR}^{\mathrm v}=\eta\,\lr^2\dot\lr,\qquad
+  P_{\theta\theta}^{\mathrm v}=\eta\,\lt^2\dot\lt .
+  \label{eq:Pv_visc}
+\end{equation}
+
+\paragraph{Active: Bestel--Cl\'ement--Sorine.}
+Averaging $\bfib\otimes\bfib$ over in-plane orientations gives $\boldsymbol\Sigma^{\mathrm{act}}=\tfrac12\sig(\bI-\be_R\otimes\be_R)$, hence
+\begin{equation}
+  P_{RR}^{\mathrm{act}}=0,\qquad
+  P_{\theta\theta}^{\mathrm{act}}=\tfrac12\,\sig\,\lt .
+  \label{eq:Pact}
+\end{equation}
+The wall carries a single contractile unit, evaluated at the mid-wall hoop strain $e=\tfrac12\big(\lt^2(R_m)-1\big)$, $R_m=\tfrac12(\Rin+\Rout)$. Its state is described by the contractile deformation $e_c$, the active stiffness $k_c$, the active stress $\tau_c$ and the load-dependent relaxation factor $w$, driven by the electrical activation $u(t)$ (with $|u|_\pm$ its positive and negative parts, $n_0(e_c)$ the recruitment function and $m_0(e_c)$ the relaxation target):
+\begin{align}
+  \sig&=\frac{E_s\,(e-e_c)}{(1+2e_c)^2}, \label{eq:sig1d}\\
+  (\tau_c+\mu\dot e_c)(1+2e_c)^3&=E_s\,(e-e_c)(1+2e), \label{eq:series}\\
+  \dot k_c&=-\big(|u|_++w|u|_-+\alpha|\dot e_c|\big)k_c+n_0(e_c)\,k_0\,|u|_+, \label{eq:kc}\\
+  \dot\tau_c&=-\big(|u|_++w|u|_-+\alpha|\dot e_c|\big)\tau_c+k_c\dot e_c+n_0(e_c)\,\sigma_0\,|u|_+, \label{eq:tauc}\\
+  \alpha_r\dot w&=m_0(e_c)-w . \label{eq:w}
+\end{align}
+Equation~\eqref{eq:sig1d} is the stress in the series elastic element; \eqref{eq:series} is the Maxwell condition that this stress equals the stress $\tau_c+\mu\dot e_c$ developed by the contractile element, written in the appropriate strain measures; \eqref{eq:kc}--\eqref{eq:w} are the contraction--relaxation dynamics of~\cite{Bestel2001} exactly as in~\cite{Caruel2014}.
+
+\paragraph{Circulation.}
+The cavity is closed by the valve and Windkessel model of~\cite{Caruel2014}: with $p_{\mathrm{at}}(t)$ the prescribed atrial pressure and $p_{\mathrm{ar}}$, $p_d$ the proximal and distal arterial pressures,
+\begin{align}
+  C_{\mathrm{cav}}\,\dot p_v+q_{\mathrm{valve}}(p_v,p_{\mathrm{ar}},p_{\mathrm{at}})+4\pi\rin^2\dot y&=0, \label{eq:cav}\\
+  C_p\,\dot p_{\mathrm{ar}}+q_p(p_{\mathrm{ar}}-p_d)-Q^+_{\mathrm{ar}}(p_v,p_{\mathrm{ar}})+Q_{\mathrm{in}}&=0, \label{eq:wk1}\\
+  C_d\,\dot p_d-q_p(p_{\mathrm{ar}}-p_d)-q_d(p_{\mathrm{sv}}-p_d)&=0, \label{eq:wk2}
+\end{align}
+where
+\begin{equation}
+  q_{\mathrm{valve}}=
+  \begin{cases}
+    K_{\mathrm{at}}(p_v-p_{\mathrm{at}}) & p_v\le p_{\mathrm{at}}\quad\text{(mitral open)}\\
+    K_p(p_v-p_{\mathrm{at}}) & p_{\mathrm{at}}\le p_v\le p_{\mathrm{ar}}\quad\text{(both closed)}\\
+    K_{\mathrm{ar}}(p_v-p_{\mathrm{ar}})+K_p(p_{\mathrm{ar}}-p_{\mathrm{at}}) & p_v>p_{\mathrm{ar}}\quad\text{(aortic open)}
+  \end{cases}
+  \qquad
+  Q^+_{\mathrm{ar}}=\max\big(0,K_{\mathrm{ar}}(p_v-p_{\mathrm{ar}})\big),
+  \label{eq:valve}
+\end{equation}
+and $q_p$, $q_d$ are the Poiseuille or non-Newtonian tube-flow laws of the Windkessel branches. The coronary inflow $Q_{\mathrm{in}}$ is drawn from the proximal arterial compartment in~\eqref{eq:wk1}, so that blood is conserved between the circulation, the coronary tree and the wall.
+
+% ---------------------------------------------------------------------
+\subsection{The complete system}
+\label{sec:complete}
+
+\begin{tcolorbox}[title=Reduced poroelastic ventricle: state and equations]
+\textbf{Unknowns} $\mathbf q=(y,\Phi,p_v,p_{\mathrm{ar}},p_d,e_c,k_c,\tau_c,w)$; \textbf{explicit outputs} $J$, $\lb$, $\pf$, $V$.\\[2pt]
+\textbf{Kinematics (exact):} \eqref{eq:kin}--\eqref{eq:tangent}.\\
+\textbf{Wall equilibrium (algebraic in $y$ if $\eta=0$):} $P_v(y,\Phi,\dot y,\dot\Phi,e_c)-p_v=0$ \hfill \eqref{eq:Pv}\\
+\textbf{Reaction and interstitial pressure (explicit):} $\lb$ from~\eqref{eq:lb}, $\pf=K_\Phi(\Phi-\phi_0)-\lb$\\
+\textbf{Fluid mass (ODE):} $\dot\Phi=\big[Q_{\mathrm{in}}-\gamma_{\mathrm{ven}}(\pf-p_{\mathrm{sv}})\big]/\Vw$ \hfill \eqref{eq:fluid0d}\\
+\textbf{Stresses:} \eqref{eq:holzapfel}--\eqref{eq:Pact}.\quad
+\textbf{Active law:} \eqref{eq:sig1d}--\eqref{eq:w}.\quad
+\textbf{Circulation:} \eqref{eq:cav}--\eqref{eq:valve}.\\[2pt]
+\textbf{Inputs:} $u(t)$, $p_{\mathrm{at}}(t)$, $p_{\mathrm{sv}}(t)$.\quad
+\textbf{Parameters:} geometry $\Rin,d_0,\phi_0$; wall $W,\eta,K_\Phi,\gamma_{\mathrm{ven}}$ (and $\gamma_{\mathrm{ar}}$ when standalone); active $E_s,\mu,\alpha,\alpha_r,k_0,\sigma_0$; circulation $K_{\mathrm{at}},K_p,K_{\mathrm{ar}},C_{\mathrm{cav}},C_p,C_d,R_p,R_d$.
+\end{tcolorbox}
+
+The result is a differential--algebraic system of eight ordinary differential equations and one scalar algebraic equation, with two explicit evaluations. Its cost is that of the thin-wall model plus two one-dimensional transmural quadratures, for which an eight-point Gauss--Legendre rule is already converged to six digits. The two poroelastic quantities exchanged with the three-dimensional coronary model, $p_{\mathrm{ar}}$ at the inlet and $\pf$ at the outlets, are therefore obtained at negligible cost and, unlike a prescribed intramyocardial pressure, respond to every change in wall mechanics, blood content, activation or loading. The time discretization and the coupling algorithm are described in Section~\ref{sec:numerics}.
+
+%%% ---------------- END SECTION BODY ----------------
+
+\section{Numerical methods (placeholder)}
+\label{sec:numerics}
+Implicit BDF2 in time, all rates evaluated at $t_{n+1}$; Newton on the nine residuals with the analytic Jacobian.
+
+\begin{thebibliography}{9}
+\bibitem{Westerhof2006} N. Westerhof, C. Boer, R.R. Lamberts, P. Sipkema. Cross-talk between cardiac muscle and coronary vasculature. \emph{Physiol.\ Rev.} 86 (2006). [verify]
+\bibitem{Chapelle2010} D. Chapelle, J.-F. Gerbeau, J. Sainte-Marie, I.E. Vignon-Clementel. A poroelastic model valid in large strains with applications to perfusion in cardiac modeling. \emph{Comput.\ Mech.} 46 (2010). [verify]
+\bibitem{DiGregorio2021} S. Di Gregorio et al. A computational model applied to myocardial perfusion in the human heart: from large coronaries to microvasculature. \emph{J.\ Comput.\ Phys.} 424 (2021). [verify]
+\bibitem{Kim2010} H.J. Kim, I.E. Vignon-Clementel, J.S. Coogan, C.A. Figueroa, K.E. Jansen, C.A. Taylor. Patient-specific modeling of blood flow and pressure in human coronary arteries. \emph{Ann.\ Biomed.\ Eng.} 38 (2010). [verify]
+\bibitem{Mynard2014} J.P. Mynard, D.J. Penny, J.J. Smolich. Scalability and in vivo validation of a multiscale numerical model of the left coronary circulation. \emph{Am.\ J.\ Physiol.\ Heart Circ.\ Physiol.} 306 (2014). [verify]
+\bibitem{Caruel2014} M. Caruel, R. Chabiniok, P. Moireau, Y. Lecarpentier, D. Chapelle. Dimensional reductions of a cardiac model for effective validation and calibration. \emph{Biomech.\ Model.\ Mechanobiol.} 13 (2014). [verify]
+\bibitem{Holzapfel2009} G.A. Holzapfel, R.W. Ogden. Constitutive modelling of passive myocardium: a structurally based framework for material characterization. \emph{Phil.\ Trans.\ R.\ Soc.\ A} 367 (2009). [verify]
+\bibitem{Bestel2001} J. Bestel, F. Cl\'ement, M. Sorine. A biomechanical model of muscle contraction. \emph{MICCAI 2001}, LNCS 2208. [verify]
+\bibitem{Chapelle2012} D. Chapelle, P. Le Tallec, P. Moireau, M. Sorine. An energy-preserving muscle tissue model: formulation and compatible discretizations. \emph{Int.\ J.\ Multiscale Comput.\ Eng.} 10 (2012). [verify]
+\end{thebibliography}
+
+\end{document}

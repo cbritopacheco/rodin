@@ -12,6 +12,7 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(Models)
   add_subdirectory(Solid)
   add_subdirectory(Heart)
+  add_subdirectory(Heat)
   add_subdirectory(FSITest)
 
   # add_subdirectory(SurfaceEvolution)

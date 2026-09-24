@@ -1,0 +1,236 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[spanish,es-noquoting,es-nodecimaldot]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb,bm,booktabs,siunitx,enumitem,array}
+\usepackage[hidelinks]{hyperref}
+\sisetup{per-mode=symbol,output-decimal-marker={,}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\bu}{\bm{u}}
+\newcommand{\bn}{\bm{n}}
+\newcommand{\Lc}{\mathcal{L}}
+\newcommand{\Pref}{P_{\rm ref}}
+
+\title{\vspace{-1.5em}Un modelo reducido y conservativo de la coagulación en la orejuela izquierda\\[3pt]
+\large Formulación, justificación de cada elección, diferencias con Qureshi y algoritmo de resolución\\
+\normalsize (documento de acompañamiento de \texttt{examples/Heart/LeftAtrium2DPTAG})}
+\author{Nota de trabajo}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{La bioquímica en una página, para un ingeniero mecánico}
+
+La coagulación es un sistema de \emph{producción y destrucción} de una enzima, la trombina. Basta con cuatro actores y un producto:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Símbolo & Qué es & Papel & Valor en plasma \\
+\midrule
+$P$ & protrombina & \textbf{precursor}: la reserva de la que sale la trombina & \SI{1.4}{\micro M} \\
+$T$ & trombina & \textbf{enzima}: corta fibrinógeno y acelera su propia producción & $\sim0$ en reposo \\
+$A$ & antitrombina & \textbf{inhibidor}: captura trombina 1:1 y la inactiva & \SI{2.8}{\micro M} \\
+$G$ & fibrinógeno & \textbf{sustrato}: lo que la trombina convierte & 7--12 \si{\micro M} \\
+$F=G_0-G$ & fibrina & \textbf{producto}: la malla del coágulo (aquí, diagnóstico) & -- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Tres hechos gobiernan la dinámica. (i) \emph{Iniciación en la pared}: el endocardio sano es anticoagulante; cuando el flujo lo daña (cizalle bajo y oscilante) expone \emph{factor tisular}, que genera las primeras trazas de trombina. Es una reacción de superficie, no de volumen. (ii) \emph{Amplificación}: la trombina activa cofactores y plaquetas que multiplican por $\sim3\times10^5$ la velocidad de conversión de protrombina; por eso la trombina crece como un estallido y por eso hace falta un mínimo de trombina (del orden de nM) para que el estallido arranque. (iii) \emph{Freno}: la antitrombina consume trombina molécula a molécula; en un flujo normal se repone, en una orejuela estancada se agota. La tríada de Virchow (estasis, daño endotelial, hipercoagulabilidad) es exactamente: poco lavado del inhibidor y del precursor, más flujo de iniciación en la pared, más fibrinógeno.
+
+\section{Ecuaciones}
+
+Dominio fijo $\Omega$ (aurícula 2D con orejuela rectangular, paredes rígidas), venas pulmonares $\Gamma_{\rm in}$, válvula mitral $\Gamma_{\rm out}$, endocardio $\Gamma_w$. Concentraciones en \si{mol/m^3} referidas a volumen de plasma.
+
+\paragraph{Flujo.} Navier--Stokes incompresible, sangre de Carreau--Yasuda, con arrastre de Brinkman dependiente de la fibrina:
+\begin{equation}
+\rho\,(\partial_t\bu+\bu\!\cdot\!\nabla\bu)=-\nabla p+\nabla\!\cdot\!\big(2\mu(\dot\gamma)\,\bm\varepsilon(\bu)\big)-\sigma_B(F)\,\bu,\qquad
+\nabla\!\cdot\!\bu=0,\qquad
+\sigma_B(F)=\frac{\mu_\infty}{\kappa_0}\,\frac{F^2}{K_F^2+F^2}.
+\label{eq:ns}
+\end{equation}
+Presiones medidas $p_{\rm pv}(t)$ en $\Gamma_{\rm in}$ y $p_{\rm mv}(t)$ en $\Gamma_{\rm out}$, con el término de \emph{do-nothing direccional} $\tfrac{\rho}{2}\max(-\bu\!\cdot\!\bn,0)\,\bu$ en ambas; no deslizamiento en $\Gamma_w$.
+
+\paragraph{Especies.} Con $\Lc c:=\partial_t c+\bu\!\cdot\!\nabla c-\nabla\!\cdot(D_c\nabla c)$,
+\begin{align}
+\Lc P &= -R, & \Lc T &= R-R_I, & \Lc A &= -R_I, & \Lc G &= -R_F,
+\label{eq:pde}\\[2pt]
+R &= k_a\,\frac{T^2}{K_A+T}\,\frac{P}{\Pref}, & R_I &= k_{\rm on}\,A\,T, & R_F &= k_F\,T\,\frac{G}{K_G+G}. &&
+\label{eq:rates}
+\end{align}
+
+\paragraph{Iniciación en la capa endocárdica.} La activación $E\in[0,1]$, definida en la pared, se extiende hacia el lumen sobre un espesor $\delta$ (el de las trabéculas) con
+\begin{equation}
+-\delta^2\nabla^2\tilde E+\tilde E=0\ \text{en }\Omega,\qquad \tilde E=E\ \text{en }\Gamma_w
+\qquad(\tilde E\approx E\,e^{-d/\delta}),
+\label{eq:ext}
+\end{equation}
+y la iniciación es un canal volumétrico $P\to T$ que se suma a $R$:
+\begin{equation}
+s=\frac{j_0}{\delta}\,\chi\,\tilde E\,\frac{P}{\Pref},\qquad
+\chi=\frac{\delta\int_{\Gamma_w}E\,\dd A}{\int_\Omega\tilde E\,\dd V},
+\qquad\text{de modo que}\quad \int_\Omega s\,\dd V=j_0\!\int_{\Gamma_w}\!E\,\frac{P}{\Pref}\dd A .
+\label{eq:bc}
+\end{equation}
+Con $\delta\to0$ se recupera el flujo de pared $D_T\partial_{\bn}T=j_0EP/\Pref$, $D_P\partial_{\bn}P=-j$. Todas las especies tienen flujo difusivo nulo en $\Gamma_w$. Entrada: $(P,T,A,G)=(P_0,0,A_0,G_0)$ en $\Gamma_{\rm in}$ y en $t=0$; salida libre.
+
+\paragraph{Mapa de activación.} Sobre un ciclo desarrollado de periodo $\mathcal P$, en cada nodo de pared,
+\begin{equation}
+\mathrm{TAWSS}=\tfrac1{\mathcal P}\!\int_0^{\mathcal P}\!|\bm\tau_w|\dd t,\qquad
+\mathrm{OSI}=\tfrac12\Big(1-\tfrac{|\int_0^{\mathcal P}\bm\tau_w\dd t|}{\int_0^{\mathcal P}|\bm\tau_w|\dd t}\Big),\qquad
+E=\frac{\min(2\,\mathrm{OSI},1)}{1+\exp\big((\mathrm{TAWSS}-\tau_a)/w_a\big)} .
+\label{eq:E}
+\end{equation}
+
+\section{Por qué cada elección}
+
+\begin{description}[leftmargin=1.1em,style=nextline]
+\item[Capa endocárdica en vez de línea de pared.] El endocardio auricular es trabeculado (músculos pectíneos de 0.5--1\,mm): la superficie activada es una capa, no una curva lisa. Numéricamente es decisivo: un flujo de Robin sobre nodos de no deslizamiento deposita la trombina donde $\bu=0$, y de ahí sólo sale por difusión molecular, $h^2/D\approx\SI{2000}{s}$ por celda; todo se produce, reacciona y se agota en la franja de pared sin advectar nunca. En la capa, las especies nacen donde el fluido se mueve. La dosis total es la misma que la del flujo de pared, exactamente, por la normalización $\chi$. $\delta$ es un parámetro anatómico (0.5\,mm), no numérico; la prueba es que el resultado no cambie al refinar la malla dentro de la capa.
+\item[Flujo de pared en vez de semilla puntual.] El factor tisular está en la superficie; la trombina que produce entra al fluido como flujo, no como concentración inicial en un nodo. Un flujo ponderado por $E$ es continuo, independiente de la malla y controlable: $\int_{\Gamma_w}j\,\dd A$ es una \emph{dosis}. Que el flujo salga de $P$ y entre en $T$ es lo que cierra el presupuesto de masa en la pared.
+\item[Amplificación con umbral, no logística ni constante.] La forma $T^2/(K_A+T)$ cumple $\partial R/\partial T|_{0}=0$: una contaminación pequeña de trombina (un rebote numérico, por ejemplo) \emph{decae} a tasa $k_{\rm on}A$ en vez de amplificarse, mientras que por encima de $T_{\rm th}=k_{\rm on}A\,K_A/(k_aP/\Pref-k_{\rm on}A)\approx\SI{2.5}{nM}$ la trombina crece a tasa $\sim k_a$. Es un cierre agrupado de la retroalimentación (no resuelve FV, FVIII ni plaquetas), pero reproduce lo esencial: retardo, estallido y extinción. Una logística $k_aT(1-T/T_{\max})$ hace inestable a $T=0$; una fuente constante da una respuesta lineal sin estallido.
+\item[Protrombina como variable, no un tope.] El factor $P/\Pref$ es el sustrato real. Se agota, y al agotarse el estallido termina: es la forma de un trombograma clínico. Reemplaza una constante no calibrable ($T_{\max}$ o $T_c$) por una medible ($P_0$). $\Pref$ es fija entre casos para que un $P_0$ distinto cambie el resultado y no se cancele.
+\item[Antitrombina explícita.] Escribir la inhibición como $k_iT$ supone $A$ constante. En estasis no lo es: cada trombina inhibida gasta una antitrombina y el flujo no la repone. Con $A$ transportada, ``la estasis debilita la inhibición'' deja de ser una hipótesis y pasa a ser una consecuencia; además $I=A_0-A$ es el complejo trombina--antitrombina (TAT), un biomarcador que se mide en pacientes con FA. Y es el lugar natural de los anticoagulantes: la heparina multiplica $k_{\rm on}$, los anti-Xa reducen $k_a$, el dabigatrán reduce la trombina activa, la warfarina reduce $P_0$.
+\item[Michaelis--Menten en la conversión.] La trombina es un catalizador: no se consume, y la velocidad satura en el sustrato. Con $K_G\approx\SI{3.6}{\micro M}$ y fibrinógeno plasmático de 7--12 \si{\micro M} el sustrato \emph{no} es diluido, así que la ley bilineal $K_{\rm eff}GT$ sobreestima la velocidad y hace lineal en $G_0$ una respuesta que en realidad satura.
+\item[$E$ acotado y con umbral medido.] Una logística en TAWSS (el fenotipo endotelial cambia por debajo de $\sim\SI{0.4}{Pa}$) por el índice oscilatorio llevado a $[0,1]$. A diferencia del cociente ECAP = OSI/TAWSS, no diverge en los puntos de estancamiento (donde el máximo dependería de la malla) y no puede volverse negativo y convertir la fuente en sumidero.
+\item[Brinkman en $F$, retrasado un paso.] Un gel de fibrina es una red porosa inmóvil que frena el fluido; $\sigma_B(F)$ crece de 0 a $\mu_\infty/\kappa_0$ al pasar el umbral de gel $K_F$. Se ensambla implícito en $\bu^{n+1}$ y con $F^n$ congelado: es una matriz de masa semidefinida positiva y, con paredes rígidas (andamio en reposo), es exactamente disipativo. Cierra el último lazo de la tríada: obstrucción $\to$ más estasis.
+\end{description}
+
+\section{Diferencias con Qureshi et al. (2021, 2022, 2025)}
+
+\begin{center}\small
+\begin{tabular}{@{}p{3.1cm}p{5.6cm}p{6.6cm}@{}}
+\toprule
+Aspecto & Qureshi & Este modelo \\
+\midrule
+Iniciación & concentración inicial de trombina en el nodo (o parche de 2\,mm$^2$) de máximo ECAP & flujo de pared $j_0E\,P/\Pref$ distribuido, extraído de $P$ \\
+Ley de trombina & 2021/22: sin reacción explícita; 2025: polinomio con tope $u_0$ e inhibición constante $K_6T$ & amplificación con umbral por construcción, sustrato $P$ que se agota, inhibidor $A$ que se consume \\
+Conversión & bilineal $K_{\rm eff}GT$ & Michaelis--Menten \\
+Campos & Th, Fg, Fn & $P,T,A,G$; $F$ e $I$ diagnósticos \\
+Conservación & ninguna cantidad acotada a priori & $P+T-A=P_0-A_0$, $P+T\le P_0$, $A\le A_0$, $0\le G\le G_0$ \\
+Sangre y pared & newtoniana, movimiento prescrito (2025) & Carreau--Yasuda; aquí paredes rígidas (FSI en el código 3D) \\
+Retroalimentación al flujo & ninguna (2025); viscosidad de Hill (2021) & arrastre de Brinkman disipativo en $F$ \\
+Constantes libres & $K_1..K_6,u_0,K_{\rm eff}$ ajustadas in vitro & $k_a,K_A,j_0$; el resto de literatura \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Por qué protrombina y no fibrina como eje del modelo}
+
+La pregunta física es \emph{cuánta trombina se genera y cuánta se lava}; la fibrina es el rastro que deja. Poner la fibrina en el centro obliga a atribuirle propiedades que un campo advectado no tiene: en Qureshi la fibrina viaja como un soluto y ``se desprende'' del sitio de lesión, lo que es un artefacto, porque un gel no advecta. Poner la protrombina en el centro tiene cuatro ventajas concretas. Cierra el presupuesto: cada molécula de trombina proviene de una de protrombina y termina en una de antitrombina, con lo que $P+T-A$ es un invariante exacto y el sistema no puede explotar. Da el estallido \emph{y} su fin, sin un tope artificial. Convierte el umbral en una propiedad del modelo con expresión cerrada. Y produce dos diagnósticos clínicos (exposición a trombina y TAT) que sí se miden, mientras que ``concentración de fibrina'' en \si{mmol/m^3} no corresponde a ningún ensayo. Lo que este modelo \emph{no} afirma: que sea más preciso. Ninguno de los dos está validado contra trombo o ictus; lo que se puede defender es consistencia física y menos grados de libertad.
+
+\section{Energía del sistema con el término de Brinkman}
+
+Con $\sigma_B\ge0$ ensamblado implícito y las paredes rígidas, el balance discreto de energía cinética del esquema (Euler implícito, convección antisimétrica, do-nothing direccional, división IMEX telescópica de la viscosidad) se completa con un término de signo definido:
+\begin{equation}
+\frac{\rho}{2\Delta t}\big(\|\bu^{n+1}\|^2-\|\bu^n\|^2\big)+\int_\Omega 2\mu\,|\bm\varepsilon(\bu^{n+1})|^2
++\int_\Omega\sigma_B(F^n)\,|\bu^{n+1}|^2\;\le\;-\!\int_{\Gamma_{\rm in}\cup\Gamma_{\rm out}}\!p_{\rm ext}\,\bu^{n+1}\!\cdot\!\bn .
+\end{equation}
+El arrastre sólo puede quitar energía, para cualquier historia de $F$ y cualquier $\Delta t$. El parámetro $\sigma_B$ entra además en $\tau_1$ de la estabilización como una reacción, y en el residuo de PSPG por consistencia.
+
+\section{Cotas}
+
+Para $\nabla\!\cdot\!\bu=0$, $D_P=D_T=D_A$, datos de entrada iguales a los iniciales y los flujos \eqref{eq:bc}: $P,T,A,G\ge0$; $\Lc(P+T)=-R_I\le0$ con flujo neto de pared nulo y valor de entrada $P_0$ da $P+T\le P_0$; $A\le A_0$; $0\le G\le G_0$; y $\Lc(P+T-A)=0$ da $P+T-A=P_0-A_0$. Son propiedades del problema continuo; el código las verifica escribiendo en cada paso la deriva máxima de $P+T-A-(P_0-A_0)$.
+
+\section{Algoritmo, paso a paso (como está implementado)}
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{Preparación.} Malla plana de la aurícula; ondas de presión $p_{\rm pv}(t)$, $p_{\rm mv}(t)$ (periodo $\mathcal P$ leído del archivo); espacios $P_1/P_1$; estado inicial $(P_0,0,A_0,G_0)$; $E=0$.
+\item \textbf{Ciclos de calentamiento} ($n_{\rm flow}=2$): sólo flujo, hasta que sea periódico.
+\item \textbf{En cada paso $\Delta t$:}
+\begin{enumerate}[leftmargin=1.4em]
+\item \emph{Flujo.} Proyecciones VMS (término convectivo, subescala dinámica, residuo grad-div); ensamblar y resolver el sistema $P_1/P_1$ con viscosidad $\mu(\bu^n)$, división IMEX, PSPG, do-nothing direccional y el arrastre $\sigma_B(F^n)\,\bu^{n+1}$; guardar $\bu^{n+1}$.
+\item \emph{Cizalle de pared.} Recuperar $2\bm\varepsilon(\bu)$ en los nodos, proyectar la tracción sobre $\Gamma_w$, acumular $\int\bm\tau_w\dd t$ e $\int|\bm\tau_w|\dd t$ nodo a nodo.
+\item \emph{Cierre de ciclo} (una vez por periodo): TAWSS, OSI y $E$ según \eqref{eq:E}, sólo en nodos de pared; extensión $\tilde E$ por \eqref{eq:ext} (una resolución CG) y escala $\chi$; reiniciar acumuladores. La cinética no arranca antes del primer cierre: sin $E$ no hay fuente.
+\item \emph{Transporte} (desde el ciclo $n_{\rm flow}+1$): cuatro sistemas lineales escalares con la velocidad retrasada, Euler implícito, SUPG y crosswind de Codina; entrada Dirichlet en las venas, flujo nulo en la pared. (Con $\delta=0$: $P$ lleva el Robin $\int_{\Gamma_w}\!\frac{j_0E}{\Pref}P^{n+1}v$ implícito y $T$ la misma integral como carga.)
+\item \emph{Reacción nodal} (Patankar--Euler modificado), en cada nodo y para cualquier $\Delta t$:
+\[
+P^\ast=\frac{P}{1+\Delta t\big[k_a\frac{T^2}{(K_A+T)\Pref}+\frac{j_0\chi\tilde E}{\delta\Pref}\big]},\quad \Delta_P=P-P^\ast,\qquad
+\Delta_I=\frac{2c}{b+\sqrt{b^2-4ac}},\ \ a=\Delta t\,k_{\rm on},\ b=1+a(A+T+\Delta_P),\ c=aA(T+\Delta_P),
+\]
+\[
+T^\ast=T+\Delta_P-\Delta_I,\qquad A^\ast=A-\Delta_I,\qquad G^\ast=\frac{G}{1+\Delta t\,k_FT^\ast/(K_G+G)} .
+\]
+$\Delta_I$ es la raíz menor de $\Delta_I=\Delta t\,k_{\rm on}(A-\Delta_I)(T+\Delta_P-\Delta_I)$, de modo que todo queda $\ge0$, $P^\ast+T^\ast-A^\ast=P+T-A$ y la protrombina consumida es la trombina producida. Es \emph{splitting} de Lie: con transporte de primer orden, Strang no subiría el orden.
+\item \emph{Diagnósticos y salida.} $F=G_0-G$, $I=A_0-A$, $\sigma_B$, deriva del invariante; máximos y mínimos al CSV; campos a XDMF cada $k$ pasos y al cierre de cada ciclo.
+\end{enumerate}
+\item \textbf{Verificación antes de la fisiología.} Semilla $T(0)<T_{\rm th}$ con $E=0$ debe decaer; semilla $T(0)>T_{\rm th}$ debe dar pico ($\approx0.65\,\si{\micro M}$ a $\approx\SI{135}{s}$ con los valores de abajo) y luego decaer al agotarse $P$; deriva del invariante al nivel de redondeo; capa de pared $\sqrt{D_T/(k_{\rm on}A_0)}\approx\SI{48}{\micro m}$ resuelta; arrastre nulo mientras $F\ll K_F$ (la corrida acoplada reproduce la no acoplada hasta que aparece gel).
+\item \textbf{Diseño del estudio.} Misma anatomía y datos de borde; variar reología (newtoniana / Carreau--Yasuda) y movimiento de pared (SR / FA); primero con $E$ fijo (aísla el transporte), luego con $E$ recalculado (aísla la fuente); dosis--respuesta en $j_0$. Reportar exposición a trombina $\int\!\!\int_{\rm LAA}T$, generación $\int R$, TAT $\int R_I$, exportación por el ostium y $\int_{\rm LAA}F$ en un intervalo declarado.
+\end{enumerate}
+
+\section{Por qué aquí las concentraciones se mantienen positivas}
+
+En la implementación del modelo de Qureshi las concentraciones se hacían negativas por una cadena de tres eslabones, ninguno de los cuales existe en este modelo.
+
+\begin{enumerate}[leftmargin=1.6em]
+\item \textbf{La fuente podía cambiar de signo.} El flujo de pared era $j_0\,E$ con $E$ construido a partir de TAWSS y OSI. Si esos índices pasan por una proyección $L^2$ (cuadratura) en vez de evaluarse en los nodos, la proyección de una función positiva que varía en una década entre celdas vecinas rebota y da nodos con TAWSS $<0$ o OSI fuera de $[0,\tfrac12]$; con ellos $E<0$ y el flujo de trombina se convierte en un \emph{sumidero}: trombina negativa desde la pared. Aquí $E$ es nodal, se recorta a $[0,1]$, y el flujo es $j_0EP/\Pref$ con $P\ge0$: no puede ser negativo. Y como el término de Robin en $P$ es proporcional a $P$ y se ensambla implícito, tampoco puede llevar a $P$ por debajo de cero.
+\item \textbf{La reacción amplificaba el signo equivocado.} La conversión $-K_{\rm eff}\,\mathrm{Th}\,\mathrm{Fg}$ estaba dentro del sistema de elementos finitos con Th retrasada como coeficiente. Con Th $<0$ en un nodo, el sumidero de fibrinógeno pasa a ser fuente y la fuente de fibrina pasa a ser sumidero: fibrina negativa donde había trombina negativa, y la ley bilineal no tiene nada que lo frene. Aquí ninguna reacción vive dentro del sistema lineal. El transporte es lineal y sin reacción; las reacciones se integran nodo a nodo con un esquema de producción--destrucción (Patankar--Euler modificado) que es positivo para \emph{cualquier} $\Delta t$: la destrucción es implícita, la producción explícita, y cada cantidad producida sale de un depósito que se descuenta. Un valor no puede bajar de cero porque su propio sumidero se apaga con él.
+\item \textbf{El ruido crecía.} En una ley logística o de fuente constante, un rebote negativo o positivo en trombina es un dato que la cinética toma en serio. Con $T^2/(K_A+T)$, la pendiente en $T=0$ es cero: un rebote de $\pm$pM se inhibe a tasa $k_{\rm on}A$ en vez de amplificarse. Además, el paso nodal recorta las entradas negativas antes de reaccionar, y la fibrina no es una incógnita transportada que pueda hacerse negativa sino el diagnóstico $F=G_0-G$ recortado a $[0,G_0]$.
+\end{enumerate}
+
+Lo que este esquema \emph{no} garantiza es la positividad del paso de transporte SUPG en sí (ningún método de Galerkin estabilizado lineal lo hace en mallas gruesas); el crosswind de Codina reduce los rebotes y el recorte nodal elimina los que queden. El costo es una deriva del invariante $P+T-A$ del tamaño del rebote, que el CSV imprime en cada paso: si es del orden del redondeo, no hubo rebotes; si crece, la malla o el $\Delta t$ son insuficientes y el mensaje es explícito en vez de una concentración negativa silenciosa.
+
+\section{Comandos de ejecución}
+
+Desde \texttt{build/}, con la malla plana y las ondas de presión en \texttt{resources/examples/Heart}. Configuración de estabilización validada en \texttt{LeftAtrium2D} (subescalas cuasi-estáticas, $\tau_C$ retrasado, PSPG como penalización de gradiente):
+
+\medskip\noindent Verificación de la activación (32 s de cinética, salida cada ciclo):
+\begin{verbatim}
+mpirun -n 7 ./examples/Heart/LeftAtrium2DPTAG \
+  -ptag_quasistatic true -ptag_graddiv_tau_lag true -ptag_pspg_residual 0 \
+  -ptag_dt 1e-2 -ptag_flow_cycles 2 -ptag_species_cycles 40 \
+  -ptag_output_every 80 -ptag_brinkman false -ptag_transport_iterative true
+\end{verbatim}
+Qué mirar: \texttt{maxT} cruza $T_{\rm th}=2.5\,$nM en la pared de la orejuela y sigue subiendo (activación sostenida) o cae (lavado); \texttt{invariantDrift} al nivel de redondeo; \texttt{maxE} entre 0 y 1.
+
+\medskip\noindent Estudio con Brinkman (320 s de cinética, salida cada 5 ciclos):
+\begin{verbatim}
+mpirun -n 7 ./examples/Heart/LeftAtrium2DPTAG \
+  -ptag_quasistatic true -ptag_graddiv_tau_lag true -ptag_pspg_residual 0 \
+  -ptag_dt 1e-2 -ptag_flow_cycles 3 -ptag_species_cycles 400 \
+  -ptag_output_every 400 -ptag_brinkman true -ptag_transport_iterative true
+\end{verbatim}
+Qué mirar: $t_{\rm gel}$ (primer \texttt{maxF} $>K_F=2\times10^{-3}$), \texttt{maxDrag} y la caída de $|\bu|$ en la orejuela respecto a la corrida sin Brinkman. Caso de FA: añadir \texttt{-ptag\_fibrinogen 11.76e-3} y las ondas de presión de FA con \texttt{-ptag\_pv}, \texttt{-ptag\_mv}. Otra malla: \texttt{-ptag\_mesh}. Sin \texttt{-ptag\_transport\_iterative} los cuatro transportes usan el LU global (MUMPS).
+
+\section{Constantes (SI; \SI{1}{\micro M}=\SI{e-3}{mol/m^3})}
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Símbolo & Valor & Estado & Origen \\
+\midrule
+$D_P=D_T=D_A$; $D_G$ & \SI{4.6e-11}{}; \SI{2.0e-11}{m^2/s} & fijo & Qureshi 2021 \\
+$P_0$; $\Pref$ & \SI{1.4e-3}{mol/m^3} & medido; convención & Mann 2003 \\
+$A_0$ & \SI{2.8e-3}{mol/m^3} & medido & Danforth 2009 \\
+$G_0$ & \SI{7.35e-3}{} (SR) / \SI{11.76e-3}{mol/m^3} (FA) & caso & Qureshi 2022 \\
+$k_{\rm on}$ & \SI{7.1}{m^3\,mol^{-1}s^{-1}} ($k_{\rm on}A_0=\SI{0.020}{s^{-1}}$) & fijo & Danforth 2009 \\
+$k_F$; $K_G$ & \SI{42}{s^{-1}}; \SI{3.6e-3}{mol/m^3} & fijo & Higgins 1983 \\
+$k_a$ & \SI{0.10}{s^{-1}} & \textbf{calibrar} (fase de subida CAT) & -- \\
+$K_A$ & \SI{1e-5}{mol/m^3} & \textbf{calibrar} con $k_a$ ($T_{\rm th}\approx\SI{2.5}{nM}$) & -- \\
+$j_0$ & \SI{2e-12}{mol\,m^{-2}s^{-1}} & \textbf{dosis controlada} & -- \\
+$\delta$ & \SI{0.5}{mm} & anatómico (trabéculas), verificar con malla & -- \\
+$\tau_a$; $w_a$ & \SI{0.4}{Pa}; \SI{0.15}{Pa} & medido; sensibilidad & Chiu \& Chien 2011 \\
+$\mu_\infty/\kappa_0$; $K_F$ & \SI{e7}{kg\,m^{-3}s^{-1}}; \SI{2e-3}{mol/m^3} & práctico; umbral de gel & Wufsus 2013 (orden) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Referencias}
+\begin{enumerate}\small
+\item Qureshi A. et al. Comput. Cardiol. 48 (2021); 49 (2022); Med. Image Anal. 101 (2025) 103475.
+\item Hoffman M., Monroe D.M. A cell-based model of hemostasis. Thromb. Haemost. 85 (2001) 958--965.
+\item Mann K.G., Brummel K., Butenas S. What is all that thrombin for? J. Thromb. Haemost. 1 (2003) 1504--1514.
+\item Danforth C.M. et al. The impact of uncertainty in a blood coagulation model. Math. Med. Biol. 26 (2009) 323--336.
+\item Higgins D.L., Lewis S.D., Shafer J.A. J. Biol. Chem. 258 (1983) 9276--9282.
+\item Galochkina T. et al. Reaction--diffusion waves of blood coagulation. Math. Biosci. 288 (2017) 130--139.
+\item Weitz J.I. et al. Clot-bound thrombin is protected from inhibition\ldots J. Clin. Invest. 86 (1990) 385--391.
+\item Chiu J.-J., Chien S. Effects of disturbed flow on vascular endothelium. Physiol. Rev. 91 (2011) 327--387.
+\item Di Achille P. et al. Proc. R. Soc. A 470 (2014) 20140163.
+\item Menichini C., Xu X.Y. J. Math. Biol. 73 (2016) 1205--1226.
+\item Wufsus A.R., Macera N.E., Neeves K.B. Biophys. J. 104 (2013) 1812--1823.
+\item Kopecz S., Meister A. Appl. Numer. Math. 123 (2018) 159--179.
+\item Codina R. Comparison of some finite element methods for solving the diffusion-convection-reaction equation. Comput. Methods Appl. Mech. Engrg. 156 (1998) 185--210.
+\end{enumerate}
+\end{document}
