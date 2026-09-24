@@ -119,9 +119,9 @@ An analytic exact field may admit $E_i\le C\exp(-b p_i)$ over a range in
 which geometry, quadrature, conditioning and floating-point errors do not
 dominate. Positive measured $\alpha_i$ over a finite degree range supports
 that case-specific observation; it is not a proof of exponential decay at
-arbitrary degree. The existing Poisson p suite compares only degrees 1 and 4,
-so it is a two-point comparison, whereas the Helmholtz p suite checks every
-interval from degree 1 through degree 4.
+arbitrary degree. The Poisson, Helmholtz, conductivity, and coupled
+reaction–diffusion p suites check every adjacent interval from degree 1
+through degree 4.
 
 For hp refinement, a log ratio against $h_i$ describes only the stated
 combined path $(h_i,p_i)$; it is not a fixed-degree h order. In an
@@ -144,6 +144,10 @@ quadrature order and solver tolerance are varied to identify numerical
 contamination; unexplained non-monotonicity or superconvergence is not
 absorbed by widening the bound.
 
+The present rate studies meet this minimum: h, hp and isoparametric paths
+contain three meshes, while analytic p studies contain four degrees.
+One-mesh patch tests and P0g exact-reproduction tests are not rate studies.
+
 Each suite README states the equations, exact fields, derived data, discrete
 spaces, mesh or degree sequence, quadrature and solver settings, norm domains,
 expected rates and their hypotheses, assertion bounds, tested geometries and
@@ -163,10 +167,12 @@ exists yet.
 
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
-| Poisson | P1–P3, boundary variants; PETSc local/MPI P1 | P1/P2 patch; P1→P4 analytic | P1–P3 | Curved P2 |
+| Poisson | P1–P3, boundary variants; PETSc local P1/P2, MPI P1 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
 | Complex Helmholtz | P1/P2 | P1–P4 | P1–P3 | — |
 | Linear elasticity, Stokes | Implemented | — | — | — |
-| Conductivity, coupled reaction–diffusion, nonlinear Poisson | P1/P2 | — | — | — |
+| Variable conductivity | P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
+| Coupled reaction–diffusion | P1/P2 | P1→P2→P3→P4 analytic | — | — |
+| Nonlinear Poisson | P1/P2 | — | — | — |
 | P0/P0g projection | Implemented | Not applicable to fixed degree | — | — |
 
 The main refinement sequences can be read with $n$ grid points per coordinate
@@ -174,17 +180,23 @@ axis, $h=1/(n-1)$, and field degree $p$:
 
 - h: P1 commonly uses `n=5→9→17` ($h=1/4\to1/8\to1/16$); P2/P3 commonly
   use `n=3→5→9`. P0 projection and Taylor–Hood Stokes use `n=3→5→9`.
-- p: Poisson's analytic comparison uses `p=1→4` on fixed `n=2`; complex
-  Helmholtz checks `p=1→2→3→4` on that same fixed mesh.
-- hp: Poisson and Helmholtz use `(n,p)=(2,1)→(3,2)→(5,3)`.
-- isoparametric: curved P2 Poisson uses `n=5→9→17` in 1D/2D and
-  `n=3→4→5` in 3D.
+- p: Poisson, complex Helmholtz, variable conductivity, and coupled
+  reaction–diffusion check `p=1→2→3→4` on a fixed `n=2` mesh.
+- hp: Poisson, Helmholtz, and variable conductivity use
+  `(n,p)=(2,1)→(3,2)→(5,3)`.
+- isoparametric: curved P2 Poisson and conductivity use `n=5→9→17`
+  in 1D/2D and `n=3→4→5` in 3D. A separate P1 geometry-map error
+  study uses `n=5→9→17` in 1D/2D and `n=3→5→9` in 3D.
 
 These are rate-test levels, not one-mesh patch-test levels. The P1
 mixed-traction elasticity test on tetrahedra uses `n=9→17→33` because its
 coarsest mesh is pre-asymptotic. This is a coverage inventory, not a claim
 that every supported space or physical context is certified; the suite
 READMEs and test sources give all case-specific sequences and bounds.
+Distributed P2 Poisson remains uncertified because an exploratory
+three-rank tetrahedral run produced a rank-dependent error at one refinement
+level; the observation and reproduction levels are recorded in the
+`h/PETScMPIPoisson` README.
 
 Configure with `-DRODIN_BUILD_CONVERGENCE_TESTS=ON` and run with
 `ctest --test-dir build/tests -L convergence --output-on-failure`.
@@ -197,7 +209,7 @@ their refinement axis.
 
 The CI convergence job runs the full local suite twice: once with sequential
 assembly and once with OpenMP assembly (`RODIN_MULTITHREADED=OFF/ON`). A
-separate PETSc job checks both local-context and distributed P1 Poisson
+separate PETSc job checks local-context P1/P2 and distributed P1 Poisson
 convergence with PETSc assembly and CG. The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
 it is a separate check from the local-context suites.

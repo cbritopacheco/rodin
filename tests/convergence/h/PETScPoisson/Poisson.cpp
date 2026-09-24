@@ -5,11 +5,12 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief PETSc local-context P1 Poisson rate certification. */
+/** @file @brief PETSc local-context P1/P2 Poisson rate certification. */
 
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <initializer_list>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -25,11 +26,11 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::H::PETScPoisson
 {
-  template <class Exact, class Source, class Gradient>
+  template <size_t K, class Exact, class Source, class Gradient>
   ErrorNorms solve(const LocalMesh& mesh, const Exact& exact,
     const Source& source, const Gradient& gradient)
   {
-    P1 space(mesh);
+    H1 space(std::integral_constant<size_t, K>{}, mesh);
     PETSc::Variational::TrialFunction u(space);
     PETSc::Variational::TestFunction v(space);
     auto stiffness = Integral(Grad(u), Grad(v));
@@ -47,9 +48,12 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
 
   class PETScPoissonTest : public ::testing::TestWithParam<Polytope::Type> {};
 
-  TEST_P(PETScPoissonTest, P1OptimalRates)
+  template <size_t K>
+  void checkRates(Polytope::Type geometry)
   {
-    UniformGridHierarchy hierarchy(GetParam(), {5, 9, 17});
+    UniformGridHierarchy hierarchy(geometry,
+      K == 1 ? std::initializer_list<size_t>{5, 9, 17}
+             : std::initializer_list<size_t>{3, 5, 9});
     const size_t dim = hierarchy.getDimension();
     const Real pi = Math::Constants::pi();
     const RealFunction exact([dim, pi](const Point& p)
@@ -83,8 +87,9 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
     {
       const auto mesh = hierarchy.makeMesh(level);
       history.append(hierarchy.getMeshSize(level),
-        solve(mesh, exact, source, gradient));
+        solve<K>(mesh, exact, source, gradient));
     }
+    ASSERT_EQ(history.getSize(), 3);
     for (size_t i = 1; i < history.getSize(); ++i)
     {
       const auto& coarse = history.getSample(i - 1).error;
@@ -98,12 +103,15 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
         << " -> " << fine.getL2() << ", H1 " << coarse.getH1Seminorm()
         << " -> " << fine.getH1Seminorm() << ", rates " << rate.getL2()
         << ", " << rate.getH1Seminorm());
-      EXPECT_GT(rate.getL2(), 1.6);
-      EXPECT_LT(rate.getL2(), 2.4);
-      EXPECT_GT(rate.getH1Seminorm(), 0.75);
-      EXPECT_LT(rate.getH1Seminorm(), 1.4);
+      EXPECT_GT(rate.getL2(), Real(K) + 0.55);
+      EXPECT_LT(rate.getL2(), Real(K) + 1.45);
+      EXPECT_GT(rate.getH1Seminorm(), Real(K) - 0.3);
+      EXPECT_LT(rate.getH1Seminorm(), Real(K) + 0.45);
     }
   }
+
+  TEST_P(PETScPoissonTest, P1OptimalRates) { checkRates<1>(GetParam()); }
+  TEST_P(PETScPoissonTest, P2OptimalRates) { checkRates<2>(GetParam()); }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScPoissonTest,
     ::testing::Values(

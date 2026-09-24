@@ -45,7 +45,7 @@ rates, and a nonhomogeneous Dirichlet component on all cell geometries.
 `NonlinearPoisson` validates a semilinear reaction law through a true Newton
 solve and P1/P2 rates on the same geometry set.
 When PETSc is enabled, `PETScPoisson` certifies local-context PETSc assembly
-and CG through all-geometry P1 L2/H1 convergence rates.
+and CG through all-geometry P1/P2 L2/H1 convergence rates.
 When both MPI and PETSc are enabled, `PETScMPIPoisson` checks the same P1 rates
 on distributed meshes, with globally reduced errors and one to four ranks.
 

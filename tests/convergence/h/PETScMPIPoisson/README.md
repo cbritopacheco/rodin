@@ -15,3 +15,12 @@ per axis, as in the local P1 suite.
 This tests distributed mesh partitioning, FE ownership, PETSc assembly and
 solver behavior, and global error reduction together. It does not imply that
 every other physics suite or space has distributed convergence coverage.
+
+P2 is not yet certified here. An exploratory three-level P2 run on
+tetrahedra with $n=7,9,11$ yielded different errors at $n=9$ for one and
+three ranks: respectively $E_{L^2}=0.000704082$ versus $0.000972264$ and
+$E_{H^1}=0.0449821$ versus $0.0533736$. Errors at $n=7$ and $n=11$
+agreed across those rank counts, and the owned-cell quadrature summed to
+unit volume at every level. This isolates a rank-dependent value or
+evaluation at the middle level; its underlying cause remains to be
+determined before a distributed P2 rate claim can be made.

@@ -1,5 +1,5 @@
-add_executable(RodinConvergenceIsoparametricPoisson Poisson.cpp)
-target_link_libraries(RodinConvergenceIsoparametricPoisson
+add_executable(RodinConvergenceIsoparametric CurvedGeometry.cpp)
+target_link_libraries(RodinConvergenceIsoparametric
   PRIVATE
     GTest::gtest
     GTest::gtest_main
@@ -7,7 +7,7 @@ target_link_libraries(RodinConvergenceIsoparametricPoisson
     Rodin::Solver
 )
 
-gtest_discover_tests(RodinConvergenceIsoparametricPoisson
+gtest_discover_tests(RodinConvergenceIsoparametric
   PROPERTIES
     LABELS "convergence;slow"
 )

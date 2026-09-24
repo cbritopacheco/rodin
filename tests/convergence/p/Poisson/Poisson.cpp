@@ -87,9 +87,9 @@ namespace Rodin::Tests::Convergence::P::Poisson
   }
 
   /**
-   * @brief Verifies exponential p-decay between degrees one and four.
+   * @brief Verifies successive exponential p-decay from degree one to four.
    *
-   * For the analytic sine-product solution, approximation theory gives
+   * For the analytic exponential solution, approximation theory gives
    * @f$e_p\le C\exp(-\alpha p)@f$. The measured L2 and H1-seminorm decay
    * constants must both be positive on every cell geometry.
    */
@@ -98,36 +98,29 @@ namespace Rodin::Tests::Convergence::P::Poisson
     const UniformGrid grid(GetParam());
     const auto mesh = grid.makeMesh(2);
     const size_t dim = grid.getDimension();
-    const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
+    const RealFunction exact([dim](const Point& p)
       {
-        Real value = 1;
+        Real exponent = 0;
         for (size_t i = 0; i < dim; ++i)
-          value *= std::sin(pi * p(i));
-        return value;
+          exponent += p(i);
+        return std::exp(exponent);
       });
-    const RealFunction forcing([dim, pi](const Point& p)
+    const RealFunction forcing([dim, &exact](const Point& p)
       {
-        Real value = Real(dim) * pi * pi;
-        for (size_t i = 0; i < dim; ++i)
-          value *= std::sin(pi * p(i));
-        return value;
+        return -Real(dim) * exact(p);
       });
-    const VectorFunction exactGradient(dim, [dim, pi](const Point& p)
+    const VectorFunction exactGradient(dim, [dim, &exact](const Point& p)
       {
         Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
         for (size_t i = 0; i < dim; ++i)
-        {
-          value(i) = pi * std::cos(pi * p(i));
-          for (size_t j = 0; j < dim; ++j)
-            if (j != i)
-              value(i) *= std::sin(pi * p(j));
-        }
+          value(i) = exact(p);
         return value;
       });
 
     ErrorHistory history;
     history.append(1, solve<1>(mesh, exact, forcing, exactGradient))
+           .append(2, solve<2>(mesh, exact, forcing, exactGradient))
+           .append(3, solve<3>(mesh, exact, forcing, exactGradient))
            .append(4, solve<4>(mesh, exact, forcing, exactGradient));
 
     for (size_t i = 1; i < history.getSize(); ++i)
@@ -146,8 +139,8 @@ namespace Rodin::Tests::Convergence::P::Poisson
         << ')');
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
-      EXPECT_GT(rates.getL2(), 0.1);
-      EXPECT_GT(rates.getH1Seminorm(), 0.1);
+      EXPECT_GT(rates.getL2(), 0.25);
+      EXPECT_GT(rates.getH1Seminorm(), 0.25);
     }
   }
 
