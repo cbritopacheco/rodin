@@ -16,7 +16,8 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   `ctest --test-dir build/tests -L unit -LE "slow|distributed"
   --output-on-failure`, or `-R <pattern>` for one suite. Running a gtest
   executable directly still works when you want its raw output
-  (`--gtest_filter`, `--gtest_list_tests`).
+  (`build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`,
+  `--gtest_filter`, `--gtest_list_tests`).
 - Build type is part of correctness here: unit tests may run `Debug`
   (assertions, sanitizers), but manufactured tests solve PDEs and verify
   convergence rates, so they run `Release`/`RelWithDebInfo` — `Debug` is
@@ -27,6 +28,9 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   "does this converge at the right rate" and backend-contract regressions
   (e.g. `PETSc/TargetedAssemblyTest.cpp` pins sparsity-pattern reuse:
   0 mallocs on reuse, structural zeros preserved).
+
+A change is complete after the affected unit test executable passes. Assembly
+and solver changes also require the relevant manufactured tests to pass.
 
 ## Required coverage
 
