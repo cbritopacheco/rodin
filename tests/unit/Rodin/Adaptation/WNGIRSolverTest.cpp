@@ -20,6 +20,34 @@ namespace Rodin::Tests::Unit
 {
   namespace
   {
+    TEST(Rodin_Adaptation_WNGIRSolver, CalibratedDefaults)
+    {
+      const WNGIRParameters parameters;
+      EXPECT_EQ(parameters.kappaBulk, Real(1e-4));
+      EXPECT_EQ(parameters.cgMaxIterations, 1000);
+      EXPECT_EQ(parameters.maxIterations, 200);
+      EXPECT_EQ(parameters.geometricValidationOrder, 0);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(1), 4);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(2), 6);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(3), 8);
+      EXPECT_EQ(wngirGeometricValidationOrder(1), 6);
+      EXPECT_EQ(wngirGeometricValidationOrder(2), 8);
+      EXPECT_EQ(wngirGeometricValidationOrder(3), 10);
+    }
+
+    TEST(Rodin_Adaptation_WNGIRSolver, GeometricValidationUsesPhysicalDistance)
+    {
+      WNGIRReport report;
+      constexpr Real h = Real(0.02);
+      report.effectiveTauRmsH = Real(0.01) * h;
+      report.geometricRMS = Real(0.009) * h * h;
+      EXPECT_NEAR(report.getGeometricRMSTolerance(h), Real(0.01) * h * h, Real(1e-16));
+      EXPECT_TRUE(report.hasGeometricRMSConverged(h));
+
+      report.geometricRMS = Real(0.011) * h * h;
+      EXPECT_FALSE(report.hasGeometricRMSConverged(h));
+    }
+
     constexpr Attribute Interface = 10;
 
     struct SolveState
@@ -105,6 +133,9 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(state.report.maxQRel, Real(10));
     EXPECT_GE(state.report.maxJ, state.report.minJ);
     EXPECT_GT(state.report.activeFraction, Real(0));
+    EXPECT_TRUE(std::isfinite(state.report.geometricRMS));
+    EXPECT_TRUE(std::isfinite(state.report.geometricSup));
+    EXPECT_LT(state.report.normalRMS, Real(1e-12));
     EXPECT_EQ(state.report.rigidModeDimension, 3);
     // The interface is a straight line, so the translation along it is invisible
     // to the rank-one observation and the rigid-mode coercivity constant
@@ -113,6 +144,8 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(state.report.rigidModeCoercivity, Real(1e-12));
     EXPECT_GE(state.report.rigidModeCoercivity, Real(0));
     EXPECT_GT(state.report.iterations, 0);
+    EXPECT_GT(state.report.linearSolveCount, 0);
+    EXPECT_LE(state.report.maxLinearIterations, 1000);
     EXPECT_TRUE(std::isfinite(state.report.energy));
   }
 
@@ -128,6 +161,9 @@ namespace Rodin::Tests::Unit
       Real(7) * base.report.levelSetGradientScale, Real(1e-12));
     EXPECT_NEAR(
       scaled.report.rigidModeCoercivity, base.report.rigidModeCoercivity, Real(1e-10));
+    EXPECT_NEAR(scaled.report.geometricRMS, base.report.geometricRMS, Real(1e-10));
+    EXPECT_NEAR(scaled.report.geometricSup, base.report.geometricSup, Real(1e-10));
+    EXPECT_NEAR(scaled.report.normalRMS, base.report.normalRMS, Real(1e-12));
     EXPECT_EQ(base.report.iterations, scaled.report.iterations);
     EXPECT_STREQ(base.report.exitReason, scaled.report.exitReason);
   }
