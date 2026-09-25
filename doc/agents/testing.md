@@ -17,7 +17,8 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   `ctest --test-dir build/tests -L unit -LE "slow|distributed"
   --output-on-failure`, or `-R <pattern>` for one suite. Running a gtest
   executable directly still works when you want its raw output
-  (`--gtest_filter`, `--gtest_list_tests`).
+  (`build/tests/unit/Rodin/<Module>/Rodin<Module><Component>Test`,
+  `--gtest_filter`, `--gtest_list_tests`).
 - Build type is part of correctness here: unit tests may run `Debug`
   (assertions, sanitizers), but manufactured and convergence tests solve PDEs,
   so they run `Release`/`RelWithDebInfo` — `Debug` is impractically slow.
@@ -31,6 +32,9 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   `isoparametric/`). They use enough discretizations to establish the stated
   rate interval, integrate error norms independently of the solved field, and
   assert every observed rate.
+
+A change is complete after the affected unit test executable passes. Assembly
+and solver changes also require the relevant manufactured tests to pass.
 
 ## Required coverage
 
