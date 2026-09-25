@@ -162,43 +162,81 @@ search.
 
 ### Minimum thickness
 
-The body is kept thicker than $d_{\min}$ = `--thickness-min` times $h$
-(default 2; 0 disables it) by the penalty of Allaire, Jouve and
-Michailidis,
+Thin parts are penalized below $d_{\min}$ = `--thickness-min` times $h$
+(default 2; 0 disables it). The body-to-fluid normal is projected in the
+surface $H^1$ metric and normalized at each quadrature point:
 
 ```math
-P(\Omega_{\mathrm{s}}) = \int_\Gamma \int_0^{d_{\min}} \bigl[d_+(s - \xi n(s))\bigr]^2\,d\xi\,ds ,
+\int_\Gamma (n_h\cdot v+\ell_n^2\nabla_\Gamma n_h:\nabla_\Gamma v)\,ds
+=\int_\Gamma n_{\rm geom}\cdot v\,ds,
+\qquad \widehat n_h=\frac{n_h}{|n_h|}.
 ```
 
-where $d$ is the signed distance to the interface, positive in the fluid. A
-ray entering the body from $s$ and leaving it before the length $d_{\min}$
-reports how far it has left. The update ascends $\rho - \beta P$ with
-$\beta$ = `--thickness-weight` (default 1), through the derivative
+The smoothing length $\ell_n$ is set by `--normal-regularization` (default
+$h$). Smoothing is confined to the interface, so normals on opposite sides
+of a thin solid are not coupled through its interior. Its curvature is
+$H_h=\operatorname{div}_\Gamma\widehat n_h$. Where the projected direction
+is less than 0.5 aligned with the local outward normal, it is corrected to
+that orientation cone before measuring thickness; the count is logged.
+
+At $s\in\Gamma$, let $d(s)=-\widehat n_h(s)$ be the inward direction.
+The first transverse outward intersection of $s+t d(s)$ with the complete
+interface defines $t_{\rm exit}(s)$, clipped at $d_{\min}$ if no crossing is
+found within that distance. The penalty is
 
 ```math
-dP(w) = \int_\Gamma \int_0^{d_{\min}} \left[2 d_+(x_m)\bigl(\nabla d(x_m)\cdot n(s)\,w(s) - w(y_m)\bigr) + H(s)d_+(x_m)^2w(s)\right]\,d\xi\,ds ,
-\qquad x_m = s - \xi n(s),
+P(\Omega_{\rm s})=\int_\Gamma
+\bigl(d_{\min}-t_{\rm exit}(s)\bigr)_+^2\,ds.
 ```
 
-with $w$ the normal velocity and $y_m$ the point of $\Gamma$ nearest to
-$x_m$, and $H=\operatorname{div}_{\Gamma}n$. The interface normal is extended
-and smoothed by a vector $H^1$ projection with a surface anchoring term and
-rotational matching across the chamber cuts. Its interpolated value is
-normalised pointwise before launching a ray or evaluating the derivative; the
-curvature is computed from the derivative of this unit normal. The term due to
-rotation of the normal is omitted, as in the authors' formulation. The
-null-space step removes the volume change as before.
+One bounding-volume tree contains the chamber interface triangles. The ray
+segment is inverse-rotated by each of the 24 cube rotations and queried
+against this tree; the first outward crossing is retained. The starting
+intersection at $t=0$ is excluded. A nearly tangent exit is rejected because
+its intersection derivative is ill-conditioned.
 
-The chamber carries one copy of the interface, and a thin part may cross a
-cut, so the distance is measured to the 24 rotated copies of the chamber
-interface, searched on a uniform grid of cell size $d_{\min}$. Whether a ray
-point is outside the body is read from the label of the chamber cell containing
-its rotated image. The rays are sampled at three points per interface triangle
-and eight Gauss points in $\xi$. Each iterate reports $P$, the number of rays
-that leave the body and the deepest exit. On the unit sphere with
-$d_{\min} = 2.5$, where every ray exits at the antipode after $\xi = 2$, the
-computed $P$ agrees with $4\pi(d_{\min} - 2)^3/3$ up to the radius of the
-discrete sphere.
+Let $y=s+t_{\rm exit}d$ lie on the crossing triangle and $m$ be its
+body-to-fluid normal. For a deformation $\theta$ and fixed ray direction,
+the intersection-distance variation is
+
+```math
+t'_{\rm exit}(\theta)=
+\frac{m\cdot\bigl(\theta(y)-\theta(s)\bigr)}{m\cdot d}.
+```
+
+The discrete load differentiates this intersection and the source-triangle
+area. The latter is the discrete counterpart of the surface-measure term;
+it does not add a separate curvature regularization. The ray direction and
+its $H^1$ projection are held fixed, so this is not the full derivative
+through normal smoothing. The update ascends $\rho-\beta P$, with
+$\beta$ = `--thickness-weight` (default 1), before the volume null-space
+projection. This normal-ray penalty is not a certificate of global minimum
+thickness.
+
+This is a soft penalty, not a projection onto the set of feasible designs.
+The logged directional prediction concerns an infinitesimal deformation of
+the current mesh; a finite deformation can increase $P$ even before
+reconstruction, and reconstruction may change it further. Because the shape
+direction is normalised
+before transport, increasing $\beta$ cannot by itself shorten the update once
+the penalty dominates the direction.
+
+The weight is fixed during a run. It changes the direction only where the
+penalty is active: if no ray exits before $d_{\min}$, then $P=DP=0$ for every
+weight. Once active, the reported $DP[\theta]$ and actual change in $P$
+show whether the chosen weight is sufficient to oppose thinning. The
+direction is normalized before transport, so increasing the weight does not
+reduce the advection step.
+
+The nodally normalised projected field and its curvature are written as
+`Smoothed_Normal` and `Smoothed_Curvature` on the chamber and sewn designs
+at each iterate. They are interface fields and are zero at other vertices.
+Thickness is evaluated at three quadrature points per interface triangle.
+Each iterate reports the penalty, number of rays exiting before $d_{\min}$,
+minimum exit distance, maximum deficit, and minimum exit transversality,
+number of samples whose smoothed normal needed orientation correction,
+normal alignment, and the range of smoothed curvature. The minimum exit
+distance is clipped at $d_{\min}$ when no ray exits early.
 
 ### Transport
 
@@ -482,6 +520,7 @@ KelvinBall --h=0.125 --iterations=20
 KelvinBall --outer-radius=3 --h=0.1666666667 --iterations=2
 KelvinBall --n=25 --iterations=5 --reconstruction=wngir
 KelvinBall --n=30 --iterations=20 --mmg-adapt --mmg-adapt-interface-size=0.5
+KelvinBall --n=13 --iterations=5 --thickness-min=4 --thickness-weight=1
 ```
 
 The resolution is given either as points per edge (`--n`) or as a mesh size
@@ -553,8 +592,10 @@ wall-clock time of each stage. They are followed by:
   pitch $= 2\pi\ell/\rho$, and at the end of the row the components of $Z$
   and $\omega$ for the unit force along `--motion-force`, which are also
   printed at every iterate;
-- the level-set penalty, and the thickness bound, weight, penalty, rays that
-  leave the body and deepest exit;
+- the level-set penalty, and the thickness bound and weight, number of
+  early-exiting rays, minimum exit distance,
+  maximum deficit, exit transversality, normal alignment and curvature, and predicted versus
+  actual change of the thickness penalty;
 - the identification across the cuts: the rotated jump of the Eikonal
   distance and of its projection, the largest projection correction and the
   interface shift;

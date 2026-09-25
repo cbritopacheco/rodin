@@ -306,6 +306,8 @@ namespace KelvinBall
           << "    P1--P1 pressure-stabilization factor (default: 0.05)." << Alert::NewLine
           << Alert::Notation("--regularization=<value>")
           << "   H1 smoothing length in multiples of h (default: 4)." << Alert::NewLine
+          << Alert::Notation("--normal-regularization=<value>")
+          << " Thickness-normal smoothing length in h (default: 1)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
           << "             Advection time step in multiples of h (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--level-set-penalty=<value>")
@@ -313,7 +315,8 @@ namespace KelvinBall
           << Alert::Notation("--thickness-min=<value>")
           << "      Minimum body thickness in h (default: 2; 0 disables it)."
           << Alert::NewLine << Alert::Notation("--thickness-weight=<value>")
-          << "   Weight of the thickness penalty (default: 1)." << Alert::NewLine
+          << "   Fixed thickness penalty weight (default: 1)."
+          << Alert::NewLine
           << Alert::Notation("--motion-every=<count>")
           << "      Write the rigid motion every count iterates (default: 0, off)."
           << Alert::NewLine << Alert::Notation("--motion-force=<fx,fy,fz>")
@@ -906,6 +909,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   bool geometryOnly = false;
   bool stateOnly = false;
   Real regularizationFactor = 4.0;
+  Real normalRegularizationFactor = 1.0;
   Real stepFactor = 0.1;
   Real levelSetPenalty = 1;
   Real thicknessFactor = 2;
@@ -927,6 +931,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       maxIterations = std::stoul(std::string(mode.substr(13)));
     else if (mode.rfind("--regularization=", 0) == 0)
       regularizationFactor = std::stod(std::string(mode.substr(17)));
+    else if (mode.rfind("--normal-regularization=", 0) == 0)
+      normalRegularizationFactor = std::stod(std::string(mode.substr(24)));
     else if (mode.rfind("--step=", 0) == 0)
       stepFactor = std::stod(std::string(mode.substr(7)));
     else if (mode.rfind("--level-set-penalty=", 0) == 0)
@@ -982,6 +988,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The iteration count must be positive.");
   if (!(regularizationFactor > 0))
     throw std::runtime_error("The regularization factor must be positive.");
+  if (!(normalRegularizationFactor > 0))
+    throw std::runtime_error("The normal regularization factor must be positive.");
   if (!(stepFactor > 0))
     throw std::runtime_error("The advection step factor must be positive.");
   if (!(levelSetPenalty > 0))
@@ -1005,6 +1013,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
   const Real h = configuration.getH();
   const Real hilbertLength = regularizationFactor * h;
+  const Real normalLength = normalRegularizationFactor * h;
   const Real dt = stepFactor * h;
   Alert::Info configurationInfo;
   configurationInfo << substageHeading("Configuration") << Alert::NewLine
@@ -1024,6 +1033,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                     << diagnosticLabel("Regularization length:")
                     << Alert::Notation::Number(hilbertLength) << " = "
                     << Alert::Notation::Number(regularizationFactor) << " h"
+                    << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
+                    << Alert::Notation::Number(normalLength) << " = "
+                    << Alert::Notation::Number(normalRegularizationFactor) << " h"
                     << Alert::NewLine << diagnosticLabel("Advection step:")
                     << Alert::Notation::Number(dt) << " = "
                     << Alert::Notation::Number(stepFactor) << " h" << Alert::NewLine
@@ -1126,8 +1138,14 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "stage_9_seconds,"
              "translational_mobility,coupling_mobility,rotational_mobility,"
              "revolution_period,pitch,resistance_radius,"
-             "level_set_penalty,thickness_min,thickness_weight,thickness_penalty,"
-             "thickness_violating_rays,thickness_deepest_exit,"
+             "level_set_penalty,thickness_min,thickness_weight,normal_smoothing_length,"
+             "thickness_penalty,"
+             "thickness_violating_rays,thickness_minimum_exit,"
+             "thickness_maximum_deficit,thickness_minimum_transversality,"
+             "thickness_normal_alignment_min,thickness_normal_alignment_mean,"
+             "thickness_corrected_normals,thickness_curvature_min,thickness_curvature_max,"
+             "thickness_normal_magnitude_min,thickness_normal_magnitude_max,"
+             "actual_delta_thickness,predicted_delta_thickness,d_thickness_theta,"
              "eikonal_rotated_jump,projected_rotated_jump,distance_correction,"
              "interface_shift_max,advection_increment,advected_rotated_jump,"
              "min_crossing_fraction,snapped_vertices,reconstruction_scale,"
@@ -1146,6 +1164,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Optional<Real> previousRho;
   Optional<Real> predictedRhoChange;
   Optional<Real> previousVolume;
+  Optional<Real> previousThicknessPenalty;
+  Optional<Real> predictedThicknessChange;
   Optional<Real> predictedVolumeChange;
   Optional<MMG::Mesh> nextMesh;
 
@@ -1220,7 +1240,19 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
         Real thicknessPenalty = std::numeric_limits<Real>::quiet_NaN();
         Real thicknessViolating = std::numeric_limits<Real>::quiet_NaN();
-        Real thicknessDeepest = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessMinimumExit = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessMaximumDeficit = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessMinimumTransversality = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessNormalAlignmentMin = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessNormalAlignmentMean = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessCorrectedNormals = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessCurvatureMin = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessCurvatureMax = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessNormalMagnitudeMin = std::numeric_limits<Real>::quiet_NaN();
+        Real thicknessNormalMagnitudeMax = std::numeric_limits<Real>::quiet_NaN();
+        Real actualThicknessChange = std::numeric_limits<Real>::quiet_NaN();
+        Real predictedThicknessChange = std::numeric_limits<Real>::quiet_NaN();
+        Real dThicknessTheta = std::numeric_limits<Real>::quiet_NaN();
         Real eikonalJump = std::numeric_limits<Real>::quiet_NaN();
         Real projectedJump = std::numeric_limits<Real>::quiet_NaN();
         Real distanceCorrection = std::numeric_limits<Real>::quiet_NaN();
@@ -1268,9 +1300,22 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << (c != 0 ? 2 * M_PI * determinant / std::abs(c) : nan) << ','
               << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
               << ',' << levelSetPenalty << ',' << thicknessFactor * h << ','
-              << thicknessWeight << ',' << stageDiagnostics.thicknessPenalty << ','
+              << thicknessWeight << ',' << normalLength << ','
+              << stageDiagnostics.thicknessPenalty << ','
               << stageDiagnostics.thicknessViolating << ','
-              << stageDiagnostics.thicknessDeepest << ',' << stageDiagnostics.eikonalJump
+              << stageDiagnostics.thicknessMinimumExit << ','
+              << stageDiagnostics.thicknessMaximumDeficit << ','
+              << stageDiagnostics.thicknessMinimumTransversality << ','
+              << stageDiagnostics.thicknessNormalAlignmentMin << ','
+              << stageDiagnostics.thicknessNormalAlignmentMean << ','
+              << stageDiagnostics.thicknessCorrectedNormals << ','
+              << stageDiagnostics.thicknessCurvatureMin << ','
+              << stageDiagnostics.thicknessCurvatureMax << ','
+              << stageDiagnostics.thicknessNormalMagnitudeMin << ','
+              << stageDiagnostics.thicknessNormalMagnitudeMax << ','
+              << stageDiagnostics.actualThicknessChange << ','
+              << stageDiagnostics.predictedThicknessChange << ','
+              << stageDiagnostics.dThicknessTheta << ',' << stageDiagnostics.eikonalJump
               << ',' << stageDiagnostics.projectedJump << ','
               << stageDiagnostics.distanceCorrection << ','
               << stageDiagnostics.interfaceShift << ','
@@ -1390,40 +1435,104 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     // The minimum-thickness penalty enters the ascent direction of
     // rho - weight * P as an additional load of the rho identification.
     Math::Vector<Real> thicknessLoad;
+    GridFunction smoothedNormal(shapeSpace);
+    GridFunction smoothedCurvature(levelSetSpace);
+    smoothedCurvature.getData().setZero();
     if (thicknessFactor > 0)
     {
       thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
       mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
       const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, thicknessFactor * h);
       const auto projectedNormal = thicknessPenalty.projectNormal(
-        shapeSpace, shapeCoupling, hilbertLength, nitschePenalty);
-      const Location::AABB<MMG::Mesh> chamberLocator(mesh);
+        shapeSpace, normalLength);
+      smoothedNormal = projectedNormal;
+      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
+        const auto dofs = shapeSpace.getDOFs(0, vertex);
+        Math::SpatialVector<Real> normal(3);
+        for (size_t component = 0; component < 3; ++component)
+          normal(component) = smoothedNormal.getData()(dofs(component));
+        const Real magnitude = normal.norm();
+        if (std::isfinite(magnitude) && magnitude > Real(1e-12))
+          for (size_t component = 0; component < 3; ++component)
+            smoothedNormal.getData()(dofs(component)) /= magnitude;
+        else
+          for (size_t component = 0; component < 3; ++component)
+            smoothedNormal.getData()(dofs(component)) = 0;
+      }
       const auto thickness = thicknessPenalty.evaluate(
-        mesh, chamberLocator, shapeSpace, projectedNormal, thicknessWeight, thicknessLoad);
+        mesh, shapeSpace, projectedNormal, Real(1), thicknessLoad);
+      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
+        const auto dofs = levelSetSpace.getDOFs(0, vertex);
+        smoothedCurvature.getData()(dofs(0)) = thickness.curvature[vertex];
+      }
       stageDiagnostics.thicknessPenalty = thickness.penalty;
       stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
-      stageDiagnostics.thicknessDeepest = thickness.deepest;
+      stageDiagnostics.thicknessMinimumExit = thickness.minimumExit;
+      stageDiagnostics.thicknessMaximumDeficit = thickness.maximumDeficit;
+      stageDiagnostics.thicknessMinimumTransversality = thickness.minimumTransversality;
+      stageDiagnostics.thicknessNormalAlignmentMin = thickness.minimumNormalAlignment;
+      stageDiagnostics.thicknessNormalAlignmentMean = thickness.meanNormalAlignment;
+      stageDiagnostics.thicknessCorrectedNormals =
+        static_cast<Real>(thickness.correctedNormals);
+      stageDiagnostics.thicknessCurvatureMin = thickness.minimumCurvature;
+      stageDiagnostics.thicknessCurvatureMax = thickness.maximumCurvature;
+      stageDiagnostics.thicknessNormalMagnitudeMin = thickness.minimumNormalMagnitude;
+      stageDiagnostics.thicknessNormalMagnitudeMax = thickness.maximumNormalMagnitude;
+      stageDiagnostics.actualThicknessChange = previousThicknessPenalty
+        ? thickness.penalty - *previousThicknessPenalty : nan;
+      stageDiagnostics.predictedThicknessChange = predictedThicknessChange
+        ? *predictedThicknessChange : nan;
       Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
                     << diagnosticLabel("Minimum thickness:")
                     << Alert::Notation::Number(thicknessFactor * h) << " = "
                     << Alert::Notation::Number(thicknessFactor) << " h" << Alert::NewLine
-                    << diagnosticLabel("Weight:")
+                    << diagnosticLabel("Normal smoothing length:")
+                    << Alert::Notation::Number(normalLength) << Alert::NewLine
+                    << diagnosticLabel("Penalty weight:")
                     << Alert::Notation::Number(thicknessWeight) << Alert::NewLine
                     << diagnosticLabel("Penalty P:")
                     << Alert::Notation::Number(thickness.penalty) << Alert::NewLine
-                    << diagnosticLabel("Rays leaving the body:")
+                    << diagnosticLabel("Rays exiting before minimum:")
                     << Alert::Notation::Number(thickness.violating) << " of "
-                    << Alert::Notation::Number(thickness.rays) << Alert::NewLine
-                    << diagnosticLabel("Deepest exit:")
-                    << Alert::Notation::Number(thickness.deepest) << Alert::NewLine
+                    << Alert::Notation::Number(thickness.samples) << Alert::NewLine
+                    << diagnosticLabel("Corrected normals:")
+                    << Alert::Notation::Number(thickness.correctedNormals) << Alert::NewLine
+                    << diagnosticLabel("Minimum exit distance:")
+                    << Alert::Notation::Number(thickness.minimumExit) << Alert::NewLine
+                    << diagnosticLabel("Maximum thickness deficit:")
+                    << Alert::Notation::Number(thickness.maximumDeficit) << Alert::NewLine
+                    << diagnosticLabel("Minimum exit transversality:")
+                    << Alert::Notation::Number(thickness.minimumTransversality)
+                    << Alert::NewLine
+                    << diagnosticLabel("Minimum projected alignment:")
+                    << Alert::Notation::Number(thickness.minimumNormalAlignment)
+                    << Alert::NewLine << diagnosticLabel("Mean projected alignment:")
+                    << Alert::Notation::Number(thickness.meanNormalAlignment)
+                    << Alert::NewLine
                     << diagnosticLabel("Minimum smoothed curvature:")
                     << Alert::Notation::Number(thickness.minimumCurvature) << Alert::NewLine
                     << diagnosticLabel("Maximum smoothed curvature:")
-                    << Alert::Notation::Number(thickness.maximumCurvature) << Alert::Raise;
+                    << Alert::Notation::Number(thickness.maximumCurvature) << Alert::NewLine
+                    << diagnosticLabel("Raw normal magnitude range:")
+                    << Alert::Notation::Number(thickness.minimumNormalMagnitude) << " to "
+                    << Alert::Notation::Number(thickness.maximumNormalMagnitude)
+                    << Alert::Raise;
+      if (previousThicknessPenalty)
+        Alert::Info() << substageHeading("Thickness change") << Alert::NewLine
+                      << diagnosticLabel("Actual delta P:")
+                      << Alert::Notation::Number(stageDiagnostics.actualThicknessChange)
+                      << Alert::NewLine << diagnosticLabel("Predicted delta P:")
+                      << Alert::Notation::Number(stageDiagnostics.predictedThicknessChange)
+                      << Alert::Raise;
     }
+    if (thicknessFactor > 0)
+      thicknessLoad *= thicknessWeight;
     const GradientDiagnostics rhoGradientDiagnostics =
       identifyGradient(shapeSpace, -rhoDensity, shapeCoupling, rhoGradient, hilbertLength,
-        nitschePenalty, "Rho", thicknessFactor > 0 ? &thicknessLoad : nullptr);
+        nitschePenalty, "Rho",
+        thicknessFactor > 0 ? &thicknessLoad : nullptr);
     const GradientDiagnostics volumeGradientDiagnostics =
       identifyGradient(shapeSpace, RealFunction{-1}, shapeCoupling, volumeGradient,
         hilbertLength, nitschePenalty, "Volume");
@@ -1448,6 +1557,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real thetaInfinityNorm = xiRhoNorm.max();
     const Real dRhoTheta = dRho(theta);
     const Real dVolumeTheta = dVolume(theta);
+    stageDiagnostics.dThicknessTheta = thicknessFactor > 0
+      ? -thicknessLoad.dot(theta.getData()) / thicknessWeight : nan;
+    if (thicknessFactor > 0)
+    {
+      previousThicknessPenalty = stageDiagnostics.thicknessPenalty;
+      predictedThicknessChange = dt * stageDiagnostics.dThicknessTheta;
+    }
     const Real requiredDVolumeTheta = 0;
     Alert::Info() << substageHeading("Constrained direction") << Alert::NewLine
                   << diagnosticLabel("Null-space multiplier:")
@@ -1460,6 +1576,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(dRhoTheta) << Alert::NewLine
                   << diagnosticLabel("D volume [theta]:")
                   << Alert::Notation::Number(dVolumeTheta) << Alert::NewLine
+                  << diagnosticLabel("D thickness [theta]:")
+                  << Alert::Notation::Number(stageDiagnostics.dThicknessTheta)
+                  << Alert::NewLine
+                  << diagnosticLabel("Thickness weight:")
+                  << Alert::Notation::Number(thicknessWeight) << Alert::NewLine
                   << diagnosticLabel("Required D volume [theta]:")
                   << Alert::Notation::Number(requiredDVolumeTheta) << Alert::Raise;
     previousRho = rho;
@@ -1547,6 +1668,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     chamber.clear();
     chamber.add("Distance", distance, IO::XDMF::Center::Node);
     chamber.add("Theta", theta, IO::XDMF::Center::Node);
+    if (thicknessFactor > 0)
+    {
+      chamber.add("Smoothed_Normal", smoothedNormal, IO::XDMF::Center::Node);
+      chamber.add("Smoothed_Curvature", smoothedCurvature, IO::XDMF::Center::Node);
+    }
     fluidState.clear();
     fluidState.setMesh(fluid, IO::XDMF::MeshPolicy::Transient);
     fluidState.add("Translation_0", uT0, IO::XDMF::Center::Node);
@@ -1567,12 +1693,22 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     P1 sewedDesignVector(sewedDesign.getMesh(), 3);
     GridFunction sewedDistance(sewedDesignScalar);
     GridFunction sewedVelocity(sewedDesignVector);
+    GridFunction sewedNormal(sewedDesignVector);
+    GridFunction sewedCurvature(sewedDesignScalar);
     sewedDesign.setScalar(sewedDistance, distance);
     sewedDesign.setVector(sewedVelocity, theta);
     sewedDesignOutput.clear();
     sewedDesignOutput.setMesh(sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
     sewedDesignOutput.add("Distance", sewedDistance, IO::XDMF::Center::Node);
     sewedDesignOutput.add("Theta", sewedVelocity, IO::XDMF::Center::Node);
+    if (thicknessFactor > 0)
+    {
+      sewedDesign.setVector(sewedNormal, smoothedNormal);
+      sewedDesign.setScalar(sewedCurvature, smoothedCurvature);
+      sewedDesignOutput.add("Smoothed_Normal", sewedNormal, IO::XDMF::Center::Node);
+      sewedDesignOutput.add("Smoothed_Curvature", sewedCurvature,
+        IO::XDMF::Center::Node);
+    }
 
     KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
     VelocitySpace sewedVelocitySpace = makeVelocitySpace(sewedFluid.getMesh());
@@ -1781,7 +1917,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
     Problem transport(advected, test);
     auto transportedDistance =
-      Integral(Flow(-dt, advectionDistance, advectionDirection, Math::RungeKutta::RK4{},
+      Integral(Flow(-dt, advectionDistance, advectionDirection,
+                 Math::RungeKutta::RK4{},
                  rotationalContinuation),
         test);
     transportedDistance.setOrder(advectionQuadratureOrder);
@@ -1805,7 +1942,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     stageDiagnostics.advectionIncrement = advectionIncrement;
     stageDiagnostics.advectedJump = advectedJump;
     Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
-                  << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
+                  << diagnosticLabel("Advection step:")
+                  << Alert::Notation::Number(dt)
                   << Alert::NewLine << diagnosticLabel("Linear residual:")
                   << Alert::Notation::Number(transportResidual) << Alert::NewLine
                   << diagnosticLabel("Minimum:")
