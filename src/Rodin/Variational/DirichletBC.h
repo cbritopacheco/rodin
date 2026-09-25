@@ -1019,12 +1019,11 @@ namespace Rodin::Variational
         {
           const auto& fes = m_u.get().getFiniteElementSpace();
           const auto& mesh = fes.getMesh();
-          const auto value = [defect = m_defect.get()](const Geometry::Point& p) {
-            return defect->getValue(p);
-          };
+          const auto value = [defect = m_defect.get()](
+                               const Geometry::Point& p) { return defect->getValue(p); };
           if constexpr (requires {
-            m_assembly.assembleValues(m_values, fes, m_essBdr, value);
-          })
+                          m_assembly.assembleValues(m_values, fes, m_essBdr, value);
+                        })
           {
             m_assembly.assembleValues(m_values, fes, m_essBdr, value);
           }

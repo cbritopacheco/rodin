@@ -762,9 +762,10 @@ namespace Rodin::Variational
         const auto& basisValues = getCachedBasisValues(d, i, ip);
         for (Index local = 0; local < basisValues.size(); ++local)
         {
-          const auto k = [&]
-          {
-            if constexpr (requires { this->operator[](dofs[local]) * basisValues[local]; })
+          const auto k = [&] {
+            if constexpr (requires {
+                            this->operator[](dofs[local]) * basisValues[local];
+                          })
               return this->operator[](dofs[local]) * basisValues[local];
             else
               return basisValues[local] * this->operator[](dofs[local]);
@@ -1181,8 +1182,7 @@ namespace Rodin::Variational
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
         if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
-          cache.fes != fes || cache.element != element ||
-          cache.d != d || cache.i != i)
+          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
@@ -1209,8 +1209,7 @@ namespace Rodin::Variational
         if (!cache.hasBasisValues || cache.owner != this ||
           cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
           cache.element != element || cache.d != d || cache.i != i ||
-          cache.qf != ip.getQuadratureFormula() ||
-          cache.qp != ip.getIndex())
+          cache.qf != ip.getQuadratureFormula() || cache.qp != ip.getIndex())
         {
           const auto& fe = *element;
           const size_t count = fe.getCount();
@@ -1239,7 +1238,6 @@ namespace Rodin::Variational
       std::reference_wrapper<const FESType> m_fes;
       inline static std::atomic<size_t> s_nextCacheIdentity{0};
       const size_t m_cacheIdentity;
-
   };
 
   /**

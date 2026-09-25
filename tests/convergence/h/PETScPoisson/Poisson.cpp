@@ -27,8 +27,8 @@ using namespace Rodin::Variational;
 namespace Rodin::Tests::Convergence::H::PETScPoisson
 {
   template <size_t K, class Exact, class Source, class Gradient>
-  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact,
-    const Source& source, const Gradient& gradient)
+  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact, const Source& source,
+    const Gradient& gradient)
   {
     H1 space(std::integral_constant<size_t, K>{}, mesh);
     PETSc::Variational::TrialFunction u(space);
@@ -46,7 +46,8 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
     return ErrorNorm::compute(mesh, u.getSolution(), exact, gradient, 12);
   }
 
-  class PETScPoissonTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class PETScPoissonTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   template <size_t K>
   void checkRates(Polytope::Type geometry)
@@ -56,22 +57,19 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
              : std::initializer_list<size_t>{3, 5, 9});
     const size_t dim = hierarchy.getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
-    {
+    const RealFunction exact([dim, pi](const Point& p) {
       Real value = 1;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const RealFunction source([dim, pi](const Point& p)
-    {
+    const RealFunction source([dim, pi](const Point& p) {
       Real value = Real(dim) * pi * pi;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const VectorFunction gradient(dim, [dim, pi](const Point& p)
-    {
+    const VectorFunction gradient(dim, [dim, pi](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t i = 0; i < dim; ++i)
       {
@@ -86,8 +84,8 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
     for (size_t level : hierarchy.getLevels())
     {
       const auto mesh = hierarchy.makeMesh(level);
-      history.append(hierarchy.getMeshSize(level),
-        solve<K>(mesh, exact, source, gradient));
+      history.append(
+        hierarchy.getMeshSize(level), solve<K>(mesh, exact, source, gradient));
     }
     ASSERT_EQ(history.getSize(), 3);
     for (size_t i = 1; i < history.getSize(); ++i)
@@ -99,10 +97,10 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       const auto rate = history.getAlgebraicRates(i);
-      SCOPED_TRACE(::testing::Message() << "L2 " << coarse.getL2()
-        << " -> " << fine.getL2() << ", H1 " << coarse.getH1Seminorm()
-        << " -> " << fine.getH1Seminorm() << ", rates " << rate.getL2()
-        << ", " << rate.getH1Seminorm());
+      SCOPED_TRACE(::testing::Message()
+        << "L2 " << coarse.getL2() << " -> " << fine.getL2() << ", H1 "
+        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm() << ", rates "
+        << rate.getL2() << ", " << rate.getH1Seminorm());
       EXPECT_GT(rate.getL2(), Real(K) + 0.55);
       EXPECT_LT(rate.getL2(), Real(K) + 1.45);
       EXPECT_GT(rate.getH1Seminorm(), Real(K) - 0.3);
@@ -110,20 +108,20 @@ namespace Rodin::Tests::Convergence::H::PETScPoisson
     }
   }
 
-  TEST_P(PETScPoissonTest, P1OptimalRates) { checkRates<1>(GetParam()); }
-  TEST_P(PETScPoissonTest, P2OptimalRates) { checkRates<2>(GetParam()); }
+  TEST_P(PETScPoissonTest, P1OptimalRates)
+  {
+    checkRates<1>(GetParam());
+  }
+  TEST_P(PETScPoissonTest, P2OptimalRates)
+  {
+    checkRates<2>(GetParam());
+  }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScPoissonTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
-    [](const ::testing::TestParamInfo<Polytope::Type>& info)
-    {
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 }

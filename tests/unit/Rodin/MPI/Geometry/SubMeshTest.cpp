@@ -546,17 +546,18 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
 {
   Context::MPI ctx(*g_env, *g_world);
   for (auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
-       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-       Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
   {
     const size_t D = Polytope::Traits(type).getDimension();
-    auto parent = D == 1 ? distributeFromRoot(ctx, type, {17}) :
-      D == 2 ? distributeFromRoot(ctx, type, {5, 5}) :
-               distributeFromRoot(ctx, type, {5, 5, 5});
+    auto parent = D == 1 ? distributeFromRoot(ctx, type, {17})
+      : D == 2           ? distributeFromRoot(ctx, type, {5, 5})
+                         : distributeFromRoot(ctx, type, {5, 5, 5});
     for (int mode = 0; mode < 5; ++mode)
     {
-      SCOPED_TRACE(::testing::Message() << "geometry=" << static_cast<int>(type)
-        << " mode=" << mode << " rank=" << g_world->rank());
+      SCOPED_TRACE(::testing::Message()
+        << "geometry=" << static_cast<int>(type) << " mode=" << mode
+        << " rank=" << g_world->rank());
       const size_t d = mode == 2 ? D - 1 : D;
       SubMesh<Context::MPI>::Builder builder;
       builder.initialize(parent);
@@ -566,9 +567,10 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
         const Index i = cell->getIndex();
         const Index gid = parent.getShard().getPolytopeMap(d).left.at(i);
         const bool owned = parent.getShard().isOwned(d, i);
-        const bool choose = mode == 0 ? owned : mode == 1 ? owned && gid % 2 == 0 :
-          mode == 2 ? owned && parent.getShard().isBoundary(i) :
-          g_world->rank() == 0 && requested.empty() &&
+        const bool choose = mode == 0 ? owned
+          : mode == 1                 ? owned && gid % 2 == 0
+          : mode == 2                 ? owned && parent.getShard().isBoundary(i)
+                                      : g_world->rank() == 0 && requested.empty() &&
             (mode == 3 || !owned || g_world->size() == 1);
         if (choose)
         {
@@ -611,7 +613,8 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
             IndexSet expectedHalo;
             for (size_t rank = 0; rank < allVisible.size(); ++rank)
               if (rank != static_cast<size_t>(g_world->rank()) &&
-                  std::find(allVisible[rank].begin(), allVisible[rank].end(), ids[i]) != allVisible[rank].end())
+                std::find(allVisible[rank].begin(), allVisible[rank].end(), ids[i]) !=
+                  allVisible[rank].end())
                 expectedHalo.insert(rank);
             const auto& halo = sub.getShard().getHalo(dp);
             const auto found = halo.find(i);
@@ -620,7 +623,8 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
           else
           {
             const auto owner = sub.getShard().getOwner(dp).at(i);
-            EXPECT_NE(std::find(allOwned.at(owner).begin(), allOwned.at(owner).end(), ids[i]),
+            EXPECT_NE(
+              std::find(allOwned.at(owner).begin(), allOwned.at(owner).end(), ids[i]),
               allOwned.at(owner).end());
             bool shared = false;
             if (dp < d)
@@ -644,7 +648,8 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
         if (!parent.getShard().isOwned(d, i) || !selected.contains(gid))
           continue;
         for (Index face : parent.getConnectivity().getIncidence({d, d - 1}, i))
-          incidences.emplace_back(parent.getShard().getPolytopeMap(d - 1).left.at(face), gid);
+          incidences.emplace_back(
+            parent.getShard().getPolytopeMap(d - 1).left.at(face), gid);
       }
       std::vector<std::vector<std::pair<Index, Index>>> allIncidences;
       boost::mpi::all_gather(*g_world, incidences, allIncidences);

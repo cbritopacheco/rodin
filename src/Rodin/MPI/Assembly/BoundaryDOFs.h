@@ -39,10 +39,13 @@ namespace Rodin::Assembly
   class MPIBoundaryDOFs
   {
     public:
+      /** Scalar field type of the constrained space. */
       using Scalar = typename FES::ScalarType;
+      /** Whether the space has globally supported constant DOFs. */
       static constexpr bool Global = std::is_same_v<FES,
         Variational::P0g<typename FES::RangeType, typename FES::MeshType>>;
 
+      /** Selects the boundary functional source for each required DOF. */
       MPIBoundaryDOFs(const FES& fes, const FlatSet<Geometry::Attribute>& attributes)
         : m_fes(fes)
       {
@@ -97,7 +100,8 @@ namespace Rodin::Assembly
         if constexpr (Global)
         {
           const auto& comm = mesh.getContext().getCommunicator();
-          const Index selected = boost::mpi::all_reduce(comm, first, boost::mpi::minimum<Index>());
+          const Index selected =
+            boost::mpi::all_reduce(comm, first, boost::mpi::minimum<Index>());
           if (selected == std::numeric_limits<Index>::max())
             return;
           m_sourceRank = boost::mpi::all_reduce(comm,
@@ -108,7 +112,10 @@ namespace Rodin::Assembly
       }
 
       /// Global DOF -> (shard-local face, face-local functional ordinal).
-      const auto& getDOFs() const { return m_dofs; }
+      const auto& getDOFs() const
+      {
+        return m_dofs;
+      }
 
       /** Broadcasts only the globally supported P0g payload; otherwise a no-op. */
       template <class Payload>
@@ -119,7 +126,8 @@ namespace Rodin::Assembly
           if (m_sourceRank < 0)
             return;
           std::vector<std::pair<Index, Payload>> entries(values.begin(), values.end());
-          boost::mpi::broadcast(m_fes.getMesh().getContext().getCommunicator(), entries, m_sourceRank);
+          boost::mpi::broadcast(
+            m_fes.getMesh().getContext().getCommunicator(), entries, m_sourceRank);
           values.clear();
           for (auto& entry : entries)
             values.emplace(std::move(entry));

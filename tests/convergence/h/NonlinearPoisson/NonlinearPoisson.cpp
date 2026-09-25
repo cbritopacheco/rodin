@@ -27,8 +27,8 @@ using namespace Rodin::Variational;
 namespace Rodin::Tests::Convergence::H::NonlinearPoisson
 {
   template <size_t K, class Exact, class Source, class Gradient>
-  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact,
-    const Source& source, const Gradient& gradient)
+  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact, const Source& source,
+    const Gradient& gradient)
   {
     H1 space(std::integral_constant<size_t, K>{}, mesh);
     GridFunction current(space);
@@ -46,14 +46,11 @@ namespace Rodin::Tests::Convergence::H::NonlinearPoisson
     residualReaction.setOrder(12);
     load.setOrder(12);
     Problem problem(du, v);
-    problem = tangentDiffusion + tangentReaction
-            + residualDiffusion + residualReaction - load
-            + DirichletBC(du, Zero());
+    problem = tangentDiffusion + tangentReaction + residualDiffusion + residualReaction -
+      load + DirichletBC(du, Zero());
     SparseLU linearSolver(problem);
     NewtonSolver newton(linearSolver);
-    newton.setMaxIterations(20)
-      .setAbsoluteTolerance(1e-11)
-      .setRelativeTolerance(1e-10);
+    newton.setMaxIterations(20).setAbsoluteTolerance(1e-11).setRelativeTolerance(1e-10);
     newton.solve(current);
     EXPECT_TRUE(newton.converged());
     return ErrorNorm::compute(mesh, current, exact, gradient, 12);
@@ -67,20 +64,17 @@ namespace Rodin::Tests::Convergence::H::NonlinearPoisson
              : std::initializer_list<size_t>{3, 5, 9});
     const size_t dim = hierarchy.getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
-    {
+    const RealFunction exact([dim, pi](const Point& p) {
       Real value = 1;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const RealFunction source([&](const Point& p)
-    {
+    const RealFunction source([&](const Point& p) {
       const Real value = exact(p);
       return (Real(dim) * pi * pi + 1) * value + value * value * value;
     });
-    const VectorFunction gradient(dim, [dim, pi](const Point& p)
-    {
+    const VectorFunction gradient(dim, [dim, pi](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t i = 0; i < dim; ++i)
       {
@@ -95,8 +89,8 @@ namespace Rodin::Tests::Convergence::H::NonlinearPoisson
     for (size_t level : hierarchy.getLevels())
     {
       const auto mesh = hierarchy.makeMesh(level);
-      history.append(hierarchy.getMeshSize(level),
-        solve<K>(mesh, exact, source, gradient));
+      history.append(
+        hierarchy.getMeshSize(level), solve<K>(mesh, exact, source, gradient));
     }
     for (size_t i = 1; i < history.getSize(); ++i)
     {
@@ -107,10 +101,10 @@ namespace Rodin::Tests::Convergence::H::NonlinearPoisson
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       const auto rate = history.getAlgebraicRates(i);
-      SCOPED_TRACE(::testing::Message() << "L2 " << coarse.getL2()
-        << " -> " << fine.getL2() << ", H1 " << coarse.getH1Seminorm()
-        << " -> " << fine.getH1Seminorm() << ", rates " << rate.getL2()
-        << ", " << rate.getH1Seminorm());
+      SCOPED_TRACE(::testing::Message()
+        << "L2 " << coarse.getL2() << " -> " << fine.getL2() << ", H1 "
+        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm() << ", rates "
+        << rate.getL2() << ", " << rate.getH1Seminorm());
       EXPECT_GT(rate.getL2(), Real(K) + 0.5);
       EXPECT_LT(rate.getL2(), Real(K) + 1.5);
       EXPECT_GT(rate.getH1Seminorm(), Real(K) - 0.3);
@@ -118,21 +112,22 @@ namespace Rodin::Tests::Convergence::H::NonlinearPoisson
     }
   }
 
-  class NonlinearPoissonTest : public ::testing::TestWithParam<Polytope::Type> {};
-  TEST_P(NonlinearPoissonTest, P1OptimalRates) { checkRates<1>(GetParam()); }
-  TEST_P(NonlinearPoissonTest, P2OptimalRates) { checkRates<2>(GetParam()); }
+  class NonlinearPoissonTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
+  TEST_P(NonlinearPoissonTest, P1OptimalRates)
+  {
+    checkRates<1>(GetParam());
+  }
+  TEST_P(NonlinearPoissonTest, P2OptimalRates)
+  {
+    checkRates<2>(GetParam());
+  }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, NonlinearPoissonTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
-    [](const ::testing::TestParamInfo<Polytope::Type>& info)
-    {
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 }

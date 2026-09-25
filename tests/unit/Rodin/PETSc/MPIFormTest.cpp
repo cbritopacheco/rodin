@@ -64,8 +64,8 @@ namespace
     Sharder<Context::MPI> sharder(ctx);
     if (comm.rank() == 0)
     {
-      auto mesh = Mesh<Context::Local>::UniformGrid(
-        Polytope::Type::Tetrahedron, {9, 9, 9});
+      auto mesh =
+        Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {9, 9, 9});
       auto& connectivity = mesh.getConnectivity();
       connectivity.compute(3, 3);
       connectivity.compute(3, 0);
@@ -95,14 +95,12 @@ namespace
     // MPI Mesh::getFaceCount() is global, while facet indices are shard-local.
     // The previous affine-defect loop used the former as a local loop bound.
     EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
-    H1<2, Real, Mesh<Context::MPI>> space(
-      std::integral_constant<size_t, 2>{}, mesh);
+    H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
     PETSc::Variational::TrialFunction uValue(space);
     PETSc::Variational::TestFunction vValue(space);
     Problem valueProblem(uValue, vValue);
-    valueProblem = Integral(Grad(uValue), Grad(vValue))
-      - Integral(RealFunction(1), vValue)
-      + DirichletBC(uValue, RealFunction(1));
+    valueProblem = Integral(Grad(uValue), Grad(vValue)) -
+      Integral(RealFunction(1), vValue) + DirichletBC(uValue, RealFunction(1));
     PETSc::Solver::CG valueSolver(valueProblem);
     valueSolver.setTolerances(1e-12, 1e-14, 1e5, 20000);
     valueSolver.solve();
@@ -110,9 +108,8 @@ namespace
     PETSc::Variational::TrialFunction uIdent(space);
     PETSc::Variational::TestFunction vIdent(space);
     Problem identProblem(uIdent, vIdent);
-    identProblem = Integral(Grad(uIdent), Grad(vIdent))
-      - Integral(RealFunction(1), vIdent)
-      + DirichletBC(uIdent, -uIdent, RealFunction(2));
+    identProblem = Integral(Grad(uIdent), Grad(vIdent)) -
+      Integral(RealFunction(1), vIdent) + DirichletBC(uIdent, -uIdent, RealFunction(2));
     PETSc::Solver::CG identSolver(identProblem);
     identSolver.setTolerances(1e-12, 1e-14, 1e5, 20000);
     identSolver.solve();

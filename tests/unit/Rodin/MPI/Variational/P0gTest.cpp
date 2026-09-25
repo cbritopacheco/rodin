@@ -353,21 +353,15 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    for (auto type : {Polytope::Type::Segment,
-           Polytope::Type::Triangle,
-           Polytope::Type::Quadrilateral,
-           Polytope::Type::Tetrahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Wedge})
+    for (auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
       const size_t dim = Polytope::Traits(type).getDimension();
-      auto mesh = dim == 1
-        ? distributeFromRoot(ctx, type, {5})
-        : dim == 2
-          ? distributeFromRoot(ctx, type, {4, 4})
-          : distributeFromRoot(ctx, type, {4, 3, 3});
+      auto mesh = dim == 1 ? distributeFromRoot(ctx, type, {5})
+        : dim == 2         ? distributeFromRoot(ctx, type, {4, 4})
+                           : distributeFromRoot(ctx, type, {4, 3, 3});
       P0g<Real, Mesh<Context::MPI>> realScalar(mesh);
       P0g<Complex, Mesh<Context::MPI>> complexScalar(mesh);
       P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(mesh, 2);

@@ -18,13 +18,16 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  class P0gSpaceTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class P0gSpaceTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   LocalMesh makeP0gMesh(Polytope::Type geometry)
   {
     const size_t dim = Polytope::Traits(geometry).getDimension();
-    if (dim == 1) return LocalMesh::UniformGrid(geometry, {3});
-    if (dim == 2) return LocalMesh::UniformGrid(geometry, {3, 3});
+    if (dim == 1)
+      return LocalMesh::UniformGrid(geometry, {3});
+    if (dim == 2)
+      return LocalMesh::UniformGrid(geometry, {3, 3});
     return LocalMesh::UniformGrid(geometry, {3, 3, 3});
   }
 
@@ -48,8 +51,7 @@ namespace Rodin::Tests::Unit
       const auto cell = mesh.getCell(i);
       const Point point(*cell, Polytope::Traits(geometry).getCentroid());
       EXPECT_NEAR(realField(point), 2.5, 1e-12);
-      EXPECT_NEAR(std::abs(complexField(point) - Complex(2.5, -1.25)),
-        0, 1e-12);
+      EXPECT_NEAR(std::abs(complexField(point) - Complex(2.5, -1.25)), 0, 1e-12);
     }
   }
 
@@ -90,12 +92,7 @@ namespace Rodin::Tests::Unit
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, P0gSpaceTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge));
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge));
 }

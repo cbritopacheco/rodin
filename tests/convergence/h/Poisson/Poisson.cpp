@@ -38,14 +38,9 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::H::Poisson
 {
-  template <size_t K, class FES, class Exact, class Forcing,
-    class ExactGradient>
-  ErrorNorms solveProblem(
-    const LocalMesh& mesh,
-    FES& vh,
-    const Exact& exact,
-    const Forcing& forcing,
-    const ExactGradient& exactGradient)
+  template <size_t K, class FES, class Exact, class Forcing, class ExactGradient>
+  ErrorNorms solveProblem(const LocalMesh& mesh, FES& vh, const Exact& exact,
+    const Forcing& forcing, const ExactGradient& exactGradient)
   {
     TrialFunction u(vh);
     TestFunction v(vh);
@@ -57,9 +52,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
       stiffness.setOrder(12);
 
     Problem poisson(u, v);
-    poisson = stiffness
-            - load
-            + DirichletBC(u, exact);
+    poisson = stiffness - load + DirichletBC(u, exact);
 
     CG solver(poisson);
     solver.setTolerance(1e-13).setMaxIterations(20000).solve();
@@ -70,12 +63,8 @@ namespace Rodin::Tests::Convergence::H::Poisson
   }
 
   template <size_t K, class Exact, class Forcing, class ExactGradient>
-  ErrorNorms solve(
-    const UniformGridHierarchy& hierarchy,
-    size_t pointsPerAxis,
-    const Exact& exact,
-    const Forcing& forcing,
-    const ExactGradient& exactGradient)
+  ErrorNorms solve(const UniformGridHierarchy& hierarchy, size_t pointsPerAxis,
+    const Exact& exact, const Forcing& forcing, const ExactGradient& exactGradient)
   {
     auto mesh = hierarchy.makeMesh(pointsPerAxis);
     if constexpr (K == 1)
@@ -90,12 +79,8 @@ namespace Rodin::Tests::Convergence::H::Poisson
     }
   }
 
-  void expectRate(
-    const ErrorHistory& history,
-    Real minimumL2Rate,
-    Real maximumL2Rate,
-    Real minimumH1Rate,
-    Real maximumH1Rate)
+  void expectRate(const ErrorHistory& history, Real minimumL2Rate, Real maximumL2Rate,
+    Real minimumH1Rate, Real maximumH1Rate)
   {
     ASSERT_GE(history.getSize(), 3);
     for (size_t i = 1; i < history.getSize(); ++i)
@@ -112,10 +97,9 @@ namespace Rodin::Tests::Convergence::H::Poisson
 
       const auto rates = history.getAlgebraicRates(i);
       SCOPED_TRACE(::testing::Message()
-        << "L2 errors " << coarse.getL2() << " -> " << fine.getL2()
-        << ", rate " << rates.getL2() << "; H1 seminorm errors "
-        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm()
-        << ", rate " << rates.getH1Seminorm());
+        << "L2 errors " << coarse.getL2() << " -> " << fine.getL2() << ", rate "
+        << rates.getL2() << "; H1 seminorm errors " << coarse.getH1Seminorm() << " -> "
+        << fine.getH1Seminorm() << ", rate " << rates.getH1Seminorm());
       EXPECT_GT(rates.getL2(), minimumL2Rate);
       EXPECT_LT(rates.getL2(), maximumL2Rate);
       EXPECT_GT(rates.getH1Seminorm(), minimumH1Rate);
@@ -123,8 +107,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
     }
   }
 
-  class PoissonHConvergenceTest
-    : public ::testing::TestWithParam<Polytope::Type>
+  class PoissonHConvergenceTest : public ::testing::TestWithParam<Polytope::Type>
   {};
 
   /**
@@ -139,24 +122,22 @@ namespace Rodin::Tests::Convergence::H::Poisson
     const auto geometry = GetParam();
     const UniformGridHierarchy hierarchy(geometry, {5, 9, 17});
     const size_t dim = hierarchy.getDimension();
-    const RealFunction exact([dim](const Point& p)
-      {
-        Real value = 1;
-        for (size_t i = 0; i < dim; ++i)
-          value += p(i);
-        return value;
-      });
+    const RealFunction exact([dim](const Point& p) {
+      Real value = 1;
+      for (size_t i = 0; i < dim; ++i)
+        value += p(i);
+      return value;
+    });
     const RealFunction forcing(0.0);
-    const VectorFunction exactGradient(dim, [dim](const Point&)
-      {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        for (size_t i = 0; i < dim; ++i)
-          value(i) = 1;
-        return value;
-      });
+    const VectorFunction exactGradient(dim, [dim](const Point&) {
+      Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+      for (size_t i = 0; i < dim; ++i)
+        value(i) = 1;
+      return value;
+    });
 
-    const auto error = solve<1>(hierarchy, dim < 3 ? 9 : 5,
-      exact, forcing, exactGradient);
+    const auto error =
+      solve<1>(hierarchy, dim < 3 ? 9 : 5, exact, forcing, exactGradient);
     EXPECT_LT(error.getL2(), 1e-10);
     EXPECT_LT(error.getH1Seminorm(), 1e-10);
   }
@@ -174,32 +155,29 @@ namespace Rodin::Tests::Convergence::H::Poisson
     const UniformGridHierarchy hierarchy(geometry, {5, 9, 17});
     const size_t dim = hierarchy.getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
+    const RealFunction exact([dim, pi](const Point& p) {
+      Real value = 1;
+      for (size_t i = 0; i < dim; ++i)
+        value *= std::sin(pi * p(i));
+      return value;
+    });
+    const RealFunction forcing([dim, pi](const Point& p) {
+      Real value = Real(dim) * pi * pi;
+      for (size_t i = 0; i < dim; ++i)
+        value *= std::sin(pi * p(i));
+      return value;
+    });
+    const VectorFunction exactGradient(dim, [dim, pi](const Point& p) {
+      Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+      for (size_t i = 0; i < dim; ++i)
       {
-        Real value = 1;
-        for (size_t i = 0; i < dim; ++i)
-          value *= std::sin(pi * p(i));
-        return value;
-      });
-    const RealFunction forcing([dim, pi](const Point& p)
-      {
-        Real value = Real(dim) * pi * pi;
-        for (size_t i = 0; i < dim; ++i)
-          value *= std::sin(pi * p(i));
-        return value;
-      });
-    const VectorFunction exactGradient(dim, [dim, pi](const Point& p)
-      {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        for (size_t i = 0; i < dim; ++i)
-        {
-          value(i) = pi * std::cos(pi * p(i));
-          for (size_t j = 0; j < dim; ++j)
-            if (j != i)
-              value(i) *= std::sin(pi * p(j));
-        }
-        return value;
-      });
+        value(i) = pi * std::cos(pi * p(i));
+        for (size_t j = 0; j < dim; ++j)
+          if (j != i)
+            value(i) *= std::sin(pi * p(j));
+      }
+      return value;
+    });
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
@@ -221,30 +199,27 @@ namespace Rodin::Tests::Convergence::H::Poisson
     const auto geometry = GetParam();
     const UniformGridHierarchy hierarchy(geometry, {5, 9, 17});
     const size_t dim = hierarchy.getDimension();
-    const RealFunction exact([dim](const Point& p)
-      {
-        Real sum = 0;
-        for (size_t i = 0; i < dim; ++i)
-          sum += p(i);
-        return std::exp(sum);
-      });
-    const RealFunction forcing([dim](const Point& p)
-      {
-        Real sum = 0;
-        for (size_t i = 0; i < dim; ++i)
-          sum += p(i);
-        return -Real(dim) * std::exp(sum);
-      });
-    const VectorFunction exactGradient(dim, [dim](const Point& p)
-      {
-        Real sum = 0;
-        for (size_t i = 0; i < dim; ++i)
-          sum += p(i);
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        for (size_t i = 0; i < dim; ++i)
-          value(i) = std::exp(sum);
-        return value;
-      });
+    const RealFunction exact([dim](const Point& p) {
+      Real sum = 0;
+      for (size_t i = 0; i < dim; ++i)
+        sum += p(i);
+      return std::exp(sum);
+    });
+    const RealFunction forcing([dim](const Point& p) {
+      Real sum = 0;
+      for (size_t i = 0; i < dim; ++i)
+        sum += p(i);
+      return -Real(dim) * std::exp(sum);
+    });
+    const VectorFunction exactGradient(dim, [dim](const Point& p) {
+      Real sum = 0;
+      for (size_t i = 0; i < dim; ++i)
+        sum += p(i);
+      Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+      for (size_t i = 0; i < dim; ++i)
+        value(i) = std::exp(sum);
+      return value;
+    });
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
@@ -255,51 +230,43 @@ namespace Rodin::Tests::Convergence::H::Poisson
   }
 
   template <size_t K>
-  void testSmoothHomogeneousSolution(
-    Polytope::Type geometry,
-    std::initializer_list<size_t> levels,
-    Real minimumL2Rate,
-    Real maximumL2Rate,
-    Real minimumH1Rate,
-    Real maximumH1Rate)
+  void testSmoothHomogeneousSolution(Polytope::Type geometry,
+    std::initializer_list<size_t> levels, Real minimumL2Rate, Real maximumL2Rate,
+    Real minimumH1Rate, Real maximumH1Rate)
   {
     const UniformGridHierarchy hierarchy(geometry, levels);
     const size_t dim = hierarchy.getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
+    const RealFunction exact([dim, pi](const Point& p) {
+      Real value = 1;
+      for (size_t i = 0; i < dim; ++i)
+        value *= std::sin(pi * p(i));
+      return value;
+    });
+    const RealFunction forcing([dim, pi](const Point& p) {
+      Real value = Real(dim) * pi * pi;
+      for (size_t i = 0; i < dim; ++i)
+        value *= std::sin(pi * p(i));
+      return value;
+    });
+    const VectorFunction exactGradient(dim, [dim, pi](const Point& p) {
+      Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+      for (size_t i = 0; i < dim; ++i)
       {
-        Real value = 1;
-        for (size_t i = 0; i < dim; ++i)
-          value *= std::sin(pi * p(i));
-        return value;
-      });
-    const RealFunction forcing([dim, pi](const Point& p)
-      {
-        Real value = Real(dim) * pi * pi;
-        for (size_t i = 0; i < dim; ++i)
-          value *= std::sin(pi * p(i));
-        return value;
-      });
-    const VectorFunction exactGradient(dim, [dim, pi](const Point& p)
-      {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        for (size_t i = 0; i < dim; ++i)
-        {
-          value(i) = pi * std::cos(pi * p(i));
-          for (size_t j = 0; j < dim; ++j)
-            if (j != i)
-              value(i) *= std::sin(pi * p(j));
-        }
-        return value;
-      });
+        value(i) = pi * std::cos(pi * p(i));
+        for (size_t j = 0; j < dim; ++j)
+          if (j != i)
+            value(i) *= std::sin(pi * p(j));
+      }
+      return value;
+    });
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
       history.append(hierarchy.getMeshSize(level),
         solve<K>(hierarchy, level, exact, forcing, exactGradient));
 
-    expectRate(history,
-      minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
+    expectRate(history, minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
   }
 
   /**
@@ -310,8 +277,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
    */
   TEST_P(PoissonHConvergenceTest, HomogeneousDirichletHasOptimalP2Rates)
   {
-    testSmoothHomogeneousSolution<2>(
-      GetParam(), {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
+    testSmoothHomogeneousSolution<2>(GetParam(), {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
   }
 
   /**
@@ -322,26 +288,17 @@ namespace Rodin::Tests::Convergence::H::Poisson
    */
   TEST_P(PoissonHConvergenceTest, HomogeneousDirichletHasOptimalP3Rates)
   {
-    testSmoothHomogeneousSolution<3>(
-      GetParam(), {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
+    testSmoothHomogeneousSolution<3>(GetParam(), {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
   }
 
-  std::string geometryName(
-    const ::testing::TestParamInfo<Polytope::Type>& info)
+  std::string geometryName(const ::testing::TestParamInfo<Polytope::Type>& info)
   {
     return std::string(UniformGridHierarchy::getGeometryName(info.param));
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllUniformGridGeometries,
-    PoissonHConvergenceTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
+  INSTANTIATE_TEST_SUITE_P(AllUniformGridGeometries, PoissonHConvergenceTest,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
     geometryName);
 }

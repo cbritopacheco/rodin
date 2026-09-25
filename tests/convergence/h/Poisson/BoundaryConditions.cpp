@@ -41,8 +41,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
   constexpr Real RobinCoefficient = 2;
 
   using ScalarCallable = std::function<Real(const Point&)>;
-  using VectorCallable =
-    std::function<Math::SpatialVector<Real>(const Point&)>;
+  using VectorCallable = std::function<Math::SpatialVector<Real>(const Point&)>;
   using ScalarField = RealFunction<ScalarCallable>;
   using VectorField = VectorFunction<VectorCallable>;
 
@@ -55,26 +54,22 @@ namespace Rodin::Tests::Convergence::H::Poisson
 
   struct ExponentialManufacturedSolution
   {
-    ExponentialManufacturedSolution(size_t dim, bool zeroMean)
-      : exact([dim, zeroMean](const Point& p)
-          {
+      ExponentialManufacturedSolution(size_t dim, bool zeroMean)
+        : exact([dim, zeroMean](const Point& p) {
             Real sum = 0;
             for (size_t i = 0; i < dim; ++i)
               sum += p(i);
-            const Real mean = zeroMean
-              ? std::pow(std::expm1(Real(1)), Real(dim))
-              : Real(0);
+            const Real mean =
+              zeroMean ? std::pow(std::expm1(Real(1)), Real(dim)) : Real(0);
             return std::exp(sum) - mean;
           }),
-        forcing([dim](const Point& p)
-          {
+          forcing([dim](const Point& p) {
             Real sum = 0;
             for (size_t i = 0; i < dim; ++i)
               sum += p(i);
             return -Real(dim) * std::exp(sum);
           }),
-        gradient(dim, [dim](const Point& p)
-          {
+          gradient(dim, [dim](const Point& p) {
             Real sum = 0;
             for (size_t i = 0; i < dim; ++i)
               sum += p(i);
@@ -82,43 +77,35 @@ namespace Rodin::Tests::Convergence::H::Poisson
             value.setConstant(std::exp(sum));
             return value;
           })
-    {}
+      {}
 
-    ScalarField exact;
-    ScalarField forcing;
-    VectorField gradient;
+      ScalarField exact;
+      ScalarField forcing;
+      VectorField gradient;
   };
 
-  ScalarField makeNormalFlux(
-    const LocalMesh& mesh,
-    const VectorField& exactGradient)
+  ScalarField makeNormalFlux(const LocalMesh& mesh, const VectorField& exactGradient)
   {
     const size_t dim = mesh.getSpaceDimension();
     const BoundaryNormal normal(mesh);
-    return ScalarField(ScalarCallable(
-      [dim, exactGradient, normal](const Point& p)
-      {
-        const auto gradient = exactGradient(p);
-        if (dim == 1)
-          return (p(0) < 0.5 ? -1 : 1) * gradient(0);
+    return ScalarField(ScalarCallable([dim, exactGradient, normal](const Point& p) {
+      const auto gradient = exactGradient(p);
+      if (dim == 1)
+        return (p(0) < 0.5 ? -1 : 1) * gradient(0);
 
-        const auto outward = normal(p);
-        Real flux = 0;
-        for (size_t i = 0; i < dim; ++i)
-          flux += gradient(i) * outward(i);
-        return flux;
-      }));
+      const auto outward = normal(p);
+      Real flux = 0;
+      for (size_t i = 0; i < dim; ++i)
+        flux += gradient(i) * outward(i);
+      return flux;
+    }));
   }
 
   template <size_t K, class FES>
-  ErrorNorms solveBoundaryProblem(
-    LocalMesh& mesh,
-    FES& vh,
-    BoundaryCondition condition)
+  ErrorNorms solveBoundaryProblem(LocalMesh& mesh, FES& vh, BoundaryCondition condition)
   {
     const bool pureNeumann = condition == BoundaryCondition::PureNeumann;
-    const ExponentialManufacturedSolution data(
-      mesh.getSpaceDimension(), pureNeumann);
+    const ExponentialManufacturedSolution data(mesh.getSpaceDimension(), pureNeumann);
     const ScalarField normalFlux = makeNormalFlux(mesh, data.gradient);
 
     TrialFunction u(vh);
@@ -136,10 +123,8 @@ namespace Rodin::Tests::Convergence::H::Poisson
     if (condition == BoundaryCondition::DirichletNeumann)
     {
       Problem poisson(u, v);
-      poisson = stiffness
-              - load
-              - naturalLoad.over(NaturalAttribute)
-              + DirichletBC(u, data.exact).on(DirichletAttribute);
+      poisson = stiffness - load - naturalLoad.over(NaturalAttribute) +
+        DirichletBC(u, data.exact).on(DirichletAttribute);
 
       CG solver(poisson);
       solver.setTolerance(1e-13).setMaxIterations(20000).solve();
@@ -147,9 +132,8 @@ namespace Rodin::Tests::Convergence::H::Poisson
     }
     else if (condition == BoundaryCondition::DirichletRobin)
     {
-      const ScalarField robinData(ScalarCallable(
-        [normalFlux, exact = data.exact](const Point& p)
-        {
+      const ScalarField robinData(
+        ScalarCallable([normalFlux, exact = data.exact](const Point& p) {
           return normalFlux(p) + RobinCoefficient * exact(p);
         }));
       auto robinMass = BoundaryIntegral(u, v);
@@ -158,11 +142,9 @@ namespace Rodin::Tests::Convergence::H::Poisson
       robinLoad.setOrder(quadratureOrder);
 
       Problem poisson(u, v);
-      poisson = stiffness
-              + RobinCoefficient * robinMass.over(NaturalAttribute)
-              - load
-              - robinLoad.over(NaturalAttribute)
-              + DirichletBC(u, data.exact).on(DirichletAttribute);
+      poisson = stiffness + RobinCoefficient * robinMass.over(NaturalAttribute) - load -
+        robinLoad.over(NaturalAttribute) +
+        DirichletBC(u, data.exact).on(DirichletAttribute);
 
       CG solver(poisson);
       solver.setTolerance(1e-13).setMaxIterations(20000).solve();
@@ -175,11 +157,8 @@ namespace Rodin::Tests::Convergence::H::Poisson
       TestFunction mu(constants);
 
       Problem poisson(u, lambda, v, mu);
-      poisson = stiffness
-              + Integral(lambda, v)
-              + Integral(u, mu)
-              - load
-              - naturalLoad.over(NaturalAttribute);
+      poisson = stiffness + Integral(lambda, v) + Integral(u, mu) - load -
+        naturalLoad.over(NaturalAttribute);
 
       SparseLU solver(poisson);
       solver.solve();
@@ -190,9 +169,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
   }
 
   template <size_t K>
-  ErrorNorms solve(
-    const UniformGridHierarchy& hierarchy,
-    size_t pointsPerAxis,
+  ErrorNorms solve(const UniformGridHierarchy& hierarchy, size_t pointsPerAxis,
     BoundaryCondition condition)
   {
     auto mesh = hierarchy.makeMesh(pointsPerAxis);
@@ -204,8 +181,7 @@ namespace Rodin::Tests::Convergence::H::Poisson
     else
     {
       UnitBoxBoundary::labelCoordinatePartition(
-        mesh, 0,
-        DirichletAttribute, NaturalAttribute, NaturalAttribute);
+        mesh, 0, DirichletAttribute, NaturalAttribute, NaturalAttribute);
     }
 
     if constexpr (K == 1)
@@ -220,12 +196,8 @@ namespace Rodin::Tests::Convergence::H::Poisson
     }
   }
 
-  void expectRates(
-    const ErrorHistory& history,
-    Real minimumL2Rate,
-    Real maximumL2Rate,
-    Real minimumH1Rate,
-    Real maximumH1Rate)
+  void expectRates(const ErrorHistory& history, Real minimumL2Rate, Real maximumL2Rate,
+    Real minimumH1Rate, Real maximumH1Rate)
   {
     ASSERT_GE(history.getSize(), 3);
     for (size_t i = 1; i < history.getSize(); ++i)
@@ -239,10 +211,9 @@ namespace Rodin::Tests::Convergence::H::Poisson
 
       const auto rates = history.getAlgebraicRates(i);
       SCOPED_TRACE(::testing::Message()
-        << "L2 errors " << coarse.getL2() << " -> " << fine.getL2()
-        << ", rate " << rates.getL2() << "; H1-seminorm errors "
-        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm()
-        << ", rate " << rates.getH1Seminorm());
+        << "L2 errors " << coarse.getL2() << " -> " << fine.getL2() << ", rate "
+        << rates.getL2() << "; H1-seminorm errors " << coarse.getH1Seminorm() << " -> "
+        << fine.getH1Seminorm() << ", rate " << rates.getH1Seminorm());
       EXPECT_GT(rates.getL2(), minimumL2Rate);
       EXPECT_LT(rates.getL2(), maximumL2Rate);
       EXPECT_GT(rates.getH1Seminorm(), minimumH1Rate);
@@ -251,113 +222,91 @@ namespace Rodin::Tests::Convergence::H::Poisson
   }
 
   template <size_t K>
-  void testBoundaryCondition(
-    Polytope::Type geometry,
-    BoundaryCondition condition,
-    std::initializer_list<size_t> levels,
-    Real minimumL2Rate,
-    Real maximumL2Rate,
-    Real minimumH1Rate,
-    Real maximumH1Rate)
+  void testBoundaryCondition(Polytope::Type geometry, BoundaryCondition condition,
+    std::initializer_list<size_t> levels, Real minimumL2Rate, Real maximumL2Rate,
+    Real minimumH1Rate, Real maximumH1Rate)
   {
     const UniformGridHierarchy hierarchy(geometry, levels);
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
-      history.append(
-        hierarchy.getMeshSize(level), solve<K>(hierarchy, level, condition));
-    expectRates(history,
-      minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
+      history.append(hierarchy.getMeshSize(level), solve<K>(hierarchy, level, condition));
+    expectRates(history, minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
   }
 
-  class PoissonBoundaryHConvergenceTest
-    : public ::testing::TestWithParam<Polytope::Type>
+  class PoissonBoundaryHConvergenceTest : public ::testing::TestWithParam<Polytope::Type>
   {};
 
   /** @brief Verifies optimal P1 rates with Dirichlet--Neumann data. */
-  TEST_P(PoissonBoundaryHConvergenceTest,
-    DirichletNeumannHasOptimalP1Rates)
+  TEST_P(PoissonBoundaryHConvergenceTest, DirichletNeumannHasOptimalP1Rates)
   {
-    testBoundaryCondition<1>(GetParam(), BoundaryCondition::DirichletNeumann,
-      {5, 9, 17}, 1.65, 2.35, 0.75, 1.25);
+    testBoundaryCondition<1>(GetParam(), BoundaryCondition::DirichletNeumann, {5, 9, 17},
+      1.65, 2.35, 0.75, 1.25);
   }
 
   /** @brief Verifies optimal P2 rates with Dirichlet--Neumann data. */
-  TEST_P(PoissonBoundaryHConvergenceTest,
-    DirichletNeumannHasOptimalP2Rates)
+  TEST_P(PoissonBoundaryHConvergenceTest, DirichletNeumannHasOptimalP2Rates)
   {
-    testBoundaryCondition<2>(GetParam(), BoundaryCondition::DirichletNeumann,
-      {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
+    testBoundaryCondition<2>(
+      GetParam(), BoundaryCondition::DirichletNeumann, {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
   }
 
   /** @brief Verifies optimal P3 rates with Dirichlet--Neumann data. */
-  TEST_P(PoissonBoundaryHConvergenceTest,
-    DirichletNeumannHasOptimalP3Rates)
+  TEST_P(PoissonBoundaryHConvergenceTest, DirichletNeumannHasOptimalP3Rates)
   {
-    testBoundaryCondition<3>(GetParam(), BoundaryCondition::DirichletNeumann,
-      {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
+    testBoundaryCondition<3>(
+      GetParam(), BoundaryCondition::DirichletNeumann, {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
   }
 
   /** @brief Verifies optimal P1 rates with Dirichlet--Robin data. */
-  TEST_P(PoissonBoundaryHConvergenceTest,
-    DirichletRobinHasOptimalP1Rates)
+  TEST_P(PoissonBoundaryHConvergenceTest, DirichletRobinHasOptimalP1Rates)
   {
-    testBoundaryCondition<1>(GetParam(), BoundaryCondition::DirichletRobin,
-      {5, 9, 17}, 1.65, 2.35, 0.75, 1.25);
+    testBoundaryCondition<1>(
+      GetParam(), BoundaryCondition::DirichletRobin, {5, 9, 17}, 1.65, 2.35, 0.75, 1.25);
   }
 
   /** @brief Verifies optimal P2 rates with Dirichlet--Robin data. */
-  TEST_P(PoissonBoundaryHConvergenceTest,
-    DirichletRobinHasOptimalP2Rates)
+  TEST_P(PoissonBoundaryHConvergenceTest, DirichletRobinHasOptimalP2Rates)
   {
-    testBoundaryCondition<2>(GetParam(), BoundaryCondition::DirichletRobin,
-      {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
+    testBoundaryCondition<2>(
+      GetParam(), BoundaryCondition::DirichletRobin, {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
   }
 
   /** @brief Verifies optimal P3 rates with Dirichlet--Robin data. */
-  TEST_P(PoissonBoundaryHConvergenceTest,
-    DirichletRobinHasOptimalP3Rates)
+  TEST_P(PoissonBoundaryHConvergenceTest, DirichletRobinHasOptimalP3Rates)
   {
-    testBoundaryCondition<3>(GetParam(), BoundaryCondition::DirichletRobin,
-      {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
+    testBoundaryCondition<3>(
+      GetParam(), BoundaryCondition::DirichletRobin, {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
   }
 
   /** @brief Verifies optimal P1 pure-Neumann rates and mean normalization. */
   TEST_P(PoissonBoundaryHConvergenceTest, PureNeumannHasOptimalP1Rates)
   {
-    testBoundaryCondition<1>(GetParam(), BoundaryCondition::PureNeumann,
-      {5, 9, 17}, 1.65, 2.35, 0.75, 1.25);
+    testBoundaryCondition<1>(
+      GetParam(), BoundaryCondition::PureNeumann, {5, 9, 17}, 1.65, 2.35, 0.75, 1.25);
   }
 
   /** @brief Verifies optimal P2 pure-Neumann rates and mean normalization. */
   TEST_P(PoissonBoundaryHConvergenceTest, PureNeumannHasOptimalP2Rates)
   {
-    testBoundaryCondition<2>(GetParam(), BoundaryCondition::PureNeumann,
-      {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
+    testBoundaryCondition<2>(
+      GetParam(), BoundaryCondition::PureNeumann, {3, 5, 9}, 2.45, 3.55, 1.55, 2.45);
   }
 
   /** @brief Verifies optimal P3 pure-Neumann rates and mean normalization. */
   TEST_P(PoissonBoundaryHConvergenceTest, PureNeumannHasOptimalP3Rates)
   {
-    testBoundaryCondition<3>(GetParam(), BoundaryCondition::PureNeumann,
-      {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
+    testBoundaryCondition<3>(
+      GetParam(), BoundaryCondition::PureNeumann, {3, 5, 9}, 3.25, 4.75, 2.35, 3.65);
   }
 
-  std::string geometryName(
-    const ::testing::TestParamInfo<Polytope::Type>& info)
+  std::string geometryName(const ::testing::TestParamInfo<Polytope::Type>& info)
   {
     return std::string(UniformGrid::getGeometryName(info.param));
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllUniformGridGeometries,
-    PoissonBoundaryHConvergenceTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
+  INSTANTIATE_TEST_SUITE_P(AllUniformGridGeometries, PoissonBoundaryHConvergenceTest,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
     geometryName);
 }

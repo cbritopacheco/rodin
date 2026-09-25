@@ -28,107 +28,90 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::H::Stokes
 {
-  using VectorCallable =
-    std::function<Math::SpatialVector<Real>(const Point&)>;
+  using VectorCallable = std::function<Math::SpatialVector<Real>(const Point&)>;
   using ScalarCallable = std::function<Real(const Point&)>;
-  using MatrixCallable =
-    std::function<Math::SpatialMatrix<Real>(const Point&)>;
+  using MatrixCallable = std::function<Math::SpatialMatrix<Real>(const Point&)>;
   using VectorField = VectorFunction<VectorCallable>;
   using ScalarField = RealFunction<ScalarCallable>;
 
   struct ManufacturedSolution
   {
-    VectorField velocity;
-    ScalarField pressure;
-    VectorField forcing;
-    MatrixCallable velocityJacobian;
-    VectorField pressureGradient;
+      VectorField velocity;
+      ScalarField pressure;
+      VectorField forcing;
+      MatrixCallable velocityJacobian;
+      VectorField pressureGradient;
   };
 
   ManufacturedSolution makeAffineSolution(size_t dim)
   {
-    return {
-      VectorField(dim, VectorCallable([dim](const Point& p)
-        {
-          Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0) = p(1);
-          return value;
-        })),
-      ScalarField(ScalarCallable(
-        [](const Point& p) { return p(0) - 0.5; })),
-      VectorField(dim, VectorCallable([dim](const Point&)
-        {
-          Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0) = 1;
-          return value;
-        })),
-      MatrixCallable([dim](const Point&)
-        {
-          Math::SpatialMatrix<Real> value(
-            static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0, 1) = 1;
-          return value;
-        }),
-      VectorField(dim, VectorCallable([dim](const Point&)
-        {
-          Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0) = 1;
-          return value;
-        }))
-    };
+    return {VectorField(dim, VectorCallable([dim](const Point& p) {
+              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+              value.setZero();
+              value(0) = p(1);
+              return value;
+            })),
+      ScalarField(ScalarCallable([](const Point& p) { return p(0) - 0.5; })),
+      VectorField(dim, VectorCallable([dim](const Point&) {
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        value.setZero();
+        value(0) = 1;
+        return value;
+      })),
+      MatrixCallable([dim](const Point&) {
+        Math::SpatialMatrix<Real> value(
+          static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
+        value.setZero();
+        value(0, 1) = 1;
+        return value;
+      }),
+      VectorField(dim, VectorCallable([dim](const Point&) {
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        value.setZero();
+        value(0) = 1;
+        return value;
+      }))};
   }
 
   ManufacturedSolution makePolynomialSolution(size_t dim)
   {
-    return {
-      VectorField(dim, VectorCallable([dim](const Point& p)
-        {
-          Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0) = p(1) * p(1) * p(1);
-          return value;
-        })),
-      ScalarField(ScalarCallable([](const Point& p)
-        { return p(0) * p(0) - Real(1) / 3; })),
-      VectorField(dim, VectorCallable([dim](const Point& p)
-        {
-          Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0) = -6 * p(1) + 2 * p(0);
-          return value;
-        })),
-      MatrixCallable([dim](const Point& p)
-        {
-          Math::SpatialMatrix<Real> value(
-            static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0, 1) = 3 * p(1) * p(1);
-          return value;
-        }),
-      VectorField(dim, VectorCallable([dim](const Point& p)
-        {
-          Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-          value.setZero();
-          value(0) = 2 * p(0);
-          return value;
-        }))
-    };
+    return {VectorField(dim, VectorCallable([dim](const Point& p) {
+              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+              value.setZero();
+              value(0) = p(1) * p(1) * p(1);
+              return value;
+            })),
+      ScalarField(
+        ScalarCallable([](const Point& p) { return p(0) * p(0) - Real(1) / 3; })),
+      VectorField(dim, VectorCallable([dim](const Point& p) {
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        value.setZero();
+        value(0) = -6 * p(1) + 2 * p(0);
+        return value;
+      })),
+      MatrixCallable([dim](const Point& p) {
+        Math::SpatialMatrix<Real> value(
+          static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
+        value.setZero();
+        value(0, 1) = 3 * p(1) * p(1);
+        return value;
+      }),
+      VectorField(dim, VectorCallable([dim](const Point& p) {
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        value.setZero();
+        value(0) = 2 * p(0);
+        return value;
+      }))};
   }
 
   struct StokesErrors
   {
-    ErrorNorms velocity;
-    ErrorNorms pressure;
-    Real divergence;
+      ErrorNorms velocity;
+      ErrorNorms pressure;
+      Real divergence;
   };
 
-  StokesErrors solve(
-    const UniformGridHierarchy& hierarchy,
-    size_t pointsPerAxis,
+  StokesErrors solve(const UniformGridHierarchy& hierarchy, size_t pointsPerAxis,
     const ManufacturedSolution& data)
   {
     auto mesh = hierarchy.makeMesh(pointsPerAxis);
@@ -160,31 +143,22 @@ namespace Rodin::Tests::Convergence::H::Stokes
     body.setOrder(quadratureOrder);
 
     Problem stokes(u, p, lambda, v, q, mu);
-    stokes = viscosity
-           - pressureVelocity
-           + incompressibility
-           + gaugePressure
-           + gaugeMean
-           - body
-           + DirichletBC(u, data.velocity);
+    stokes = viscosity - pressureVelocity + incompressibility + gaugePressure +
+      gaugeMean - body + DirichletBC(u, data.velocity);
 
     SparseLU solver(stokes);
     solver.solve();
 
     const auto velocity = ErrorNorm::computeVector(
-      mesh, u.getSolution(), data.velocity, data.velocityJacobian,
-      quadratureOrder);
+      mesh, u.getSolution(), data.velocity, data.velocityJacobian, quadratureOrder);
     const auto pressure = ErrorNorm::compute(
-      mesh, p.getSolution(), data.pressure, data.pressureGradient,
-      quadratureOrder);
-    const Real divergenceError = ErrorNorm::computeDivergenceL2(
-      mesh, u.getSolution(), quadratureOrder);
+      mesh, p.getSolution(), data.pressure, data.pressureGradient, quadratureOrder);
+    const Real divergenceError =
+      ErrorNorm::computeDivergenceL2(mesh, u.getSolution(), quadratureOrder);
     return {velocity, pressure, divergenceError};
   }
 
-  void expectRates(
-    const ErrorHistory& velocity,
-    const ErrorHistory& pressure)
+  void expectRates(const ErrorHistory& velocity, const ErrorHistory& pressure)
   {
     ASSERT_EQ(velocity.getSize(), pressure.getSize());
     ASSERT_GE(velocity.getSize(), 3);
@@ -206,15 +180,13 @@ namespace Rodin::Tests::Convergence::H::Stokes
       const auto velocityRates = velocity.getAlgebraicRates(i);
       const auto pressureRates = pressure.getAlgebraicRates(i);
       SCOPED_TRACE(::testing::Message()
-        << "velocity L2 " << coarseVelocity.getL2() << " -> "
-        << fineVelocity.getL2() << " (rate " << velocityRates.getL2()
-        << "), velocity H1 " << coarseVelocity.getH1Seminorm() << " -> "
-        << fineVelocity.getH1Seminorm() << " (rate "
-        << velocityRates.getH1Seminorm() << "); pressure L2 "
-        << coarsePressure.getL2() << " -> " << finePressure.getL2()
-        << " (rate " << pressureRates.getL2() << "), pressure H1 "
-        << coarsePressure.getH1Seminorm() << " -> "
-        << finePressure.getH1Seminorm() << " (rate "
+        << "velocity L2 " << coarseVelocity.getL2() << " -> " << fineVelocity.getL2()
+        << " (rate " << velocityRates.getL2() << "), velocity H1 "
+        << coarseVelocity.getH1Seminorm() << " -> " << fineVelocity.getH1Seminorm()
+        << " (rate " << velocityRates.getH1Seminorm() << "); pressure L2 "
+        << coarsePressure.getL2() << " -> " << finePressure.getL2() << " (rate "
+        << pressureRates.getL2() << "), pressure H1 " << coarsePressure.getH1Seminorm()
+        << " -> " << finePressure.getH1Seminorm() << " (rate "
         << pressureRates.getH1Seminorm() << ')');
       EXPECT_GT(velocityRates.getL2(), 2.45);
       EXPECT_LT(velocityRates.getL2(), 3.55);
@@ -227,16 +199,14 @@ namespace Rodin::Tests::Convergence::H::Stokes
     }
   }
 
-  class StokesHConvergenceTest
-    : public ::testing::TestWithParam<Polytope::Type>
+  class StokesHConvergenceTest : public ::testing::TestWithParam<Polytope::Type>
   {};
 
   /** @brief Verifies exact reproduction by the Taylor--Hood pair. */
   TEST_P(StokesHConvergenceTest, AffineDivergenceFreeSolutionIsExact)
   {
     const UniformGridHierarchy hierarchy(GetParam(), {3});
-    const auto error = solve(hierarchy, 3,
-      makeAffineSolution(hierarchy.getDimension()));
+    const auto error = solve(hierarchy, 3, makeAffineSolution(hierarchy.getDimension()));
     EXPECT_LT(error.velocity.getL2(), 1e-10);
     EXPECT_LT(error.velocity.getH1Seminorm(), 1e-10);
     EXPECT_LT(error.pressure.getL2(), 1e-10);
@@ -261,21 +231,14 @@ namespace Rodin::Tests::Convergence::H::Stokes
     expectRates(velocity, pressure);
   }
 
-  std::string geometryName(
-    const ::testing::TestParamInfo<Polytope::Type>& info)
+  std::string geometryName(const ::testing::TestParamInfo<Polytope::Type>& info)
   {
     return std::string(UniformGrid::getGeometryName(info.param));
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllUniformGridGeometries,
-    StokesHConvergenceTest,
-    ::testing::Values(
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
+  INSTANTIATE_TEST_SUITE_P(AllUniformGridGeometries, StokesHConvergenceTest,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
       Polytope::Type::Wedge),
     geometryName);
 }

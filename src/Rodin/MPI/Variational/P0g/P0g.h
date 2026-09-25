@@ -56,15 +56,14 @@ namespace Rodin::Variational
    * interface.  All ranks see the same single global DOF (index 0).
    */
   template <class Scalar>
-    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+    requires(std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
   class P0g<Scalar, Geometry::Mesh<Context::MPI>> final
-    : public FiniteElementSpace<
-        Geometry::Mesh<Context::MPI>,
+    : public FiniteElementSpace<Geometry::Mesh<Context::MPI>,
         P0g<Scalar, Geometry::Mesh<Context::MPI>>>
   {
     public:
       /// @brief Scalar coefficient type.
-      using ScalarType  = Scalar;
+      using ScalarType = Scalar;
       /// @brief Value type represented by the finite element space.
       using RangeType   = ScalarType;
       /// @brief Execution context type.
@@ -276,17 +275,16 @@ namespace Rodin::Variational
    * @p vdim - 1).
    */
   template <class Scalar>
-    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+    requires(std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
   class P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::MPI>> final
-    : public FiniteElementSpace<
-        Geometry::Mesh<Context::MPI>,
+    : public FiniteElementSpace<Geometry::Mesh<Context::MPI>,
         P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::MPI>>>
   {
     public:
       /// @brief Scalar coefficient type.
-      using ScalarType  = Scalar;
+      using ScalarType = Scalar;
       /// @brief Vector value type represented by the finite element space.
-      using RangeType   = Math::SpatialVector<Scalar>;
+      using RangeType = Math::SpatialVector<Scalar>;
       /// @brief Execution context type.
       using ContextType = Context::MPI;
       /// @brief Distributed mesh type.
@@ -298,7 +296,8 @@ namespace Rodin::Variational
       using FESType = P0g<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>;
 
       /// Parent class.
-      using Parent = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Scalar>, MeshType>>;
+      using Parent =
+        FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Scalar>, MeshType>>;
 
       using Parent::getGlobalIndex;
 

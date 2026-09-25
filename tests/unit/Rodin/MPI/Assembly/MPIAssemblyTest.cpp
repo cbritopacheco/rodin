@@ -79,11 +79,9 @@ namespace
   /**
    * @brief Distributes a uniform-grid mesh from rank 0.
    */
-  static Mesh<Context::MPI> distributeFromRoot(
-      const Context::MPI& ctx,
-      Polytope::Type type,
-      std::initializer_list<size_t> shape,
-      std::vector<Index>* physicalBoundary = nullptr)
+  static Mesh<Context::MPI> distributeFromRoot(const Context::MPI& ctx,
+    Polytope::Type type, std::initializer_list<size_t> shape,
+    std::vector<Index>* physicalBoundary = nullptr)
   {
     const auto& comm = ctx.getCommunicator();
 
@@ -150,8 +148,8 @@ namespace Rodin::Tests::Unit
   class MPITraceGeometryTest : public testing::TestWithParam<Polytope::Type>
   {
     protected:
-      Mesh<Context::MPI> makeMesh(const Context::MPI& ctx,
-        std::vector<Index>* physicalBoundary = nullptr) const
+      Mesh<Context::MPI> makeMesh(
+        const Context::MPI& ctx, std::vector<Index>* physicalBoundary = nullptr) const
       {
         const auto geometry = GetParam();
         const size_t dim = Polytope::Traits(geometry).getDimension();
@@ -166,8 +164,8 @@ namespace Rodin::Tests::Unit
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, MPITraceGeometryTest,
     testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
     [](const auto& info) { return polytopeName(info.param); });
 
   /**
@@ -181,8 +179,7 @@ namespace Rodin::Tests::Unit
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = makeMesh(ctx);
-    auto probe = [&](const auto& fes, const auto& value, const char* name)
-    {
+    auto probe = [&](const auto& fes, const auto& value, const char* name) {
       TrialFunction u(fes);
       DirichletBC dbc(u, value);
       dbc.assemble();
@@ -208,8 +205,7 @@ namespace Rodin::Tests::Unit
         if (begin <= index && index < end)
           missing += !corrected.contains(index);
       }
-      const int total = boost::mpi::all_reduce(
-        world, missing, std::plus<int>());
+      const int total = boost::mpi::all_reduce(world, missing, std::plus<int>());
       EXPECT_FALSE(boundary.empty()) << name;
       EXPECT_EQ(total, 0) << name;
     };
@@ -218,17 +214,13 @@ namespace Rodin::Tests::Unit
     const VectorFunction vectorValue{realValue, realValue, realValue};
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     probe(p1, realValue, "P1");
-    H1<1, Real, Mesh<Context::MPI>> h1(
-      std::integral_constant<size_t, 1>{}, mesh);
+    H1<1, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 1>{}, mesh);
     probe(h1, realValue, "H1<1>");
-    H1<2, Real, Mesh<Context::MPI>> h2(
-      std::integral_constant<size_t, 2>{}, mesh);
+    H1<2, Real, Mesh<Context::MPI>> h2(std::integral_constant<size_t, 2>{}, mesh);
     probe(h2, realValue, "H1<2>");
-    H1<3, Real, Mesh<Context::MPI>> h3(
-      std::integral_constant<size_t, 3>{}, mesh);
+    H1<3, Real, Mesh<Context::MPI>> h3(std::integral_constant<size_t, 3>{}, mesh);
     probe(h3, realValue, "H1<3>");
-    H1<4, Real, Mesh<Context::MPI>> h4(
-      std::integral_constant<size_t, 4>{}, mesh);
+    H1<4, Real, Mesh<Context::MPI>> h4(std::integral_constant<size_t, 4>{}, mesh);
     probe(h4, realValue, "H1<4>");
     P0g<Real, Mesh<Context::MPI>> p0g(mesh);
     probe(p0g, realValue, "P0g");
@@ -264,7 +256,6 @@ namespace Rodin::Tests::Unit
     H1<4, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH4(
       std::integral_constant<size_t, 4>{}, mesh, 3);
     probe(vectorH4, vectorValue, "H1<4> vector");
-
   }
 
   /**
@@ -280,8 +271,7 @@ namespace Rodin::Tests::Unit
     auto mesh = makeMesh(ctx);
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     H1<2, Real, Mesh<Context::MPI>> p2(std::integral_constant<size_t, 2>{}, mesh);
-    auto probe = [&](const auto& fes)
-    {
+    auto probe = [&](const auto& fes) {
       // TrialFunction allocates a distributed GridFunction collectively.
       // Only constraint assembly, not distributed-field construction, is local.
       TrialFunction u(fes);
@@ -291,7 +281,8 @@ namespace Rodin::Tests::Unit
       {
         value.assemble();
         affine.assemble();
-        const auto& prescribed = std::get<DirichletBCBase<Real>::ValueDOFs>(value.getDOFs());
+        const auto& prescribed =
+          std::get<DirichletBCBase<Real>::ValueDOFs>(value.getDOFs());
         EXPECT_FALSE(prescribed.empty());
         EXPECT_EQ(prescribed.size(), affine.getIdentificationValues().size());
       }
@@ -326,7 +317,8 @@ namespace Rodin::Tests::Unit
       const auto required = requiredDOFs(fes);
       std::set<Index> expected;
       for (auto face = mesh.getFace(); face; ++face)
-        if (physical.contains(mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
+        if (physical.contains(
+              mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
           for (Index dof : fes.getDOFs(D - 1, face->getIndex()))
             if (required.contains(dof))
               expected.insert(dof);
@@ -345,13 +337,13 @@ namespace Rodin::Tests::Unit
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = makeMesh(ctx);
-    auto probe = [&](const auto& fes, const char* name)
-    {
+    auto probe = [&](const auto& fes, const char* name) {
       TrialFunction u(fes);
       TrialFunction v(fes);
       using Space = std::remove_cvref_t<decltype(fes)>;
       const auto defect = [] {
-        if constexpr (std::is_same_v<typename Space::RangeType, Math::SpatialVector<Real>>)
+        if constexpr (std::is_same_v<typename Space::RangeType,
+                        Math::SpatialVector<Real>>)
           return VectorFunction{RealFunction(2), RealFunction(3), RealFunction(4)};
         else if constexpr (std::is_same_v<typename Space::ScalarType, Complex>)
           return ComplexFunction(Complex(2, 3));
@@ -385,8 +377,8 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(it, rows.end()) << name << " unrelated slave=" << slave;
           continue;
         }
-        ASSERT_NE(it, rows.end()) << name << " rank=" << world.rank()
-          << " slave=" << slave;
+        ASSERT_NE(it, rows.end())
+          << name << " rank=" << world.rank() << " slave=" << slave;
         EXPECT_TRUE(offsets.contains(slave)) << name;
         EXPECT_GT(it->second.first.size(), 0) << name;
         EXPECT_EQ(it->second.first.size(), it->second.second.size()) << name;
@@ -394,17 +386,13 @@ namespace Rodin::Tests::Unit
     };
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     probe(p1, "P1 real");
-    H1<1, Real, Mesh<Context::MPI>> h1(
-      std::integral_constant<size_t, 1>{}, mesh);
+    H1<1, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 1>{}, mesh);
     probe(h1, "H1<1> real");
-    H1<2, Real, Mesh<Context::MPI>> h2(
-      std::integral_constant<size_t, 2>{}, mesh);
+    H1<2, Real, Mesh<Context::MPI>> h2(std::integral_constant<size_t, 2>{}, mesh);
     probe(h2, "H1<2> real");
-    H1<3, Real, Mesh<Context::MPI>> h3(
-      std::integral_constant<size_t, 3>{}, mesh);
+    H1<3, Real, Mesh<Context::MPI>> h3(std::integral_constant<size_t, 3>{}, mesh);
     probe(h3, "H1<3> real");
-    H1<4, Real, Mesh<Context::MPI>> h4(
-      std::integral_constant<size_t, 4>{}, mesh);
+    H1<4, Real, Mesh<Context::MPI>> h4(std::integral_constant<size_t, 4>{}, mesh);
     probe(h4, "H1<4> real");
     P0g<Real, Mesh<Context::MPI>> p0g(mesh);
     probe(p0g, "P0g real");
@@ -440,9 +428,7 @@ namespace Rodin::Tests::Unit
     H1<4, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH4(
       std::integral_constant<size_t, 4>{}, mesh, 3);
     probe(vectorH4, "H1<4> vector");
-
   }
-
 
   /** Certifies the mesh metadata independently of constraint assembly. */
   TEST_P(MPITraceGeometryTest, HaloContainsRequiredPhysicalBoundaryIncidence)
@@ -511,21 +497,25 @@ namespace Rodin::Tests::Unit
       }
       EXPECT_EQ(missing, 0u);
       EXPECT_EQ(relevantFalseFaces, 0u);
-      const size_t globalMissing = boost::mpi::all_reduce(*g_world, missing, std::plus<size_t>());
-      const size_t globalFiltered = boost::mpi::all_reduce(*g_world, filtered, std::plus<size_t>());
-      const size_t globalFalse = boost::mpi::all_reduce(*g_world, falseFaces, std::plus<size_t>());
+      const size_t globalMissing =
+        boost::mpi::all_reduce(*g_world, missing, std::plus<size_t>());
+      const size_t globalFiltered =
+        boost::mpi::all_reduce(*g_world, filtered, std::plus<size_t>());
+      const size_t globalFalse =
+        boost::mpi::all_reduce(*g_world, falseFaces, std::plus<size_t>());
       if (g_world->rank() == 0)
         std::cout << "[halo-audit] " << polytopeName(GetParam()) << ' ' << name
-          << " missing incidences=" << globalMissing
-          << " DOFs missed by owned-face filter=" << globalFiltered
-          << " artificial shard-boundary faces=" << globalFalse << '\n';
+                  << " missing incidences=" << globalMissing
+                  << " DOFs missed by owned-face filter=" << globalFiltered
+                  << " artificial shard-boundary faces=" << globalFalse << '\n';
     };
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     probe(p1, "P1");
     const auto orders = [&]<size_t K>() {
       H1<K, Real, Mesh<Context::MPI>> scalar(std::integral_constant<size_t, K>{}, mesh);
       probe(scalar, "H1 real");
-      H1<K, Complex, Mesh<Context::MPI>> complex(std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Complex, Mesh<Context::MPI>> complex(
+        std::integral_constant<size_t, K>{}, mesh);
       probe(complex, "H1 complex");
       H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> vector(
         std::integral_constant<size_t, K>{}, mesh, 3);
@@ -566,7 +556,8 @@ namespace Rodin::Tests::Unit
           if (declaration.second)
           {
             EXPECT_EQ(declaration.first, peer);
-            EXPECT_TRUE(owners.emplace(gid, peer).second) << "duplicate owner gid=" << gid;
+            EXPECT_TRUE(owners.emplace(gid, peer).second)
+              << "duplicate owner gid=" << gid;
           }
         }
       for (const auto& records : gathered)
@@ -596,23 +587,19 @@ namespace Rodin::Tests::Unit
   {
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron,
-      {9, 9, 9});
-    H1<2, Real, Mesh<Context::MPI>> fes(
-      std::integral_constant<size_t, 2>{}, mesh);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {9, 9, 9});
+    H1<2, Real, Mesh<Context::MPI>> fes(std::integral_constant<size_t, 2>{}, mesh);
     TrialFunction u(fes);
     TrialFunction v(fes);
     DirichletBC dbc(u, -v, RealFunction(2));
     dbc.assemble();
-    const auto& rows =
-      std::get<DirichletBCBase<Real>::IdentifiedDOFs>(dbc.getDOFs());
+    const auto& rows = std::get<DirichletBCBase<Real>::IdentifiedDOFs>(dbc.getDOFs());
     const auto& values = dbc.getIdentificationValues();
     ASSERT_FALSE(rows.empty());
     for (const auto& [slave, row] : rows)
     {
       const auto it = values.find(slave);
-      ASSERT_NE(it, values.end()) << "rank=" << world.rank()
-        << " slave=" << slave;
+      ASSERT_NE(it, values.end()) << "rank=" << world.rank() << " slave=" << slave;
       EXPECT_NEAR(it->second, 2, 1e-12);
     }
 
@@ -621,8 +608,7 @@ namespace Rodin::Tests::Unit
     TrialFunction complexU(complexFES);
     TrialFunction complexV(complexFES);
     const Complex prescribed(2, 3);
-    DirichletBC complexDBC(complexU, -complexV,
-      ComplexFunction(prescribed));
+    DirichletBC complexDBC(complexU, -complexV, ComplexFunction(prescribed));
     complexDBC.assemble();
     const auto& complexRows =
       std::get<DirichletBCBase<Complex>::IdentifiedDOFs>(complexDBC.getDOFs());
@@ -631,8 +617,8 @@ namespace Rodin::Tests::Unit
     for (const auto& [slave, row] : complexRows)
     {
       const auto it = complexValues.find(slave);
-      ASSERT_NE(it, complexValues.end()) << "rank=" << world.rank()
-        << " complex slave=" << slave;
+      ASSERT_NE(it, complexValues.end())
+        << "rank=" << world.rank() << " complex slave=" << slave;
       EXPECT_NEAR(std::abs(it->second - prescribed), 0, 1e-12);
     }
   }
@@ -648,14 +634,12 @@ namespace Rodin::Tests::Unit
     constexpr Attribute selected = 97;
     if (world.rank() == 0)
     {
-      auto localMesh = makeShardableMesh(
-        Polytope::Type::Triangle, {9, 9});
+      auto localMesh = makeShardableMesh(Polytope::Type::Triangle, {9, 9});
       BalancedCompactPartitioner partitioner(localMesh);
       partitioner.partition(static_cast<size_t>(world.size()));
       const size_t dim = localMesh.getDimension();
       sharder.shard(partitioner);
-      const auto& rankZeroFaces =
-        sharder.getShards()[0].getPolytopeMap(dim - 1).right;
+      const auto& rankZeroFaces = sharder.getShards()[0].getPolytopeMap(dim - 1).right;
       for (auto it = localMesh.getBoundary(); it; ++it)
       {
         if (!rankZeroFaces.contains(it->getIndex()))
@@ -676,8 +660,8 @@ namespace Rodin::Tests::Unit
     for (auto it = mpiMesh.getFace(); it; ++it)
       if (it->getAttribute() == selected)
         ++visibleSelected;
-    const size_t selectedCount = boost::mpi::all_reduce(
-      world, localSelected, std::plus<size_t>());
+    const size_t selectedCount =
+      boost::mpi::all_reduce(world, localSelected, std::plus<size_t>());
     P0g<Real, Mesh<Context::MPI>> fes(mpiMesh);
     TrialFunction u(fes);
     auto dbc = DirichletBC(u, RealFunction(2));
@@ -693,7 +677,6 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(values.at(0), 2);
     }
   }
-
 
   /** Tagged interior faces use topological indices; reselection clears old rows. */
   TEST(Assembly_MPI_DirichletBC, TaggedInteriorAndEmptyReselection)
@@ -713,8 +696,7 @@ namespace Rodin::Tests::Unit
       sharder.scatter(0);
     }
     auto mesh = sharder.gather(0);
-    auto probe = [&](const auto& fes)
-    {
+    auto probe = [&](const auto& fes) {
       TrialFunction u(fes);
       auto value = DirichletBC(u, RealFunction(2));
       auto affine = DirichletBC(u, -u, RealFunction(4));
@@ -722,7 +704,8 @@ namespace Rodin::Tests::Unit
       affine.on(selected).assemble();
       std::vector<Index> local;
       for (auto face = mesh.getFace(); face; ++face)
-        if (mesh.getShard().isOwned(1, face->getIndex()) && face->getAttribute() == selected)
+        if (mesh.getShard().isOwned(1, face->getIndex()) &&
+          face->getAttribute() == selected)
           for (Index dof : fes.getDOFs(1, face->getIndex()))
             local.push_back(dof);
       std::vector<std::vector<Index>> gathered;
@@ -734,7 +717,8 @@ namespace Rodin::Tests::Unit
           if (required.contains(dof))
             expected.insert(dof);
       const auto& values = std::get<IndexMap<Real>>(value.getDOFs());
-      const auto& rows = std::get<DirichletBCBase<Real>::IdentifiedDOFs>(affine.getDOFs());
+      const auto& rows =
+        std::get<DirichletBCBase<Real>::IdentifiedDOFs>(affine.getDOFs());
       EXPECT_EQ(values.size(), expected.size());
       EXPECT_EQ(rows.size(), expected.size());
       EXPECT_EQ(affine.getIdentificationValues().size(), expected.size());
@@ -1045,8 +1029,7 @@ namespace Rodin::Tests::Unit
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    H1<2, Complex, Mesh<Context::MPI>> fes(
-      std::integral_constant<size_t, 2>{}, mpiMesh);
+    H1<2, Complex, Mesh<Context::MPI>> fes(std::integral_constant<size_t, 2>{}, mpiMesh);
     TrialFunction u(fes);
     const Complex prescribed(1, 2);
     DirichletBC dbc(u, ComplexFunction(prescribed));
@@ -1059,13 +1042,12 @@ namespace Rodin::Tests::Unit
       if (begin <= index && index < end)
         EXPECT_NEAR(std::abs(value - prescribed), 0, 1e-12);
     }
-    const size_t localCount = static_cast<size_t>(std::count_if(
-      values.begin(), values.end(), [begin, end](const auto& entry)
-      {
+    const size_t localCount = static_cast<size_t>(
+      std::count_if(values.begin(), values.end(), [begin, end](const auto& entry) {
         return begin <= entry.first && entry.first < end;
       }));
-    const size_t globalCount = boost::mpi::all_reduce(
-      world, localCount, std::plus<size_t>());
+    const size_t globalCount =
+      boost::mpi::all_reduce(world, localCount, std::plus<size_t>());
     EXPECT_GT(globalCount, 0u);
   }
 

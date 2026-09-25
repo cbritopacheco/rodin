@@ -205,13 +205,15 @@ namespace Rodin::Geometry
   CellIterator MPIMesh::getCell(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return CellIterator(*this, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(getDimension())));
+    return CellIterator(
+      *this, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(getDimension())));
   }
 
   FaceIterator MPIMesh::getFace(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    const size_t count = getDimension() == 0 ? 0 : shard.getPolytopeCount(getDimension() - 1);
+    const size_t count =
+      getDimension() == 0 ? 0 : shard.getPolytopeCount(getDimension() - 1);
     return FaceIterator(*this, BoundedIndexGenerator(localIdx, count));
   }
 

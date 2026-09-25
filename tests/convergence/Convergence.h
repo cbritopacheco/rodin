@@ -29,11 +29,18 @@ namespace Rodin::Tests::Convergence
   {
     public:
       ErrorNorms(Real l2, Real h1Semi)
-        : m_l2(l2), m_h1Semi(h1Semi)
+        : m_l2(l2),
+          m_h1Semi(h1Semi)
       {}
 
-      Real getL2() const { return m_l2; }
-      Real getH1Seminorm() const { return m_h1Semi; }
+      Real getL2() const
+      {
+        return m_l2;
+      }
+      Real getH1Seminorm() const
+      {
+        return m_h1Semi;
+      }
 
       bool isFinite() const
       {
@@ -49,11 +56,18 @@ namespace Rodin::Tests::Convergence
   {
     public:
       Rates(Real l2, Real h1Semi)
-        : m_l2(l2), m_h1Semi(h1Semi)
+        : m_l2(l2),
+          m_h1Semi(h1Semi)
       {}
 
-      Real getL2() const { return m_l2; }
-      Real getH1Seminorm() const { return m_h1Semi; }
+      Real getL2() const
+      {
+        return m_l2;
+      }
+      Real getH1Seminorm() const
+      {
+        return m_h1Semi;
+      }
 
     private:
       Real m_l2;
@@ -73,8 +87,8 @@ namespace Rodin::Tests::Convergence
     public:
       struct Sample
       {
-        Real parameter;
-        ErrorNorms error;
+          Real parameter;
+          ErrorNorms error;
       };
 
       ErrorHistory& append(Real parameter, const ErrorNorms& error)
@@ -83,7 +97,10 @@ namespace Rodin::Tests::Convergence
         return *this;
       }
 
-      size_t getSize() const { return m_samples.size(); }
+      size_t getSize() const
+      {
+        return m_samples.size();
+      }
 
       const Sample& getSample(size_t i) const
       {
@@ -95,8 +112,7 @@ namespace Rodin::Tests::Convergence
         const auto& coarse = getCoarse(fineSample);
         const auto& fine = getFine(fineSample);
         assert(coarse.parameter > fine.parameter);
-        return getRates(
-          coarse, fine, std::log(coarse.parameter / fine.parameter));
+        return getRates(coarse, fine, std::log(coarse.parameter / fine.parameter));
       }
 
       Rates getExponentialRates(size_t fineSample) const
@@ -122,20 +138,16 @@ namespace Rodin::Tests::Convergence
         return m_samples.at(fineSample);
       }
 
-      static Rates getRates(
-        const Sample& coarse, const Sample& fine, Real denominator)
+      static Rates getRates(const Sample& coarse, const Sample& fine, Real denominator)
       {
         assert(denominator > 0);
         assert(coarse.error.getL2() > 0);
         assert(fine.error.getL2() > 0);
         assert(coarse.error.getH1Seminorm() > 0);
         assert(fine.error.getH1Seminorm() > 0);
-        return {
-          std::log(coarse.error.getL2() / fine.error.getL2()) / denominator,
-          std::log(
-            coarse.error.getH1Seminorm() / fine.error.getH1Seminorm())
-            / denominator
-        };
+        return {std::log(coarse.error.getL2() / fine.error.getL2()) / denominator,
+          std::log(coarse.error.getH1Seminorm() / fine.error.getH1Seminorm()) /
+            denominator};
       }
 
       std::vector<Sample> m_samples;
@@ -147,8 +159,8 @@ namespace Rodin::Tests::Convergence
     public:
       struct Sample
       {
-        Real parameter;
-        Real error;
+          Real parameter;
+          Real error;
       };
 
       NormHistory& append(Real parameter, Real error)
@@ -157,9 +169,15 @@ namespace Rodin::Tests::Convergence
         return *this;
       }
 
-      size_t getSize() const { return m_samples.size(); }
+      size_t getSize() const
+      {
+        return m_samples.size();
+      }
 
-      const Sample& getSample(size_t i) const { return m_samples.at(i); }
+      const Sample& getSample(size_t i) const
+      {
+        return m_samples.at(i);
+      }
 
       Real getAlgebraicRate(size_t fineSample) const
       {
@@ -168,8 +186,8 @@ namespace Rodin::Tests::Convergence
         const auto& fine = m_samples[fineSample];
         assert(coarse.parameter > fine.parameter);
         assert(coarse.error > 0 && fine.error > 0);
-        return std::log(coarse.error / fine.error)
-          / std::log(coarse.parameter / fine.parameter);
+        return std::log(coarse.error / fine.error) /
+          std::log(coarse.parameter / fine.parameter);
       }
 
     private:
@@ -194,7 +212,10 @@ namespace Rodin::Tests::Convergence
         return Geometry::Polytope::Traits(m_geometry).getDimension();
       }
 
-      Geometry::Polytope::Type getGeometry() const { return m_geometry; }
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
+      }
 
       Geometry::LocalMesh makeMesh(size_t pointsPerAxis) const
       {
@@ -204,8 +225,7 @@ namespace Rodin::Tests::Convergence
         switch (dim)
         {
           case 1:
-            mesh = Geometry::LocalMesh::UniformGrid(
-              m_geometry, {pointsPerAxis});
+            mesh = Geometry::LocalMesh::UniformGrid(m_geometry, {pointsPerAxis});
             break;
           case 2:
             mesh = Geometry::LocalMesh::UniformGrid(
@@ -213,8 +233,7 @@ namespace Rodin::Tests::Convergence
             break;
           case 3:
             mesh = Geometry::LocalMesh::UniformGrid(
-              m_geometry,
-              {pointsPerAxis, pointsPerAxis, pointsPerAxis});
+              m_geometry, {pointsPerAxis, pointsPerAxis, pointsPerAxis});
             break;
           default:
             assert(false);
@@ -243,20 +262,27 @@ namespace Rodin::Tests::Convergence
         return mesh;
       }
 
-      static std::string_view getGeometryName(
-        Geometry::Polytope::Type geometry)
+      static std::string_view getGeometryName(Geometry::Polytope::Type geometry)
       {
         using Type = Geometry::Polytope::Type;
         switch (geometry)
         {
-          case Type::Segment:       return "Segment";
-          case Type::Triangle:      return "Triangle";
-          case Type::Quadrilateral: return "Quadrilateral";
-          case Type::Tetrahedron:   return "Tetrahedron";
-          case Type::Pyramid:       return "Pyramid";
-          case Type::Hexahedron:    return "Hexahedron";
-          case Type::Wedge:         return "Wedge";
-          default:                  return "Unsupported";
+          case Type::Segment:
+            return "Segment";
+          case Type::Triangle:
+            return "Triangle";
+          case Type::Quadrilateral:
+            return "Quadrilateral";
+          case Type::Tetrahedron:
+            return "Tetrahedron";
+          case Type::Pyramid:
+            return "Pyramid";
+          case Type::Hexahedron:
+            return "Hexahedron";
+          case Type::Wedge:
+            return "Wedge";
+          default:
+            return "Unsupported";
         }
       }
 
@@ -275,11 +301,8 @@ namespace Rodin::Tests::Convergence
   class UnitBoxBoundary
   {
     public:
-      static void labelCoordinatePartition(
-        Geometry::LocalMesh& mesh,
-        size_t axis,
-        Geometry::Attribute lowerAttribute,
-        Geometry::Attribute upperAttribute,
+      static void labelCoordinatePartition(Geometry::LocalMesh& mesh, size_t axis,
+        Geometry::Attribute lowerAttribute, Geometry::Attribute upperAttribute,
         Geometry::Attribute remainderAttribute)
       {
         assert(axis < mesh.getSpaceDimension());
@@ -311,35 +334,29 @@ namespace Rodin::Tests::Convergence
     public:
       /** @brief Integrates scalar or vector value error with a complex modulus. */
       template <class GF, class Exact>
-      static Real computeL2(
-        const Geometry::LocalMesh& mesh,
-        const GF& uh,
-        const Exact& exact,
-        size_t quadratureOrder = 8)
+      static Real computeL2(const Geometry::LocalMesh& mesh, const GF& uh,
+        const Exact& exact, size_t quadratureOrder = 8)
       {
         Real squared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& qf = QF::PolytopeQuadratureFormula::get(
-            quadratureOrder, cell->getGeometry());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
             const Variational::IntegrationPoint ip(p, &qf, qp);
-            squared += qf.getWeight(qp) * p.getDistortion()
-              * squaredMagnitude(uh(ip) - evaluate(exact, ip));
+            squared += qf.getWeight(qp) * p.getDistortion() *
+              squaredMagnitude(uh(ip) - evaluate(exact, ip));
           }
         }
         return std::sqrt(squared);
       }
 
       template <class GF, class Exact, class ExactGradient>
-      static ErrorNorms compute(
-        const Geometry::LocalMesh& mesh,
-        const GF& uh,
-        const Exact& exact,
-        const ExactGradient& exactGradient,
+      static ErrorNorms compute(const Geometry::LocalMesh& mesh, const GF& uh,
+        const Exact& exact, const ExactGradient& exactGradient,
         size_t quadratureOrder = 8)
       {
         const auto gradient = Variational::Grad(uh);
@@ -354,11 +371,8 @@ namespace Rodin::Tests::Convergence
        * the Frobenius norm of the displacement Jacobian.
        */
       template <class GF, class Exact, class ExactJacobian>
-      static ErrorNorms computeVector(
-        const Geometry::LocalMesh& mesh,
-        const GF& uh,
-        const Exact& exact,
-        const ExactJacobian& exactJacobian,
+      static ErrorNorms computeVector(const Geometry::LocalMesh& mesh, const GF& uh,
+        const Exact& exact, const ExactJacobian& exactJacobian,
         size_t quadratureOrder = 8)
       {
         const auto jacobian = Variational::Jacobian(uh);
@@ -374,16 +388,14 @@ namespace Rodin::Tests::Convergence
        */
       template <class GF>
       static Real computeDivergenceL2(
-        const Geometry::LocalMesh& mesh,
-        const GF& uh,
-        size_t quadratureOrder = 8)
+        const Geometry::LocalMesh& mesh, const GF& uh, size_t quadratureOrder = 8)
       {
         const auto jacobian = Variational::Jacobian(uh);
         Real squared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& qf = QF::PolytopeQuadratureFormula::get(
-            quadratureOrder, cell->getGeometry());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
@@ -395,30 +407,24 @@ namespace Rodin::Tests::Convergence
               static_cast<size_t>(value.rows()), static_cast<size_t>(value.cols()));
             for (size_t i = 0; i < dimension; ++i)
               divergence += value(i, i);
-            squared += qf.getWeight(qp) * p.getDistortion()
-                     * divergence * divergence;
+            squared += qf.getWeight(qp) * p.getDistortion() * divergence * divergence;
           }
         }
         return std::sqrt(squared);
       }
 
     private:
-      template <class GF, class Derivative, class Exact,
-        class ExactDerivative>
-      static ErrorNorms computeWithDerivative(
-        const Geometry::LocalMesh& mesh,
-        const GF& uh,
-        const Derivative& derivative,
-        const Exact& exact,
-        const ExactDerivative& exactDerivative,
-        size_t quadratureOrder)
+      template <class GF, class Derivative, class Exact, class ExactDerivative>
+      static ErrorNorms computeWithDerivative(const Geometry::LocalMesh& mesh,
+        const GF& uh, const Derivative& derivative, const Exact& exact,
+        const ExactDerivative& exactDerivative, size_t quadratureOrder)
       {
         Real l2Squared = 0;
         Real h1SemiSquared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
-          const auto& qf = QF::PolytopeQuadratureFormula::get(
-            quadratureOrder, cell->getGeometry());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
@@ -435,11 +441,9 @@ namespace Rodin::Tests::Convergence
       }
 
       template <class F>
-      static decltype(auto) evaluate(
-        const F& f, const Variational::IntegrationPoint& ip)
+      static decltype(auto) evaluate(const F& f, const Variational::IntegrationPoint& ip)
       {
-        if constexpr (
-          std::is_invocable_v<const F&, const Variational::IntegrationPoint&>)
+        if constexpr (std::is_invocable_v<const F&, const Variational::IntegrationPoint&>)
           return f(ip);
         else
           return f(ip.getPoint());
@@ -448,7 +452,11 @@ namespace Rodin::Tests::Convergence
       template <class Scalar>
       static Real squaredMagnitude(const Scalar& value)
       {
-        if constexpr (requires { value.rows(); value.cols(); value(0, 0); })
+        if constexpr (requires {
+                        value.rows();
+                        value.cols();
+                        value(0, 0);
+                      })
         {
           Real result = 0;
           for (size_t i = 0; i < static_cast<size_t>(value.rows()); ++i)
@@ -456,7 +464,10 @@ namespace Rodin::Tests::Convergence
               result += squaredMagnitude(value(i, j));
           return result;
         }
-        else if constexpr (requires { value.size(); value(0); })
+        else if constexpr (requires {
+                             value.size();
+                             value(0);
+                           })
         {
           Real result = 0;
           for (size_t i = 0; i < static_cast<size_t>(value.size()); ++i)

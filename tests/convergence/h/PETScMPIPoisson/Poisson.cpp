@@ -63,8 +63,8 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
   }
 
   template <class GF, class Exact, class Gradient>
-  ErrorNorms globalError(const Mesh<Context::MPI>& mesh, const GF& uh,
-    const Exact& exact, const Gradient& exactGradient)
+  ErrorNorms globalError(const Mesh<Context::MPI>& mesh, const GF& uh, const Exact& exact,
+    const Gradient& exactGradient)
   {
     const auto& shard = mesh.getShard();
     const size_t dim = shard.getDimension();
@@ -95,7 +95,8 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     return {std::sqrt(totalL2), std::sqrt(totalH1)};
   }
 
-  class PETScMPIPoissonTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class PETScMPIPoissonTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   TEST_P(PETScMPIPoissonTest, P2BoundaryConstraintsReachDOFOwners)
   {
@@ -105,8 +106,7 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     const size_t level = geometry == Polytope::Type::Tetrahedron ? 9 : 5;
     Context::MPI context(*environment, *world);
     auto mesh = distribute(context, geometry, level);
-    H1<2, Real, Mesh<Context::MPI>> space(
-      std::integral_constant<size_t, 2>{}, mesh);
+    H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
     PETSc::Variational::TrialFunction u(space);
     auto dbc = DirichletBC(u, RealFunction(1));
     dbc.assemble();
@@ -126,9 +126,9 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     {
       if (index >= begin && index < end)
       {
-        SCOPED_TRACE(::testing::Message() << "rank " << world->rank()
-          << ", geometry " << UniformGrid::getGeometryName(geometry)
-          << ", boundary DOF " << index);
+        SCOPED_TRACE(::testing::Message()
+          << "rank " << world->rank() << ", geometry "
+          << UniformGrid::getGeometryName(geometry) << ", boundary DOF " << index);
         EXPECT_TRUE(dofs.contains(index));
       }
     }
@@ -146,14 +146,12 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     const size_t level = geometry == Polytope::Type::Tetrahedron ? 9 : 5;
     Context::MPI context(*environment, *world);
     auto mesh = distribute(context, geometry, level);
-    H1<2, Real, Mesh<Context::MPI>> space(
-      std::integral_constant<size_t, 2>{}, mesh);
+    H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
     PETSc::Variational::TrialFunction u(space);
     PETSc::Variational::TrialFunction master(space);
     auto dbc = DirichletBC(u, -master);
     dbc.assemble();
-    const auto& rows =
-      std::get<DirichletBCBase<Real>::IdentifiedDOFs>(dbc.getDOFs());
+    const auto& rows = std::get<DirichletBCBase<Real>::IdentifiedDOFs>(dbc.getDOFs());
     std::vector<Index> local;
     for (const auto& [slave, row] : rows)
       local.push_back(slave);
@@ -173,9 +171,9 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
         for (Index dof : space.getDOFs(mesh.getDimension(), cell->getIndex()))
           required.insert(dof);
     for (const Index slave : all)
-      EXPECT_EQ(rows.contains(slave), required.contains(slave)) << "rank=" << world->rank()
-        << " geometry=" << UniformGrid::getGeometryName(geometry)
-        << " slave=" << slave;
+      EXPECT_EQ(rows.contains(slave), required.contains(slave))
+        << "rank=" << world->rank()
+        << " geometry=" << UniformGrid::getGeometryName(geometry) << " slave=" << slave;
   }
 
   /** Exact P2 polynomial, with either prescribed or affine-identified trace. */
@@ -185,23 +183,20 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       GTEST_SKIP() << "Test designed for at most four ranks.";
     const size_t dim = Polytope::Traits(geometry).getDimension();
     const size_t level = geometry == Polytope::Type::Tetrahedron ? 9 : 5;
-    const RealFunction exact([dim](const Point& p)
-    {
+    const RealFunction exact([dim](const Point& p) {
       Real value = 1;
       for (size_t d = 0; d < dim; ++d)
         value += p(d) * p(d);
       return value;
     });
     const RealFunction source(-2 * Real(dim));
-    const RealFunction defect([dim](const Point& p)
-    {
+    const RealFunction defect([dim](const Point& p) {
       Real value = 1;
       for (size_t d = 0; d < dim; ++d)
         value += p(d) * p(d);
       return 2 * value;
     });
-    const VectorFunction gradient(dim, [dim](const Point& p)
-    {
+    const VectorFunction gradient(dim, [dim](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t d = 0; d < dim; ++d)
         value(d) = 2 * p(d);
@@ -219,9 +214,9 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
           builder.include(dim, cell->getIndex());
       sub.emplace(builder.finalize());
     }
-    const Mesh<Context::MPI>& mesh = extracted ? static_cast<const Mesh<Context::MPI>&>(*sub) : parent;
-    H1<2, Real, Mesh<Context::MPI>> space(
-      std::integral_constant<size_t, 2>{}, mesh);
+    const Mesh<Context::MPI>& mesh =
+      extracted ? static_cast<const Mesh<Context::MPI>&>(*sub) : parent;
+    H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
     PETSc::Variational::TrialFunction u(space);
     PETSc::Variational::TestFunction v(space);
     auto stiffness = Integral(Grad(u), Grad(v));
@@ -264,19 +259,15 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     const auto geometry = GetParam();
     const size_t dim = Polytope::Traits(geometry).getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
-    {
+    const RealFunction exact([dim, pi](const Point& p) {
       Real value = 1;
       for (size_t d = 0; d < dim; ++d)
         value *= std::sin(pi * p(d));
       return value;
     });
-    const RealFunction source([dim, pi, &exact](const Point& p)
-    {
-      return Real(dim) * pi * pi * exact(p);
-    });
-    const VectorFunction gradient(dim, [dim, pi](const Point& p)
-    {
+    const RealFunction source(
+      [dim, pi, &exact](const Point& p) { return Real(dim) * pi * pi * exact(p); });
+    const VectorFunction gradient(dim, [dim, pi](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t d = 0; d < dim; ++d)
       {
@@ -289,15 +280,13 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     });
     Context::MPI context(*environment, *world);
     ErrorHistory history;
-    const std::vector<size_t> levels =
-      geometry == Polytope::Type::Tetrahedron
+    const std::vector<size_t> levels = geometry == Polytope::Type::Tetrahedron
       ? std::vector<size_t>{7, 9, 11}
       : std::vector<size_t>{5, 7, 9};
     for (const size_t level : levels)
     {
       auto mesh = distribute(context, geometry, level);
-      H1<2, Real, Mesh<Context::MPI>> space(
-        std::integral_constant<size_t, 2>{}, mesh);
+      H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
       PETSc::Variational::TrialFunction u(space);
       PETSc::Variational::TestFunction v(space);
       auto stiffness = Integral(Grad(u), Grad(v));
@@ -310,8 +299,8 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       solver.setTolerances(1e-12, 1e-14, 1e5, 20000);
       solver.solve();
       EXPECT_TRUE(std::isfinite(solver.getError()));
-      history.append(Real(1) / Real(level - 1),
-        globalError(mesh, u.getSolution(), exact, gradient));
+      history.append(
+        Real(1) / Real(level - 1), globalError(mesh, u.getSolution(), exact, gradient));
     }
     for (size_t i = 1; i < history.getSize(); ++i)
     {
@@ -322,10 +311,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       const auto rate = history.getAlgebraicRates(i);
-      SCOPED_TRACE(::testing::Message() << "L2 " << coarse.getL2()
-        << " -> " << fine.getL2() << ", H1 " << coarse.getH1Seminorm()
-        << " -> " << fine.getH1Seminorm() << ", rates " << rate.getL2()
-        << ", " << rate.getH1Seminorm());
+      SCOPED_TRACE(::testing::Message()
+        << "L2 " << coarse.getL2() << " -> " << fine.getL2() << ", H1 "
+        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm() << ", rates "
+        << rate.getL2() << ", " << rate.getH1Seminorm());
       EXPECT_GT(rate.getL2(), 2.4);
       EXPECT_LT(rate.getL2(), 3.6);
       EXPECT_GT(rate.getH1Seminorm(), 1.5);
@@ -340,22 +329,19 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     const auto geometry = GetParam();
     const size_t dim = Polytope::Traits(geometry).getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
-    {
+    const RealFunction exact([dim, pi](const Point& p) {
       Real value = 1;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const RealFunction source([dim, pi](const Point& p)
-    {
+    const RealFunction source([dim, pi](const Point& p) {
       Real value = Real(dim) * pi * pi;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const VectorFunction gradient(dim, [dim, pi](const Point& p)
-    {
+    const VectorFunction gradient(dim, [dim, pi](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t i = 0; i < dim; ++i)
       {
@@ -384,8 +370,8 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       solver.setTolerances(1e-12, 1e-14, 1e5, 20000);
       solver.solve();
       EXPECT_TRUE(std::isfinite(solver.getError()));
-      history.append(Real(1) / Real(level - 1),
-        globalError(mesh, u.getSolution(), exact, gradient));
+      history.append(
+        Real(1) / Real(level - 1), globalError(mesh, u.getSolution(), exact, gradient));
     }
     for (size_t i = 1; i < history.getSize(); ++i)
     {
@@ -396,10 +382,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       const auto rate = history.getAlgebraicRates(i);
-      SCOPED_TRACE(::testing::Message() << "L2 " << coarse.getL2()
-        << " -> " << fine.getL2() << ", H1 " << coarse.getH1Seminorm()
-        << " -> " << fine.getH1Seminorm() << ", rates " << rate.getL2()
-        << ", " << rate.getH1Seminorm());
+      SCOPED_TRACE(::testing::Message()
+        << "L2 " << coarse.getL2() << " -> " << fine.getL2() << ", H1 "
+        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm() << ", rates "
+        << rate.getL2() << ", " << rate.getH1Seminorm());
       EXPECT_GT(rate.getL2(), 1.5);
       EXPECT_LT(rate.getL2(), 2.5);
       EXPECT_GT(rate.getH1Seminorm(), 0.7);
@@ -420,22 +406,19 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     const size_t dim = Polytope::Traits(geometry).getDimension();
     const Real pi = Math::Constants::pi();
     const Real offset = Affine ? Real(1) : Real(0);
-    const RealFunction exact([dim, pi, offset](const Point& p)
-    {
+    const RealFunction exact([dim, pi, offset](const Point& p) {
       Real value = 1;
       for (size_t d = 0; d < dim; ++d)
         value *= std::sin(pi * p(d));
       return offset + value;
     });
-    const RealFunction source([dim, pi](const Point& p)
-    {
+    const RealFunction source([dim, pi](const Point& p) {
       Real value = Real(dim) * pi * pi;
       for (size_t d = 0; d < dim; ++d)
         value *= std::sin(pi * p(d));
       return value;
     });
-    const VectorFunction gradient(dim, [dim, pi](const Point& p)
-    {
+    const VectorFunction gradient(dim, [dim, pi](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t d = 0; d < dim; ++d)
       {
@@ -446,18 +429,15 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       }
       return value;
     });
-    const std::vector<size_t> levels = Order == 1
-      ? std::vector<size_t>{5, 9, 17}
-      : geometry == Polytope::Type::Tetrahedron
-        ? std::vector<size_t>{7, 9, 11}
-        : std::vector<size_t>{5, 7, 9};
+    const std::vector<size_t> levels = Order == 1 ? std::vector<size_t>{5, 9, 17}
+      : geometry == Polytope::Type::Tetrahedron   ? std::vector<size_t>{7, 9, 11}
+                                                  : std::vector<size_t>{5, 7, 9};
     Context::MPI context(*environment, *world);
     ErrorHistory history;
     for (const size_t level : levels)
     {
       auto mesh = distribute(context, geometry, level);
-      auto solveLevel = [&](auto& space)
-      {
+      auto solveLevel = [&](auto& space) {
         PETSc::Variational::TrialFunction u(space);
         PETSc::Variational::TestFunction v(space);
         auto stiffness = Integral(Grad(u), Grad(v));
@@ -466,16 +446,15 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
         load.setOrder(12);
         Problem problem(u, v);
         if constexpr (Affine)
-          problem = stiffness - load
-            + DirichletBC(u, -u, RealFunction(2));
+          problem = stiffness - load + DirichletBC(u, -u, RealFunction(2));
         else
           problem = stiffness - load + DirichletBC(u, -u);
         PETSc::Solver::CG solver(problem);
         solver.setTolerances(1e-12, 1e-14, 1e5, 20000);
         solver.solve();
         EXPECT_TRUE(std::isfinite(solver.getError()));
-        history.append(Real(1) / Real(level - 1),
-          globalError(mesh, u.getSolution(), exact, gradient));
+        history.append(
+          Real(1) / Real(level - 1), globalError(mesh, u.getSolution(), exact, gradient));
       };
       if constexpr (Order == 1)
       {
@@ -484,8 +463,7 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       }
       else
       {
-        H1<2, Real, Mesh<Context::MPI>> space(
-          std::integral_constant<size_t, 2>{}, mesh);
+        H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
         solveLevel(space);
       }
     }
@@ -500,12 +478,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       const auto rate = history.getAlgebraicRates(i);
       SCOPED_TRACE(::testing::Message()
-        << "geometry=" << UniformGrid::getGeometryName(geometry)
-        << " order=" << Order << " affine=" << Affine
-        << " L2 " << coarse.getL2() << " -> " << fine.getL2()
-        << " H1 " << coarse.getH1Seminorm() << " -> "
-        << fine.getH1Seminorm() << " rates " << rate.getL2()
-        << ", " << rate.getH1Seminorm());
+        << "geometry=" << UniformGrid::getGeometryName(geometry) << " order=" << Order
+        << " affine=" << Affine << " L2 " << coarse.getL2() << " -> " << fine.getL2()
+        << " H1 " << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm() << " rates "
+        << rate.getL2() << ", " << rate.getH1Seminorm());
       if constexpr (Order == 1)
       {
         EXPECT_GT(rate.getL2(), 1.5);
@@ -534,16 +510,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScMPIPoissonTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
-    [](const ::testing::TestParamInfo<Polytope::Type>& info)
-    {
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 }

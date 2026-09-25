@@ -27,10 +27,7 @@ using namespace Rodin::Variational;
 namespace Rodin::Tests::Convergence::P::Poisson
 {
   template <size_t K, class Exact, class Forcing, class ExactGradient>
-  ErrorNorms solve(
-    const LocalMesh& mesh,
-    const Exact& exact,
-    const Forcing& forcing,
+  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact, const Forcing& forcing,
     const ExactGradient& exactGradient)
   {
     H1 vh(std::integral_constant<size_t, K>{}, mesh);
@@ -42,19 +39,15 @@ namespace Rodin::Tests::Convergence::P::Poisson
     auto bilinear = Integral(Grad(u), Grad(v));
     bilinear.setOrder(12);
     Problem poisson(u, v);
-    poisson = bilinear
-            - load
-            + DirichletBC(u, exact);
+    poisson = bilinear - load + DirichletBC(u, exact);
 
     CG solver(poisson);
     solver.setTolerance(1e-13).setMaxIterations(20000).solve();
     EXPECT_TRUE(solver.success());
-    return ErrorNorm::compute(
-      mesh, u.getSolution(), exact, exactGradient, 12);
+    return ErrorNorm::compute(mesh, u.getSolution(), exact, exactGradient, 12);
   }
 
-  class PoissonPConvergenceTest
-    : public ::testing::TestWithParam<Polytope::Type>
+  class PoissonPConvergenceTest : public ::testing::TestWithParam<Polytope::Type>
   {};
 
   TEST_P(PoissonPConvergenceTest, QuadraticSolutionIsExactFromDegreeTwo)
@@ -62,21 +55,19 @@ namespace Rodin::Tests::Convergence::P::Poisson
     const UniformGrid grid(GetParam());
     const auto mesh = grid.makeMesh(2);
     const size_t dim = grid.getDimension();
-    const RealFunction exact([dim](const Point& p)
-      {
-        Real value = 0;
-        for (size_t i = 0; i < dim; ++i)
-          value += p(i) * p(i);
-        return value;
-      });
+    const RealFunction exact([dim](const Point& p) {
+      Real value = 0;
+      for (size_t i = 0; i < dim; ++i)
+        value += p(i) * p(i);
+      return value;
+    });
     const RealFunction forcing(-2 * Real(dim));
-    const VectorFunction exactGradient(dim, [dim](const Point& p)
-      {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        for (size_t i = 0; i < dim; ++i)
-          value(i) = 2 * p(i);
-        return value;
-      });
+    const VectorFunction exactGradient(dim, [dim](const Point& p) {
+      Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+      for (size_t i = 0; i < dim; ++i)
+        value(i) = 2 * p(i);
+      return value;
+    });
 
     const auto p1 = solve<1>(mesh, exact, forcing, exactGradient);
     const auto p2 = solve<2>(mesh, exact, forcing, exactGradient);
@@ -98,30 +89,26 @@ namespace Rodin::Tests::Convergence::P::Poisson
     const UniformGrid grid(GetParam());
     const auto mesh = grid.makeMesh(2);
     const size_t dim = grid.getDimension();
-    const RealFunction exact([dim](const Point& p)
-      {
-        Real exponent = 0;
-        for (size_t i = 0; i < dim; ++i)
-          exponent += p(i);
-        return std::exp(exponent);
-      });
-    const RealFunction forcing([dim, &exact](const Point& p)
-      {
-        return -Real(dim) * exact(p);
-      });
-    const VectorFunction exactGradient(dim, [dim, &exact](const Point& p)
-      {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        for (size_t i = 0; i < dim; ++i)
-          value(i) = exact(p);
-        return value;
-      });
+    const RealFunction exact([dim](const Point& p) {
+      Real exponent = 0;
+      for (size_t i = 0; i < dim; ++i)
+        exponent += p(i);
+      return std::exp(exponent);
+    });
+    const RealFunction forcing(
+      [dim, &exact](const Point& p) { return -Real(dim) * exact(p); });
+    const VectorFunction exactGradient(dim, [dim, &exact](const Point& p) {
+      Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+      for (size_t i = 0; i < dim; ++i)
+        value(i) = exact(p);
+      return value;
+    });
 
     ErrorHistory history;
     history.append(1, solve<1>(mesh, exact, forcing, exactGradient))
-           .append(2, solve<2>(mesh, exact, forcing, exactGradient))
-           .append(3, solve<3>(mesh, exact, forcing, exactGradient))
-           .append(4, solve<4>(mesh, exact, forcing, exactGradient));
+      .append(2, solve<2>(mesh, exact, forcing, exactGradient))
+      .append(3, solve<3>(mesh, exact, forcing, exactGradient))
+      .append(4, solve<4>(mesh, exact, forcing, exactGradient));
 
     for (size_t i = 1; i < history.getSize(); ++i)
     {
@@ -132,11 +119,10 @@ namespace Rodin::Tests::Convergence::P::Poisson
       const auto rates = history.getExponentialRates(i);
       SCOPED_TRACE(::testing::Message()
         << "degrees " << history.getSample(i - 1).parameter << " -> "
-        << history.getSample(i).parameter << "; L2 " << coarse.getL2()
-        << " -> " << fine.getL2() << " (rate " << rates.getL2()
-        << "), H1-seminorm " << coarse.getH1Seminorm() << " -> "
-        << fine.getH1Seminorm() << " (rate " << rates.getH1Seminorm()
-        << ')');
+        << history.getSample(i).parameter << "; L2 " << coarse.getL2() << " -> "
+        << fine.getL2() << " (rate " << rates.getL2() << "), H1-seminorm "
+        << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm() << " (rate "
+        << rates.getH1Seminorm() << ')');
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       EXPECT_GT(rates.getL2(), 0.25);
@@ -144,22 +130,14 @@ namespace Rodin::Tests::Convergence::P::Poisson
     }
   }
 
-  std::string geometryName(
-    const ::testing::TestParamInfo<Polytope::Type>& info)
+  std::string geometryName(const ::testing::TestParamInfo<Polytope::Type>& info)
   {
     return std::string(UniformGrid::getGeometryName(info.param));
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllUniformGridGeometries,
-    PoissonPConvergenceTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
+  INSTANTIATE_TEST_SUITE_P(AllUniformGridGeometries, PoissonPConvergenceTest,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
     geometryName);
 }

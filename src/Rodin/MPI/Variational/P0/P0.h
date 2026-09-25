@@ -253,6 +253,7 @@ namespace Rodin::Variational
         : P0(mesh, 1)
       {}
 
+      /** Constructs one constant DOF per cell and field component. */
       P0(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(makeShardFES(mesh, vdim))
@@ -285,8 +286,8 @@ namespace Rodin::Variational
 
         // The local DOFs of cell i occupy [i * vdim, (i + 1) * vdim).
         // Pre-allocate the left map with an invalid sentinel.
-        m_localToGlobal.left.assign(localCellCount * vdim,
-          std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(
+          localCellCount * vdim, std::numeric_limits<Index>::max());
 
         // send[r]: messages to rank r — pairs (globalCellID, globalDOF).
         // Keyed by rank so every neighbor gets an entry (possibly empty).
@@ -599,8 +600,7 @@ namespace Rodin::Variational
     private:
       static FESType makeShardFES(const MeshType& mesh, size_t vdim)
       {
-        if constexpr (std::is_same_v<Range, Real>
-          || std::is_same_v<Range, Complex>)
+        if constexpr (std::is_same_v<Range, Real> || std::is_same_v<Range, Complex>)
         {
           assert(vdim == 1);
           return FESType(mesh.getShard());

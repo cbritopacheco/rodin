@@ -39,9 +39,11 @@ namespace Rodin::Tests::Convergence::LinearElasticity
 
     public:
       ManufacturedSolution(size_t dim, Real lambda, Real mu)
-        : m_dim(dim), m_lambda(lambda), m_mu(mu),
-          exact(dim, [dim](const Geometry::Point& p)
-            {
+        : m_dim(dim),
+          m_lambda(lambda),
+          m_mu(mu),
+          exact(dim,
+            [dim](const Geometry::Point& p) {
               Real exponent = 0;
               for (size_t j = 0; j < dim; ++j)
                 exponent += p(j);
@@ -50,22 +52,20 @@ namespace Rodin::Tests::Convergence::LinearElasticity
                 value(i) = Real(i + 1) * std::exp(exponent);
               return value;
             }),
-          forcing(dim, [dim, lambda, mu](const Geometry::Point& p)
+          forcing(dim, [dim, lambda, mu](const Geometry::Point& p) {
+            Real exponent = 0;
+            Real coefficientSum = 0;
+            for (size_t j = 0; j < dim; ++j)
             {
-              Real exponent = 0;
-              Real coefficientSum = 0;
-              for (size_t j = 0; j < dim; ++j)
-              {
-                exponent += p(j);
-                coefficientSum += Real(j + 1);
-              }
-              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-              for (size_t i = 0; i < dim; ++i)
-                value(i) = -std::exp(exponent)
-                  * (mu * Real(dim) * Real(i + 1)
-                     + (lambda + mu) * coefficientSum);
-              return value;
-            })
+              exponent += p(j);
+              coefficientSum += Real(j + 1);
+            }
+            Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+            for (size_t i = 0; i < dim; ++i)
+              value(i) = -std::exp(exponent) *
+                (mu * Real(dim) * Real(i + 1) + (lambda + mu) * coefficientSum);
+            return value;
+          })
       {}
 
       Math::SpatialMatrix<Real> jacobian(const Geometry::Point& p) const
@@ -81,30 +81,36 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         return value;
       }
 
-      size_t getDimension() const { return m_dim; }
-      Real getLambda() const { return m_lambda; }
-      Real getMu() const { return m_mu; }
+      size_t getDimension() const
+      {
+        return m_dim;
+      }
+      Real getLambda() const
+      {
+        return m_lambda;
+      }
+      Real getMu() const
+      {
+        return m_mu;
+      }
 
       Variational::VectorFunction<
-        std::function<Math::SpatialVector<Real>(const Geometry::Point&)>> exact;
+        std::function<Math::SpatialVector<Real>(const Geometry::Point&)>>
+        exact;
       Variational::VectorFunction<
-        std::function<Math::SpatialVector<Real>(const Geometry::Point&)>> forcing;
-
+        std::function<Math::SpatialVector<Real>(const Geometry::Point&)>>
+        forcing;
   };
 
   template <size_t K>
-  ErrorNorms solve(
-    const Geometry::LocalMesh& mesh,
-    const ManufacturedSolution& data)
+  ErrorNorms solve(const Geometry::LocalMesh& mesh, const ManufacturedSolution& data)
   {
     using namespace Variational;
-    const auto evaluate = [&](auto& space)
-    {
+    const auto evaluate = [&](auto& space) {
       TrialFunction u(space);
       TestFunction v(space);
       auto volumetric = Integral(data.getLambda() * Div(u), Div(v));
-      auto shear = Integral(
-        data.getMu() * (Jacobian(u) + Jacobian(u).T()),
+      auto shear = Integral(data.getMu() * (Jacobian(u) + Jacobian(u).T()),
         0.5 * (Jacobian(v) + Jacobian(v).T()));
       auto body = Integral(data.forcing, v);
       volumetric.setOrder(12);

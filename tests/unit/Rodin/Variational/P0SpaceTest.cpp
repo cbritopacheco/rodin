@@ -18,16 +18,20 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  class P0SpaceTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class P0SpaceTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   TEST_P(P0SpaceTest, ScalarRealAndComplexAreCellwiseConstant)
   {
     const auto geometry = GetParam();
     const size_t dim = Polytope::Traits(geometry).getDimension();
     LocalMesh mesh;
-    if (dim == 1) mesh = LocalMesh::UniformGrid(geometry, {3});
-    if (dim == 2) mesh = LocalMesh::UniformGrid(geometry, {3, 3});
-    if (dim == 3) mesh = LocalMesh::UniformGrid(geometry, {3, 3, 3});
+    if (dim == 1)
+      mesh = LocalMesh::UniformGrid(geometry, {3});
+    if (dim == 2)
+      mesh = LocalMesh::UniformGrid(geometry, {3, 3});
+    if (dim == 3)
+      mesh = LocalMesh::UniformGrid(geometry, {3, 3, 3});
 
     P0 realSpace(mesh);
     ComplexP0<LocalMesh> complexSpace(mesh);
@@ -45,8 +49,8 @@ namespace Rodin::Tests::Unit
       const auto cell = mesh.getCell(i);
       const Point point(*cell, Polytope::Traits(geometry).getCentroid());
       EXPECT_NEAR(realField(point), Real(i + 1), 1e-12);
-      EXPECT_NEAR(std::abs(complexField(point)
-        - Complex(Real(i + 1), -Real(i + 2))), 0, 1e-12);
+      EXPECT_NEAR(
+        std::abs(complexField(point) - Complex(Real(i + 1), -Real(i + 2))), 0, 1e-12);
     }
   }
 
@@ -55,9 +59,12 @@ namespace Rodin::Tests::Unit
     const auto geometry = GetParam();
     const size_t dim = Polytope::Traits(geometry).getDimension();
     LocalMesh mesh;
-    if (dim == 1) mesh = LocalMesh::UniformGrid(geometry, {3});
-    if (dim == 2) mesh = LocalMesh::UniformGrid(geometry, {3, 3});
-    if (dim == 3) mesh = LocalMesh::UniformGrid(geometry, {3, 3, 3});
+    if (dim == 1)
+      mesh = LocalMesh::UniformGrid(geometry, {3});
+    if (dim == 2)
+      mesh = LocalMesh::UniformGrid(geometry, {3, 3});
+    if (dim == 3)
+      mesh = LocalMesh::UniformGrid(geometry, {3, 3, 3});
 
     P0<Math::SpatialVector<Real>, LocalMesh> realSpace(mesh, 2);
     P0<Math::SpatialVector<Complex>, LocalMesh> complexSpace(mesh, 2);
@@ -84,19 +91,15 @@ namespace Rodin::Tests::Unit
       {
         const Index global = 2 * i + component;
         EXPECT_NEAR(realValue(component), Real(global + 1), 1e-12);
-        EXPECT_NEAR(std::abs(complexValue(component)
-          - Complex(Real(global + 1), Real(component + 1))), 0, 1e-12);
+        EXPECT_NEAR(std::abs(complexValue(component) -
+                      Complex(Real(global + 1), Real(component + 1))),
+          0, 1e-12);
       }
     }
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, P0SpaceTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge));
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge));
 }

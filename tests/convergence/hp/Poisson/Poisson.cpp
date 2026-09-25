@@ -25,8 +25,8 @@ using namespace Rodin::Variational;
 namespace Rodin::Tests::Convergence::HP::Poisson
 {
   template <size_t K, class Exact, class Source, class Gradient>
-  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact,
-    const Source& source, const Gradient& gradient)
+  ErrorNorms solve(const LocalMesh& mesh, const Exact& exact, const Source& source,
+    const Gradient& gradient)
   {
     H1 space(std::integral_constant<size_t, K>{}, mesh);
     TrialFunction u(space);
@@ -43,29 +43,27 @@ namespace Rodin::Tests::Convergence::HP::Poisson
     return ErrorNorm::compute(mesh, u.getSolution(), exact, gradient, 12);
   }
 
-  class HPPoissonTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class HPPoissonTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   TEST_P(HPPoissonTest, AnalyticSolutionImprovesUnderCombinedRefinement)
   {
     UniformGrid grid(GetParam());
     const size_t dim = grid.getDimension();
     const Real pi = Math::Constants::pi();
-    const RealFunction exact([dim, pi](const Point& p)
-    {
+    const RealFunction exact([dim, pi](const Point& p) {
       Real value = 1;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const RealFunction source([dim, pi](const Point& p)
-    {
+    const RealFunction source([dim, pi](const Point& p) {
       Real value = Real(dim) * pi * pi;
       for (size_t i = 0; i < dim; ++i)
         value *= std::sin(pi * p(i));
       return value;
     });
-    const VectorFunction gradient(dim, [dim, pi](const Point& p)
-    {
+    const VectorFunction gradient(dim, [dim, pi](const Point& p) {
       Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
       for (size_t i = 0; i < dim; ++i)
       {
@@ -78,8 +76,8 @@ namespace Rodin::Tests::Convergence::HP::Poisson
     });
     ErrorHistory history;
     history.append(1, solve<1>(grid.makeMesh(2), exact, source, gradient))
-           .append(0.5, solve<2>(grid.makeMesh(3), exact, source, gradient))
-           .append(0.25, solve<3>(grid.makeMesh(5), exact, source, gradient));
+      .append(0.5, solve<2>(grid.makeMesh(3), exact, source, gradient))
+      .append(0.25, solve<3>(grid.makeMesh(5), exact, source, gradient));
     for (size_t i = 1; i < history.getSize(); ++i)
     {
       const auto& coarse = history.getSample(i - 1).error;
@@ -89,27 +87,20 @@ namespace Rodin::Tests::Convergence::HP::Poisson
       ASSERT_GT(coarse.getL2(), fine.getL2());
       ASSERT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
       const auto rate = history.getAlgebraicRates(i);
-      SCOPED_TRACE(::testing::Message() << "interval " << i
-        << ": L2 " << coarse.getL2() << " -> " << fine.getL2()
-        << ", H1 " << coarse.getH1Seminorm() << " -> "
-        << fine.getH1Seminorm() << ", ratios " << rate.getL2()
-        << ", " << rate.getH1Seminorm());
+      SCOPED_TRACE(::testing::Message()
+        << "interval " << i << ": L2 " << coarse.getL2() << " -> " << fine.getL2()
+        << ", H1 " << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm()
+        << ", ratios " << rate.getL2() << ", " << rate.getH1Seminorm());
       EXPECT_GT(rate.getL2(), 1.9);
       EXPECT_GT(rate.getH1Seminorm(), 0.9);
     }
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, HPPoissonTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
-    [](const ::testing::TestParamInfo<Polytope::Type>& info)
-    {
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 }

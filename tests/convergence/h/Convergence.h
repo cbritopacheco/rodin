@@ -26,17 +26,19 @@ namespace Rodin::Tests::Convergence::H
   {
     public:
       UniformGridHierarchy(
-        Geometry::Polytope::Type geometry,
-        std::initializer_list<size_t> pointsPerAxis)
-        : m_grid(geometry), m_pointsPerAxis(pointsPerAxis)
+        Geometry::Polytope::Type geometry, std::initializer_list<size_t> pointsPerAxis)
+        : m_grid(geometry),
+          m_pointsPerAxis(pointsPerAxis)
       {
         assert(!m_pointsPerAxis.empty());
-        assert(std::all_of(
-          m_pointsPerAxis.begin(), m_pointsPerAxis.end(),
+        assert(std::all_of(m_pointsPerAxis.begin(), m_pointsPerAxis.end(),
           [](size_t points) { return points >= 2; }));
       }
 
-      size_t getDimension() const { return m_grid.getDimension(); }
+      size_t getDimension() const
+      {
+        return m_grid.getDimension();
+      }
 
       Geometry::Polytope::Type getGeometry() const
       {
@@ -59,8 +61,7 @@ namespace Rodin::Tests::Convergence::H
         return m_grid.makeMesh(pointsPerAxis);
       }
 
-      static std::string_view getGeometryName(
-        Geometry::Polytope::Type geometry)
+      static std::string_view getGeometryName(Geometry::Polytope::Type geometry)
       {
         return UniformGrid::getGeometryName(geometry);
       }

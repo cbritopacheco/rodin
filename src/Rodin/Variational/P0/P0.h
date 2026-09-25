@@ -114,10 +114,10 @@ namespace Rodin::Variational
    * @see P0Element, GridFunction
    */
   template <class Scalar>
-    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+    requires(std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
   class P0<Scalar, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<
-        Geometry::Mesh<Context::Local>, P0<Scalar, Geometry::Mesh<Context::Local>>>
+    : public FiniteElementSpace<Geometry::Mesh<Context::Local>,
+        P0<Scalar, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -415,29 +415,38 @@ namespace Rodin::Variational
    * count is independent of the physical mesh dimension.
    */
   template <class Scalar>
-    requires (std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
+    requires(std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>)
   class P0<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>> final
-    : public FiniteElementSpace<
-        Geometry::Mesh<Context::Local>,
+    : public FiniteElementSpace<Geometry::Mesh<Context::Local>,
         P0<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>>
   {
     public:
+      /** Scalar type of each vector component. */
       using ScalarType = Scalar;
+      /** Vector-valued range of the space. */
       using RangeType = Math::SpatialVector<Scalar>;
+      /** Local mesh context. */
       using ContextType = Context::Local;
+      /** Mesh supporting the cellwise constant field. */
       using MeshType = Geometry::Mesh<ContextType>;
+      /** Vector constant finite element. */
       using ElementType = P0Element<RangeType>;
+      /** Common finite element space interface. */
       using Parent = FiniteElementSpace<MeshType, P0<RangeType, MeshType>>;
 
+      /** Pulls a physical vector field back to a cell reference domain. */
       template <class Callable>
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /** Binds the physical cell and callable field. */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& function)
-            : m_polytope(polytope), m_function(std::forward<Function>(function))
+            : m_polytope(polytope),
+              m_function(std::forward<Function>(function))
           {}
 
+          /** Evaluates the physical field at a reference coordinate. */
           auto operator()(const Math::SpatialPoint& reference) const
           {
             return m_function(Geometry::Point(m_polytope, reference));
@@ -448,16 +457,18 @@ namespace Rodin::Variational
           Callable m_function;
       };
 
+      /** Pushes a reference vector field forward to a physical cell. */
       template <class Callable>
-      class Pushforward
-        : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
+          /** Binds a reference-domain callable. */
           template <class Function>
           explicit Pushforward(Function&& function)
             : m_function(std::forward<Function>(function))
           {}
 
+          /** Evaluates the reference field at a physical point's chart coordinate. */
           auto operator()(const Geometry::Point& point) const
           {
             return m_function(point.getReferenceCoordinates());
@@ -467,8 +478,10 @@ namespace Rodin::Variational
           Callable m_function;
       };
 
+      /** Constructs a cellwise vector space with @p vdim components. */
       explicit P0(const MeshType& mesh, size_t vdim)
-        : m_mesh(mesh), m_vdim(vdim)
+        : m_mesh(mesh),
+          m_vdim(vdim)
       {
         assert(m_vdim > 0);
         m_dofs.reserve(mesh.getCellCount());
@@ -481,19 +494,32 @@ namespace Rodin::Variational
         }
       }
 
+      /** Constructs a cellwise vector space with compile-time component count. */
       template <size_t VDim>
       explicit P0(std::integral_constant<size_t, VDim>, const MeshType& mesh)
         : P0(mesh, VDim)
       {}
 
+      /** Copies the space while retaining its mesh reference. */
       P0(const P0&) = default;
+      /** Moves the space while retaining its mesh reference. */
       P0(P0&&) = default;
       ~P0() override = default;
 
-      size_t getSize() const override { return m_mesh.get().getCellCount() * m_vdim; }
-      size_t getVectorDimension() const override { return m_vdim; }
-      const MeshType& getMesh() const override { return m_mesh.get(); }
+      size_t getSize() const override
+      {
+        return m_mesh.get().getCellCount() * m_vdim;
+      }
+      size_t getVectorDimension() const override
+      {
+        return m_vdim;
+      }
+      const MeshType& getMesh() const override
+      {
+        return m_mesh.get();
+      }
 
+      /** Returns the constant vector element for polytope @p i of dimension @p d. */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto geometry = getMesh().getGeometry(d, i);
@@ -517,17 +543,17 @@ namespace Rodin::Variational
         return idx.second * m_vdim + local;
       }
 
+      /** Creates the physical-to-reference field pullback on a cell. */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& function) const
       {
-        return Pullback<Callable>(
-          *getMesh().getPolytope(idx.first, idx.second),
+        return Pullback<Callable>(*getMesh().getPolytope(idx.first, idx.second),
           std::forward<Callable>(function));
       }
 
+      /** Creates the reference-to-physical field pushforward on a cell. */
       template <class Callable>
-      auto getPushforward(
-        const std::pair<size_t, Index>&, Callable&& function) const
+      auto getPushforward(const std::pair<size_t, Index>&, Callable&& function) const
       {
         return Pushforward<Callable>(std::forward<Callable>(function));
       }

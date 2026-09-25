@@ -64,11 +64,9 @@ namespace Rodin::Tests::Convergence::H::P0Projection
   Real scalarError(const LocalMesh& mesh)
   {
     P0<Scalar, LocalMesh> space(mesh);
-    const auto field = [dim = mesh.getDimension()](const Point& point)
-    {
-      return coefficient<Scalar>(1.25, 0.5)
-        + coefficient<Scalar>(1, -0.75) * point(0)
-        + coefficient<Scalar>(0.3, 0.2) * point(dim - 1);
+    const auto field = [dim = mesh.getDimension()](const Point& point) {
+      return coefficient<Scalar>(1.25, 0.5) + coefficient<Scalar>(1, -0.75) * point(0) +
+        coefficient<Scalar>(0.3, 0.2) * point(dim - 1);
     };
     if constexpr (std::is_same_v<Scalar, Real>)
       return project(mesh, space, RealFunction(field));
@@ -80,14 +78,12 @@ namespace Rodin::Tests::Convergence::H::P0Projection
   Real vectorError(const LocalMesh& mesh)
   {
     P0<Math::SpatialVector<Scalar>, LocalMesh> space(mesh, 2);
-    const auto field = [dim = mesh.getDimension()](const Point& point)
-    {
+    const auto field = [dim = mesh.getDimension()](const Point& point) {
       Math::SpatialVector<Scalar> value(2);
-      value(0) = coefficient<Scalar>(1.25, 0.5)
-        + coefficient<Scalar>(1, -0.75) * point(0);
-      value(1) = coefficient<Scalar>(-0.75, 0.25)
-        + coefficient<Scalar>(0.8, 0.2)
-        * point(dim - 1);
+      value(0) =
+        coefficient<Scalar>(1.25, 0.5) + coefficient<Scalar>(1, -0.75) * point(0);
+      value(1) =
+        coefficient<Scalar>(-0.75, 0.25) + coefficient<Scalar>(0.8, 0.2) * point(dim - 1);
       return value;
     };
     return project(mesh, space, VectorFunction<decltype(field)>(2, field));
@@ -112,14 +108,15 @@ namespace Rodin::Tests::Convergence::H::P0Projection
       ASSERT_TRUE(std::isfinite(fine));
       ASSERT_GT(coarse, fine);
       const Real rate = history.getAlgebraicRate(i);
-      SCOPED_TRACE(::testing::Message()
-        << "L2 " << coarse << " -> " << fine << ", rate " << rate);
+      SCOPED_TRACE(
+        ::testing::Message() << "L2 " << coarse << " -> " << fine << ", rate " << rate);
       EXPECT_GT(rate, 0.8);
       EXPECT_LT(rate, 1.2);
     }
   }
 
-  class P0ProjectionTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class P0ProjectionTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   TEST_P(P0ProjectionTest, RealScalar)
   {
@@ -142,7 +139,8 @@ namespace Rodin::Tests::Convergence::H::P0Projection
   }
 
   /** P0g contains constants exactly, so its assembled projection is exact. */
-  class P0gProjectionTest : public ::testing::TestWithParam<Polytope::Type> {};
+  class P0gProjectionTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
 
   template <class Scalar>
   Real globalScalarError(const LocalMesh& mesh)
@@ -160,8 +158,7 @@ namespace Rodin::Tests::Convergence::H::P0Projection
   Real globalVectorError(const LocalMesh& mesh)
   {
     P0g<Math::SpatialVector<Scalar>, LocalMesh> space(mesh, 2);
-    const auto field = [](const Point&)
-    {
+    const auto field = [](const Point&) {
       Math::SpatialVector<Scalar> value(2);
       value(0) = coefficient<Scalar>(1.25, -0.75);
       value(1) = coefficient<Scalar>(-0.5, 0.25);
@@ -181,30 +178,18 @@ namespace Rodin::Tests::Convergence::H::P0Projection
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, P0ProjectionTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
-    [](const ::testing::TestParamInfo<Polytope::Type>& info)
-    {
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, P0gProjectionTest,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge),
-    [](const ::testing::TestParamInfo<Polytope::Type>& info)
-    {
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 }
