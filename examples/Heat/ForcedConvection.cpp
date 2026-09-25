@@ -12,13 +12,17 @@
 // with mixture properties phi-weighted (arithmetic for rho, mu, rho cp;
 // harmonic for k) and the Lee source
 //
-//   mdot = beta(phi, T) (T - T_sat)/T_sat,
-//   beta = r_l (1 - phi) rho_l   (T > T_sat, evaporation)
-//        = r_v phi rho_v         (T < T_sat, condensation),
+//   mdot = r_l (1 - phi) rho_l [theta]_+  +  r_v phi rho_v [theta]_-,
+//   theta = (T - T_sat)/T_sat,
 //
-// so mdot is continuous at T_sat. The switch is smoothed with tanh and the
-// source is linearised in (phi, T) about the previous Picard iterate: both
-// resulting reaction terms are positive on the left-hand side.
+// evaporation only above T_sat, condensation only where there is vapour, and
+// mdot continuous at T_sat. The ramps are smoothed with a softplus of width
+// dTsmooth ([theta]_+ >= 0, [theta]_- = theta - [theta]_+ <= 0), NOT by
+// blending the two rate coefficients: a blended switch evaporates "negative
+// vapour" from pure subcooled liquid and grows like exp(2 T/dTsmooth).
+// The source is linearised (Newton) in (phi, T) about the previous Picard
+// iterate: dmdot/dphi <= 0 and dmdot/dT >= 0, so both reaction terms are
+// positive on the left-hand side.
 //
 // The conservative Allen-Cahn term (Chiu & Lin 2011) keeps the interface at a
 // fixed thickness eps (tanh profile) and phi in [0, 1]; n = Pi_h[grad phi /
@@ -31,7 +35,8 @@
 // split orthogonal subgrid scales (OSS): tau (A(u_h) - Pi_h[A(u_h^n)], B(v_h))
 // with Pi_h the L2 projection from OrthogonalProjection.h, lagged at t^n. The
 // two blocks are coupled by Picard iterations within each time step
-// (properties, mdot, normal and curvature refreshed every iteration).
+// (properties and mdot refreshed every iteration; normal and curvature at t^n
+// unless -fc_lag_interface false).
 // Curvature is kappa = -div Pi_h[grad phi / |grad phi|].
 //
 // Run from the build directory:
@@ -40,7 +45,8 @@
 // Options: -fc_mesh, -fc_dt, -fc_tend, -fc_G, -fc_q, -fc_tin, -fc_r, -fc_g,
 // -fc_eps, -fc_gamma (0 disables Allen-Cahn), -fc_maxit, -fc_tol, -fc_output_every,
 // -fc_print_every (progress line on screen, default every step), -fc_picard_monitor,
-// -fc_neps (normal regularisation, 1/m; default 0.05/eps); solvers under the prefixes -fc_flow_
+// -fc_neps (normal regularisation, 1/m; default 0.05/eps), -fc_dtsmooth (K, Lee switch width),
+// -fc_lag_interface (n, kappa at t^n; default true); solvers under the prefixes -fc_flow_
 // (MUMPS), -fc_phase_ (GMRES) and -fc_proj_* (CG + Jacobi mass solves).
 #include "Rodin/Variational/ForwardDecls.h"
 #include <algorithm>
@@ -126,7 +132,7 @@ namespace Rodin::Examples::Heat
         // Lee model. r is not physical: calibrate on the 1D Stefan problem.
         Real rL = 100.0;       ///< 1/s, evaporation
         Real rV = 100.0;       ///< 1/s, condensation
-        Real dTsmooth = 0.05;  ///< K, half-width of the tanh switch at T_sat
+        Real dTsmooth = 0.05;  ///< K, width of the softplus ramps at T_sat
         Real gravity = 0.0;    ///< m/s^2 along -z; 0 keeps the microchannel horizontal
         /// 1/m, regularisation of n = grad phi / sqrt(|grad phi|^2 + neps^2).
         /// Must be comparable to interface gradients (~1/(4 eps)), not ~0: with
@@ -154,6 +160,11 @@ namespace Rodin::Examples::Heat
         int outputEvery = 20;
         int printEvery = 1;       ///< steps between progress lines on screen
         bool picardMonitor = false; ///< print (dPhi, dT, dU) at every Picard iteration
+        /// Normal n and curvature kappa at t^n (true) or at the Picard iterate
+        /// (false). At the iterate, the compression gamma (1 - phi^k) n^k phi
+        /// is a lagged term quadratic in phi when |grad phi| << neps, and
+        /// Picard oscillates (even/odd) with a gain that grows with phi.
+        bool lagInterface = true;
       };
 
       ForcedConvection(const Context::MPI& context, const Config& cfg)
@@ -173,18 +184,18 @@ namespace Rodin::Examples::Heat
           m_k([this](const Point& p) { return kAt(p); }),
           m_rhoCp([this](const Point& p) { return rhoCpAt(p); }),
           m_liquidFraction([this](const Point& p) { return 1.0 - phiAt(p); }),
-          m_cT([this](const Point& p) { return betaAt(p) / m_cfg.Tsat; }),
-          m_cPhi([this](const Point& p) { return dbetaAt(p) * thetaAt(p); }),
+          m_cT([this](const Point& p) { return dmdotdTAt(p); }),
+          m_cPhi([this](const Point& p) { return dmdotdphiAt(p); }),
           m_c0([this](const Point& p) {
-            return -betaAt(p) - dbetaAt(p) * thetaAt(p) * phiAt(p); }),
+            return mdotAt(p) - dmdotdphiAt(p) * phiAt(p) - dmdotdTAt(p) * m_TIt.getValue(p); }),
           m_divSource([this](const Point& p) {
-            return betaAt(p) * thetaAt(p) * (1.0 / m_cfg.rhoV - 1.0 / m_cfg.rhoL); }),
+            return mdotAt(p) * (1.0 / m_cfg.rhoV - 1.0 / m_cfg.rhoL); }),
           m_tauM([this](const Point& p) { return tau(p, muAt(p) / rhoAt(p), 0.0); }),
           m_tauT([this](const Point& p) {
             const Real C = rhoCpAt(p);
-            return tau(p, kAt(p) / C, m_cfg.hLV * betaAt(p) / (m_cfg.Tsat * C)); }),
+            return tau(p, kAt(p) / C, m_cfg.hLV * dmdotdTAt(p) / C); }),
           m_tauPhi([this](const Point& p) {
-            return tau(p, m_gamma * m_eps, -dbetaAt(p) * thetaAt(p) / m_cfg.rhoV); }),
+            return tau(p, m_gamma * m_eps, -dmdotdphiAt(p) / m_cfg.rhoV); }),
           m_tauC([this](const Point& p) {
             return muAt(p) + 0.5 * rhoAt(p) * speed(p) * cellSize(p); }),
           m_piConv(m_vh, "fc_proj_conv_"), m_piGradP(m_vh, "fc_proj_gradp_"),
@@ -261,6 +272,8 @@ namespace Rodin::Examples::Heat
           m_phiOld.setData(m_phi.getSolution().getData());
           m_TOld.setData(m_T.getSolution().getData());
           updateStabilisation();  // Pi_h at t^n for the next step
+          if (m_cfg.lagInterface)
+            updateInterface();    // n, kappa at t^n for the next step
 
           report(n, iterations);
           if (n % m_cfg.outputEvery == 0 || n == steps)
@@ -293,7 +306,8 @@ namespace Rodin::Examples::Heat
           // and continuity source see (phi, T)^{k+1}. The OSS projections stay
           // at t^n: lagged at the iterate they make Picard contract only like
           // tau_M/(tau_M + dt) on smooth pressure modes (~0.37 measured).
-          updateInterface();
+          if (!m_cfg.lagInterface)
+            updateInterface();
           solve(m_flow, m_flowKSP);
           const Real dU = increment(m_u.getSolution(), m_uIt);
           m_uIt.setData(m_u.getSolution().getData());
@@ -437,30 +451,52 @@ namespace Rodin::Examples::Heat
         return f * m_cfg.rhoV * m_cfg.cpV + (1.0 - f) * m_cfg.rhoL * m_cfg.cpL;
       }
 
-      /// Smooth evaporation switch s in [0, 1]: 1 above T_sat, 0 below.
-      Real switchAt(const Point& p) const
+      // ---- Lee source at the iterate (phi^k clipped, T^k) ----
+      // x = T^k - T_sat, d = dTsmooth:
+      //   [x]_+ = max(x, 0) + d log(1 + exp(-|x|/d))  (softplus, >= 0)
+      //   [x]_- = x - [x]_+                            (<= 0)
+      //   d[x]_+/dx = logistic(x/d)
+
+      Real superheatAt(const Point& p) const  ///< [theta]_+
       {
-        return 0.5 * (1.0 + std::tanh((m_TIt.getValue(p) - m_cfg.Tsat) / m_cfg.dTsmooth));
+        const Real x = m_TIt.getValue(p) - m_cfg.Tsat, d = m_cfg.dTsmooth;
+        return (std::max(x, Real(0)) + d * std::log1p(std::exp(-std::abs(x) / d))) / m_cfg.Tsat;
       }
 
-      /// (T^k - T_sat)/T_sat
-      Real thetaAt(const Point& p) const
+      Real subcoolingAt(const Point& p) const  ///< [theta]_-
       {
-        return (m_TIt.getValue(p) - m_cfg.Tsat) / m_cfg.Tsat;
+        return (m_TIt.getValue(p) - m_cfg.Tsat) / m_cfg.Tsat - superheatAt(p);
       }
 
-      /// beta(phi^k, T^k): mdot = beta (T - T_sat)/T_sat.
-      Real betaAt(const Point& p) const
+      Real logisticAt(const Point& p) const  ///< d[x]_+/dx in [0, 1]
       {
-        const Real f = phiAt(p), s = switchAt(p);
-        return s * m_cfg.rL * (1.0 - f) * m_cfg.rhoL + (1.0 - s) * m_cfg.rV * f * m_cfg.rhoV;
+        const Real z = (m_TIt.getValue(p) - m_cfg.Tsat) / m_cfg.dTsmooth;
+        if (z >= 0.0)
+          return 1.0 / (1.0 + std::exp(-z));
+        const Real e = std::exp(z);
+        return e / (1.0 + e);
       }
 
-      /// d beta / d phi at the iterate.
-      Real dbetaAt(const Point& p) const
+      /// mdot(phi^k, T^k) = r_l (1 - phi) rho_l [theta]_+ + r_v phi rho_v [theta]_-
+      Real mdotAt(const Point& p) const
       {
-        const Real s = switchAt(p);
-        return -s * m_cfg.rL * m_cfg.rhoL + (1.0 - s) * m_cfg.rV * m_cfg.rhoV;
+        const Real f = phiAt(p);
+        return m_cfg.rL * (1.0 - f) * m_cfg.rhoL * superheatAt(p)
+             + m_cfg.rV * f * m_cfg.rhoV * subcoolingAt(p);
+      }
+
+      /// d mdot / d phi <= 0
+      Real dmdotdphiAt(const Point& p) const
+      {
+        return -m_cfg.rL * m_cfg.rhoL * superheatAt(p) + m_cfg.rV * m_cfg.rhoV * subcoolingAt(p);
+      }
+
+      /// d mdot / d T >= 0
+      Real dmdotdTAt(const Point& p) const
+      {
+        const Real f = phiAt(p), s = logisticAt(p);
+        return (m_cfg.rL * (1.0 - f) * m_cfg.rhoL * s + m_cfg.rV * f * m_cfg.rhoV * (1.0 - s))
+             / m_cfg.Tsat;
       }
 
       /// tau = [(2/dt)^2 + (2|u^k|/h)^2 + (4 D/h^2)^2 + s^2]^{-1/2}
@@ -553,8 +589,8 @@ namespace Rodin::Examples::Heat
 
         // Linearised Lee source about (phi^k, T^k):
         //   mdot ~= cT T + cPhi phi + c0,
-        //   cT = beta/T_sat >= 0,  cPhi = beta' theta <= 0,
-        //   c0 = -beta - beta' theta phi^k.
+        //   cT = dmdot/dT >= 0,  cPhi = dmdot/dphi <= 0,
+        //   c0 = mdot^k - cPhi phi^k - cT T^k.
         // phi-equation: conservative transport div(phi u^k), source mdot/rho_v.
         // T-equation:   rho cp (T - T^n)/dt + rho cp u^k.grad T - div(k grad T)
         //               = -mdot h_lv.
@@ -761,6 +797,7 @@ int main(int argc, char** argv)
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_eps", &cfg.epsilon, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_gamma", &cfg.gamma, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_neps", &cfg.normalEps, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_dtsmooth", &cfg.dTsmooth, PETSC_NULLPTR);
     Rodin::Real r = cfg.rL;
     PetscBool gotR = PETSC_FALSE;
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_r", &r, &gotR);
@@ -775,6 +812,9 @@ int main(int argc, char** argv)
     PetscBool monitor = PETSC_FALSE;
     PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_picard_monitor", &monitor, PETSC_NULLPTR);
     cfg.picardMonitor = (monitor == PETSC_TRUE);
+    PetscBool lag = cfg.lagInterface ? PETSC_TRUE : PETSC_FALSE;
+    PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-fc_lag_interface", &lag, PETSC_NULLPTR);
+    cfg.lagInterface = (lag == PETSC_TRUE);
     cfg.outputEvery = static_cast<int>(every);
     cfg.maxIterations = static_cast<int>(maxit);
 
