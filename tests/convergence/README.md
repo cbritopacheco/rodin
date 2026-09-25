@@ -167,7 +167,7 @@ exists yet.
 
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
-| Poisson | P1–P3, boundary variants; PETSc local P1/P2, MPI P1 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
+| Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
 | Complex Helmholtz | P1/P2 | P1–P4 | P1–P3 | — |
 | Linear elasticity, Stokes | Implemented | — | — | — |
 | Variable conductivity | P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
@@ -193,11 +193,15 @@ mixed-traction elasticity test on tetrahedra uses `n=9→17→33` because its
 coarsest mesh is pre-asymptotic. This is a coverage inventory, not a claim
 that every supported space or physical context is certified; the suite
 READMEs and test sources give all case-specific sequences and bounds.
-Distributed P2 Poisson remains uncertified because an exploratory
-three-rank tetrahedral run produced a rank-dependent error at one refinement
-level. The constrained system has four fewer owned Dirichlet DOFs than the
-one-rank system; the observation and reproduction levels are recorded in the
-`h/PETScMPIPoisson` README.
+Distributed P2 Poisson now checks three-level rates on all seven geometries
+and one to four ranks. The ownership regression for the previously missing
+tetrahedral boundary constraints and its mathematical patch test are recorded
+in the `h/PETScMPIPoisson` README.
+The distributed P2 identification regression checks every geometry; its
+tetrahedral solve on two to four ranks also compares equivalent value and
+affine-identification boundary conditions. Homogeneous P1 and affine P2
+identification additionally have three-level rate checks on all seven
+geometries and one to four ranks.
 
 Configure with `-DRODIN_BUILD_CONVERGENCE_TESTS=ON` and run with
 `ctest --test-dir build/tests -L convergence --output-on-failure`.
@@ -210,7 +214,7 @@ their refinement axis.
 
 The CI convergence job runs the full local suite twice: once with sequential
 assembly and once with OpenMP assembly (`RODIN_MULTITHREADED=OFF/ON`). A
-separate PETSc job checks local-context P1/P2 and distributed P1 Poisson
+separate PETSc job checks local-context and distributed P1/P2 Poisson
 convergence with PETSc assembly and CG. The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
 it is a separate check from the local-context suites.

@@ -19,6 +19,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/Variational/P1.h>
+#include <Rodin/MPI/Variational/H1/H1.h>
 #include <Rodin/PETSc.h>
 
 using namespace Rodin;
@@ -54,6 +55,81 @@ namespace
     }
 
     return sharder.gather(0);
+  }
+
+  /** Partition the three-dimensional P2 regression mesh from rank zero. */
+  Mesh<Context::MPI> distributeP2Tetrahedron(const Context::MPI& ctx)
+  {
+    const auto& comm = ctx.getCommunicator();
+    Sharder<Context::MPI> sharder(ctx);
+    if (comm.rank() == 0)
+    {
+      auto mesh = Mesh<Context::Local>::UniformGrid(
+        Polytope::Type::Tetrahedron, {9, 9, 9});
+      auto& connectivity = mesh.getConnectivity();
+      connectivity.compute(3, 3);
+      connectivity.compute(3, 0);
+      connectivity.compute(3, 2);
+      connectivity.compute(2, 3);
+      connectivity.compute(2, 0);
+      connectivity.compute(2, 1);
+      connectivity.compute(1, 0);
+      BalancedCompactPartitioner partitioner(mesh);
+      partitioner.partition(static_cast<size_t>(comm.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    return sharder.gather(0);
+  }
+
+  /**
+   * On the partition that lost four owner-side P2 constraints, prescribing
+   * u = 1 and the mathematically equivalent affine identification u = -u + 2
+   * must produce the same distributed Poisson solution to solver accuracy.
+   */
+  TEST(PETSc_MPI_Form, DistributedP2AffineIdentificationMatchesValueSolve)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeP2Tetrahedron(ctx);
+    // MPI Mesh::getFaceCount() is global, while facet indices are shard-local.
+    // The previous affine-defect loop used the former as a local loop bound.
+    EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
+    H1<2, Real, Mesh<Context::MPI>> space(
+      std::integral_constant<size_t, 2>{}, mesh);
+    PETSc::Variational::TrialFunction uValue(space);
+    PETSc::Variational::TestFunction vValue(space);
+    Problem valueProblem(uValue, vValue);
+    valueProblem = Integral(Grad(uValue), Grad(vValue))
+      - Integral(RealFunction(1), vValue)
+      + DirichletBC(uValue, RealFunction(1));
+    PETSc::Solver::CG valueSolver(valueProblem);
+    valueSolver.setTolerances(1e-12, 1e-14, 1e5, 20000);
+    valueSolver.solve();
+
+    PETSc::Variational::TrialFunction uIdent(space);
+    PETSc::Variational::TestFunction vIdent(space);
+    Problem identProblem(uIdent, vIdent);
+    identProblem = Integral(Grad(uIdent), Grad(vIdent))
+      - Integral(RealFunction(1), vIdent)
+      + DirichletBC(uIdent, -uIdent, RealFunction(2));
+    PETSc::Solver::CG identSolver(identProblem);
+    identSolver.setTolerances(1e-12, 1e-14, 1e5, 20000);
+    identSolver.solve();
+
+    Vec difference = nullptr;
+    auto ierr = VecDuplicate(uValue.getSolution().getData(), &difference);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecCopy(uValue.getSolution().getData(), difference);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAXPY(difference, -1, uIdent.getSolution().getData());
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    PetscReal norm = 0;
+    ierr = VecNorm(difference, NORM_2, &norm);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_LT(norm, 1e-9);
+    ierr = VecDestroy(&difference);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
   }
 
   /// @brief Verifies distributed linear form uses mesh communicator and assembles for PET sc MPI form by checking exact expected values, form assembly, MPI behavior.

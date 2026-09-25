@@ -26,7 +26,7 @@ foreach(np 1 2 3 4)
       $<TARGET_FILE:RodinConvergenceHPETScMPIPoisson>)
   set_tests_properties(RodinConvergenceHPETScMPIPoisson_np${np} PROPERTIES
     LABELS "convergence;petsc;distributed"
-    TIMEOUT 180)
+    TIMEOUT 300)
   rodin_suppress_external_mpi_lsan_for_test(
     RodinConvergenceHPETScMPIPoisson_np${np})
 endforeach()

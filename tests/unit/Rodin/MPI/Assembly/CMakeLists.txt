@@ -27,6 +27,7 @@ foreach(np 1 2 3 4 8)
             $<TARGET_FILE:RodinMPIAssemblyTest>)
   set_tests_properties(RodinMPIAssemblyTest_np${np} PROPERTIES
     LABELS "unit;distributed"
+    TIMEOUT 120
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyTest_np${np})
 endforeach()

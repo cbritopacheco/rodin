@@ -288,9 +288,11 @@ namespace Rodin::Geometry
           /**
            * @brief Initializes the builder from a parent mesh.
            * @param[in] parent Parent mesh from which shard entities are drawn.
+           * @param[in] dimension Minimum metadata dimension, for empty shards
+           * belonging to a distributed mesh with a collective dimension.
            * @returns Reference to this builder.
            */
-          Builder& initialize(const Mesh<Context>& parent);
+          Builder& initialize(const Mesh<Context>& parent, size_t dimension = 0);
 
           /**
            * @brief Initializes the builder for direct construction.

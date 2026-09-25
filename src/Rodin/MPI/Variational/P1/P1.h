@@ -671,7 +671,7 @@ namespace Rodin::Variational
         if (find == m_localToGlobal.right.end())
           return std::nullopt;
         else
-          return *find;
+          return find->second;
       }
 
       /**

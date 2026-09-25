@@ -46,8 +46,12 @@ rates, and a nonhomogeneous Dirichlet component on all cell geometries.
 solve and P1/P2 rates on the same geometry set.
 When PETSc is enabled, `PETScPoisson` certifies local-context PETSc assembly
 and CG through all-geometry P1/P2 L2/H1 convergence rates.
-When both MPI and PETSc are enabled, `PETScMPIPoisson` checks the same P1 rates
+When both MPI and PETSc are enabled, `PETScMPIPoisson` checks P1/P2 rates
 on distributed meshes, with globally reduced errors and one to four ranks.
+Its P2 tests also verify a nonzero quadratic Dirichlet patch, ownership
+of every value-constrained boundary DOF, and availability of identification
+rows for owned DOFs and owned-cell assembly across all seven geometries. Additional
+three-level rates cover homogeneous P1 and affine P2 identification.
 
 Equation-specific suites should supply only the manufactured fields, assemble
 and solve their weak formulation, then use these classes for measurement.

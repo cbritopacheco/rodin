@@ -28,9 +28,9 @@ namespace Rodin::Geometry
       m_mode(Mode::None)
   {}
 
-  Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
+  Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent, size_t dimension)
   {
-    const size_t dim = parent.getDimension();
+    const size_t dim = std::max(parent.getDimension(), dimension);
     const size_t sdim = parent.getSpaceDimension();
 
     m_mode = Mode::Parent;
@@ -481,4 +481,3 @@ namespace Rodin::Geometry
     return m_state[d];
   }
 }
-

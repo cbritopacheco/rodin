@@ -1001,11 +1001,12 @@ namespace Rodin::Variational
        * ShapeFunctionBase::setIntegrationPoint() with the active
        * quadrature formula and quadrature index.
        *
-       * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the linear part is the
+       * Exactly zero coefficients are omitted; the linear part is the
        * @c DirichletBCBase::IdentifiedDOFs alternative of the variant
        * returned by @ref getDOFs. If the three-argument constructor was used,
        * the same slave linear form is applied to the known defect and exposed
-       * through @ref getIdentificationValues.
+       * through @ref getIdentificationValues. On MPI meshes, both maps use
+       * the same halo-aware selection of required boundary functionals.
        */
       void assemble() override
       {
@@ -1018,34 +1019,44 @@ namespace Rodin::Variational
         {
           const auto& fes = m_u.get().getFiniteElementSpace();
           const auto& mesh = fes.getMesh();
-          const size_t faceCount = mesh.getFaceCount();
-          const size_t faceDim = mesh.getDimension() - 1;
-
-          for (Index i = 0; i < faceCount; i++)
+          const auto value = [defect = m_defect.get()](const Geometry::Point& p) {
+            return defect->getValue(p);
+          };
+          if constexpr (requires {
+            m_assembly.assembleValues(m_values, fes, m_essBdr, value);
+          })
           {
-            if (m_essBdr.empty() && !mesh.isBoundary(i))
-              continue;
-
-            if (!m_essBdr.empty())
+            m_assembly.assembleValues(m_values, fes, m_essBdr, value);
+          }
+          else
+          {
+            const size_t faceDim = mesh.getDimension() - 1;
+            auto assembleFace = [&](const Geometry::Polytope& face) {
+              const Index i = face.getIndex();
+              if (!m_essBdr.empty())
+              {
+                const auto a = face.getAttribute();
+                if (!a || !m_essBdr.count(*a))
+                  return;
+              }
+              const auto& fe = fes.getFiniteElement(faceDim, i);
+              const auto mapping = fes.getPullback({faceDim, i}, value);
+              for (Index local = 0; local < fe.getCount(); ++local)
+              {
+                const Index global = fes.getGlobalIndex({faceDim, i}, local);
+                if (!m_values.contains(global))
+                  m_values.emplace(global, fe.getLinearForm(local)(mapping));
+              }
+            };
+            if (m_essBdr.empty())
             {
-              const auto a = mesh.getAttribute(faceDim, i);
-              if (!a || !m_essBdr.count(*a))
-                continue;
+              for (auto it = mesh.getBoundary(); it; ++it)
+                assembleFace(*it);
             }
-
-            const auto& fe = fes.getFiniteElement(faceDim, i);
-            const auto mapping = fes.getPullback(
-              {faceDim, i}, [defect = m_defect.get()](const Geometry::Point& p) {
-                return defect->getValue(p);
-              });
-
-            for (Index local = 0; local < fe.getCount(); local++)
+            else
             {
-              const Index global = fes.getGlobalIndex({faceDim, i}, local);
-              auto find = m_values.find(global);
-              if (find == m_values.end())
-                m_values.insert(
-                  find, std::pair{global, fe.getLinearForm(local)(mapping)});
+              for (auto it = mesh.getFace(); it; ++it)
+                assembleFace(*it);
             }
           }
         }
