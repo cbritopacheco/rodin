@@ -21,7 +21,9 @@
 #include <iostream>
 #include <limits>
 #include <numbers>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 
 #include <boost/mpi/collectives.hpp>
@@ -414,7 +416,9 @@ namespace Rodin::Examples::Heart
     // safeguarded Newton on log gd converges globally. Run once per node.
     auto shearAt = [&](Real tauW) -> Real {
       Real lo = std::log(1e-14);
-      Real hi = std::log(std::max<Real>(tauW / muInf, 1e-12)) + 1.0;
+      // Upper bracket from the lowest viscosity of the active law: for
+      // Quemada the plateau is not visc.muInf and may lie below it.
+      Real hi = std::log(std::max<Real>(tauW / std::min(muInf, muPlateau), 1e-12)) + 1.0;
       Real s = 0.5 * (lo + hi);
 
       for (int it = 0; it < law.shearMaxIterations; ++it)
@@ -859,9 +863,27 @@ namespace Rodin::Examples::Heart
     m_xdmf.add("viscosity", m_mu.getSolution());
     m_xdmf.add("shearStress", m_shearWall);
 
+    if (m_cfg.outlets.empty())
+      throw std::runtime_error("CoupledLV0DCoronary3D: no outlet attributes configured.");
+
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
       m_wk.emplace(tag, m_cfg.defaultRCR);
+
+    // Inlet impedance from the lumped resistance: Z = R_in A_in keeps the
+    // area-averaged inlet pressure drop at R_in Q for any ostium calibre.
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(m_cfg.inlet);
+    m_flux.assemble();
+    m_inletArea = m_flux(m_one);
+    if (!(m_inletArea > 0.0))
+      throw std::runtime_error("CoupledLV0DCoronary3D: inlet attribute has zero area.");
+    m_inletImpedance = m_cfg.inletResistance * m_inletArea;
+
+    if (isRoot())
+      Alert::Info() << "  [inlet] attribute " << m_cfg.inlet << "  A=" << m_inletArea
+                    << " m^2  r_eq=" << (std::sqrt(m_inletArea / std::numbers::pi_v<Real>) * 1e3)
+                    << " mm  R_in=" << m_cfg.inletResistance << " Pa s/m^3  Z=R_in*A="
+                    << m_inletImpedance << " Pa s/m" << Alert::Raise;
 
     // Universal WRMS apparent-viscosity table. Built once, shared by every
     // outlet and both limbs: mu_ap depends only on the wall shear stress, not
@@ -1230,12 +1252,7 @@ namespace Rodin::Examples::Heart
     const Real pin = s.par;
 
     const auto normal = BoundaryNormal(m_mesh);
-    const Attribute outlet0 = m_cfg.outlets[0];
-    const Attribute outlet1 = m_cfg.outlets[1];
-    const Attribute outlet2 = m_cfg.outlets[2];
-    const Attribute outlet3 = m_cfg.outlets[3];
-    const Attribute outlet4 = m_cfg.outlets[4];
-    const Attribute outlet5 = m_cfg.outlets[5];
+    const FlatSet<Attribute> outletSet(m_cfg.outlets.begin(), m_cfg.outlets.end());
 
     const auto& uState = m_u.getSolution();
     const auto& pState = m_p.getSolution();
@@ -1296,6 +1313,11 @@ namespace Rodin::Examples::Heart
       return bc.Ra * bc.muA * bc.area;
     };
 
+    const Real pimNew = m_cfg.intramyocardialFraction * s.pv;
+    const auto outletPressure = [this, pimNew](const Attribute tag) {
+      return pimNew + m_wk.at(tag).ptm;
+    };
+
     const auto& cy = m_cfg.viscosity;
     const Real gammaReg = cy.gammaRegularization;
     const Real mu0 = cy.mu0;
@@ -1325,7 +1347,7 @@ namespace Rodin::Examples::Heart
 
     if (m_cfg.flowMode == FlowMode::Newton)
     {
-      m_flow =
+      auto body =
         /*
          * =========================
          * Newton Jacobian / tangent
@@ -1370,12 +1392,12 @@ namespace Rodin::Examples::Heart
          * Inlet normal impedance tangent.
          *
          * Boundary pressure law:
-         *   p_inlet_boundary = pin + Z (u · n)
+         *   p_inlet_boundary = pin + Z (u · n),   Z = R_in A_in
          *
          * Tangent:
          *   Z (du · n) (v · n)
          */
-        + m_cfg.inletImpedance *
+        + m_inletImpedance *
           BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
 
         /*
@@ -1397,32 +1419,7 @@ namespace Rodin::Examples::Heart
          * Since beta is lagged with m_uOld, the tangent is simply beta * du.
          */
         + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
-
-        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
-
-        /*
-         * Implicit outlet resistance tangent.
-         *
-         * Boundary pressure law:
-         *   p_out = p_c + R_a Phi_a Q,   Q = int (u.n)
-         *
-         * Tangent (flat-profile form, symmetric positive semidefinite):
-         *   R_a Phi_a A (du.n)(v.n)
-         *
-         * Assembled rather than lagged, which makes the 3D-0D exchange stable
-         * for any dt and removes the need for an outlet capacitor.
-         */
-        + outletResistance(outlet0) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet0) +
-        outletResistance(outlet1) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet1) +
-        outletResistance(outlet2) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet2) +
-        outletResistance(outlet3) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet3) +
-        outletResistance(outlet4) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet4) +
-        outletResistance(outlet5) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet5)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outletSet)
 
         /*
          * =========================
@@ -1430,7 +1427,10 @@ namespace Rodin::Examples::Heart
          * =========================
          *
          * Assembled at the current nonlinear state (uState, pState); m_u
-         * appears only inside the DirichletBC correction terms.
+         * appears only inside the DirichletBC correction terms. Every
+         * boundary term of the tangent has its residual counterpart here,
+         * otherwise the converged state would not satisfy the Oseen-mode
+         * equations.
          */
 
         + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v) -
@@ -1465,41 +1465,18 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
         /*
-         * Outlet pressure Neumann residuals.
+         * Inlet normal impedance and tangential damping residuals, at uState.
          */
-        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
-        BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1) +
-        BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2) +
-        BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3) +
-        BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4) +
-        BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
-
-        /*
-         * Implicit outlet resistance residual, at uStateNormal.
-         */
-        + outletResistance(outlet0) *
-          BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet0) +
-        outletResistance(outlet1) *
-          BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet1) +
-        outletResistance(outlet2) *
-          BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet2) +
-        outletResistance(outlet3) *
-          BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet3) +
-        outletResistance(outlet4) *
-          BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet4) +
-        outletResistance(outlet5) * BoundaryIntegral(Dot(uStateNormal, m_v)).over(outlet5)
+        + m_inletImpedance *
+          BoundaryIntegral(Dot(uStateNormal, m_v)).over(m_cfg.inlet)
+        + m_cfg.inletTangentialDamping *
+          BoundaryIntegral(Dot(uState - uStateNormal, m_v)).over(m_cfg.inlet)
 
         /*
          * Backflow stabilization residual, at uState.
          */
         + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v)).over(m_cfg.inlet)
-
-        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet0) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet1) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet2) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet3) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet4) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet5)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outletSet)
 
         /*
          * Variational elimination of the wall Dirichlet condition. The
@@ -1507,10 +1484,42 @@ namespace Rodin::Examples::Heart
          *   du = -uState.
          */
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
+
+      for (const Attribute tag : m_cfg.outlets)
+      {
+        body = body
+
+          /*
+           * Implicit outlet resistance tangent.
+           *
+           * Boundary pressure law:
+           *   p_out = p_c + R_a Phi_a Q,   Q = int (u.n)
+           *
+           * Tangent (flat-profile form, symmetric positive semidefinite):
+           *   R_a Phi_a A (du.n)(v.n)
+           *
+           * Its area average is exactly R_a Phi_a Q. Assembled rather than
+           * lagged, which makes the 3D-0D exchange stable for any dt and
+           * removes the need for an outlet capacitor.
+           */
+          + outletResistance(tag) * BoundaryIntegral(Dot(duNormal, m_v)).over(tag)
+
+          /*
+           * Implicit outlet resistance residual, at uStateNormal.
+           */
+          + outletResistance(tag) * BoundaryIntegral(Dot(uStateNormal, m_v)).over(tag)
+
+          /*
+           * Outlet pressure Neumann residual, p_im(t^{n+1}) + p_tm^n.
+           */
+          + BoundaryIntegral(outletPressure(tag) * Dot(m_v, normal)).over(tag);
+      }
+
+      m_flow = body;
     }
     else
     {
-      m_flow =
+      auto body =
         /*
          * =========================
          * Oseen linear operator
@@ -1544,9 +1553,9 @@ namespace Rodin::Examples::Heart
         m_cfg.eps * Integral(m_p, m_q)
 
         /*
-         * Inlet normal impedance.
+         * Inlet normal impedance, Z = R_in A_in.
          */
-        + m_cfg.inletImpedance *
+        + m_inletImpedance *
           BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
 
         /*
@@ -1556,30 +1565,10 @@ namespace Rodin::Examples::Heart
           BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
 
         /*
-         * Backflow stabilization. One inlet term only.
+         * Backflow stabilization. One inlet term, one term over all outlets.
          */
         + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
-
-        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4) +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
-
-        /*
-         * Implicit outlet resistance.
-         *
-         * p_out = p_c + R_a Phi_a Q with Q = int (u.n). The resistive part is
-         * assembled here rather than lagged, which makes the exchange stable
-         * for any dt and removes the need for an outlet capacitor.
-         */
-        + outletResistance(outlet0) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet0) +
-        outletResistance(outlet1) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet1) +
-        outletResistance(outlet2) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet2) +
-        outletResistance(outlet3) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet3) +
-        outletResistance(outlet4) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet4) +
-        outletResistance(outlet5) * BoundaryIntegral(Dot(duNormal, m_v)).over(outlet5)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outletSet)
 
         /*
          * =========================
@@ -1600,20 +1589,31 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
         /*
-         * Explicit outlet pressures.
-         */
-        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
-        BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1) +
-        BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2) +
-        BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3) +
-        BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4) +
-        BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
-
-        /*
          * Wall no-slip condition. The Oseen unknown is the velocity itself,
          * so the condition is u = 0.
          */
         + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
+
+      for (const Attribute tag : m_cfg.outlets)
+      {
+        body = body
+
+          /*
+           * Implicit outlet resistance.
+           *
+           * p_out = p_c + R_a Phi_a Q with Q = int (u.n). The resistive part
+           * is assembled here rather than lagged, which makes the exchange
+           * stable for any dt and removes the need for an outlet capacitor.
+           */
+          + outletResistance(tag) * BoundaryIntegral(Dot(duNormal, m_v)).over(tag)
+
+          /*
+           * Outlet pressure, p_im(t^{n+1}) + p_tm^n.
+           */
+          + BoundaryIntegral(outletPressure(tag) * Dot(m_v, normal)).over(tag);
+      }
+
+      m_flow = body;
     }
 
     m_stepTiming.setup3DForm = secondsSince(setup3DStart);
@@ -1817,7 +1817,9 @@ namespace Rodin::Examples::Heart
 
     computeWallShear();
 
-    m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
+    // The 0D state has already been advanced, so s.t = t^{n+1} is the time of
+    // the 3D solution being written, the same stamp as the CSV row.
+    m_xdmf.write(m_model.getState().t).flush();
   }
 
   CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const
@@ -1901,23 +1903,22 @@ namespace Rodin::Examples::Heart
     if (!isRoot())
       return;
 
+    // Per-outlet columns follow Config::outlets, named by boundary attribute.
+    const auto perOutlet = [this](const char* quantity) {
+      std::string cols;
+      for (const Attribute tag : m_cfg.outlets)
+        cols += "CoronaryOutlet" + std::to_string(tag) + quantity + ",";
+      return cols;
+    };
+
     m_csv << "t," << "LeftAtriumPressure," << "VenaCavaPressure,"
           << "LeftVentricleDisplacement," << "LeftVentricleVelocity,"
           << "LeftVentricleRadius," << "LeftVentricleVolume," << "LeftVentriclePressure,"
           << "AortaPressure," << "DistalPressure," << "LeftVentricleFlow,"
-          << "CoronaryInletFlux," << "CoronaryOutlet7Flux," << "CoronaryOutlet8Flux,"
-          << "CoronaryOutlet9Flux," << "CoronaryOutlet10Flux," << "CoronaryOutlet14Flux,"
-          << "CoronaryOutlet15Flux," << "CoronaryOutletFluxTotal,"
-          << "CoronaryOutlet7DistalFlux," << "CoronaryOutlet8DistalFlux,"
-          << "CoronaryOutlet9DistalFlux," << "CoronaryOutlet10DistalFlux,"
-          << "CoronaryOutlet14DistalFlux," << "CoronaryOutlet15DistalFlux,"
-          << "CoronaryDistalFluxTotal," << "CoronaryCapChargingFluxTotal,"
-          << "CoronaryOutlet7CapPressure," << "CoronaryOutlet8CapPressure,"
-          << "CoronaryOutlet9CapPressure," << "CoronaryOutlet10CapPressure,"
-          << "CoronaryOutlet14CapPressure," << "CoronaryOutlet15CapPressure,"
-          << "CoronaryOutlet7Pressure," << "CoronaryOutlet8Pressure,"
-          << "CoronaryOutlet9Pressure," << "CoronaryOutlet10Pressure,"
-          << "CoronaryOutlet14Pressure," << "CoronaryOutlet15Pressure," << "FlowBalance,"
+          << "CoronaryInletFlux," << perOutlet("Flux") << "CoronaryOutletFluxTotal,"
+          << perOutlet("DistalFlux") << "CoronaryDistalFluxTotal,"
+          << "CoronaryCapChargingFluxTotal," << perOutlet("CapPressure")
+          << perOutlet("Pressure") << "FlowBalance,"
           << "ec," << "gamma," << "beta," << "w," << "kc," << "tauc,"
           << "IntramyoPressure," << "TransmuralPressure,"
           << "ArteriolarViscosityRatio," << "VenularViscosityRatio,"
@@ -1933,26 +1934,27 @@ namespace Rodin::Examples::Heart
 
     const StepData d = collectStepData();
 
-    auto get = [](const std::map<Attribute, Real>& m, Attribute a) -> Real {
-      const auto it = m.find(a);
-      return (it == m.end()) ? 0.0 : it->second;
+    const auto perOutlet = [this](const std::map<Attribute, Real>& m) {
+      std::string cols;
+      for (const Attribute tag : m_cfg.outlets)
+      {
+        const auto it = m.find(tag);
+        std::ostringstream os;
+        os.precision(m_csv.precision());
+        os << ((it == m.end()) ? 0.0 : it->second) << ',';
+        cols += os.str();
+      }
+      return cols;
     };
 
     m_csv << d.t << ',' << d.pat << ',' << d.psv << ',' << d.y << ',' << d.v << ','
           << d.radius << ',' << d.lvVolume << ',' << d.pv << ',' << d.par << ',' << d.pd
-          << ',' << d.lvFlow << ',' << d.qIn << ',' << get(d.qOut, 7) << ','
-          << get(d.qOut, 8) << ',' << get(d.qOut, 9) << ',' << get(d.qOut, 10) << ','
-          << get(d.qOut, 14) << ',' << get(d.qOut, 15) << ',' << d.qOutSum << ','
-          << get(d.qDistal, 7) << ',' << get(d.qDistal, 8) << ',' << get(d.qDistal, 9)
-          << ',' << get(d.qDistal, 10) << ',' << get(d.qDistal, 14) << ','
-          << get(d.qDistal, 15) << ',' << d.qDistalSum << ',' << d.qCapChargingSum << ','
-          << get(d.pc, 7) << ',' << get(d.pc, 8) << ',' << get(d.pc, 9) << ','
-          << get(d.pc, 10) << ',' << get(d.pc, 14) << ',' << get(d.pc, 15) << ','
-          << get(d.pOut, 7) << ',' << get(d.pOut, 8) << ',' << get(d.pOut, 9) << ','
-          << get(d.pOut, 10) << ',' << get(d.pOut, 14) << ',' << get(d.pOut, 15) << ','
-          << d.flowBalance << ',' << d.ec << ',' << d.gamma << ',' << d.beta << ',' << d.w
-          << ',' << d.kc << ',' << d.tauc << ',' << d.pim << ',' << d.ptm << ','
-          << d.muARatio << ',' << d.muVRatio << ',' << d.storedVolume << '\n';
+          << ',' << d.lvFlow << ',' << d.qIn << ',' << perOutlet(d.qOut) << d.qOutSum
+          << ',' << perOutlet(d.qDistal) << d.qDistalSum << ',' << d.qCapChargingSum
+          << ',' << perOutlet(d.pc) << perOutlet(d.pOut) << d.flowBalance << ',' << d.ec
+          << ',' << d.gamma << ',' << d.beta << ',' << d.w << ',' << d.kc << ','
+          << d.tauc << ',' << d.pim << ',' << d.ptm << ',' << d.muARatio << ','
+          << d.muVRatio << ',' << d.storedVolume << '\n';
 
     m_csv.flush();
   }

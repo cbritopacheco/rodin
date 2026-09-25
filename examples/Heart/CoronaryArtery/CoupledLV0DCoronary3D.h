@@ -222,15 +222,15 @@ namespace Rodin::Examples::Heart
       struct CarreauYasuda
       {
           /// @brief Low-shear viscosity.
-          Real mu0 = 0.346;
+          Real mu0 = 0.071;
           /// @brief Infinite-shear viscosity.
-          Real muInf = 0.0053;
+          Real muInf = 0.004;
           /// @brief Relaxation time.
-          Real lambda = 17.41;
+          Real lambda = 9.71;
           /// @brief Power-law index.
-          Real n = 0.22;
+          Real n = 0.25;
           /// @brief Yasuda transition exponent.
-          Real yasuda = 0.69;
+          Real yasuda = 1.82;
           /// @brief Shear-rate regularization used in the 3D viscosity.
           Real gammaRegularization = 1.0e-3;
       };
@@ -476,15 +476,15 @@ namespace Rodin::Examples::Heart
           /// @brief Initial distal pressure.
           Real initialPd = 10000.0;
           /// @brief Low-shear viscosity.
-          Real mu_0 = 0.346;
+          Real mu_0 = 0.071;
           /// @brief Infinite-shear viscosity.
-          Real mu_Inf = 0.0053;
+          Real mu_Inf = 0.0044;
           /// @brief Relaxation time.
-          Real lambda = 17.4172;
+          Real lambda = 9.91;
           /// @brief Power-law index.
-          Real n = 0.22;
+          Real n = 0.25;
           /// @brief Yasuda transition exponent.
-          Real yasuda = 0.69;
+          Real yasuda = 1.82;
           /// @brief Proximal surrogate vessel radius.
           Real proximalRadius = 0.0125;
           /// @brief Proximal surrogate vessel length.
@@ -532,13 +532,15 @@ namespace Rodin::Examples::Heart
 
           /// @brief No-slip wall boundary attribute.
           Attribute wall = 2;
-          /// @brief Inlet boundary attribute.
-          Attribute inlet = 4;
+          /// @brief Inlet boundary attribute (left main ostium, the largest cap).
+          Attribute inlet = 40;
 
-          /// @brief Outlet boundary attributes, in the same order used by RCR data.
-          std::array<Attribute, 6> outlets{{7, 8, 9, 10, 14, 15}};
+          /// @brief Outlet boundary attributes, in the order used by the RCR
+          ///        data and the CSV columns. Any number of outlets.
+          std::vector<Attribute> outlets{{36, 37, 38, 39}};
 
-          /// @brief Mesh coordinate scale applied after partitioning.
+          /// @brief Mesh coordinate scale applied after partitioning. The mesh
+          ///        is in millimetres.
           Real meshScale = 1.0e-3;
           /// @brief Pressure stabilization parameter.
           Real eps = 1.0e-12;
@@ -546,17 +548,23 @@ namespace Rodin::Examples::Heart
           Real rho = 1060.0;
           /// @brief Inlet reversed-flow damping multiplier. Set to 0 to disable.
           Real inletBackflowStabilization = 1.0;
-          /// @brief Inlet normal impedance coefficient in Pa s / m. Set to 0 to
-          /// disable.
-          /// @details Defaults to defaultRCR.Rp times the scaled inlet area.
-          Real inletImpedance = 5.e2;
+          /// @brief Lumped inlet resistance R_in (Pa s/m^3). Set to 0 to disable.
+          /// @details Assembled as the normal impedance Z (u.n)(v.n) with
+          ///          Z = R_in A_in and A_in measured on the scaled mesh, so the
+          ///          area-averaged inlet pressure drop is R_in Q whatever the
+          ///          ostium calibre. The default reproduces the former
+          ///          Z = 500 Pa s/m on the 19.40 mm^2 inlet of Coronary3D.mesh.
+          Real inletResistance = 2.578e7;
           /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
           Real outletBackflowStabilization = 1.0;
 
           /// @brief Time-step size.
           Real dt = 1.0e-3;
-          /// @brief Number of time steps.
-          size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+          /// @brief Number of time steps (three cycles of 0.85 s at dt = 1 ms).
+          /// @details Rounded, not truncated: 0.85 / 1e-3 evaluates to
+          ///          849.999..., which truncation turns into 849 steps per
+          ///          cycle and leaves the last cycle 3 ms short.
+          size_t nsteps = 3 * static_cast<size_t>(std::lround(0.85 / 1.0e-3));
           /// @brief Factor applied to dt when the 3D KSP/SNES solve fails.
           Real timeAdaptivityReductionFactor = 0.5;
           /// @brief Maximum number of successive dt reductions per accepted step.
@@ -644,21 +652,6 @@ namespace Rodin::Examples::Heart
           Quemada quemada;
 
           /// @brief Morphometric radius of the arteriolar limb (m).
-          /// @details The prescribed pair is (r, v), a calibre and a red-cell
-          ///          velocity, which is what intravital microscopy measures.
-          ///          The rest is derived,
-          ///
-          ///            g_0 = 4 v / r                       (Poiseuille wall shear)
-          ///            N   = Q_i / (pi r^2 v)              (bed multiplicity)
-          ///            L   = r dP_share / (2 mu_N g_0)     (pressure budget)
-          ///            T   = L / v                         (transit time)
-          ///
-          ///          so the effective path length is an output: L lumps
-          ///          several generations in series and is not measurable,
-          ///          whereas r and v are. Three measurables (r, v, T) for two
-          ///          degrees of freedom leave one consistency check, the
-          ///          derived transit time against the indicator-dilution
-          ///          value (~1-2 s at rest), reported at calibration.
           Real arteriolarRadius = 25.0e-6;
           /// @brief Mean arteriolar velocity (m/s). Physiological range 2-10 mm/s.
           Real arteriolarVelocity = 5.0e-3;
@@ -692,19 +685,7 @@ namespace Rodin::Examples::Heart
 
           /// @brief Right atrial pressure seen by the running 0D outlets (Pa).
           ///        <= 0 means "same as rightAtrialPressure".
-          /// @details Separates the runtime drainage pressure from the value
-          ///          used by the resting calibration. A venous-hypertension
-          ///          scenario (right-heart failure, tricuspid regurgitation,
-          ///          constrictive pericarditis; ~1800-2500 Pa, 13-19 mmHg)
-          ///          displaces the operating point of a bed whose
-          ///          (R_a, R_v, C) were calibrated at the healthy baseline:
-          ///          set this value and leave rightAtrialPressure alone.
-          ///          Setting rightAtrialPressure instead models a chronically
-          ///          adapted bed, since the calibration budget
-          ///          dP = p_ar(0) - P_RA then absorbs part of the change. The
-          ///          first cycles carry a transient, because the calibrated
-          ///          initial p_tm uses the baseline value.
-          Real operatingRightAtrialPressure = 2400.0;
+          Real operatingRightAtrialPressure = 700.0;
 
           /// @brief Freeze the reduced outlet closure at its high-shear
           ///        plateau, giving a constant outlet resistance.
@@ -883,6 +864,11 @@ namespace Rodin::Examples::Heart
       Rodin::Solver::KSP m_wssKSP;
 
       std::map<Attribute, RCR> m_wk;
+
+      /// @brief Inlet area measured on the scaled mesh (m^2).
+      Real m_inletArea = 0.0;
+      /// @brief Inlet normal impedance Z = R_in A_in (Pa s/m).
+      Real m_inletImpedance = 0.0;
 
       /// @brief Universal WRMS apparent-viscosity table. Built once at
       ///        calibration and shared by every outlet and both limbs.

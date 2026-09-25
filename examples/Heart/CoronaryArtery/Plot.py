@@ -60,7 +60,7 @@ import pandas as pd
 
 
 # Boundary attributes of the coronary outlets, matching Config::outlets.
-OUTLET_IDS = [7, 8, 9, 10, 14, 15]
+OUTLET_IDS = [36, 37, 38, 39]
 PERIOD = 0.85
 
 # Systole is taken from the activation ramp to the end of the relaxation ramp

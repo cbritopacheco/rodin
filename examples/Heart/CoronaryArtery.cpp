@@ -55,11 +55,14 @@
  * back to the nominal value once solves are accepted again. Failures of the
  * 0D Newton are not retried by this mechanism.
  *
- * The simulation defaults inherited from `CoupledLV0DCoronary3D::Config`
- * include `dt = 1e-3 s`, `nsteps = 2550`, `rho = 1060 kg/m^3`,
- * `eps = 1e-12`, `meshScale = 1e-3`, inlet/outlet backflow stabilization `1`,
- * wall attribute `2`, inlet attribute `4`, outlet attributes
- * `7, 8, 9, 10, 14, 15`.
+ * The mesh is `LCA_volumen_v22_smooth.mesh` (left coronary tree, left main
+ * ostium plus four distal outlets, coordinates in millimetres). The simulation
+ * defaults inherited from `CoupledLV0DCoronary3D::Config` include
+ * `dt = 1e-3 s`, `nsteps = 2550`, `rho = 1060 kg/m^3`, `eps = 1e-12`,
+ * `meshScale = 1e-3`, inlet/outlet backflow stabilization `1`, wall attribute
+ * `2`, inlet attribute `40`, outlet attributes `36, 37, 38, 39`, and a
+ * lumped inlet resistance `R_in = 2.578e7 Pa s/m^3` assembled as the normal
+ * impedance `Z = R_in A_in`.
  * Each outlet is a Starling resistor in an intramyocardial bed with a single
  * state, the microvascular transmural pressure `p_tm = p_c - p_im`; its three
  * lumped constants `(R_a, R_v, C)` are produced by the calibration from
@@ -136,9 +139,10 @@ int main(int argc, char** argv)
 
     {
       Rodin::Examples::Heart::CoupledLV0DCoronary3D::Config cfg;
-      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery/Coronary3D.mesh";
-      cfg.xdmfBasename = "hyp2/CoronaryArtery";
-      cfg.csvPath = "hyp2/CoronaryArtery.csv";
+      cfg.meshPath =
+        "../resources/examples/Heart/CoronaryArtery/LCA_volumen_v22_smooth.mesh";
+      cfg.xdmfBasename = "results/CoronaryArtery";
+      cfg.csvPath = "results/CoronaryArtery.csv";
 
       char flowMode[32] = {};
       PetscBool flowModeSet = PETSC_FALSE;
