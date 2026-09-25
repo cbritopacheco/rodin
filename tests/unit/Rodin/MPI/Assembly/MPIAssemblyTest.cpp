@@ -566,7 +566,9 @@ namespace Rodin::Tests::Unit
           const auto owner = owners.find(gid);
           EXPECT_NE(owner, owners.end());
           if (owner != owners.end())
+          {
             EXPECT_EQ(owner->second, declaration.first);
+          }
         }
       for (Index i = 0; i < shard.getPolytopeCount(dim); ++i)
         if (shard.isOwned(dim, i))
@@ -575,9 +577,13 @@ namespace Rodin::Tests::Unit
           expected.erase(rank);
           const auto halo = shard.getHalo(dim).find(i);
           if (halo == shard.getHalo(dim).end())
+          {
             EXPECT_TRUE(expected.empty());
+          }
           else
+          {
             EXPECT_EQ(halo->second, expected);
+          }
         }
     }
   }
@@ -642,7 +648,7 @@ namespace Rodin::Tests::Unit
       const auto& rankZeroFaces = sharder.getShards()[0].getPolytopeMap(dim - 1).right;
       for (auto it = localMesh.getBoundary(); it; ++it)
       {
-        if (!rankZeroFaces.contains(it->getIndex()))
+        if (rankZeroFaces.find(it->getIndex()) == rankZeroFaces.end())
         {
           localMesh.setAttribute({dim - 1, it->getIndex()}, selected);
           break;
@@ -1040,7 +1046,9 @@ namespace Rodin::Tests::Unit
     for (const auto& [index, value] : values)
     {
       if (begin <= index && index < end)
+      {
         EXPECT_NEAR(std::abs(value - prescribed), 0, 1e-12);
+      }
     }
     const size_t localCount = static_cast<size_t>(
       std::count_if(values.begin(), values.end(), [begin, end](const auto& entry) {
