@@ -21,14 +21,17 @@ namespace Rodin::Tests::Unit
   namespace
   {
     constexpr Attribute Interface = 10;
+    constexpr Attribute FixedBoundary = 11;
 
     struct SolveState
     {
         Math::Vector<Real> displacement;
         WNGIRReport report;
+        Real fixedBoundaryMaximum = 0;
     };
 
-    SolveState solveTranslatedLine(Real levelSetScale, Real robustScale = 0)
+    SolveState solveTranslatedLine(
+      Real levelSetScale, Real robustScale = 0, bool freezeBoundary = false)
     {
       constexpr std::size_t n = 5;
       constexpr Real h = Real(1) / Real(n - 1);
@@ -50,6 +53,21 @@ namespace Rodin::Tests::Unit
           interfaceFacets.push_back(face->getIndex());
           mesh.setAttribute({1, face->getIndex()}, Interface);
         }
+        bool onBoundary = false;
+        for (std::size_t component = 0; component < 2; ++component)
+        {
+          bool onLowerSide = true;
+          bool onUpperSide = true;
+          for (const Index vertex : face->getVertices())
+          {
+            const Real coordinate = mesh.getVertexCoordinates(vertex)(component);
+            onLowerSide &= std::abs(coordinate) < Real(1e-12);
+            onUpperSide &= std::abs(coordinate - Real(1)) < Real(1e-12);
+          }
+          onBoundary |= onLowerSide || onUpperSide;
+        }
+        if (onBoundary)
+          mesh.setAttribute({1, face->getIndex()}, FixedBoundary);
       }
       EXPECT_FALSE(interfaceFacets.empty());
 
@@ -62,6 +80,11 @@ namespace Rodin::Tests::Unit
       parameters.robustScale = robustScale;
       parameters.hasInterfaceAttribute = true;
       parameters.interfaceAttribute = Interface;
+      if (freezeBoundary)
+      {
+        parameters.fixedBoundaryAttributes = {FixedBoundary};
+        parameters.rigidStabilisationLevel = 0;
+      }
       parameters.maxIterations = 12;
       parameters.tauRms = 0;
       parameters.tauInf = 0;
@@ -92,8 +115,32 @@ namespace Rodin::Tests::Unit
         2);
 
       const WNGIRReport report = solver.solve(mesh, interfaceFacets, phi, grad);
-      return {trial.getSolution().getData(), report};
+      Real fixedBoundaryMaximum = 0;
+      if (freezeBoundary)
+      {
+        const auto& displacement = trial.getSolution().getData();
+        for (std::size_t j = 0; j < n; ++j)
+        {
+          for (std::size_t i = 0; i < n; ++i)
+          {
+            if (i != 0 && i != n - 1 && j != 0 && j != n - 1)
+              continue;
+            const auto& dofs = fes.getDOFs(0, j * n + i);
+            for (const auto dof : dofs)
+              fixedBoundaryMaximum =
+                std::max(fixedBoundaryMaximum, std::abs(displacement(dof)));
+          }
+        }
+      }
+      return {trial.getSolution().getData(), report, fixedBoundaryMaximum};
     }
+  }
+
+  /// @brief Essential constraints keep every boundary displacement exactly zero.
+  TEST(Rodin_Adaptation_WNGIRSolver, FreezesMarkedBoundary)
+  {
+    const SolveState state = solveTranslatedLine(Real(1), Real(0), true);
+    EXPECT_LT(state.fixedBoundaryMaximum, Real(1e-12));
   }
 
   /// @brief The default primal-barrier solve reduces fit while preserving geometry.

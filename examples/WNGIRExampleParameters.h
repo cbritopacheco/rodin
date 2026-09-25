@@ -178,7 +178,7 @@ namespace Rodin::Examples
     p.directionNormFactor =
       realOption(argc, argv, "wngir-direction-norm-factor", p.directionNormFactor);
 
-    p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
+    p.jMinRatio = realOption(argc, argv, "wngir-j-min", "j-min", Real(1e-8));
     p.jLineSearchRatio =
       realOption(argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
     p.tauRmsHFloor = realOption(argc, argv, "wngir-rms-floor", defaults.tauRmsHFloor);
@@ -204,6 +204,7 @@ namespace Rodin::Examples
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
+    p.directStep = boolOption(argc, argv, "wngir-direct-step", p.directStep);
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;
     p.trace =
