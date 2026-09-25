@@ -15,3 +15,11 @@ decay on the same geometry set.
 `ReactionDiffusion` checks both fields in a symmetric coupled system on the
 same fixed mesh, with separate L2 and H1-seminorm errors at degrees one
 through four for all seven geometries.
+`LinearElasticity` checks the vector displacement
+$u_i=(i+1)\exp(\sum_j x_j)$ at degrees one through four. The fixed unit-box
+mesh, Lamé parameters $\lambda=1.5$, $\mu=0.5$, forcing, and full displacement
+trace remain unchanged. Both the independently integrated displacement L2
+error and Jacobian H1-seminorm error must decrease at every adjacent degree
+on all seven geometries. Positive observed degree-decay constants over this
+finite sequence support the analytic-field study; they do not prove an
+asymptotic rate for arbitrarily high degree.

@@ -169,7 +169,8 @@ exists yet.
 | --- | --- | --- | --- | --- |
 | Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
 | Complex Helmholtz | P1/P2 | P1–P4 | P1–P3 | — |
-| Linear elasticity, Stokes | Implemented | — | — | — |
+| Linear elasticity | Vector P1/P2, displacement and traction variants | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | — |
+| Stokes | Taylor–Hood velocity/pressure | — | — | — |
 | Variable conductivity | P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
 | Coupled reaction–diffusion | P1/P2 | P1→P2→P3→P4 analytic | — | — |
 | Nonlinear Poisson | P1/P2 | — | — | — |
@@ -180,9 +181,10 @@ axis, $h=1/(n-1)$, and field degree $p$:
 
 - h: P1 commonly uses `n=5→9→17` ($h=1/4\to1/8\to1/16$); P2/P3 commonly
   use `n=3→5→9`. P0 projection and Taylor–Hood Stokes use `n=3→5→9`.
-- p: Poisson, complex Helmholtz, variable conductivity, and coupled
-  reaction–diffusion check `p=1→2→3→4` on a fixed `n=2` mesh.
-- hp: Poisson, Helmholtz, and variable conductivity use
+- p: Poisson, complex Helmholtz, variable conductivity, coupled
+  reaction–diffusion, and linear elasticity check `p=1→2→3→4` on a fixed
+  `n=2` mesh.
+- hp: Poisson, Helmholtz, variable conductivity, and linear elasticity use
   `(n,p)=(2,1)→(3,2)→(5,3)`.
 - isoparametric: curved P2 Poisson and conductivity use `n=5→9→17`
   in 1D/2D and `n=3→4→5` in 3D. A separate P1 geometry-map error
