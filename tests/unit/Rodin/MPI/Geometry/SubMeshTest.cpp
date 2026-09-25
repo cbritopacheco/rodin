@@ -636,8 +636,10 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
         }
       }
       // Every selected entity already held by the parent must be retained.
-      for (const auto& [gid, local] : parent.getShard().getPolytopeMap(d).right)
-        EXPECT_EQ(sub.getPolytopeMap(d).right.contains(local), selected.contains(gid));
+      const auto& subIDs = sub.getShard().getPolytopeMap(d).right;
+      for (const auto& entry : parent.getShard().getPolytopeMap(d).right)
+        EXPECT_EQ(
+          subIDs.find(entry.first) != subIDs.end(), selected.contains(entry.first));
       if (d == 0)
         continue;
       std::vector<std::pair<Index, Index>> incidences;
