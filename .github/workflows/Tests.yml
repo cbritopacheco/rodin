@@ -433,14 +433,14 @@ jobs:
       - name: Build
         run: cmake --build ${{ github.workspace }}/build
 
-      - name: Run slow manufactured tests
+      - name: Run slow tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
-      - name: Rerun failed slow manufactured tests (verbose)
+      - name: Rerun failed slow tests (verbose)
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests

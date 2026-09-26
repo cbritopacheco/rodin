@@ -100,5 +100,10 @@ and refinement rates are tested separately in
 ## Backend-independent build
 
 Configure with MPI enabled, PETSc disabled, and unit tests enabled. Build
-RodinMPIAssemblyTest, then run
-`ctest --test-dir <build>/tests -R '^RodinMPIAssemblyTest_np' --output-on-failure`.
+RodinMPIAssemblyTest. The regular `RodinMPIAssemblyTest_np*` CTest entries
+cover all checks except the four 3D affine-identification cases, and have a
+120-second limit. The latter run on each of 1, 2, 3, 4, and 8 ranks as
+`RodinMPIAssemblyIdentificationSlowTest_np*` entries, labelled
+`unit;distributed;slow` with a 600-second limit. CI's Release slow job runs
+them separately; no geometry or rank is omitted. Run both groups with
+`ctest --test-dir <build>/tests -R '^RodinMPIAssembly' --output-on-failure`.
