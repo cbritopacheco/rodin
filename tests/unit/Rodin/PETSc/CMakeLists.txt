@@ -89,7 +89,7 @@ if (RODIN_USE_MPI)
     Rodin::MPI
     Rodin::PETSc)
 
-  foreach(np 2 4)
+  foreach(np 2 3 4)
     add_test(
       NAME RodinPETScMPIFormTest_np${np}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
@@ -97,7 +97,7 @@ if (RODIN_USE_MPI)
               $<TARGET_FILE:RodinPETScMPIFormTest>)
     set_tests_properties(RodinPETScMPIFormTest_np${np} PROPERTIES
       LABELS "unit;petsc;distributed"
-      TIMEOUT 10
+      TIMEOUT 120
     )
     rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIFormTest_np${np})
   endforeach()

@@ -76,6 +76,15 @@ namespace Rodin::Geometry
        * Provides a fluent interface for incrementally building submeshes from
        * a parent `Mesh<Context::MPI>` by selecting specific polytopes. Each
        * rank includes entities independently using parent-shard-local indices.
+       *
+       * Architecture: the global top-dimensional selection is the union of
+       * rank-local requests. Finalization first reconciles that selection at
+       * parent owners and publishes it to parent holders, then includes those
+       * entities and their subentities before resolving ownership. For a parent
+       * with complete vertex-star overlap, the selected mesh inherits that
+       * overlap. No entities outside the global selection are imported.
+       * Parent-local maps and distributed identities are preserved. Partition
+       * membership (Shared versus Ghost) is recomputed for the selected mesh.
        */
       class Builder
       {
@@ -113,6 +122,9 @@ namespace Rodin::Geometry
            * @brief Finalizes construction and returns the distributed submesh.
            *
            * After finalization:
+           * - Selected top-dimensional entities are present on all their parent
+           *   holders, even if only a nonowner requested them. Selection is
+           *   collective; the parent must already provide complete overlap.
            * - The submesh shard uses the parent shard's distributed entity
            *   indices for consistent global operations.
            * - Ownership and halo metadata are inherited from the parent shard
@@ -126,6 +138,9 @@ namespace Rodin::Geometry
           SubMesh finalize();
 
         private:
+          /// Completes the globally selected top-dimensional entities on parent holders.
+          void completeOverlap();
+
           Optional<std::reference_wrapper<const Mesh<Context::MPI>>> m_parent;
           Shard::Builder m_shardBuilder;
           std::vector<SubMeshBase::PolytopeMap> m_s2ps;

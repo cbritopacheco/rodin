@@ -17,6 +17,7 @@
  *
  * Run with mpirun -n 1/2/3/4 as registered in CMakeLists.txt.
  */
+#include <algorithm>
 #include <set>
 #include <limits>
 #include <numeric>
@@ -26,6 +27,8 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/collectives.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
@@ -54,6 +57,9 @@ namespace
     mesh.getConnectivity().compute(D, D - 1);
     mesh.getConnectivity().compute(D - 1, D);
     mesh.getConnectivity().compute(D - 1, 0);
+    for (size_t d = 1; d <= D; ++d)
+      for (size_t dp = 0; dp <= D; ++dp)
+        mesh.getConnectivity().compute(d, dp);
     return mesh;
   }
 
@@ -534,6 +540,146 @@ TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
 }
 
 // ---------------------------------------------------------------------------
+
+/** Exact incidence oracle: selection changes, geometry and parent partition stay fixed. */
+TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  for (auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    const size_t D = Polytope::Traits(type).getDimension();
+    auto parent = D == 1 ? distributeFromRoot(ctx, type, {17})
+      : D == 2           ? distributeFromRoot(ctx, type, {5, 5})
+                         : distributeFromRoot(ctx, type, {5, 5, 5});
+    for (int mode = 0; mode < 5; ++mode)
+    {
+      SCOPED_TRACE(::testing::Message()
+        << "geometry=" << static_cast<int>(type) << " mode=" << mode
+        << " rank=" << g_world->rank());
+      const size_t d = mode == 2 ? D - 1 : D;
+      SubMesh<Context::MPI>::Builder builder;
+      builder.initialize(parent);
+      std::vector<Index> requested;
+      for (auto cell = parent.getPolytope(d); cell; ++cell)
+      {
+        const Index i = cell->getIndex();
+        const Index gid = parent.getShard().getPolytopeMap(d).left.at(i);
+        const bool owned = parent.getShard().isOwned(d, i);
+        const bool choose = mode == 0 ? owned
+          : mode == 1                 ? owned && gid % 2 == 0
+          : mode == 2                 ? owned && parent.getShard().isBoundary(i)
+                                      : g_world->rank() == 0 && requested.empty() &&
+            (mode == 3 || !owned || g_world->size() == 1);
+        if (choose)
+        {
+          builder.include(d, i);
+          requested.push_back(gid);
+        }
+      }
+      std::vector<std::vector<Index>> gathered;
+      boost::mpi::all_gather(*g_world, requested, gathered);
+      std::set<Index> selected;
+      for (const auto& indices : gathered)
+        selected.insert(indices.begin(), indices.end());
+      auto sub = builder.finalize();
+      EXPECT_EQ(sub.getDimension(), d);
+      EXPECT_EQ(sub.getPolytopeCount(d), selected.size());
+      for (size_t dp = 0; dp <= d; ++dp)
+      {
+        std::vector<Index> owned, visible;
+        const auto& ids = sub.getShard().getPolytopeMap(dp).left;
+        for (Index i = 0; i < ids.size(); ++i)
+        {
+          visible.push_back(ids[i]);
+          if (sub.getShard().isOwned(dp, i))
+            owned.push_back(ids[i]);
+        }
+        std::vector<std::vector<Index>> allOwned, allVisible;
+        boost::mpi::all_gather(*g_world, owned, allOwned);
+        boost::mpi::all_gather(*g_world, visible, allVisible);
+        std::set<Index> owners, holders;
+        for (const auto& indices : allOwned)
+          for (Index gid : indices)
+            EXPECT_TRUE(owners.insert(gid).second) << "duplicate owner, dim=" << dp;
+        for (const auto& indices : allVisible)
+          holders.insert(indices.begin(), indices.end());
+        EXPECT_EQ(owners, holders);
+        for (Index i = 0; i < ids.size(); ++i)
+        {
+          if (sub.getShard().isOwned(dp, i))
+          {
+            IndexSet expectedHalo;
+            for (size_t rank = 0; rank < allVisible.size(); ++rank)
+              if (rank != static_cast<size_t>(g_world->rank()) &&
+                std::find(allVisible[rank].begin(), allVisible[rank].end(), ids[i]) !=
+                  allVisible[rank].end())
+                expectedHalo.insert(rank);
+            const auto& halo = sub.getShard().getHalo(dp);
+            const auto found = halo.find(i);
+            EXPECT_EQ(found == halo.end() ? IndexSet{} : found->second, expectedHalo);
+          }
+          else
+          {
+            const auto owner = sub.getShard().getOwner(dp).at(i);
+            EXPECT_NE(
+              std::find(allOwned.at(owner).begin(), allOwned.at(owner).end(), ids[i]),
+              allOwned.at(owner).end());
+            bool shared = false;
+            if (dp < d)
+              for (Index cell : sub.getConnectivity().getIncidence({dp, d}, i))
+                shared |= sub.getShard().isOwned(d, cell);
+            EXPECT_EQ(sub.getShard().getState(dp)[i],
+              shared ? Shard::State::Shared : Shard::State::Ghost);
+          }
+        }
+      }
+      // Every selected entity already held by the parent must be retained.
+      const auto& subIDs = sub.getShard().getPolytopeMap(d).right;
+      for (const auto& entry : parent.getShard().getPolytopeMap(d).right)
+        EXPECT_EQ(
+          subIDs.find(entry.first) != subIDs.end(), selected.contains(entry.first));
+      if (d == 0)
+        continue;
+      std::vector<std::pair<Index, Index>> incidences;
+      for (auto cell = parent.getPolytope(d); cell; ++cell)
+      {
+        const Index i = cell->getIndex();
+        const Index gid = parent.getShard().getPolytopeMap(d).left.at(i);
+        if (!parent.getShard().isOwned(d, i) || !selected.contains(gid))
+          continue;
+        for (Index face : parent.getConnectivity().getIncidence({d, d - 1}, i))
+          incidences.emplace_back(
+            parent.getShard().getPolytopeMap(d - 1).left.at(face), gid);
+      }
+      std::vector<std::vector<std::pair<Index, Index>>> allIncidences;
+      boost::mpi::all_gather(*g_world, incidences, allIncidences);
+      IndexMap<std::set<Index>> incidentCells;
+      for (const auto& records : allIncidences)
+        for (const auto& [face, cell] : records)
+          incidentCells[face].insert(cell);
+      for (auto face = sub.getFace(); face; ++face)
+      {
+        const Index i = face->getIndex();
+        if (!sub.getShard().isOwned(d - 1, i))
+          continue;
+        const Index gid = sub.getShard().getPolytopeMap(d - 1).left.at(i);
+        EXPECT_EQ(sub.isBoundary(i), incidentCells.at(gid).size() == 1);
+      }
+      // Repeating extraction must not progressively discard overlap.
+      SubMesh<Context::MPI>::Builder nestedBuilder;
+      nestedBuilder.initialize(sub);
+      for (auto cell = sub.getCell(); cell; ++cell)
+        if (sub.getShard().isOwned(d, cell->getIndex()))
+          nestedBuilder.include(d, cell->getIndex());
+      auto nested = nestedBuilder.finalize();
+      EXPECT_EQ(nested.getPolytopeCount(d), selected.size());
+      EXPECT_EQ(nested.getShard().getPolytopeMap(d).right.size(),
+        sub.getShard().getPolytopeMap(d).right.size());
+    }
+  }
+}
 
 int main(int argc, char** argv)
 {

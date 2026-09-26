@@ -443,7 +443,7 @@ namespace Rodin::Variational
            * @brief Evaluates the vector basis function at a spatial point.
            * @return Constant unit vector: e_j where j = local % vdim
            */
-          ReturnType operator()(const Math::SpatialVector<ScalarType>&) const
+          ReturnType operator()(const Math::SpatialVector<Real>&) const
           {
             ReturnType out(static_cast<std::uint8_t>(m_vdim));
             out.setZero();

@@ -344,6 +344,52 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(fes.getSize(), 1u);
     }
   }
+
+  /** Real/complex scalar and vector global constants have identical DOF maps. */
+  TEST(MPIP0gSpace, ValueTypesShareGlobalDOFMaps)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    for (auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(polytopeName(type));
+      const size_t dim = Polytope::Traits(type).getDimension();
+      auto mesh = dim == 1 ? distributeFromRoot(ctx, type, {5})
+        : dim == 2         ? distributeFromRoot(ctx, type, {4, 4})
+                           : distributeFromRoot(ctx, type, {4, 3, 3});
+      P0g<Real, Mesh<Context::MPI>> realScalar(mesh);
+      P0g<Complex, Mesh<Context::MPI>> complexScalar(mesh);
+      P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(mesh, 2);
+      P0g<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(mesh, 2);
+      EXPECT_EQ(realScalar.getSize(), 1u);
+      EXPECT_EQ(complexScalar.getSize(), 1u);
+      EXPECT_EQ(realVector.getSize(), 2u);
+      EXPECT_EQ(complexVector.getSize(), 2u);
+      const auto& shard = mesh.getShard();
+      for (Index i = 0; i < shard.getCellCount(); ++i)
+      {
+        const auto& rs = realScalar.getDOFs(dim, i);
+        const auto& cs = complexScalar.getDOFs(dim, i);
+        const auto& rv = realVector.getDOFs(dim, i);
+        const auto& cv = complexVector.getDOFs(dim, i);
+        ASSERT_EQ(rs.size(), 1u);
+        ASSERT_EQ(cs.size(), 1u);
+        ASSERT_EQ(rv.size(), 2u);
+        ASSERT_EQ(cv.size(), 2u);
+        EXPECT_EQ(rs[0], 0);
+        EXPECT_EQ(cs[0], 0);
+        EXPECT_EQ(rv[0], 0);
+        EXPECT_EQ(rv[1], 1);
+        EXPECT_EQ(cv[0], 0);
+        EXPECT_EQ(cv[1], 1);
+      }
+    }
+  }
 } // namespace Rodin::Tests::Unit
 
 // ---------------------------------------------------------------------------

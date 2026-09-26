@@ -166,7 +166,7 @@ namespace Rodin::Variational
           for (size_t local = 0; local < fe.getCount(); ++local)
           {
             const auto& basis = fe.getBasis(local);
-            out += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
+            out += basis.getGradient()(rc) * gf[fes.getGlobalIndex({d, i}, local)];
           }
 
           out = p.getJacobianInverse().transpose() * out;
