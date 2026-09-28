@@ -13,7 +13,7 @@
   @section examples-shapeopt-ls-intro Introduction
 
   This advanced example combines **level-set shape optimization** with
-  **body-fitted meshing**. Unlike the
+  body-fitted meshing. Unlike the
   @ref examples-shapeoptimization-simple_cantilever "simple cantilever"
   which only moves the boundary, this algorithm can perform **topology
   changes** (create holes, merge components) by advecting a level-set
@@ -186,7 +186,7 @@
   @subsection examples-shapeopt-ls-loop-advect Step 5 — Advect the Level Set
 
   The signed distance function is first computed by solving the
-  **Eikonal equation** @f$ |\nabla d| = 1 @f$. Then it is advected along the
+  Eikonal equation @f$ |\nabla d| = 1 @f$. Then it is advected along the
   descent direction using a **Lagrangian advection** scheme:
 
   @code{.cpp}

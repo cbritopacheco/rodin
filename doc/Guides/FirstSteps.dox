@@ -107,7 +107,7 @@
   domain @f$ \Omega @f$ into a collection of polytopes. You can create meshes
   in several ways:
 
-  **Generate a uniform grid on the unit hypercube:**
+  Generate a uniform grid on the unit hypercube:
   @code{.cpp}
   Mesh mesh;
   // 2D triangular mesh: 16×16 subdivisions on [0, 15] × [0, 15]
@@ -117,7 +117,7 @@
   mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
   @endcode
 
-  **Generate a boundary (surface) mesh:**
+  Generate a boundary (surface) mesh:
   @code{.cpp}
   // 2D box boundary (segments): a rectangle boundary in 2D
   mesh = mesh.Box(Polytope::Type::Segment, {4, 4});
@@ -130,14 +130,14 @@
   is one less than the ambient space (e.g. a 1D curve in 2D, or a 2D surface
   in 3D). The `type` parameter specifies the **face** type, not the cell type.
 
-  **Load from file:**
+  Load from file:
   @code{.cpp}
   Mesh mesh;
   mesh.load("domain.mesh", IO::FileFormat::MEDIT);   // MEDIT format
   mesh.load("domain.mesh", IO::FileFormat::MFEM);     // MFEM format
   @endcode
 
-  **Key properties:**
+  Key properties:
   @code{.cpp}
   mesh.getDimension();          // Topological dimension (2 or 3)
   mesh.getSpaceDimension();     // Ambient space dimension
