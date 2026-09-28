@@ -83,8 +83,10 @@ namespace KelvinBall
       throw std::runtime_error("The background Hausdorff tolerance must be positive.");
     if (!(backgroundGradation > 1))
       throw std::runtime_error("The background gradation must exceed one.");
-    if (!(adaptInterfaceSize > 0) || !(adaptFarSize > 0))
-      throw std::runtime_error("The adaptation sizes must be positive.");
+    if (!(adaptInterfaceSize > 0) || !(adaptFarSize >= adaptInterfaceSize))
+      throw std::runtime_error(
+        "The adaptation sizes must satisfy 0 < --mmg-adapt-interface-size "
+        "<= --mmg-adapt-far-size.");
     if (!(adaptWidth > 0))
       throw std::runtime_error("The adaptation width must be positive.");
     if (!(adaptGradation > 1))

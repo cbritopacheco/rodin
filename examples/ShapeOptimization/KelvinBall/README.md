@@ -442,13 +442,16 @@ background with WNGIR:
 | Option | Meaning | Default |
 |---|---|---|
 | `--mmg-adapt` | Enables the adaptation | Off |
-| `--mmg-adapt-interface-size` | Size $h_\Gamma$ on $\Gamma$, in multiples of $h$ | 1 |
-| `--mmg-adapt-far-size` | Size $h_{\mathrm{far}}$ away from $\Gamma$, in multiples of $h$ | 1 |
+| `--mmg-adapt-interface-size` | Adaptation `hmin` = $h_\Gamma$, in multiples of $h$ | 1 |
+| `--mmg-adapt-far-size` | Adaptation `hmax` = $h_{\mathrm{far}}$, in multiples of $h$ | 1 |
 | `--mmg-adapt-width` | MMG-cut size-map width $w$, in multiples of $h$; not used for WNGIR | 3 |
 | `--mmg-adapt-gradation` | Largest ratio between neighbouring sizes | 1.3 |
 
-For MMG reconstruction, the minimum size and Hausdorff tolerance are those of
-the cut. For WNGIR, they follow the background settings. The WNGIR background
+The interface and far-field sizes are also MMG's `hmin` and `hmax` for the
+adaptation pass; thus $0<h_\Gamma\leq h_{\mathrm{far}}$ is required. The
+preceding MMG level-set cut retains its separate bounds. The WNGIR background
+uses `--background-hmin` and `--background-hmax` only when adaptation is off;
+its Hausdorff tolerance still follows `--background-hausdorff`. The background
 remains fixed: later interfaces can leave the initially refined band.
 
 #### Level-set snapping
@@ -495,11 +498,11 @@ MMG is called **once**, before any interface exists, to optimise the
 interface-free chamber. With `--mmg-adapt` it instead adapts that background
 near the initial sphere according to the Welsch-weighted size map, without
 inserting a material interface. Cut faces may be retriangulated but stay on
-their planes. The resulting mesh is the fixed
-background for the whole run;
-its settings are exposed as `--background-hmin`, `--background-hmax` and
-`--background-hausdorff` (in multiples of $h$, defaults 0.1, 1 and 0.05) and
-`--background-gradation` (default 2).
+their planes. The resulting mesh is the fixed background for the whole run.
+Without adaptation, its MMG optimisation uses `--background-hmin`,
+`--background-hmax`, and `--background-gradation` (defaults 0.1, 1, and 2).
+Both preparations use `--background-hausdorff` (default 0.05). These sizes
+and tolerances are in multiples of $h$.
 
 At every iterate the level set labels the background cells, which selects an
 envelope of internal facets, and WNGIR fits a fresh copy of the background so

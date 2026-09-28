@@ -444,9 +444,10 @@ namespace KelvinBall
           << Alert::NewLine
           << "                              once on the fixed WNGIR background."
           << Alert::NewLine << Alert::Notation("--mmg-adapt-interface-size=<value>")
-          << " Size on Gamma, in h (default: 1)." << Alert::NewLine
+          << " Adaptation hmin at Gamma, in h (default: 1)." << Alert::NewLine
           << Alert::Notation("--mmg-adapt-far-size=<value>")
-          << "   Size away from Gamma, in h (default: 1)." << Alert::NewLine
+          << "   Adaptation hmax away from Gamma, in h (default: 1)."
+          << Alert::NewLine
           << Alert::Notation("--mmg-adapt-width=<value>")
           << "      MMG-cut size-map width, in h (default: 3)."
           << Alert::NewLine << Alert::Notation("--mmg-adapt-gradation=<value>")
@@ -1146,7 +1147,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                     << diagnosticLabel("Transport velocity:")
                     << "Full shape direction" << Alert::NewLine
                     << diagnosticLabel("Reconstruction method:") << reconstructionMethod;
-  if (reconstructionMethod == "wngir")
+  if (reconstructionMethod == "wngir" && !configuration.adapt)
   {
     configurationInfo << Alert::NewLine << diagnosticLabel("Background minimum size:")
                       << Alert::Notation::Number(configuration.backgroundHMin) << " h"
@@ -1160,10 +1161,14 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   }
   if (configuration.adapt)
   {
-    configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation interface size:")
+    configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation hmin (interface):")
                       << Alert::Notation::Number(configuration.adaptInterfaceSize) << " h"
-                      << Alert::NewLine << diagnosticLabel("Adaptation far size:")
+                      << Alert::NewLine << diagnosticLabel("Adaptation hmax (far field):")
                       << Alert::Notation::Number(configuration.adaptFarSize) << " h";
+    if (reconstructionMethod == "wngir")
+      configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
+                        << Alert::Notation::Number(configuration.backgroundHausdorff)
+                        << " h";
     if (reconstructionMethod == "mmg")
       configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation width:")
                         << Alert::Notation::Number(configuration.adaptWidth) << " h";

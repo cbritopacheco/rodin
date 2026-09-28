@@ -223,10 +223,10 @@ namespace KelvinBall
     const Real interfaceSize = m_configuration.adaptInterfaceSize * h;
     const Real farSize = m_configuration.adaptFarSize * h;
     const Real hmin = m_configuration.adapt
-      ? std::min(m_configuration.backgroundHMin * h, std::min(interfaceSize, farSize))
+      ? interfaceSize
       : m_configuration.backgroundHMin * h;
     const Real hmax = m_configuration.adapt
-      ? std::max(interfaceSize, farSize)
+      ? farSize
       : m_configuration.backgroundHMax * h;
     const Real hausdorff = m_configuration.backgroundHausdorff * h;
     MMG::Mesh mesh(makeUniformChamber());
@@ -291,8 +291,8 @@ namespace KelvinBall
 
     protectFixedGeometry(mesh, false);
     MMG::Adapt()
-      .setHMin(0.1 * h)
-      .setHMax(std::max(interfaceSize, farSize))
+      .setHMin(interfaceSize)
+      .setHMax(farSize)
       .setHausdorff(0.1 * h * h)
       .setGradation(m_configuration.adaptGradation)
       .setAngleDetection(false)
