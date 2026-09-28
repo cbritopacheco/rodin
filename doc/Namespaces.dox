@@ -1145,7 +1145,7 @@
   The Solver module provides a comprehensive set of direct and iterative
   linear solvers:
 
-  **Direct solvers** (exact up to floating-point precision):
+  Direct solvers (exact up to floating-point precision):
   - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
   - @ref Rodin::Solver::UMFPack "UMFPack" — SuiteSparse UMFPACK solver
   - @ref Rodin::Solver::CHOLMOD "CHOLMOD" — SuiteSparse Cholesky for SPD systems
@@ -1156,7 +1156,7 @@
   - @ref Rodin::Solver::HouseholderQR "HouseholderQR" — Dense Householder QR
   - @ref Rodin::Solver::LDLT "LDLT" — Dense @f$ LDL^T @f$
 
-  **Iterative solvers** (for large systems):
+  Iterative solvers (for large systems):
   - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (SPD systems)
   - @ref Rodin::Solver::BiCGSTAB "BiCGSTAB" — Bi-conjugate gradient stabilized
   - @ref Rodin::Solver::GMRES "GMRES" — Generalized Minimum Residual
@@ -1181,7 +1181,7 @@
   Solver::SparseLU(problem).solve();
   @endcode
 
-  **Nonlinear solvers** (for hyperelastic or other nonlinear problems):
+  Nonlinear solvers (for hyperelastic or other nonlinear problems):
   - `Solver::NewtonSolver<LinearSolver>` — Newton-Raphson iteration for nonlinear
     variational problems. At each iterate @f$ u^k @f$, assembles the tangent
     system @f$ J(u^k)\,\delta u^k = -F(u^k) @f$ and updates
@@ -1458,14 +1458,14 @@
 
   ## Key Components
 
-  **Math types** (@ref Rodin::PETSc::Math):
+  Math types (@ref Rodin::PETSc::Math):
   - @ref Rodin::PETSc::Math::LinearSystem "LinearSystem" — Couples a PETSc
     `Mat` (operator @f$ A @f$), right-hand side `Vec` (@f$ \mathbf{b} @f$), and
     solution `Vec` (@f$ \mathbf{x} @f$).  Supports Dirichlet elimination via
     `eliminate()` and block-preconditioner field splits via `setFieldSplits()`.
   - `Vector` (`::Vec`) and `Matrix` (`::Mat`) — PETSc handle aliases.
 
-  **Solvers** (@ref Rodin::PETSc::Solver):
+  Solvers (@ref Rodin::PETSc::Solver):
   - @ref Rodin::Solver::KSP "KSP" — Wraps the PETSc KSP (Krylov subspace)
     context.  Configurable via `setType()`, `setTolerances()`,
     `setPreconditioner()`, and PETSc command-line options (`-ksp_type`,
@@ -1478,7 +1478,7 @@
     Equations Solvers) for Newton-type methods.  The inner linear solve uses
     `KSP`.
 
-  **Variational** (@ref Rodin::PETSc::Variational):
+  Variational (@ref Rodin::PETSc::Variational):
   - `PETSc::Variational::TrialFunction` / `TestFunction` — Thin wrappers
     that trigger PETSc-specific CTAD so that `Problem`, `BilinearForm`, and
     `LinearForm` automatically use PETSc storage.
@@ -1490,7 +1490,7 @@
     (`Problem(u, p, l, v, q, m)`) with field-split preconditioning.
   - `BilinearForm` / `LinearForm` — Assemble into PETSc `Mat` / `Vec`.
 
-  **Assembly** (@ref Rodin::PETSc::Assembly):
+  Assembly (@ref Rodin::PETSc::Assembly):
   - `Sequential` — Single-rank assembly into PETSc objects.
   - `MPI` — Distributed assembly where each rank contributes owned elements.
   - `OpenMP` — Shared-memory parallel assembly on a single rank.

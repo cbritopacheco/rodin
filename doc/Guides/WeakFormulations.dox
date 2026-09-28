@@ -302,7 +302,7 @@
 
   A **linear form** @f$ \ell(v) @f$ is a mapping that is linear in @f$ v @f$
   only (it does not depend on the unknown @f$ u @f$). It is assembled into the
-  **right-hand side vector** @f$ \mathbf{b} @f$.
+  right-hand side vector @f$ \mathbf{b} @f$.
 
   Common examples:
 
@@ -380,7 +380,7 @@
   The **Lax-Milgram theorem** guarantees existence and uniqueness of the
   solution when:
   - The bilinear form @f$ a(\cdot, \cdot) @f$ is **continuous** and
-    **coercive** on the function space @f$ V @f$
+    coercive on the function space @f$ V @f$
   - The linear form @f$ \ell(\cdot) @f$ is **continuous** on @f$ V @f$
 
   For the Poisson equation, the bilinear form @f$ a(u, v) = \int_\Omega

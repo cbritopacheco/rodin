@@ -41,18 +41,18 @@
 
   The @ref Rodin::Variational::P0 "P0" space consists of functions that are
   constant on each cell of the mesh. Functions in P0 are generally
-  **discontinuous** across cell boundaries.
+  discontinuous across cell boundaries.
 
   @f[
     V_h^0 = \{ v \in L^2(\Omega) : v|_K \in \mathbb{P}_0(K), \
     \forall K \in \mathcal{T}_h \}
   @f]
 
-  **Properties:**
+  Properties:
   - One DOF per cell (the constant value on that cell)
   - Number of DOFs = number of cells (retrieved by `Wh.getSize()`)
   - Discontinuous across cell boundaries — this is an @f$ L^2 @f$ space,
-    **not** @f$ H^1 @f$-conforming
+    not @f$ H^1 @f$-conforming
   - Used for piecewise constant approximations such as material properties,
     indicator functions, and cell-based data
   - The `Grad` operator applied to a P0 function is identically zero
@@ -83,9 +83,9 @@
 
   The @ref Rodin::Variational::P0g "P0g" space is a **global constant**
   finite element space — it consists of functions that are constant over the
-  **entire** mesh (not per-cell like P0).
+  entire mesh (not per-cell like P0).
 
-  **Properties:**
+  Properties:
   - Scalar P0g: **1 DOF** total (the single global constant)
   - Vector P0g: **vdim DOFs** total (one per component)
   - Continuous everywhere (trivially, since the function is constant)
@@ -109,7 +109,7 @@
     \forall K \in \mathcal{T}_h \}
   @f]
 
-  **Properties:**
+  Properties:
   - One DOF per vertex (the function value at that vertex)
   - Number of DOFs = number of vertices (retrieved by `Vh.getSize()`)
   - Continuous across cell boundaries (@f$ H^1 @f$-conforming): values at
@@ -160,7 +160,7 @@
   | Quadrilateral | @f$ (k+1)^2 @f$ | e.g., 9 for @f$ k = 2 @f$ |
   | Tetrahedron | @f$ \frac{(k+1)(k+2)(k+3)}{6} @f$ | e.g., 10 for @f$ k = 2 @f$ |
 
-  **Convergence rates** for smooth solutions:
+  Convergence rates for smooth solutions:
   - @f$ L^2 @f$ norm: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
   - @f$ H^1 @f$ seminorm: @f$ |u - u_h|_{H^1} = O(h^k) @f$
 
@@ -362,7 +362,7 @@
   | Higher accuracy for smooth solutions | `H1` with order @f$ k \geq 2 @f$ | @f$ O(h^{k+1}) @f$ @f$ L^2 @f$ convergence |
   | Incompressible flow (Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair, satisfies inf-sup |
 
-  **Rule of thumb**: Start with P1 for scalar problems. Use vector-valued P1
+  Rule of thumb: Start with P1 for scalar problems. Use vector-valued P1
   for elasticity and fluid dynamics. Move to higher-order H1 when you need
   better accuracy per DOF or when the PDE's solution is smooth enough to
   benefit from higher polynomial approximation.

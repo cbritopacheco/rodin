@@ -17,7 +17,7 @@
   Rodin. It represents a discretization of your domain into simple shapes
   (polytopes).
 
-  **Key concepts:**
+  Key concepts:
   - **Vertices** (dimension 0): Points in space
   - **Edges/Faces** (dimension 1 in 2D, 1-2 in 3D): Line segments or faces
   - **Cells** (dimension 2 in 2D, 3 in 3D): Triangles, quads, tetrahedra, etc.
@@ -71,7 +71,7 @@
   mesh.getConnectivity().compute(2, 2);
   @endcode
 
-  **Common connectivity patterns:**
+  Common connectivity patterns:
   - `(1, 2)`: Edges to cells - needed for boundary conditions in 2D
   - `(2, 3)`: Faces to cells - needed for boundary conditions in 3D
   - `(0, d)`: Vertices to cells - for vertex-based operations
@@ -158,7 +158,7 @@
   TestFunction v(Vh);
   @endcode
 
-  **Mathematical background:**
+  Mathematical background:
 
   The finite element method seeks an approximate solution @f$ u_h @f$ in the
   finite-dimensional space @f$ V_h @f$ by requiring the **residual** to be
@@ -235,7 +235,7 @@
 
   Rodin supports different types of boundary conditions:
 
-  **Dirichlet (essential) boundary conditions:**
+  Dirichlet (essential) boundary conditions:
   @code{.cpp}
   // Homogeneous: u = 0 on boundary
   DirichletBC(u, Zero())
@@ -248,7 +248,7 @@
   DirichletBC(u, Zero()).on(1)
   @endcode
 
-  **Neumann (natural) boundary conditions:**
+  Neumann (natural) boundary conditions:
   @code{.cpp}
   // Neumann conditions appear as boundary integrals
   RealFunction g = 1.0;
@@ -269,7 +269,7 @@
           + DirichletBC(u, Zero());      // Boundary conditions
   @endcode
 
-  **What happens internally:**
+  What happens internally:
   1. Rodin assembles the stiffness matrix from `Integral(Grad(u), Grad(v))`
   2. Assembles the load vector from `Integral(f, v)`
   3. Applies boundary conditions by modifying the system
@@ -595,7 +595,7 @@
   (boundary faces), Rodin provides:
 
   - @ref Rodin::Variational::FaceIntegral "FaceIntegral" — integrates over
-    **all** faces (interior and boundary)
+    all faces (interior and boundary)
   - @ref Rodin::Variational::InterfaceIntegral "InterfaceIntegral" —
     integrates over **interior** faces only (excludes boundary)
 

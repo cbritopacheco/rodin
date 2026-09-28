@@ -151,7 +151,7 @@
   first call). All convenience methods on XDMF (`setMesh`, `add`) delegate
   to the default grid.
 
-  **Grid handle API** (returns `Grid&` for chaining):
+  Grid handle API (returns `Grid&` for chaining):
 
   | Method | Description |
   |--------|-------------|
@@ -163,7 +163,7 @@
   | `hasMesh()` | Check if a mesh has been set |
   | `reset()` | Reset grid state for next snapshot |
 
-  **XDMF writer API**:
+  XDMF writer API:
 
   | Method | Description |
   |--------|-------------|

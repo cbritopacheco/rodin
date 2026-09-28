@@ -51,7 +51,7 @@
   | `Polytope::Type::Hexahedron` | 3 | 8 | No | A hexahedral (brick, tensor-product) element |
   | `Polytope::Type::Wedge` | 3 | 6 | No | A prismatic (wedge) element |
 
-  **Simplicial vs. tensor-product elements:**
+  Simplicial vs. tensor-product elements:
   - **Simplicial** elements (triangle, tetrahedron) are the simplest shapes
     in their dimension. They are flexible for meshing complex geometries
     because any domain can be triangulated.
@@ -66,7 +66,7 @@
 
   All local computations in the finite element method (basis function
   evaluation, quadrature, gradient computation) are performed on a
-  **reference element** @f$ \hat{K} @f$, then mapped to each physical cell
+  reference element @f$ \hat{K} @f$, then mapped to each physical cell
   via a geometric transformation @f$ F_K : \hat{K} \to K @f$. The reference
   element vertices for the standard types are:
 
