@@ -93,7 +93,10 @@ assembly/solver changes, the relevant manufactured tests pass too.
 2. **Minimal, behavior-preserving changes.** Do not bundle speculative
    optimizations or fast paths into a requested change; propose them
    separately. For performance work, verify identical numerics (iteration
-   counts, final energies) against a baseline run.
+   counts, final energies) against a baseline run. Before changing established
+   behavior, inspect the relevant commit history and rationale, especially
+   for numerical convergence and stopping criteria. Do not treat a difference
+   from a paper or specification as an error without checking why it exists.
 3. **CI builds against PETSc 3.19** (local dev is typically newer). PETSc
    assembly changes can pass locally and fail CI — check 3.19 semantics.
 4. **No hard geometric projections inside mesh-optimization solves** — surface

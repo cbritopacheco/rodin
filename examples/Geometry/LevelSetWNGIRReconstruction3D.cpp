@@ -23,6 +23,7 @@
 #include <Rodin/Variational.h>
 
 #include "../WNGIRExampleParameters.h"
+#include "LobedSphereLevelSet.h"
 
 #include <algorithm>
 #include <array>
@@ -82,57 +83,6 @@ namespace
     }
     return A;
   }
-
-  struct LobedSphereLevelSet
-  {
-      Vec3 c = vec3(Real(0.5), Real(0.5), Real(0.5));
-      Real R0 = Real(0.25);
-      Real amp = Real(0.05);
-      Real lobes = Real(6);
-      Real phase = Real(0);
-
-      Real radius(const Vec3& p) const
-      {
-        const Vec3 d = p - c;
-        const Real r = std::max(d.norm(), Real(1e-14));
-        const Real theta = std::atan2(d(1), d(0));
-        const Real mu = d(2) / r;
-        return R0 + amp * std::cos(lobes * theta + phase) * (Real(1) - mu * mu);
-      }
-
-      Real phi(const Vec3& p) const
-      {
-        return (p - c).norm() - radius(p);
-      }
-
-      Vec3 grad(const Vec3& p) const
-      {
-        const Vec3 x = p - c;
-        const Real x0 = x(0);
-        const Real x1 = x(1);
-        const Real x2 = x(2);
-        const Real r2 = x.squaredNorm();
-        const Real r = std::sqrt(r2);
-        if (r <= Real(1e-14))
-          return vec3(0, 0, 0);
-
-        const Real rho2 = x0 * x0 + x1 * x1;
-        const Real theta = std::atan2(x1, x0);
-        const Real angle = lobes * theta + phase;
-        const Real cosA = std::cos(angle);
-        const Real sinA = std::sin(angle);
-
-        const Real invR2 = Real(1) / r2;
-        const Real invR4 = invR2 * invR2;
-        const Vec3 gradR = amp *
-          (-sinA * lobes * vec3(-x1 * invR2, x0 * invR2, 0) +
-            cosA *
-              vec3(Real(2) * x0 * x2 * x2 * invR4, Real(2) * x1 * x2 * x2 * invR4,
-                -Real(2) * x2 * rho2 * invR4));
-
-        return x / r - gradR;
-      }
-  };
 
   constexpr std::array<std::array<Real, 4>, 4> TetraBarycentricQuadrature = {
     {{{Real(0.5854101966249685), Real(0.1381966011250105), Real(0.1381966011250105),
@@ -349,7 +299,6 @@ int main(int argc, char** argv)
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
   const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
-  const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
@@ -437,7 +386,7 @@ int main(int argc, char** argv)
   movedGrid.add(qRelMoved, IO::XDMF::Center::Cell);
   movedGrid.add(phiMoved, IO::XDMF::Center::Node);
 
-  LobedSphereLevelSet levelSet;
+  Rodin::Examples::LobedSphereLevelSet levelSet;
   levelSet.c = vec3(cx, cy, cz);
   levelSet.R0 = R0;
   levelSet.amp = amp;
@@ -446,6 +395,7 @@ int main(int argc, char** argv)
 
   std::cout << "Lobed-sphere WNGIR reconstruction on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh\n";
+  std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes << "  center=("
             << cx << ", " << cy << ", " << cz << ")"
             << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
@@ -537,7 +487,9 @@ int main(int argc, char** argv)
       const auto face = mesh.getFace(facet);
       const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
       const std::size_t nLocal = fe.getCount();
-      const std::size_t qFitOrder = std::max<std::size_t>(qOrder, 2 * fe.getOrder());
+      const std::size_t qFitOrder = wngirParams.geometricValidationOrder > 0
+        ? wngirParams.geometricValidationOrder
+        : wngirGeometricValidationOrder(fe.getOrder());
       const auto& qf = QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
       const auto& quad = face->getQuadrature(qf);
       std::vector<Index> dofs(nLocal);
@@ -578,13 +530,17 @@ int main(int argc, char** argv)
               << "  fit0=" << interfaceFit << "\n";
   }
 
-  Real effectiveFitTol = fitTol;
+  Real geometricRMSTolerance = std::numeric_limits<Real>::infinity();
   Real minJ = Real(1);
   Real maxJ = Real(1);
   Real maxQRel = Real(1);
   Real activeRMS = Real(0);
+  Real activeSup = Real(0);
   Real levelSetGradientScale = Real(0);
   Real activeFraction = Real(0);
+  Real geometricRMS = std::numeric_limits<Real>::infinity();
+  Real geometricSup = std::numeric_limits<Real>::infinity();
+  Real normalRMS = std::numeric_limits<Real>::infinity();
   Real rigidModeCoercivity = Real(0);
   std::size_t jacobianRejections = 0;
   std::size_t distortionRejections = 0;
@@ -595,11 +551,16 @@ int main(int argc, char** argv)
   const char* exitReason = "iter-budget";
   {
     const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-    effectiveFitTol = wngirRep.effectiveTauRms;
+    geometricRMSTolerance = wngirRep.getGeometricRMSTolerance(h);
     std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
               << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
               << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
               << "  cgIt=" << wngirRep.linearIterations
+              << "  cgSolves=" << wngirRep.linearSolveCount << "  cgMean="
+              << (wngirRep.linearSolveCount > 0
+                     ? Real(wngirRep.linearIterations) / Real(wngirRep.linearSolveCount)
+                     : Real(0))
+              << "  cgMax=" << wngirRep.maxLinearIterations
               << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
               << "  exit=" << wngirRep.exitReason << '\n';
     iterations = wngirRep.iterations;
@@ -609,8 +570,12 @@ int main(int argc, char** argv)
     maxJ = wngirRep.maxJ;
     maxQRel = wngirRep.maxQRel;
     activeRMS = wngirRep.activeRMS;
+    activeSup = wngirRep.activeSup;
     levelSetGradientScale = wngirRep.levelSetGradientScale;
     activeFraction = wngirRep.activeFraction;
+    geometricRMS = wngirRep.geometricRMS;
+    geometricSup = wngirRep.geometricSup;
+    normalRMS = wngirRep.normalRMS;
     rigidModeCoercivity = wngirRep.rigidModeCoercivity;
     jacobianRejections = wngirRep.jacobianRejections;
     distortionRejections = wngirRep.distortionRejections;
@@ -622,10 +587,8 @@ int main(int argc, char** argv)
                 << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
   }
 
-  const std::string_view exit(exitReason);
-  const bool residualConverged =
-    exit.starts_with("numerical-") || exit.starts_with("geometric-");
-  const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
+  const bool converged =
+    fitTol > Real(0) ? interfaceFit <= fitTol : geometricRMS <= geometricRMSTolerance;
 
   const std::size_t D = mesh.getDimension();
   for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -702,14 +665,16 @@ int main(int argc, char** argv)
             << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
             << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
             << "  max_qrel=" << maxQRel << "  act_frac=" << activeFraction
-            << "  active_rms=" << activeRMS << "  active_rms_hg="
+            << "  active_rms=" << activeRMS << "  active_sup=" << activeSup
+            << "  active_rms_hg="
             << (h * levelSetGradientScale > Real(0)
                    ? activeRMS / (h * levelSetGradientScale)
                    : Real(0))
             << "  cR=" << rigidModeCoercivity << "  rej_j=" << jacobianRejections
             << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections
             << "  converged=" << (converged ? "yes" : "best-effort")
-            << "  exit=" << exitReason << '\n';
+            << "  exit=" << exitReason << "  geom_rms=" << geometricRMS
+            << "  geom_sup=" << geometricSup << "  normal_rms=" << normalRMS << '\n';
   std::cout << "\nSummary\n";
   std::cout << "  cases converged: " << (converged ? 1 : 0) << " / 1\n";
   std::cout << "  ||phi(X+u)||_RMS  min=" << std::scientific << std::setprecision(3)

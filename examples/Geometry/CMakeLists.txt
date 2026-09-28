@@ -21,6 +21,66 @@ target_link_libraries(LevelSetWNGIRReconstruction
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetWNGIRReconstructionAccel LevelSetWNGIRReconstruction.cpp)
+target_compile_definitions(LevelSetWNGIRReconstructionAccel
+  PRIVATE
+  RODIN_WNGIR_EXPERIMENTAL_CONTINUATION=1
+  RODIN_WNGIR_EXPERIMENTAL_IC=1)
+target_link_libraries(LevelSetWNGIRReconstructionAccel
+  PRIVATE
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::MMG)
+
+add_executable(LevelSetWNGIRReconstructionContinuation LevelSetWNGIRReconstruction.cpp)
+target_compile_definitions(LevelSetWNGIRReconstructionContinuation
+  PRIVATE
+  RODIN_WNGIR_EXPERIMENTAL_CONTINUATION=1)
+target_link_libraries(LevelSetWNGIRReconstructionContinuation
+  PRIVATE
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::MMG)
+
+add_executable(LevelSetWNGIRReconstructionIC LevelSetWNGIRReconstruction.cpp)
+target_compile_definitions(LevelSetWNGIRReconstructionIC
+  PRIVATE
+  RODIN_WNGIR_EXPERIMENTAL_IC=1)
+target_link_libraries(LevelSetWNGIRReconstructionIC
+  PRIVATE
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::MMG)
+
+if (RODIN_USE_PETSC)
+  add_executable(LevelSetWNGIRReconstructionPETScGAMG LevelSetWNGIRReconstruction.cpp)
+  target_compile_definitions(LevelSetWNGIRReconstructionPETScGAMG
+    PRIVATE
+    RODIN_WNGIR_PETSC_GAMG=1)
+  target_link_libraries(LevelSetWNGIRReconstructionPETScGAMG
+    PRIVATE
+    Rodin::Geometry
+    Rodin::Solver
+    Rodin::Variational
+    Rodin::MMG
+    Rodin::PETSc)
+
+  add_executable(LevelSetWNGIRReconstructionPETScLU LevelSetWNGIRReconstruction.cpp)
+  target_compile_definitions(LevelSetWNGIRReconstructionPETScLU
+    PRIVATE
+    RODIN_WNGIR_PETSC_LU=1)
+  target_link_libraries(LevelSetWNGIRReconstructionPETScLU
+    PRIVATE
+    Rodin::Geometry
+    Rodin::Solver
+    Rodin::Variational
+    Rodin::MMG
+    Rodin::PETSc)
+endif()
+
 add_executable(LevelSetWNGIRReconstructionP2 LevelSetWNGIRReconstruction.cpp)
 target_compile_definitions(LevelSetWNGIRReconstructionP2
   PRIVATE

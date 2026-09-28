@@ -14,6 +14,12 @@ was abandoned. When you do performance work, the acceptance bar is *identical
 numerics* (iteration counts, final energies/fits) against a baseline run —
 not just "tests pass".
 
+**Inspect history before changing established behavior.** Use `git blame` and
+the relevant commits to find why a condition, threshold, or formula was
+introduced or removed, especially in numerical convergence and stopping logic.
+If the implementation differs from a paper or specification, establish whether
+the difference was deliberate before editing the code.
+
 ## Anomalies
 
 **An unexplained measurement is a finding, not a footnote. Do not ship a

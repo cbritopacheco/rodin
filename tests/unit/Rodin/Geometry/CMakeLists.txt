@@ -1,3 +1,18 @@
+add_executable(RodinGeometryLobedSphereLevelSetTest LobedSphereLevelSetTest.cpp)
+target_include_directories(RodinGeometryLobedSphereLevelSetTest
+  PRIVATE
+  ${PROJECT_SOURCE_DIR}/examples/Geometry)
+target_link_libraries(RodinGeometryLobedSphereLevelSetTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryLobedSphereLevelSetTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinGeometryConnectivityTest ConnectivityTest.cpp)
 target_link_libraries(RodinGeometryConnectivityTest
   PUBLIC

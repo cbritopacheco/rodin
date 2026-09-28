@@ -565,7 +565,9 @@ int main(int argc, char** argv)
         const auto face = mesh.getFace(facet);
         const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
         const std::size_t nLocal = fe.getCount();
-        const std::size_t qFitOrder = std::max<std::size_t>(qOrder, 2 * fe.getOrder());
+        const std::size_t qFitOrder = wngirParams.geometricValidationOrder > 0
+          ? wngirParams.geometricValidationOrder
+          : wngirGeometricValidationOrder(fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
         const auto& quad = face->getQuadrature(qf);
@@ -619,7 +621,9 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveTauRms;
+      effectiveFitTol = fitTol > Real(0)
+        ? fitTol
+        : h * wngirRep.levelSetGradientScale * wngirRep.effectiveTauRmsH;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve

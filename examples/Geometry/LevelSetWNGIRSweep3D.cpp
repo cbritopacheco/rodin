@@ -25,6 +25,7 @@
 #include <Rodin/Variational.h>
 
 #include "../WNGIRExampleParameters.h"
+#include "LobedSphereLevelSet.h"
 
 #include <algorithm>
 #include <array>
@@ -83,57 +84,6 @@ namespace
     }
     return A;
   }
-
-  struct LobedSphereLevelSet
-  {
-      Vec3 c = vec3(Real(0.5), Real(0.5), Real(0.5));
-      Real R0 = Real(0.25);
-      Real amp = Real(0.05);
-      Real lobes = Real(6);
-      Real phase = Real(0);
-
-      Real radius(const Vec3& p) const
-      {
-        const Vec3 d = p - c;
-        const Real r = std::max(d.norm(), Real(1e-14));
-        const Real theta = std::atan2(d(1), d(0));
-        const Real mu = d(2) / r;
-        return R0 + amp * std::cos(lobes * theta + phase) * (Real(1) - mu * mu);
-      }
-
-      Real phi(const Vec3& p) const
-      {
-        return (p - c).norm() - radius(p);
-      }
-
-      Vec3 grad(const Vec3& p) const
-      {
-        const Vec3 x = p - c;
-        const Real x0 = x(0);
-        const Real x1 = x(1);
-        const Real x2 = x(2);
-        const Real r2 = x.squaredNorm();
-        const Real r = std::sqrt(r2);
-        if (r <= Real(1e-14))
-          return vec3(0, 0, 0);
-
-        const Real rho2 = x0 * x0 + x1 * x1;
-        const Real theta = std::atan2(x1, x0);
-        const Real angle = lobes * theta + phase;
-        const Real cosA = std::cos(angle);
-        const Real sinA = std::sin(angle);
-
-        const Real invR2 = Real(1) / r2;
-        const Real invR4 = invR2 * invR2;
-        const Vec3 gradR = amp *
-          (-sinA * lobes * vec3(-x1 * invR2, x0 * invR2, 0) +
-            cosA *
-              vec3(Real(2) * x0 * x2 * x2 * invR4, Real(2) * x1 * x2 * x2 * invR4,
-                -Real(2) * x2 * rho2 * invR4));
-
-        return x / r - gradR;
-      }
-  };
 
   constexpr std::array<std::array<Real, 4>, 4> TetraBarycentricQuadrature = {
     {{{Real(0.5854101966249685), Real(0.1381966011250105), Real(0.1381966011250105),
@@ -346,7 +296,6 @@ int main(int argc, char** argv)
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
   const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
-  const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
@@ -448,7 +397,7 @@ int main(int argc, char** argv)
     const Real t = static_cast<Real>(frame) / static_cast<Real>(nFrames);
     const Real angle = Real(2) * Real(M_PI) * t;
 
-    LobedSphereLevelSet levelSet;
+    Rodin::Examples::LobedSphereLevelSet levelSet;
     levelSet.c =
       vec3(Real(0.5) + orbitR * std::cos(angle), Real(0.5) + orbitR * std::sin(angle),
         Real(0.5) + Real(0.5) * orbitR * std::sin(Real(2) * angle));
@@ -549,7 +498,9 @@ int main(int argc, char** argv)
         const auto face = mesh.getFace(facet);
         const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
         const std::size_t nLocal = fe.getCount();
-        const std::size_t qFitOrder = std::max<std::size_t>(qOrder, 2 * fe.getOrder());
+        const std::size_t qFitOrder = wngirParams.geometricValidationOrder > 0
+          ? wngirParams.geometricValidationOrder
+          : wngirGeometricValidationOrder(fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
         const auto& quad = face->getQuadrature(qf);
@@ -602,7 +553,9 @@ int main(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveTauRms;
+      effectiveFitTol = fitTol > Real(0)
+        ? fitTol
+        : h * wngirRep.levelSetGradientScale * wngirRep.effectiveTauRmsH;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
