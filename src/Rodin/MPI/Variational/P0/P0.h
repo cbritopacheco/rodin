@@ -23,6 +23,7 @@
  */
 
 #include <limits>
+#include <algorithm>
 #include <type_traits>
 #include <vector>
 #include <utility>
@@ -325,7 +326,6 @@ namespace Rodin::Variational
             const Index local = static_cast<Index>(i * vdim + c);
             const Index globalComponent = global + c;
             m_localToGlobal.left[local] = globalComponent;
-            m_localToGlobal.right.emplace(globalComponent, local);
           }
           dofIdx += vdim;
 
@@ -382,7 +382,6 @@ namespace Rodin::Variational
               const Index local = li * vdim + c;
               const Index globalComponent = global + c;
               m_localToGlobal.left[local] = globalComponent;
-              m_localToGlobal.right.emplace(globalComponent, local);
             }
           }
         }
@@ -391,6 +390,18 @@ namespace Rodin::Variational
         for (size_t i = 0; i < localCellCount * vdim; ++i)
           assert(m_localToGlobal.left[i] != std::numeric_limits<Index>::max());
 #endif
+
+        // Ghost numbering arrives in neighbor order, not global-index order.
+        // Sorting once avoids repeatedly shifting the flat map's storage.
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(m_localToGlobal.left.size());
+        for (Index local = 0; local < m_localToGlobal.left.size(); ++local)
+          globalLocalPairs.emplace_back(m_localToGlobal.left[local], local);
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end());
+        m_localToGlobal.right.reserve(globalLocalPairs.size());
+        for (const auto& [global, local] : globalLocalPairs)
+          m_localToGlobal.right.emplace_hint(m_localToGlobal.right.end(), global, local);
+        assert(m_localToGlobal.right.size() == globalLocalPairs.size());
       }
 
       /**

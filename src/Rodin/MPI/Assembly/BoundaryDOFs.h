@@ -52,7 +52,7 @@ namespace Rodin::Assembly
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
         const size_t dim = mesh.getDimension();
-        IndexSet required;
+        UnorderedSet<Index> required;
         if constexpr (!Global)
         {
           Index begin, end;
@@ -65,7 +65,10 @@ namespace Rodin::Assembly
                 required.insert(dof);
         }
 
-        IndexMap<Index> sources;
+        // Face order is unrelated to global DOF order. Select into a hash
+        // table, then materialize the public flat map in sorted order.
+        using Candidate = std::pair<Index, std::pair<Index, Index>>;
+        UnorderedMap<Index, Candidate> candidates;
         Index first = std::numeric_limits<Index>::max();
         for (auto face = mesh.getFace(); face; ++face)
         {
@@ -87,16 +90,21 @@ namespace Rodin::Assembly
           {
             const Index global = dofs[local];
             if constexpr (!Global)
-              if (!required.contains(global))
+              if (required.find(global) == required.end())
                 continue;
-            const auto found = sources.find(global);
-            if (found == sources.end() || source < found->second)
-            {
-              sources[global] = source;
-              m_dofs[global] = {i, local};
-            }
+            const auto found = candidates.find(global);
+            if (found == candidates.end() || source < found->second.first)
+              candidates[global] = {source, {i, local}};
           }
         }
+        std::vector<std::pair<Index, std::pair<Index, Index>>> ordered;
+        ordered.reserve(candidates.size());
+        for (const auto& [global, candidate] : candidates)
+          ordered.emplace_back(global, candidate.second);
+        std::sort(ordered.begin(), ordered.end());
+        m_dofs.reserve(ordered.size());
+        for (const auto& [global, indices] : ordered)
+          m_dofs.emplace_hint(m_dofs.end(), global, indices);
         if constexpr (Global)
         {
           const auto& comm = mesh.getContext().getCommunicator();

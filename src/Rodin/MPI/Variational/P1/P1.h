@@ -19,6 +19,7 @@
 
 #include <mpi.h>
 #include <sys/mman.h>
+#include <algorithm>
 #include <type_traits>
 #include <utility>
 
@@ -506,6 +507,8 @@ namespace Rodin::Variational
         // pull[r]: (gid, [globalDOFs]) to receive from neighbor r.
         using MsgVec = std::vector<std::pair<Index, std::vector<Index>>>;
         UnorderedMap<int, MsgVec> push;
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(m_fes.getSize());
         for (int r : neighbors)
           push[r]; // default-construct empty entry
 
@@ -525,9 +528,7 @@ namespace Rodin::Variational
               const Index global = m_offset + dofIdx;
               s_send.push_back(global);
 
-              [[maybe_unused]] const auto [it, inserted] =
-                m_localToGlobal.right.emplace(global, local);
-              assert(inserted);
+              globalLocalPairs.emplace_back(global, local);
 
               ++dofIdx;
             }
@@ -583,12 +584,16 @@ namespace Rodin::Variational
 
             for (size_t k = 0; k < static_cast<size_t>(global.size()); ++k)
             {
-              [[maybe_unused]] const auto [it, inserted] =
-                m_localToGlobal.right.emplace(global[k], dofs[k]);
-              assert(inserted);
+              globalLocalPairs.emplace_back(global[k], dofs[k]);
             }
           }
         }
+
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end());
+        m_localToGlobal.right.reserve(globalLocalPairs.size());
+        for (const auto& [global, local] : globalLocalPairs)
+          m_localToGlobal.right.emplace_hint(m_localToGlobal.right.end(), global, local);
+        assert(m_localToGlobal.right.size() == globalLocalPairs.size());
 
         const size_t localDofCount = m_fes.getSize();
         m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());

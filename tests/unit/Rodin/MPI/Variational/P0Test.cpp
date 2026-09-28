@@ -470,6 +470,15 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(complexScalar.getSize(), cells);
       EXPECT_EQ(realVector.getSize(), 2 * cells);
       EXPECT_EQ(complexVector.getSize(), 2 * cells);
+      const auto checkReverseMap = [](const auto& fes) {
+        const Index localCount = static_cast<Index>(fes.getShard().getSize());
+        for (Index local = 0; local < localCount; ++local)
+          EXPECT_EQ(fes.getLocalIndex(fes.getGlobalIndex(local)), Optional<Index>(local));
+      };
+      checkReverseMap(realScalar);
+      checkReverseMap(complexScalar);
+      checkReverseMap(realVector);
+      checkReverseMap(complexVector);
       const auto& shard = mesh.getShard();
       for (Index i = 0; i < shard.getCellCount(); ++i)
       {

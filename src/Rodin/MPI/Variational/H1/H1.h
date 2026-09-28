@@ -19,6 +19,7 @@
  * dimension (vertices, edges, faces, cells).
  */
 
+#include <algorithm>
 #include <array>
 #include <limits>
 #include <numeric>
@@ -919,17 +920,23 @@ namespace Rodin::Variational
 
         // ------------------------------------------------------------------
         // Step 5: build global-to-local reverse map.
+        // Local DOF order differs from global order; sort before inserting
+        // into the flat map to avoid shifting its storage at each entry.
         // ------------------------------------------------------------------
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
           assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
 
+        std::vector<std::pair<Index, Index>> globalToLocal;
+        globalToLocal.reserve(localDofCount);
         for (size_t local = 0; local < localDofCount; ++local)
-        {
-          const Index global = m_localToGlobal.left[local];
-          m_localToGlobal.right.emplace(global, static_cast<Index>(local));
-        }
+          globalToLocal.emplace_back(
+            m_localToGlobal.left[local], static_cast<Index>(local));
+        std::sort(globalToLocal.begin(), globalToLocal.end());
+        m_localToGlobal.right.reserve(globalToLocal.size());
+        for (const auto& [global, local] : globalToLocal)
+          m_localToGlobal.right.emplace_hint(m_localToGlobal.right.end(), global, local);
       }
 
       std::reference_wrapper<const MeshType> m_mesh;
@@ -1189,11 +1196,16 @@ namespace Rodin::Variational
           assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
 
+        // Preserve the same inverse map while inserting in global order.
+        std::vector<std::pair<Index, Index>> globalToLocal;
+        globalToLocal.reserve(localVecSize);
         for (size_t local = 0; local < localVecSize; ++local)
-        {
-          const Index global = m_localToGlobal.left[local];
-          m_localToGlobal.right.emplace(global, static_cast<Index>(local));
-        }
+          globalToLocal.emplace_back(
+            m_localToGlobal.left[local], static_cast<Index>(local));
+        std::sort(globalToLocal.begin(), globalToLocal.end());
+        m_localToGlobal.right.reserve(globalToLocal.size());
+        for (const auto& [global, local] : globalToLocal)
+          m_localToGlobal.right.emplace_hint(m_localToGlobal.right.end(), global, local);
       }
 
       /// @brief Copy constructor.

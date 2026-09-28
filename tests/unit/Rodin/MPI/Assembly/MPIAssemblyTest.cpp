@@ -27,6 +27,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/collectives.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
@@ -168,6 +169,46 @@ namespace Rodin::Tests::Unit
       Polytope::Type::Hexahedron, Polytope::Type::Wedge),
     [](const auto& info) { return polytopeName(info.param); });
 
+  /** Reverse indices and shared-entity numbering survive unordered ghost exchange. */
+  TEST_P(MPITraceGeometryTest, P0AndVectorP1GhostMapsAreBijective)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = makeMesh(ctx);
+
+    const auto check = [&](const auto& fes, size_t entityDim) {
+      const Index localCount = static_cast<Index>(fes.getShard().getSize());
+      for (Index local = 0; local < localCount; ++local)
+        EXPECT_EQ(fes.getLocalIndex(fes.getGlobalIndex(local)), Optional<Index>(local));
+
+      using Entry = std::pair<Index, std::vector<Index>>;
+      std::vector<Entry> localEntries;
+      for (Index i = 0; i < mesh.getShard().getPolytopeCount(entityDim); ++i)
+      {
+        const auto& dofs = fes.getDOFs(entityDim, i);
+        localEntries.emplace_back(mesh.getGlobalIndex(entityDim, i),
+          std::vector<Index>(dofs.begin(), dofs.end()));
+      }
+      std::vector<std::vector<Entry>> gathered;
+      boost::mpi::all_gather(world, localEntries, gathered);
+      UnorderedMap<Index, std::vector<Index>> expected;
+      for (const auto& entries : gathered)
+        for (const auto& [entity, dofs] : entries)
+        {
+          const auto [it, inserted] = expected.emplace(entity, dofs);
+          if (!inserted)
+            EXPECT_EQ(it->second, dofs);
+        }
+    };
+
+    P0<Real, Mesh<Context::MPI>> scalarP0(mesh);
+    check(scalarP0, mesh.getDimension());
+    P0<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP0(mesh, 2);
+    check(vectorP0, mesh.getDimension());
+    P1<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP1(mesh, 3);
+    check(vectorP1, 0);
+  }
+
   /**
    * Every supported trace DOF must be constrained on its owning rank.
    * On this three-rank tetrahedral partition, face-local assembly alone
@@ -180,6 +221,18 @@ namespace Rodin::Tests::Unit
     Context::MPI ctx(*g_env, world);
     auto mesh = makeMesh(ctx);
     auto probe = [&](const auto& fes, const auto& value, const char* name) {
+      if constexpr (requires { fes.getLocalIndex(Index{}); })
+      {
+        const Index localSize = fes.getShard().getSize();
+        Index mismatch = localSize;
+        for (Index local = 0; local < localSize; ++local)
+          if (fes.getLocalIndex(fes.getGlobalIndex(local)) != Optional<Index>(local))
+          {
+            mismatch = local;
+            break;
+          }
+        EXPECT_EQ(mismatch, localSize) << name << " rank=" << world.rank();
+      }
       TrialFunction u(fes);
       DirichletBC dbc(u, value);
       dbc.assemble();
