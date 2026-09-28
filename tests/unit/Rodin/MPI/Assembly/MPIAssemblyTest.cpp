@@ -197,7 +197,9 @@ namespace Rodin::Tests::Unit
         {
           const auto [it, inserted] = expected.emplace(entity, dofs);
           if (!inserted)
+          {
             EXPECT_EQ(it->second, dofs);
+          }
         }
     };
 
