@@ -19,25 +19,24 @@
 #include <vector>
 
 #include <Rodin/Geometry.h>
-
 #include "Common.h"
 #include "SewedOutput.h"
 
 namespace KelvinBall
 {
   /**
-   * @brief A normal-ray minimum-thickness penalty for the sewn body.
+   * @brief First-exit thickness measurement and paired-point correction.
    *
-   * A surface H1 projection smooths the body-to-fluid normal. One inward
-   * ray from each interface quadrature point finds its first outward crossing
-   * of the complete surface, at distance @f$ t @f$. The penalty integrates
-   * @f$ (d_{min}-t)_+^2 @f$. A single AABB tree of the chamber interface
-   * is queried with all 24 inverse-rotated ray segments.
+   * The geometric body-to-fluid face normal defines one inward ray from each
+   * interface quadrature point. The ray finds its first outward crossing
+   * of the complete surface, at distance @f$ t @f$. The measured penalty
+   * integrates @f$ (D-t)_+^2 @f$. A single AABB tree of the chamber
+   * interface is queried with all 24 inverse-rotated ray segments.
    *
-   * The discrete variation differentiates source-face area and the
-   * ray-triangle intersection, holding the regularized direction fixed.
-   * The surface divergence of the normalized normal is evaluated as the
-   * corresponding continuum curvature diagnostic.
+   * The update uses a bounded paired-point differential weighted by
+   * @f$ (m\cdot d)^2 @f$. This is a local surrogate, not the shape
+   * derivative of the measured penalty. The surface divergence of the
+   * projected normal is retained as a curvature diagnostic.
    */
   class ThicknessPenalty
   {
@@ -50,7 +49,8 @@ namespace KelvinBall
           Real minimumTransversality = Real(1);
           size_t samples = 0;
           size_t violating = 0;
-          size_t correctedNormals = 0;
+          Real maximumPairLoad = 0;
+          Real topOnePercentLoadShare = 0;
           Real minimumCurvature = std::numeric_limits<Real>::infinity();
           Real maximumCurvature = -std::numeric_limits<Real>::infinity();
           Real minimumNormalMagnitude = std::numeric_limits<Real>::infinity();
@@ -58,6 +58,10 @@ namespace KelvinBall
           Real minimumNormalAlignment = Real(1);
           Real meanNormalAlignment = 0;
           std::vector<Real> curvature;
+          /// Mass-lumped average of the inward quadrature rays.
+          std::vector<Math::SpatialVector<Real>> rayDirection;
+          /// Mass-lumped average of the unsmoothed interface face normals.
+          std::vector<Math::SpatialVector<Real>> geometricNormal;
       };
 
       /**
@@ -65,7 +69,7 @@ namespace KelvinBall
        *
        * Opposing sides of a thin solid are not coupled through a bulk
        * extension. The resulting values are copied to the parent vertices;
-       * only the interface trace is used by the thickness functional.
+       * only the interface trace is used for normal and curvature diagnostics.
        */
       template <class Space>
       auto projectNormal(const Space& space, Real length) const
@@ -151,15 +155,15 @@ namespace KelvinBall
       }
 
       /**
-       * @brief Adds the negative derivative of the first-exit penalty.
+       * @brief Adds the paired-point surrogate descent load.
        *
-       * The regularized directions are held fixed in this discrete
-       * derivative; the source-face area and the ray-triangle crossing
-       * are differentiated on the current triangulation.
+       * At a first hit with transversality @f$ a=m\cdot d @f$, the load
+       * uses the bounded separation rate @f$ V_n(x)+a V_n(y) @f$, weighted
+       * by @f$ a^2 @f$. Source-area variation is omitted.
        */
       template <class ChamberMesh, class Space, class Normal, class Load>
       Result evaluate(const ChamberMesh& mesh, const Space& space,
-        const Normal& projectedNormal, Real weight, Load& load) const
+        const Normal& projectedNormal, Load& load) const
       {
         static constexpr std::array<std::array<Real, 3>, 3> quadrature{
           {{Real(2) / 3, Real(1) / 6, Real(1) / 6},
@@ -183,7 +187,15 @@ namespace KelvinBall
 
         Result result;
         result.curvature.assign(mesh.getVertexCount(), Real(0));
+        result.rayDirection.resize(mesh.getVertexCount());
+        for (auto& direction : result.rayDirection)
+          direction = Math::SpatialVector<Real>::Zero(3);
+        result.geometricNormal.resize(mesh.getVertexCount());
+        for (auto& normal : result.geometricNormal)
+          normal = Math::SpatialVector<Real>::Zero(3);
         std::vector<Real> curvatureMass(mesh.getVertexCount(), Real(0));
+        std::vector<Real> rayMass(mesh.getVertexCount(), Real(0));
+        std::vector<Real> pairLoads;
         for (auto face = mesh.getPolytope(D - 1); face; ++face)
         {
           if (face->getAttribute() != Gamma)
@@ -245,6 +257,9 @@ namespace KelvinBall
             const Math::SpatialVector<Real> smoothNormal = rawNormal / magnitude;
             const Math::SpatialVector<Real> geometricNormal =
               -fluidNormal.getValue(surfacePoint);
+            for (size_t k = 0; k < 3; ++k)
+              result.geometricNormal[vertices[k]] +=
+                area * barycentric[k] / 3 * geometricNormal;
             const Real alignment = smoothNormal.dot(geometricNormal);
             result.minimumNormalAlignment = std::min(result.minimumNormalAlignment, alignment);
             result.meanNormalAlignment += alignment;
@@ -260,21 +275,16 @@ namespace KelvinBall
               result.curvature[vertices[k]] += mass * curvature;
               curvatureMass[vertices[k]] += mass;
             }
-            Math::SpatialVector<Real> normal = smoothNormal;
-            if (alignment < Real(0.5))
+            const Math::SpatialVector<Real> direction = -geometricNormal;
+            for (size_t k = 0; k < 3; ++k)
             {
-              ++result.correctedNormals;
-              const Real blend = (Real(0.5) - alignment) / (Real(1) - alignment);
-              normal = (Real(1) - blend) * smoothNormal + blend * geometricNormal;
-              normal.normalize();
+              const Real mass = area * barycentric[k] / 3;
+              result.rayDirection[vertices[k]] += mass * direction;
+              rayMass[vertices[k]] += mass;
             }
-            const Math::SpatialVector<Real> direction = -normal;
             const Exit exit = firstExit(s, direction);
             if (!exit.found || exit.distance >= m_minimum)
               continue;
-            if (exit.transversality < Real(1e-3))
-              throw std::runtime_error(
-                "The first thickness exit is nearly tangent to the ray.");
             ++result.violating;
             result.minimumExit = std::min(result.minimumExit, exit.distance);
             result.minimumTransversality =
@@ -282,34 +292,57 @@ namespace KelvinBall
             const Real deficit = m_minimum - exit.distance;
             result.maximumDeficit = std::max(result.maximumDeficit, deficit);
             const Real measure = multiplicity * area / Real(3);
-            result.penalty += measure * deficit * deficit;
             const Triangle& target = m_triangles[exit.triangle];
-            const Math::SpatialVector<Real> gradient =
-              rotations[exit.rotation] * target.normal / exit.transversality;
+            const Real a = exit.transversality;
+            result.penalty += measure * deficit * deficit;
+            const Real taper = a * a;
+            const Math::SpatialVector<Real> targetNormal =
+              rotations[exit.rotation] * target.normal;
+            const Math::SpatialVector<Real> sourceGradient = -taper * geometricNormal;
+            const Math::SpatialVector<Real> targetGradient = taper * a * targetNormal;
+            const Real pairLoad = measure * Real(2) * deficit *
+              (sourceGradient.norm() + targetGradient.norm());
+            pairLoads.push_back(pairLoad);
+            result.maximumPairLoad = std::max(result.maximumPairLoad, pairLoad);
             for (size_t k = 0; k < 3; ++k)
             {
-              const Math::SpatialVector<Real> sourceGradient =
-                Real(2) * deficit * barycentric[k] * gradient +
-                (deficit * deficit / doubledArea) *
-                  cross(edgeOpposite[k], orientation);
+              const Math::SpatialVector<Real> gradient =
+                Real(2) * deficit * barycentric[k] * sourceGradient;
               const auto dofs = space.getDOFs(0, vertices[k]);
               for (Eigen::Index component = 0; component < 3; ++component)
-                load(dofs(component)) -= weight * measure * sourceGradient(component);
+                load(dofs(component)) -= measure * gradient(component);
             }
             deposit(target.face, exit.barycentric,
-              rotations[exit.rotation].transpose() * gradient,
-              weight * measure * Real(2) * deficit);
+              rotations[exit.rotation].transpose() * targetGradient,
+              measure * Real(2) * deficit);
           }
         }
         if (result.samples)
           result.meanNormalAlignment /= result.samples;
+        if (!pairLoads.empty())
+        {
+          std::sort(pairLoads.begin(), pairLoads.end(), std::greater<Real>());
+          const size_t count = std::max(size_t(1), (pairLoads.size() + 99) / 100);
+          const Real total = std::accumulate(pairLoads.begin(), pairLoads.end(), Real(0));
+          if (total > 0)
+            result.topOnePercentLoadShare =
+              std::accumulate(pairLoads.begin(), pairLoads.begin() + count, Real(0)) / total;
+        }
         for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+        {
           if (curvatureMass[vertex] > 0)
             result.curvature[vertex] /= curvatureMass[vertex];
+          if (rayMass[vertex] > 0)
+            result.rayDirection[vertex] /= rayMass[vertex];
+          const Real geometricMagnitude = result.geometricNormal[vertex].norm();
+          if (geometricMagnitude > Real(1e-12))
+            result.geometricNormal[vertex] /= geometricMagnitude;
+        }
         if (!std::isfinite(result.minimumExit))
           result.minimumExit = m_minimum;
         return result;
       }
+
     private:
       struct Triangle
       {

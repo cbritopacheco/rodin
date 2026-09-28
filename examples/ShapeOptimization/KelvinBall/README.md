@@ -162,81 +162,79 @@ search.
 
 ### Minimum thickness
 
-Thin parts are penalized below $d_{\min}$ = `--thickness-min` times $h$
-(default 2; 0 disables it). The body-to-fluid normal is projected in the
-surface $H^1$ metric and normalized at each quadrature point:
+The thickness bound is $d_{\min}=$ `--thickness-min` $\times h$ (default $2h$).
+For each quadrature point $x$ on the body interface, the inward geometric
+normal $d(x)$ defines a ray. Its first outward intersection with the
+complete sewn interface is $y=x+t(x)d(x)$. The chamber AABB tree is queried
+under all 24 cube rotations. Let $m=n(y)$ be the outward normal at the hit
+and $a=m\cdot d>0$.
+
+The measured first-exit penalty is
 
 ```math
-\int_\Gamma (n_h\cdot v+\ell_n^2\nabla_\Gamma n_h:\nabla_\Gamma v)\,ds
-=\int_\Gamma n_{\rm geom}\cdot v\,ds,
-\qquad \widehat n_h=\frac{n_h}{|n_h|}.
+P_D(\Omega_s)=\int_\Gamma (D-t(x))_+^2\,dS(x).
 ```
 
-The smoothing length $\ell_n$ is set by `--normal-regularization` (default
-$h$). Smoothing is confined to the interface, so normals on opposite sides
-of a thin solid are not coupled through its interior. Its curvature is
-$H_h=\operatorname{div}_\Gamma\widehat n_h$. Where the projected direction
-is less than 0.5 aligned with the local outward normal, it is corrected to
-that orientation cone before measuring thickness; the count is logged.
+The update uses $D=d_{\min}+2\Delta t$, where the shape direction has unit
+infinity norm; the penalty at $d_{\min}$ is also reported. The guard
+distance anticipates the largest first-order relative displacement of two
+walls over one step.
 
-At $s\in\Gamma$, let $d(s)=-\widehat n_h(s)$ be the inward direction.
-The first transverse outward intersection of $s+t d(s)$ with the complete
-interface defines $t_{\rm exit}(s)$, clipped at $d_{\min}$ if no crossing is
-found within that distance. The penalty is
+The paired-point surrogate holds the current first hit and angle fixed.
+With $V_n(x)=\theta(x)\cdot n(x)$ and $V_n(y)=\theta(y)\cdot m$, it sets
 
 ```math
-P(\Omega_{\rm s})=\int_\Gamma
-\bigl(d_{\min}-t_{\rm exit}(s)\bigr)_+^2\,ds.
+\dot t_{\rm pair}=V_n(x)+aV_n(y),\qquad
+\widetilde{D P}_D[\theta]
+=-2\int_\Gamma (D-t)_+a^2\dot t_{\rm pair}\,dS.
 ```
 
-One bounding-volume tree contains the chamber interface triangles. The ray
-segment is inverse-rotated by each of the 24 cube rotations and queried
-against this tree; the first outward crossing is retained. The starting
-intersection at $t=0$ is excluded. A nearly tangent exit is rejected because
-its intersection derivative is ill-conditioned.
+The factor $a^2$ bounds the load from a grazing first hit. This is a local
+linear model, $P_D(\Omega_s)+\widetilde{D P}_D[\theta]$, rebuilt at each
+design. It is not the shape derivative of the measured $P_D$; the
+source-area variation is also omitted. The actual penalty is re-evaluated
+after each step, and its change can differ from the surrogate prediction.
 
-Let $y=s+t_{\rm exit}d$ lie on the crossing triangle and $m$ be its
-body-to-fluid normal. For a deformation $\theta$ and fixed ray direction,
-the intersection-distance variation is
+The surrogate load is Hilbert-extended and projected into the volume
+constraint null space. The smallest nonnegative multiplier of the projected
+thickness-repair direction is chosen, when feasible, so that the normalized
+direction satisfies
 
 ```math
-t'_{\rm exit}(\theta)=
-\frac{m\cdot\bigl(\theta(y)-\theta(s)\bigr)}{m\cdot d}.
+\widetilde{D P}_D[\theta]\leq-P_D/d_{\min}.
 ```
 
-The discrete load differentiates this intersection and the source-triangle
-area. The latter is the discrete counterpart of the surface-measure term;
-it does not add a separate curvature regularization. The ray direction and
-its $H^1$ projection are held fixed, so this is not the full derivative
-through normal smoothing. The update ascends $\rho-\beta P$, with
-$\beta$ = `--thickness-weight` (default 1), before the volume null-space
-projection. This normal-ray penalty is not a certificate of global minimum
-thickness.
+If this aggregate target is infeasible, the projected repair direction is
+used alone. The penalty, nominal penalty, minimum exit distance, incidence,
+load concentration, active multiplier, and actual and predicted changes are
+reported each iterate. The full shape direction transports the level set.
 
-This is a soft penalty, not a projection onto the set of feasible designs.
-The logged directional prediction concerns an infinitesimal deformation of
-the current mesh; a finite deformation can increase $P$ even before
-reconstruction, and reconstruction may change it further. Because the shape
-direction is normalised
-before transport, increasing $\beta$ cannot by itself shorten the update once
-the penalty dominates the direction.
-
-The weight is fixed during a run. It changes the direction only where the
-penalty is active: if no ray exits before $d_{\min}$, then $P=DP=0$ for every
-weight. Once active, the reported $DP[\theta]$ and actual change in $P$
-show whether the chosen weight is sufficient to oppose thinning. The
-direction is normalized before transport, so increasing the weight does not
-reduce the advection step.
-
-The nodally normalised projected field and its curvature are written as
-`Smoothed_Normal` and `Smoothed_Curvature` on the chamber and sewn designs
-at each iterate. They are interface fields and are zero at other vertices.
+The normal fields are written on separate `Interface` surface grids in the
+chamber and sewn XDMF files, containing only triangles labelled $\Gamma$,
+not the chamber cuts. `Smoothed_Normal` is the nodally normalised projected
+diagnostic and `Smoothed_Curvature` its surface divergence. The projection
+has a natural boundary condition where $\Gamma$ meets a cut; it does not
+enforce rotational matching of its normal there. `Geometric_Normal` is the
+area-averaged interface face normal, included as a baseline for the cut
+diagnostic. `Ray_Direction` is
+the mass-lumped nodal average of the
+geometric inward directions actually used at the three quadrature points
+of each interface triangle; it is not a second normal projection. On the
+sewn output, vectors are rotated and averaged at coincident vertices.
+`Thickness_Descent` is the Hilbert-smoothed representative of the negative
+paired-point surrogate differential, before the volume null-space
+projection. It is written on the design and interface grids for inspecting
+the thickness contribution separately from `Theta`.
 Thickness is evaluated at three quadrature points per interface triangle.
 Each iterate reports the penalty, number of rays exiting before $d_{\min}$,
 minimum exit distance, maximum deficit, and minimum exit transversality,
-number of samples whose smoothed normal needed orientation correction,
-normal alignment, and the range of smoothed curvature. The minimum exit
+diagnostic normal alignment, and the range of smoothed curvature. The minimum exit
 distance is clipped at $d_{\min}$ when no ray exits early.
+The maximum rotated jumps of `Geometric_Normal`, `Smoothed_Normal`, and
+`Ray_Direction` are
+reported at interface vertices on the paired chamber cuts, together with
+the number of located and unmatched vertices. These diagnostics are measured
+before sewn-output averaging.
 
 ### Transport
 
@@ -245,7 +243,9 @@ $\Omega_{\mathrm{s}} = \{\phi < 0\}$ and $\Gamma = \{\phi = 0\}$, starting from
 $\phi_0(x) = |x| - 1$. The direction is normalised in the nodal maximum norm,
 
 ```math
-\widehat\theta^{\,n} = \frac{\xi_{\rho,h}}{\|\xi_{\rho,h}\|_{L^\infty}},
+\widehat\theta^{\,n} =
+\frac{\xi_{\rho,h}+\alpha\xi_{P,h}}
+{\|\xi_{\rho,h}+\alpha\xi_{P,h}\|_{L^\infty}},
 ```
 
 so that the step length, not the metric, sets the size of the update. The level
@@ -418,26 +418,38 @@ The optimisation pass takes its target sizes from the current edge lengths.
 After a cut these include the short edges the cut created, so the mesh
 refines from one iterate to the next and never coarsens back. With
 `--mmg-adapt` the optimisation pass is replaced by an adaptation to a
-prescribed size map,
+prescribed size map. For MMG reconstruction this map is
 
 ```math
 h(x) = h_\Gamma + \bigl(h_{\mathrm{far}} - h_\Gamma\bigr)\min\Bigl(1, \frac{d(x)}{w}\Bigr),
 ```
 
-where $d$ is the distance to $\Gamma$ on the cut mesh. Both passes finish with
-the same quality improvement; they differ only in where the target sizes come
-from. The adaptation applies to the initial sphere and to every iterate:
+where $d$ is the distance to $\Gamma$ on the cut mesh. For WNGIR the map uses
+the Welsch weight of the initial sphere's signed-distance residual:
+
+```math
+r(x)=\bigl|\lVert x\rVert-1\bigr|,\qquad
+W(x)=\exp\!\left(-\frac{r(x)^2}{\sigma^2}\right),\qquad
+h(x)=h_{\mathrm{far}}-(h_{\mathrm{far}}-h_\Gamma)W(x).
+```
+
+With `--mmg-adapt`, the size map and WNGIR fit share one fixed scale $\sigma$:
+`--wngir-robust-scale` when positive, or $3h$ otherwise. Without adaptation,
+WNGIR keeps its automatic, data-dependent scale. Adaptation
+applies after every cut with MMG reconstruction, but only once to the fixed
+background with WNGIR:
 
 | Option | Meaning | Default |
 |---|---|---|
 | `--mmg-adapt` | Enables the adaptation | Off |
 | `--mmg-adapt-interface-size` | Size $h_\Gamma$ on $\Gamma$, in multiples of $h$ | 1 |
 | `--mmg-adapt-far-size` | Size $h_{\mathrm{far}}$ away from $\Gamma$, in multiples of $h$ | 1 |
-| `--mmg-adapt-width` | Distance $w$ over which the size changes, in multiples of $h$ | 3 |
+| `--mmg-adapt-width` | MMG-cut size-map width $w$, in multiples of $h$; not used for WNGIR | 3 |
 | `--mmg-adapt-gradation` | Largest ratio between neighbouring sizes | 1.3 |
 
-The minimum size and the Hausdorff tolerance are those of the cut. The option is
-rejected with `--reconstruction=wngir`, whose background is fixed.
+For MMG reconstruction, the minimum size and Hausdorff tolerance are those of
+the cut. For WNGIR, they follow the background settings. The WNGIR background
+remains fixed: later interfaces can leave the initially refined band.
 
 #### Level-set snapping
 
@@ -480,7 +492,11 @@ the protected intersections of its fixed faces.
 ### WNGIR
 
 MMG is called **once**, before any interface exists, to optimise the
-interface-free chamber. That mesh is the fixed background for the whole run;
+interface-free chamber. With `--mmg-adapt` it instead adapts that background
+near the initial sphere according to the Welsch-weighted size map, without
+inserting a material interface. Cut faces may be retriangulated but stay on
+their planes. The resulting mesh is the fixed
+background for the whole run;
 its settings are exposed as `--background-hmin`, `--background-hmax` and
 `--background-hausdorff` (in multiples of $h$, defaults 0.1, 1 and 0.05) and
 `--background-gradation` (default 2).
@@ -520,7 +536,7 @@ KelvinBall --h=0.125 --iterations=20
 KelvinBall --outer-radius=3 --h=0.1666666667 --iterations=2
 KelvinBall --n=25 --iterations=5 --reconstruction=wngir
 KelvinBall --n=30 --iterations=20 --mmg-adapt --mmg-adapt-interface-size=0.5
-KelvinBall --n=13 --iterations=5 --thickness-min=4 --thickness-weight=1
+KelvinBall --n=13 --iterations=5 --thickness-min=4
 ```
 
 The resolution is given either as points per edge (`--n`) or as a mesh size
@@ -592,9 +608,11 @@ wall-clock time of each stage. They are followed by:
   pitch $= 2\pi\ell/\rho$, and at the end of the row the components of $Z$
   and $\omega$ for the unit force along `--motion-force`, which are also
   printed at every iterate;
-- the level-set penalty, and the thickness bound and weight, number of
+- the level-set penalty, and the thickness bound and active multiplier, number of
   early-exiting rays, minimum exit distance,
-  maximum deficit, exit transversality, normal alignment and curvature, and predicted versus
+  maximum deficit, exit transversality, normal alignment and curvature,
+  the geometric-normal, projected-normal, and ray-direction cut jumps and
+  sample counts, and predicted versus
   actual change of the thickness penalty;
 - the identification across the cuts: the rotated jump of the Eikonal
   distance and of its projection, the largest projection correction and the

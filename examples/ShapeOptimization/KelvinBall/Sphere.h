@@ -63,10 +63,11 @@ namespace KelvinBall
       /**
        * @brief Prepares the fixed background mesh used by WNGIR.
        *
-       * MMG acts only on the interface-free chamber background. The returned
-       * mesh contains no design interface and remains fixed during optimization.
+       * MMG optimizes the interface-free background, or adapts it according to
+       * the initial sphere's Welsch weight at @p welschScale. The returned mesh contains no design
+       * interface and remains fixed during optimization.
        */
-      SphereDiscretization prepareWNGIRBackground() const;
+      SphereDiscretization prepareWNGIRBackground(Real welschScale) const;
 
       /**
        * @brief Adapts a mesh fitted to Gamma to the prescribed size map.

@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <Rodin/Distance/Eikonal.h>
+#include <Rodin/Adaptation/WNGIRLoss.h>
 #include <Rodin/Variational.h>
 
 namespace KelvinBall
@@ -216,24 +217,54 @@ namespace KelvinBall
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
   }
 
-  SphereDiscretization Sphere::prepareWNGIRBackground() const
+  SphereDiscretization Sphere::prepareWNGIRBackground(Real welschScale) const
   {
     const Real h = m_configuration.getH();
-    const Real hmin = m_configuration.backgroundHMin * h;
-    const Real hmax = m_configuration.backgroundHMax * h;
+    const Real interfaceSize = m_configuration.adaptInterfaceSize * h;
+    const Real farSize = m_configuration.adaptFarSize * h;
+    const Real hmin = m_configuration.adapt
+      ? std::min(m_configuration.backgroundHMin * h, std::min(interfaceSize, farSize))
+      : m_configuration.backgroundHMin * h;
+    const Real hmax = m_configuration.adapt
+      ? std::max(interfaceSize, farSize)
+      : m_configuration.backgroundHMax * h;
     const Real hausdorff = m_configuration.backgroundHausdorff * h;
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
-    protectFixedGeometry(mesh, true);
-    MMG::Optimizer()
-      .setHMin(hmin)
-      .setHMax(hmax)
-      .setHausdorff(hausdorff)
-      .setGradation(m_configuration.backgroundGradation)
-      .setAngleDetection(false)
-      .optimize(mesh);
+    if (m_configuration.adapt)
+    {
+      P1<Real, Mesh> sizeSpace(mesh);
+      MMG::RealGridFunction size(sizeSpace);
+      const Adaptation::WNGIRLoss welsch(welschScale);
+      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
+        const Real distance =
+          std::abs(mesh.getVertexCoordinates(vertex).norm() - Real(1));
+        size[vertex] =
+          farSize - (farSize - interfaceSize) * welsch.getWeight(distance);
+      }
+      protectFixedGeometry(mesh, false);
+      MMG::Adapt()
+        .setHMin(hmin)
+        .setHMax(hmax)
+        .setHausdorff(hausdorff)
+        .setGradation(m_configuration.adaptGradation)
+        .setAngleDetection(false)
+        .adapt(mesh, size);
+    }
+    else
+    {
+      protectFixedGeometry(mesh, true);
+      MMG::Optimizer()
+        .setHMin(hmin)
+        .setHMax(hmax)
+        .setHausdorff(hausdorff)
+        .setGradation(m_configuration.backgroundGradation)
+        .setAngleDetection(false)
+        .optimize(mesh);
+    }
     splitSelfPairedCut(mesh);
-    const size_t requiredTriangles = protectFixedGeometry(mesh, true);
+    const size_t requiredTriangles = protectFixedGeometry(mesh, !m_configuration.adapt);
 
     const size_t cellsAfter = mesh.getCellCount();
     return {std::move(mesh),
