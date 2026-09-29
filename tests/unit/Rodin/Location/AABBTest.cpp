@@ -57,6 +57,76 @@ TEST(Location_AABB, Locates0DVertex)
   EXPECT_EQ(p->getPolytope().getIndex(), 0);
 }
 
+class AABBGeometryTest : public ::testing::TestWithParam<Polytope::Type>
+{};
+
+TEST_P(AABBGeometryTest, LocatesMappedNonCentroidPoint)
+{
+  const auto type = GetParam();
+  const Polytope::Traits traits(type);
+  const size_t dimension = traits.getDimension();
+  if (type == Polytope::Type::Point)
+  {
+    Mesh mesh = Mesh<Context::Local>::Builder()
+                  .initialize(3)
+                  .nodes(1)
+                  .vertex({0.25, 0.5, 0.75})
+                  .finalize();
+    AABB locator(mesh);
+    const auto located = locator.locate(0, point({0.25, 0.5, 0.75}));
+    ASSERT_TRUE(located.has_value());
+    EXPECT_EQ(located->getPolytope().getGeometry(), type);
+    EXPECT_FALSE(locator.locate(0, point({-1, -1, -1})).has_value());
+    return;
+  }
+
+  Array<size_t> grid(dimension);
+  grid.setConstant(3);
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(type, grid);
+  AABB locator(mesh);
+  const Math::SpatialPoint rc =
+    Real(0.75) * traits.getCentroid() + Real(0.25) * traits.getVertex(0);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    Math::SpatialPoint x;
+    cell->getTransformation().transform(x, rc);
+    const auto located = locator.locate(x);
+    ASSERT_TRUE(located.has_value()) << "cell=" << cell->getIndex();
+    EXPECT_EQ(located->getPolytope().getGeometry(), type);
+    Math::SpatialPoint mapped;
+    located->getPolytope().getTransformation().transform(
+      mapped, located->getReferenceCoordinates());
+    EXPECT_LT((mapped - x).norm(), 1e-9);
+  }
+  Math::SpatialPoint outside(dimension);
+  outside.setConstant(-1);
+  EXPECT_FALSE(locator.locate(outside).has_value());
+}
+
+INSTANTIATE_TEST_SUITE_P(AllGeometries, AABBGeometryTest,
+  ::testing::ValuesIn(Polytope::Types), [](const auto& info) {
+    switch (info.param)
+    {
+      case Polytope::Type::Point:
+        return "Point";
+      case Polytope::Type::Segment:
+        return "Segment";
+      case Polytope::Type::Triangle:
+        return "Triangle";
+      case Polytope::Type::Quadrilateral:
+        return "Quadrilateral";
+      case Polytope::Type::Tetrahedron:
+        return "Tetrahedron";
+      case Polytope::Type::Hexahedron:
+        return "Hexahedron";
+      case Polytope::Type::Pyramid:
+        return "Pyramid";
+      case Polytope::Type::Wedge:
+        return "Wedge";
+    }
+    return "Unknown";
+  });
+
 TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
 {
   for (const auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
