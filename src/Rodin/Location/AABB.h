@@ -18,6 +18,7 @@
 #include <map>
 #include <utility>
 #include <functional>
+#include <Eigen/QR>
 
 #include "Rodin/Types.h"
 #include "Rodin/Geometry.h"
@@ -53,10 +54,11 @@ namespace Rodin::Location
    *   individual polytopes, using only componentwise box containment.
    *
    * - Narrow phase. For each surviving candidate, the actual transformation
-   *   is inverted by Newton iteration. The candidate is accepted only when
-   *   the physical residual is below tolerance and the recovered reference
-   *   coordinate lies in the reference polytope. Consequently, the AABB never
-   *   certifies membership; it only decides which candidates are worth testing.
+   *   is inverted by controlled Newton iteration, retrying from other
+   *   reference points if the centroid attempt fails. A reference coordinate
+   *   slightly outside the polytope is clipped back to it, then accepted only
+   *   if the clipped point maps within physical tolerance of the query. The
+   *   AABB never certifies membership; it only selects candidates to test.
    *
    * Boxes bound the whole curved image, not just sampled points on it. The
    * transformation is resampled on a unisolvent reference lattice and
@@ -72,7 +74,9 @@ namespace Rodin::Location
    * PolytopeTransformation::getOrder(), so a transformation that understates
    * its own order understates its box.
    *
-   * Tolerances are relative to the mesh bounding-box diagonal. Queries are
+   * Physical tolerance is relative to the mesh bounding-box diagonal. The
+   * reference tolerance only permits a small inversion overshoot before
+   * clipping; physical residual is checked again after clipping. Queries are
    * thread-safe: the lazy per-dimension build is guarded by a mutex and
    * transformations are immutable after construction.
    */
@@ -106,13 +110,13 @@ namespace Rodin::Location
         return *this;
       }
 
-      /// Reference-space containment slack (reference coordinates are O(1)).
+      /// Maximum reference-space overshoot before clipping and residual check.
       Real getReferenceTolerance() const
       {
         return m_referenceTolerance;
       }
 
-      /// @brief Sets the reference-space containment slack.
+      /// @brief Sets the maximum reference-space overshoot before clipping.
       AABB& setReferenceTolerance(Real tolerance)
       {
         m_referenceTolerance = tolerance;
@@ -123,9 +127,9 @@ namespace Rodin::Location
        * @brief Enables the exhaustive narrow-phase fallback on broad-phase
        * miss.
        *
-       * Only useful for transformations of order three or higher, whose true
-       * extent may exceed the sampled, inflated boxes. Costs one full
-       * narrow-phase sweep per miss.
+       * Useful when a transformation cannot be enclosed by the control-point
+       * construction and its sampled box may miss part of its image. Costs
+       * one full narrow-phase sweep per miss.
        */
       AABB& setExhaustiveFallback(bool fallback)
       {
@@ -861,9 +865,10 @@ namespace Rodin::Location
         return boxContains(node.lo, node.hi, x, sdim);
       }
 
-      bool containsReference(
-        const Geometry::Polytope::Traits& traits, const Math::SpatialPoint& rc) const
+      bool containsReference(const Geometry::Polytope::Traits& traits,
+        const Math::SpatialPoint& rc, bool& needsClip) const
       {
+        needsClip = false;
         if (traits.getDimension() == 0)
           return rc.size() == 0;
         if (!isFinite(rc))
@@ -875,70 +880,232 @@ namespace Rodin::Location
           const Real margin = hs.vector[i] - rc.dot(hs.matrix.row(i).transpose());
           if (!(margin >= -m_referenceTolerance))
             return false;
+          needsClip |= margin < Real(0);
         }
         return true;
       }
 
-      /**
-       * Newton inversion of the polytope transformation. Exact after one
-       * iteration for affine maps; iterative for bilinear and curved maps.
-       * Returns true only when the physical residual is below tolerance, so
-       * off-manifold points (facet queries) and diverged iterations are
-       * rejected.
-       */
+      void clipReference(Geometry::Polytope::Type geometry, Math::SpatialPoint& rc) const
+      {
+        using G = Geometry::Polytope::Type;
+        auto clipSimplex = [&](size_t dimension) {
+          Real sum = 0;
+          for (size_t i = 0; i < dimension; ++i)
+          {
+            rc[i] = std::max(Real(0), rc[i]);
+            sum += rc[i];
+          }
+          if (sum > Real(1))
+          {
+            for (size_t i = 0; i < dimension; ++i)
+              rc[i] /= sum;
+          }
+        };
+
+        switch (geometry)
+        {
+          case G::Point:
+            break;
+          case G::Segment:
+            rc[0] = std::clamp(rc[0], Real(0), Real(1));
+            break;
+          case G::Triangle:
+            clipSimplex(2);
+            break;
+          case G::Tetrahedron:
+            clipSimplex(3);
+            break;
+          case G::Quadrilateral:
+            rc[0] = std::clamp(rc[0], Real(0), Real(1));
+            rc[1] = std::clamp(rc[1], Real(0), Real(1));
+            break;
+          case G::Hexahedron:
+            for (size_t i = 0; i < 3; ++i)
+              rc[i] = std::clamp(rc[i], Real(0), Real(1));
+            break;
+          case G::Wedge:
+            clipSimplex(2);
+            rc[2] = std::clamp(rc[2], Real(0), Real(1));
+            break;
+          case G::Pyramid:
+            rc[2] = std::clamp(rc[2], Real(0), Real(1));
+            rc[0] = std::clamp(rc[0], Real(0), Real(1) - rc[2]);
+            rc[1] = std::clamp(rc[1], Real(0), Real(1) - rc[2]);
+            break;
+        }
+      }
+
+      /// @brief Inverts a valid, injective map from several seeds with controlled steps.
       bool invert(const Geometry::PolytopeTransformation& transformation,
-        const Geometry::Polytope::Traits& traits, const Math::SpatialPoint& x,
-        Math::SpatialPoint& rc) const
+        Geometry::Polytope::Type geometry, const Geometry::Polytope::Traits& traits,
+        const Math::SpatialPoint& x, Math::SpatialPoint& rc) const
       {
         const Real physTol = physicalTolerance();
         const size_t rdim = traits.getDimension();
         const size_t pdim = static_cast<size_t>(x.size());
-
-        rc = traits.getCentroid();
+        using G = Geometry::Polytope::Type;
+        const bool affineSimplex = transformation.getOrder() <= 1 &&
+          (geometry == G::Segment || geometry == G::Triangle ||
+            geometry == G::Tetrahedron);
         Math::SpatialPoint mapped;
         Math::SpatialMatrix<Real> jac;
         Math::SpatialPoint residual;
         Math::SpatialPoint step;
-
-        for (size_t iteration = 0; iteration < m_maxNewtonIterations; ++iteration)
-        {
-          transformation.transform(mapped, rc);
-          residual = x - mapped;
-          if (residual.norm() <= physTol)
+        Math::SpatialPoint candidate;
+        Math::SpatialPoint candidateMapped;
+        auto accept = [&]() {
+          bool needsClip;
+          if (!containsReference(traits, rc, needsClip))
+            return false;
+          if (!needsClip)
             return true;
+          clipReference(geometry, rc);
+          Math::SpatialPoint clippedMapped;
+          transformation.transform(clippedMapped, rc);
+          return isFinite(clippedMapped) && (x - clippedMapped).norm() <= physTol;
+        };
 
-          transformation.jacobian(jac, rc);
-          if (!isFinite(jac))
-            return false;
-
-          if (rdim == pdim)
-          {
-            const Real determinant = jac.determinant();
-            if (!std::isfinite(determinant) || determinant == Real(0))
-              return false;
-            step = jac.solve(residual);
-          }
+        for (size_t seed = 0; seed < 1 + 2 * traits.getVertexCount(); ++seed)
+        {
+          if (seed == 0)
+            rc = traits.getCentroid();
+          else if (seed % 2 == 1)
+            rc = traits.getVertex((seed - 1) / 2);
           else
+            rc = Real(0.5) * (traits.getCentroid() + traits.getVertex((seed - 2) / 2));
+          transformation.transform(mapped, rc);
+          for (size_t iteration = 0; iteration < m_maxNewtonIterations; ++iteration)
           {
-            const Math::SpatialMatrix<Real> normal = jac.transpose() * jac;
-            const Math::SpatialPoint rhs = jac.transpose() * residual;
-            const Real determinant = normal.determinant();
-            if (!std::isfinite(determinant) || determinant == Real(0))
+            if (!isFinite(mapped))
+              break;
+            residual = x - mapped;
+            const Real residualNorm = residual.norm();
+            if (residualNorm == Real(0))
+            {
+              if (accept())
+                return true;
+              // A valid element has an injective map: an exact preimage
+              // outside its reference cell cannot yield another inside.
               return false;
-            step = normal.solve(rhs);
-          }
-          if (!isFinite(step))
-            return false;
+            }
+            transformation.jacobian(jac, rc);
+            if (!isFinite(jac))
+              break;
 
-          rc += step;
-          // Diverging iterates cannot represent a contained point: reference
-          // coordinates of interest live in an O(1) neighborhood.
-          if (rc.norm() > Real(1e3))
+            if (rdim == pdim)
+            {
+              const Real determinant = jac.determinant();
+              if (!std::isfinite(determinant) || determinant == Real(0))
+                break;
+              if (rdim == 1)
+              {
+                step.resize(1);
+                step[0] = residual[0] / determinant;
+              }
+              else
+              {
+                step = jac.solve(residual);
+              }
+            }
+            else
+            {
+              Math::Matrix<Real> dense(pdim, rdim);
+              Math::Vector<Real> rhs(pdim);
+              for (size_t i = 0; i < pdim; ++i)
+              {
+                rhs[i] = residual[i];
+                for (size_t j = 0; j < rdim; ++j)
+                  dense(i, j) = jac(i, j);
+              }
+              Eigen::ColPivHouseholderQR<Math::Matrix<Real>> qr(dense);
+              if (qr.rank() < static_cast<Eigen::Index>(rdim))
+                break;
+              step = qr.solve(rhs);
+            }
+            if (!isFinite(step))
+              break;
+            if (affineSimplex)
+            {
+              rc += step;
+              if (rc.squaredNorm() > Real(1e6))
+                return false;
+              bool needsClip;
+              if (!containsReference(traits, rc, needsClip))
+                return false;
+              if (needsClip)
+                clipReference(geometry, rc);
+              transformation.transform(mapped, rc);
+              return isFinite(mapped) && (x - mapped).norm() <= physTol;
+            }
+            const Real stepNormSquared = step.squaredNorm();
+            const Real referenceAccuracy =
+              std::max(m_tolerance, Real(16) * std::numeric_limits<Real>::epsilon());
+            // A small physical residual alone can hide a large coordinate
+            // error on a thin element. Also require a small reference update.
+            if (residualNorm <= physTol &&
+              std::sqrt(stepNormSquared) <= referenceAccuracy)
+            {
+              if (accept())
+                return true;
+              return false;
+            }
+            if (stepNormSquared == Real(0))
+              break;
+
+            Real alpha = 1;
+            bool advanced = false;
+            for (size_t trial = 0; trial < 24; ++trial)
+            {
+              candidate = rc + alpha * step;
+              if (candidate.squaredNorm() <= Real(1e6))
+              {
+                transformation.transform(candidateMapped, candidate);
+                if (isFinite(candidateMapped))
+                {
+                  const Real candidateResidualNorm = (x - candidateMapped).norm();
+                  if (candidateResidualNorm < residualNorm)
+                  {
+                    rc = candidate;
+                    mapped = candidateMapped;
+                    if (candidateResidualNorm == Real(0))
+                    {
+                      if (accept())
+                        return true;
+                      return false;
+                    }
+                    // Estimate the remaining reference correction using
+                    // this step's residual ratio. Skip the next Jacobian
+                    // only when the estimate is well below tolerance.
+                    if (candidateResidualNorm <= physTol && alpha == Real(1) &&
+                      candidateResidualNorm / residualNorm * std::sqrt(stepNormSquared) <=
+                        Real(0.25) * referenceAccuracy)
+                    {
+                      if (accept())
+                        return true;
+                      return false;
+                    }
+                    advanced = true;
+                    break;
+                  }
+                }
+              }
+              alpha *= Real(0.5);
+            }
+            if (!advanced)
+            {
+              // A floating-point stationary point can have a small residual
+              // even when another Newton correction cannot reduce it.
+              if (residualNorm <= physTol && accept())
+                return true;
+              if (residualNorm <= physTol)
+                return false;
+              break;
+            }
+          }
+          if (affineSimplex)
             return false;
         }
-
-        transformation.transform(mapped, rc);
-        return (x - mapped).norm() <= physTol;
+        return false;
       }
 
       Optional<Geometry::Point> narrowPhase(
@@ -957,9 +1124,7 @@ namespace Rodin::Location
 
         const Geometry::Polytope::Traits traits(polytope.getGeometry());
         Math::SpatialPoint rc;
-        if (!invert(polytope.getTransformation(), traits, x, rc))
-          return {};
-        if (!containsReference(traits, rc))
+        if (!invert(polytope.getTransformation(), polytope.getGeometry(), traits, x, rc))
           return {};
         return Geometry::Point(polytope, rc, x);
       }

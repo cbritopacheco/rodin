@@ -200,9 +200,7 @@ TEST(Location_AABB, RejectsSingularNewtonSystem)
   EXPECT_FALSE(locator.locate(point({0.0, 0.05})).has_value());
 }
 
-// These desired-behavior regressions are disabled until the inverse and
-// tolerance fixes land. Run them explicitly with --gtest_also_run_disabled_tests.
-TEST(Location_AABB, DISABLED_LocatesMappedPointWhenCentroidNewtonStepIsZero)
+TEST(Location_AABB, LocatesMappedPointWhenCentroidNewtonStepIsZero)
 {
   const auto map = [](Real t) {
     const Real s = t - Real(0.5);
@@ -233,7 +231,7 @@ TEST(Location_AABB, DISABLED_LocatesMappedPointWhenCentroidNewtonStepIsZero)
   EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.25, 1e-8);
 }
 
-TEST(Location_AABB, DISABLED_LocatesMappedPointAfterOversizedNewtonStep)
+TEST(Location_AABB, LocatesMappedPointAfterOversizedNewtonStep)
 {
   const auto map = [](Real t) {
     const Real s = t - Real(0.5);
@@ -260,7 +258,7 @@ TEST(Location_AABB, DISABLED_LocatesMappedPointAfterOversizedNewtonStep)
   EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
 }
 
-TEST(Location_AABB, DISABLED_LocatesPointOnThinEmbeddedTriangle)
+TEST(Location_AABB, LocatesPointOnThinEmbeddedTriangle)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()
                 .initialize(3)
@@ -277,7 +275,7 @@ TEST(Location_AABB, DISABLED_LocatesPointOnThinEmbeddedTriangle)
   EXPECT_NEAR(located->getReferenceCoordinates()[1], 0.2, 1e-8);
 }
 
-TEST(Location_AABB, DISABLED_BroadPhaseAgreesWithExhaustiveNarrowPhase)
+TEST(Location_AABB, BroadPhaseAgreesWithExhaustiveNarrowPhase)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()
                 .initialize(2)
@@ -294,7 +292,29 @@ TEST(Location_AABB, DISABLED_BroadPhaseAgreesWithExhaustiveNarrowPhase)
   EXPECT_EQ(locator.locate(x).has_value(), exhaustive.locate(x).has_value());
 }
 
-TEST(Location_AABB, DISABLED_ResolvesReferenceCoordinateOnSmallCellOfLargeMesh)
+TEST(Location_AABB, ClipsNearBoundaryReferencePointAndChecksPhysicalResidual)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({0, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  AABB locator(mesh);
+  const auto located = locator.locate(point({-5e-11, 0.2}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_GE(located->getReferenceCoordinates()[0], 0);
+  EXPECT_NEAR(located->getReferenceCoordinates()[1], 0.2, 1e-10);
+  Math::SpatialPoint mapped;
+  located->getPolytope().getTransformation().transform(
+    mapped, located->getReferenceCoordinates());
+  EXPECT_LE(
+    (mapped - point({-5e-11, 0.2})).norm(), locator.getTolerance() * std::sqrt(Real(2)));
+}
+
+TEST(Location_AABB, ResolvesReferenceCoordinateOnSmallCellOfLargeMesh)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()
                 .initialize(1)
@@ -308,6 +328,50 @@ TEST(Location_AABB, DISABLED_ResolvesReferenceCoordinateOnSmallCellOfLargeMesh)
   const auto located = locator.locate(point({0.9e-6}));
   ASSERT_TRUE(located.has_value());
   EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+}
+
+TEST(Location_AABB, ResolvesReferenceCoordinateOnSmallCurvedCellOfLargeMesh)
+{
+  const auto map = [](Real t) {
+    return Real(1e-12) * (t + Real(0.2) * t * (Real(1) - t));
+  };
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(3)
+                .vertex({map(0)})
+                .vertex({map(1)})
+                .vertex({1})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  Variational::RealH1Element<2> element(Polytope::Type::Segment);
+  PointCloud nodes(1, element.getCount());
+  for (size_t a = 0; a < element.getCount(); ++a)
+    nodes(0, a) = map(element.getNode(a)[0]);
+  mesh.setPolytopeTransformation({1, 0},
+    new ParametricTransformation<Variational::RealH1Element<2>>(
+      std::move(nodes), element));
+
+  AABB locator(mesh);
+  const auto located = locator.locate(point({map(Real(0.9))}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+}
+
+TEST(Location_AABB, ResolvesReferenceCoordinateOnAnisotropicCell)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({0, 1e-12})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  AABB locator(mesh);
+  const auto located = locator.locate(point({Real(1) / Real(3), 0.6e-12}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], Real(1) / Real(3), 1e-8);
+  EXPECT_NEAR(located->getReferenceCoordinates()[1], 0.6, 1e-8);
 }
 
 TEST(Location_AABB, RejectsOffManifoldPointInsideEmbeddedSegmentBox)
@@ -838,6 +902,10 @@ namespace
         const auto located = locator.locate(x);
         ASSERT_TRUE(located.has_value()) << "type=" << static_cast<int>(type)
                                          << " K=" << K << " cell=" << cell->getIndex();
+
+        if (located->getPolytope().getIndex() == cell->getIndex())
+          EXPECT_LT((located->getReferenceCoordinates() - rc).norm(), 1e-9)
+            << "type=" << static_cast<int>(type) << " K=" << K;
 
         Math::SpatialPoint mapped;
         located->getPolytope().getTransformation().transform(
