@@ -185,6 +185,7 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
+/// @cond RODIN_TEST_INTERNAL
 #define RODIN_AABB_BENCHMARKS(GEOMETRY)                                                  \
   BENCHMARK_CAPTURE(BM_AABBBuild, GEOMETRY, G::GEOMETRY);                                \
   BENCHMARK_CAPTURE(BM_AABBHit, GEOMETRY, G::GEOMETRY);                                  \
@@ -209,4 +210,5 @@ namespace Rodin::Tests::Benchmarks
   BENCHMARK_CAPTURE(BM_AABBCurvedHit, Pyramid, G::Pyramid);
   BENCHMARK_CAPTURE(BM_AABBCurvedHit, Wedge, G::Wedge);
   BENCHMARK(BM_AABBTriangleNarrowMiss);
+  /// @endcond
 }

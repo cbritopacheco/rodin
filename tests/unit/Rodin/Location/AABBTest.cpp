@@ -904,8 +904,10 @@ namespace
                                          << " K=" << K << " cell=" << cell->getIndex();
 
         if (located->getPolytope().getIndex() == cell->getIndex())
+        {
           EXPECT_LT((located->getReferenceCoordinates() - rc).norm(), 1e-9)
             << "type=" << static_cast<int>(type) << " K=" << K;
+        }
 
         Math::SpatialPoint mapped;
         located->getPolytope().getTransformation().transform(
