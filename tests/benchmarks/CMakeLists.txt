@@ -8,6 +8,7 @@ set(RodinBenchmarks_SRCS
   Connectivity.cpp
   Integrators.cpp
   Quadrature.cpp
+  AABB.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
