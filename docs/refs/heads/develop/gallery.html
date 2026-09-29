@@ -98,8 +98,12 @@
               <ul>
                 <li><a href="#gallery-shapeopt-cantilever">Shape Optimization: Cantilever</a></li>
                 <li><a href="#gallery-shapeopt-levelset">Level-Set Shape Optimization</a></li>
+                <li><a href="#gallery-density-temp">Density Optimization: Temperature</a></li>
               </ul>
             </li>
+            <li><a href="#gallery-geometry">Mesh Geometry and Utilities</a></li>
+            <li><a href="#gallery-io">Visualization and I/O</a></li>
+            <li><a href="#gallery-see-also">See Also</a></li>
           </ul>
         </nav>
 <section id="gallery-intro"><h2><a href="#gallery-intro">Overview</a></h2><p>This gallery showcases results from simulations built with the Rodin framework. Each entry links to the corresponding example or tutorial page where you can find the full source code and step-by-step explanations.</p></section><section id="gallery-pdes"><h2><a href="#gallery-pdes">Partial Differential Equations</a></h2><section id="gallery-pdes-poisson"><h3><a href="#gallery-pdes-poisson">Poisson Equation</a></h3><img class="m-image" src="Poisson.png" alt="Image" style="width: 360px;" /><p>The <a href="examples-pdes-poisson.html" class="m-doc">Poisson equation</a> example solves the classic scalar PDE <svg class="m-math" style="width: 5.053em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 48.508667 10.626798">
@@ -193,57 +197,7 @@ $ -\Delta_\Gamma u + u = f $
 <use x='55.903878' y='0' xlink:href='#eq4-g3-61'/>
 <use x='68.329359' y='0' xlink:href='#eq4-g1-102'/>
 </g>
-</svg> on a curved 3D manifold. It demonstrates that Rodin handles surface PDEs transparently — the same <code>Integral(Grad(u), Grad(v))</code> syntax automatically computes the surface gradient.</p></section></section><section id="gallery-optimization"><h2><a href="#gallery-optimization">Optimization</a></h2><section id="gallery-shapeopt-cantilever"><h3><a href="#gallery-shapeopt-cantilever">Shape Optimization: Cantilever</a></h3><img class="m-image" src="SimpleCantilever.png" alt="Image" style="width: 360px;" /><p>The <a href="examples-shapeoptimization-simple_cantilever.html" class="m-doc">simple cantilever</a> example performs boundary-variation shape optimization of a cantilever beam, minimizing the compliance (structural stiffness) subject to a volume constraint. The shape gradient is computed and regularized via the Hilbert extension-regularization procedure, and the mesh is updated using the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> remesher.</p></section><section id="gallery-shapeopt-levelset"><h3><a href="#gallery-shapeopt-levelset">Level-Set Shape Optimization</a></h3><img class="m-image" src="LevelSetCantilever.png" alt="Image" style="width: 360px;" /><p>The <a href="examples-shapeoptimization-levelset_cantilever.html" class="m-doc">level-set</a>cantilever&quot; example combines body-fitted meshing with level-set
-techniques. The optimizer advects a signed-distance function and recovers
-the implicit domain at each iteration using the
-@ref Rodin::MMG &quot;MMG&quot; level-set discretizer.
-
-@subsection gallery-density-temp Density Optimization: Temperature
-
-@image html SIMPTemperatureMinimization.png width=360px
-
-The @ref examples-density_optimization-simp_temperature_minimization
-&quot;temperature minimization&quot; example uses the SIMP (Solid Isotropic
-Material with Penalization) approach to find an optimal material
-distribution that minimizes the average temperature in a domain.
-
-@section gallery-geometry Mesh Geometry and Utilities
-
-Rodin provides a rich set of geometric operations for creating,
-transforming, and querying meshes:
-
-- &lt;strong&gt;UniformGrid&lt;/strong&gt;: Generate structured meshes of triangles, quads,
-  tetrahedra, hexahedra, or wedges in any dimension. See
-  @ref examples-geometry-uniformgrid &quot;UniformGrid example&quot;.
-- &lt;strong&gt;Scale and displace&lt;/strong&gt;: Transform mesh coordinates with
-  &lt;tt&gt;mesh.scale()&lt;/tt&gt; and &lt;tt&gt;mesh.displace()&lt;/tt&gt;.
-- &lt;strong&gt;Trim&lt;/strong&gt;: Remove cells by attribute to extract subdomains.
-- &lt;strong&gt;Skin&lt;/strong&gt;: Extract the boundary surface of a volumetric mesh.
-- &lt;strong&gt;CCL&lt;/strong&gt;: Connected component labeling for domain decomposition.
-- &lt;strong&gt;Connectivity&lt;/strong&gt;: Compute topological incidence relations between
-  mesh entities of any dimension. See
-  @ref examples-geometry-connectivity &quot;Connectivity example&quot;.
-
-@section gallery-io Visualization and I/O
-
-Rodin supports exporting simulation data in the
-@ref Rodin::IO::XDMF &quot;XDMF&quot; format, which can be opened directly in
-&lt;a href=&quot;<a href="https://www.paraview.org/">https:/<wbr />/<wbr />www.paraview.org/<wbr /></a>&quot; &gt;ParaView&lt;/a&gt; for advanced 3D visualization
-including time-series animation, vector glyphs, and surface warping.
-
-See the @ref examples-io-xdmf &quot;XDMF example&quot; for a complete guide.
-
-The supported mesh file formats are:
-- &lt;strong&gt;MFEM&lt;/strong&gt; (&lt;tt&gt;IO::FileFormat::MFEM&lt;/tt&gt;): Text-based, used by the MFEM library
-- &lt;strong&gt;MEDIT&lt;/strong&gt; (&lt;tt&gt;IO::FileFormat::MEDIT&lt;/tt&gt;): Native for MMG/INRIA tools
-- &lt;strong&gt;HDF5&lt;/strong&gt; (&lt;tt&gt;IO::FileFormat::HDF5&lt;/tt&gt;): Binary, for large-scale simulations
-
-@section gallery-see-also See Also
-
-- @ref examples-index &quot;Examples and tutorials&quot;
-- @ref guides-io &quot;I/O in Rodin&quot;
-- @ref guides-weak-formulations &quot;Weak formulations&quot;
-- @ref notation-index &quot;Notation reference&quot;</p></section></section>
+</svg> on a curved 3D manifold. It demonstrates that Rodin handles surface PDEs transparently — the same <code>Integral(Grad(u), Grad(v))</code> syntax automatically computes the surface gradient.</p></section></section><section id="gallery-optimization"><h2><a href="#gallery-optimization">Optimization</a></h2><section id="gallery-shapeopt-cantilever"><h3><a href="#gallery-shapeopt-cantilever">Shape Optimization: Cantilever</a></h3><img class="m-image" src="SimpleCantilever.png" alt="Image" style="width: 360px;" /><p>The <a href="examples-shapeoptimization-simple_cantilever.html" class="m-doc">simple cantilever</a> example performs boundary-variation shape optimization of a cantilever beam, minimizing the compliance (structural stiffness) subject to a volume constraint. The shape gradient is computed and regularized via the Hilbert extension-regularization procedure, and the mesh is updated using the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> remesher.</p></section><section id="gallery-shapeopt-levelset"><h3><a href="#gallery-shapeopt-levelset">Level-Set Shape Optimization</a></h3><img class="m-image" src="LevelSetCantilever.png" alt="Image" style="width: 360px;" /><p>The <a href="examples-shapeoptimization-levelset_cantilever.html" class="m-doc">level-set cantilever</a> example combines body-fitted meshing with level-set techniques. The optimizer advects a signed-distance function and recovers the implicit domain at each iteration using the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> level-set discretizer.</p></section><section id="gallery-density-temp"><h3><a href="#gallery-density-temp">Density Optimization: Temperature</a></h3><img class="m-image" src="SIMPTemperatureMinimization.png" alt="Image" style="width: 360px;" /><p>The <a href="examples-density_optimization-simp_temperature_minimization.html" class="m-doc">temperature minimization</a> example uses the SIMP (Solid Isotropic Material with Penalization) approach to find an optimal material distribution that minimizes the average temperature in a domain.</p></section></section><section id="gallery-geometry"><h2><a href="#gallery-geometry">Mesh Geometry and Utilities</a></h2><p>Rodin provides a rich set of geometric operations for creating, transforming, and querying meshes:</p><ul><li><strong>UniformGrid</strong>: Generate structured meshes of triangles, quads, tetrahedra, hexahedra, or wedges in any dimension. See <a href="examples-geometry-uniformgrid.html" class="m-doc">UniformGrid example</a>.</li><li><strong>Scale and displace</strong>: Transform mesh coordinates with <code>mesh.scale()</code> and <code>mesh.displace()</code>.</li><li><strong>Trim</strong>: Remove cells by attribute to extract subdomains.</li><li><strong>Skin</strong>: Extract the boundary surface of a volumetric mesh.</li><li><strong>CCL</strong>: Connected component labeling for domain decomposition.</li><li><strong>Connectivity</strong>: Compute topological incidence relations between mesh entities of any dimension. See <a href="examples-geometry-connectivity.html" class="m-doc">Connectivity example</a>.</li></ul></section><section id="gallery-io"><h2><a href="#gallery-io">Visualization and I/O</a></h2><p>Rodin supports exporting simulation data in the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> format, which can be opened directly in <a href="https://www.paraview.org/">ParaView</a> for advanced 3D visualization including time-series animation, vector glyphs, and surface warping.</p><p>See the <a href="examples-io-xdmf.html" class="m-doc">XDMF example</a> for a complete guide.</p><p>The supported mesh file formats are:</p><ul><li><strong>MFEM</strong> (<code>IO::FileFormat::MFEM</code>): Text-based, used by the MFEM library</li><li><strong>MEDIT</strong> (<code>IO::FileFormat::MEDIT</code>): Native for MMG/INRIA tools</li><li><strong>HDF5</strong> (<code>IO::FileFormat::HDF5</code>): Binary, for large-scale simulations</li></ul></section><section id="gallery-see-also"><h2><a href="#gallery-see-also">See Also</a></h2><ul><li><a href="examples-index.html" class="m-doc">Examples and tutorials</a></li><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a></li><li><a href="guides-weak-formulations.html" class="m-doc">Weak formulations</a></li><li><a href="notation-index.html" class="m-doc">Notation reference</a></li></ul></section>
       </div>
     </div>
   </div>

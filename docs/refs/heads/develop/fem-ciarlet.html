@@ -101,7 +101,7 @@
             <li><a href="#fem-ciarlet-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="fem-ciarlet-intro"><h2><a href="#fem-ciarlet-intro">Introduction</a></h2><p>The finite element method (FEM) is a powerful technique for numerically solving partial differential equations. At its heart lies the concept of a finite element**, which provides a systematic way to construct piecewise-polynomial approximations on a mesh.</p><p>The most widely used formal definition of a finite element was introduced by Philippe G. Ciarlet. This definition provides a clean mathematical framework that separates three concerns:</p><ol><li><strong>Geometry</strong>: on which shape is the element defined?</li><li><strong>Approximation</strong>: which polynomial space is used?</li><li><strong>Degrees of freedom</strong>: how are functions in the space uniquely determined?</li></ol><p>This separation is precisely mirrored in Rodin&#x27;s architecture: the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module handles shapes, the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module defines polynomial spaces and DOFs, and the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module puts them together.</p></section><section id="fem-ciarlet-definition"><h2><a href="#fem-ciarlet-definition">The Ciarlet Triple</a></h2><p>A <strong>finite element</strong> in the sense of Ciarlet is defined as a triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
+<section id="fem-ciarlet-intro"><h2><a href="#fem-ciarlet-intro">Introduction</a></h2><p>The finite element method (FEM) is a powerful technique for numerically solving partial differential equations. At its heart lies the concept of a finite element, which provides a systematic way to construct piecewise-polynomial approximations on a mesh.</p><p>The most widely used formal definition of a finite element was introduced by Philippe G. Ciarlet. This definition provides a clean mathematical framework that separates three concerns:</p><ol><li><strong>Geometry</strong>: on which shape is the element defined?</li><li><strong>Approximation</strong>: which polynomial space is used?</li><li><strong>Degrees of freedom</strong>: how are functions in the space uniquely determined?</li></ol><p>This separation is precisely mirrored in Rodin&#x27;s architecture: the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module handles shapes, the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module defines polynomial spaces and DOFs, and the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module puts them together.</p></section><section id="fem-ciarlet-definition"><h2><a href="#fem-ciarlet-definition">The Ciarlet Triple</a></h2><p>A <strong>finite element</strong> in the sense of Ciarlet is defined as a triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
 <title>
 $ (K, P, \Sigma) $
 </title>
@@ -389,7 +389,7 @@ $ \Sigma = \{ \sigma_1, \sigma_2, \ldots, \sigma_n \} $
 <use x='91.068185' y='1.793263' xlink:href='#eq15-g1-110'/>
 <use x='96.70452' y='0' xlink:href='#eq15-g0-103'/>
 </g>
-</svg> is a set of degrees of freedom** (DOFs) — linear functionals <svg class="m-math" style="width: 5.868em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 56.330319 10.029041">
+</svg> is a set of degrees of freedom (DOFs) — linear functionals <svg class="m-math" style="width: 5.868em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 56.330319 10.029041">
 <title>
 $ \sigma_i : P \to \mathbb{R} $
 </title>
@@ -619,7 +619,7 @@ $ (K, P, \Sigma) $
 <use x='33.078425' y='0' xlink:href='#eq27-g1-6'/>
 <use x='41.532744' y='0' xlink:href='#eq27-g1-41'/>
 </g>
-</svg>, there exists a unique set of basis functions** <svg class="m-math" style="width: 9.116em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 87.512116 11.955168">
+</svg>, there exists a unique set of basis functions <svg class="m-math" style="width: 9.116em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 87.512116 11.955168">
 <title>
 $ \{ \phi_1, \ldots, \phi_n \} \subset P $
 </title>
@@ -691,7 +691,7 @@ $ \delta_{ij} $
 <use x='5.184655' y='1.793263' xlink:href='#eq30-g0-105'/>
 <use x='8.067795' y='1.793263' xlink:href='#eq30-g0-106'/>
 </g>
-</svg> is the Kronecker delta. This is called the nodal basis** of the finite element. These basis functions are the shape functions that are used to represent any function in the finite element space.</p><p>Any function <svg class="m-math" style="width: 3.089em; height: 1.093em; vertical-align: -0.243em;" viewBox="0 -8.169366 29.658039 10.493973">
+</svg> is the Kronecker delta. This is called the nodal basis of the finite element. These basis functions are the shape functions that are used to represent any function in the finite element space.</p><p>Any function <svg class="m-math" style="width: 3.089em; height: 1.093em; vertical-align: -0.243em;" viewBox="0 -8.169366 29.658039 10.493973">
 <title>
 $ p \in P $
 </title>

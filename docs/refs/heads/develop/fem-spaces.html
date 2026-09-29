@@ -196,7 +196,7 @@ $ C^0 $
 <use x='0' y='0' xlink:href='#eq6-g0-67'/>
 <use x='9.233612' y='-4.338437' xlink:href='#eq6-g1-48'/>
 </g>
-</svg> (continuous)</td><td>Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes)</td></tr></tbody></table></section><section id="fem-spaces-p0"><h2><a href="#fem-spaces-p0">P0: Piecewise Constant Space</a></h2><p>The <code>P0</code> space consists of functions that are constant on each cell of the mesh. Functions in P0 are generally discontinuous** across cell boundaries.</p><div class="m-math"><svg style="width: 22.821em; height: 1.361em;" viewBox="84.72835 -13.06128 219.086385 13.06128">
+</svg> (continuous)</td><td>Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes)</td></tr></tbody></table></section><section id="fem-spaces-p0"><h2><a href="#fem-spaces-p0">P0: Piecewise Constant Space</a></h2><p>The <code>P0</code> space consists of functions that are constant on each cell of the mesh. Functions in P0 are generally discontinuous across cell boundaries.</p><div class="m-math"><svg style="width: 22.821em; height: 1.361em;" viewBox="84.72835 -13.06128 219.086385 13.06128">
 <title>
 \[
   V_h^0 = \{ v \in L^2(\Omega) : v|_K \in \mathbb{P}_0(K), \
@@ -257,7 +257,7 @@ $ C^0 $
 <use x='292.459087' y='-1.195529' xlink:href='#eq7-g2-104'/>
 <use x='297.837128' y='-2.988792' xlink:href='#eq7-g1-103'/>
 </g>
-</svg></div><p>Properties:**</p><ul><li>One DOF per cell (the constant value on that cell)</li><li>Number of DOFs = number of cells (retrieved by <code>Wh.getSize()</code>)</li><li>Discontinuous across cell boundaries — this is an <svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
+</svg></div><p>Properties:</p><ul><li>One DOF per cell (the constant value on that cell)</li><li>Number of DOFs = number of cells (retrieved by <code>Wh.getSize()</code>)</li><li>Discontinuous across cell boundaries — this is an <svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
 <title>
 $ L^2 $
 </title>
@@ -269,7 +269,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq8-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq8-g1-50'/>
 </g>
-</svg> space, not** <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+</svg> space, not <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -292,7 +292,7 @@ $ H^1 $
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">indicator</span><span class="p">(</span><span class="n">Wh</span><span class="p">);</span>
 <span class="n">indicator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
-<span class="p">};</span></pre><section id="fem-spaces-p0-dg"><h3><a href="#fem-spaces-p0-dg">Discontinuous Galerkin with P0</a></h3><p>Because P0 functions are discontinuous, they are natural for DG methods. In a DG formulation, jump and average operators are used across cell interfaces. See <a href="guides-variational.html#guides-variational-dg" class="m-doc">DG formulations</a> for details.</p></section></section><section id="fem-spaces-p0g"><h2><a href="#fem-spaces-p0g">P0g: Global Constant Space</a></h2><p>The <code>P0g</code> space is a <strong>global constant</strong> finite element space — it consists of functions that are constant over the entire** mesh (not per-cell like P0).</p><p>Properties:**</p><ul><li>Scalar P0g: <strong>1 DOF</strong> total (the single global constant)</li><li>Vector P0g: <strong>vdim DOFs</strong> total (one per component)</li><li>Continuous everywhere (trivially, since the function is constant)</li></ul><pre class="m-code"><span class="n">P0g</span><span class="w"> </span><span class="nf">Wh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// scalar: 1 DOF</span>
+<span class="p">};</span></pre><section id="fem-spaces-p0-dg"><h3><a href="#fem-spaces-p0-dg">Discontinuous Galerkin with P0</a></h3><p>Because P0 functions are discontinuous, they are natural for DG methods. In a DG formulation, jump and average operators are used across cell interfaces. See <a href="guides-variational.html#guides-variational-dg" class="m-doc">DG formulations</a> for details.</p></section></section><section id="fem-spaces-p0g"><h2><a href="#fem-spaces-p0g">P0g: Global Constant Space</a></h2><p>The <code>P0g</code> space is a <strong>global constant</strong> finite element space — it consists of functions that are constant over the entire mesh (not per-cell like P0).</p><p>Properties:</p><ul><li>Scalar P0g: <strong>1 DOF</strong> total (the single global constant)</li><li>Vector P0g: <strong>vdim DOFs</strong> total (one per component)</li><li>Continuous everywhere (trivially, since the function is constant)</li></ul><pre class="m-code"><span class="n">P0g</span><span class="w"> </span><span class="nf">Wh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// scalar: 1 DOF</span>
 <span class="n">P0g</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w">        </span><span class="c1">// vector: d DOFs</span></pre><p>P0g is useful for representing globally constant fields (e.g., a uniform property or a Lagrange multiplier for a global constraint).</p></section><section id="fem-spaces-p1"><h2><a href="#fem-spaces-p1">P1: Piecewise Linear Space</a></h2><p>The <code>P1</code> space is the most commonly used finite element space. It consists of <strong>continuous</strong> functions that are <strong>linear</strong> on each cell.</p><div class="m-math"><svg style="width: 23.098em; height: 1.361em;" viewBox="83.399289 -13.06128 221.744489 13.06128">
 <title>
 \[
@@ -353,7 +353,7 @@ $ H^1 $
 <use x='293.78813' y='-1.195529' xlink:href='#eq10-g2-104'/>
 <use x='299.166171' y='-2.988792' xlink:href='#eq10-g1-103'/>
 </g>
-</svg></div><p>Properties:**</p><ul><li>One DOF per vertex (the function value at that vertex)</li><li>Number of DOFs = number of vertices (retrieved by <code>Vh.getSize()</code>)</li><li>Continuous across cell boundaries ( <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+</svg></div><p>Properties:</p><ul><li>One DOF per vertex (the function value at that vertex)</li><li>Number of DOFs = number of vertices (retrieved by <code>Vh.getSize()</code>)</li><li>Continuous across cell boundaries ( <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -637,7 +637,7 @@ $ k = 2 $
 <use x='9.810333' y='0' xlink:href='#eq25-g1-61'/>
 <use x='22.235814' y='0' xlink:href='#eq25-g1-50'/>
 </g>
-</svg></td></tr></tbody></table><p>Convergence rates** for smooth solutions:</p><ul><li><svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
+</svg></td></tr></tbody></table><p>Convergence rates for smooth solutions:</p><ul><li><svg class="m-math" style="width: 1.271em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 12.198689 9.474739">
 <title>
 $ L^2 $
 </title>
@@ -904,7 +904,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq35-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq35-g1-50'/>
 </g>
-</svg> convergence</td></tr><tr><td>Incompressible flow (Stokes)</td><td><code>H1</code> order 2 (velocity) + <code>H1</code> order 1 (pressure)</td><td>Taylor-Hood pair, satisfies inf-sup</td></tr></tbody></table><p>Rule of thumb**: Start with P1 for scalar problems. Use vector-valued P1 for elasticity and fluid dynamics. Move to higher-order H1 when you need better accuracy per DOF or when the PDE&#x27;s solution is smooth enough to benefit from higher polynomial approximation.</p></section><section id="fem-spaces-see-also"><h2><a href="#fem-spaces-see-also">See Also</a></h2><ul><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition</a> — Mathematical foundations</li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core Concepts</a> — Practical guide</li><li><a href="guides-mpi.html" class="m-doc">MPI distributed computing</a> — Distributed P1 on <code>Mesh&lt;Context::MPI&gt;</code> with local↔global DOF index maps</li><li><a href="guides-petsc.html" class="m-doc">PETSc integration</a> — PETSc-backed grid functions with ghost-layer synchronization</li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a> — Using P1 in practice</li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a> — Vector-valued spaces</li></ul></section>
+</svg> convergence</td></tr><tr><td>Incompressible flow (Stokes)</td><td><code>H1</code> order 2 (velocity) + <code>H1</code> order 1 (pressure)</td><td>Taylor-Hood pair, satisfies inf-sup</td></tr></tbody></table><p>Rule of thumb: Start with P1 for scalar problems. Use vector-valued P1 for elasticity and fluid dynamics. Move to higher-order H1 when you need better accuracy per DOF or when the PDE&#x27;s solution is smooth enough to benefit from higher polynomial approximation.</p></section><section id="fem-spaces-see-also"><h2><a href="#fem-spaces-see-also">See Also</a></h2><ul><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition</a> — Mathematical foundations</li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core Concepts</a> — Practical guide</li><li><a href="guides-mpi.html" class="m-doc">MPI distributed computing</a> — Distributed P1 on <code>Mesh&lt;Context::MPI&gt;</code> with local↔global DOF index maps</li><li><a href="guides-petsc.html" class="m-doc">PETSc integration</a> — PETSc-backed grid functions with ghost-layer synchronization</li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a> — Using P1 in practice</li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a> — Vector-valued spaces</li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="fem-ciarlet.html" class="m-doc">&laquo; Ciarlet&#x27;s definition of a finite element</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-quadrature.html" class="m-doc">Quadrature formulas &raquo;</a></div>
       </div>
     </div>

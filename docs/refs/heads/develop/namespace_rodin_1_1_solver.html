@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Solver</p><p>Module for solving linear and nonlinear systems arising from finite element discretizations.</p><p>The Solver module provides a comprehensive set of direct and iterative linear solvers:</p><p>Direct solvers** (exact up to floating-point precision):</p><ul><li><a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a> — General-purpose sparse LU factorization</li><li><code>UMFPack</code> — SuiteSparse UMFPACK solver</li><li><code>CHOLMOD</code> — SuiteSparse Cholesky for SPD systems</li><li><a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a> — Simplicial <svg class="m-math" style="width: 2.295em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 22.035371 9.784673">
+<p>Directory src/Rodin/Solver</p><p>Module for solving linear and nonlinear systems arising from finite element discretizations.</p><p>The Solver module provides a comprehensive set of direct and iterative linear solvers:</p><p>Direct solvers (exact up to floating-point precision):</p><ul><li><a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a> — General-purpose sparse LU factorization</li><li><code>UMFPack</code> — SuiteSparse UMFPACK solver</li><li><code>CHOLMOD</code> — SuiteSparse Cholesky for SPD systems</li><li><a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a> — Simplicial <svg class="m-math" style="width: 2.295em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 22.035371 9.784673">
 <title>
 $ LL^T $
 </title>
@@ -118,7 +118,7 @@ $ LDL^T $
 <use x='18.008982' y='0' xlink:href='#eq2-g1-76'/>
 <use x='25.973488' y='-4.338437' xlink:href='#eq2-g0-84'/>
 </g>
-</svg></li><li><a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a> — Sparse QR factorization</li><li><code>SPQR</code> — SuiteSparse sparse QR</li><li><a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> — Dense Householder QR</li><li><p><a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> — Dense <svg class="m-math" style="width: 3.342em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 32.079846 9.784673">
+</svg></li><li><a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a> — Sparse QR factorization</li><li><code>SPQR</code> — SuiteSparse sparse QR</li><li><a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> — Dense Householder QR</li><li><a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> — Dense <svg class="m-math" style="width: 3.342em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 32.079846 9.784673">
 <title>
 $ LDL^T $
 </title>
@@ -133,7 +133,7 @@ $ LDL^T $
 <use x='18.008982' y='0' xlink:href='#eq3-g1-76'/>
 <use x='25.973488' y='-4.338437' xlink:href='#eq3-g0-84'/>
 </g>
-</svg></p><p>Iterative solvers** (for large systems):</p></li><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>Usage:</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
+</svg></li></ul><p>Iterative solvers (for large systems):</p><ul><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>Usage:</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
 <span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Configured iterative solver</span>
@@ -143,7 +143,7 @@ $ LDL^T $
 <span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Direct solver</span>
-<span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><p>Nonlinear solvers** (for hyperelastic or other nonlinear problems):</p><ul><li><code>Solver::NewtonSolver&lt;LinearSolver&gt;</code> — Newton-Raphson iteration for nonlinear variational problems. At each iterate <svg class="m-math" style="width: 1.175em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 11.284055 9.873238">
+<span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><p>Nonlinear solvers (for hyperelastic or other nonlinear problems):</p><ul><li><code>Solver::NewtonSolver&lt;LinearSolver&gt;</code> — Newton-Raphson iteration for nonlinear variational problems. At each iterate <svg class="m-math" style="width: 1.175em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 11.284055 9.873238">
 <title>
 $ u^k $
 </title>
