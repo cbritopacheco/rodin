@@ -443,14 +443,10 @@ namespace KelvinBall
           << "                Adapt near the interface: after each MMG cut, or"
           << Alert::NewLine
           << "                              once on the fixed WNGIR background."
-          << Alert::NewLine << Alert::Notation("--mmg-adapt-interface-size=<value>")
-          << " Adaptation hmin at Gamma, in h (default: 1)." << Alert::NewLine
-          << Alert::Notation("--mmg-adapt-far-size=<value>")
-          << "   Adaptation hmax away from Gamma, in h (default: 1)."
           << Alert::NewLine
-          << Alert::Notation("--mmg-adapt-width=<value>")
-          << "      MMG-cut size-map width, in h (default: 3)."
-          << Alert::NewLine << Alert::Notation("--mmg-adapt-gradation=<value>")
+          << "                              Adaptation hmin = 0.1 h, hmax = 10 h."
+          << Alert::NewLine
+          << Alert::Notation("--mmg-adapt-gradation=<value>")
           << "  Adaptation gradation (default: 1.3)." << Alert::NewLine
           << Alert::Notation("--mmg-snap=<value>")
           << "         MMG path: snap edge crossings closer than this fraction"
@@ -700,7 +696,8 @@ namespace KelvinBall
 
       template <class LevelSet>
       MMGReconstruction discretizeLevelSetMMG(MMG::Mesh& mesh, const LevelSet& levelSet,
-        Real h, const Sphere& sphere, bool adapt, Real snap)
+        Real h, const Sphere& sphere, bool adapt, Real snap,
+        Real requestedWelschScale)
       {
         const size_t previousCells = mesh.getCellCount();
         const Real hmin = 0.1 * h;
@@ -912,7 +909,7 @@ namespace KelvinBall
           sphere.protectFixedGeometry(reconstructed, false);
         if (adapt)
         {
-          sphere.adapt(reconstructed, h);
+          sphere.adapt(reconstructed, h, requestedWelschScale);
         }
         else
         {
@@ -1111,6 +1108,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   if (geometryOnly && stateOnly)
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
   const Real h = configuration.getH();
+  const Real requestedWelschScale =
+    Rodin::Examples::realOption(argc, argv, "wngir-robust-scale", Real(0));
+  const Real backgroundWelschScale =
+    requestedWelschScale > 0 ? requestedWelschScale : Real(3) * h;
   const Real hilbertLength = regularizationFactor * h;
   const Real normalLength = normalRegularizationFactor * h;
   const Real dt = stepFactor * h;
@@ -1162,16 +1163,15 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   if (configuration.adapt)
   {
     configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation hmin (interface):")
-                      << Alert::Notation::Number(configuration.adaptInterfaceSize) << " h"
+                      << Alert::Notation::Number(Real(0.1) * h) << " = 0.1 h"
                       << Alert::NewLine << diagnosticLabel("Adaptation hmax (far field):")
-                      << Alert::Notation::Number(configuration.adaptFarSize) << " h";
+                      << Alert::Notation::Number(Real(10) * h) << " = 10 h";
     if (reconstructionMethod == "wngir")
       configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
                         << Alert::Notation::Number(configuration.backgroundHausdorff)
                         << " h";
-    if (reconstructionMethod == "mmg")
-      configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation width:")
-                        << Alert::Notation::Number(configuration.adaptWidth) << " h";
+    configurationInfo << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
+                      << Alert::Notation::Number(backgroundWelschScale);
     configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation gradation:")
                       << Alert::Notation::Number(configuration.adaptGradation);
   }
@@ -1186,13 +1186,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         "WNGIR."
       : "Stage 1: Discretizing the initial sphere with MMG.");
   Sphere sphere(configuration);
-  const Real requestedWelschScale =
-    Rodin::Examples::realOption(argc, argv, "wngir-robust-scale", Real(0));
-  const Real backgroundWelschScale =
-    requestedWelschScale > 0 ? requestedWelschScale : Real(3) * h;
   SphereDiscretization initial = reconstructionMethod == "wngir"
     ? sphere.prepareWNGIRBackground(backgroundWelschScale)
-    : sphere.discretize();
+    : sphere.discretize(false, requestedWelschScale);
   ReconstructionDiagnostics reconstruction = initial.diagnostics;
   Optional<MMG::Mesh> wngirBackground;
   MMG::Mesh mesh;
@@ -2410,7 +2406,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         try
         {
           auto reconstructed = discretizeLevelSetMMG(mesh, advectedDistance, scale,
-            sphere, configuration.adapt, configuration.mmgSnap);
+            sphere, configuration.adapt, configuration.mmgSnap,
+            requestedWelschScale);
           reconstructed.diagnostics.scale = scale / h;
           return reconstructed;
         }

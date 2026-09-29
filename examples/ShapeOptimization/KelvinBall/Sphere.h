@@ -58,7 +58,8 @@ namespace KelvinBall
        * adaptation is then not applied. Otherwise the cuts are free, as for
        * every later reconstruction.
        */
-      SphereDiscretization discretize(bool conformingCuts = false) const;
+      SphereDiscretization discretize(bool conformingCuts = false,
+        Real requestedWelschScale = 0) const;
 
       /**
        * @brief Prepares the fixed background mesh used by WNGIR.
@@ -75,10 +76,12 @@ namespace KelvinBall
        * Replaces the MMG optimization pass after a level-set cut when
        * `--mmg-adapt` is given. The optimization pass keeps the edge lengths the
        * cut created, including its short edges; adaptation remeshes towards
-       * a size set by the distance to Gamma instead. The sizes are multiples
-       * of @p h, which a retried reconstruction halves.
+       * a size set by the Welsch weight of the FMM distance to Gamma instead.
+       * The sizes and default Welsch scale are multiples of @p h, which a
+       * retried reconstruction halves. A positive @p requestedWelschScale
+       * overrides the default scale.
        */
-      void adapt(MMG::Mesh& mesh, Real h) const;
+      void adapt(MMG::Mesh& mesh, Real h, Real requestedWelschScale = 0) const;
 
       /**
        * @brief Marks the fixed boundary for MMG and returns the number of

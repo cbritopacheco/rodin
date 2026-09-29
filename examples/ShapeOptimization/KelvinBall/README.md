@@ -418,41 +418,41 @@ The optimisation pass takes its target sizes from the current edge lengths.
 After a cut these include the short edges the cut created, so the mesh
 refines from one iterate to the next and never coarsens back. With
 `--mmg-adapt` the optimisation pass is replaced by an adaptation to a
-prescribed size map. For MMG reconstruction this map is
+prescribed size map. Both reconstruction paths now use the same Welsch map:
 
 ```math
-h(x) = h_\Gamma + \bigl(h_{\mathrm{far}} - h_\Gamma\bigr)\min\Bigl(1, \frac{d(x)}{w}\Bigr),
+h(x)=h_{\mathrm{far}}-(h_{\mathrm{far}}-h_\Gamma)
+\,\exp\!\left(-\frac{d(x)^2}{\sigma^2}\right).
 ```
 
-where $d$ is the distance to $\Gamma$ on the cut mesh. For WNGIR the map uses
-the Welsch weight of the initial sphere's signed-distance residual:
+For MMG reconstruction, $d$ is the unsigned FMM distance to $\Gamma$ on
+the newly cut mesh. For the initial WNGIR background, which has no interface
+yet, $d(x)=|\lVert x\rVert-1|$ is the exact distance to the initial sphere.
+Thus the weight and scale agree, while the distance field belongs to the
+geometry present at each stage.
 
-```math
-r(x)=\bigl|\lVert x\rVert-1\bigr|,\qquad
-W(x)=\exp\!\left(-\frac{r(x)^2}{\sigma^2}\right),\qquad
-h(x)=h_{\mathrm{far}}-(h_{\mathrm{far}}-h_\Gamma)W(x).
-```
-
-With `--mmg-adapt`, the size map and WNGIR fit share one fixed scale $\sigma$:
-`--wngir-robust-scale` when positive, or $3h$ otherwise. Without adaptation,
-WNGIR keeps its automatic, data-dependent scale. Adaptation
+With `--mmg-adapt`, the size map and WNGIR fit share one scale $\sigma$:
+`--wngir-robust-scale` when positive, or $3h$ otherwise. An MMG retry halves
+$h$ and therefore also the default $\sigma$; an explicitly supplied scale
+remains fixed. Without adaptation, WNGIR keeps its automatic, data-dependent
+scale. Adaptation
 applies after every cut with MMG reconstruction, but only once to the fixed
 background with WNGIR:
 
 | Option | Meaning | Default |
 |---|---|---|
 | `--mmg-adapt` | Enables the adaptation | Off |
-| `--mmg-adapt-interface-size` | Adaptation `hmin` = $h_\Gamma$, in multiples of $h$ | 1 |
-| `--mmg-adapt-far-size` | Adaptation `hmax` = $h_{\mathrm{far}}$, in multiples of $h$ | 1 |
-| `--mmg-adapt-width` | MMG-cut size-map width $w$, in multiples of $h$; not used for WNGIR | 3 |
 | `--mmg-adapt-gradation` | Largest ratio between neighbouring sizes | 1.3 |
 
-The interface and far-field sizes are also MMG's `hmin` and `hmax` for the
-adaptation pass; thus $0<h_\Gamma\leq h_{\mathrm{far}}$ is required. The
+The interface and far-field sizes are fixed at $h_\Gamma=h_{\min}=0.1h$
+and $h_{\mathrm{far}}=h_{\max}=10h$, where $h$ is the effective mesh size.
+These are also MMG's `hmin` and `hmax` for the adaptation pass. The
 preceding MMG level-set cut retains its separate bounds. The WNGIR background
 uses `--background-hmin` and `--background-hmax` only when adaptation is off;
 its Hausdorff tolerance still follows `--background-hausdorff`. The background
 remains fixed: later interfaces can leave the initially refined band.
+This range can refine the interface substantially; the reported cell count
+should be checked before running a long optimisation.
 
 #### Level-set snapping
 
@@ -538,7 +538,7 @@ KelvinBall --n=17 --iterations=20
 KelvinBall --h=0.125 --iterations=20
 KelvinBall --outer-radius=3 --h=0.1666666667 --iterations=2
 KelvinBall --n=25 --iterations=5 --reconstruction=wngir
-KelvinBall --n=30 --iterations=20 --mmg-adapt --mmg-adapt-interface-size=0.5
+KelvinBall --n=30 --iterations=20 --mmg-adapt
 KelvinBall --n=13 --iterations=5 --thickness-min=4
 ```
 

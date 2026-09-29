@@ -29,12 +29,8 @@ namespace KelvinBall
       Real backgroundHausdorff = 0.05;
       Real backgroundGradation = 2;
       /// Optional MMG adaptation after each MMG cut or once on the fixed
-      /// WNGIR background. The interface and far-field sizes are also the
-      /// adaptation pass's minimum and maximum sizes, respectively.
+      /// WNGIR background. Its size map ranges from 0.1 h to 10 h.
       bool adapt = false;
-      Real adaptInterfaceSize = 1;
-      Real adaptFarSize = 1;
-      Real adaptWidth = 3;
       Real adaptGradation = 1.3;
       /// Crossing fraction below which the MMG cut snaps the near endpoint of
       /// a crossed edge onto the level set; zero disables the snapping.
