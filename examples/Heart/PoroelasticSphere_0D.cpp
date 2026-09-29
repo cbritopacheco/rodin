@@ -11,201 +11,37 @@
  * Integrates the thick-walled, solid-incompressible poroelastic sphere of
  * @ref Rodin::Heart::PoroelasticSphereT, which shares the passive, active,
  * valve and Windkessel laws of CCMLC2014 and adds a porosity balance fed by a
- * two-resistor coronary source, driven by a periodic activation. It writes the
- * resulting pressure, volume, flow and porosity history. No mesh and no finite
- * element space are involved.
+ * two-resistor coronary source, driven by a periodic activation. The parameters
+ * are the healthy-adult calibration of CoronaryPoroelastic/HealthyLV.h
+ * (Murray-sized Windkessel branches, porosity-dependent perfusion
+ * conductances). It writes the resulting pressure, volume, flow and porosity
+ * history. No mesh and no finite element space are involved.
  */
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <numbers>
-#include <type_traits>
-#include <algorithm>
 
-#include "Rodin/Heart/PoroelasticSphere.h"
+#include "CoronaryPoroelastic/HealthyLV.h"
 
 using Real = Rodin::Real;
-using Model = Rodin::Heart::PoroelasticSphereT<>;
-
-static Real periodic_activation(Real t)
-{
-  const Real T = 0.85;
-  const Real tau = t - T * std::floor(t / T);
-
-  if (tau < 0.13)
-    return 0.0;
-  if (tau < 0.141)
-    return 35.0 * ((tau - 0.13) / 0.011);
-  if (tau < 0.281)
-    return 35.0;
-  if (tau < 0.361)
-    return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
-  if (tau < 0.45)
-    return -20.0;
-  return 0.0;
-}
-
-static Real load_dependent_relaxation_m0(Real ec)
-{
-  // Piecewise-linear approximation of Caruel et al. Fig. 7.
-  const Real low_ec = 0.0;
-  const Real high_ec = 2.0;
-  const Real low_value = 1.6;
-  const Real high_value = 1.0;
-
-  if (ec <= low_ec)
-    return low_value;
-  if (ec >= high_ec)
-    return high_value;
-
-  const Real s = (ec - low_ec) / (high_ec - low_ec);
-  return (1.0 - s) * low_value + s * high_value;
-}
-
-static Real load_dependent_relaxation_dm0(Real ec)
-{
-  const Real low_ec = 0.0;
-  const Real high_ec = 2.0;
-  const Real low_value = 1.6;
-  const Real high_value = 1.0;
-
-  if (ec <= low_ec || ec >= high_ec)
-    return 0.0;
-  return (high_value - low_value) / (high_ec - low_ec);
-}
-
-static Real atrial_pressure(Real t)
-{
-  const Real T = 0.85;
-  const Real tau = t - T * std::floor(t / T);
-
-  const Real min_value = 500.0;
-  const Real max_value = 1000.0;
-  const Real second_threshold = 1250.0;
-
-  const Real t1 = 0.02;
-  const Real t2 = 0.15;
-  const Real t3 = 0.17;
-  const Real t4 = 0.56;
-  const Real t5 = 0.62;
-  const Real t6 = 0.85;
-
-  Real alpha = 0.0;
-  Real value = min_value;
-
-  if (tau < t1)
-  {
-    alpha = -(tau - t1) / t1;
-    value = alpha * min_value + (1.0 - alpha) * max_value;
-  }
-  else if (tau < t2)
-  {
-    value = max_value;
-  }
-  else if (tau < t3)
-  {
-    alpha = -(tau - t3) / (t3 - t2);
-    value = alpha * max_value + (1.0 - alpha) * min_value;
-  }
-  else if (tau < t4)
-  {
-    alpha = -(tau - t4) / (t4 - t3);
-    value = alpha * min_value + (1.0 - alpha) * second_threshold;
-  }
-  else if (tau < t5)
-  {
-    value = second_threshold;
-  }
-  else if (tau < t6)
-  {
-    alpha = -(tau - t6) / (t6 - t5);
-    value = alpha * second_threshold + (1.0 - alpha) * min_value;
-  }
-  else
-  {
-    value = min_value;
-  }
-
-  return value;
-}
+using namespace Rodin::Examples::Heart::CoronaryPoroelastic;
 
 int main()
 {
-  Model::Input in;
+  HealthyCalibration cal;
+  const Model::Input in = makeHealthyInput(HealthyTargets(), &cal);
 
-  // Geometry (thick wall: R_out = R0 + d0) / reference porosity
-  in.R0 = 2.4e-2;
-  in.d0 = 1.45e-2;
-  in.phi0 = 0.1;
-
-  // Active law parameters
-  in.Es = 3.0e6;
-  in.mu = 70.0;
-  in.eta = 70.0;
-  in.alpha = 1.5;
-  in.alphaR = 0.12;
-  in.k0 = 1.0e5;
-  in.sigma0 = 1.25e5;
-
-  // Perfusion: storage modulus and two-resistor coronary source
-  in.KPhi = 2.0e5;
-  in.gammaAr = 7.0e-10;
-  in.gammaVen = 7.0e-10;
-
-  // Windkessel
-  in.Rp = 5.0e7;
-  in.Cp = 6e-9;
-  in.Rd = 1.0e8;
-  in.Cd = 1.0e-9;
-
-  in.mu_0 = 5.35;
-  in.mu_Inf = 0.0033;
-  in.lambda = 14.445;
-  in.n = 0.8;
-  in.m = 0.003;
-  in.yasuda = 0.62;
-  in.mu_plasma = 0.0032704;
-  in.k_0 = 3.5678;
-  in.gamma_c = 10.2754;
-  in.k_Inf = 1.5352;
-  in.proximalRadius = 0.0125;
-  in.proximalLength = 0.35;
-  in.distalRadius = 0.002;
-  in.distalLength = 0.55;
-  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Cross;
-  // Valve parameters
-  in.Kat = 6.0e-7;
-  in.Kp = 5.0e-11;
-  in.Kar = 1.0e-7;
-
-  in.cavityCapacity = 5.0e-12;
-
-  in.absRegularization = 1e-14;
-  in.wallQuadraturePoints = 8;
-
-  // Initial local active state
-  in.initFibDef = 0.0;
-  in.initActiveStiffness = 0.0;
-  in.initActiveStress = 0.0;
-
-  in.pSv = [](Real) { return 1.0e3; };
-  in.pAt = atrial_pressure;
-  in.u = periodic_activation;
-  in.m0 = load_dependent_relaxation_m0;
-  in.dm0 = load_dependent_relaxation_dm0;
-
-  {
-    using PassiveEnergy = std::decay_t<decltype(in.passiveEnergy)>;
-    typename PassiveEnergy::Parameters hp;
-    hp.mu1 = 0.0;
-    hp.mu2 = 0.0;
-    hp.C0 = 1.9e3;
-    hp.C1 = 1.1e-1;
-    hp.C2 = 1.9e3;
-    hp.C3 = 1.1e-1;
-    in.passiveEnergy = PassiveEnergy(hp);
-  }
+  std::cout << "Healthy calibration:\n"
+            << "  V_w0      = " << cal.wallVolume * 1e6 << " mL\n"
+            << "  Q_cor     = " << cal.coronaryFlow * 6e7 << " mL/min (target)\n"
+            << "  R_p, R_d  = " << cal.Rp << ", " << cal.Rd << " Pa s/m^3\n"
+            << "  Murray r0 = " << cal.proximal.radius * 1e3 << " mm, L_p = "
+            << cal.proximal.length << " m (" << cal.proximal.generations
+            << " generations), L_d = " << cal.distal.length << " m\n"
+            << "  gamma_ar  = " << in.gammaAr << ", gamma_ven = " << in.gammaVen
+            << " m^3/(Pa s)\n";
 
   Model model(in);
   model.setMaxIterations(200)
@@ -213,25 +49,7 @@ int main()
     .setRelativeTolerance(1e-8)
     .setStepTolerance(1e-10)
     .setDampingFactor(1.0);
-
-  Model::State s0;
-  s0.t = 0.0;
-
-  s0.y = 0.0;
-  s0.phi = in.phi0;
-  s0.pv = in.pAt(0.0) - 100.0;
-  s0.par = 11000.0;
-  s0.pd = 10000.0;
-
-  // Initial local active state
-  s0.ec = in.initFibDef;
-  s0.gamma = std::sqrt(std::max<Real>(in.initActiveStiffness, 0.0));
-  s0.beta = (s0.gamma > 0.0) ? (in.initActiveStress / s0.gamma) : 0.0;
-  s0.kc = s0.gamma * s0.gamma;
-  s0.tauc = s0.gamma * s0.beta;
-  s0.w = in.m0(s0.ec);
-
-  model.initialize(s0);
+  model.initialize(makeHealthyInitialState(in));
 
   {
     const auto& s = model.getState();
@@ -258,7 +76,7 @@ int main()
   // six significant digits quantize it too coarsely for its discrete rate --
   // and hence for the fluid mass balance -- to be recovered from the file.
   out << std::setprecision(12);
-  out << "t,y,phi,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat,lambdaBar,pf,Qcor\n";
+  out << "t,y,phi,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat,lambdaBar,pf,Qcor,Qven\n";
 
   for (int i = 0; i < nsteps; ++i)
   {
@@ -284,12 +102,11 @@ int main()
     const Real Q = (V - Vprev) / dt;
     Vprev = V;
     const Real pat = in.pAt(s.t);
-    const Real Qcor = in.gammaAr * (s.par - s.pf);
 
     out << s.t << "," << s.y << "," << s.phi << "," << s.pv << "," << s.par << "," << s.pd
         << "," << s.ec << "," << s.gamma << "," << s.beta << "," << s.w << "," << s.kc
         << "," << s.tauc << "," << V << "," << Q << "," << pat << "," << s.lambdaBar
-        << "," << s.pf << "," << Qcor << "\n";
+        << "," << s.pf << "," << s.qPerfusionIn << "," << s.qPerfusionOut << "\n";
   }
 
   return 0;

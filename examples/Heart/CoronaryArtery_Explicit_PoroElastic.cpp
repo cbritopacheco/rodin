@@ -224,7 +224,8 @@ namespace
 
       // Outlet calibration: areas measured on the mesh, Murray split
       // Q_i ~ r_i^3, resting budget dP = p_ar(0) - p_f(0):
-      //   R_v,i = f_v dP/Q_i,  R_a,i = (1 - f_v) dP/Q_i,  C_i = C_tot w_i.
+      //   R_v,i Phi_v0 = f_v dP/Q_i,  R_a,i Phi_a0 = (1 - f_v) dP/Q_i,
+      //   C_i = C_tot w_i.
       bool autoCalibrateOutlets = true;
       Real lcaTargetFlow = 1.5e-6; // m^3/s
       Real newtonianCalibrationViscosity = 0.0035;
@@ -1376,8 +1377,8 @@ int main(int argc, char** argv)
     }
 
     // Outlet calibration on the resting budget dP = p_ar(0) - p_f(0):
-    //   R_v,i = f_v dP/Q_i, R_a,i = (1 - f_v) dP/Q_i, C_i = C_tot w_i,
-    //   p_tm,i(0) = f_v dP Phi_v0 (steady state of the calibrated network).
+    //   R_v,i Phi_v0 = f_v dP/Q_i, R_a,i Phi_a0 = (1 - f_v) dP/Q_i,
+    //   C_i = C_tot w_i, p_tm,i(0) = f_v dP (steady state of the network).
     if (cfg.autoCalibrateOutlets)
     {
       const Real dP = std::max<Real>(par0 - pf0, 1.0);
@@ -1400,7 +1401,9 @@ int main(int argc, char** argv)
 
       const Real phiA0 = wrms(gammaA0) / muN;
       const Real phiV0 = wrms(gammaV0) / muN;
-      const Real ptmRest = dPv * phiV0;
+      // The effective resistances R Phi_0 carry the budget at rest, so the
+      // resting drops are exactly (1 - f_v) dP and f_v dP.
+      const Real ptmRest = dPv;
 
       for (const Attribute tag : BoundaryFluid::Outlets)
       {
@@ -1409,8 +1412,8 @@ int main(int argc, char** argv)
 
         auto& bc = wk.at(tag);
         bc.q0 = Qi;
-        bc.Ra = dPa / Qi;
-        bc.Rv = dPv / Qi;
+        bc.Ra = dPa / (Qi * phiA0);
+        bc.Rv = dPv / (Qi * phiV0);
         bc.C = std::max<Real>(cfg.coronaryComplianceTotal * wgt, 1e-300);
         bc.gammaA = gammaA0;
         bc.gammaV = gammaV0;

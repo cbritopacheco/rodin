@@ -233,7 +233,8 @@ namespace Rodin::Assembly
             }
 
             bfi.setPolytope(*it);
-            const auto& rows = testFES.getDOFs(d, idx);
+            // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
+            const auto rows = testFES.getDOFs(d, idx);
             const auto& cols = trialFES.getDOFs(d, idx);
 
             for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
@@ -548,7 +549,8 @@ namespace Rodin::Assembly
 
               bfi.setPolytope(*it);
 
-              const auto& rowsDOF = testFES.getDOFs(d, idx);
+              // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
+              const auto rowsDOF = testFES.getDOFs(d, idx);
               const auto& colsDOF = trialFES.getDOFs(d, idx);
 
               for (Index i = 0; i < static_cast<Index>(rowsDOF.size()); ++i)
@@ -592,7 +594,8 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              const auto& rowsDOF = testFES.getDOFs(td, tidx);
+              // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
+              const auto rowsDOF = testFES.getDOFs(td, tidx);
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
@@ -1283,7 +1286,8 @@ namespace Rodin::Assembly
 
               bfi.setPolytope(*it);
 
-              const auto& rows = vFES.getDOFs(d, idx);
+              // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
+              const auto rows = vFES.getDOFs(d, idx);
               const auto& cols = uFES.getDOFs(d, idx);
 
               for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
@@ -1334,7 +1338,8 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              const auto& rows = vFES.getDOFs(td, tidx);
+              // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
+              const auto rows = vFES.getDOFs(td, tidx);
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {

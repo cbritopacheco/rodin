@@ -356,6 +356,8 @@ namespace Rodin::Heart::PoroelasticSphere::Solver
           m_state = unpackUnknownsIntoState(m_x, m_state, m_history.n.t + dt);
           m_state.lambdaBar = evalData.lambdaBar;
           m_state.pf = evalData.pf;
+          m_state.qPerfusionIn = evalData.perfusionInflow;
+          m_state.qPerfusionOut = evalData.perfusionOutflow;
         }
 
         return m_report;

@@ -16,7 +16,8 @@
  * The wall is quasi-static — the pressure-volume law of the @f$ v_1 @f$
  * projection is an algebraic equation in @f$ y @f$ — and the fluid mass
  * balance @f$ V_{w0}\dot\Phi = Q @f$ with the lumped two-resistor perfusion
- * source @f$ Q = \gamma_{ar}(p_{ar} - \tilde p) - \gamma_{ven}(\tilde p - p_{sv}) @f$
+ * source @f$ Q = \gamma_{ar}(\Phi)(p_{ar} - \tilde p) - \gamma_{ven}(\Phi)(\tilde p - p_{sv}) @f$,
+ * @f$ \gamma_\bullet(\Phi) = \gamma_\bullet (\Phi/\phi_0)^{\kappa_\bullet} @f$,
  * is the differential equation of the porosity. The active, valve and
  * Windkessel equations are those of CCMLC2014 on the same implicit time grid.
  * The coronary inflow @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$ is drawn from the
@@ -200,13 +201,19 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         jacobianMatrix(Model::RadialDisplacement, Model::FiberDeformation) =
           evalData.dWallPressure_dec;
 
-        // Fluid mass balance: d(Q_in - Q_out)/dpf = -(gamma_ar + gamma_ven).
-        const Scalar gSum = (m_input.gammaAr + m_input.gammaVen) / evalData.Vw0;
+        // Fluid mass balance: d(Q_in - Q_out)/dpf = -(gamma_ar + gamma_ven), plus
+        // the porosity dependence of the conductances.
+        const Scalar gSum = (evalData.gAr + evalData.gVen) / evalData.Vw0;
+        const Scalar dQnet_dphiG =
+          (evalData.dgAr_dphi * (evalData.par - evalData.pf) -
+            evalData.dgVen_dphi * (evalData.pf - evalData.pSvMid)) /
+          evalData.Vw0;
         jacobianMatrix(Model::Porosity, Model::RadialDisplacement) =
           gSum * evalData.dPf_dy;
-        jacobianMatrix(Model::Porosity, Model::Porosity) = a0 + gSum * evalData.dPf_dphi;
+        jacobianMatrix(Model::Porosity, Model::Porosity) =
+          a0 + gSum * evalData.dPf_dphi - dQnet_dphiG;
         jacobianMatrix(Model::Porosity, Model::ArterialPressure) =
-          -m_input.gammaAr / evalData.Vw0;
+          -evalData.gAr / evalData.Vw0;
         jacobianMatrix(Model::Porosity, Model::FiberDeformation) =
           gSum * evalData.dPf_dec;
 
@@ -226,17 +233,18 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
           -evalData.dWindkesselOutflow_dPv;
 
         jacobianMatrix(Model::ArterialPressure, Model::ArterialPressure) +=
-          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar + m_input.gammaAr;
+          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar + evalData.gAr;
 
         jacobianMatrix(Model::ArterialPressure, Model::DistalPressure) +=
           evalData.dWindkesselflowP_dPd;
 
         jacobianMatrix(Model::ArterialPressure, Model::RadialDisplacement) =
-          -m_input.gammaAr * evalData.dPf_dy;
+          -evalData.gAr * evalData.dPf_dy;
         jacobianMatrix(Model::ArterialPressure, Model::Porosity) =
-          -m_input.gammaAr * evalData.dPf_dphi;
+          -evalData.gAr * evalData.dPf_dphi +
+          evalData.dgAr_dphi * (evalData.par - evalData.pf);
         jacobianMatrix(Model::ArterialPressure, Model::FiberDeformation) =
-          -m_input.gammaAr * evalData.dPf_dec;
+          -evalData.gAr * evalData.dPf_dec;
 
         // --- Row: DistalPressure ---
         jacobianMatrix(Model::DistalPressure, Model::ArterialPressure) +=
@@ -481,8 +489,14 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         data.dPf_dy = -data.dLambdaBar_dy;
         data.dPf_dphi = m_input.KPhi - data.dLambdaBar_dphi;
         data.dPf_dec = -data.dLambdaBar_dec;
-        data.perfusionInflow = m_input.gammaAr * (data.par - data.pf);
-        data.perfusionOutflow = m_input.gammaVen * (data.pf - data.pSvMid);
+        // gamma(Phi) = gamma (Phi/phi0)^kappa (Poiseuille bed: kappa = 2).
+        const Scalar phiRatio = data.phi / m_input.phi0;
+        data.gAr = m_input.gammaAr * std::pow(phiRatio, m_input.gammaArExponent);
+        data.gVen = m_input.gammaVen * std::pow(phiRatio, m_input.gammaVenExponent);
+        data.dgAr_dphi = m_input.gammaArExponent * data.gAr / data.phi;
+        data.dgVen_dphi = m_input.gammaVenExponent * data.gVen / data.phi;
+        data.perfusionInflow = data.gAr * (data.par - data.pf);
+        data.perfusionOutflow = data.gVen * (data.pf - data.pSvMid);
       }
 
       template <class EvalData>

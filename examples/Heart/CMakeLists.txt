@@ -11,6 +11,8 @@ target_link_libraries(PoroelasticSphere_0D
   Rodin::Heart
   Rodin::Alert
   )
+target_include_directories(PoroelasticSphere_0D
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(CoronarySolid CoronarySolid.cpp)
 target_link_libraries(CoronarySolid
@@ -108,6 +110,21 @@ if (RODIN_USE_PETSC)
     Rodin::Geometry
     Rodin::Assembly)
 
+  # Rigid-wall coronary flow coupled in closed loop (staggered) to the
+  # healthy-calibrated 0D poroelastic left ventricle.  Sequential, PETSc only.
+  add_executable(CoronaryPoroelastic CoronaryPoroelastic.cpp)
+  target_link_libraries(CoronaryPoroelastic
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(CoronaryPoroelastic
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
   # Coagulation-kinetics testbed on a simplified geometry: one inlet, one
   # outlet, an R_mu-Windkessel outlet and an ectatic segment that provides the
   # recirculation the kinetics need. Sequential and PETSc-only, like the P1/P1
@@ -177,6 +194,58 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
   target_include_directories(LeftAtrium2D PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   if (RODIN_USE_SCOTCH)
     target_link_libraries(LeftAtrium2D PUBLIC Rodin::Scotch)
+  endif()
+
+  # LeftAtrium2D with Oldroyd-B blood (standard formulation, split OSS), same
+  # mesh and data as LeftAtrium2D.
+  add_executable(LeftAtrium2D_viscous LeftAtrium2D_viscous.cpp)
+  target_link_libraries(LeftAtrium2D_viscous
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(LeftAtrium2D_viscous PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(LeftAtrium2D_viscous PUBLIC Rodin::Scotch)
+  endif()
+
+  # Same case in the log-conformation reformulation.
+  add_executable(LeftAtrium2D_viscous_logarithmic LeftAtrium2D_viscous_logarithmic.cpp)
+  target_link_libraries(LeftAtrium2D_viscous_logarithmic
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(LeftAtrium2D_viscous_logarithmic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(LeftAtrium2D_viscous_logarithmic PUBLIC Rodin::Scotch)
+  endif()
+
+  # Same case, constitutive equation in the log variable itself (Newton).
+  add_executable(LeftAtrium2D_viscous_logarithmic_implicit LeftAtrium2D_viscous_logarithmic_implicit.cpp)
+  target_link_libraries(LeftAtrium2D_viscous_logarithmic_implicit
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(LeftAtrium2D_viscous_logarithmic_implicit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(LeftAtrium2D_viscous_logarithmic_implicit PUBLIC Rodin::Scotch)
   endif()
 
   add_executable(CoronaryArtery

@@ -84,6 +84,10 @@ namespace Rodin::Heart::PoroelasticSphere::Model
         0.0; ///< Wall-averaged incompressibility multiplier @f$ \bar\lambda @f$ (explicit).
       Scalar pf =
         0.0; ///< Interstitial fluid pressure @f$ \tilde p = \Psi_P'(\Phi) - \bar\lambda @f$ (explicit).
+      Scalar qPerfusionIn =
+        0.0; ///< Lumped arterial perfusion inflow @f$ \gamma_{ar}(\Phi)(p_{ar} - \tilde p) @f$ (explicit).
+      Scalar qPerfusionOut =
+        0.0; ///< Lumped venous perfusion outflow @f$ \gamma_{ven}(\Phi)(\tilde p - p_{sv}) @f$ (explicit).
 
       Scalar t = 0.0; ///< Time associated with this state.
   };
@@ -112,8 +116,18 @@ namespace Rodin::Heart::PoroelasticSphere::Model
 
       Scalar KPhi =
         0.0; ///< Fluid storage modulus: @f$ \Psi_P(\Phi) = \tfrac12 K_\Phi (\Phi - \phi_0)^2 @f$ (0: pure Terzaghi).
-      Scalar gammaAr = 0.0; ///< Arterial perfusion conductance @f$ \gamma_{ar} @f$.
-      Scalar gammaVen = 0.0; ///< Venous perfusion conductance @f$ \gamma_{ven} @f$.
+      Scalar gammaAr = 0.0; ///< Arterial perfusion conductance @f$ \gamma_{ar} @f$ at @f$ \Phi = \phi_0 @f$.
+      Scalar gammaVen = 0.0; ///< Venous perfusion conductance @f$ \gamma_{ven} @f$ at @f$ \Phi = \phi_0 @f$.
+      /**
+       * @brief Porosity exponents of the perfusion conductances,
+       * @f$ \gamma_\bullet(\Phi) = \gamma_\bullet (\Phi / \phi_0)^{\kappa_\bullet} @f$.
+       *
+       * A bed of fixed vessel count and length has @f$ R \propto r^{-4} \propto V^{-2} @f$,
+       * i.e. @f$ \kappa = 2 @f$: systolic squeezing of the intramyocardial blood
+       * volume raises the resistance. @f$ \kappa = 0 @f$ gives constant conductances.
+       */
+      Scalar gammaArExponent = 0.0;
+      Scalar gammaVenExponent = 0.0; ///< See @ref gammaArExponent.
 
       Scalar Cp = 1.0; ///< Proximal (arterial) compliance.
       Scalar Cd = 1.0; ///< Distal compliance.
@@ -306,10 +320,14 @@ namespace Rodin::Heart::PoroelasticSphere::Model
       Scalar dPf_dphi = 0.0; ///< Total derivative wrt @f$ \Phi @f$.
       Scalar dPf_dec = 0.0; ///< Derivative wrt @f$ e_c @f$.
 
+      Scalar gAr = 0.0; ///< @f$ \gamma_{ar}(\Phi) @f$.
+      Scalar gVen = 0.0; ///< @f$ \gamma_{ven}(\Phi) @f$.
+      Scalar dgAr_dphi = 0.0; ///< @f$ \gamma_{ar}'(\Phi) @f$.
+      Scalar dgVen_dphi = 0.0; ///< @f$ \gamma_{ven}'(\Phi) @f$.
       Scalar perfusionInflow =
-        0.0; ///< Arterial perfusion inflow @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$.
+        0.0; ///< Arterial perfusion inflow @f$ \gamma_{ar}(\Phi)(p_{ar} - \tilde p) @f$.
       Scalar perfusionOutflow =
-        0.0; ///< Venous perfusion outflow @f$ \gamma_{ven}(\tilde p - p_{sv}) @f$.
+        0.0; ///< Venous perfusion outflow @f$ \gamma_{ven}(\Phi)(\tilde p - p_{sv}) @f$.
       Scalar externalArterialOutflow =
         0.0; ///< External flow drawn from the proximal Windkessel node (@ref InputT::qArterialExternal).
       Scalar externalPerfusionInflow =

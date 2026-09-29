@@ -31,7 +31,7 @@ This script reads the CSV produced by PoroelasticSphere_0D and provides:
 The CSV columns are those written by examples/Heart/PoroelasticSphere_0D.cpp:
 
     t, y, phi, pv, par, pd, ec, gamma, beta, w, kc, tauc,
-    V, Q, pat, lambdaBar, pf, Qcor
+    V, Q, pat, lambdaBar, pf, Qcor, Qven
 
 Model parameters that are not in the CSV (geometry, storage modulus,
 perfusion conductances, venous pressure) are needed for the derived
@@ -91,11 +91,11 @@ TRAPEZOID = getattr(np, "trapezoid", None) or np.trapz
 # examples/Heart/PoroelasticSphere_0D.cpp; main() overrides them from the CLI.
 PARAMS = {
     "R0": 2.4e-2,      # reference cavity radius [m]
-    "d0": 1.45e-2,     # reference wall thickness [m]
+    "d0": 1.1e-2,      # reference wall thickness [m]
     "phi0": 0.1,       # reference porosity [-]
     "KPhi": 2.0e5,     # fluid storage modulus [Pa]
-    "gammaAr": 7.0e-10,   # arterial perfusion conductance [m^3/(s Pa)]
-    "gammaVen": 7.0e-10,  # venous perfusion conductance [m^3/(s Pa)]
+    "gammaAr": 1.81e-10,  # arterial perfusion conductance at phi0 [m^3/(s Pa)]
+    "gammaVen": 7.24e-10, # venous perfusion conductance at phi0 [m^3/(s Pa)]
     "pSv": 1.0e3,      # venous pressure [Pa]
 }
 
@@ -243,7 +243,12 @@ def add_derived_columns(df):
     if "Qcor" in df:
         df["CoronaryArterialInflow_mL_min"] = 6e7 * df["Qcor"]
 
-    if "pf" in df:
+    # Qven is written by the driver (porosity-dependent conductance); the
+    # constant-conductance law is the fallback for older files.
+    if "Qven" in df:
+        df["CoronaryVenousOutflow"] = df["Qven"]
+        df["CoronaryVenousOutflow_mL_min"] = 6e7 * df["CoronaryVenousOutflow"]
+    elif "pf" in df:
         df["CoronaryVenousOutflow"] = PARAMS["gammaVen"] * (df["pf"] - PARAMS["pSv"])
         df["CoronaryVenousOutflow_mL_min"] = 6e7 * df["CoronaryVenousOutflow"]
 

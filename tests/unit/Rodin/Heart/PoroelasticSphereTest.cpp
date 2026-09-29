@@ -574,6 +574,50 @@ TEST(PoroelasticSphereTest, DynamicJacobianMatchesFiniteDifference)
   }
 }
 
+/// @brief Verifies dynamic jacobian matches finite difference with porosity-dependent perfusion conductances.
+TEST(PoroelasticSphereTest, DynamicJacobianMatchesFiniteDifferenceWithVariableConductances)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+  cardiacInput.gammaArExponent = 2.0;
+  cardiacInput.gammaVenExponent = 3.0;
+
+  Model::DenseVector candidateState = makeCandidateState();
+  Model::State currentState = makeCurrentState();
+  Model::State previousState = makePreviousState(currentState);
+
+  const std::array<Real, 3> perturbations{{1e-6, 1e-7, 1e-8}};
+  for (const Real relativePerturbation : perturbations)
+  {
+    const Real relativeError = computeDynamicJacobianRelativeError(cardiacInput,
+      candidateState, currentState, previousState, 1e-3, relativePerturbation);
+    EXPECT_LT(relativeError, 2e-3);
+  }
+}
+
+/// @brief Verifies the stored perfusion flows reduce to the constant-conductance law at zero exponent.
+TEST(PoroelasticSphereTest, StoredPerfusionFlowsMatchConstantConductanceLaw)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+  Model model(cardiacInput);
+  model.setMaxIterations(200)
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10);
+
+  Model::State initial;
+  initial.pv = cardiacInput.pAt(0.0) - 100.0;
+  initial.par = 11000.0;
+  initial.pd = 10000.0;
+  model.initialize(initial);
+  ASSERT_TRUE(model.step(1e-3).converged);
+
+  const auto& s = model.getState();
+  const Real scale = std::abs(cardiacInput.gammaAr * s.par);
+  EXPECT_NEAR(s.qPerfusionIn, cardiacInput.gammaAr * (s.par - s.pf), 1e-12 * scale);
+  EXPECT_NEAR(s.qPerfusionOut,
+    cardiacInput.gammaVen * (s.pf - cardiacInput.pSv(s.t)), 1e-12 * scale);
+}
+
 /// @brief Verifies dynamic jacobian matches finite difference across data scales and the non-Newtonian path.
 TEST(PoroelasticSphereTest, DynamicJacobianMatchesFiniteDifferenceAcrossDataScales)
 {
