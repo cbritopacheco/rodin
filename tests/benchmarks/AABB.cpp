@@ -77,7 +77,8 @@ namespace Rodin::Tests::Benchmarks
 
     void BM_AABB3DHit(benchmark::State& state)
     {
-      const MeshType mesh = MeshType::UniformGrid(Polytope::Type::Tetrahedron, {12, 12, 12});
+      const MeshType mesh =
+        MeshType::UniformGrid(Polytope::Type::Tetrahedron, {12, 12, 12});
       const auto queries = mappedQueries(mesh, Math::SpatialPoint{0.2, 0.3, 0.1});
       Location::AABB locator(mesh);
       for (const auto& x : queries)
