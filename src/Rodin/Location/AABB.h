@@ -87,9 +87,9 @@ namespace Rodin::Location
       /// @brief Builds a locator bound to a fixed mesh.
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
-          m_tolerance(Real(1e-10)),
-          m_referenceTolerance(Real(1e-10)),
-          m_maxNewtonIterations(16),
+          m_tolerance(DefaultPhysicalTolerance),
+          m_referenceTolerance(DefaultReferenceTolerance),
+          m_maxNewtonIterations(DefaultMaxNewtonIterations),
           m_exhaustiveFallback(false),
           m_index(mesh.getDimension() + 1)
       {
@@ -169,9 +169,44 @@ namespace Rodin::Location
       }
 
     private:
+      /// Ambient dimension supported by the spatial coordinate storage.
       static constexpr size_t MaxSpaceDimension = 3;
+      /// Leaf capacity: a policy balance between tree traversal and candidate scans.
       static constexpr size_t LeafSize = 8;
+      /// Median splits give logarithmic depth; this capacity accommodates the
+      /// supported 32-bit entry range with spare traversal slots.
       static constexpr int32_t StackDepth = 64;
+
+      /// Default physical residual tolerance, relative to the mesh diagonal.
+      static constexpr Real DefaultPhysicalTolerance = Real(1e-10);
+      /// Default permitted reference-space overshoot before clipping.
+      static constexpr Real DefaultReferenceTolerance = Real(1e-10);
+      /// Work limit per Newton seed; it does not guarantee convergence.
+      static constexpr size_t DefaultMaxNewtonIterations = 16;
+      /// Roundoff allowance in reference coordinates, measured in machine epsilons.
+      /// This is a numerical policy margin, not an error bound for the inverse map.
+      static constexpr Real ReferenceRoundoffFactor = Real(16);
+      /// Divergence guard: reference cells have coordinates of order one.
+      /// The generous radius permits intermediate overshoot without accepting it.
+      static constexpr Real MaxReferenceNorm = Real(1e3);
+      /// Squared divergence radius, derived for squared-length comparisons.
+      static constexpr Real MaxReferenceNormSquared = MaxReferenceNorm * MaxReferenceNorm;
+      /// Try a vertex and its midpoint with the centroid after the centroid seed.
+      static constexpr size_t SeedsPerVertex = 2;
+      /// Equal weights place the second seed exactly at that midpoint.
+      static constexpr Real SeedCentroidWeight = Real(0.5);
+      /// Halve a rejected step to search toward the current iterate.
+      static constexpr Real BacktrackingContraction = Real(0.5);
+      /// Work limit including the full-step trial; the last scale is 2^-23.
+      /// Exhausting this budget rejects the seed, rather than certifying a miss.
+      static constexpr size_t MaxBacktrackingTrials = 24;
+      /// Require the estimated correction to fit within one quarter of the
+      /// reference accuracy before skipping another Jacobian evaluation.
+      /// This conservative policy margin is heuristic, not a convergence proof.
+      static constexpr Real CorrectionEstimateMargin = Real(0.25);
+      /// Square the margin because the correction estimate uses squared lengths.
+      static constexpr Real CorrectionEstimateMarginSquared =
+        CorrectionEstimateMargin * CorrectionEstimateMargin;
 
       static bool isFinite(const Math::SpatialPoint& v)
       {
@@ -942,8 +977,8 @@ namespace Rodin::Location
       {
         const Real physTol = physicalTolerance();
         const Real physTolSquared = physTol * physTol;
-        const Real referenceAccuracy =
-          std::max(m_tolerance, Real(16) * std::numeric_limits<Real>::epsilon());
+        const Real referenceAccuracy = std::max(
+          m_tolerance, ReferenceRoundoffFactor * std::numeric_limits<Real>::epsilon());
         const Real referenceAccuracySquared = referenceAccuracy * referenceAccuracy;
         const size_t rdim = traits.getDimension();
         const size_t pdim = static_cast<size_t>(x.size());
@@ -969,14 +1004,17 @@ namespace Rodin::Location
           return isFinite(clippedMapped) && (x - clippedMapped).norm() <= physTol;
         };
 
-        for (size_t seed = 0; seed == 0 || seed < 1 + 2 * traits.getVertexCount(); ++seed)
+        for (size_t seed = 0;
+          seed == 0 || seed < 1 + SeedsPerVertex * traits.getVertexCount(); ++seed)
         {
           if (seed == 0)
             rc = traits.getCentroid();
-          else if (seed % 2 == 1)
-            rc = traits.getVertex((seed - 1) / 2);
+          else if (seed % SeedsPerVertex == 1)
+            rc = traits.getVertex((seed - 1) / SeedsPerVertex);
           else
-            rc = Real(0.5) * (traits.getCentroid() + traits.getVertex((seed - 2) / 2));
+            rc = SeedCentroidWeight *
+              (traits.getCentroid() +
+                traits.getVertex((seed - SeedsPerVertex) / SeedsPerVertex));
           transformation.transform(mapped, rc);
           if (!isFinite(mapped))
             continue;
@@ -1031,7 +1069,7 @@ namespace Rodin::Location
             if (affineSimplex)
             {
               rc += step;
-              if (rc.squaredNorm() > Real(1e6))
+              if (rc.squaredNorm() > MaxReferenceNormSquared)
                 return false;
               bool needsClip;
               if (!containsReference(traits, rc, needsClip))
@@ -1057,9 +1095,9 @@ namespace Rodin::Location
             Real alpha = 1;
             bool advanced = false;
             candidate = rc + step;
-            for (size_t trial = 0; trial < 24; ++trial)
+            for (size_t trial = 0; trial < MaxBacktrackingTrials; ++trial)
             {
-              if (candidate.squaredNorm() <= Real(1e6))
+              if (candidate.squaredNorm() <= MaxReferenceNormSquared)
               {
                 transformation.transform(candidateMapped, candidate);
                 residual = x - candidateMapped;
@@ -1081,7 +1119,7 @@ namespace Rodin::Location
                     alpha == Real(1) &&
                     candidateResidualNormSquared / residualNormSquared *
                         stepNormSquared <=
-                      Real(0.0625) * referenceAccuracySquared)
+                      CorrectionEstimateMarginSquared * referenceAccuracySquared)
                   {
                     if (accept())
                       return true;
@@ -1092,7 +1130,7 @@ namespace Rodin::Location
                   break;
                 }
               }
-              alpha *= Real(0.5);
+              alpha *= BacktrackingContraction;
               candidate = rc + alpha * step;
             }
             if (!advanced)
