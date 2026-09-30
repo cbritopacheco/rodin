@@ -20,13 +20,49 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 foreach(np 1 2 3 4 8)
+  # The 3D affine-identification matrix uses a 9^3 tetrahedral grid and
+  # orders 1-4 in real, complex, and vector spaces. Keep its full rank and
+  # geometry coverage, but run it in the dedicated slow CI job.
+  set(_RODIN_MPI_SLOW_IDENTIFICATION_FILTER
+    "AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Tetrahedron:AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Pyramid:AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Hexahedron:AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Wedge")
+  # These two tetrahedral probes take 32.6 s and 19.5 s respectively in the
+  # eight-rank GCC Debug ASan+UBSan job. Isolate them without removing their
+  # sanitizer coverage or reducing the regular suite's 120-second budget.
+  set(_RODIN_MPI_SLOW_GEOMETRY_FILTER
+    "AllGeometries/MPITraceGeometryTest.BoundaryConstraintsReachOwnersAcrossSpaces/Tetrahedron:AllGeometries/MPITraceGeometryTest.HaloContainsRequiredPhysicalBoundaryIncidence/Tetrahedron")
   add_test(
     NAME RodinMPIAssemblyTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinMPIAssemblyTest>)
+            $<TARGET_FILE:RodinMPIAssemblyTest>
+            "--gtest_filter=-${_RODIN_MPI_SLOW_IDENTIFICATION_FILTER}:${_RODIN_MPI_SLOW_GEOMETRY_FILTER}")
   set_tests_properties(RodinMPIAssemblyTest_np${np} PROPERTIES
     LABELS "unit;distributed"
+    TIMEOUT 120
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyTest_np${np})
+
+  add_test(
+    NAME RodinMPIAssemblyGeometrySlowTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIAssemblyTest>
+            "--gtest_filter=${_RODIN_MPI_SLOW_GEOMETRY_FILTER}")
+  set_tests_properties(RodinMPIAssemblyGeometrySlowTest_np${np} PROPERTIES
+    LABELS "unit;distributed;slow"
+    TIMEOUT 600
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyGeometrySlowTest_np${np})
+
+  add_test(
+    NAME RodinMPIAssemblyIdentificationSlowTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIAssemblyTest>
+            "--gtest_filter=${_RODIN_MPI_SLOW_IDENTIFICATION_FILTER}")
+  set_tests_properties(RodinMPIAssemblyIdentificationSlowTest_np${np} PROPERTIES
+    LABELS "unit;distributed;slow"
+    TIMEOUT 600
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyIdentificationSlowTest_np${np})
 endforeach()

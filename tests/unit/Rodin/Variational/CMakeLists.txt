@@ -25,6 +25,30 @@ gtest_discover_tests(RodinVariationalP0ElementTest
     LABELS unit
 )
 
+add_executable(RodinVariationalP0SpaceTest P0SpaceTest.cpp)
+target_link_libraries(RodinVariationalP0SpaceTest
+  PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Variational
+)
+gtest_discover_tests(RodinVariationalP0SpaceTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalP0gSpaceTest P0gSpaceTest.cpp)
+target_link_libraries(RodinVariationalP0gSpaceTest
+  PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Variational
+)
+gtest_discover_tests(RodinVariationalP0gSpaceTest
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinVariationalH1ElementTest H1ElementTest.cpp)
 target_link_libraries(RodinVariationalH1ElementTest
   PUBLIC

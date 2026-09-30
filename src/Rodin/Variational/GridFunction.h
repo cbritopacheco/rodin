@@ -52,7 +52,6 @@
 
 #include <atomic>
 #include <algorithm>
-#include <cstdint>
 #include <utility>
 #include <fstream>
 #include <functional>
@@ -371,7 +370,7 @@ namespace Rodin::Variational
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_fes(std::cref(fes)),
-          m_identity(getNextIdentity())
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -382,7 +381,7 @@ namespace Rodin::Variational
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(other.m_name),
           m_fes(other.m_fes),
-          m_identity(getNextIdentity())
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -393,7 +392,7 @@ namespace Rodin::Variational
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes)),
-          m_identity(getNextIdentity())
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -769,7 +768,14 @@ namespace Rodin::Variational
         const auto& basisValues = getCachedBasisValues(d, i, ip);
         for (Index local = 0; local < basisValues.size(); ++local)
         {
-          const auto k = this->operator[](dofs[local]) * basisValues[local];
+          const auto k = [&] {
+            if constexpr (requires {
+                            this->operator[](dofs[local]) * basisValues[local];
+                          })
+              return this->operator[](dofs[local]) * basisValues[local];
+            else
+              return basisValues[local] * this->operator[](dofs[local]);
+          }();
           if (local == 0)
             res = k;
           else
@@ -1165,17 +1171,21 @@ namespace Rodin::Variational
        */
       struct EvaluationCache
       {
-          std::uint64_t owner = 0;
-          const FES* fes = nullptr;
-          size_t d = static_cast<size_t>(-1);
-          Index i = static_cast<Index>(-1);
-          std::vector<Index> dofs;
+        const GridFunctionBase* owner = nullptr;
+        size_t ownerIdentity = static_cast<size_t>(-1);
+        const FES* fes = nullptr;
+        // Distinguishes geometry-specific static elements when stack addresses
+        // for successive grid functions and spaces are reused.
+        const ElementType* element = nullptr;
+        size_t d = static_cast<size_t>(-1);
+        Index i = static_cast<Index>(-1);
+        std::vector<Index> dofs;
 
-          bool hasBasisValues = false;
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = static_cast<size_t>(-1);
-          std::vector<Real> referenceCoordinates;
-          std::vector<RangeType> basisValues;
+        bool hasBasisValues = false;
+        const QF::QuadratureFormulaBase* qf = nullptr;
+        size_t qp = static_cast<size_t>(-1);
+        std::vector<Real> referenceCoordinates;
+        std::vector<RangeType> basisValues;
       };
 
       static EvaluationCache& getEvaluationCache()
@@ -1188,11 +1198,15 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
-        if (cache.owner != m_identity || cache.fes != fes || cache.d != d || cache.i != i)
+        const auto* element = &fes->getFiniteElement(d, i);
+        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
+          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
-          cache.owner = m_identity;
+          cache.owner = this;
+          cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
+          cache.element = element;
           cache.d = d;
           cache.i = i;
           const size_t count = static_cast<size_t>(dofs.size());
@@ -1208,6 +1222,8 @@ namespace Rodin::Variational
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
+        const auto* fes = &this->getFiniteElementSpace();
+        const auto* element = &fes->getFiniteElement(d, i);
         const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
         const size_t referenceCoordinateCount =
           static_cast<size_t>(referenceCoordinates.size());
@@ -1216,17 +1232,20 @@ namespace Rodin::Variational
         for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinateCount; ++j)
           sameReferenceCoordinates =
             cache.referenceCoordinates[j] == referenceCoordinates(j);
-        if (!cache.hasBasisValues || cache.owner != m_identity || cache.d != d ||
-          cache.i != i || cache.qf != ip.getQuadratureFormula() ||
-          cache.qp != ip.getIndex() || !sameReferenceCoordinates)
+        if (!cache.hasBasisValues || cache.owner != this ||
+          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
+          cache.element != element || cache.d != d || cache.i != i ||
+          cache.qf != ip.getQuadratureFormula() || cache.qp != ip.getIndex() ||
+          !sameReferenceCoordinates)
         {
-          const auto* fes = &this->getFiniteElementSpace();
-          const auto& fe = fes->getFiniteElement(d, i);
+          const auto& fe = *element;
           const size_t count = fe.getCount();
           const auto& p = ip.getPoint();
 
-          cache.owner = m_identity;
+          cache.owner = this;
+          cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
+          cache.element = element;
           cache.d = d;
           cache.i = i;
           cache.qf = ip.getQuadratureFormula();
@@ -1245,16 +1264,10 @@ namespace Rodin::Variational
         return cache.basisValues;
       }
 
-      /// @brief Draws an identity for the evaluation cache, never reused.
-      static std::uint64_t getNextIdentity()
-      {
-        static std::atomic<std::uint64_t> s_next{1};
-        return s_next.fetch_add(1, std::memory_order_relaxed);
-      }
-
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
-      std::uint64_t m_identity;
+      inline static std::atomic<size_t> s_nextCacheIdentity{0};
+      const size_t m_cacheIdentity;
   };
 
   /**
