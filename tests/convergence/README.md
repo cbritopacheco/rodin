@@ -174,7 +174,8 @@ exists yet.
 | Variable conductivity | P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
 | Coupled reaction–diffusion | P1/P2 | P1→P2→P3→P4 analytic | — | — |
 | Nonlinear Poisson | P1/P2 | — | — | — |
-| P0/P0g projection | Implemented | Not applicable to fixed degree | — | — |
+| P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | — |
+| P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Not applicable |
 
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:
@@ -220,3 +221,41 @@ separate PETSc job checks local-context and distributed P1/P2 Poisson
 convergence with PETSc assembly and CG. The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
 it is a separate check from the local-context suites.
+
+## Remaining verification work
+
+The coverage above is the baseline merged in PR #333. The following extensions
+are planned; their presence in this workplan does not imply an implemented or
+passing test. Completion is assessed per formulation, space, geometry,
+refinement path, and backend, rather than by the presence of a directory.
+
+| Priority | Extension | Required evidence |
+| --- | --- | --- |
+| 1 | PETSc local and MPI PDE coverage beyond Poisson: conductivity, complex Helmholtz, vector linear elasticity, coupled reaction–diffusion, Stokes, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
+| 2 | Missing refinement paths: coupled reaction–diffusion hp; nonlinear Poisson p/hp; Stokes p/hp | At least three discretizations; separate mixed-field errors and pressure gauge; stable velocity/pressure degree pairs for Stokes; nonlinear residual and tangent checks |
+| 3 | Curved-field tests for Helmholtz, linear elasticity, Stokes, reaction–diffusion, nonlinear Poisson, and P0 projection | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
+| 4 | Nonpolynomial geometry approximated at multiple geometry degrees | Separate geometry-map error from field error; state the comparison domain or pullback, map regularity, and geometry/field refinement sequence |
+| 5 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
+| 6 | Independent NAFEMS benchmarks | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
+
+Backend extensions require an initial support check: a mathematically meaningful
+formulation does not establish that every solver, scalar type, or assembly path
+supports it. Unsupported combinations must be recorded explicitly. Structural
+MPI regressions for a space do not establish PDE convergence for that space.
+The existing structural rank matrix is 1, 2, 3, 4, and 8; distributed PDE
+studies currently use 1–4 ranks. Extensions must state their own rank matrix,
+including empty-rank or sparse-selection cases where relevant.
+
+Each new suite must document its continuous problem, derived data, discrete
+spaces, geometry families, refinement levels, quadrature, algebraic error
+budget, measured norms, expected rates, and exclusions. At least three levels
+and two adjacent intervals are required for rate evidence. Negative controls
+and quadrature/solver sensitivity checks must establish that the assertions
+detect the targeted defect and that numerical integration or algebraic error
+does not determine the observed rate. Expensive resolved hierarchies belong
+in explicitly timed slow tests with the required backend coverage retained.
+
+Darcy remains deferred. Fixed-degree P0 has no p-refinement family; P0g has
+no nonconstant approximation rate. These are mathematical exclusions, not
+missing certification tasks. Additional physics can be added after the
+existing formulations have their intended refinement and backend coverage.
