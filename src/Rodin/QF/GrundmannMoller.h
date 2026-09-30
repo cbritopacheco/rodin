@@ -102,7 +102,6 @@ namespace Rodin::QF
        * @brief Copy constructor.
        * @param other GrundmannMoller instance to copy from
        */
-      constexpr
       GrundmannMoller(const GrundmannMoller& other)
         : Parent(other),
           m_geometry(other.m_geometry),
@@ -115,7 +114,6 @@ namespace Rodin::QF
        * @brief Move constructor.
        * @param other GrundmannMoller instance to move from
        */
-      constexpr
       GrundmannMoller(GrundmannMoller&& other)
         : Parent(std::move(other)),
           m_geometry(other.m_geometry),

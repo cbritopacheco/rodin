@@ -72,7 +72,6 @@ namespace Rodin::QF
        * @brief Constructs a centroid quadrature formula for the given geometry.
        * @param g Geometry type (e.g., Triangle, Quadrilateral, Tetrahedron, etc.)
        */
-      constexpr
       Centroid(Geometry::Polytope::Type g)
         : m_geometry(g)
       {}

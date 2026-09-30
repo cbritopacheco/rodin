@@ -363,3 +363,34 @@ TEST_F(GaussLegendreTest, EdgeCases)
   EXPECT_EQ(gl_min.getSize(), 1);
   EXPECT_DOUBLE_EQ(gl_min.getWeight(0), 1.0);
 }
+
+
+/// @brief Copies and moves receive identities distinct from their source.
+TEST_F(GaussLegendreTest, CacheIdentityDistinguishesCopiesAndMoves)
+{
+  GaussLegendre original(Polytope::Type::Segment, 2);
+  const size_t originalIdentity = original.getCacheIdentity();
+  GaussLegendre copied(original);
+  const size_t copiedIdentity = copied.getCacheIdentity();
+  EXPECT_NE(copiedIdentity, originalIdentity);
+  GaussLegendre moved(std::move(copied));
+  EXPECT_NE(moved.getCacheIdentity(), copiedIdentity);
+  EXPECT_NE(moved.getCacheIdentity(), originalIdentity);
+  EXPECT_EQ(original.getCacheIdentity(), originalIdentity);
+  EXPECT_NEAR(moved.getPoint(0)(0), original.getPoint(0)(0), 1e-14);
+}
+
+/// @brief Replacing rule contents changes its cache identity at the same address.
+TEST_F(GaussLegendreTest, AssignmentInvalidatesCacheIdentity)
+{
+  GaussLegendre destination(Polytope::Type::Segment, 1);
+  GaussLegendre source(Polytope::Type::Segment, 2);
+  const size_t previousIdentity = destination.getCacheIdentity();
+  const size_t sourceIdentity = source.getCacheIdentity();
+  destination = source;
+  EXPECT_NE(destination.getCacheIdentity(), previousIdentity);
+  EXPECT_NE(destination.getCacheIdentity(), sourceIdentity);
+  EXPECT_EQ(source.getCacheIdentity(), sourceIdentity);
+  EXPECT_EQ(destination.getSize(), source.getSize());
+  EXPECT_NEAR(destination.getPoint(0)(0), source.getPoint(0)(0), 1e-14);
+}

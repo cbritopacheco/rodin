@@ -1184,7 +1184,7 @@ namespace Rodin::Variational
         bool hasBasisValues = false;
         const QF::QuadratureFormulaBase* qf = nullptr;
         size_t qp = static_cast<size_t>(-1);
-        std::vector<Real> referenceCoordinates;
+        size_t qfIdentity = static_cast<size_t>(-1);
         std::vector<RangeType> basisValues;
       };
 
@@ -1224,19 +1224,12 @@ namespace Rodin::Variational
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
-        const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
-        const size_t referenceCoordinateCount =
-          static_cast<size_t>(referenceCoordinates.size());
-        bool sameReferenceCoordinates =
-          cache.referenceCoordinates.size() == referenceCoordinateCount;
-        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinateCount; ++j)
-          sameReferenceCoordinates =
-            cache.referenceCoordinates[j] == referenceCoordinates(j);
+        const auto* qf = ip.getQuadratureFormula();
+        const size_t qfIdentity = qf->getCacheIdentity();
         if (!cache.hasBasisValues || cache.owner != this ||
           cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
           cache.element != element || cache.d != d || cache.i != i ||
-          cache.qf != ip.getQuadratureFormula() || cache.qp != ip.getIndex() ||
-          !sameReferenceCoordinates)
+          cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex())
         {
           const auto& fe = *element;
           const size_t count = fe.getCount();
@@ -1248,11 +1241,9 @@ namespace Rodin::Variational
           cache.element = element;
           cache.d = d;
           cache.i = i;
-          cache.qf = ip.getQuadratureFormula();
+          cache.qf = qf;
+          cache.qfIdentity = qfIdentity;
           cache.qp = ip.getIndex();
-          cache.referenceCoordinates.resize(referenceCoordinateCount);
-          for (size_t j = 0; j < cache.referenceCoordinates.size(); ++j)
-            cache.referenceCoordinates[j] = referenceCoordinates(j);
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)
           {
