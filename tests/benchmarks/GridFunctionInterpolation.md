@@ -36,6 +36,7 @@ target:
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DRODIN_BUILD_BENCHMARKS=ON
 cmake --build build --target RodinGridFunctionBenchmarks -j 4
 build/tests/benchmarks/RodinGridFunctionBenchmarks \
+  --benchmark_filter=^Interpolation/ \
   --benchmark_min_time=0.05s --benchmark_repetitions=5 \
   --benchmark_enable_random_interleaving=true \
   --benchmark_out=interpolation.json --benchmark_out_format=json
@@ -129,3 +130,7 @@ comparison makes both formula storage/assignment regressions fail. Multiplying
 cached basis values by two makes all four new interpolation/evaluation tests
 fail. Restoring the implementation makes them pass. The benchmarks retain
 analytic-value checks independently of these unit tests.
+
+For large immutable-mesh traversals, controlled miss/hit mixtures, direct
+expansion comparisons, and a cache-key audit, see
+[the large-workload report](GridFunctionLarge.md).

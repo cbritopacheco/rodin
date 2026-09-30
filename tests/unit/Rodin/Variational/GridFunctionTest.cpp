@@ -830,4 +830,82 @@ namespace Rodin::Tests::Unit
     check(p2);
   }
 
+  /// @brief Moving a field can change its space without changing its lifetime identity.
+  TEST(Rodin_Variational_GridFunction, MoveAssignmentRefreshesSpaceCache)
+  {
+    LocalMesh firstMesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    LocalMesh secondMesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    P1 firstSpace(firstMesh);
+    P1 secondSpace(secondMesh);
+    GridFunction target(firstSpace);
+    GridFunction source(secondSpace);
+    const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
+    target.project(fn);
+    source.project(fn);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const Point firstPoint(Polytope(2, 0, firstMesh), qf.getPoint(0));
+    const Point secondPoint(Polytope(2, 0, secondMesh), qf.getPoint(0));
+    ASSERT_EQ(&firstSpace.getFiniteElement(2, 0), &secondSpace.getFiniteElement(2, 0));
+    const IndexArray firstDOFs = firstSpace.getDOFs(2, 0);
+    ASSERT_TRUE((firstDOFs != secondSpace.getDOFs(2, 0)).any());
+    EXPECT_NEAR(target.getValue(IntegrationPoint(firstPoint, &qf, 0)), fn(firstPoint), 1e-12);
+    target = std::move(source);
+    EXPECT_EQ(&target.getFiniteElementSpace(), &secondSpace);
+    EXPECT_NEAR(target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+    EXPECT_NEAR(target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+  }
+
+  /// @brief Immutable mesh connectivity does not imply an immutable vector-space definition.
+  TEST(Rodin_Variational_GridFunction, ElementDefinitionChangeRefreshesCaches)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh, 2);
+    P1 replacement(mesh, 3);
+    GridFunction gf(fes);
+    const auto initial = VectorFunction{
+      [](const Point& p) { return 1 + p.x(); },
+      [](const Point& p) { return 2 + p.y(); }};
+    gf.project(initial);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const Point point(Polytope(2, 0, mesh), qf.getPoint(0));
+    const IntegrationPoint ip(point, &qf, 0);
+    EXPECT_NEAR((gf.getValue(ip) - initial(point)).norm(), 0, 1e-12);
+    const auto* previousElement = &fes.getFiniteElement(2, 0);
+    fes = replacement;
+    ASSERT_NE(&fes.getFiniteElement(2, 0), previousElement);
+    gf.getData().resize(fes.getSize());
+    const auto updated = VectorFunction{
+      [](const Point& p) { return -1 + p.x(); },
+      [](const Point& p) { return 3 - p.y(); },
+      [](const Point& p) { return 4 + p.x() + p.y(); }};
+    gf.project(updated);
+    const auto value = gf.getValue(ip);
+    ASSERT_EQ(value.size(), 3);
+    EXPECT_NEAR((value - updated(point)).norm(), 0, 1e-12);
+    EXPECT_NEAR((gf.getValue(ip) - updated(point)).norm(), 0, 1e-12);
+  }
+
+  /// @brief A space can rebind to another immutable mesh at the same address.
+  TEST(Rodin_Variational_GridFunction, SpaceMeshRebindingRefreshesCache)
+  {
+    LocalMesh firstMesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    LocalMesh secondMesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    P1 fes(firstMesh);
+    P1 replacement(secondMesh);
+    GridFunction gf(fes);
+    const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
+    gf.project(fn);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const Point firstPoint(Polytope(2, 0, firstMesh), qf.getPoint(0));
+    const Point secondPoint(Polytope(2, 0, secondMesh), qf.getPoint(0));
+    ASSERT_EQ(&fes.getFiniteElement(2, 0), &replacement.getFiniteElement(2, 0));
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(firstPoint, &qf, 0)), fn(firstPoint), 1e-12);
+    fes = replacement;
+    gf.getData().resize(fes.getSize());
+    gf.project(fn);
+    EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+  }
+
 }

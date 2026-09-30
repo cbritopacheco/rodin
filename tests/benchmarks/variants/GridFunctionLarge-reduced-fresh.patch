@@ -1,0 +1,79 @@
+--- a/src/Rodin/Variational/GridFunction.h
++++ b/src/Rodin/Variational/GridFunction.h
+@@ -1171,10 +1171,8 @@
+        */
+       struct EvaluationCache
+       {
+-        const GridFunctionBase* owner = nullptr;
+         size_t ownerIdentity = static_cast<size_t>(-1);
+         const FES* fes = nullptr;
+-        const Geometry::MeshBase* mesh = nullptr;
+         // Space assignments can change the element even with fixed connectivity.
+         const ElementType* element = nullptr;
+         size_t d = static_cast<size_t>(-1);
+@@ -1182,7 +1180,6 @@
+         std::vector<Index> dofs;
+
+         bool hasBasisValues = false;
+-        const QF::QuadratureFormulaBase* qf = nullptr;
+         size_t qp = static_cast<size_t>(-1);
+         size_t qfIdentity = static_cast<size_t>(-1);
+         std::vector<RangeType> basisValues;
+@@ -1198,17 +1195,13 @@
+       {
+         auto& cache = getEvaluationCache();
+         const auto* fes = &this->getFiniteElementSpace();
+-        const auto* mesh = &fes->getMesh();
+         const auto* element = &fes->getFiniteElement(d, i);
+-        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
+-          cache.fes != fes || cache.mesh != mesh || cache.element != element ||
+-          cache.d != d || cache.i != i)
++        if (cache.ownerIdentity != m_cacheIdentity ||
++          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
+         {
+           const auto& dofs = fes->getDOFs(d, i);
+-          cache.owner = this;
+           cache.ownerIdentity = m_cacheIdentity;
+           cache.fes = fes;
+-          cache.mesh = mesh;
+           cache.element = element;
+           cache.d = d;
+           cache.i = i;
+@@ -1221,30 +1214,21 @@
+         return cache.dofs;
+       }
+
++      // getCachedDOFs validates the field, space, element and polytope first.
++      // Its invalidation flag makes repeating those comparisons unnecessary.
+       const std::vector<RangeType>& getCachedBasisValues(
+           size_t d, Index i, const IntegrationPoint& ip) const
+       {
+         auto& cache = getEvaluationCache();
+-        const auto* fes = &this->getFiniteElementSpace();
+-        const auto* element = &fes->getFiniteElement(d, i);
+-        const auto* qf = ip.getQuadratureFormula();
+-        const size_t qfIdentity = qf->getCacheIdentity();
+-        if (!cache.hasBasisValues || cache.owner != this ||
+-          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
+-          cache.element != element || cache.d != d || cache.i != i ||
+-          cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex())
++        assert(cache.d == d && cache.i == i);
++        const size_t qfIdentity = ip.getQuadratureFormula()->getCacheIdentity();
++        if (!cache.hasBasisValues || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex())
+         {
+-          const auto& fe = *element;
++          const auto* fes = &this->getFiniteElementSpace();
++          const auto& fe = fes->getFiniteElement(d, i);
+           const size_t count = fe.getCount();
+           const auto& p = ip.getPoint();
+
+-          cache.owner = this;
+-          cache.ownerIdentity = m_cacheIdentity;
+-          cache.fes = fes;
+-          cache.element = element;
+-          cache.d = d;
+-          cache.i = i;
+-          cache.qf = qf;
+           cache.qfIdentity = qfIdentity;
+           cache.qp = ip.getIndex();
+           cache.basisValues.resize(count);

@@ -1174,8 +1174,8 @@ namespace Rodin::Variational
         const GridFunctionBase* owner = nullptr;
         size_t ownerIdentity = static_cast<size_t>(-1);
         const FES* fes = nullptr;
-        // Distinguishes geometry-specific static elements when stack addresses
-        // for successive grid functions and spaces are reused.
+        const Geometry::MeshBase* mesh = nullptr;
+        // Space assignments can change the element even with fixed connectivity.
         const ElementType* element = nullptr;
         size_t d = static_cast<size_t>(-1);
         Index i = static_cast<Index>(-1);
@@ -1198,14 +1198,17 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
+        const auto* mesh = &fes->getMesh();
         const auto* element = &fes->getFiniteElement(d, i);
         if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
-          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
+          cache.fes != fes || cache.mesh != mesh || cache.element != element ||
+          cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
           cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
+          cache.mesh = mesh;
           cache.element = element;
           cache.d = d;
           cache.i = i;
@@ -1330,7 +1333,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator=(GridFunction&& other)
       {
-        Parent::operator=(std::move(other));
+        Parent::operator=(static_cast<Parent&&>(other));
         m_data = std::move(other.m_data);
         return *this;
       }
