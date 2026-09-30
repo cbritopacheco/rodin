@@ -2,6 +2,7 @@
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import json
 import math
 import os
@@ -165,6 +166,18 @@ def element_count(n):
     return 2 * (n - 1) * (n - 1)
 
 
+def save_case_trace(out_dir, identity, command, output):
+    """Retain lossless inner/outer traces separately from terminal CSV records."""
+    directory = Path(out_dir) / "iteration_logs"
+    directory.mkdir(parents=True, exist_ok=True)
+    identity_json = json.dumps(identity, sort_keys=True)
+    name = hashlib.sha256(identity_json.encode()).hexdigest()
+    path = directory / f"{name}.log"
+    path.write_text("case=" + identity_json + "\ncommand=" + json.dumps(command)
+                    + "\n" + output)
+    return path
+
+
 def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa_q):
     cmd = [
         str(exe),
@@ -187,7 +200,7 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         "--wngir-robust-scale=0",
         "--wngir-jsafe=1e-2",
         "--wngir-qmax=10",
-        "--wngir-primal-barrier-iterations=25",
+        f"--wngir-primal-barrier-iterations={args.barrier_max_iters}",
         "--wngir-primal-barrier-relative-tol=1e-3",
         "--wngir-theta-boundary=0.95",
         "--j-min=1e-8",
@@ -218,6 +231,8 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
     ]
     if args.extra:
         cmd.extend(args.extra.split())
+    if args.log_iterations:
+        cmd.extend(["--trace=1", "--wngir-trace=1"])
     env = dict(os.environ)
     env["OMP_NUM_THREADS"] = str(args.threads)
     env["DYLD_LIBRARY_PATH"] = args.dyld_library_path
@@ -230,6 +245,11 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         stderr=subprocess.STDOUT,
         text=True)
     seconds = time.time() - t0
+    if args.log_iterations:
+        save_case_trace(args.out_dir,
+                        dict(dataset=stage, n=n, lobes=lobes, kappa_bulk=kappa_bulk,
+                             rho=rho, mu_hat=mu_hat, kappa_j=kappa_j, kappa_q=kappa_q),
+                        cmd, proc.stdout)
     elements_match = ELEMENTS_RE.search(proc.stdout)
     elements = int(elements_match.group("elements")) if elements_match else element_count(int(n))
     final_matches = list(FINAL_RE.finditer(proc.stdout))
@@ -349,7 +369,10 @@ def main():
     parser.add_argument("--deadline", default="none",
                         help="wall-clock stop time, or 'none' to run to completion")
     parser.add_argument("--threads", type=int, default=8)
-    parser.add_argument("--steps", type=int, default=200)
+    parser.add_argument("--steps", type=int, default=30)
+    parser.add_argument("--barrier-max-iters", type=int, default=15)
+    parser.add_argument("--log-iterations", action="store_true",
+                        help="save inner Newton and accepted-geometry traces for every case")
     parser.add_argument("--amp", type=float, default=0.08)
     parser.add_argument("--r0", type=float, default=0.24)
     parser.add_argument("--extra", default="")
@@ -369,6 +392,8 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.steps <= 200:
         parser.error("--steps must be between 1 and the campaign cap of 200")
+    if args.barrier_max_iters < 1:
+        parser.error("--barrier-max-iters must be positive")
     if "--initial-mmg" in args.extra:
         sys.stderr.write("element_count assumes the uniform grid; --initial-mmg changes it\n")
         raise SystemExit(2)
@@ -381,6 +406,7 @@ def main():
     if not out_dir.is_absolute():
         out_dir = args.root / out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
+    args.out_dir = out_dir
     csv_path = out_dir / f"{args.dataset}.csv"
     ensure_schema(csv_path)
     deadline = deadline_from(args.deadline)
@@ -413,7 +439,7 @@ def main():
         "fixed_profile": {
             "r_div": 1, "kappa_obs": 1, "robust_scale": "automatic",
             "j_safe": 1e-2, "q_max": 10,
-            "barrier_iterations": 25, "barrier_relative_tolerance": 1e-3,
+            "barrier_iterations": args.barrier_max_iters, "barrier_relative_tolerance": 1e-3,
             "fraction_to_boundary": 0.95, "j_min": 1e-8, "j_line_search": 1e-2,
             "armijo": 1e-4, "descent_fraction": 1e-4, "direction_norm_factor": 10,
             "alpha_min": 1e-4, "omega_min": 0.1,
@@ -428,7 +454,12 @@ def main():
             "max_iterations": args.steps,
         },
     }
-    with (out_dir / f"{args.dataset}_manifest.json").open("w") as f:
+    if args.log_iterations:
+        manifest["iteration_logging"] = "inner Newton and full-interface geometry trace v1"
+    manifest_path = out_dir / f"{args.dataset}_manifest.json"
+    if manifest_path.exists() and json.loads(manifest_path.read_text()) != manifest:
+        parser.error("manifest differs from existing dataset; use a new out-dir")
+    with manifest_path.open("w") as f:
         json.dump(manifest, f, indent=2)
         f.write("\n")
     _, done = read_done(csv_path)

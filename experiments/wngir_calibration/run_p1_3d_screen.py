@@ -13,7 +13,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from run_p1_2d_parameter_campaign import int_values, real_values
+from run_p1_2d_parameter_campaign import int_values, real_values, save_case_trace
 
 
 FIELDS = (
@@ -51,7 +51,7 @@ def mesh_samples_per_wave(n, lobes, r0, amp):
 
 def command(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
     h = 1 / (n - 1)
-    return [
+    cmd = [
         str(args.exe), f"--n={n}", f"--lobes={lobes}",
         "--cx=0.5", "--cy=0.5", "--cz=0.5", "--phase=0",
         f"--amp={args.amp:.14g}", f"--R0={args.r0:.14g}",
@@ -77,6 +77,9 @@ def command(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
         f"--wngir-cg-rtol={args.cg_rtol:.14g}", "--wngir-cg-max-iters=1000",
         f"--wngir-steps={steps}", "--output=0", "--verbose",
     ]
+    if args.log_iterations:
+        cmd.extend(["--trace=1", "--wngir-trace=1"])
+    return cmd
 
 
 def run_case(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
@@ -96,6 +99,11 @@ def run_case(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
         if isinstance(output, bytes):
             output = output.decode(errors="replace")
         returncode = 124
+    if args.log_iterations:
+        save_case_trace(args.out_dir,
+                        dict(stage=args.stage, n=n, lobes=lobes, kappa_bulk=kappa_bulk,
+                             rho=rho, mu_hat=mu_hat),
+                        command(args, n, lobes, kappa_bulk, rho, mu_hat, steps), output)
     final = parse_metrics(output, "WNGIR it=")
     timing = parse_metrics(output, "wngir timing:")
     geometry = parse_metrics(output, "debug: facets=")
@@ -163,8 +171,10 @@ def main():
     parser.add_argument("--kappa-bulk", default=DEFAULT_KAPPA_BULK)
     parser.add_argument("--rho", default="0.1:1.0:0.1")
     parser.add_argument("--mu-hat", default="0.1:1.0:0.1")
-    parser.add_argument("--steps", type=int, default=3)
-    parser.add_argument("--barrier-max-iters", type=int, default=10,
+    parser.add_argument("--steps", type=int, default=30)
+    parser.add_argument("--log-iterations", action="store_true",
+                        help="save inner Newton and accepted-geometry traces for every case")
+    parser.add_argument("--barrier-max-iters", type=int, default=15,
                         help="inner Newton cap; use 25 to audit cap failures")
     parser.add_argument("--cg-rtol", type=float, default=1e-6,
                         help="CG relative tolerance; use 1e-9 for finalists")
@@ -195,8 +205,8 @@ def main():
                        ("0:10" if args.stage == "preflight" else "0,5,10"))
     if not ns or any(n < 2 for n in ns) or not lobes or any(l < 0 for l in lobes):
         parser.error("n must be >=2 and lobes must be nonnegative")
-    if args.stage == "screen" and not 1 <= args.steps <= 20:
-        parser.error("screen steps must be between 1 and 20")
+    if args.stage == "screen" and not 1 <= args.steps <= 30:
+        parser.error("screen steps must be between 1 and 30")
     if args.barrier_max_iters < 1:
         parser.error("barrier-max-iters must be positive")
     if args.threads < 1 or args.timeout < 1 or args.max_cases < 0:
@@ -253,6 +263,8 @@ def main():
                 "linear": {"backend": "CG", "relative_tolerance": args.cg_rtol,
                            "max_iterations_per_solve": 1000},
                 "executable": str(args.exe), "sha256": digest}
+    if args.log_iterations:
+        manifest["iteration_logging"] = "inner Newton and full-interface geometry trace v1"
     if manifest_path.exists():
         if json.loads(manifest_path.read_text()) != manifest:
             parser.error("manifest differs from existing dataset; use a new out-dir")

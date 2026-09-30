@@ -43,10 +43,10 @@ namespace Rodin::Adaptation
       Real jSafe = 1e-2; ///< @f$j_{\mathrm{safe}}@f$, barrier floor on normalised j.
       Real qMax = 10; ///< @f$Q_{\max}@f$, barrier + line-search ceiling on Q.
       std::size_t primalBarrierIterations =
-        8; ///< Maximum Newton corrections of the QP barrier.
+        15; ///< Maximum Newton corrections of the QP barrier.
       Real primalBarrierRelativeTolerance =
-        Real(1e-2); ///< Relative Newton-correction tolerance for the QP barrier.
-      Real muHat = Real(0.3); ///< @f$\widehat\mu@f$, dimensionless
+        Real(1e-3); ///< Relative Newton-correction tolerance for the QP barrier.
+      Real muHat = Real(0.9); ///< @f$\widehat\mu@f$, dimensionless
         ///< barrier/model-decrease ratio.
       Real thetaBoundary = Real(0.95); ///< @f$\tau@f$, strict-feasibility fraction.
       Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
@@ -87,14 +87,14 @@ namespace Rodin::Adaptation
       Real acceptedStepOverHTol =
         Real(5e-4); ///< >0 stops best-effort when accepted step/h is small.
       Real rigidStabilisationLevel =
-        Real(1); ///< @f$\rho@f$, lifts weakly observed rigid modes to this
+        Real(0.1); ///< @f$\rho@f$, lifts weakly observed rigid modes to this
       ///< fraction of the stiffest rigid mode; zero disables the
       ///< stabilisation.
       Real cgRelativeTolerance =
         1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for CG.
       std::size_t cgMaxIterations =
         1000; ///< Maximum iterations for each CG linear solve.
-      std::size_t maxIterations = 200; ///< Maximum nonlinear WNGIR iterations.
+      std::size_t maxIterations = 30; ///< Maximum nonlinear WNGIR iterations.
       std::size_t quadratureOrder =
         0; ///< @f$p_{\mathrm{quad}}@f$ override; zero selects automatic orders.
       std::size_t geometricValidationOrder =
@@ -102,7 +102,7 @@ namespace Rodin::Adaptation
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
-      bool trace = false; ///< Print per-iteration diagnostics when true.
+      bool trace = false; ///< Print inner diagnostics and validate each accepted outer geometry.
       /// @brief Compute the rigid-observation coercivity diagnostics.
       ///
       /// The initial and final rigid-mode states are reported but never read

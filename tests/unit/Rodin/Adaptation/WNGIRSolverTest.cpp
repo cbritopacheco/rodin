@@ -3,6 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <sstream>
 
 #include "Rodin/Adaptation.h"
 #include "Rodin/Assembly.h"
@@ -24,8 +25,12 @@ namespace Rodin::Tests::Unit
     {
       const WNGIRParameters parameters;
       EXPECT_EQ(parameters.kappaBulk, Real(1e-4));
+      EXPECT_EQ(parameters.rigidStabilisationLevel, Real(0.1));
+      EXPECT_EQ(parameters.muHat, Real(0.9));
+      EXPECT_EQ(parameters.primalBarrierIterations, 15);
+      EXPECT_EQ(parameters.primalBarrierRelativeTolerance, Real(1e-3));
       EXPECT_EQ(parameters.cgMaxIterations, 1000);
-      EXPECT_EQ(parameters.maxIterations, 200);
+      EXPECT_EQ(parameters.maxIterations, 30);
       EXPECT_EQ(parameters.geometricValidationOrder, 0);
       EXPECT_EQ(wngirInterfaceQuadratureOrder(1), 4);
       EXPECT_EQ(wngirInterfaceQuadratureOrder(2), 6);
@@ -56,7 +61,7 @@ namespace Rodin::Tests::Unit
         WNGIRReport report;
     };
 
-    SolveState solveTranslatedLine(Real levelSetScale, Real robustScale = 0)
+    SolveState solveTranslatedLine(Real levelSetScale, Real robustScale = 0, bool trace = false)
     {
       constexpr std::size_t n = 5;
       constexpr Real h = Real(1) / Real(n - 1);
@@ -87,6 +92,7 @@ namespace Rodin::Tests::Unit
       WNGIR solver(trial, test);
       WNGIRParameters parameters;
       parameters.h = h;
+      parameters.trace = trace;
       parameters.robustScale = robustScale;
       parameters.hasInterfaceAttribute = true;
       parameters.interfaceAttribute = Interface;
@@ -147,6 +153,46 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(state.report.linearSolveCount, 0);
     EXPECT_LE(state.report.maxLinearIterations, 1000);
     EXPECT_TRUE(std::isfinite(state.report.energy));
+  }
+
+  /// @brief Tracing preserves numerics and records each accepted geometry.
+  TEST(Rodin_Adaptation_WNGIRSolver, TraceRecordsInnerAndAcceptedGeometryWithoutChangingSolve)
+  {
+    const SolveState base = solveTranslatedLine(Real(1));
+    testing::internal::CaptureStdout();
+    const SolveState traced = solveTranslatedLine(Real(1), Real(0), true);
+    const std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(base.report.iterations, traced.report.iterations);
+    EXPECT_EQ(base.report.primalBarrierIterations, traced.report.primalBarrierIterations);
+    EXPECT_EQ(base.report.energy, traced.report.energy);
+    EXPECT_EQ(base.report.geometricSup, traced.report.geometricSup);
+    EXPECT_EQ((base.displacement - traced.displacement).norm(), Real(0));
+    EXPECT_NE(output.find("barrier inner="), std::string::npos);
+    EXPECT_NE(output.find("cg_it="), std::string::npos);
+    EXPECT_NE(output.find("rel="), std::string::npos);
+    std::istringstream lines(output);
+    std::string line;
+    std::size_t accepted = 0, initial = 0, final = 0;
+    while (std::getline(lines, line))
+    {
+      if (line.find("wngir geometry:") == std::string::npos)
+        continue;
+      accepted += line.find("phase=accepted") != std::string::npos;
+      initial += line.find("phase=initial") != std::string::npos;
+      final += line.find("phase=final") != std::string::npos;
+      EXPECT_NE(line.find("inner_total="), std::string::npos);
+      EXPECT_NE(line.find("seconds="), std::string::npos);
+      EXPECT_NE(line.find("max_qrel="), std::string::npos);
+      const std::size_t start = line.find("geom_sup=");
+      ASSERT_NE(start, std::string::npos);
+      const Real distance = std::stod(line.substr(start + 9));
+      EXPECT_TRUE(std::isfinite(distance));
+      if (line.find("phase=final") != std::string::npos)
+        EXPECT_EQ(distance, traced.report.geometricSup);
+    }
+    EXPECT_EQ(initial, 1);
+    EXPECT_EQ(final, 1);
+    EXPECT_EQ(accepted, traced.report.iterations);
   }
 
   /// @brief Rescaling a level set leaves the geometric displacement unchanged.
