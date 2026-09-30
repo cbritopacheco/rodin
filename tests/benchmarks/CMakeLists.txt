@@ -30,3 +30,9 @@ if (RODIN_USE_MPI)
     Rodin::Variational
     benchmark::benchmark)
 endif()
+
+if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  add_executable(RodinPETScPhysicsAssemblyBenchmarks PETScPhysicsAssembly.cpp)
+  target_link_libraries(RodinPETScPhysicsAssemblyBenchmarks PRIVATE
+    Rodin::PETSc Rodin::MPI benchmark::benchmark)
+endif()

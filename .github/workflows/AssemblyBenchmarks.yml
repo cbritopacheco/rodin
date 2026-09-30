@@ -56,3 +56,50 @@ jobs:
         with:
           name: assembly-smoke-openmp-${{ matrix.openmp }}
           path: assembly-smoke.json
+
+  PETScNumericalSmoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp: [OFF, ON]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_DYNAMIC: "FALSE"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libeigen3-dev libscotch-dev libhdf5-dev
+          petsc-dev mpi-default-dev mpi-default-bin
+      - name: Configure optimized PETSc benchmark checks
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_BENCHMARKS=ON -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MCSS=OFF
+          -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
+          -DRODIN_MULTITHREADED=${{ matrix.openmp }}
+          -DRODIN_USE_OPENMP=${{ matrix.openmp }}
+      - name: Build PETSc physics benchmarks
+        run: cmake --build build --target RodinPETScPhysicsAssemblyBenchmarks -j2
+      - name: Check local and distributed numerical oracles
+        run: |
+          executable=build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-petsc-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-petsc-np${np}.json" --benchmark_out_format=json
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assembly-petsc-smoke-openmp-${{ matrix.openmp }}
+          path: assembly-petsc-*.json

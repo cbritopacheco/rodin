@@ -68,11 +68,57 @@ registration order to detect cache-order artefacts. Sanitized timings are not
 interchangeable with optimized unsanitized measurements. No timing threshold
 is imposed on general-purpose CI runners.
 
+## PETSc local and MPI workload
+
+`RodinPETScPhysicsAssemblyBenchmarks` uses the same `PhysicsForm` definitions,
+affine energy oracles, degrees, geometries, sizes, and quadrature order as the
+Eigen executable. The target requires `RODIN_USE_PETSC=ON` and
+`RODIN_USE_MPI=ON`, including for the local-context mode. Local assembly uses
+PETSc sequential/OpenMP according to `RODIN_USE_OPENMP`; `--assembly_mpi`
+selects distributed assembly. This batch measures real fields with real-scalar
+PETSc; complex-scalar PETSc builds and complex fields are not claimed as
+verified coverage.
+
+Each case uses three fixed iterations to keep all ranks on the same collective
+sequence. With rank elapsed times $t_r$, the manual wall-time sample is
+$T_A=\max_r t_r$. A barrier precedes each sample; neither that barrier nor the
+timing reduction is included in $T_A$. Communication and matrix finalization
+performed by `assemble` are included. Google Benchmark reports CPU time from
+its own timer, which is not this maximum-rank assembly metric. Only manual
+wall time and counters derived from it are used for distributed comparisons.
+
+Workload metadata includes global owned-cell count $N_K$, global DOFs and
+nonzeros, rank count $R$, minimum/maximum owned cells, and cell imbalance
+$I_K=R\max_r N_{K,r}/N_K$. Ghost cells are excluded. The matrix difference
+is measured in a global Frobenius norm and the energy by the distributed form
+action; neither compares rank-local coefficient layouts. Empty owned-cell
+partitions are included in the smallest segment cases at three/four ranks.
+
+Only rank zero writes benchmark reports/JSON; other ranks still execute every
+case. Failures may emit rank-local diagnostics. Random
+benchmark interleaving and user-specified adaptive warmup are rejected to
+prevent rank-dependent collective order. Local mode requires one process.
+An empty benchmark selection returns nonzero rather than passing a smoke job.
+
+```sh
+build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks \
+  --benchmark_filter='/3/iterations:3/manual_time$'
+mpiexec -n 4 build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks \
+  --assembly_mpi --benchmark_filter='LinearElasticity/P2' \
+  --benchmark_repetitions=5 --benchmark_out=/tmp/assembly-mpi.json \
+  --benchmark_out_format=json
+```
+
+Dedicated PR smoke jobs run local and MPI (1–4 ranks) smallest-mesh cases in
+sequential/OpenMP builds and archive JSON without timing thresholds. Full
+three-size registrations support fixed-global-work comparisons across ranks;
+no weak-scaling sequence or speedup claim follows merely from registration.
+
 ## Remaining performance workplan
 
 | Extension | Required measurement or evidence |
 | --- | --- |
-| PETSc sequential/OpenMP/MPI for the implemented physics | Same forms and numerical oracles; support checks; MPI maximum-rank wall time; explicit ownership and partition imbalance |
+| Extended PETSc workload/constraint parity | Loads, boundary constraints, and independent operator-action comparisons beyond affine energy; retain maximum-rank timing and ownership metadata |
 | Complex Helmholtz, coupled reaction–diffusion, Taylor–Hood Stokes, nonlinear Poisson | Loads/block forms and residual/tangent assembly at a prescribed state; supported scalar/backend paths; stable mixed spaces |
 | P0/P0g real/complex scalar/vector mass and projection forms, higher H1 orders | Global and local integrator coverage; meaningful point/0D forms where supported; explicit mathematical exclusions |
 | Cold/setup and stage isolation | Mesh, space, sparsity/allocation, kernels, insertion, constraints, finalization, solve, and norm timings reported separately |

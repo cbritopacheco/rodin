@@ -12,6 +12,7 @@
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational/H1.h"
 #include "../convergence/Convergence.h"
+#include "PhysicsForm.h"
 
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
@@ -57,48 +58,8 @@ namespace Rodin::Tests::Benchmarks
         TrialFunction u(space);
         TestFunction v(space);
         BilinearForm form(u, v);
-        Real expected;
-        if constexpr (Elasticity)
-        {
-          auto volumetric = Integral(1.5 * Div(u), Div(v));
-          auto shear = Integral(
-            0.5 * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
-          volumetric.setOrder(6);
-          shear.setOrder(6);
-          form = volumetric + shear;
-          u.getSolution() = VectorFunction(dim, [dim](const Point& p) {
-            Real s = 0;
-            for (size_t j = 0; j < dim; ++j)
-              s += p(j);
-            Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-            for (size_t i = 0; i < dim; ++i)
-              value(i) = Real(i + 1) * s;
-            return value;
-          });
-          const Real c = Real(dim * (dim + 1)) / 2;
-          const Real squares = Real(dim * (dim + 1) * (2 * dim + 1)) / 6;
-          expected = 1.5 * c * c + 0.5 * (Real(dim) * squares + c * c);
-        }
-        else
-        {
-          const RealFunction gamma([dim, conductivity](const Point& p) {
-            Real value = 1;
-            if (conductivity)
-              for (size_t j = 0; j < dim; ++j)
-                value += p(j);
-            return value;
-          });
-          auto diffusion = Integral(gamma * Grad(u), Grad(v));
-          diffusion.setOrder(6);
-          form = diffusion;
-          u.getSolution() = RealFunction([dim](const Point& p) {
-            Real value = 0;
-            for (size_t j = 0; j < dim; ++j)
-              value += p(j);
-            return value;
-          });
-          expected = Real(dim) * (conductivity ? 1 + Real(dim) / 2 : 1);
-        }
+        const Real expected =
+          PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
 
         form.assemble();
         const auto baseline = form.getOperator();
