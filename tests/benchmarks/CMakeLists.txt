@@ -26,3 +26,8 @@ if (RODIN_USE_MPI)
     Rodin::Variational
     benchmark::benchmark)
 endif()
+
+# Build the interpolation measurements without unrelated solver benchmarks.
+add_executable(RodinGridFunctionBenchmarks GridFunctionInterpolation.cpp)
+target_link_libraries(RodinGridFunctionBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)

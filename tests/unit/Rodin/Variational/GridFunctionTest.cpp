@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Variational/H1.h"
 
@@ -699,6 +700,134 @@ namespace Rodin::Tests::Unit
       previousElement = &element;
       previousDOFs = dofs;
     }
+  }
+
+  /// @brief Reassigning a live formula invalidates cached values at the same sample index.
+  TEST(Rodin_Variational_GridFunction, AssignedQuadratureUsesNewCoordinates)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    gf.project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    QF::GaussLegendre qf(cell.getGeometry(), 1);
+    for (size_t order : {1, 2, 1})
+    {
+      qf = QF::GaussLegendre(cell.getGeometry(), order);
+      const Point point(cell, qf.getPoint(0));
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+        EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, 0)),
+          point.x() + 10 * point.y(), 1e-12);
+    }
+  }
+
+  /// @brief Cached bases remain valid while interpolation replaces field coefficients.
+  TEST(Rodin_Variational_GridFunction, CachedEvaluationTracksReinterpolation)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    P1 p1(mesh);
+    H1 p2(std::integral_constant<size_t, 2>{}, mesh);
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const Point point(cell, qf.getPoint(0));
+    const IntegrationPoint ip(point, &qf, 0);
+    auto check = [&](const auto& fes)
+    {
+      GridFunction gf(fes);
+      for (Real scale : {1.0, -2.0, 0.0, 3.0})
+      {
+        const auto fn = RealFunction([scale](const Point& p) {
+          return scale * (1 + p.x() + 10 * p.y());
+        });
+        gf.project(fn);
+        EXPECT_NEAR(gf.getValue(ip), fn(point), 1e-11);
+        EXPECT_NEAR(gf.getValue(ip), gf.getValue(point), 1e-11);
+        gf.getData() *= 2;
+        EXPECT_NEAR(gf.getValue(ip), 2 * fn(point), 1e-11);
+      }
+    };
+    check(p1);
+    check(p2);
+  }
+
+  /// @brief Cross-space assignments preserve the target space and refresh its field.
+  TEST(Rodin_Variational_GridFunction, CachedEvaluationTracksRepeatedCrossSpaceAssignment)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    P1 sourceSpace(mesh);
+    H1 targetSpace(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction source(sourceSpace);
+    GridFunction target(targetSpace);
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const Point point(cell, qf.getPoint(0));
+    const IntegrationPoint ip(point, &qf, 0);
+    for (Real scale : {1.0, -2.0, 0.0, 3.0})
+    {
+      const auto fn = RealFunction([scale](const Point& p) {
+        return scale * (1 + p.x() + 10 * p.y());
+      });
+      source.project(fn);
+      target = source;
+      EXPECT_EQ(&target.getFiniteElementSpace(), &targetSpace);
+      EXPECT_NEAR(target.getValue(ip), fn(point), 1e-11);
+      EXPECT_NEAR(target.getValue(ip), target.getValue(point), 1e-11);
+    }
+  }
+
+  /// @brief Sample-index changes and null-formula points select the correct basis.
+  TEST(Rodin_Variational_GridFunction, AlternatingEvaluationContextsUseTheirOwnPoints)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
+    gf.project(fn);
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+    ASSERT_GT(qf.getSize(), 1);
+    const Point arbitrary(cell, Math::SpatialPoint{0.2, 0.3});
+    for (size_t sample : {0, 1, 0, 1})
+    {
+      const Point point(cell, qf.getPoint(sample));
+      EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, sample)), fn(point), 1e-12);
+      EXPECT_NEAR(gf.getValue(IntegrationPoint(arbitrary)), fn(arbitrary), 1e-12);
+      EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, sample)), fn(point), 1e-12);
+    }
+  }
+
+  /// @brief Vector fields use fresh coefficients with a warmed quadrature basis cache.
+  TEST(Rodin_Variational_GridFunction, CachedVectorEvaluationTracksReinterpolation)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    P1 p1(mesh, 2);
+    H1 p2(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const Point point(cell, qf.getPoint(0));
+    const IntegrationPoint ip(point, &qf, 0);
+    auto check = [&](const auto& fes)
+    {
+      GridFunction gf(fes);
+      for (Real scale : {1.0, -2.0, 0.0, 3.0})
+      {
+        const auto fn = VectorFunction{
+          [scale](const Point& p) { return scale * (1 + p.x() + 10 * p.y()); },
+          [scale](const Point& p) { return scale * (-2 + 3 * p.x() - p.y()); }};
+        gf.project(fn);
+        EXPECT_NEAR((gf.getValue(ip) - fn(point)).norm(), 0, 1e-11);
+        gf.getData() *= 2;
+        EXPECT_NEAR((gf.getValue(ip) - 2 * fn(point)).norm(), 0, 1e-11);
+      }
+    };
+    check(p1);
+    check(p2);
   }
 
 }
