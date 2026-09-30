@@ -115,6 +115,16 @@ namespace Rodin::Geometry
         return m_fe.getOrder();
       }
 
+      /// @brief Returns the element's factor degree when available, otherwise
+      /// the conservative total-degree bound of the transformation interface.
+      size_t getFactorOrder() const override
+      {
+        if constexpr (requires { m_fe.getFactorOrder(); })
+          return m_fe.getFactorOrder();
+        else
+          return Parent::getFactorOrder();
+      }
+
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();

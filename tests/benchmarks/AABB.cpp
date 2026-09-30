@@ -69,10 +69,11 @@ namespace Rodin::Tests::Benchmarks
       return queries;
     }
 
+    template <size_t K = 2>
     void curveMesh(MeshType& mesh, G type)
     {
       const size_t dimension = mesh.getDimension();
-      Variational::RealH1Element<2> element(type);
+      Variational::RealH1Element<K> element(type);
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
         PointCloud nodes(dimension, element.getCount());
@@ -84,7 +85,7 @@ namespace Rodin::Tests::Benchmarks
             nodes(i, a) = x[i] + (i == dimension - 1 ? 0.15 * x[0] * x[0] : 0);
         }
         mesh.setPolytopeTransformation({dimension, cell->getIndex()},
-          new ParametricTransformation<Variational::RealH1Element<2>>(
+          new ParametricTransformation<Variational::RealH1Element<K>>(
             std::move(nodes), element));
       }
     }
@@ -110,6 +111,18 @@ namespace Rodin::Tests::Benchmarks
         benchmark::DoNotOptimize(locator.locate(queries.front()).has_value());
       }
       state.counters["cells"] = static_cast<double>(mesh.getCellCount());
+    }
+
+    void BM_AABBBuildWithoutProjections(benchmark::State& state, G type)
+    {
+      const MeshType mesh = makeMesh(type);
+      const auto queries = mappedQueries(mesh, type);
+      for (auto _ : state)
+      {
+        Location::AABB locator(mesh);
+        locator.setProjectionPruning(false);
+        benchmark::DoNotOptimize(locator.locate(queries.front()).has_value());
+      }
     }
 
     void BM_AABBHit(benchmark::State& state, G type)
@@ -167,6 +180,75 @@ namespace Rodin::Tests::Benchmarks
       state.counters["cells"] = static_cast<double>(mesh.getCellCount());
     }
 
+    template <size_t K>
+    void BM_AABBCurvedBuild(benchmark::State& state, G type)
+    {
+      MeshType mesh = makeMesh(type, true);
+      curveMesh<K>(mesh, type);
+      const auto queries = mappedQueries(mesh, type);
+      for (auto _ : state)
+      {
+        Location::AABB locator(mesh);
+        benchmark::DoNotOptimize(locator.locate(queries.front()).has_value());
+      }
+      // Includes per-cell sampling, conversion and BVH build. The process-wide
+      // factor conversion cache is reused after its first construction.
+      state.counters["cells"] = static_cast<double>(mesh.getCellCount());
+      state.counters["degree"] = static_cast<double>(K);
+    }
+
+    void BM_AABBEmbeddedCurvedHit(benchmark::State& state)
+    {
+      MeshType mesh = MeshType::Builder()
+                        .initialize(3)
+                        .nodes(2)
+                        .vertex({0, 0, 0})
+                        .vertex({1, 0, 0})
+                        .polytope(G::Segment, {0, 1})
+                        .finalize();
+      Variational::RealH1Element<2> element(G::Segment);
+      PointCloud nodes(3, element.getCount());
+      for (size_t a = 0; a < element.getCount(); ++a)
+      {
+        const Real t = element.getNode(a)[0];
+        nodes(0, a) = t;
+        nodes(1, a) = Real(0.2) * t * (Real(1) - t);
+        nodes(2, a) = 0;
+      }
+      mesh.setPolytopeTransformation({1, 0},
+        new ParametricTransformation<Variational::RealH1Element<2>>(
+          std::move(nodes), element));
+      Location::AABB locator(mesh);
+      const Math::SpatialPoint x{0.75, 0.0375, 0};
+      if (!locator.locate(x))
+      {
+        state.SkipWithError("AABB missed the embedded curved query");
+        return;
+      }
+      for (auto _ : state)
+        benchmark::DoNotOptimize(locator.locate(x).has_value());
+    }
+
+    void BM_AABBGradedHit(benchmark::State& state)
+    {
+      constexpr size_t CellCount = 1024;
+      constexpr Real SmallCellLength = 1e-6;
+      constexpr Real DistantVertex = 1e6;
+      MeshType::Builder builder;
+      builder.initialize(1).nodes(CellCount + 2);
+      for (size_t i = 0; i <= CellCount; ++i)
+        builder.vertex({static_cast<Real>(i) * SmallCellLength});
+      builder.vertex({DistantVertex});
+      for (size_t i = 0; i < CellCount; ++i)
+        builder.polytope(G::Segment, {i, i + 1});
+      const MeshType mesh = builder.finalize();
+      Location::AABB locator(mesh);
+      const Math::SpatialPoint x{(CellCount - Real(0.25)) * SmallCellLength};
+      benchmark::DoNotOptimize(locator.locate(x).has_value());
+      for (auto _ : state)
+        benchmark::DoNotOptimize(locator.locate(x).has_value());
+    }
+
     void BM_AABBTriangleNarrowMiss(benchmark::State& state)
     {
       const MeshType mesh = MeshType::Builder()
@@ -209,6 +291,53 @@ namespace Rodin::Tests::Benchmarks
   BENCHMARK_CAPTURE(BM_AABBCurvedHit, Hexahedron, G::Hexahedron);
   BENCHMARK_CAPTURE(BM_AABBCurvedHit, Pyramid, G::Pyramid);
   BENCHMARK_CAPTURE(BM_AABBCurvedHit, Wedge, G::Wedge);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Segment, G::Segment);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Segment, G::Segment);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Triangle, G::Triangle);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Triangle, G::Triangle);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Quadrilateral, G::Quadrilateral);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Quadrilateral, G::Quadrilateral);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Tetrahedron, G::Tetrahedron);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Tetrahedron, G::Tetrahedron);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Hexahedron, G::Hexahedron);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Hexahedron, G::Hexahedron);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Pyramid, G::Pyramid);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Pyramid, G::Pyramid);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, P2Wedge, G::Wedge);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, P4Wedge, G::Wedge);
+  // Run only FirstP4 cases in a fresh process to include the conversion-cache
+  // construction. Running the other build cases first warms that cache.
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Segment, G::Segment)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Triangle, G::Triangle)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Quadrilateral, G::Quadrilateral)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Tetrahedron, G::Tetrahedron)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Hexahedron, G::Hexahedron)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Pyramid, G::Pyramid)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Wedge, G::Wedge)
+    ->Iterations(1)
+    ->Repetitions(1);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Point, G::Point);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Segment, G::Segment);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Triangle, G::Triangle);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Quadrilateral, G::Quadrilateral);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Tetrahedron, G::Tetrahedron);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Hexahedron, G::Hexahedron);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Pyramid, G::Pyramid);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Wedge, G::Wedge);
+  BENCHMARK(BM_AABBEmbeddedCurvedHit);
+  BENCHMARK(BM_AABBGradedHit);
   BENCHMARK(BM_AABBTriangleNarrowMiss);
   /// @endcond
 }

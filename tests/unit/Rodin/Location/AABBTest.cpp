@@ -1044,3 +1044,217 @@ TEST(Location_AABB, DegreeOneGeometryBasisIsANonNegativePartitionOfUnity)
     }
   }
 }
+
+class QuadraticShear : public PolytopeTransformation
+{
+  public:
+    QuadraticShear()
+      : PolytopeTransformation(2, 2)
+    {}
+    size_t getOrder() const override
+    {
+      return 2;
+    }
+    void transform(Math::SpatialPoint& x, const Math::SpatialPoint& r) const override
+    {
+      x = point({r[0], r[1] + 4 * r[0] * (1 - r[0])});
+    }
+    void jacobian(
+      Math::SpatialMatrix<Real>& j, const Math::SpatialPoint& r) const override
+    {
+      j.resize(2, 2);
+      j(0, 0) = 1;
+      j(0, 1) = 0;
+      j(1, 0) = 4 - 8 * r[0];
+      j(1, 1) = 1;
+    }
+    QuadraticShear* copy() const noexcept override
+    {
+      return new QuadraticShear(*this);
+    }
+};
+TEST(Location_AABB, QuadraticTensorMap)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(4)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({1, 1})
+                .vertex({0, 1})
+                .polytope(Polytope::Type::Quadrilateral, {0, 1, 2, 3})
+                .finalize();
+  mesh.setPolytopeTransformation({2, 0}, new QuadraticShear());
+  AABB locator(mesh);
+  const auto x = point({0.5, 1.5});
+  EXPECT_TRUE(locator.locate(x).has_value());
+  locator.setExhaustiveFallback(true);
+  EXPECT_TRUE(locator.locate(x).has_value());
+}
+TEST(Location_AABB, UnderflowedResidual)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(2)
+                .vertex({0})
+                .vertex({1e-200})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  locator.setTolerance(1e-210);
+  const auto hit = locator.locate(point({0.75e-200}));
+  ASSERT_TRUE(hit.has_value());
+  EXPECT_NEAR(hit->getReferenceCoordinates()[0], 0.75, 1e-10);
+}
+TEST(Location_AABB, OverflowedPhysicalTolerance)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({0, 0})
+                .vertex({1e200, 0})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  EXPECT_FALSE(locator.locate(point({0.5e200, 0.1e200})).has_value());
+}
+TEST(Location_AABB, ExtremeDeterminantScales)
+{
+  // Cubing these scales produces a zero, subnormal, or overflowing determinant.
+  for (Real scale : {1e-110, 1e-107, 1e110})
+  {
+    SCOPED_TRACE(scale);
+    Mesh mesh = Mesh<Context::Local>::Builder()
+                  .initialize(3)
+                  .nodes(4)
+                  .vertex({0, 0, 0})
+                  .vertex({scale, 0, 0})
+                  .vertex({0, scale, 0})
+                  .vertex({0, 0, scale})
+                  .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+                  .finalize();
+    AABB locator(mesh);
+    const auto hit = locator.locate(point({0.1 * scale, 0.2 * scale, 0.3 * scale}));
+    ASSERT_TRUE(hit.has_value());
+    EXPECT_NEAR(hit->getReferenceCoordinates()[0], 0.1, 1e-10);
+    EXPECT_NEAR(hit->getReferenceCoordinates()[1], 0.2, 1e-10);
+    EXPECT_NEAR(hit->getReferenceCoordinates()[2], 0.3, 1e-10);
+  }
+}
+class QuarticSegment : public PolytopeTransformation
+{
+  public:
+    QuarticSegment()
+      : PolytopeTransformation(1, 1)
+    {}
+    size_t getOrder() const override
+    {
+      return 4;
+    }
+    void transform(Math::SpatialPoint& x, const Math::SpatialPoint& r) const override
+    {
+      const Real s = r[0] - 0.5;
+      x = point({s / 16 + s * s * s * (1 - s)});
+    }
+    void jacobian(
+      Math::SpatialMatrix<Real>& j, const Math::SpatialPoint& r) const override
+    {
+      const Real s = r[0] - 0.5;
+      j.resize(1, 1);
+      j(0, 0) = Real(1) / 16 + s * s * (3 - 4 * s);
+    }
+    QuarticSegment* copy() const noexcept override
+    {
+      return new QuarticSegment(*this);
+    }
+};
+TEST(Location_AABB, OutsideNewtonRootDoesNotExcludeInsideRoot)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(2)
+                .vertex({-0.21875})
+                .vertex({0.09375})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  mesh.setPolytopeTransformation({1, 0}, new QuarticSegment());
+  AABB locator(mesh);
+  EXPECT_TRUE(locator.locate(point({Real(1) / 16})).has_value());
+  locator.setExhaustiveFallback(true);
+  EXPECT_TRUE(locator.locate(point({Real(1) / 16})).has_value());
+}
+
+TEST(Location_AABB, LocatesVeryLargeEmbeddedSegment)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({0, 0})
+                .vertex({1e200, 0})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  const auto hit = locator.locate(point({0.75e200, 0}));
+  ASSERT_TRUE(hit.has_value());
+  EXPECT_NEAR(hit->getReferenceCoordinates()[0], 0.75, 1e-10);
+}
+
+TEST(Location_AABB, RejectsInvalidToleranceConfiguration)
+{
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {2});
+  AABB locator(mesh);
+  for (Real invalid :
+    {-1.0, std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::quiet_NaN()})
+  {
+    EXPECT_THROW(locator.setTolerance(invalid), std::invalid_argument);
+    EXPECT_THROW(locator.setReferenceTolerance(invalid), std::invalid_argument);
+  }
+  EXPECT_TRUE(locator.locate(point({0.25})).has_value());
+}
+
+TEST(Location_AABB, HighOrderCurvedBoxesAcrossEveryGeometry)
+{
+  for (const auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    checkBoxesBoundCurvedImage<4>(type, 0.15);
+}
+
+TEST(Location_AABB, HighOrderTranslatedBoundaryIsNotPruned)
+{
+  constexpr Real Translation = 1e8;
+  const auto type = Polytope::Type::Quadrilateral;
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(type, {2, 2});
+  Variational::RealH1Element<4> element(type);
+  PointCloud nodes(2, element.getCount());
+  for (size_t a = 0; a < element.getCount(); ++a)
+  {
+    const auto r = element.getNode(a);
+    nodes(0, a) = Translation + r[0];
+    nodes(1, a) = Translation + r[1] + 0.2 * r[0] * (1 - r[0]);
+  }
+  mesh.setPolytopeTransformation({2, 0},
+    new ParametricTransformation<Variational::RealH1Element<4>>(
+      std::move(nodes), element));
+  AABB locator(mesh);
+  for (const auto& r :
+    {point({0, 0}), point({1, 0}), point({0, 1}), point({1, 1}), point({0.5, 1})})
+  {
+    Math::SpatialPoint x;
+    mesh.getPolytopeTransformation(2, 0).transform(x, r);
+    EXPECT_TRUE(locator.locate(x).has_value()) << "reference=" << r;
+  }
+}
+
+TEST(Location_AABB, ProjectionPruningCanBeDisabledAndReenabled)
+{
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+  AABB locator(mesh);
+  for (bool enabled : {false, true, false})
+  {
+    locator.setProjectionPruning(enabled);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      EXPECT_TRUE(locator.locate(physicalCentroid(mesh, *cell)).has_value());
+    EXPECT_FALSE(locator.locate(point({-1, -1, -1})).has_value());
+  }
+}

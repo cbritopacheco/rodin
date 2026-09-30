@@ -8,6 +8,7 @@
 #define RODIN_LOCATION_AABB_H
 
 #include <cmath>
+#include <stdexcept>
 #include <array>
 #include <atomic>
 #include <mutex>
@@ -65,19 +66,23 @@ namespace Rodin::Location
    * converted into control points of a non-negative partition of unity
    * (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra
    * and wedges, the collapsed-coordinate basis on pyramids), whose extrema
-   * bound the image exactly for every polytope type and order. Degree-one
+   * bound the image in exact arithmetic. Numerical boxes include a conversion
+   * roundoff allowance. Degree-one
    * factors need no conversion: the mapped vertices are already the control
    * points, so affine and multilinear cells keep the cheap vertex box. Should
    * a geometry ever fall outside this construction the box degrades to a
-   * heuristic inflation, and an exhaustive narrow-phase fallback can be
-   * enabled with setExhaustiveFallback(). The degree is taken from
-   * PolytopeTransformation::getOrder(), so a transformation that understates
-   * its own order understates its box.
+   * box that cannot be computed reliably, that entry remains unpruned. An
+   * exhaustive narrow-phase fallback can also be enabled with
+   * setExhaustiveFallback(). The degree is obtained from
+   * PolytopeTransformation::getFactorOrder(); its default total-degree bound
+   * is conservative for custom polynomial maps.
    *
    * Physical tolerance is relative to the mesh bounding-box diagonal. The
    * reference tolerance only permits a small inversion overshoot before
    * clipping; physical residual is checked again after clipping. Queries are
-   * thread-safe: the lazy per-dimension build is guarded by a mutex and
+   * thread-safe for concurrent queries on a fixed mesh and configuration:
+   * setters and mesh mutation must not overlap queries. The lazy build is
+   * guarded by a mutex and
    * transformations are immutable after construction.
    */
   template <class MeshType>
@@ -91,6 +96,7 @@ namespace Rodin::Location
           m_referenceTolerance(DefaultReferenceTolerance),
           m_maxNewtonIterations(DefaultMaxNewtonIterations),
           m_exhaustiveFallback(false),
+          m_projectionPruning(true),
           m_index(mesh.getDimension() + 1)
       {
         computeScale();
@@ -105,6 +111,9 @@ namespace Rodin::Location
       /// Sets the relative physical tolerance and invalidates the index.
       AABB& setTolerance(Real tolerance)
       {
+        if (!std::isfinite(tolerance) || tolerance < Real(0))
+          throw std::invalid_argument(
+            "AABB physical tolerance must be finite and nonnegative.");
         m_tolerance = tolerance;
         invalidate();
         return *this;
@@ -119,6 +128,9 @@ namespace Rodin::Location
       /// @brief Sets the maximum reference-space overshoot before clipping.
       AABB& setReferenceTolerance(Real tolerance)
       {
+        if (!std::isfinite(tolerance) || tolerance < Real(0))
+          throw std::invalid_argument(
+            "AABB reference tolerance must be finite and nonnegative.");
         m_referenceTolerance = tolerance;
         return *this;
       }
@@ -127,13 +139,28 @@ namespace Rodin::Location
        * @brief Enables the exhaustive narrow-phase fallback on broad-phase
        * miss.
        *
-       * Useful when a transformation cannot be enclosed by the control-point
-       * construction and its sampled box may miss part of its image. Costs
-       * one full narrow-phase sweep per miss.
+       * Useful as a diagnostic when a transformation's degree metadata does
+       * not describe its image. Unreliable control-point conversions already
+       * leave their entries unpruned. Costs one full narrow-phase sweep per miss.
        */
       AABB& setExhaustiveFallback(bool fallback)
       {
         m_exhaustiveFallback = fallback;
+        return *this;
+      }
+
+      /**
+       * @brief Enables control-hull projections in addition to axis-aligned boxes.
+       *
+       * Enabled by default to reduce Newton retries on overlapping boxes.
+       * Disable for short-lived locators when construction cost and storage
+       * matter more than repeated-query throughput. Membership checks and
+       * Newton seed retries are unchanged. Invalidates the existing index.
+       */
+      AABB& setProjectionPruning(bool enabled)
+      {
+        m_projectionPruning = enabled;
+        invalidate(false);
         return *this;
       }
 
@@ -204,9 +231,25 @@ namespace Rodin::Location
       /// reference accuracy before skipping another Jacobian evaluation.
       /// This conservative policy margin is heuristic, not a convergence proof.
       static constexpr Real CorrectionEstimateMargin = Real(0.25);
-      /// Square the margin because the correction estimate uses squared lengths.
-      static constexpr Real CorrectionEstimateMarginSquared =
-        CorrectionEstimateMargin * CorrectionEstimateMargin;
+
+      /// Conversion roundoff allowance in machine epsilons per basis entry.
+      /// This heuristic accounts for conditioning; it is not an interval proof.
+      static constexpr Real ControlRoundoffFactor = Real(32);
+      /// Cubic and higher tensor factors use line conversions. Small dense
+      /// products avoid the line-loop overhead on quadratic factors.
+      static constexpr size_t MinSeparableTensorDegree = 3;
+      /// Euclidean norm with the cheap squared-norm path at ordinary scales.
+      /// Scaling avoids overflow and avoids classifying nonzero tiny vectors as zero.
+      static Real stableNorm(const Math::SpatialPoint& v)
+      {
+        const Real squared = v.squaredNorm();
+        if (std::isnormal(squared))
+          return std::sqrt(squared);
+        Real norm = 0;
+        for (Eigen::Index i = 0; i < v.size(); ++i)
+          norm = std::hypot(norm, v[i]);
+        return norm;
+      }
 
       static bool isFinite(const Math::SpatialPoint& v)
       {
@@ -243,17 +286,31 @@ namespace Rodin::Location
           uint32_t end;    ///< One past last entry (valid for leaves)
       };
 
+      struct ProjectionBound
+      {
+          Bound normal;
+          Real upper;
+      };
+
+      struct ProjectionRange
+      {
+          size_t begin = 0;
+          size_t end = 0;
+      };
+
       struct DimensionIndex
       {
           std::vector<Node> nodes;
           std::vector<Index> entries;      ///< Polytope indices, leaf-ordered
           std::vector<Bound> entryLo;      ///< Per-entry box, leaf-ordered
           std::vector<Bound> entryHi;
+          std::vector<ProjectionBound> projections;
+          std::vector<ProjectionRange> projectionRanges;
           std::atomic<bool> built{false};
           mutable std::mutex mutex;
       };
 
-      void invalidate()
+      void invalidate(bool updateScale = true)
       {
         for (auto& index : m_index)
         {
@@ -262,9 +319,12 @@ namespace Rodin::Location
           index.entries.clear();
           index.entryLo.clear();
           index.entryHi.clear();
+          index.projections.clear();
+          index.projectionRanges.clear();
           index.built.store(false, std::memory_order_release);
         }
-        computeScale();
+        if (updateScale)
+          computeScale();
       }
 
       void computeScale()
@@ -283,21 +343,23 @@ namespace Rodin::Location
             hi[i] = std::max(hi[i], x[static_cast<Eigen::Index>(i)]);
           }
         }
-        Real diag2 = 0;
+        Real diag = 0;
         for (size_t i = 0; i < sdim; ++i)
         {
           const Real e = hi[i] - lo[i];
           if (std::isfinite(e))
-            diag2 += e * e;
+            diag = std::hypot(diag, e);
+          else if (lo[i] <= hi[i])
+            diag = std::numeric_limits<Real>::max();
         }
-        const Real diag = std::sqrt(diag2);
-        m_scale = diag > Real(0) ? diag : Real(1);
+        m_scale =
+          diag > Real(0) ? std::min(diag, std::numeric_limits<Real>::max()) : Real(1);
       }
 
       /// Effective physical tolerance in mesh units.
       Real physicalTolerance() const
       {
-        return m_tolerance * m_scale;
+        return std::min(m_tolerance * m_scale, std::numeric_limits<Real>::max());
       }
 
       const DimensionIndex& ensureBuilt(size_t dimension) const
@@ -320,11 +382,15 @@ namespace Rodin::Location
         const auto& mesh = m_mesh.get();
         const size_t sdim = mesh.getSpaceDimension();
         const size_t count = mesh.getPolytopeCount(dimension);
+        const bool projectionsEnabled =
+          m_projectionPruning && dimension == sdim && dimension > 1;
 
         index.entries.clear();
         index.nodes.clear();
         index.entryLo.clear();
         index.entryHi.clear();
+        index.projections.clear();
+        index.projectionRanges.clear();
         if (count == 0)
           return;
 
@@ -332,12 +398,19 @@ namespace Rodin::Location
         std::vector<Bound> lo(count), hi(count);
         std::vector<Bound> mid(count);
         index.entries.reserve(count);
+        std::vector<ProjectionRange> ranges(projectionsEnabled ? count : 0);
         size_t n = 0;
         for (auto it = mesh.getPolytope(dimension); it; ++it, ++n)
         {
-          makeBox(*it, lo[n], hi[n]);
+          if (projectionsEnabled)
+            ranges[n].begin = index.projections.size();
+          makeBox(*it, lo[n], hi[n], index.projections);
+          if (projectionsEnabled)
+            ranges[n].end = index.projections.size();
           for (size_t i = 0; i < sdim; ++i)
-            mid[n][i] = Real(0.5) * (lo[n][i] + hi[n][i]);
+            mid[n][i] = std::isfinite(lo[n][i]) && std::isfinite(hi[n][i])
+              ? Real(0.5) * lo[n][i] + Real(0.5) * hi[n][i]
+              : Real(0);
           index.entries.push_back(it->getIndex());
         }
         assert(n == count);
@@ -354,13 +427,18 @@ namespace Rodin::Location
         std::vector<Index> reordered(count);
         index.entryLo.resize(count);
         index.entryHi.resize(count);
+        index.projectionRanges.resize(projectionsEnabled ? count : 0);
         for (size_t i = 0; i < count; ++i)
         {
           reordered[i] = index.entries[order[i]];
           index.entryLo[i] = lo[order[i]];
           index.entryHi[i] = hi[order[i]];
+          if (projectionsEnabled)
+            index.projectionRanges[i] = ranges[order[i]];
         }
         index.entries = std::move(reordered);
+        if (index.projections.empty())
+          std::vector<ProjectionRange>().swap(index.projectionRanges);
       }
 
       int32_t buildNode(DimensionIndex& index, std::vector<uint32_t>& order,
@@ -427,39 +505,6 @@ namespace Rodin::Location
         index.nodes[self].left = left;
         index.nodes[self].right = right;
         return self;
-      }
-
-      /**
-       * @brief Per-factor polynomial degree of a geometry transformation.
-       *
-       * PolytopeTransformation::getOrder() reports the total degree, which on
-       * a tensor-product geometry is the sum over its factors: @f$ 2k @f$ on
-       * quadrilaterals, wedges and pyramids, @f$ 3k @f$ on hexahedra. The
-       * control-point basis is built per factor, so the total is divided by
-       * the number of factors. Rounding up keeps the recovered degree
-       * conservative if a transformation ever reports a total that is not an
-       * exact multiple.
-       */
-      static size_t factorDegree(Geometry::Polytope::Type g, size_t order)
-      {
-        using G = Geometry::Polytope::Type;
-        switch (g)
-        {
-          case G::Point:
-            return 0;
-          case G::Segment:
-          case G::Triangle:
-          case G::Tetrahedron:
-            return order;
-          case G::Quadrilateral:
-          case G::Wedge:
-          case G::Pyramid:
-            return (order + 1) / 2;
-          case G::Hexahedron:
-            return (order + 2) / 3;
-        }
-        assert(false);
-        return order;
       }
 
       static Real binomial(size_t n, size_t i)
@@ -720,7 +765,8 @@ namespace Rodin::Location
        * @f]
        * every mapped point is a convex combination of the control points
        * @f$ C_n @f$, so their componentwise extrema bound the entire curved
-       * image -- exactly, not heuristically, and for every order.
+       * image in exact arithmetic. Floating-point conversion requires a
+       * roundoff allowance; ill-conditioned conversions cannot certify a box.
        *
        * The control points are recovered from values sampled on a unisolvent
        * lattice: @f$ F_m = T(r_m) = \sum_n C_n \psi_n(r_m) @f$ reads
@@ -733,6 +779,8 @@ namespace Rodin::Location
       {
           std::vector<Math::SpatialPoint> samples;
           Math::Matrix<Real> conversion;
+          Real roundoffAmplification = 0;
+          size_t tensorFactors = 0;
           bool valid = false;
       };
 
@@ -753,6 +801,32 @@ namespace Rodin::Location
         std::vector<std::array<size_t, 4>> modes;
         makeControlLattice(g, k, modes, basis.samples);
         const size_t n = modes.size();
+        using G = Geometry::Polytope::Type;
+        basis.tensorFactors = k >= MinSeparableTensorDegree
+          ? (g == G::Quadrilateral ? 2 : (g == G::Hexahedron ? 3 : 0))
+          : 0;
+        if (basis.tensorFactors > 0)
+        {
+          // Tensor conversion is a succession of small one-dimensional solves,
+          // not an inverse of the full (k+1)^d by (k+1)^d lattice matrix.
+          Math::Matrix<Real> vandermonde(k + 1, k + 1);
+          for (size_t m = 0; m <= k; ++m)
+            for (size_t c = 0; c <= k; ++c)
+              vandermonde(m, c) = bernstein(k, c, static_cast<Real>(m) / k);
+          const Eigen::FullPivLU<Math::Matrix<Real>> lu(vandermonde);
+          if (lu.isInvertible())
+          {
+            basis.conversion = lu.inverse().transpose();
+            basis.roundoffAmplification = ControlRoundoffFactor *
+              static_cast<Real>((k + 1) * basis.tensorFactors) *
+              std::numeric_limits<Real>::epsilon() /
+              std::pow(lu.rcond(), static_cast<Real>(basis.tensorFactors));
+            basis.valid = basis.conversion.allFinite() &&
+              std::isfinite(basis.roundoffAmplification) &&
+              basis.roundoffAmplification < Real(1);
+          }
+          return s_cache.emplace(key, std::move(basis)).first->second;
+        }
         if (n > 0)
         {
           Math::Matrix<Real> vandermonde(n, n);
@@ -767,7 +841,11 @@ namespace Rodin::Location
           if (lu.isInvertible())
           {
             basis.conversion = lu.inverse().transpose();
-            basis.valid = true;
+            basis.roundoffAmplification = ControlRoundoffFactor * static_cast<Real>(n) *
+              std::numeric_limits<Real>::epsilon() / lu.rcond();
+            basis.valid = basis.conversion.allFinite() &&
+              std::isfinite(basis.roundoffAmplification) &&
+              basis.roundoffAmplification < Real(1);
           }
         }
         return s_cache.emplace(key, std::move(basis)).first->second;
@@ -777,12 +855,76 @@ namespace Rodin::Location
       {
         for (size_t i = 0; i < sdim; ++i)
         {
-          lo[i] -= pad;
-          hi[i] += pad;
+          lo[i] = std::nextafter(lo[i] - pad, -std::numeric_limits<Real>::infinity());
+          hi[i] = std::nextafter(hi[i] + pad, std::numeric_limits<Real>::infinity());
         }
       }
 
-      void makeBox(const Geometry::Polytope& polytope, Bound& lo, Bound& hi) const
+      /**
+       * @brief Adds conservative hull projections along mapped reference-face normals.
+       *
+       * Every image point is a convex combination of the control points, so its
+       * projection cannot exceed their maximum. Axis-aligned directions are
+       * already covered by the AABB. Normals select useful directions only;
+       * they do not assert that curved faces themselves are planar.
+       */
+      template <class GetControlPoint>
+      void makeProjections(const Geometry::Polytope& polytope, size_t count,
+        GetControlPoint&& getControlPoint, Real conversionError,
+        std::vector<ProjectionBound>& projections) const
+      {
+        const Geometry::Polytope::Traits traits(polytope.getGeometry());
+        const size_t dimension = polytope.getDimension();
+        const size_t sdim = m_mesh.get().getSpaceDimension();
+        if (!m_projectionPruning || dimension != sdim || dimension < 2)
+          return;
+        Math::SpatialMatrix<Real> jac;
+        polytope.getTransformation().jacobian(jac, traits.getCentroid());
+        if (!isFinite(jac) || !std::isnormal(jac.determinant()))
+          return;
+        const auto& hs = traits.getHalfSpace();
+        for (Eigen::Index face = 0; face < hs.vector.size(); ++face)
+        {
+          Math::SpatialPoint refNormal(dimension);
+          for (size_t i = 0; i < dimension; ++i)
+            refNormal[i] = hs.matrix(face, i);
+          auto normal = jac.transpose().solve(refNormal);
+          const Real norm = stableNorm(normal);
+          if (!(norm > Real(0)) || !std::isfinite(norm))
+            continue;
+          normal /= norm;
+          size_t nonzero = 0;
+          for (size_t i = 0; i < sdim; ++i)
+            nonzero += normal[i] != Real(0);
+          if (nonzero <= 1)
+            continue;
+          Real upper = -std::numeric_limits<Real>::infinity();
+          Real coordinateScale = 0;
+          Math::SpatialPoint control;
+          for (size_t j = 0; j < count; ++j)
+          {
+            getControlPoint(control, j);
+            upper = std::max(upper, control.dot(normal));
+            for (size_t i = 0; i < sdim; ++i)
+              coordinateScale = std::max(coordinateScale, std::abs(control[i]));
+          }
+          const Real error = std::sqrt(static_cast<Real>(sdim)) * conversionError +
+            ControlRoundoffFactor * std::numeric_limits<Real>::epsilon() *
+              coordinateScale;
+          upper = std::nextafter(
+            upper + physicalTolerance() + error, std::numeric_limits<Real>::infinity());
+          if (!std::isfinite(upper))
+            continue;
+          ProjectionBound bound{};
+          for (size_t i = 0; i < sdim; ++i)
+            bound.normal[i] = normal[i];
+          bound.upper = upper;
+          projections.push_back(bound);
+        }
+      }
+
+      void makeBox(const Geometry::Polytope& polytope, Bound& lo, Bound& hi,
+        std::vector<ProjectionBound>& projections) const
       {
         const auto& mesh = m_mesh.get();
         const size_t sdim = mesh.getSpaceDimension();
@@ -795,9 +937,9 @@ namespace Rodin::Location
           const auto& x = mesh.getVertexCoordinates(polytope.getIndex());
           for (size_t i = 0; i < sdim; ++i)
           {
-            lo[i] = x[static_cast<Eigen::Index>(i)] - physTol;
-            hi[i] = x[static_cast<Eigen::Index>(i)] + physTol;
+            lo[i] = hi[i] = x[static_cast<Eigen::Index>(i)];
           }
+          padBox(lo, hi, physTol, sdim);
           return;
         }
 
@@ -820,14 +962,18 @@ namespace Rodin::Location
         // on a tensor geometry -- so the mapped vertices are the control
         // points and their box already bounds the image. Affine cells stay
         // on this path and pay nothing for the curved machinery.
-        const size_t degree = factorDegree(g, transformation.getOrder());
+        const size_t degree = transformation.getFactorOrder();
         if (degree <= 1)
         {
+          std::array<Math::SpatialPoint, RODIN_MAXIMUM_POLYTOPE_VERTICES> vertices;
           for (size_t i = 0; i < nv; ++i)
           {
-            transformation.transform(x, traits.getVertex(i));
-            add(x);
+            transformation.transform(vertices[i], traits.getVertex(i));
+            add(vertices[i]);
           }
+          makeProjections(
+            polytope, nv, [&](Math::SpatialPoint& out, size_t j) { out = vertices[j]; },
+            Real(0), projections);
           padBox(lo, hi, physTol, sdim);
           return;
         }
@@ -843,44 +989,64 @@ namespace Rodin::Location
             for (size_t i = 0; i < sdim; ++i)
               sampled(i, m) = x[static_cast<Eigen::Index>(i)];
           }
-          const Math::Matrix<Real> control = sampled * basis.conversion;
+          // Center before conversion: translating a cell far from the origin
+          // must not amplify cancellation in recovered control-point offsets.
+          const Math::Vector<Real> origin = sampled.col(0);
+          sampled.colwise() -= origin;
+          Math::Matrix<Real> control;
+          if (basis.tensorFactors == 0)
+            control = sampled * basis.conversion;
+          else
+          {
+            control = sampled;
+            Math::Matrix<Real> next(sdim, n);
+            const size_t width = degree + 1;
+            size_t stride = 1;
+            for (size_t axis = 0; axis < basis.tensorFactors; ++axis)
+            {
+              for (size_t block = 0; block < n; block += width * stride)
+                for (size_t offset = 0; offset < stride; ++offset)
+                  for (size_t j = 0; j < width; ++j)
+                  {
+                    const size_t dst = block + offset + j * stride;
+                    next.col(dst).setZero();
+                    for (size_t c = 0; c < width; ++c)
+                      next.col(dst) +=
+                        control.col(block + offset + c * stride) * basis.conversion(c, j);
+                  }
+              control.swap(next);
+              stride *= width;
+            }
+          }
           for (size_t i = 0; i < sdim; ++i)
           {
-            lo[i] = control.row(static_cast<Eigen::Index>(i)).minCoeff();
-            hi[i] = control.row(static_cast<Eigen::Index>(i)).maxCoeff();
+            const auto row = control.row(static_cast<Eigen::Index>(i));
+            const Real roundoff = basis.roundoffAmplification *
+              sampled.row(static_cast<Eigen::Index>(i)).cwiseAbs().maxCoeff();
+            lo[i] = origin[i] + row.minCoeff() - roundoff;
+            hi[i] = origin[i] + row.maxCoeff() + roundoff;
           }
-          padBox(lo, hi, physTol, sdim);
-          return;
-        }
-
-        // No conservative basis available for this geometry and degree: fall
-        // back to sampled vertices, centroid and edge midpoints inflated by
-        // the largest chord deviation. This bounds quadratic geometries and
-        // is heuristic beyond them, which is what setExhaustiveFallback()
-        // exists for.
-        std::vector<Math::SpatialPoint> vertex(nv);
-        for (size_t i = 0; i < nv; ++i)
-        {
-          transformation.transform(vertex[i], traits.getVertex(i));
-          add(vertex[i]);
-        }
-        transformation.transform(x, traits.getCentroid());
-        add(x);
-
-        Real deviation = 0;
-        for (size_t i = 0; i < nv; ++i)
-        {
-          for (size_t j = i + 1; j < nv; ++j)
+          if (control.allFinite())
           {
-            transformation.transform(
-              x, Real(0.5) * (traits.getVertex(i) + traits.getVertex(j)));
-            add(x);
-            deviation =
-              std::max(deviation, (x - Real(0.5) * (vertex[i] + vertex[j])).norm());
+            const Real error =
+              basis.roundoffAmplification * sampled.cwiseAbs().maxCoeff();
+            makeProjections(
+              polytope, n,
+              [&](Math::SpatialPoint& out, size_t j) {
+                out.resize(sdim);
+                for (size_t i = 0; i < sdim; ++i)
+                  out[i] = origin[i] + control(i, j);
+              },
+              error, projections);
+            padBox(lo, hi, physTol, sdim);
+            return;
           }
         }
 
-        padBox(lo, hi, physTol + deviation, sdim);
+        // An unreliable conversion must not silently turn a sampled box into
+        // a membership filter. Leave this entry unpruned so every query tests it.
+        lo.fill(-std::numeric_limits<Real>::infinity());
+        hi.fill(std::numeric_limits<Real>::infinity());
       }
 
       bool boxContains(
@@ -976,10 +1142,10 @@ namespace Rodin::Location
         const Math::SpatialPoint& x, Math::SpatialPoint& rc) const
       {
         const Real physTol = physicalTolerance();
-        const Real physTolSquared = physTol * physTol;
+
         const Real referenceAccuracy = std::max(
           m_tolerance, ReferenceRoundoffFactor * std::numeric_limits<Real>::epsilon());
-        const Real referenceAccuracySquared = referenceAccuracy * referenceAccuracy;
+
         const size_t rdim = traits.getDimension();
         const size_t pdim = static_cast<size_t>(x.size());
         using G = Geometry::Polytope::Type;
@@ -1001,11 +1167,11 @@ namespace Rodin::Location
           clipReference(geometry, rc);
           Math::SpatialPoint clippedMapped;
           transformation.transform(clippedMapped, rc);
-          return isFinite(clippedMapped) && (x - clippedMapped).norm() <= physTol;
+          return isFinite(clippedMapped) && stableNorm(x - clippedMapped) <= physTol;
         };
 
         for (size_t seed = 0;
-          seed == 0 || seed < 1 + SeedsPerVertex * traits.getVertexCount(); ++seed)
+             seed == 0 || seed < 1 + SeedsPerVertex * traits.getVertexCount(); ++seed)
         {
           if (seed == 0)
             rc = traits.getCentroid();
@@ -1019,16 +1185,16 @@ namespace Rodin::Location
           if (!isFinite(mapped))
             continue;
           residual = x - mapped;
-          Real residualNormSquared = residual.squaredNorm();
+          Real residualNorm = stableNorm(residual);
           for (size_t iteration = 0; iteration < m_maxNewtonIterations; ++iteration)
           {
-            if (residualNormSquared == Real(0))
+            if (residualNorm == Real(0))
             {
               if (accept())
                 return true;
-              // A valid element has an injective map: an exact preimage
-              // outside its reference cell cannot yield another inside.
-              return false;
+              // Injectivity inside the reference cell says nothing about the
+              // polynomial extension outside it. Try the next seed.
+              break;
             }
             transformation.jacobian(jac, rc);
             if (!isFinite(jac))
@@ -1036,9 +1202,28 @@ namespace Rodin::Location
 
             if (rdim == pdim)
             {
-              const Real determinant = jac.determinant();
-              if (!std::isfinite(determinant) || determinant == Real(0))
-                break;
+              Real determinant = jac.determinant();
+              if (!std::isnormal(determinant))
+              {
+                // Rescale the system before the determinant test: small valid
+                // cells can have determinants that underflow, and large ones
+                // can overflow. The solution is unchanged by common scaling.
+                Real scale = 0;
+                for (size_t i = 0; i < pdim; ++i)
+                  for (size_t j = 0; j < rdim; ++j)
+                    scale = std::max(scale, std::abs(jac(i, j)));
+                if (!(scale > Real(0)))
+                  break;
+                for (size_t i = 0; i < pdim; ++i)
+                {
+                  residual[i] /= scale;
+                  for (size_t j = 0; j < rdim; ++j)
+                    jac(i, j) /= scale;
+                }
+                determinant = jac.determinant();
+                if (!std::isfinite(determinant) || determinant == Real(0))
+                  break;
+              }
               if (rdim == 1)
               {
                 step.resize(1);
@@ -1051,15 +1236,26 @@ namespace Rodin::Location
             }
             else
             {
-              Math::Matrix<Real> dense(pdim, rdim);
-              Math::Vector<Real> rhs(pdim);
+              // Bounded storage keeps these <=3-dimensional QR solves off the heap.
+              using Dense = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic,
+                Eigen::ColMajor, MaxSpaceDimension, MaxSpaceDimension>;
+              using Vector = Eigen::Matrix<Real, Eigen::Dynamic, 1, Eigen::ColMajor,
+                MaxSpaceDimension, 1>;
+              Dense dense(pdim, rdim);
+              Vector rhs(pdim);
               for (size_t i = 0; i < pdim; ++i)
               {
                 rhs[i] = residual[i];
                 for (size_t j = 0; j < rdim; ++j)
                   dense(i, j) = jac(i, j);
               }
-              Eigen::ColPivHouseholderQR<Math::Matrix<Real>> qr(dense);
+              const Real scale = dense.cwiseAbs().maxCoeff();
+              if (scale > Real(0) && !std::isnormal(scale * scale))
+              {
+                dense /= scale;
+                rhs /= scale;
+              }
+              Eigen::ColPivHouseholderQR<Dense> qr(dense);
               if (qr.rank() < static_cast<Eigen::Index>(rdim))
                 break;
               step = qr.solve(rhs);
@@ -1077,23 +1273,23 @@ namespace Rodin::Location
               if (needsClip)
                 clipReference(geometry, rc);
               transformation.transform(mapped, rc);
-              return isFinite(mapped) && (x - mapped).norm() <= physTol;
+              return isFinite(mapped) && stableNorm(x - mapped) <= physTol;
             }
-            const Real stepNormSquared = step.squaredNorm();
+            const Real stepNorm = stableNorm(step);
             // A small physical residual alone can hide a large coordinate
             // error on a thin element. Also require a small reference update.
-            if (residualNormSquared <= physTolSquared &&
-              stepNormSquared <= referenceAccuracySquared)
+            if (residualNorm <= physTol && stepNorm <= referenceAccuracy)
             {
               if (accept())
                 return true;
-              return false;
+              break;
             }
-            if (stepNormSquared == Real(0))
+            if (stepNorm == Real(0))
               break;
 
             Real alpha = 1;
             bool advanced = false;
+            bool retrySeed = false;
             candidate = rc + step;
             for (size_t trial = 0; trial < MaxBacktrackingTrials; ++trial)
             {
@@ -1101,31 +1297,31 @@ namespace Rodin::Location
               {
                 transformation.transform(candidateMapped, candidate);
                 residual = x - candidateMapped;
-                const Real candidateResidualNormSquared = residual.squaredNorm();
+                const Real candidateResidualNorm = stableNorm(residual);
                 // Strict decrease also rejects NaN and infinite trial residuals.
-                if (candidateResidualNormSquared < residualNormSquared)
+                if (candidateResidualNorm < residualNorm)
                 {
                   rc = candidate;
-                  if (candidateResidualNormSquared == Real(0))
+                  if (candidateResidualNorm == Real(0))
                   {
                     if (accept())
                       return true;
-                    return false;
+                    retrySeed = true;
+                    break;
                   }
                   // Estimate the remaining reference correction using
                   // this step's residual ratio. Skip the next Jacobian
                   // only when the estimate is well below tolerance.
-                  if (candidateResidualNormSquared <= physTolSquared &&
-                    alpha == Real(1) &&
-                    candidateResidualNormSquared / residualNormSquared *
-                        stepNormSquared <=
-                      CorrectionEstimateMarginSquared * referenceAccuracySquared)
+                  if (candidateResidualNorm <= physTol && alpha == Real(1) &&
+                    candidateResidualNorm / residualNorm * stepNorm <=
+                      CorrectionEstimateMargin * referenceAccuracy)
                   {
                     if (accept())
                       return true;
-                    return false;
+                    retrySeed = true;
+                    break;
                   }
-                  residualNormSquared = candidateResidualNormSquared;
+                  residualNorm = candidateResidualNorm;
                   advanced = true;
                   break;
                 }
@@ -1133,14 +1329,16 @@ namespace Rodin::Location
               alpha *= BacktrackingContraction;
               candidate = rc + alpha * step;
             }
+            if (retrySeed)
+              break;
             if (!advanced)
             {
               // A floating-point stationary point can have a small residual
               // even when another Newton correction cannot reduce it.
-              if (residualNormSquared <= physTolSquared && accept())
+              if (residualNorm <= physTol && accept())
                 return true;
-              if (residualNormSquared <= physTolSquared)
-                return false;
+              if (residualNorm <= physTol)
+                break;
               break;
             }
           }
@@ -1158,7 +1356,7 @@ namespace Rodin::Location
 
         if (dimension == 0)
         {
-          if ((mesh.getVertexCoordinates(polytopeIndex) - x).norm() <=
+          if (stableNorm(mesh.getVertexCoordinates(polytopeIndex) - x) <=
             physicalTolerance())
             return Geometry::Point(polytope, Math::SpatialPoint(0), x);
           return {};
@@ -1195,6 +1393,24 @@ namespace Rodin::Location
               // miss here rules the candidate out without a Newton inversion.
               if (!boxContains(index.entryLo[k], index.entryHi[k], x, sdim))
                 continue;
+              bool outsideHull = false;
+              const auto range = index.projectionRanges.empty()
+                ? ProjectionRange{}
+                : index.projectionRanges[k];
+              for (size_t j = range.begin; j < range.end; ++j)
+              {
+                const auto& projection = index.projections[j];
+                Real value = 0;
+                for (size_t i = 0; i < sdim; ++i)
+                  value += projection.normal[i] * x[i];
+                if (value > projection.upper)
+                {
+                  outsideHull = true;
+                  break;
+                }
+              }
+              if (outsideHull)
+                continue;
               if (auto p = narrowPhase(dimension, index.entries[k], x))
                 return p;
             }
@@ -1223,6 +1439,7 @@ namespace Rodin::Location
       Real m_referenceTolerance;
       size_t m_maxNewtonIterations;
       bool m_exhaustiveFallback;
+      bool m_projectionPruning;
       Real m_scale;
       mutable std::vector<DimensionIndex> m_index;
   };

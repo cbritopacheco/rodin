@@ -875,6 +875,13 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
+
+      /// @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
+      constexpr size_t getFactorOrder() const
+      {
+        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : 1;
+      }
+
       /// @brief Serializes the object through a Boost archive.
 
       template<class Archive>
@@ -1245,6 +1252,13 @@ namespace Rodin::Variational
         assert(false);
         return 0;
       }
+
+      /// @brief Degree of each simplex, tensor, or collapsed-coordinate factor.
+      constexpr size_t getFactorOrder() const
+      {
+        return this->getGeometry() == Geometry::Polytope::Type::Point ? 0 : 1;
+      }
+
       /// @brief Serializes the object through a Boost archive.
 
       template<class Archive>
