@@ -258,6 +258,78 @@ TEST(Location_AABB, LocatesMappedPointAfterOversizedNewtonStep)
   EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
 }
 
+TEST(Location_AABB, BacktracksAfterNonFiniteTrialMapping)
+{
+  class Transformation final : public PolytopeTransformation
+  {
+    public:
+      explicit Transformation(Real invalid)
+        : PolytopeTransformation(1, 1),
+          m_invalid(invalid)
+      {}
+
+      static Real map(Real t)
+      {
+        const Real s = t - Real(0.5);
+        return s * s * s + Real(1e-3) * t;
+      }
+
+      size_t getOrder() const override
+      {
+        return 3;
+      }
+
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
+      {
+        pc.resize(1);
+        if (rc[0] < 0 || rc[0] > 1)
+        {
+          ++m_invalidTrials;
+          pc[0] = m_invalid;
+        }
+        else
+          pc[0] = map(rc[0]);
+      }
+
+      void jacobian(
+        Math::SpatialMatrix<Real>& jac, const Math::SpatialPoint& rc) const override
+      {
+        jac.resize(1, 1);
+        const Real s = rc[0] - Real(0.5);
+        jac(0, 0) = Real(3) * s * s + Real(1e-3);
+      }
+
+      Transformation* copy() const noexcept override
+      {
+        return new Transformation(*this);
+      }
+
+      mutable size_t m_invalidTrials = 0;
+
+    private:
+      Real m_invalid;
+  };
+
+  for (Real invalid :
+    {std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::infinity()})
+  {
+    Mesh mesh = Mesh<Context::Local>::Builder()
+                  .initialize(1)
+                  .nodes(2)
+                  .vertex({Transformation::map(0)})
+                  .vertex({Transformation::map(1)})
+                  .polytope(Polytope::Type::Segment, {0, 1})
+                  .finalize();
+    auto* transformation = new Transformation(invalid);
+    mesh.setPolytopeTransformation({1, 0}, transformation);
+    AABB locator(mesh);
+    const auto located = locator.locate(point({Transformation::map(0.9)}));
+    ASSERT_TRUE(located.has_value());
+    EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+    EXPECT_GT(transformation->m_invalidTrials, 0);
+  }
+}
+
 TEST(Location_AABB, LocatesPointOnThinEmbeddedTriangle)
 {
   Mesh mesh = Mesh<Context::Local>::Builder()

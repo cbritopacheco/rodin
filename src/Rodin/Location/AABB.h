@@ -941,6 +941,10 @@ namespace Rodin::Location
         const Math::SpatialPoint& x, Math::SpatialPoint& rc) const
       {
         const Real physTol = physicalTolerance();
+        const Real physTolSquared = physTol * physTol;
+        const Real referenceAccuracy =
+          std::max(m_tolerance, Real(16) * std::numeric_limits<Real>::epsilon());
+        const Real referenceAccuracySquared = referenceAccuracy * referenceAccuracy;
         const size_t rdim = traits.getDimension();
         const size_t pdim = static_cast<size_t>(x.size());
         using G = Geometry::Polytope::Type;
@@ -965,7 +969,7 @@ namespace Rodin::Location
           return isFinite(clippedMapped) && (x - clippedMapped).norm() <= physTol;
         };
 
-        for (size_t seed = 0; seed < 1 + 2 * traits.getVertexCount(); ++seed)
+        for (size_t seed = 0; seed == 0 || seed < 1 + 2 * traits.getVertexCount(); ++seed)
         {
           if (seed == 0)
             rc = traits.getCentroid();
@@ -974,13 +978,13 @@ namespace Rodin::Location
           else
             rc = Real(0.5) * (traits.getCentroid() + traits.getVertex((seed - 2) / 2));
           transformation.transform(mapped, rc);
+          if (!isFinite(mapped))
+            continue;
+          residual = x - mapped;
+          Real residualNormSquared = residual.squaredNorm();
           for (size_t iteration = 0; iteration < m_maxNewtonIterations; ++iteration)
           {
-            if (!isFinite(mapped))
-              break;
-            residual = x - mapped;
-            const Real residualNorm = residual.norm();
-            if (residualNorm == Real(0))
+            if (residualNormSquared == Real(0))
             {
               if (accept())
                 return true;
@@ -1038,12 +1042,10 @@ namespace Rodin::Location
               return isFinite(mapped) && (x - mapped).norm() <= physTol;
             }
             const Real stepNormSquared = step.squaredNorm();
-            const Real referenceAccuracy =
-              std::max(m_tolerance, Real(16) * std::numeric_limits<Real>::epsilon());
             // A small physical residual alone can hide a large coordinate
             // error on a thin element. Also require a small reference update.
-            if (residualNorm <= physTol &&
-              std::sqrt(stepNormSquared) <= referenceAccuracy)
+            if (residualNormSquared <= physTolSquared &&
+              stepNormSquared <= referenceAccuracySquared)
             {
               if (accept())
                 return true;
@@ -1054,50 +1056,52 @@ namespace Rodin::Location
 
             Real alpha = 1;
             bool advanced = false;
+            candidate = rc + step;
             for (size_t trial = 0; trial < 24; ++trial)
             {
-              candidate = rc + alpha * step;
               if (candidate.squaredNorm() <= Real(1e6))
               {
                 transformation.transform(candidateMapped, candidate);
-                if (isFinite(candidateMapped))
+                residual = x - candidateMapped;
+                const Real candidateResidualNormSquared = residual.squaredNorm();
+                // Strict decrease also rejects NaN and infinite trial residuals.
+                if (candidateResidualNormSquared < residualNormSquared)
                 {
-                  const Real candidateResidualNorm = (x - candidateMapped).norm();
-                  if (candidateResidualNorm < residualNorm)
+                  rc = candidate;
+                  if (candidateResidualNormSquared == Real(0))
                   {
-                    rc = candidate;
-                    mapped = candidateMapped;
-                    if (candidateResidualNorm == Real(0))
-                    {
-                      if (accept())
-                        return true;
-                      return false;
-                    }
-                    // Estimate the remaining reference correction using
-                    // this step's residual ratio. Skip the next Jacobian
-                    // only when the estimate is well below tolerance.
-                    if (candidateResidualNorm <= physTol && alpha == Real(1) &&
-                      candidateResidualNorm / residualNorm * std::sqrt(stepNormSquared) <=
-                        Real(0.25) * referenceAccuracy)
-                    {
-                      if (accept())
-                        return true;
-                      return false;
-                    }
-                    advanced = true;
-                    break;
+                    if (accept())
+                      return true;
+                    return false;
                   }
+                  // Estimate the remaining reference correction using
+                  // this step's residual ratio. Skip the next Jacobian
+                  // only when the estimate is well below tolerance.
+                  if (candidateResidualNormSquared <= physTolSquared &&
+                    alpha == Real(1) &&
+                    candidateResidualNormSquared / residualNormSquared *
+                        stepNormSquared <=
+                      Real(0.0625) * referenceAccuracySquared)
+                  {
+                    if (accept())
+                      return true;
+                    return false;
+                  }
+                  residualNormSquared = candidateResidualNormSquared;
+                  advanced = true;
+                  break;
                 }
               }
               alpha *= Real(0.5);
+              candidate = rc + alpha * step;
             }
             if (!advanced)
             {
               // A floating-point stationary point can have a small residual
               // even when another Newton correction cannot reduce it.
-              if (residualNorm <= physTol && accept())
+              if (residualNormSquared <= physTolSquared && accept())
                 return true;
-              if (residualNorm <= physTol)
+              if (residualNormSquared <= physTolSquared)
                 return false;
               break;
             }
@@ -1122,9 +1126,10 @@ namespace Rodin::Location
           return {};
         }
 
-        const Geometry::Polytope::Traits traits(polytope.getGeometry());
+        const auto geometry = polytope.getGeometry();
+        const Geometry::Polytope::Traits traits(geometry);
         Math::SpatialPoint rc;
-        if (!invert(polytope.getTransformation(), polytope.getGeometry(), traits, x, rc))
+        if (!invert(polytope.getTransformation(), geometry, traits, x, rc))
           return {};
         return Geometry::Point(polytope, rc, x);
       }
