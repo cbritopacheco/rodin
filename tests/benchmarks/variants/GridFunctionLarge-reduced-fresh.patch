@@ -36,15 +36,15 @@
          const auto* fes = &this->getFiniteElementSpace();
 -        const auto* mesh = &fes->getMesh();
          const auto* element = &fes->getFiniteElement(d, i);
--        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
+-        if (cache.owner != this || cache.ownerIdentity != m_identity ||
 -          cache.fes != fes || cache.mesh != mesh || cache.element != element ||
 -          cache.d != d || cache.i != i)
-+        if (cache.ownerIdentity != m_cacheIdentity ||
++        if (cache.ownerIdentity != m_identity ||
 +          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
          {
            const auto& dofs = fes->getDOFs(d, i);
 -          cache.owner = this;
-           cache.ownerIdentity = m_cacheIdentity;
+           cache.ownerIdentity = m_identity;
            cache.fes = fes;
 -          cache.mesh = mesh;
            cache.element = element;
@@ -74,7 +74,7 @@
 -          sameReferenceCoordinates = std::memcmp(
 -            &cache.referenceCoordinates(j), &referenceCoordinates(j), sizeof(Real)) == 0;
 -        if (!cache.hasBasisValues || cache.owner != this ||
--          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
+-          cache.ownerIdentity != m_identity || cache.fes != fes ||
 -          cache.element != element || cache.d != d || cache.i != i ||
 -          cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
 -          !sameReferenceCoordinates)
@@ -89,7 +89,7 @@
            const auto& p = ip.getPoint();
 
 -          cache.owner = this;
--          cache.ownerIdentity = m_cacheIdentity;
+-          cache.ownerIdentity = m_identity;
 -          cache.fes = fes;
 -          cache.element = element;
 -          cache.d = d;

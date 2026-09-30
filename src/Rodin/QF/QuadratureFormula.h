@@ -64,7 +64,7 @@ namespace Rodin::QF
       QuadratureFormulaBase& operator=(const QuadratureFormulaBase& other)
       {
         if (this != &other)
-          m_cacheIdentity = s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
+          m_identity = s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
         return *this;
       }
 
@@ -77,7 +77,7 @@ namespace Rodin::QF
        */
       size_t getCacheIdentity() const noexcept
       {
-        return m_cacheIdentity;
+        return m_identity;
       }
 
       /**
@@ -119,7 +119,7 @@ namespace Rodin::QF
 
     private:
       inline static std::atomic<size_t> s_nextCacheIdentity{0};
-      size_t m_cacheIdentity =
+      size_t m_identity =
         s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
   };
 }

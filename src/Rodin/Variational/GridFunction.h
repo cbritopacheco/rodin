@@ -371,7 +371,7 @@ namespace Rodin::Variational
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_fes(std::cref(fes)),
-          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -382,7 +382,7 @@ namespace Rodin::Variational
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(other.m_name),
           m_fes(other.m_fes),
-          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -393,7 +393,7 @@ namespace Rodin::Variational
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes)),
-          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -1202,13 +1202,13 @@ namespace Rodin::Variational
         const auto* fes = &this->getFiniteElementSpace();
         const auto* mesh = &fes->getMesh();
         const auto* element = &fes->getFiniteElement(d, i);
-        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
+        if (cache.owner != this || cache.ownerIdentity != m_identity ||
           cache.fes != fes || cache.mesh != mesh || cache.element != element ||
           cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
-          cache.ownerIdentity = m_cacheIdentity;
+          cache.ownerIdentity = m_identity;
           cache.fes = fes;
           cache.mesh = mesh;
           cache.element = element;
@@ -1241,7 +1241,7 @@ namespace Rodin::Variational
           sameReferenceCoordinates = std::memcmp(
             &cache.referenceCoordinates(j), &referenceCoordinates(j), sizeof(Real)) == 0;
         if (!cache.hasBasisValues || cache.owner != this ||
-          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
+          cache.ownerIdentity != m_identity || cache.fes != fes ||
           cache.element != element || cache.d != d || cache.i != i ||
           cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
           !sameReferenceCoordinates)
@@ -1251,7 +1251,7 @@ namespace Rodin::Variational
           const auto& p = ip.getPoint();
 
           cache.owner = this;
-          cache.ownerIdentity = m_cacheIdentity;
+          cache.ownerIdentity = m_identity;
           cache.fes = fes;
           cache.element = element;
           cache.d = d;
@@ -1274,7 +1274,7 @@ namespace Rodin::Variational
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
       inline static std::atomic<size_t> s_nextCacheIdentity{0};
-      const size_t m_cacheIdentity;
+      const size_t m_identity;
   };
 
   /**
