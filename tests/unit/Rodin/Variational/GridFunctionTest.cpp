@@ -625,4 +625,80 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(gf.getValue(IntegrationPoint(p1)), 3.2, 1e-12);
     EXPECT_NEAR(gf.getValue(IntegrationPoint(p2)), 1.6, 1e-12);
   }
+
+  /// @brief Reusing a quadrature formula's storage must invalidate cached basis values.
+  TEST(Rodin_Variational_GridFunction, ReconstructedQuadratureUsesNewCoordinates)
+  {
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    gf.project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
+
+    const Polytope cell(mesh.getDimension(), 0, mesh);
+    Optional<QF::PolytopeQuadratureFormula> qf;
+    const QF::QuadratureFormulaBase* previousFormula = nullptr;
+    Math::SpatialPoint previousCoordinates;
+    for (size_t order : {1, 2, 1})
+    {
+      qf.emplace(order, cell.getGeometry());
+      const Point point(cell, qf->getPoint(0));
+      if (previousFormula)
+      {
+        ASSERT_EQ(&*qf, previousFormula);
+        ASSERT_GT((point.getReferenceCoordinates() - previousCoordinates).norm(), 1e-12);
+      }
+      const Real expected = point.x() + 10 * point.y();
+      // Repeat the evaluation to cover both invalidation and a cache hit.
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+        EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &*qf, 0)), expected, 1e-12)
+          << "quadrature order " << order;
+      previousFormula = &*qf;
+      previousCoordinates = point.getReferenceCoordinates();
+    }
+  }
+
+  /// @brief Same-address grid functions on different meshes must refresh cached DOFs.
+  TEST(Rodin_Variational_GridFunction, ReconstructedGridFunctionUsesNewDOFs)
+  {
+    Optional<LocalMesh> mesh;
+    Optional<P1<Real>> fes;
+    Optional<GridFunction<P1<Real>, Math::Vector<Real>>> gf;
+    const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
+    const GridFunction<P1<Real>, Math::Vector<Real>>* previousFunction = nullptr;
+    const P1<Real>* previousSpace = nullptr;
+    const P1Element<Real>* previousElement = nullptr;
+    IndexArray previousDOFs;
+    for (size_t resolution : {2, 3, 2})
+    {
+      gf.reset();
+      fes.reset();
+      mesh.emplace(LocalMesh::UniformGrid(Polytope::Type::Triangle,
+        {resolution, resolution}));
+      fes.emplace(*mesh);
+      gf.emplace(*fes);
+      gf->project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
+
+      const Polytope cell(mesh->getDimension(), 0, *mesh);
+      const auto& element = fes->getFiniteElement(mesh->getDimension(), 0);
+      const auto& dofs = fes->getDOFs(mesh->getDimension(), 0);
+      if (previousFunction)
+      {
+        ASSERT_EQ(&*gf, previousFunction);
+        ASSERT_EQ(&*fes, previousSpace);
+        ASSERT_EQ(&element, previousElement);
+        ASSERT_EQ(dofs.size(), previousDOFs.size());
+        ASSERT_TRUE((dofs != previousDOFs).any());
+      }
+      const Point point(cell, qf.getPoint(0));
+      const Real expected = point.x() + 10 * point.y();
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+        EXPECT_NEAR(gf->getValue(IntegrationPoint(point, &qf, 0)), expected, 1e-12)
+          << "mesh resolution " << resolution;
+      previousFunction = &*gf;
+      previousSpace = &*fes;
+      previousElement = &element;
+      previousDOFs = dofs;
+    }
+  }
+
 }
