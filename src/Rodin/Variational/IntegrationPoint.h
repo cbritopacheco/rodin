@@ -27,6 +27,11 @@ namespace Rodin::Variational
    *   case, consumers are expected to evaluate using
    *   `getPoint().getReferenceCoordinates()` rather than quadrature tabulation.
    *
+   * The formula/index records sample provenance. Mapping a face sample into an
+   * adjacent cell changes its reference coordinates while retaining that
+   * provenance. Coordinate-sensitive caches must therefore account for the
+   * actual geometric point, rather than only the formula/index.
+   *
    * @note The quadrature formula pointer is non-owning. The referenced
    * quadrature object must outlive all IntegrationPoint uses that dereference
    * this pointer.
@@ -43,7 +48,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Constructs a quadrature-associated integration point.
-       * @param[in] p Geometric point (usually built from quadrature sample coordinates)
+       * @param[in] p Geometric point, possibly mapped from the quadrature sample into another polytope
        * @param[in] qf Non-owning pointer to the quadrature formula that owns
        *                the sample indexing, or @c nullptr for direct
        *                pointwise evaluation

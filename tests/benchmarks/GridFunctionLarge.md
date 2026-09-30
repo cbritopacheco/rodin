@@ -149,9 +149,10 @@ was not isolated. The existing identity checks are retained to avoid introducing
 measured miss regression, and the missing mesh-address guard is added for
 correctness. Experimental patches are checked in for reproduction.
 
-## Corrected production confirmation
+## Mesh-guard confirmation (before the coordinate correction)
 
-Runs 16–17 measure the final implementation including the mesh-address guard,
+Runs 16–17 measure the implementation with the mesh-address guard, before
+the later exact-coordinate correction,
 using the same complete 64-case matrix, three randomized repetitions per run,
 and minimum time 50 ms. Every case passes its numerical oracle. These results
 are kept in the separate `final-matrix` protocol. Representative P2Vector 3D
@@ -171,6 +172,11 @@ adding the mesh guard. The new guard fixes incorrect DOF reuse when space
 assignment changes meshes, while this benchmark keeps space/mesh bindings fixed.
 
 ## Minimality under immutable connectivity
+
+This audit assumes that the formula/index uniquely binds the point coordinates.
+Mapped face points violate that assumption in the current API; the later
+[coordinate correctness study](GridFunctionCoordinateKey.md) adds coordinates
+to the basis entry key. The table below describes the earlier restricted audit.
 
 For the current valid point/formula binding and built-in P1/H1 elements, the
 following validation retains the necessary contexts in the current cache
@@ -195,7 +201,7 @@ Space assignment can change vector dimension and element on the same immutable
 mesh. It can also rebind the same space object to another immutable mesh without
 changing its element pointer. The existing production key missed this case;
 `SpaceMeshRebindingRefreshesCache` fails before the mesh-address guard is added
-(observed error 1.56) and passes with it. The corrected production key includes
+(observed error 1.56) and passes with it. The mesh-guard implementation includes
 the mesh address in DOF validation, which invalidates basis values as well.
 `MoveAssignmentRefreshesSpaceCache` and
 `ElementDefinitionChangeRefreshesCaches` cover these independently. Suppressing
@@ -232,7 +238,7 @@ concurrent builds. To test the smaller key, apply
 [reduced-fresh](variants/GridFunctionLarge-reduced-fresh.patch) with
 `git apply`, build/save the executable, and reverse the patch before trying
 the other variant. These patches reproduce the measured experimental headers,
-including omission of the new mesh-address guard: use them only for the fixed
+including omission of the mesh-address and exact-coordinate guards: use them only for the fixed
 space/mesh bindings in these benchmarks. For coordinates, extract the header
 at `34adfb3db` and
 apply the same base-rvalue move fix; retain the current quadrature base class.
@@ -249,3 +255,7 @@ Final regression verification: 127 tests passed across GridFunction, NamedForm,
 NamedFormConsistency, GaussLegendre, QuadratureExactness and QF umbrella suites;
 one existing geometry-specific elasticity test was skipped. The 48-case small
 suite also passes after the production corrections.
+
+The subsequent correctness-first coordinate comparison study is recorded in
+[Exact coordinate cache keys](GridFunctionCoordinateKey.md). Its results refer
+to a new paired protocol and should not be pooled with the earlier runs.

@@ -51,6 +51,7 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <atomic>
+#include <cstring>
 #include <algorithm>
 #include <utility>
 #include <fstream>
@@ -1185,6 +1186,7 @@ namespace Rodin::Variational
         const QF::QuadratureFormulaBase* qf = nullptr;
         size_t qp = static_cast<size_t>(-1);
         size_t qfIdentity = static_cast<size_t>(-1);
+        Math::SpatialPoint referenceCoordinates;
         std::vector<RangeType> basisValues;
       };
 
@@ -1229,10 +1231,20 @@ namespace Rodin::Variational
         const auto* element = &fes->getFiniteElement(d, i);
         const auto* qf = ip.getQuadratureFormula();
         const size_t qfIdentity = qf->getCacheIdentity();
+        const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
+        bool sameReferenceCoordinates =
+          cache.referenceCoordinates.size() == referenceCoordinates.size();
+        // Mapped face samples can share a formula/index but have different cell
+        // coordinates. Exact component representations prevent approximate hits
+        // and distinguish signed zeros without allocating coordinate storage.
+        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinates.size(); ++j)
+          sameReferenceCoordinates = std::memcmp(
+            &cache.referenceCoordinates(j), &referenceCoordinates(j), sizeof(Real)) == 0;
         if (!cache.hasBasisValues || cache.owner != this ||
           cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
           cache.element != element || cache.d != d || cache.i != i ||
-          cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex())
+          cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
+          !sameReferenceCoordinates)
         {
           const auto& fe = *element;
           const size_t count = fe.getCount();
@@ -1247,6 +1259,7 @@ namespace Rodin::Variational
           cache.qf = qf;
           cache.qfIdentity = qfIdentity;
           cache.qp = ip.getIndex();
+          cache.referenceCoordinates = referenceCoordinates;
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)
           {

@@ -134,3 +134,7 @@ analytic-value checks independently of these unit tests.
 For large immutable-mesh traversals, controlled miss/hit mixtures, direct
 expansion comparisons, and a cache-key audit, see
 [the large-workload report](GridFunctionLarge.md).
+
+The subsequent correctness-first coordinate comparison study is recorded in
+[Exact coordinate cache keys](GridFunctionCoordinateKey.md). Its results refer
+to a new paired protocol and should not be pooled with the earlier runs.
