@@ -23,6 +23,11 @@
 #include "Rodin/QF.h"
 #include "Rodin/Variational.h"
 
+#ifdef RODIN_USE_MPI
+#include <boost/mpi/collectives.hpp>
+#include "Rodin/MPI/Geometry/Mesh.h"
+#endif
+
 namespace Rodin::Tests::Convergence
 {
   class ErrorNorms
@@ -333,13 +338,16 @@ namespace Rodin::Tests::Convergence
   {
     public:
       /** @brief Integrates scalar or vector value error with a complex modulus. */
-      template <class GF, class Exact>
-      static Real computeL2(const Geometry::LocalMesh& mesh, const GF& uh,
-        const Exact& exact, size_t quadratureOrder = 8)
+      template <class Mesh, class GF, class Exact>
+      static Real computeL2(
+        const Mesh& mesh, const GF& uh, const Exact& exact, size_t quadratureOrder = 8)
       {
         Real squared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
+          if constexpr (requires { mesh.getShard(); })
+            if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
+              continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(qf);
@@ -351,13 +359,18 @@ namespace Rodin::Tests::Convergence
               squaredMagnitude(uh(ip) - evaluate(exact, ip));
           }
         }
+#ifdef RODIN_USE_MPI
+        if constexpr (requires { mesh.getShard(); })
+          squared = boost::mpi::all_reduce(
+            mesh.getContext().getCommunicator(), squared, std::plus<Real>());
+#endif
         return std::sqrt(squared);
       }
 
-      template <class GF, class Exact, class ExactGradient>
-      static ErrorNorms compute(const Geometry::LocalMesh& mesh, const GF& uh,
-        const Exact& exact, const ExactGradient& exactGradient,
-        size_t quadratureOrder = 8)
+      /** MPI variants integrate owned cells and globally reduce squared norms. */
+      template <class Mesh, class GF, class Exact, class ExactGradient>
+      static ErrorNorms compute(const Mesh& mesh, const GF& uh, const Exact& exact,
+        const ExactGradient& exactGradient, size_t quadratureOrder = 8)
       {
         const auto gradient = Variational::Grad(uh);
         return computeWithDerivative(
@@ -370,10 +383,9 @@ namespace Rodin::Tests::Convergence
        * The value error uses the Euclidean norm and the derivative error uses
        * the Frobenius norm of the displacement Jacobian.
        */
-      template <class GF, class Exact, class ExactJacobian>
-      static ErrorNorms computeVector(const Geometry::LocalMesh& mesh, const GF& uh,
-        const Exact& exact, const ExactJacobian& exactJacobian,
-        size_t quadratureOrder = 8)
+      template <class Mesh, class GF, class Exact, class ExactJacobian>
+      static ErrorNorms computeVector(const Mesh& mesh, const GF& uh, const Exact& exact,
+        const ExactJacobian& exactJacobian, size_t quadratureOrder = 8)
       {
         const auto jacobian = Variational::Jacobian(uh);
         return computeWithDerivative(
@@ -414,15 +426,19 @@ namespace Rodin::Tests::Convergence
       }
 
     private:
-      template <class GF, class Derivative, class Exact, class ExactDerivative>
-      static ErrorNorms computeWithDerivative(const Geometry::LocalMesh& mesh,
-        const GF& uh, const Derivative& derivative, const Exact& exact,
+      template <class Mesh, class GF, class Derivative, class Exact,
+        class ExactDerivative>
+      static ErrorNorms computeWithDerivative(const Mesh& mesh, const GF& uh,
+        const Derivative& derivative, const Exact& exact,
         const ExactDerivative& exactDerivative, size_t quadratureOrder)
       {
         Real l2Squared = 0;
         Real h1SemiSquared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
+          if constexpr (requires { mesh.getShard(); })
+            if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
+              continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(qf);
@@ -437,6 +453,14 @@ namespace Rodin::Tests::Convergence
             h1SemiSquared += weight * squaredMagnitude(eg);
           }
         }
+#ifdef RODIN_USE_MPI
+        if constexpr (requires { mesh.getShard(); })
+        {
+          const auto& comm = mesh.getContext().getCommunicator();
+          l2Squared = boost::mpi::all_reduce(comm, l2Squared, std::plus<Real>());
+          h1SemiSquared = boost::mpi::all_reduce(comm, h1SemiSquared, std::plus<Real>());
+        }
+#endif
         return {std::sqrt(l2Squared), std::sqrt(h1SemiSquared)};
       }
 

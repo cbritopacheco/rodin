@@ -118,6 +118,7 @@ jobs:
           cmake --build build -j 2 --target
           RodinConvergenceHPETScPoisson
           RodinConvergenceHPETScMPIPoisson
+          RodinConvergenceHPETScConductivity
 
       - name: Run PETSc convergence suite
         run: >-

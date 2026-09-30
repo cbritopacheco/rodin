@@ -158,7 +158,11 @@ fails; the correct formulation is then restored. The seven `UniformGrid`
 cell types—segment, triangle, quadrilateral, tetrahedron, pyramid, hexahedron
 and wedge—are tested where the formulation is meaningful, with any exclusion
 recorded. Sequential, OpenMP, PETSc and MPI results are distinct evidence;
-none implies the others.
+none implies the others. The PETSc conductivity suite additionally checks
+nonzero-trace affine/P2 polynomial patches, P1/P2 rates on all seven geometries
+at 1–4 ranks, a coefficient-omission negative control, and quadrature/solver
+sensitivity. Its [suite specification](h/PETScConductivity/README.md) records
+the exact data, levels, acceptance bounds, and backend scope.
 
 ## Coverage and execution
 
@@ -171,7 +175,7 @@ exists yet.
 | Complex Helmholtz | P1/P2 | P1–P4 | P1–P3 | — |
 | Linear elasticity | Vector P1/P2, displacement and traction variants | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | — |
 | Stokes | Taylor–Hood velocity/pressure | — | — | — |
-| Variable conductivity | P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
+| Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
 | Coupled reaction–diffusion | P1/P2 | P1→P2→P3→P4 analytic | — | — |
 | Nonlinear Poisson | P1/P2 | — | — | — |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | — |
@@ -217,7 +221,7 @@ their refinement axis.
 
 The CI convergence job runs the full local suite twice: once with sequential
 assembly and once with OpenMP assembly (`RODIN_MULTITHREADED=OFF/ON`). A
-separate PETSc job checks local-context and distributed P1/P2 Poisson
+separate PETSc job checks local-context and distributed P1/P2 Poisson and conductivity
 convergence with PETSc assembly and CG. The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
 it is a separate check from the local-context suites.
@@ -231,7 +235,7 @@ refinement path, and backend, rather than by the presence of a directory.
 
 | Priority | Extension | Required evidence |
 | --- | --- | --- |
-| 1 | PETSc local and MPI PDE coverage beyond Poisson: conductivity, complex Helmholtz, vector linear elasticity, coupled reaction–diffusion, Stokes, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
+| 1 | PETSc local and MPI PDE coverage beyond Poisson and conductivity: complex Helmholtz, vector linear elasticity, coupled reaction–diffusion, Stokes, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Missing refinement paths: coupled reaction–diffusion hp; nonlinear Poisson p/hp; Stokes p/hp | At least three discretizations; separate mixed-field errors and pressure gauge; stable velocity/pressure degree pairs for Stokes; nonlinear residual and tangent checks |
 | 3 | Curved-field tests for Helmholtz, linear elasticity, Stokes, reaction–diffusion, nonlinear Poisson, and P0 projection | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
 | 4 | Nonpolynomial geometry approximated at multiple geometry degrees | Separate geometry-map error from field error; state the comparison domain or pullback, map regularity, and geometry/field refinement sequence |
