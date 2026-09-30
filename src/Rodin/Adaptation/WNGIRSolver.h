@@ -424,6 +424,27 @@ namespace Rodin::Adaptation
         }
 
         Real ePrev = currentSurface.energy;
+        const auto traceStart = setupTic;
+        // Validation concerns the accepted outer geometry, not the inner QP iterate.
+        const auto traceGeometry = [&](const auto& geometry, std::size_t accepted,
+                                     const char* phase) {
+          const auto flags = std::cout.flags();
+          const auto precision = std::cout.precision();
+          std::cout << "      wngir geometry: outer=" << accepted << "  phase=" << phase
+                    << std::scientific << std::setprecision(std::numeric_limits<Real>::max_digits10)
+                    << "  geom_rms=" << geometry.rms << "  geom_sup=" << geometry.sup
+                    << "  normal_rms=" << geometry.normalRMS << "  h=" << h
+                    << "  min_j=" << rep.minJ << "  max_qrel=" << rep.maxQRel
+                    << "  inner_total=" << rep.primalBarrierIterations
+                    << "  inner_last=" << rep.lastPrimalBarrierIterations
+                    << "  inner_converged=" << rep.primalBarrierConverged
+                    << "  seconds=" << secondsSince(traceStart) << std::endl;
+          std::cout.flags(flags);
+          std::cout.precision(precision);
+        };
+        if (p.trace)
+          traceGeometry(getInterfaceGeometryState(
+            mesh, fes, u, phi, grad, interfaceFacets, meshDim, locator), 0, "initial");
 
         // ============================================================
         // Nonlinear iteration.
@@ -567,6 +588,11 @@ namespace Rodin::Adaptation
                 rep.tSolve += secondsSince(tic);
                 if (!solveOk)
                 {
+                  if (p.trace)
+                    std::cout << "        barrier inner=" << (inner + 1)
+                              << "  outer=" << rep.iterations << "  linear_ok=0"
+                              << "  cg_it=" << barrierIterations << "  cg_err=" << barrierError
+                              << std::endl;
                   rep.exitReason = "solve-linear-failed";
                   break;
                 }
@@ -588,6 +614,12 @@ namespace Rodin::Adaptation
                   mesh, fes, validationCells, u, vK, scratch, meshDim);
                 if (!(innerAlpha > Real(0)))
                 {
+                  if (p.trace)
+                    std::cout << "        barrier inner=" << (inner + 1)
+                              << "  outer=" << rep.iterations << "  linear_ok=1"
+                              << "  alpha=" << innerAlpha << "  admissible=0"
+                              << "  cg_it=" << barrierIterations << "  cg_err=" << barrierError
+                              << std::endl;
                   rep.exitReason = "primal-barrier-inadmissible-step";
                   solveOk = false;
                   break;
@@ -598,11 +630,21 @@ namespace Rodin::Adaptation
                 if (innerAlpha >= Real(1) - Real(1e-12))
                   ++rep.fullPrimalBarrierSteps;
                 if (p.trace)
-                  std::cout << "        barrier inner=" << (inner + 1)
+                {
+                  const auto precision = std::cout.precision();
+                  std::cout << std::setprecision(std::numeric_limits<Real>::max_digits10)
+                            << "        barrier inner=" << (inner + 1)
                             << "  outer=" << rep.iterations << "  corr=" << correctionNorm
                             << "  iterate=" << iterateNorm
                             << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
-                            << '\n';
+                            << "  linear_ok=1  cg_it=" << barrierIterations
+                            << "  cg_err=" << barrierError
+                            << "  mu_eff=" << barrierCoefficient
+                            << "  converged=" << (p.primalBarrierRelativeTolerance > Real(0) &&
+                              relativeCorrection <= p.primalBarrierRelativeTolerance)
+                            << std::endl;
+                  std::cout.precision(precision);
+                }
                 scratch *= innerAlpha;
                 vK += scratch;
                 // A fraction-to-boundary step can be intentionally smaller
@@ -780,6 +822,10 @@ namespace Rodin::Adaptation
             ? (ePrev - eNow) / (alpha * directionAction)
             : Real(0);
           recordSurfaceState(surf);
+          if (p.trace)
+            traceGeometry(getInterfaceGeometryState(
+              mesh, fes, u, phi, grad, interfaceFacets, meshDim, locator),
+              rep.iterations + 1, "accepted");
           if (!(surf.activeLen > Real(0)))
           {
             rep.exitReason = "observation-degenerate-active-set";
@@ -875,6 +921,8 @@ namespace Rodin::Adaptation
         rep.geometricRMS = geometry.rms;
         rep.geometricSup = geometry.sup;
         rep.normalRMS = geometry.normalRMS;
+        if (p.trace)
+          traceGeometry(geometry, rep.iterations, "final");
 
         m_report = rep;
         return rep;

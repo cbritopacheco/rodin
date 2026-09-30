@@ -28,7 +28,7 @@ namespace Rodin::Examples
 
   struct WNGIRExampleDefaults
   {
-      std::size_t maxIterations = 200;
+      std::size_t maxIterations = Adaptation::WNGIRParameters{}.maxIterations;
       std::size_t quadratureOrder = 0;
       Real kappaBulk = Adaptation::WNGIRParameters{}.kappaBulk;
       Real rDiv = 1;
