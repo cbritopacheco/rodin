@@ -72,7 +72,8 @@ jobs:
 
   PETScConvergence:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Includes resolved vector-elasticity studies on all geometries and 1-4 ranks.
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
@@ -119,6 +120,7 @@ jobs:
           RodinConvergenceHPETScPoisson
           RodinConvergenceHPETScMPIPoisson
           RodinConvergenceHPETScConductivity
+          RodinConvergenceHPETScLinearElasticity
 
       - name: Run PETSc convergence suite
         run: >-
