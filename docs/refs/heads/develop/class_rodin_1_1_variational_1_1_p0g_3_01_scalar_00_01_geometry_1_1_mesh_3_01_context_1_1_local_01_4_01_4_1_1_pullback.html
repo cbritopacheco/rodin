@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Tests::Manufactured namespace | Rodin</title>
+  <title>Rodin::Variational::P0g&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;::Pullback class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,10 +75,63 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span>Manufactured <span class="m-thin">namespace</span>
+          <div class="m-doc-template">template&lt;class Callable&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0g_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html">P0g&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>::<wbr/></span>Pullback <span class="m-thin">class</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Unit</a>.</p>
-<p>Directory Rodin/tests/unit</p><p>Manufactured solution test cases</p>
+        <p>Pullback of a P0g function to the reference element.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pullback_base.html" class="m-doc">FiniteElementSpacePullbackBase&lt;Pullback&lt;Callable&gt;&gt;</a>
+            </dt>
+            <dd>Base class for mappings taking functions defined on physical elements to reference elements.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ada5aed13792807883984b706fe9766f5">
+              using <a href="#ada5aed13792807883984b706fe9766f5" class="m-doc-self">CallableType</a> = Callable
+            </dt>
+            <dd>Callable type evaluated on physical points.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a643fd0f55b729ad94f17ce76d3421a5d">
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span>
+            </dt>
+            <dd>Constructs the pullback of a function on a polytope.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a8804c2e0ff07d4fd91270b8c6f33578a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8804c2e0ff07d4fd91270b8c6f33578a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; auto</span>
+            </dt>
+            <dd>Evaluates at a point on the reference element.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

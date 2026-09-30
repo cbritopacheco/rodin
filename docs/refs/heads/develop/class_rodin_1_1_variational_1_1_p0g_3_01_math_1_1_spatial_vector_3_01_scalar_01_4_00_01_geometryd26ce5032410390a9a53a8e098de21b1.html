@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Tests::Manufactured namespace | Rodin</title>
+  <title>Rodin::Variational::P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;::Pushforward class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,10 +75,62 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span>Manufactured <span class="m-thin">namespace</span>
+          <div class="m-doc-template">template&lt;class Callable&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0g_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry40cadfdef1fe14073b058a288f23b151.html">P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>::<wbr/></span>Pushforward <span class="m-thin">class</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Unit</a>.</p>
-<p>Directory Rodin/tests/unit</p><p>Manufactured solution test cases</p>
+        <p>Pushforward of a vector-valued P0g function to the physical element.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pushforward_base.html" class="m-doc">FiniteElementSpacePushforwardBase&lt;Pushforward&lt;Callable&gt;&gt;</a>
+            </dt>
+            <dd>Base class for inverse mappings taking functions defined on reference elements to physical elements.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ada5aed13792807883984b706fe9766f5">
+              using <a href="#ada5aed13792807883984b706fe9766f5" class="m-doc-self">CallableType</a> = Callable
+            </dt>
+            <dd>Callable type evaluated on physical points.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a106456d8e0f07e03ad80d1ca2e72df4a">
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a106456d8e0f07e03ad80d1ca2e72df4a" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs the pushforward of a function.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a7c866cf8be951c464aceeb788579b29a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates at a geometric point.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

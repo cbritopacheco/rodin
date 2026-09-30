@@ -170,6 +170,11 @@
               <span class="m-doc-wrap-bumper"><a href="#ab8f52df96f9fbc3c3c6642be7e961888" class="m-doc">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs the distributed P0 space on the given mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa06dd2a6f15034144fd0f9e541673da6" class="m-doc">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh,
+              size_t vdim)</span>
+            </dt>
+            <dd></dd>
             <dt id="ab3efe8437ab24c15cd2b896b1c43e268">
               <span class="m-doc-wrap-bumper"><a href="#ab3efe8437ab24c15cd2b896b1c43e268" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
@@ -399,6 +404,16 @@ $ k $
 <use x='0' y='0' xlink:href='#eq2-g0-107'/>
 </g>
 </svg> is the local owned- cell counter.</li><li>For each owned cell that also appears on neighboring ranks as a ghost (recorded in <code>shard.getHalo(D)</code>), the owner sends (globalCellID, globalDOF) to all holder ranks.</li><li>Each non-owner rank posts a matching <code>irecv</code> from its owner (recorded in <code>shard.getOwner(D)</code>) and installs the received global DOF index in the local-to-global map.</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="aa06dd2a6f15034144fd0f9e541673da6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa06dd2a6f15034144fd0f9e541673da6" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh,
+              size_t vdim)</span></span>
+            </h3>
+<p>Constructs one constant DOF per cell and field component.</p>
           </div></section>
           <section class="m-doc-details" id="a88987bef7972e7ef2a6aa0c6b83138b0"><div>
             <h3>

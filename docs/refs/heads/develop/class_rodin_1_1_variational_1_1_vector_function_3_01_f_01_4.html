@@ -99,7 +99,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Real, VectorFunction&lt;F&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;FormLanguage::Traits&lt;std::decay_t&lt;std::invoke_result_t&lt;F, const Geometry::Point&amp;&gt;&gt;&gt;::ScalarType, VectorFunction&lt;F&gt;&gt;</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
           </dl>
@@ -107,16 +107,16 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a515179486a633cd3bd8acc6d313ed50d">
-              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            <dt id="a3c07212722c50230f70e3f6813d3435d">
+              using <a href="#a3c07212722c50230f70e3f6813d3435d" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;std::invoke_result_t&lt;F, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;&gt;&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
-              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a3c07212722c50230f70e3f6813d3435d" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Vector type of the linear system.</dd>
             <dt id="ae023de41ec47dc939303db21dc3f82fc">
-              using <a href="#ae023de41ec47dc939303db21dc3f82fc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&lt;F&gt;&gt;
+              using <a href="#ae023de41ec47dc939303db21dc3f82fc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a3c07212722c50230f70e3f6813d3435d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&lt;F&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>

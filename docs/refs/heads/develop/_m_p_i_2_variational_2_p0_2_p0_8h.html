@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0</a> specialization for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a>. The implementation builds a rank-local P0 space on each shard and maintains local/global degree-of- freedom mappings consistent across ownership and ghost layers.</p><p>P0 degrees of freedom are associated with mesh cells: each cell carries exactly one DOF. Cells are partitioned across ranks; owned cells receive contiguous global indices, and ghost cells synchronize their global DOF index from the owning rank via a direct owner-push exchange.</p>
+<p>This file provides the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0</a> specialization for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a>. The implementation builds a rank-local P0 space on each shard and maintains local/global degree-of- freedom mappings consistent across ownership and ghost layers.</p><p>P0 degrees of freedom are associated with mesh cells: each cell carries one DOF per field component. Cells are partitioned across ranks; owned cells receive contiguous global indices, and ghost cells synchronize their global DOF index from the owning rank via a direct owner-push exchange.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
