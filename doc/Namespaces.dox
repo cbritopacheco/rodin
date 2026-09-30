@@ -1159,7 +1159,7 @@
   The Solver module provides a comprehensive set of direct and iterative
   linear solvers:
 
-  **Direct solvers** (exact up to floating-point precision):
+  Direct solvers (exact up to floating-point precision):
   - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
   - `UMFPack` — SuiteSparse UMFPACK solver
   - `CHOLMOD` — SuiteSparse Cholesky for SPD systems
@@ -1170,7 +1170,7 @@
   - @ref Rodin::Solver::HouseholderQR "HouseholderQR" — Dense Householder QR
   - @ref Rodin::Solver::LDLT "LDLT" — Dense @f$ LDL^T @f$
 
-  **Iterative solvers** (for large systems):
+  Iterative solvers (for large systems):
   - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (SPD systems)
   - @ref Rodin::Solver::BiCGSTAB "BiCGSTAB" — Bi-conjugate gradient stabilized
   - @ref Rodin::Solver::GMRES "GMRES" — Generalized Minimum Residual
@@ -1195,7 +1195,7 @@
   Solver::SparseLU(problem).solve();
   @endcode
 
-  **Nonlinear solvers** (for hyperelastic or other nonlinear problems):
+  Nonlinear solvers (for hyperelastic or other nonlinear problems):
   - `Solver::NewtonSolver<LinearSolver>` — Newton-Raphson iteration for nonlinear
     variational problems. At each iterate @f$ u^k @f$, assembles the tangent
     system @f$ J(u^k)\,\delta u^k = -F(u^k) @f$ and updates

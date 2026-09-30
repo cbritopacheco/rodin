@@ -10,6 +10,7 @@ set(RodinMPI_HEADERS
   Geometry/SubMesh.h
   Geometry/Sharder.h
   Assembly/MPI.h
+  Assembly/BoundaryDOFs.h
   IO/HDF5.h
   IO/MFEM.h
   IO/MEDIT.h
