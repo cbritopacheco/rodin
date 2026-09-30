@@ -176,7 +176,7 @@ exists yet.
 | Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | — |
 | Stokes | Taylor–Hood velocity/pressure | — | — | — |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
-| Coupled reaction–diffusion | P1/P2 | P1→P2→P3→P4 analytic | — | — |
+| Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | — | — |
 | Nonlinear Poisson | P1/P2 | — | — | — |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | — |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Not applicable |
@@ -222,7 +222,8 @@ their refinement axis.
 The CI convergence job runs the full local suite twice: once with sequential
 assembly and once with OpenMP assembly (`RODIN_MULTITHREADED=OFF/ON`). A
 separate PETSc job checks local-context and distributed P1/P2 Poisson,
-conductivity, and full-Dirichlet vector linear elasticity convergence with
+conductivity, full-Dirichlet vector linear elasticity, and coupled
+reaction–diffusion convergence with
 PETSc assembly and CG. The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
 it is a separate check from the local-context suites.
@@ -237,12 +238,60 @@ refinement path, and backend, rather than by the presence of a directory.
 
 | Priority | Extension | Required evidence |
 | --- | --- | --- |
-| 1 | PETSc local and MPI PDE coverage: complex Helmholtz, coupled reaction–diffusion, Stokes, nonlinear Poisson, and remaining boundary/refinement variants of Poisson, conductivity, and linear elasticity | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
+| 1 | PETSc local and MPI PDE coverage: complex Helmholtz, Stokes, nonlinear Poisson, and remaining boundary/refinement variants of Poisson, conductivity, linear elasticity, and coupled reaction–diffusion | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Missing refinement paths: coupled reaction–diffusion hp; nonlinear Poisson p/hp; Stokes p/hp | At least three discretizations; separate mixed-field errors and pressure gauge; stable velocity/pressure degree pairs for Stokes; nonlinear residual and tangent checks |
 | 3 | Curved-field tests for Helmholtz, linear elasticity, Stokes, reaction–diffusion, nonlinear Poisson, and P0 projection | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
 | 4 | Nonpolynomial geometry approximated at multiple geometry degrees | Separate geometry-map error from field error; state the comparison domain or pullback, map regularity, and geometry/field refinement sequence |
 | 5 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
 | 6 | Independent NAFEMS benchmarks | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
+| Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |
+
+### Coupled reaction–diffusion batch and continuation
+
+The current implementation adds PETSc local/MPI P1/P2 h-convergence for
+a two-component reaction–diffusion system on the unit box. For
+$u=(u_1,u_2)^T$, use positive diffusion coefficients $\kappa_i$ and a
+symmetric positive-definite reaction matrix $R$ with nonzero off-diagonal
+entries. The [suite specification](h/PETScReactionDiffusion/README.md)
+states the selected coefficients, fields, and acceptance bounds.
+Manufactured sources are derived componentwise from
+
+$$
+f_i=-\kappa_i\Delta u_i+\sum_{j=1}^{2}R_{ij}u_j,
+\qquad i\in\{1,2\},
+$$
+
+with full manufactured Dirichlet traces. Coupled-space and assembly/solver
+support is exercised through two scalar H1 trial/test pairs in a coupled
+problem. These equations do not imply that every backend combination is
+supported.
+
+- The suite includes exactly representable affine P1 and quadratic P2
+  patches, followed by smooth fields with nonzero cross-coupling and
+  independently derived gradients.
+- L2 and H1-seminorm errors are measured separately for each component, so
+  that agreement in one field cannot conceal failure in the other.
+- Three levels are used: `n=5→9→17` for P1 and `n=3→5→9` for
+  P2. Both intervals require error reduction and the expected L2/H1 orders
+  $2/1$ and $3/2$, respectively, under the stated regularity assumptions.
+- Entries cover all seven positive-dimensional geometries locally and with
+  MPI ranks 1–4, including owned-cell global norms and empty-rank cases.
+- A negative control omits cross-coupling while retaining the correct
+  sources and traces; the oracle must reject that incorrect operator.
+  Quadrature and solver-tolerance sensitivity checks have stated budgets.
+- Equations, levels, bounds, and backend exclusions are documented in the
+  suite specification; verification evidence belongs in the PR. Planned,
+  implemented, locally verified, and CI-certified coverage remain distinct
+  states.
+
+After this batch, priority 1 continues with PETSc complex Helmholtz, stable
+Stokes, nonlinear Poisson, and missing mixed-boundary variants. Priorities
+2–6 then address missing refinement paths, curved fields, approximated
+nonpolynomial geometry, exact-index MPI structural combinations, and
+independent NAFEMS cases. Assembly benchmarks advance separately in PR #356;
+completion of that PR is not a prerequisite for implementing convergence
+suites. Each convergence batch still requires its own passing CI evidence
+before being described as CI-certified.
 
 Backend extensions require an initial support check: a mathematically meaningful
 formulation does not establish that every solver, scalar type, or assembly path
@@ -260,6 +309,56 @@ and quadrature/solver sensitivity checks must establish that the assertions
 detect the targeted defect and that numerical integration or algebraic error
 does not determine the observed rate. Expensive resolved hierarchies belong
 in explicitly timed slow tests with the required backend coverage retained.
+
+### Assembly performance workplan
+
+Performance work is tracked in [PR #356](https://github.com/cbritopacheco/rodin/pull/356)
+in the existing `tests/benchmarks` module, separately from numerical
+convergence assertions. The following describes the intended final scope,
+not a claim of complete implemented coverage. The physical contexts are
+Poisson, variable conductivity, complex Helmholtz, vector linear elasticity,
+coupled reaction–diffusion, Taylor–Hood Stokes, and nonlinear Poisson. Scalar
+mass/projection forms additionally exercise supported real/complex scalar and
+vector P0/P0g spaces; these are assembly workloads, not additional PDE rate
+claims. H1 workloads begin with P1/P2 and extend through the orders already
+covered by the convergence suites, using stable mixed pairs for Stokes.
+
+Every meaningful formulation is to be exercised on segment, triangle,
+quadrilateral, tetrahedron, pyramid, hexahedron, and wedge geometries.
+Point/0D assembly is included only where a discrete form is meaningful;
+unsupported or mathematically inapplicable combinations are recorded rather
+than counted as measured coverage. Affine and supported curved geometry paths
+are distinguished. Backend coverage includes Eigen sequential/OpenMP and
+PETSc sequential/OpenMP/MPI assembly, with unsupported scalar/backend paths
+identified explicitly. Thread and rank counts are varied independently.
+
+For a fixed discrete form, distinguish setup (mesh, space, quadrature, sparsity
+and allocation), element-kernel evaluation, global insertion/accumulation,
+constraint application, and matrix/vector finalization. Measure both complete
+assembly and isolated stages where instrumentation permits; nonlinear cases
+measure residual and tangent assembly at a prescribed state. Solves and error
+integration are timed separately and excluded from assembly throughput.
+Cold construction and warmed repeated assembly are separate experiments;
+repeated assembly must not silently accumulate previous contributions.
+
+Report wall time $T_A$ in seconds, owned-cell throughput $N_K/T_A$, and time
+per global DOF $T_A/N_D$, with global cell count $N_K$, global DOF count $N_D$,
+matrix nonzeros, degree, quadrature order and point count, geometry, and field
+components. MPI wall time is the maximum elapsed time over ranks, including
+required communication/finalization. Strong scaling holds the global problem
+fixed; weak scaling holds the owned workload approximately fixed per rank.
+Both state the partition imbalance and actual thread/rank configuration.
+
+At least three mesh sizes are required per size study, beginning with the
+existing convergence hierarchies where feasible. Record build type, compiler,
+dependencies, hardware, thread affinity, sanitizer status, repetitions, and
+timing dispersion. Run isolated workloads without concurrent CTest jobs and
+check registration-order/cache effects. Sanitized and optimized-build timings
+are not interchangeable baselines. Numerical checks on operators, loads,
+constraints, and resulting solutions accompany each benchmark; an optimization
+requires baseline-equivalent numerical behavior, including solver iterations
+and residuals. Performance regression thresholds are introduced only after
+repeatability and variance have been established on a controlled runner.
 
 Darcy remains deferred. Fixed-degree P0 has no p-refinement family; P0g has
 no nonconstant approximation rate. These are mathematical exclusions, not

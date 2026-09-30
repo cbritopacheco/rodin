@@ -1,0 +1,92 @@
+# PETSc coupled reaction–diffusion h-convergence
+
+On $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, two real fields satisfy
+
+$$
+-\kappa_i\Delta u_i+\sum_{j=1}^{2}R_{ij}u_j=f_i,
+\qquad \kappa=(1,2),\qquad
+R=\begin{pmatrix}1&0.2\\0.2&1\end{pmatrix},
+$$
+
+with full manufactured Dirichlet traces. The test space is
+$H_0^1(\Omega)^2$ and the weak form is
+
+$$
+a(u,v)=\sum_{i=1}^{2}\int_\Omega\kappa_i\nabla u_i\cdot\nabla v_i
++\sum_{j=1}^{2}R_{ij}u_jv_i\,\mathrm{d}x
+=\sum_{i=1}^{2}\int_\Omega f_iv_i\,\mathrm{d}x.
+$$
+
+Positive diffusion and the symmetric reaction matrix, with eigenvalues
+$0.8$ and $1.2$, give a coercive symmetric form. Two scalar H1 trial/test
+pairs are assembled into a coupled PETSc problem and solved by CG. This
+exercises block offsets, both off-diagonal terms, and both Dirichlet traces;
+it is not two independently solved scalar equations.
+
+## Manufactured data and oracles
+
+Let $s=\sum_jx_j$. The shared `ReactionDiffusionData` supplies the following
+fields, with zero-based component index $i\in\{0,1\}$ and $c_i=i+1$:
+
+| Case | Fields | Gradient entries | Laplacian |
+| --- | --- | --- | --- |
+| Affine P1 patch | $u_i=c_i(1+s)$ | $\partial_j u_i=c_i$ | $0$ |
+| Quadratic P2 patch | $u_i=c_i(1+s^2)$ | $\partial_j u_i=2c_i s$ | $2dc_i$ |
+| Smooth rates | $u_0=e^s$, $u_1=2e^{-s}$ | $\partial_j u_0=u_0$, $\partial_j u_1=-u_1$ | $du_i$ |
+
+Sources are $f_i=-\kappa_i\Delta u_i+u_i+0.2u_{1-i}$. Each field's
+L2 and H1-seminorm errors are integrated separately:
+
+$$
+E_{0,i}^2=\int_\Omega|u_i-u_{h,i}|^2\,\mathrm{d}x,\qquad
+E_{1,i}^2=\int_\Omega\|\nabla u_i-\nabla u_{h,i}\|_2^2\,\mathrm{d}x.
+$$
+
+Patches use `n=5` grid points per axis and require both errors below
+$10^{-9}$ for both fields. The negative control sets the two off-diagonal
+reaction coefficients to zero but retains the correct affine sources and
+traces. Both fields must then have $E_{0,i}>10^{-3}$ and
+$E_{1,i}>10^{-2}$, establishing that the oracle rejects missing coupling.
+
+## Refinement and numerical budget
+
+| Degree | Levels | Expected L2/H1 orders | Accepted adjacent orders |
+| --- | --- | --- | --- |
+| P1 | `n=5→9→17` | $2/1$ | $1.6<r_0<2.4$, $0.75<r_1<1.4$ |
+| P2 | `n=3→5→9` | $3/2$ | $2.6<r_0<3.4$, $1.75<r_1<2.4$ |
+
+With $h=1/(n-1)$, every interval checks finite positive errors, strict
+reduction, and both rate bounds for each component. Expected rates assume
+smooth solutions, conforming regular affine meshes, consistent integration,
+and the required dual regularity. Observed rates are numerical evidence
+under these hypotheses, not an unconditional theorem about every geometry.
+
+All forms and error integrals use order 12. CG uses relative tolerance
+$10^{-13}$, absolute tolerance $10^{-14}$, divergence threshold $10^5$,
+and at most 50,000 iterations. Each solve requires a positive PETSc
+convergence reason and a finite reported residual below $10^{-8}$; this
+residual is not an independently recomputed unpreconditioned residual.
+At `n=5`, P2 sensitivity raises quadrature to 14 and tightens relative
+tolerance to $10^{-14}$; every component error must change by less than
+$10^{-6}$ relative to its baseline.
+
+## Geometry and backend scope
+
+Local PETSc and MPI PETSc cover segment, triangle, quadrilateral,
+tetrahedron, pyramid, hexahedron, and wedge, with MPI ranks 1–4.
+The coarsest P2 segment mesh has two cells, so some ranks have no owned
+cells. `DistributedUniformGrid` supplies partitioned meshes. Error norms
+integrate owned cells only and globally reduce squared contributions before
+taking square roots. For each discrete field, a zero function compared with
+the unit constant checks $E_0=1$ and $E_1=0$ through both norm interfaces.
+
+Configure with `RODIN_BUILD_CONVERGENCE_TESTS=ON`, `RODIN_USE_PETSC=ON`,
+and `RODIN_USE_MPI=ON` for distributed cases. Run
+`ctest --test-dir build/tests -R 'RodinConvergenceHPETSc(MPI)?ReactionDiffusion' --output-on-failure`.
+Entries are split by geometry/rank count, labelled `slow`, and have a
+600-second timeout; MPI entries declare their process count. The dedicated
+PETSc CI job selects them explicitly by name.
+
+This suite certifies real two-field full-Dirichlet h studies on affine
+meshes. Complex fields, nonsymmetric reaction, mixed boundaries, p/hp,
+and curved geometry are separate tasks. Point/0D has no PDE h-rate here.
