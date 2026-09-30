@@ -1,0 +1,58 @@
+name: Assembly benchmark checks
+
+on:
+  pull_request:
+    branches: [develop, master]
+  push:
+    branches: [develop, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: AssemblyBenchmarks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  NumericalSmoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp: [OFF, ON]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_DYNAMIC: "FALSE"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libeigen3-dev libscotch-dev libhdf5-dev
+      - name: Configure optimized numerical checks
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_BENCHMARKS=ON -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MCSS=OFF
+          -DRODIN_USE_MPI=OFF -DRODIN_USE_PETSC=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.openmp }}
+          -DRODIN_USE_OPENMP=${{ matrix.openmp }}
+      - name: Build physics assembly benchmarks
+        run: cmake --build build --target RodinPhysicsAssemblyBenchmarks -j2
+      - name: Check all contexts, degrees, and geometries on smallest meshes
+        # These are numerical smoke checks, not timing regression thresholds.
+        run: >-
+          build/tests/benchmarks/RodinPhysicsAssemblyBenchmarks
+          --benchmark_filter='/3/real_time$' --benchmark_min_time=0.01s
+          --benchmark_out=assembly-smoke.json --benchmark_out_format=json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assembly-smoke-openmp-${{ matrix.openmp }}
+          path: assembly-smoke.json

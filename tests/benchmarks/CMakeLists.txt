@@ -18,6 +18,11 @@ target_link_libraries(RodinBenchmarks
   benchmark::benchmark
   benchmark::benchmark_main)
 
+# Keep the larger physics matrix separate from historical published benchmarks.
+add_executable(RodinPhysicsAssemblyBenchmarks PhysicsAssembly.cpp)
+target_link_libraries(RodinPhysicsAssemblyBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 if (RODIN_USE_MPI)
   add_executable(RodinMPIConstructionBenchmarks MPIConstruction.cpp)
   target_link_libraries(RodinMPIConstructionBenchmarks PRIVATE
