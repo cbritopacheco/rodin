@@ -22,3 +22,39 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     target_link_libraries(ArterialLesion2D_viscous_logarithmic_implicit PUBLIC Rodin::Scotch)
   endif()
 endif()
+
+# Convergence tests of the same solver (Oldroyd-B), meshes built in the code.
+if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  add_executable(test_viscoelastic_implicit test_viscoelastic_implicit.cpp)
+  target_link_libraries(test_viscoelastic_implicit
+    PUBLIC
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(test_viscoelastic_implicit
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Heart)
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(test_viscoelastic_implicit PUBLIC Rodin::Scotch)
+  endif()
+endif()
+
+# Viscoelastic Kolmogorov flow (Berti & Boffetta 2010), doubly periodic box.
+if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  add_executable(test_kolmogorov_viscoelastic test_kolmogorov_viscoelastic.cpp)
+  target_link_libraries(test_kolmogorov_viscoelastic
+    PUBLIC
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(test_kolmogorov_viscoelastic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
