@@ -304,10 +304,14 @@ namespace Rodin::Tests::Unit
             nodes(j, a) = Real(a + j + 1) / Real(fe.getCount()) * (a % 2 ? -1 : 1);
         ParametricTransformation transformation(nodes, fe);
         std::vector<Math::SpatialPoint> references{traits.getCentroid()};
-        for (size_t v = 0; v < traits.getVertexCount(); ++v)
-          references.push_back(traits.getVertex(v));
+        // A Point has a zero-dimensional reference domain. Its centroid is
+        // the sole reference point; getVertex(0) has one stored coordinate.
+        if (traits.getDimension() > 0)
+          for (size_t v = 0; v < traits.getVertexCount(); ++v)
+            references.push_back(traits.getVertex(v));
         for (const auto& reference : references)
         {
+          ASSERT_EQ(static_cast<size_t>(reference.size()), traits.getDimension());
           Math::SpatialPoint actualPoint;
           Math::SpatialMatrix<Real> actualJacobian;
           transformation.transform(actualPoint, reference);

@@ -363,3 +363,17 @@ original evaluator and passing with the fix, including P3. All seven
 transformation tests and 51 AABB tests pass. All 24 P3 evaluation benchmark
 cases executed with three repetitions, and the cubic tetrahedron paired
 workload completed with matching pruning-on/off membership and references.
+
+
+### Assertion-enabled CI fixture correction
+
+The Debug CI matrix exposed an invalid reference input in the scalar-baseline
+test: `Traits(Point).getVertex(0)` stores one coordinate, while a point
+transformation's reference domain has dimension zero. Release assertions were
+disabled and did not reject that fixture. The test now uses the point centroid
+as its sole zero-dimensional reference input and checks the reference dimension
+before calling the transformation. Other geometry vertices retain their existing
+coverage. The malformed fixture was reproduced as a failing dimension check in
+an assertion-enabled local test translation unit (`-O0 -UNDEBUG`, linked to the
+existing Release libraries); after correction all seven transformation tests pass
+in that configuration. The change does not alter production evaluation.
