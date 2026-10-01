@@ -113,14 +113,14 @@ $ J^{-T} n_{\mathrm{ref}} $
 <use x='31.055892' y='1.793263' xlink:href='#eq1-g3-101'/>
 <use x='34.81961' y='1.793263' xlink:href='#eq1-g3-102'/>
 </g>
-</svg> as a physical normal direction on the face. (Best behavior for affine/<a href="class_rodin_1_1_variational_1_1_p1.html">P1</a> geometry.)</li></ul></aside><aside class="m-note m-default"><h4>Robustness notes</h4><ul><li>The inward nudge is done in <em>physical space</em> so that the offset represents a true physical distance, independent of the reference parametrization.</li><li>The policy orients the normal using the cell centroid as an interior probe, which avoids relying on a pre-defined orientation convention of face normals.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>epsInPhys:</code> desired inward physical offset when the boundary is hit. The effective offset is <code>max(epsInPhys, 50*sqrt(machine_epsilon))</code>.</li></ul></aside><aside class="m-note m-default"><h4>Complexity</h4><p>Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.</p></aside>
+</svg> as a physical normal direction on the face. (Best behavior for affine/<a href="class_rodin_1_1_variational_1_1_p1.html">P1</a> geometry.)</li></ul></aside><aside class="m-note m-default"><h4>Robustness notes</h4><ul><li>The inward nudge is done in <em>physical space</em> so that the offset represents a true physical distance, independent of the reference parametrization.</li><li>The policy orients the normal using the cell centroid as an interior probe, which avoids relying on a pre-defined orientation convention of face normals.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>epsInPhys:</code> desired inward physical offset when the boundary is hit. The effective offset is <code>max</code>(10*machine_epsilon, min(epsInPhys, 0.1*abs(dt))).</li></ul></aside><aside class="m-note m-default"><h4>Complexity</h4><p>Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a809c1a58d2098da6e8f947087b0945b9" class="m-doc">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              <span class="m-doc-wrap-bumper"><a href="#aeedb15f4a48bf8c629e67dc1ca15b3e2" class="m-doc">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> epsInPhys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> epsInPhys = DefaultInwardOffset)</span>
             </dt>
             <dd>Constructs the boundary policy.</dd>
           </dl>
@@ -136,11 +136,11 @@ $ J^{-T} n_{\mathrm{ref}} $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a809c1a58d2098da6e8f947087b0945b9"><div>
+          <section class="m-doc-details" id="aeedb15f4a48bf8c629e67dc1ca15b3e2"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />StopInsideBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a809c1a58d2098da6e8f947087b0945b9" class="m-doc-self">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />StopInsideBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeedb15f4a48bf8c629e67dc1ca15b3e2" class="m-doc-self">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> epsInPhys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span></span>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> epsInPhys = DefaultInwardOffset)</span></span>
             </h3>
             <p>Constructs the boundary policy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -150,7 +150,7 @@ $ J^{-T} n_{\mathrm{ref}} $
               <tbody>
                 <tr>
                   <td style="width: 1%">dt&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Signed time step used by the tracer (kept for API symmetry).</td>
+                  <td>Signed time step used to cap the inward offset.</td>
                 </tr>
                 <tr>
                   <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
