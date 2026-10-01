@@ -171,8 +171,8 @@ namespace KelvinBall
     return count;
   }
 
-  SphereDiscretization Sphere::discretize(bool conformingCuts,
-    Real requestedWelschScale) const
+  SphereDiscretization Sphere::discretize(
+    bool conformingCuts, Real requestedWelschScale) const
   {
     const Real h = m_configuration.getH();
     MMG::Mesh mesh(makeUniformChamber());
@@ -223,12 +223,10 @@ namespace KelvinBall
     const Real h = m_configuration.getH();
     const Real interfaceSize = Real(0.1) * h;
     const Real farSize = Real(10) * h;
-    const Real hmin = m_configuration.adapt
-      ? interfaceSize
-      : m_configuration.backgroundHMin * h;
-    const Real hmax = m_configuration.adapt
-      ? farSize
-      : m_configuration.backgroundHMax * h;
+    const Real hmin =
+      m_configuration.adapt ? interfaceSize : m_configuration.backgroundHMin * h;
+    const Real hmax =
+      m_configuration.adapt ? farSize : m_configuration.backgroundHMax * h;
     const Real hausdorff = m_configuration.backgroundHausdorff * h;
     MMG::Mesh mesh(makeUniformChamber());
     const size_t cellsBefore = mesh.getCellCount();
@@ -241,8 +239,7 @@ namespace KelvinBall
       {
         const Real distance =
           std::abs(mesh.getVertexCoordinates(vertex).norm() - Real(1));
-        size[vertex] =
-          farSize - (farSize - interfaceSize) * welsch.getWeight(distance);
+        size[vertex] = farSize - (farSize - interfaceSize) * welsch.getWeight(distance);
       }
       protectFixedGeometry(mesh, false);
       MMG::Adapt()
@@ -276,8 +273,8 @@ namespace KelvinBall
   {
     const Real interfaceSize = Real(0.1) * h;
     const Real farSize = Real(10) * h;
-    const Real welschScale = requestedWelschScale > 0
-      ? requestedWelschScale : Real(3) * h;
+    const Real welschScale =
+      requestedWelschScale > 0 ? requestedWelschScale : Real(3) * h;
     const Adaptation::WNGIRLoss welsch(welschScale);
 
     P1<Real, Mesh> sizeSpace(mesh);
@@ -288,8 +285,8 @@ namespace KelvinBall
     Distance::Eikonal(distance).setInterior(Obstacle).setInterface(Gamma).solve();
     for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
     {
-      size[vertex] = farSize - (farSize - interfaceSize)
-        * welsch.getWeight(std::abs(distance[vertex]));
+      size[vertex] = farSize -
+        (farSize - interfaceSize) * welsch.getWeight(std::abs(distance[vertex]));
     }
 
     protectFixedGeometry(mesh, false);

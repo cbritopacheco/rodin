@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <map>
 #include <iomanip>
@@ -2384,9 +2385,15 @@ namespace Rodin::Adaptation
       TestFunctionType m_vStep;
       ProblemType m_stepProblem;
       StepSolverType m_stepSolver;
-      /// @brief Direct step solver, created on first use and kept for its
-      /// symbolic analysis.
-      Optional<DirectStepSolverType> m_directStepSolver;
+      /// @brief Eigen direct step solver, created on first use and kept for
+      /// its symbolic analysis; PETSc uses the backend step solver instead.
+      std::conditional_t<
+        std::is_same_v<typename FormLanguage::Traits<LinearSystemType>::OperatorType,
+          Math::SparseMatrix<Real>> &&
+          std::is_same_v<typename FormLanguage::Traits<LinearSystemType>::VectorType,
+            Math::Vector<Real>>,
+        Optional<DirectStepSolverType>, std::nullptr_t>
+        m_directStepSolver{};
       /// @brief Pattern the retained symbolic analysis was built for.
       std::uint64_t m_directStepPattern = 0;
       std::vector<SlipNode> m_slipNodes;

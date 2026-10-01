@@ -58,8 +58,8 @@ namespace KelvinBall
        * adaptation is then not applied. Otherwise the cuts are free, as for
        * every later reconstruction.
        */
-      SphereDiscretization discretize(bool conformingCuts = false,
-        Real requestedWelschScale = 0) const;
+      SphereDiscretization discretize(
+        bool conformingCuts = false, Real requestedWelschScale = 0) const;
 
       /**
        * @brief Prepares the fixed background mesh used by WNGIR.

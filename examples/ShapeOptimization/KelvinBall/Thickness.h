@@ -87,8 +87,8 @@ namespace KelvinBall
         auto fluidNormal = FaceNormal(mesh);
         fluidNormal.traceOf(Fluid);
         const auto& parentFaces = surface.getPolytopeMap(surface.getDimension()).left;
-        const VectorFunction faceNormal(static_cast<size_t>(3),
-          [&](const Geometry::Point& point) {
+        const VectorFunction faceNormal(
+          static_cast<size_t>(3), [&](const Geometry::Point& point) {
             const Index parent = parentFaces[point.getPolytope().getIndex()];
             const Geometry::Point parentPoint(
               *mesh.getPolytope(mesh.getDimension() - 1, parent),
@@ -143,8 +143,10 @@ namespace KelvinBall
           triangle.face = face->getIndex();
           for (size_t d = 0; d < 3; ++d)
           {
-            triangle.lo[d] = std::min({triangle.x[0](d), triangle.x[1](d), triangle.x[2](d)});
-            triangle.hi[d] = std::max({triangle.x[0](d), triangle.x[1](d), triangle.x[2](d)});
+            triangle.lo[d] =
+              std::min({triangle.x[0](d), triangle.x[1](d), triangle.x[2](d)});
+            triangle.hi[d] =
+              std::max({triangle.x[0](d), triangle.x[1](d), triangle.x[2](d)});
           }
           m_triangles.push_back(triangle);
         }
@@ -207,10 +209,12 @@ namespace KelvinBall
           const Math::SpatialVector<Real> orientedArea = cross(b - a, c - a);
           const Real doubledArea = orientedArea.norm();
           if (!(doubledArea > 0))
-            throw std::runtime_error("The thickness interface contains a degenerate face.");
+            throw std::runtime_error(
+              "The thickness interface contains a degenerate face.");
           const Real area = doubledArea / 2;
           const Math::SpatialVector<Real> orientation = orientedArea / doubledArea;
-          const std::array<Math::SpatialVector<Real>, 3> edgeOpposite{b - c, c - a, a - b};
+          const std::array<Math::SpatialVector<Real>, 3> edgeOpposite{
+            b - c, c - a, a - b};
           Math::SpatialMatrix<Real> gradientNormal(3, 3);
           gradientNormal.setZero();
           Math::SpatialMatrix<Real> gradientPosition(3, 3);
@@ -232,7 +236,8 @@ namespace KelvinBall
               }
           }
           if (std::abs(gradientPosition.trace() - Real(2)) > Real(1e-8))
-            throw std::runtime_error("The surface barycentric gradient is inconsistent: " +
+            throw std::runtime_error(
+              "The surface barycentric gradient is inconsistent: " +
               std::to_string(gradientPosition.trace()));
           for (const auto& barycentric : quadrature)
           {
@@ -240,8 +245,7 @@ namespace KelvinBall
               barycentric[0] * a + barycentric[1] * b + barycentric[2] * c;
             const Geometry::Point surfacePoint(*face, s);
             // Use the P1 face trace of the fixed nodal field.
-            Math::SpatialVector<Real> rawNormal =
-              Math::SpatialVector<Real>::Zero(3);
+            Math::SpatialVector<Real> rawNormal = Math::SpatialVector<Real>::Zero(3);
             for (size_t k = 0; k < 3; ++k)
             {
               const auto dofs = space.getDOFs(0, vertices[k]);
@@ -252,8 +256,10 @@ namespace KelvinBall
             const Real magnitude = rawNormal.norm();
             if (!(std::isfinite(magnitude) && magnitude > Real(1e-12)))
               throw std::runtime_error("The smoothed thickness normal vanishes.");
-            result.minimumNormalMagnitude = std::min(result.minimumNormalMagnitude, magnitude);
-            result.maximumNormalMagnitude = std::max(result.maximumNormalMagnitude, magnitude);
+            result.minimumNormalMagnitude =
+              std::min(result.minimumNormalMagnitude, magnitude);
+            result.maximumNormalMagnitude =
+              std::max(result.maximumNormalMagnitude, magnitude);
             const Math::SpatialVector<Real> smoothNormal = rawNormal / magnitude;
             const Math::SpatialVector<Real> geometricNormal =
               -fluidNormal.getValue(surfacePoint);
@@ -261,12 +267,13 @@ namespace KelvinBall
               result.geometricNormal[vertices[k]] +=
                 area * barycentric[k] / 3 * geometricNormal;
             const Real alignment = smoothNormal.dot(geometricNormal);
-            result.minimumNormalAlignment = std::min(result.minimumNormalAlignment, alignment);
+            result.minimumNormalAlignment =
+              std::min(result.minimumNormalAlignment, alignment);
             result.meanNormalAlignment += alignment;
             ++result.samples;
             const Real curvature =
-              (gradientNormal.trace() -
-                smoothNormal.dot(gradientNormal * smoothNormal)) / magnitude;
+              (gradientNormal.trace() - smoothNormal.dot(gradientNormal * smoothNormal)) /
+              magnitude;
             result.minimumCurvature = std::min(result.minimumCurvature, curvature);
             result.maximumCurvature = std::max(result.maximumCurvature, curvature);
             for (size_t k = 0; k < 3; ++k)
@@ -326,7 +333,8 @@ namespace KelvinBall
           const Real total = std::accumulate(pairLoads.begin(), pairLoads.end(), Real(0));
           if (total > 0)
             result.topOnePercentLoadShare =
-              std::accumulate(pairLoads.begin(), pairLoads.begin() + count, Real(0)) / total;
+              std::accumulate(pairLoads.begin(), pairLoads.begin() + count, Real(0)) /
+              total;
         }
         for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
         {
@@ -423,7 +431,7 @@ namespace KelvinBall
           if (std::abs(direction(d)) < Real(1e-14))
           {
             if (origin(d) < node.lo[d] - Real(1e-12) ||
-                origin(d) > node.hi[d] + Real(1e-12))
+              origin(d) > node.hi[d] + Real(1e-12))
               return false;
             continue;
           }
@@ -446,8 +454,7 @@ namespace KelvinBall
         const Math::SpatialVector<Real> edge2 = triangle.x[2] - triangle.x[0];
         const Math::SpatialVector<Real> transverse = cross(direction, edge2);
         const Real determinant = edge1.dot(transverse);
-        if (std::abs(determinant) <=
-            Real(1e-12) * cross(edge1, edge2).norm())
+        if (std::abs(determinant) <= Real(1e-12) * cross(edge1, edge2).norm())
           return false;
         const Real inverse = Real(1) / determinant;
         const Math::SpatialVector<Real> offset = origin - triangle.x[0];
@@ -473,14 +480,12 @@ namespace KelvinBall
         exit.distance = m_minimum;
         if (m_nodes.empty())
           return exit;
-        const Real originTolerance =
-          std::max(Real(1e-12), Real(1e-10) * m_minimum);
+        const Real originTolerance = std::max(Real(1e-12), Real(1e-10) * m_minimum);
         std::vector<Index> pending;
         const auto& rotations = SewedOutput::getCubeRotations();
         for (size_t r = 0; r < rotations.size(); ++r)
         {
-          const Math::SpatialVector<Real> localOrigin =
-            rotations[r].transpose() * origin;
+          const Math::SpatialVector<Real> localOrigin = rotations[r].transpose() * origin;
           const Math::SpatialVector<Real> localDirection =
             rotations[r].transpose() * direction;
           pending.push_back(0);
@@ -499,16 +504,15 @@ namespace KelvinBall
             for (size_t i = node.first; i < node.first + node.count; ++i)
             {
               const Index id = m_order[i];
-              const Real transversality =
-                m_triangles[id].normal.dot(localDirection);
+              const Real transversality = m_triangles[id].normal.dot(localDirection);
               if (transversality <= Real(1e-12))
                 continue;
               Real distance;
               std::array<Real, 3> barycentric;
               if (intersectsTriangle(localOrigin, localDirection, m_triangles[id],
                     originTolerance, exit.distance, distance, barycentric) &&
-                  (!exit.found || distance < exit.distance - Real(1e-12) ||
-                   (std::abs(distance - exit.distance) <= Real(1e-12) &&
+                (!exit.found || distance < exit.distance - Real(1e-12) ||
+                  (std::abs(distance - exit.distance) <= Real(1e-12) &&
                     transversality > exit.transversality)))
               {
                 exit.found = true;
