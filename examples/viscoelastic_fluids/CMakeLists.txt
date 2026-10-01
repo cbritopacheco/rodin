@@ -23,6 +23,9 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
   endif()
 endif()
 
+# The same formulation in 3D (pipe), in its own folder.
+add_subdirectory(ArterialLesion3D_viscous_logarithmic_implicit)
+
 # Convergence tests of the same solver (Oldroyd-B), meshes built in the code.
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)
   add_executable(test_viscoelastic_implicit test_viscoelastic_implicit.cpp)
