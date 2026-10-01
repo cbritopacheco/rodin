@@ -41,7 +41,7 @@ namespace Rodin::Geometry
 
     m_parent = parent;
 
-    m_shardBuilder.initialize(shard);
+    m_shardBuilder.initialize(shard, dim);
 
     m_s2ps.clear();
     m_s2ps.resize(dim + 1);
@@ -152,12 +152,77 @@ namespace Rodin::Geometry
     return *this;
   }
 
+  void SubMesh<Context::MPI>::Builder::completeOverlap()
+  {
+    const auto& parent = m_parent.value().get();
+    const auto& shard = parent.getShard();
+    const auto& comm = parent.getContext().getCommunicator();
+    m_dimension = boost::mpi::all_reduce(comm, m_dimension, MaxSize{});
+    const size_t d = m_dimension;
+    const auto& ids = shard.getPolytopeMap(d);
+    const auto& owners = shard.getOwner(d);
+    const auto& halos = shard.getHalo(d);
+    IndexSet selected;
+    for (Index local : m_s2ps[d].left)
+      selected.insert(ids.left.at(local));
+
+    // Parent owner/holder links provide a symmetric communication stencil.
+    // Selection is a union: a nonowner may be the only rank requesting an entity.
+    UnorderedSet<int> neighbors;
+    for (const auto& [local, rank] : owners)
+      neighbors.insert(static_cast<int>(rank));
+    for (const auto& [local, ranks] : halos)
+      for (Index rank : ranks)
+        neighbors.insert(static_cast<int>(rank));
+    UnorderedMap<int, std::vector<Index>> outgoing, incoming;
+    for (int rank : neighbors)
+    {
+      outgoing[rank];
+      incoming[rank];
+    }
+    for (Index local : m_s2ps[d].left)
+      if (!shard.isOwned(d, local))
+        outgoing.at(static_cast<int>(owners.at(local))).push_back(ids.left.at(local));
+    const auto exchange = [&](int tag) {
+      std::vector<boost::mpi::request> requests;
+      for (int rank : neighbors)
+      {
+        incoming.at(rank).clear();
+        requests.push_back(comm.irecv(rank, tag, incoming.at(rank)));
+        requests.push_back(comm.isend(rank, tag, outgoing.at(rank)));
+      }
+      boost::mpi::wait_all(requests.begin(), requests.end());
+    };
+    // Complete selection at parent owners, then publish it to existing holders.
+    exchange(20);
+    for (const auto& [rank, indices] : incoming)
+      selected.insert(indices.begin(), indices.end());
+    for (auto& [rank, indices] : outgoing)
+      indices.clear();
+    for (Index global : selected)
+    {
+      const Index local = ids.right.at(global);
+      if (!shard.isOwned(d, local))
+        continue;
+      const auto halo = halos.find(local);
+      if (halo != halos.end())
+        for (Index rank : halo->second)
+          outgoing.at(static_cast<int>(rank)).push_back(global);
+    }
+    exchange(21);
+    for (const auto& [rank, indices] : incoming)
+      selected.insert(indices.begin(), indices.end());
+    for (Index global : selected)
+      include(d, ids.right.at(global));
+  }
+
   SubMesh<Context::MPI> SubMesh<Context::MPI>::Builder::finalize()
   {
     assert(m_parent.has_value());
     const auto& parentMesh = m_parent.value().get();
     const auto& parentShard = parentMesh.getShard();
 
+    completeOverlap();
     Shard shard = m_shardBuilder.finalize();
 
     // Remap the shard PolytopeMap so that left[subLocal] holds the distributed
@@ -404,14 +469,37 @@ namespace Rodin::Geometry
       }
     } // ownership resolution block
 
+    // Partition membership is relative to the selected mesh, not its parent.
+    // In particular, a parent Shared face becomes a Ghost top cell of a skin.
+    for (size_t d = 0; d <= m_dimension; ++d)
+    {
+      IndexSet partition;
+      for (Index cell = 0; cell < shard.getPolytopeCount(m_dimension); ++cell)
+      {
+        if (!shard.isOwned(m_dimension, cell))
+          continue;
+        if (d == m_dimension)
+          partition.insert(cell);
+        else
+        {
+          const auto& incidence = shard.getConnectivity().getIncidence(m_dimension, d);
+          if (!incidence.empty())
+            partition.insert(incidence.at(cell).begin(), incidence.at(cell).end());
+        }
+      }
+      auto& state = shard.getState(d);
+      for (Index i = 0; i < state.size(); ++i)
+        if (state[i] != Shard::State::Owned)
+          state[i] = partition.contains(i) ? Shard::State::Shared : Shard::State::Ghost;
+    }
+
     Mesh<Context::MPI>::Builder meshBuilder(parentMesh.getContext());
     meshBuilder.initialize(std::move(shard));
 
     SubMesh result(parentMesh);
     result.Parent::operator=(meshBuilder.finalize());
     result.m_s2ps = std::move(m_s2ps);
-    result.m_dimension = boost::mpi::all_reduce(
-      parentMesh.getContext().getCommunicator(), m_dimension, MaxSize{});
+    result.m_dimension = m_dimension;
     return result;
   }
 

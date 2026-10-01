@@ -169,7 +169,7 @@ namespace Rodin::Solid
         const Real denominatorGamma =
           1.0 + dt * std::abs(activation) + alpha * std::abs(delta);
 
-        const Real gammaSquare = std::max<Real>(1.e-16,
+        const Real gammaSquare = std::max<Real>(MinimumGammaSquared,
           (oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus) /
             denominatorGamma);
 
@@ -258,7 +258,7 @@ namespace Rodin::Solid
 
         const Real Ng = oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus;
 
-        const Real gammaSquare = std::max<Real>(1.e-16, Ng / Dg);
+        const Real gammaSquare = std::max<Real>(MinimumGammaSquared, Ng / Dg);
         const Real gamma = std::sqrt(gammaSquare);
 
         const Real dGammaSquare = -Ng * alpha * sign / (Dg * Dg);
@@ -313,6 +313,9 @@ namespace Rodin::Solid
       }
 
     private:
+      /// @brief Absolute floor on gamma squared before division; legacy numerical clamp in state units.
+      static constexpr Real MinimumGammaSquared = 1.e-16;
+
       Parameters m_parameters;
   };
 }

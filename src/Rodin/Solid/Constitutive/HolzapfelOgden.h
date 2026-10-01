@@ -132,10 +132,12 @@ namespace Rodin::Solid
       {
         const auto& state = cp.getKinematicState();
         const auto& H = state.getDisplacementGradient();
-        const Real eps = 1.e-7;
+        // Heuristic forward-difference step multiplying the dimensionless
+        // deformation-gradient direction; accuracy depends on its scale.
+        constexpr Real tangentDifferenceStep = 1.e-7;
 
         KinematicState plus(state.getDimension());
-        plus.setDisplacementGradient(H + eps * dF);
+        plus.setDisplacementGradient(H + tangentDifferenceStep * dF);
         Cache plusCache = cache;
         setCache(plusCache, plus, cache.direction);
         Math::SpatialMatrix<Real> Pplus;
@@ -144,7 +146,7 @@ namespace Rodin::Solid
         Math::SpatialMatrix<Real> P;
         computeFirstPiolaKirchhoffStress(P, cache, state);
 
-        dP = (1.0 / eps) * Pplus + (-1.0 / eps) * P;
+        dP = (1.0 / tangentDifferenceStep) * Pplus + (-1.0 / tangentDifferenceStep) * P;
       }
 
     private:

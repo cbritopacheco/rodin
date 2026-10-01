@@ -23,3 +23,11 @@ target_link_libraries(RodinBenchmarks
 # Standalone paired timing harness: no diagnostic counters in this target.
 add_executable(RodinAABBWorkload AABBWorkload.cpp)
 target_link_libraries(RodinAABBWorkload PRIVATE Rodin::Variational)
+
+if (RODIN_USE_MPI)
+  add_executable(RodinMPIConstructionBenchmarks MPIConstruction.cpp)
+  target_link_libraries(RodinMPIConstructionBenchmarks PRIVATE
+    Rodin::MPI
+    Rodin::Variational
+    benchmark::benchmark)
+endif()

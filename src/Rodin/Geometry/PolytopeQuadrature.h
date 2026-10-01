@@ -394,6 +394,7 @@ namespace Rodin::Geometry
 
       struct Formula
       {
+          // Heuristic lock-striping budget: shares locks among slots to bound storage.
           static constexpr size_t MutexCount = 64;
 
           Formula(const QF::QuadratureFormulaBase* qf, size_t count)
@@ -421,6 +422,7 @@ namespace Rodin::Geometry
 
       struct Dimension
       {
+          // Heuristic fast-lookup slot budget; larger formula sets use the full index.
           static constexpr size_t LookupCapacity = 16;
 
           Dimension() = default;
