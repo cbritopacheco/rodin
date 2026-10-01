@@ -23,12 +23,12 @@ namespace Rodin::Tests::Benchmarks
   {
     const auto geometry = static_cast<Polytope::Type>(state.range(0));
     const Polytope::Traits traits(geometry);
-    // Embed every geometry in 3D to expose repeated physical-component work.
-    constexpr size_t PhysicalDimension = 3;
+    // Compare native dimensions with 3D embeddings of lower-dimensional cells.
+    const size_t physicalDimension = static_cast<size_t>(state.range(1));
     Variational::RealH1Element<K> fe(geometry);
-    PointCloud nodes(PhysicalDimension, fe.getCount());
+    PointCloud nodes(physicalDimension, fe.getCount());
     for (size_t a = 0; a < fe.getCount(); ++a)
-      for (size_t j = 0; j < PhysicalDimension; ++j)
+      for (size_t j = 0; j < physicalDimension; ++j)
         nodes(j, a) = j < traits.getDimension() ? fe.getNode(a)[j] : Real(1);
     ParametricTransformation transformation(std::move(nodes), fe);
     const Math::SpatialPoint reference = traits.getCentroid();
@@ -63,18 +63,27 @@ namespace Rodin::Tests::Benchmarks
         {G::Hexahedron, "Hexahedron"}, {G::Pyramid, "Pyramid"}, {G::Wedge, "Wedge"}})
     {
       const std::string name = label;
-      for (bool jacobian : {false, true})
+      for (const size_t physicalDimension :
+        {std::max(size_t(1), Polytope::Traits(geometry).getDimension()), size_t(3)})
       {
-        const std::string operation = jacobian ? "Jacobian" : "Transform";
-        benchmark::RegisterBenchmark(("Parametric/" + operation + "/P1/" + name).c_str(),
-          &BM_ParametricEvaluation<1>, jacobian)
-          ->Arg(static_cast<int>(geometry));
-        benchmark::RegisterBenchmark(("Parametric/" + operation + "/P2/" + name).c_str(),
-          &BM_ParametricEvaluation<2>, jacobian)
-          ->Arg(static_cast<int>(geometry));
-        benchmark::RegisterBenchmark(("Parametric/" + operation + "/P4/" + name).c_str(),
-          &BM_ParametricEvaluation<4>, jacobian)
-          ->Arg(static_cast<int>(geometry));
+        // Three-dimensional cells need only one registration.
+        const bool embedded = physicalDimension == 3;
+        const std::string prefix = embedded ? "Parametric/" : "ParametricNative/";
+        for (bool jacobian : {false, true})
+        {
+          const std::string operation = jacobian ? "Jacobian" : "Transform";
+          benchmark::RegisterBenchmark((prefix + operation + "/P1/" + name).c_str(),
+            &BM_ParametricEvaluation<1>, jacobian)
+            ->Args({static_cast<int>(geometry), static_cast<int>(physicalDimension)});
+          benchmark::RegisterBenchmark((prefix + operation + "/P2/" + name).c_str(),
+            &BM_ParametricEvaluation<2>, jacobian)
+            ->Args({static_cast<int>(geometry), static_cast<int>(physicalDimension)});
+          benchmark::RegisterBenchmark((prefix + operation + "/P4/" + name).c_str(),
+            &BM_ParametricEvaluation<4>, jacobian)
+            ->Args({static_cast<int>(geometry), static_cast<int>(physicalDimension)});
+        }
+        if (Polytope::Traits(geometry).getDimension() == 3)
+          break;
       }
     }
   }

@@ -193,7 +193,7 @@ iteration behavior differ even when the physical polynomial is the same.
 
 ## Geometry evaluation follow-up
 
-The next comparison uses `4b6925135` as the production baseline. A minimal
+The next comparison uses `4b6925135` as the evaluation baseline. A minimal
 change to `ParametricTransformation::jacobian` evaluates each scalar reference
 basis derivative once per basis/axis, then multiplies that value by every
 physical coordinate coefficient. Previously the derivative call was inside the
@@ -210,21 +210,23 @@ is not used for timing claims. The call-count regression independently observed
 three evaluations per basis/axis for a 3D physical map before the change, and
 one afterward.
 
-The new `Parametric/Transform` and `Parametric/Jacobian` Google Benchmarks cover
-all eight geometries at P1, P2 and P4, embedded in three physical dimensions.
+The 72 new `Parametric/Transform`, `Parametric/Jacobian`, and `ParametricNative`
+Google Benchmark cases cover all eight geometries at P1, P2 and P4, with both
+native physical dimensions and three-dimensional embeddings.
 The tables are warmed outside the timed loop. CPU times below are medians of
-three alternating baseline/current runs, each with a 0.10-second minimum per
-case. Each row is a single evaluation, rather than a point-location query.
+three alternating baseline/current runs, each with a 0.08-second minimum per
+case, using the same final benchmark source and the original evaluation header
+for the baseline executable. Each row is a single evaluation, rather than a point-location query.
 
 | Geometry | P4 Jacobian before (us) | After (us) | Speedup |
 | --- | ---: | ---: | ---: |
-| Segment | 0.120 | 0.055 | 2.18x |
-| Triangle | 4.414 | 1.878 | 2.35x |
-| Quadrilateral | 1.427 | 0.598 | 2.39x |
-| Tetrahedron | 44.640 | 15.283 | 2.92x |
-| Hexahedron | 29.953 | 9.628 | 3.11x |
-| Pyramid | 549.822 | 184.037 | 2.99x |
-| Wedge | 27.874 | 9.736 | 2.86x |
+| Segment | 0.117 | 0.049 | 2.39x |
+| Triangle | 4.406 | 1.612 | 2.73x |
+| Quadrilateral | 1.409 | 0.558 | 2.53x |
+| Tetrahedron | 44.366 | 15.516 | 2.86x |
+| Hexahedron | 29.134 | 9.492 | 3.07x |
+| Pyramid | 542.069 | 188.208 | 2.88x |
+| Wedge | 27.662 | 9.907 | 2.79x |
 
 The segment and surface results here include the benefit of embedding in 3D;
 ordinary nonembedded cases have fewer physical components to share. P1 and P2
@@ -235,12 +237,25 @@ regression: P4 transform median ratios after/before ranged from 0.996 to 1.004.
 This control demonstrates drift between the earlier measurement blocks.
 
 Point has no reference axes or derivative work. Its isolated P4 zero-column
-Jacobian call changed from about 4.36 to 4.56 ns in the alternating runs.
+Jacobian call changed from about 4.32 to 4.55 ns in the alternating runs.
 Disassembly shows a different generated prologue before the zero-axis exit,
 including an additional move and stack store; the timing change is consistent
 with changed compiler bookkeeping, rather than derivative evaluation. AABB point
 queries do not call this Jacobian. This small cost is retained explicitly rather
 than claiming that every benchmark improved.
+
+The first derivative-hoisting implementation regressed the ordinary P2 segment
+AABB hit by about 5% in alternating runs (277 to 291 ns). Disassembly exposed
+compiler-generated setup for a general physical-component loop. Restricting the
+loop by the existing `SpatialMatrix::MaxSize` makes its actual storage bound
+visible, avoiding that unbounded loop machinery without adding another
+algorithm. The repeated segment AABB measurement then gave 289 to 281 ns.
+Native P4 segment Jacobian evaluation is unchanged (47.75 to 47.39 ns).
+Native P1 segment Jacobian evaluation retains a small cost (11.14 to 11.87 ns),
+consistent with the changed call bookkeeping seen in the point case; there is
+no derivative-call reduction in a one-dimensional physical map. The native
+surface P4 Jacobians improve from 2.917 to 1.536 us for triangles and from 0.973
+to 0.550 us for quadrilaterals.
 
 ### End-to-end controlled workload
 
@@ -250,9 +265,9 @@ blocks. Each query class contains 64 samples.
 
 | Query | Off before / after (us) | On before / after (us) |
 | --- | ---: | ---: |
-| Interior | 4315.55 / 1822.97 | 98.86 / 39.73 |
-| Shared boundary | 7726.17 / 3514.46 | 100.50 / 41.87 |
-| Nearby miss | 6049.06 / 2438.52 | 955.66 / 383.38 |
+| Interior | 4315.55 / 2093.34 | 98.86 / 44.09 |
+| Shared boundary | 7726.17 / 3808.22 | 100.50 / 45.29 |
+| Nearby miss | 6049.06 / 2533.12 | 955.66 / 404.52 |
 
 The diagnostic executables produced 384 identical per-query records across
 both pruning settings: candidates, transforms, Jacobians, Newton loop entries,
@@ -268,12 +283,12 @@ with three repetitions and a 0.06-second minimum (CPU medians):
 
 | Geometry | Default off before / after (us) | Pruned before / after (us) |
 | --- | ---: | ---: |
-| Triangle | 6.967 / 4.341 | 1.491 / 0.976 |
-| Quadrilateral | 2.675 / 2.103 | 0.748 / 0.697 |
-| Tetrahedron | 240.280 / 92.881 | 9.286 / 3.553 |
-| Hexahedron | 13.908 / 7.462 | 4.993 / 2.665 |
-| Pyramid | 699.474 / 265.502 | 51.841 / 19.595 |
-| Wedge | 48.475 / 21.905 | 6.100 / 3.140 |
+| Triangle | 7.304 / 4.497 | 1.540 / 1.030 |
+| Quadrilateral | 2.780 / 2.121 | 0.776 / 0.620 |
+| Tetrahedron | 249.841 / 91.864 | 9.714 / 3.647 |
+| Hexahedron | 14.542 / 7.212 | 5.191 / 2.551 |
+| Pyramid | 705.104 / 271.837 | 53.023 / 20.355 |
+| Wedge | 49.198 / 22.511 | 6.384 / 2.987 |
 
 These gains depend on the fixture's share of Jacobian work; the embedded 3D
 microbenchmark speedups should not be applied directly to every locator query.
