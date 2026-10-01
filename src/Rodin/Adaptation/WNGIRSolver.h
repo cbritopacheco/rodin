@@ -98,6 +98,34 @@ namespace Rodin::Adaptation
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
 
+      /// @brief Lower bound on the automatically selected CG work budget; heuristic.
+      static constexpr std::size_t MinAutomaticCGIterations = 100;
+      /// @brief Upper bound on the automatically selected CG work budget; heuristic.
+      static constexpr std::size_t MaxAutomaticCGIterations = 2000;
+      /// @brief CG iterations per displacement DOF before clamping the work budget.
+      static constexpr std::size_t AutomaticCGIterationsPerDof = 2;
+
+      /// @brief Fallback accepted-step tolerance relative to mesh scale h; heuristic.
+      static constexpr Real DefaultStepOverHTolerance = Real(1e-4);
+      /// @brief Fallback RMS residual threshold multiplier of h times the target-gradient scale.
+      static constexpr Real DefaultRmsMeshFactor = Real(4);
+      /// @brief Fallback maximum residual threshold multiplier of h times the target-gradient scale.
+      static constexpr Real DefaultMaxMeshFactor = Real(10);
+      /// @brief Strict upper cap on the fraction to the feasibility boundary; leaves a 0.1% margin.
+      static constexpr Real MaxBoundaryFraction = Real(0.999);
+      /// @brief Halves rejected line-search steps; heuristic geometric contraction.
+      static constexpr Real LineSearchContraction = Real(0.5);
+      /// @brief Absolute denominator floor in energy units for relative stagnation checks.
+      static constexpr Real StagnationEnergyFloor = Real(1e-30);
+      /// @brief Heuristic robust-loss scale floor in units of h times the target-gradient scale.
+      static constexpr Real RobustScaleMeshFactor = Real(3);
+      /// @brief Dimensionless empirical residual quantile for automatic robust-loss scaling.
+      static constexpr Real RobustScaleQuantile = Real(0.9);
+      /// @brief Absolute coefficient-vector norm floor after Gram-Schmidt; depends on basis scaling.
+      static constexpr Real RigidModeNormFloor = Real(1e-12);
+      /// @brief Relative residual acceptance floor, independent of the requested CG stopping tolerance.
+      static constexpr Real LinearSolveAcceptanceFloor = Real(1e-6);
+
     public:
       /// @brief Mesh-validity summary of a displacement.
       struct AdmissibilityState
@@ -180,8 +208,10 @@ namespace Rodin::Adaptation
       WNGIR& setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
-        const std::size_t defaultMaxIterations = std::min<std::size_t>(2000,
-          std::max<std::size_t>(100, 2 * m_duStep.getFiniteElementSpace().getSize()));
+        const std::size_t defaultMaxIterations =
+          std::min<std::size_t>(MaxAutomaticCGIterations,
+            std::max<std::size_t>(MinAutomaticCGIterations,
+              AutomaticCGIterationsPerDof * m_duStep.getFiniteElementSpace().getSize()));
         const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
           ? m_parameters.cgMaxIterations
           : defaultMaxIterations;
@@ -243,7 +273,8 @@ namespace Rodin::Adaptation
         const Real acceptedJacobianFloor = std::max(p.jLineSearchRatio, p.jSafe);
         const Real bulkDeviatoricCoefficient = h * p.kappaBulk;
         const Real bulkDivergenceCoefficient = bulkDeviatoricCoefficient * p.rDiv;
-        const Real stepTol = p.stepTol > Real(0) ? p.stepTol : Real(1e-4) * h;
+        const Real stepTol =
+          p.stepTol > Real(0) ? p.stepTol : DefaultStepOverHTolerance * h;
         using Clock = std::chrono::steady_clock;
         auto secondsSince = [](Clock::time_point t0) -> Real {
           return std::chrono::duration<Real>(Clock::now() - t0).count();
@@ -310,8 +341,10 @@ namespace Rodin::Adaptation
         const Real levelSetMeshScale = h * robustScale.gradientScale;
         const Real dataNormalization =
           Real(1) / (robustScale.gradientScale * robustScale.gradientScale);
-        const Real tauRms = p.tauRms > Real(0) ? p.tauRms : Real(4) * levelSetMeshScale;
-        const Real tauInf = p.tauInf > Real(0) ? p.tauInf : Real(10) * levelSetMeshScale;
+        const Real tauRms =
+          p.tauRms > Real(0) ? p.tauRms : DefaultRmsMeshFactor * levelSetMeshScale;
+        const Real tauInf =
+          p.tauInf > Real(0) ? p.tauInf : DefaultMaxMeshFactor * levelSetMeshScale;
         rep.effectiveTauRms = tauRms;
         rep.effectiveTauInf = tauInf;
         const WNGIRLoss loss(sigma);
@@ -739,7 +772,7 @@ namespace Rodin::Adaptation
                 ++rep.distortionRejections;
               if (jOK && qOK && !eOK)
                 ++rep.energyRejections;
-              alpha *= Real(0.5);
+              alpha *= LineSearchContraction;
               ++backtracks;
             }
           }
@@ -851,7 +884,8 @@ namespace Rodin::Adaptation
             ++rep.iterations;
             break;
           }
-          const Real eRel = std::abs(ePrev - eNow) / std::max(ePrev, Real(1e-30));
+          const Real eRel =
+            std::abs(ePrev - eNow) / std::max(ePrev, StagnationEnergyFloor);
           if (eRel < p.energyStagTol)
           {
             rep.exitReason = "best-effort-energy-stagnation";
@@ -1116,7 +1150,8 @@ namespace Rodin::Adaptation
         const Displacement& inner, const Displacement& increment,
         std::size_t dimension) const
       {
-        const Real tau = std::clamp(m_parameters.thetaBoundary, Real(0), Real(0.999));
+        const Real tau =
+          std::clamp(m_parameters.thetaBoundary, Real(0), MaxBoundaryFraction);
         if constexpr (requires { current.acquire(); })
           current.acquire();
         if constexpr (requires { inner.acquire(); })
@@ -1463,6 +1498,8 @@ namespace Rodin::Adaptation
         // quadrature average of the pointwise unit normals, so a curved facet
         // contributes its mean orientation; a facet degenerate throughout
         // falls back to a fixed direction rather than a null vector.
+        // Absolute numerical floor for facet measures and normal norms in their
+        // respective mesh-coordinate scales; not a mesh-quality criterion.
         constexpr Real degenerate = Real(1e-30);
         std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
         std::vector<Real> measures(interfaceFacets.size(), Real(0));
@@ -1617,9 +1654,9 @@ namespace Rodin::Adaptation
         Real sigma = m_parameters.robustScale;
         if (!(sigma > Real(0)))
         {
-          sigma = Real(3) * h * gradientScale;
-          const std::size_t k90 =
-            static_cast<std::size_t>(Real(0.9) * static_cast<Real>(residuals.size() - 1));
+          sigma = RobustScaleMeshFactor * h * gradientScale;
+          const std::size_t k90 = static_cast<std::size_t>(
+            RobustScaleQuantile * static_cast<Real>(residuals.size() - 1));
           std::nth_element(residuals.begin(), residuals.begin() + k90, residuals.end());
           sigma = std::max(sigma, residuals[k90]);
         }
@@ -1647,7 +1684,7 @@ namespace Rodin::Adaptation
           for (const auto& basis : m_rigidModeBasis)
             q -= basis.dot(q) * basis;
           const Real norm = q.norm();
-          if (norm > Real(1e-12))
+          if (norm > RigidModeNormFloor)
             m_rigidModeBasis.push_back(q / norm);
         };
 
@@ -1890,7 +1927,8 @@ namespace Rodin::Adaptation
           ++iterations;
         }
         error = r.norm() / rhsNorm;
-        return std::isfinite(error) && error <= std::max(relativeTolerance, Real(1e-6));
+        return std::isfinite(error) &&
+          error <= std::max(relativeTolerance, LinearSolveAcceptanceFloor);
       }
 
       /// @brief A node whose displacement is restricted to a subspace.
@@ -2298,9 +2336,10 @@ namespace Rodin::Adaptation
           const auto& guess = axb.getSolution();
           const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
             ? m_parameters.cgMaxIterations
-            : std::min<std::size_t>(2000,
-                std::max<std::size_t>(
-                  100, 2 * m_duStep.getFiniteElementSpace().getSize()));
+            : std::min<std::size_t>(MaxAutomaticCGIterations,
+                std::max<std::size_t>(MinAutomaticCGIterations,
+                  AutomaticCGIterationsPerDof *
+                    m_duStep.getFiniteElementSpace().getSize()));
           const auto stabilisation = getRigidStabilisation(axb.getOperator());
           Math::Vector<Real> solution =
             (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());

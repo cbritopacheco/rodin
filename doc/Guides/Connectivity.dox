@@ -10,7 +10,7 @@
 
   @section guides-connectivity-intro Introduction
 
-  **Connectivity** (or incidence) information describes how the polytopes
+  Connectivity (or incidence) information describes how the polytopes
   (vertices, edges, faces, cells) in a mesh relate to each other. In Rodin,
   this is managed by the @ref Rodin::Geometry::Connectivity "Connectivity"
   class, which is accessed through

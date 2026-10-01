@@ -17,12 +17,14 @@
  * freedom mappings consistent across ownership and ghost layers.
  *
  * P0 degrees of freedom are associated with mesh cells: each cell carries
- * exactly one DOF. Cells are partitioned across ranks; owned cells receive
+ * one DOF per field component. Cells are partitioned across ranks; owned cells receive
  * contiguous global indices, and ghost cells synchronize their global DOF
  * index from the owning rank via a direct owner-push exchange.
  */
 
 #include <limits>
+#include <algorithm>
+#include <type_traits>
 #include <vector>
 #include <utility>
 
@@ -249,8 +251,13 @@ namespace Rodin::Variational
        * @param[in] mesh Distributed mesh on which the space is defined.
        */
       P0(const MeshType& mesh)
+        : P0(mesh, 1)
+      {}
+
+      /** Constructs one constant DOF per cell and field component. */
+      P0(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
-          m_fes(mesh.getShard())
+          m_fes(makeShardFES(mesh, vdim))
       {
         const auto& ctx   = mesh.getContext();
         const auto& comm  = ctx.getCommunicator();
@@ -271,16 +278,17 @@ namespace Rodin::Variational
         for (size_t i = 0; i < localCellCount; ++i)
         {
           if (shard.isOwned(D, i))
-            ++m_owned;
+            m_owned += vdim;
         }
 
         // Assign contiguous global DOF range for owned cells via prefix scan.
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        // For P0, the local DOF index for cell i equals i (the cell index).
+        // The local DOFs of cell i occupy [i * vdim, (i + 1) * vdim).
         // Pre-allocate the left map with an invalid sentinel.
-        m_localToGlobal.left.assign(localCellCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(
+          localCellCount * vdim, std::numeric_limits<Index>::max());
 
         // send[r]: messages to rank r — pairs (globalCellID, globalDOF).
         // Keyed by rank so every neighbor gets an entry (possibly empty).
@@ -312,10 +320,14 @@ namespace Rodin::Variational
             continue;
 
           const Index gid    = mesh.getGlobalIndex(D, i);
-          const Index global = m_offset + dofIdx++;
-
-          m_localToGlobal.left[i] = global;
-          m_localToGlobal.right.emplace(global, static_cast<Index>(i));
+          const Index global = m_offset + dofIdx;
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            const Index local = static_cast<Index>(i * vdim + c);
+            const Index globalComponent = global + c;
+            m_localToGlobal.left[local] = globalComponent;
+          }
+          dofIdx += vdim;
 
           // Notify all neighbors that have this cell as a ghost.
           auto hit = halo.find(i);
@@ -365,15 +377,31 @@ namespace Rodin::Variational
             const Index li = *liOpt;
             assert(!shard.isOwned(D, li));
 
-            m_localToGlobal.left[li] = global;
-            m_localToGlobal.right.emplace(global, li);
+            for (size_t c = 0; c < vdim; ++c)
+            {
+              const Index local = li * vdim + c;
+              const Index globalComponent = global + c;
+              m_localToGlobal.left[local] = globalComponent;
+            }
           }
         }
 
 #ifndef NDEBUG
-        for (size_t i = 0; i < localCellCount; ++i)
+        for (size_t i = 0; i < localCellCount * vdim; ++i)
           assert(m_localToGlobal.left[i] != std::numeric_limits<Index>::max());
 #endif
+
+        // Ghost numbering arrives in neighbor order, not global-index order.
+        // Sorting once avoids repeatedly shifting the flat map's storage.
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(m_localToGlobal.left.size());
+        for (Index local = 0; local < m_localToGlobal.left.size(); ++local)
+          globalLocalPairs.emplace_back(m_localToGlobal.left[local], local);
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end());
+        m_localToGlobal.right.reserve(globalLocalPairs.size());
+        for (const auto& [global, local] : globalLocalPairs)
+          m_localToGlobal.right.emplace_hint(m_localToGlobal.right.end(), global, local);
+        assert(m_localToGlobal.right.size() == globalLocalPairs.size());
       }
 
       /**
@@ -475,7 +503,7 @@ namespace Rodin::Variational
        */
       size_t getSize() const override
       {
-        return getMesh().getCellCount();
+        return getMesh().getCellCount() * getVectorDimension();
       }
 
       /**
@@ -581,6 +609,19 @@ namespace Rodin::Variational
       }
 
     private:
+      static FESType makeShardFES(const MeshType& mesh, size_t vdim)
+      {
+        if constexpr (std::is_same_v<Range, Real> || std::is_same_v<Range, Complex>)
+        {
+          assert(vdim == 1);
+          return FESType(mesh.getShard());
+        }
+        else
+        {
+          return FESType(mesh.getShard(), vdim);
+        }
+      }
+
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
 

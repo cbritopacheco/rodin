@@ -34,7 +34,10 @@ if (RODIN_BUILD_MANUFACTURED_TESTS)
   add_subdirectory(manufactured)
 endif()
 
+if (RODIN_BUILD_CONVERGENCE_TESTS)
+  add_subdirectory(convergence)
+endif()
+
 if (RODIN_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
-
