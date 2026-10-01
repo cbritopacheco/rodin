@@ -151,7 +151,8 @@ namespace Rodin::Examples
   {
     constexpr const char* options[] = {"wngir-kappa-f", "wngir-robust-scale",
       "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
-      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d", "wngir-directional-newton",
+      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d", "wngir-positive-shape-curvature",
+      "wngir-directional-newton",
       "wngir-directional-newton-max-alpha", "wngir-quality-witness",
       "wngir-direct-solver", "wngir-direct-threads", "wngir-geometric-sup-tol",
       "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol",
@@ -178,6 +179,8 @@ namespace Rodin::Examples
     p.h = h;
 
     p.kappaF = realOption(argc, argv, "wngir-kappa-f", defaults.kappaF);
+    p.positiveShapeCurvature = boolOption(
+      argc, argv, "wngir-positive-shape-curvature", p.positiveShapeCurvature);
     p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
 
     p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);

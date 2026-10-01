@@ -92,6 +92,29 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
     metric.assemble();
     EXPECT_NEAR(direction.getData().dot(metric.getOperator() * direction.getData()),
       Real(2) * actual, Real(1e-12));
+    parameters.kappaS /= Real(2);
+    parameters.positiveShapeCurvature = true;
+    metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
+    metric.assemble();
+    const Math::Matrix<Real> positive(metric.getOperator());
+    EXPECT_LT((positive - positive.transpose()).norm(), Real(1e-12));
+    Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> positiveEigen(positive);
+    ASSERT_EQ(positiveEigen.info(), Eigen::Success);
+    EXPECT_GE(positiveEigen.eigenvalues().minCoeff(), Real(-1e-10));
+    Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> differenceEigen(
+      Math::Matrix<Real>(positive - dense));
+    ASSERT_EQ(differenceEigen.info(), Eigen::Success);
+    EXPECT_GE(differenceEigen.eigenvalues().minCoeff(), Real(-1e-10));
+    current = VectorFunction(Dimension, [](const Point&) {
+      return Math::SpatialVector<Real>::Zero(Dimension);
+    });
+    metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
+    metric.assemble();
+    const Math::Matrix<Real> identityPositive(metric.getOperator());
+    parameters.positiveShapeCurvature = false;
+    metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
+    metric.assemble();
+    EXPECT_LT((identityPositive - Math::Matrix<Real>(metric.getOperator())).norm(), Real(1e-10));
   };
   check.template operator()<1, 2>();
   check.template operator()<2, 2>();

@@ -1,4 +1,5 @@
 import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -7,7 +8,7 @@ from unittest.mock import patch
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from run_p1_2d_parameter_campaign import ensure_schema, run_case
+from run_p1_2d_parameter_campaign import FIELDS, cases_for, ensure_schema, main, read_done, run_case
 from run_p1_3d_screen import command
 
 
@@ -19,9 +20,60 @@ class CanonicalCampaignTest(unittest.TestCase):
         with patch("run_p1_2d_parameter_campaign.subprocess.run") as run:
             run.return_value = SimpleNamespace(stdout="", returncode=0)
             run_case(args, Path("/tmp/example"), "canonical", 20, 4,
-                     1e-4, 1, 90, 1, 1)
+                     1, 1e-4, 1, 90, 1, 1)
         self.check_command(run.call_args.args[0])
         self.assertEqual(run.call_args.kwargs["env"]["OPENBLAS_NUM_THREADS"], "4")
+
+    def test_fitting_grid_and_resume_keys_are_independent(self):
+        grid = [1e-4, 1e-3, 1e-2, .1, 1]
+        cases = list(cases_for("canonical", [20], [4], grid, grid, grid,
+                               [.1, 1, 10, 100, 1000], [1], [1]))
+        self.assertEqual(len(cases), 625)
+        self.assertEqual(len(set(cases)), 625)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "campaign.csv"
+            with path.open("w", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=FIELDS)
+                writer.writeheader()
+                for kf in grid:
+                    writer.writerow(dict(dataset="canonical", n=20, lobes=4,
+                                         kappa_f=kf, kappa_s=.001, kappa_d=.001,
+                                         shape_curvature="full", mu_hat=.1, kappa_j=1, kappa_q=1))
+            _, done = read_done(path)
+            self.assertEqual(len(done), 5)
+            self.assertTrue(done.issubset(set(cases)))
+
+    def test_extended_grid_manifest_without_launching_cases(self):
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "example"
+            executable.touch()
+            argv = ["campaign", "--root", directory, "--exe", str(executable),
+                    "--out-dir", directory, "--scratch", directory,
+                    "--mu-hat", "0.1,1,10,100,1000",
+                    "--deadline", "2000-01-01 00:00:00"]
+            with patch.object(sys, "argv", argv), patch(
+                    "run_p1_2d_parameter_campaign.run_case") as run:
+                main()
+                run.assert_not_called()
+            manifest = json.loads((Path(directory) / "canonical_p1_2d_manifest.json").read_text())
+            self.assertEqual(manifest["expected_cases"], 68750)
+            self.assertEqual(manifest["shape_curvature"], ["full", "psd"])
+            for key in ("kappa_f", "kappa_s", "kappa_d"):
+                self.assertEqual(manifest[key], [1e-4, 1e-3, 1e-2, .1, 1])
+
+    def test_shape_variants_have_separate_cases_and_commands(self):
+        cases = list(cases_for("canonical", [20], [4], [1], [.001], [.001],
+                               [.1], [1], [1], ["full", "psd"]))
+        self.assertEqual(len(set(cases)), 2)
+        args = SimpleNamespace(amp=.08, r0=.24, steps=30, barrier_max_iters=15,
+                               extra="", log_iterations=False, threads=4,
+                               dyld_library_path="", root=Path("/tmp"))
+        for case, expected in zip(cases, (0, 1)):
+            with patch("run_p1_2d_parameter_campaign.subprocess.run") as run:
+                run.return_value = SimpleNamespace(stdout="", returncode=0)
+                row = run_case(args, Path("/tmp/example"), *case)
+                self.assertIn(f"--wngir-positive-shape-curvature={expected}", run.call_args.args[0])
+                self.assertEqual(row["shape_curvature"], case[-1])
 
     def test_3d_command_uses_same_model(self):
         args = SimpleNamespace(exe=Path("/tmp/example"), kappa_f=1, amp=.08, r0=.24,

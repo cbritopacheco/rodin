@@ -37,6 +37,8 @@ namespace Rodin::Adaptation
       Real kappaF = 1; ///< Fitting curvature weight.
       Real kappaS = 1; ///< Shape curvature weight.
       Real kappaD = 1; ///< Distribution (current-strain regularity) weight.
+      /// Experimental local PSD projection of shape curvature; full Hessian by default.
+      bool positiveShapeCurvature = false;
       /// Robust directional Newton seed, omitting the level-set Hessian.
       bool directionalNewton = true;
       Real directionalNewtonMaxAlpha = 100;

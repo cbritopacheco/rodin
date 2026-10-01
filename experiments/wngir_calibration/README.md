@@ -3,7 +3,10 @@
 WNGIR now has one model: M = F + S + D (Fitting, Shape, Distribution), affine quadratic hinges,
 directional Newton, frozen inner-merit backtracking, and actual outer j/Q
 and fitting-energy checks. There is no selectable logarithmic model, PSD
-clipping, coefficient-space completion, mass term, or nonlinear-hinge path.
+clipping by default, coefficient-space completion, mass term, or nonlinear-hinge path.
+The experimental `--wngir-positive-shape-curvature=1` projects the local
+Hessian of (d/4)(Q-1) onto its PSD spectrum before assembly. It adds no force
+and does not guarantee invertibility of the total metric.
 
 - F is kappa_f times the normalized Hessian of half the squared level-set residual with
   the level-set Hessian omitted. It is not robust-weighted.
@@ -18,10 +21,17 @@ clipping, coefficient-space completion, mass term, or nonlinear-hinge path.
   The previous default metric is reproduced by (kappa_f,kappa_s,kappa_d)=(1,1e-4,1e-4).
   More generally, old weights map to (kappa_obs,kappa_bulk*kappa_c,kappa_bulk*kappa_reg).
 
-The inertia audit rejects an indefinite or unresolved metric. It does not
-repair it. Fitting must resolve the similarity modes that D leaves free;
+There is no separate inertia audit or automatic metric repair. Linear residual,
+direction, inner merit and actual outer quality/energy checks remain in place.
+Fitting must resolve the similarity modes that D leaves free;
 for example, a planar interface cannot identify tangential translation.
 Full shape curvature is not globally PSD. No general coercivity claim is made.
+The distribution integrators tabulate frozen current strain once per basis and
+quadrature point, rather than reevaluating the inverse deformation for each
+basis pair. MUMPS retains symbolic analysis while the sparsity pattern matches,
+and numeric factors while entries match exactly. An entirely inactive hinge
+model uses the predictor directly without assembling and solving a zero correction.
+Geometry traces record inactive-hinge skips and analysis/factorization counts.
 
 ## Remaining Parameters
 
@@ -75,8 +85,14 @@ used. Inner merit backtracking handles active-set changes. The nonlinear
 outer update still requires actual Jacobian and distortion admissibility
 and sufficient decrease of E_W. Metrics do not add a quality force to E_W.
 
-The 2D and 3D runners use MUMPS, fixed --kappa-f and independent
---kappa-s/--kappa-d grids (all default to one). Executables use
+The 2D runner uses MUMPS and independent --kappa-f/--kappa-s/--kappa-d grids,
+each defaulting to 1e-4,1e-3,1e-2,0.1,1. With mu_hat=0.1,1,10,100,1000,
+all five resolutions and eleven lobe counts give 34,375 cases per shape variant.
+`--shape-curvature=full,psd` compares both (68,750 cases), interleaved for each
+coefficient tuple. The schema, resume keys, logs and manifest distinguish the
+variants; the stopped fixed-F campaign is preserved separately.
+The 3D runner still uses fixed --kappa-f and --kappa-s/--kappa-d grids.
+Executable defaults remain all one. Executables use
 --wngir-kappa-f, --wngir-kappa-s and --wngir-kappa-d; the old metric flags
 are rejected. Hinges retain mu_hat, kappa_j, kappa_q and the quality guard.
 Use a new output directory: model identifiers and schemas deliberately reject

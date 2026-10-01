@@ -121,8 +121,11 @@ namespace Rodin::Adaptation
       const char* exitReason = "iter-budget";
       // Wall-clock breakdown (seconds, accumulated over iterations).
       Real tAssembly = 0; ///< WNGIR variational problem assembly.
-      std::size_t metricInertiaChecks = 0; ///< Numeric LDLT inertia audits.
-      Real tMetricAudit = 0; ///< Time spent auditing inertia, without repair.
+      std::size_t metricInertiaChecks = 0; ///< Legacy counter; no separate inertia audit.
+      Real tMetricAudit = 0; ///< Legacy timing; zero without the removed audit.
+      std::size_t inactiveHingeSkips = 0; ///< Predictor already solves the inactive-hinge model.
+      std::size_t directAnalyses = 0; ///< MUMPS symbolic analyses initiated by WNGIR.
+      std::size_t directFactorizations = 0; ///< MUMPS numeric factorizations initiated by WNGIR.
       Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
       Real tBulk = 0; ///< One-time constant bulk metric assembly.
       Real tFactor = 0; ///< CG setup/preconditioner.

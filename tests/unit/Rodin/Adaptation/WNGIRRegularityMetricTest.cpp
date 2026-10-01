@@ -3,6 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <Eigen/Eigenvalues>
 #include "Rodin/Adaptation/WNGIRRegularityMetric.h"
 #include "Rodin/Geometry.h"
 
@@ -51,6 +52,22 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, CurrentStrainKernelAndEnergyP1P2)
     BilinearForm form(trial, test);
     form = integral;
     form.assemble();
+    BilinearForm tabulated(trial, test);
+    tabulated = Adaptation::Detail::WNGIRCurrentStrainMetric(
+      trial, test, current, coefficient, 2 * Order);
+    tabulated.assemble();
+    EXPECT_LT((tabulated.getOperator() - form.getOperator()).norm(),
+      Real(1e-12) * form.getOperator().norm());
+    LinearForm reference(test), tabulatedTrace(test);
+    auto traceIntegral = Integral(weight * Trace(
+      Adaptation::Detail::wngirCurrentStrain(test, current, Dimension)));
+    traceIntegral.setOrder(2 * Order);
+    reference = traceIntegral;
+    tabulatedTrace = Adaptation::Detail::WNGIRCurrentStrainTrace(test, current, 2 * Order);
+    reference.assemble();
+    tabulatedTrace.assemble();
+    EXPECT_LT((tabulatedTrace.getVector() * std::sqrt(Real(Dimension)) -
+      reference.getVector()).norm(), Real(1e-12) * reference.getVector().norm());
     const auto modes = Adaptation::Detail::wngirCurrentStrainCouplings(
       test, current, Dimension, coefficient, 2 * Order);
     ASSERT_EQ(modes.size(), 1u);
@@ -118,24 +135,4 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, CurrentStrainKernelAndEnergyP1P2)
   check.template operator()<2, 2>();
   check.template operator()<1, 3>();
   check.template operator()<2, 3>();
-}
-
-TEST(Rodin_Adaptation_WNGIRRegularityMetric, SignedInertiaMatchesDense)
-{
-  Math::Matrix<Real> dense = Math::Matrix<Real>::Identity(5, 5);
-  std::vector<Math::Vector<Real>> modes;
-  auto mode = Math::Vector<Real>::Zero(5).eval();
-  mode(0) = Real(2);
-  modes.push_back(mode);
-  Math::SparseMatrix<Real> sparse = dense.sparseView();
-  EXPECT_EQ(Adaptation::Detail::wngirRegularityInertia(sparse, modes, {Real(-1)}), 1);
-  EXPECT_EQ(Adaptation::Detail::wngirRegularityInertia(sparse, modes, {Real(1)}), 0);
-  mode(1) = Real(1);
-  modes.push_back(mode);
-  const std::vector<Real> weights{Real(-1), Real(2)};
-  dense -= modes[0] * modes[0].transpose();
-  dense += Real(2) * modes[1] * modes[1].transpose();
-  Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(dense);
-  EXPECT_EQ(Adaptation::Detail::wngirRegularityInertia(sparse, modes, weights),
-    (eigen.eigenvalues().array() < Real(0)).count());
 }

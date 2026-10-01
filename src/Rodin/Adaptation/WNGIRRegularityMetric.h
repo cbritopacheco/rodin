@@ -5,8 +5,6 @@
 #ifndef RODIN_ADAPTATION_WNGIRREGULARITYMETRIC_H
 #define RODIN_ADAPTATION_WNGIRREGULARITYMETRIC_H
 
-#include <Eigen/SparseCholesky>
-#include <Eigen/Eigenvalues>
 #include <cmath>
 #include <limits>
 #include <vector>
@@ -16,6 +14,159 @@
 
 namespace Rodin::Adaptation::Detail
 {
+  /**
+   * @brief Frozen current-strain bilinear form, excluding the global dilation correction.
+   *
+   * Binds cached geometry and basis Jacobians, evaluates j and F^-1 once per
+   * quadrature point, then tabulates sym(grad v F^-1) before contracting pairs.
+   * This is the same integral as wngirCurrentStrain, without repeated coefficient
+   * evaluation inside the basis-pair loop. Assembly clones isolate bind state.
+   */
+  template <class TrialFunction, class TestFunction, class Displacement>
+  class WNGIRCurrentStrainMetric final
+    : public Variational::LocalBilinearFormIntegratorBase<typename TrialFunction::ScalarType>
+  {
+    public:
+      using ScalarType = typename TrialFunction::ScalarType;
+      using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      WNGIRCurrentStrainMetric(const TrialFunction& trial, const TestFunction& test,
+        const Displacement& current, Real coefficient, size_t order)
+        : Parent(trial.getLeaf(), test.getLeaf()), m_trial(trial), m_test(test),
+          m_current(current), m_coefficient(coefficient), m_order(order)
+      {}
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      WNGIRCurrentStrainMetric& setPolytope(const Geometry::Polytope& cell) final override
+      {
+        m_polytope = &cell;
+        const auto d = cell.getDimension();
+        const auto& trialFES = m_trial.get().getFiniteElementSpace();
+        const auto& testFES = m_test.get().getFiniteElementSpace();
+        const auto nTrial = trialFES.getFiniteElement(d, cell.getIndex()).getCount();
+        const auto nTest = testFES.getFiniteElement(d, cell.getIndex()).getCount();
+        const auto& qf = QF::PolytopeQuadratureFormula::get(m_order, cell.getGeometry());
+        const auto& quadrature = cell.getQuadrature(qf);
+        m_matrix = Math::Matrix<Real>::Zero(nTest, nTrial);
+        m_trialStrains.resize(nTrial);
+        m_testStrains.resize(nTest);
+        auto currentJacobian = Variational::Jacobian(m_current.get());
+        auto trialJacobian = Variational::Jacobian(m_trial.get());
+        auto testJacobian = Variational::Jacobian(m_test.get());
+        for (size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto& point = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(point, &qf, q);
+          CellDeformation deformation(d);
+          deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+          const Math::SpatialMatrix<Real> inverse(deformation.getInverseTranspose().transpose());
+          trialJacobian.setIntegrationPoint(ip);
+          for (size_t local = 0; local < nTrial; ++local)
+          {
+            const Math::SpatialMatrix<Real> L(trialJacobian.getBasis(local) * inverse);
+            m_trialStrains[local] = Real(0.5) * (L + L.transpose());
+          }
+          if (trialFES == testFES)
+            m_testStrains = m_trialStrains;
+          else
+          {
+            testJacobian.setIntegrationPoint(ip);
+            for (size_t local = 0; local < nTest; ++local)
+            {
+              const Math::SpatialMatrix<Real> L(testJacobian.getBasis(local) * inverse);
+              m_testStrains[local] = Real(0.5) * (L + L.transpose());
+            }
+          }
+          const Real weight = m_coefficient * qf.getWeight(q) * point.getDistortion() *
+            deformation.getJacobian();
+          for (size_t test = 0; test < nTest; ++test)
+            for (size_t trial = 0; trial < nTrial; ++trial)
+              m_matrix(test, trial) += weight *
+                Math::dot(m_trialStrains[trial], m_testStrains[test]);
+        }
+        return *this;
+      }
+
+      ScalarType integrate(size_t trial, size_t test) final override
+      {
+        return m_matrix(test, trial);
+      }
+      Geometry::Region getRegion() const final override { return Geometry::Region::Cells; }
+      WNGIRCurrentStrainMetric* copy() const noexcept final override
+      {
+        return new WNGIRCurrentStrainMetric(*this);
+      }
+
+    private:
+      std::reference_wrapper<const TrialFunction> m_trial;
+      std::reference_wrapper<const TestFunction> m_test;
+      std::reference_wrapper<const Displacement> m_current;
+      Real m_coefficient;
+      size_t m_order;
+      const Geometry::Polytope* m_polytope = nullptr;
+      Math::Matrix<Real> m_matrix;
+      std::vector<Math::SpatialMatrix<Real>> m_trialStrains, m_testStrains;
+  };
+
+  /// Frozen linear trace coupling, using one coefficient evaluation per quadrature point.
+  template <class TestFunction, class Displacement>
+  class WNGIRCurrentStrainTrace final
+    : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
+  {
+    public:
+      using ScalarType = typename TestFunction::ScalarType;
+      using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+      WNGIRCurrentStrainTrace(const TestFunction& test, const Displacement& current, size_t order)
+        : Parent(test.getLeaf()), m_test(test), m_current(current), m_order(order)
+      {}
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+      WNGIRCurrentStrainTrace& setPolytope(const Geometry::Polytope& cell) final override
+      {
+        m_polytope = &cell;
+        const auto d = cell.getDimension();
+        const auto n = m_test.get().getFiniteElementSpace().getFiniteElement(d, cell.getIndex()).getCount();
+        const auto& qf = QF::PolytopeQuadratureFormula::get(m_order, cell.getGeometry());
+        const auto& quadrature = cell.getQuadrature(qf);
+        m_vector = Math::Vector<Real>::Zero(n);
+        auto currentJacobian = Variational::Jacobian(m_current.get());
+        auto testJacobian = Variational::Jacobian(m_test.get());
+        for (size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto& point = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(point, &qf, q);
+          CellDeformation deformation(d);
+          deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+          const Math::SpatialMatrix<Real> inverse(deformation.getInverseTranspose().transpose());
+          const Real weight = qf.getWeight(q) * point.getDistortion() *
+            deformation.getJacobian() / std::sqrt(Real(d));
+          testJacobian.setIntegrationPoint(ip);
+          for (size_t local = 0; local < n; ++local)
+            m_vector(local) += weight * (testJacobian.getBasis(local) * inverse).trace();
+        }
+        return *this;
+      }
+      ScalarType integrate(size_t local) final override { return m_vector(local); }
+      Geometry::Region getRegion() const final override { return Geometry::Region::Cells; }
+      WNGIRCurrentStrainTrace* copy() const noexcept final override
+      {
+        return new WNGIRCurrentStrainTrace(*this);
+      }
+    private:
+      std::reference_wrapper<const TestFunction> m_test;
+      std::reference_wrapper<const Displacement> m_current;
+      size_t m_order;
+      const Geometry::Polytope* m_polytope = nullptr;
+      Math::Vector<Real> m_vector;
+  };
   /// Frozen inverse deformation gradient, expressed as a form-language coefficient.
   template <class Displacement>
   class WNGIRCurrentInverse final
@@ -87,12 +238,8 @@ namespace Rodin::Adaptation::Detail
     if (!(coefficient > Real(0)))
       Alert::Exception() << "Current strain regularity requires positive coefficient."
                          << Alert::Raise;
-    const auto weight = wngirCurrentVolumeWeight(current, dimension);
-    auto integral = Variational::Integral((Real(1) / std::sqrt(Real(dimension))) *
-      weight * Variational::Trace(wngirCurrentStrain(test, current, dimension)));
-    integral.setOrder(order);
     Variational::LinearForm form(test);
-    form = integral;
+    form = WNGIRCurrentStrainTrace(test, current, order);
     form.assemble();
     Variational::GridFunction dilation(test.getFiniteElementSpace());
     dilation = Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
@@ -108,49 +255,5 @@ namespace Rodin::Adaptation::Detail
     return {Math::Vector<Real>(std::sqrt(coefficient / measure) * form.getVector())};
   }
 
-  /**
-   * @brief Audit inertia of A + sum weights[k] modes[k] modes[k]^T, without repair.
-   * Uses inertia(A)+inertia(-D^-1-U^T A^-1 U)-inertia(-D^-1).
-   * Returns the negative eigenvalue count, or -1 if the unpivoted base
-   * factorization or small Schur block cannot resolve inertia reliably.
-   * No positive-definiteness claim follows from an unresolved check.
-   */
-  inline Integer wngirRegularityInertia(const Math::SparseMatrix<Real>& A,
-    const std::vector<Math::Vector<Real>>& modes, const std::vector<Real>& weights)
-  {
-    Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> factor;
-    factor.compute(A);
-    if (factor.info() != Eigen::Success || !factor.vectorD().allFinite())
-      return -1;
-    const auto pivots = factor.vectorD();
-    const Real margin =
-      Real(64) * std::numeric_limits<Real>::epsilon() * pivots.cwiseAbs().maxCoeff();
-    if (pivots.cwiseAbs().minCoeff() <= margin)
-      return -1;
-    Integer negative = (pivots.array() < Real(0)).count();
-    if (weights.empty())
-      return negative;
-    const auto rank = static_cast<Eigen::Index>(weights.size());
-    Math::Matrix<Real> U(A.rows(), rank), diagonal = Math::Matrix<Real>::Zero(rank, rank);
-    Integer auxiliaryNegative = 0;
-    for (Eigen::Index k = 0; k < rank; ++k)
-    {
-      U.col(k) = std::sqrt(std::abs(weights[k])) * modes[k];
-      diagonal(k, k) = weights[k] > Real(0) ? Real(-1) : Real(1);
-      auxiliaryNegative += weights[k] > Real(0);
-    }
-    const Math::Matrix<Real> inverseU = factor.solve(U);
-    if (!inverseU.allFinite() || (A * inverseU - U).norm() > Real(1e-7) * U.norm())
-      return -1;
-    Math::Matrix<Real> schur = diagonal - U.transpose() * inverseU;
-    schur = (Real(0.5) * (schur + schur.transpose())).eval();
-    Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(schur);
-    if (eigen.info() != Eigen::Success || !eigen.eigenvalues().allFinite() ||
-      eigen.eigenvalues().cwiseAbs().minCoeff() <=
-        Real(1e-9) * std::max(Real(1), eigen.eigenvalues().cwiseAbs().maxCoeff()))
-      return -1;
-    negative += (eigen.eigenvalues().array() < Real(0)).count() - auxiliaryNegative;
-    return negative >= 0 ? negative : -1;
-  }
 }
 #endif

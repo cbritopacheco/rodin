@@ -25,6 +25,7 @@ namespace Rodin::Tests::Unit
     {
       const WNGIRParameters parameters;
       EXPECT_EQ(parameters.kappaF, Real(1));
+      EXPECT_FALSE(parameters.positiveShapeCurvature);
       EXPECT_EQ(parameters.muHat, Real(90));
       EXPECT_EQ(parameters.primalBarrierIterations, 15);
       EXPECT_EQ(parameters.primalBarrierRelativeTolerance, Real(1e-3));
@@ -94,7 +95,7 @@ namespace Rodin::Tests::Unit
       std::size_t cgCap = 1000, bool strictCG = false,
       WNGIRParameters::DirectSolver directSolver =
         WNGIRParameters::DirectSolver::SparseLU,
-      bool flat = false)
+      bool flat = false, Real innerTolerance = Real(1e-3), Real muHat = Real(90))
     {
       constexpr std::size_t n = 5;
       constexpr Real h = Real(1) / Real(n - 1);
@@ -130,6 +131,8 @@ namespace Rodin::Tests::Unit
       parameters.geometricSupTolerance = target;
       parameters.directSolver = directSolver;
       parameters.directSolverThreads = 2;
+      parameters.primalBarrierRelativeTolerance = innerTolerance;
+      parameters.muHat = muHat;
       parameters.robustScale = robustScale;
       parameters.hasInterfaceAttribute = true;
       parameters.interfaceAttribute = Interface;
@@ -266,7 +269,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(base.report.energy, traced.report.energy);
     EXPECT_EQ(base.report.geometricSup, traced.report.geometricSup);
     EXPECT_EQ((base.displacement - traced.displacement).norm(), Real(0));
-    EXPECT_NE(output.find("barrier inner="), std::string::npos);
+    EXPECT_TRUE(output.find("barrier inner=") != std::string::npos ||
+      output.find("barrier skip:") != std::string::npos);
     EXPECT_NE(output.find("wngir directional:"), std::string::npos);
     EXPECT_NE(output.find("wngir quality witness:"), std::string::npos);
     EXPECT_NE(output.find("cg_it="), std::string::npos);
@@ -354,8 +358,8 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(state.report.geometricSup, Real(0.05));
     EXPECT_GT(state.report.minJ, Real(0.01));
     EXPECT_LT(state.report.maxQRel, Real(10));
-    EXPECT_GT(state.report.metricInertiaChecks, 0u);
-    EXPECT_GT(state.report.tMetricAudit, Real(0));
+    EXPECT_EQ(state.report.metricInertiaChecks, 0u);
+    EXPECT_EQ(state.report.tMetricAudit, Real(0));
     EXPECT_TRUE(state.report.primalBarrierConverged);
   }
 
@@ -377,6 +381,31 @@ namespace Rodin::Tests::Unit
   }
 
 #ifdef RODIN_USE_MUMPS
+  TEST(Rodin_Adaptation_WNGIRSolver, InactiveHingesSkipZeroCorrections)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000,
+      true, WNGIRParameters::DirectSolver::MUMPS, false, Real(1e-3), Real(0));
+    EXPECT_GT(state.report.inactiveHingeSkips, 0u);
+    EXPECT_EQ(state.report.primalBarrierIterations, 0u);
+    EXPECT_EQ(state.report.tPrimalBarrierAssembly, Real(0));
+    EXPECT_EQ(state.report.tPrimalBarrierSolve, Real(0));
+    EXPECT_TRUE(state.report.primalBarrierConverged);
+    EXPECT_LT(state.report.geometricSup, Real(0.05));
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, MUMPSRetainsIdenticalNumericFactors)
+  {
+    // Zero tolerance requests explicit corrections, even for an inactive model.
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000,
+      true, WNGIRParameters::DirectSolver::MUMPS, false, Real(0), Real(0));
+    EXPECT_GT(state.report.directFactorizations, 0u);
+    EXPECT_LT(state.report.directFactorizations, state.report.linearSolveCount);
+    EXPECT_EQ(state.report.directAnalyses, 1u);
+    EXPECT_EQ(state.report.inactiveHingeSkips, 0u);
+    EXPECT_GT(state.report.primalBarrierIterations, 0u);
+    EXPECT_LT(state.report.linearError, Real(1e-12));
+  }
+
   TEST(Rodin_Adaptation_WNGIRSolver, MUMPSAugmentedSolveRetainsDilationProjection)
   {
     const auto solve = [](WNGIRParameters::DirectSolver directSolver) {
@@ -391,6 +420,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mumps.report.linearIterations, 0u);
     EXPECT_GT(mumps.report.linearSolveCount, 0u);
     EXPECT_LT(mumps.report.linearError, Real(1e-12));
+    EXPECT_GT(mumps.report.directFactorizations, 0u);
+    EXPECT_LT(mumps.report.directAnalyses, mumps.report.directFactorizations);
   }
 #endif
 
@@ -432,14 +463,15 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(std::isinf(state.report.activeRMS));
     EXPECT_TRUE(std::isinf(state.report.activeSup));
   }
-  TEST(Rodin_Adaptation_WNGIRSolver, RejectsUnresolvedTangentialTranslation)
+  TEST(Rodin_Adaptation_WNGIRSolver, UnresolvedTranslationHasNoInertiaGate)
   {
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
       WNGIRParameters::DirectSolver::SparseLU, true);
-    EXPECT_STREQ(state.report.exitReason, "metric-inertia-unresolved");
-    EXPECT_EQ(state.report.iterations, 0u);
-    EXPECT_EQ(state.report.linearSolveCount, 0u);
-    EXPECT_EQ(state.displacement.norm(), Real(0));
+    EXPECT_STRNE(state.report.exitReason, "metric-inertia-unresolved");
+    EXPECT_GT(state.report.linearSolveCount, 0u);
+    EXPECT_EQ(state.report.metricInertiaChecks, 0u);
+    EXPECT_GT(state.report.minJ, Real(0.01));
+    EXPECT_LT(state.report.maxQRel, Real(10));
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsInvalidCanonicalWeights)

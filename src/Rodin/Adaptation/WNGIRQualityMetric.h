@@ -5,6 +5,8 @@
 #ifndef RODIN_ADAPTATION_WNGIRQUALITYMETRIC_H
 #define RODIN_ADAPTATION_WNGIRQUALITYMETRIC_H
 
+#include <Eigen/Eigenvalues>
+#include "Rodin/Alert.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "CellDeformation.h"
@@ -16,7 +18,8 @@ namespace Rodin::Adaptation::Detail
    * @brief Full frozen shape curvature for WNGIR increments.
    *
    * Assembles h*kappaS times the Hessian of (d/4)(Q-1).
-   * The tensor is not clipped and introduces no additional quality force.
+   * The tensor is unclipped by default; positiveShapeCurvature projects its
+   * local spectrum onto the nonnegative half-line. Neither adds a quality force.
    * It is frozen at the outer displacement and reused by the inner QP.
    */
   template <class TrialFunction, class TestFunction, class Displacement>
@@ -86,20 +89,36 @@ namespace Rodin::Adaptation::Detail
               curvature(a, b) =
                 Real(d) / Real(4) * deformation.getRelativeDistortionSecondAction(G, H);
             }
+          if (parameters.positiveShapeCurvature)
+          {
+            curvature = (Real(0.5) * (curvature + curvature.transpose())).eval();
+            Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(curvature);
+            if (eigen.info() != Eigen::Success || !eigen.eigenvalues().allFinite())
+              Alert::Exception() << "WNGIR shape-curvature eigensolve failed."
+                                 << Alert::Raise;
+            curvature = eigen.eigenvectors() *
+              eigen.eigenvalues().cwiseMax(Real(0)).asDiagonal() *
+              eigen.eigenvectors().transpose();
+          }
           const Real weight = coefficient * qf.getWeight(q) * point.getDistortion();
+          std::vector<Math::Vector<Real>> trialImages(trialFE.getCount());
+          for (size_t trial = 0; trial < trialFE.getCount(); ++trial)
+          {
+            const auto& G = trialJacobian.getBasis(trial);
+            Math::Vector<Real> g(d * d);
+            for (size_t a = 0; a < d * d; ++a)
+              g(a) = G(a / d, a % d);
+            trialImages[trial] = curvature * g;
+          }
           for (size_t test = 0; test < testFE.getCount(); ++test)
+          {
+            const auto& H = testJacobian.getBasis(test);
+            Math::Vector<Real> h(d * d);
+            for (size_t a = 0; a < d * d; ++a)
+              h(a) = H(a / d, a % d);
             for (size_t trial = 0; trial < trialFE.getCount(); ++trial)
-            {
-              const auto& G = trialJacobian.getBasis(trial);
-              const auto& H = testJacobian.getBasis(test);
-              Math::Vector<Real> g(d * d), h(d * d);
-              for (size_t a = 0; a < d * d; ++a)
-              {
-                g(a) = G(a / d, a % d);
-                h(a) = H(a / d, a % d);
-              }
-              m_matrix(test, trial) += weight * h.dot(curvature * g);
-            }
+              m_matrix(test, trial) += weight * h.dot(trialImages[trial]);
+          }
         }
         return *this;
       }

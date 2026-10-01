@@ -58,7 +58,9 @@ namespace Rodin::Adaptation
    *
    * The form-language assembly uses the local Eigen backend, with CG, SparseLU
    * or MUMPS solving the same dilation-projected operator. No completion or
-   * curvature clipping is applied; unresolved or negative inertia is rejected.
+   * curvature clipping is applied by default; the optional local PSD shape
+   * projection is experimental. There is no separate inertia gate; linear
+   * residual, direction and actual-geometry line-search checks remain active.
    */
   template <class TrialFunctionType, class TestFunctionType>
   class WNGIR
@@ -395,6 +397,9 @@ namespace Rodin::Adaptation
                     << "  inner_total=" << rep.primalBarrierIterations
                     << "  inner_last=" << rep.lastPrimalBarrierIterations
                     << "  inner_converged=" << rep.primalBarrierConverged
+                    << "  inactive_hinge_skips=" << rep.inactiveHingeSkips
+                    << "  direct_analyses=" << rep.directAnalyses
+                    << "  direct_factorizations=" << rep.directFactorizations
                     << "  fit_energy=" << rep.energy
                     << "  inner_assembly_seconds=" << rep.tPrimalBarrierAssembly
                     << "  inner_solve_seconds=" << rep.tPrimalBarrierSolve
@@ -458,12 +463,8 @@ namespace Rodin::Adaptation
               order, 2 * fes.getFiniteElement(meshDim, cell->getIndex()).getOrder());
           if (p.quadratureOrder > 0)
             order = p.quadratureOrder;
-          const auto weight = Detail::wngirCurrentVolumeWeight(u, meshDim);
-          auto regularity = Variational::Integral(
-            coefficient * weight * Detail::wngirCurrentStrain(m_duStep, u, meshDim),
-            Detail::wngirCurrentStrain(m_vStep, u, meshDim));
-          regularity.setOrder(order);
-          m_regularityForm = regularity;
+          m_regularityForm = Detail::WNGIRCurrentStrainMetric(
+            m_duStep, m_vStep, u, coefficient, order);
           m_regularityForm.assemble();
           m_dilationCouplings =
             Detail::wngirCurrentStrainCouplings(m_vStep, u, meshDim, coefficient, order);
@@ -489,29 +490,12 @@ namespace Rodin::Adaptation
               fixedMetric = system.getOperator();
               fixedForce = system.getVector();
               fixedProjection = getRegularityProjection();
-              const auto checkStart = Clock::now();
-              const Integer negative = Detail::wngirRegularityInertia(
-                fixedMetric, fixedProjection.modes, fixedProjection.weights);
-              rep.tMetricAudit += secondsSince(checkStart);
-              ++rep.metricInertiaChecks;
-              if (p.trace)
-                std::cout << "      wngir metric: outer=" << rep.iterations
-                          << "  inertia_checks=1"
-                          << "  negative=" << negative << "  kappa_f=" << p.kappaF
-                          << "  kappa_s=" << p.kappaS << "  kappa_d=" << p.kappaD
-                          << "  seconds=" << secondsSince(checkStart) << std::endl;
-              if (negative != 0)
-              {
-                rep.exitReason =
-                  negative > 0 ? "metric-indefinite" : "metric-inertia-unresolved";
-                break;
-              }
             }
           }
           tic = Clock::now();
           std::size_t predictorIterations = 0;
           Real predictorError = std::numeric_limits<Real>::infinity();
-          solveOk = solveStep(vK, predictorIterations, predictorError, &fixedProjection);
+          solveOk = solveStep(vK, predictorIterations, predictorError, &fixedProjection, &rep);
           recordLinearSolve(predictorIterations, predictorError);
           rep.tSolve += secondsSince(tic);
           if (!solveOk)
@@ -546,6 +530,19 @@ namespace Rodin::Adaptation
               tic = Clock::now();
               for (std::size_t inner = 0; inner < innerIterations; ++inner)
               {
+                if (inner == 0 && p.primalBarrierRelativeTolerance > Real(0) &&
+                  !hasActivePrimalHinges(mesh, fes, validationCells, u, vK,
+                    meshDim, barrierCoefficient))
+                {
+                  // The accepted predictor already solves the hinge-free inner model.
+                  innerConverged = true;
+                  rep.primalBarrierRelativeCorrection = Real(0);
+                  ++rep.inactiveHingeSkips;
+                  if (p.trace)
+                    std::cout << "        barrier skip: outer=" << rep.iterations
+                              << "  reason=inactive-hinges  converged=1\n";
+                  break;
+                }
                 Detail::WNGIRPrimalBarrierMetric barrierMetric(
                   m_duStep, m_vStep, u, vK, p, barrierCoefficient);
                 Detail::WNGIRPrimalBarrierForce barrierForce(
@@ -563,7 +560,7 @@ namespace Rodin::Adaptation
                 std::size_t barrierIterations = 0;
                 Real barrierError = std::numeric_limits<Real>::infinity();
                 solveOk =
-                  solveStep(uTrial, barrierIterations, barrierError, &fixedProjection);
+                  solveStep(uTrial, barrierIterations, barrierError, &fixedProjection, &rep);
                 recordLinearSolve(barrierIterations, barrierError);
                 const Real innerSolveSeconds = secondsSince(tic);
                 rep.tSolve += innerSolveSeconds;
@@ -1297,6 +1294,42 @@ namespace Rodin::Adaptation
 
       /// @brief Integrated affine quality energy on the same quadrature as its force and Hessian.
       template <class Mesh, class FES>
+      bool hasActivePrimalHinges(const Mesh& mesh, const FES& fes,
+        const std::vector<Index>& cells, const Displacement& current,
+        const Displacement& inner, std::size_t dimension, Real coefficient) const
+      {
+        bool active = false;
+#ifdef RODIN_USE_OPENMP
+#pragma omp parallel reduction(|| : active)
+#endif
+        {
+          auto currentJacobian = Variational::Jacobian(current);
+          auto innerJacobian = Variational::Jacobian(inner);
+          CellDeformation deformation(dimension);
+#ifdef RODIN_USE_OPENMP
+#pragma omp for schedule(static)
+#endif
+          for (Index i = 0; i < static_cast<Index>(cells.size()); ++i)
+          {
+            const auto cell = mesh.getCell(cells[static_cast<std::size_t>(i)]);
+            const auto& qf = getQuadrature(*cell, fes);
+            const auto& quadrature = cell->getQuadrature(qf);
+            for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+            {
+              const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
+              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+              const Detail::WNGIRPrimalBarrierState state(
+                deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
+              active = active || !state.isFeasible() ||
+                state.getJacobianHessian() != Real(0) ||
+                state.getDistortionHessian() != Real(0);
+            }
+          }
+        }
+        return active;
+      }
+
+      template <class Mesh, class FES>
       Real getPrimalBarrierEnergy(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& current,
         const Displacement& inner, std::size_t dimension, Real coefficient) const
@@ -1938,7 +1971,8 @@ namespace Rodin::Adaptation
       // Solves the currently-assembled step problem and copies the
       // backend-matched solution GridFunction into @p out.
       bool solveStep(Displacement& out, std::size_t& iterations, Real& error,
-        const RegularityProjection* fixedProjection = nullptr)
+        const RegularityProjection* fixedProjection = nullptr,
+        WNGIRReport* report = nullptr)
       {
         auto& axb = m_stepProblem.getLinearSystem();
         using OperatorType =
@@ -1951,11 +1985,52 @@ namespace Rodin::Adaptation
           if (m_parameters.directSolver != WNGIRParameters::DirectSolver::CG)
           {
             const auto solveDirect = [&](auto& direct, std::string_view backend) {
+              const auto solveSystem = [&](LinearSystemType& system) {
+                if constexpr (requires { direct.factorize(system); })
+                {
+                  auto& next = system.getOperator();
+                  next.makeCompressed();
+                  const auto& previous = m_directSystem.getOperator();
+                  const bool samePattern = next.rows() == previous.rows() &&
+                    next.cols() == previous.cols() &&
+                    next.nonZeros() == previous.nonZeros() &&
+                    std::equal(next.outerIndexPtr(),
+                      next.outerIndexPtr() + next.outerSize() + 1,
+                      previous.outerIndexPtr()) &&
+                    std::equal(next.innerIndexPtr(),
+                      next.innerIndexPtr() + next.nonZeros(), previous.innerIndexPtr());
+                  const bool sameValues = samePattern &&
+                    std::equal(next.valuePtr(), next.valuePtr() + next.nonZeros(),
+                      previous.valuePtr());
+                  if (!samePattern)
+                    direct.clear(Solver::Factorization::Symbolic);
+                  const bool numeric = direct.success() &&
+                    direct.getInfo().factorization == Solver::Factorization::Numeric;
+                  m_directSystem.getOperator() = next;
+                  m_directSystem.getVector() = system.getVector();
+                  if (!sameValues || !numeric)
+                  {
+                    if (report)
+                    {
+                      ++report->directFactorizations;
+                      if (!direct.getInfo().factorization)
+                        ++report->directAnalyses;
+                    }
+                    direct.factorize(m_directSystem);
+                  }
+                  if (direct.success())
+                    direct.solve(m_directSystem);
+                  if (direct.success())
+                    system.getSolution() = m_directSystem.getSolution();
+                }
+                else
+                  direct.solve(system);
+              };
               const auto& matrix = axb.getOperator();
               const auto rigid =
                 fixedProjection ? *fixedProjection : getRegularityProjection();
               if (rigid.weights.empty())
-                direct.solve(axb);
+                solveSystem(axb);
               else
               {
                 // Auxiliary diagonal signs also support negative low-rank regularity corrections.
@@ -1973,11 +2048,8 @@ namespace Rodin::Adaptation
                   for (Eigen::Index i = 0; i < n; ++i)
                   {
                     const Real value = scale * rigid.modes[k](i);
-                    if (value != Real(0))
-                    {
-                      entries.emplace_back(i, n + k, value);
-                      entries.emplace_back(n + k, i, value);
-                    }
+                    entries.emplace_back(i, n + k, value);
+                    entries.emplace_back(n + k, i, value);
                   }
                   entries.emplace_back(
                     n + k, n + k, rigid.weights[k] > Real(0) ? Real(-1) : Real(1));
@@ -1987,7 +2059,7 @@ namespace Rodin::Adaptation
                 augmented.getOperator().setFromTriplets(entries.begin(), entries.end());
                 augmented.getVector() = Math::Vector<Real>::Zero(n + rank);
                 augmented.getVector().head(n) = rhs;
-                direct.solve(augmented);
+                solveSystem(augmented);
                 if (direct.success())
                   axb.getSolution() = augmented.getSolution().head(n);
               }
@@ -2013,10 +2085,11 @@ namespace Rodin::Adaptation
 #ifdef RODIN_USE_MUMPS
             if (m_parameters.directSolver == WNGIRParameters::DirectSolver::MUMPS)
             {
-              Solver::MUMPS direct(m_stepProblem);
-              direct.setSymmetric(decltype(direct)::Symmetry::General)
+              if (!m_mumps)
+                m_mumps = std::make_unique<Solver::MUMPS<LinearSystemType>>(m_stepProblem);
+              m_mumps->setSymmetric(Solver::MUMPS<LinearSystemType>::Symmetry::General)
                 .setMaxThreads(m_parameters.directSolverThreads);
-              return solveDirect(direct, "MUMPS");
+              return solveDirect(*m_mumps, "MUMPS");
             }
 #endif
             Solver::SparseLU direct(m_stepProblem);
@@ -2055,6 +2128,10 @@ namespace Rodin::Adaptation
       TrialFunctionType m_duStep;
       TestFunctionType m_vStep;
       ProblemType m_stepProblem;
+      LinearSystemType m_directSystem;
+#ifdef RODIN_USE_MUMPS
+      std::unique_ptr<Solver::MUMPS<LinearSystemType>> m_mumps;
+#endif
       BilinearFormType m_regularityForm;
       std::vector<Math::Vector<Real>> m_dilationCouplings;
       /// @brief Observation metric and fitting force at the outer displacement.
