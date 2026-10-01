@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <memory>
 #include <string>
 #include <type_traits>
 
@@ -299,67 +300,72 @@ namespace Rodin::Tests::Unit
     gf.project(smooth());
     const auto f = smooth();
 
-    P1 fes(mesh, mesh.getSpaceDimension());
-    TrialFunction u(fes);
-    TestFunction v(fes);
-    {
-      LinearElasticityForm actual(Real(1.5), Real(0.5), u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(Real(1.5), Real(0.5));
-      expected.assemble();
-      expectNear(actual.getOperator(), expected.getOperator(), where + " constants");
-    }
-    {
-      GridFunction gfMu(scalar);
-      gfMu.project(smooth(3));
-      LinearElasticityForm actual(gf, gfMu, u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(gf, gfMu);
-      expected.assemble();
-      expectNear(actual.getOperator(), expected.getOperator(), where + " grid functions");
-    }
-    {
-      const auto mu = smooth(3);
-      LinearElasticityForm actual(f, mu, u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(f, mu);
-      expected.assemble();
-      expectNear(actual.getOperator(), expected.getOperator(), where + " callables");
-    }
-    // Lambda and mu of different types, and a function next to a constant:
-    // each deduces its own coefficient slot of the integrator.
-    {
-      LinearElasticityForm actual(gf, f, u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(gf, f);
-      expected.assemble();
-      expectNear(actual.getOperator(), expected.getOperator(),
-        where + " grid function and callable");
-    }
-    {
-      LinearElasticityForm actual(f, gf, u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(f, gf);
-      expected.assemble();
-      expectNear(actual.getOperator(), expected.getOperator(),
-        where + " callable and grid function");
-    }
-    {
-      LinearElasticityForm actual(gf, Real(0.5), u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(gf, Real(0.5));
-      expected.assemble();
-      expectNear(actual.getOperator(), expected.getOperator(),
-        where + " grid function and constant");
-    }
-    {
-      LinearElasticityForm actual(Real(1.5), f, u, v);
-      BilinearForm expected(u, v);
-      expected = LinearElasticityIntegral(u, v)(Real(1.5), f);
-      expected.assemble();
-      expectNear(
-        actual.getOperator(), expected.getOperator(), where + " constant and callable");
-    }
+    auto check = [&](auto& fes) {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+      {
+        LinearElasticityForm actual(Real(1.5), Real(0.5), u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(Real(1.5), Real(0.5));
+        expected.assemble();
+        expectNear(actual.getOperator(), expected.getOperator(), where + " constants");
+      }
+      {
+        GridFunction gfMu(scalar);
+        gfMu.project(smooth(3));
+        LinearElasticityForm actual(gf, gfMu, u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(gf, gfMu);
+        expected.assemble();
+        expectNear(actual.getOperator(), expected.getOperator(), where + " grid functions");
+      }
+      {
+        const auto mu = smooth(3);
+        LinearElasticityForm actual(f, mu, u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(f, mu);
+        expected.assemble();
+        expectNear(actual.getOperator(), expected.getOperator(), where + " callables");
+      }
+      // Lambda and mu of different types, and a function next to a constant:
+      // each deduces its own coefficient slot of the integrator.
+      {
+        LinearElasticityForm actual(gf, f, u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(gf, f);
+        expected.assemble();
+        expectNear(actual.getOperator(), expected.getOperator(),
+          where + " grid function and callable");
+      }
+      {
+        LinearElasticityForm actual(f, gf, u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(f, gf);
+        expected.assemble();
+        expectNear(actual.getOperator(), expected.getOperator(),
+          where + " callable and grid function");
+      }
+      {
+        LinearElasticityForm actual(gf, Real(0.5), u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(gf, Real(0.5));
+        expected.assemble();
+        expectNear(actual.getOperator(), expected.getOperator(),
+          where + " grid function and constant");
+      }
+      {
+        LinearElasticityForm actual(Real(1.5), f, u, v);
+        BilinearForm expected(u, v);
+        expected = LinearElasticityIntegral(u, v)(Real(1.5), f);
+        expected.assemble();
+        expectNear(
+          actual.getOperator(), expected.getOperator(), where + " constant and callable");
+      }
+    };
+    P1 linear(mesh, mesh.getSpaceDimension());
+    H1 quadratic(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    check(linear);
+    check(quadratic);
   }
 
   /// @brief Instantiates the coefficient consistency checks over every cell geometry.
@@ -375,14 +381,19 @@ namespace Rodin::Tests::Unit
     P1 scalar(mesh);
     GridFunction gf(scalar);
     gf.project(smooth());
-    P1 fes(mesh, 2);
-    TrialFunction u(fes);
-    TestFunction v(fes);
-    MassForm actual(gf, u, v);
-    BilinearForm expected(u, v);
-    expected = Integral(gf * u, v);
-    expected.assemble();
-    expectNear(actual.getOperator(), expected.getOperator(), "vector P1");
+    auto check = [&](auto& fes) {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+      MassForm actual(gf, u, v);
+      BilinearForm expected(u, v);
+      expected = Integral(gf * u, v);
+      expected.assemble();
+      expectNear(actual.getOperator(), expected.getOperator(), "vector P1/P2");
+    };
+    P1 linear(mesh, 2);
+    H1 quadratic(std::integral_constant<size_t, 2>{}, mesh, 2);
+    check(linear);
+    check(quadratic);
   }
 
   /// @brief Verifies the coefficient forms match their integrals when trial and test spaces differ in order.
@@ -587,4 +598,119 @@ namespace Rodin::Tests::Unit
     }
 #endif
   }
+
+  /// @brief Cloned/moved forms own temporary coefficient expressions and preserve reassembly.
+  TEST(Rodin_Variational_NamedFormConsistency, CoefficientAndFormLifetimes)
+  {
+    auto mesh = geometryMesh(Polytope::Type::Triangle);
+    auto check = [&](auto& fes) {
+      TrialFunction u(fes);
+      TestFunction v(fes);
+      auto exercise = [&](auto make, auto setExpected) {
+        using Form = decltype(make());
+        std::unique_ptr<Form> cloned, moved;
+        {
+          auto original = make();
+          cloned.reset(original.copy());
+          Form copied(original);
+          EXPECT_NE(&copied.getOperator(), &original.getOperator());
+          moved = std::make_unique<Form>(std::move(copied));
+        }
+        BilinearForm expected(u, v);
+        setExpected(expected);
+        expected.assemble();
+        // The original and intermediate copy have both been destroyed.
+        cloned->assemble();
+        moved->assemble();
+        expectNear(cloned->getOperator(), expected.getOperator(), "cloned form");
+        expectNear(moved->getOperator(), expected.getOperator(), "moved form");
+      };
+      exercise([&] { return MassForm(smooth(), u, v); },
+        [&](auto& f) { f = Integral(smooth() * u, v); });
+      exercise([&] { return DiffusionForm(smooth(), u, v); },
+        [&](auto& f) { f = Integral(smooth() * Grad(u), Grad(v)); });
+      exercise([&] { return HelmholtzForm(smooth(), smooth(3), u, v); },
+        [&](auto& f) { f = Integral(smooth() * Grad(u), Grad(v)) +
+          Integral(smooth(3) * u, v); });
+    };
+    P1 linear(mesh);
+    H1 quadratic(std::integral_constant<size_t, 2>{}, mesh);
+    check(linear);
+    check(quadratic);
+    H1 vector(std::integral_constant<size_t, 2>{}, mesh, 2);
+    TrialFunction u(vector);
+    TestFunction v(vector);
+    auto make = [&] { return LinearElasticityForm(smooth(), smooth(3), u, v); };
+    using Form = decltype(make());
+    std::unique_ptr<Form> cloned;
+    {
+      auto original = make();
+      Form copied(original);
+      Form moved(std::move(copied));
+      cloned.reset(moved.copy());
+    }
+    cloned->assemble();
+    BilinearForm expected(u, v);
+    expected = LinearElasticityIntegral(u, v)(smooth(), smooth(3));
+    expected.assemble();
+    expectNear(cloned->getOperator(), expected.getOperator(), "P2 elasticity copy/move");
+  }
+
+  /// @brief A copied form retains a live reference to a changing P2 coefficient field.
+  TEST(Rodin_Variational_NamedFormConsistency, ChangingP2CoefficientReassembly)
+  {
+    auto mesh = geometryMesh(Polytope::Type::Tetrahedron);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction coefficient(fes);
+    coefficient.project(smooth());
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    MassForm mass(coefficient, u, v);
+    DiffusionForm diffusion(coefficient, u, v);
+    HelmholtzForm helmholtz(coefficient, Real(-2), u, v);
+    auto copy = mass;
+    for (Real scale : {2, -1, 3})
+    {
+      coefficient.getData() *= scale;
+      mass.assemble();
+      diffusion.assemble();
+      helmholtz.assemble();
+      copy.assemble();
+      BilinearForm expected(u, v);
+      expected = Integral(coefficient * u, v);
+      expected.assemble();
+      expectNear(mass.getOperator(), expected.getOperator(), "changing P2 mass");
+      expectNear(copy.getOperator(), expected.getOperator(), "copied live coefficient");
+      expected = Integral(coefficient * Grad(u), Grad(v));
+      expected.assemble();
+      expectNear(diffusion.getOperator(), expected.getOperator(), "changing P2 diffusion");
+      expected = Integral(coefficient * Grad(u), Grad(v)) + Integral(Real(-2) * u, v);
+      expected.assemble();
+      expectNear(helmholtz.getOperator(), expected.getOperator(), "changing P2 Helmholtz");
+    }
+  }
+
+  /// @brief Named-form signs and temporary composition preserve a constrained P2 system.
+  TEST(Rodin_Variational_NamedFormConsistency, P2CompositionWithLoadAndBoundaryConditions)
+  {
+    auto mesh = geometryMesh(Polytope::Type::Triangle);
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    const auto f = smooth();
+    Problem named(u, v);
+    Problem integral(u, v);
+    named = MassForm(Real(-0.5), u, v) + HelmholtzForm(Real(0.55), Real(3), u, v) -
+      Integral(f, v) + DirichletBC(u, f);
+    integral = Integral(Real(2) * u, v) + Integral(Real(0.75) * Grad(u), Grad(v)) -
+      Integral(Real(0.2) * Grad(u), Grad(v)) - Integral(Real(-0.5) * u, v) -
+      Integral(f, v) + DirichletBC(u, f);
+    named.assemble();
+    integral.assemble();
+    expectNear(named.getLinearSystem().getOperator(), integral.getLinearSystem().getOperator(),
+      "P2 constrained matrix");
+    EXPECT_NEAR((named.getLinearSystem().getVector() -
+      integral.getLinearSystem().getVector()).norm(), 0, 1e-12);
+  }
+
 }

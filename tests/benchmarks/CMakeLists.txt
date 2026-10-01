@@ -32,3 +32,8 @@ add_executable(RodinGridFunctionBenchmarks
   GridFunctionInterpolation.cpp GridFunctionLarge.cpp)
 target_link_libraries(RodinGridFunctionBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+# Named operators with numerical oracles, independently of solver benchmarks.
+add_executable(RodinNamedFormBenchmarks NamedFormEvaluation.cpp)
+target_link_libraries(RodinNamedFormBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solid benchmark::benchmark benchmark::benchmark_main)

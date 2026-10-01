@@ -68,6 +68,14 @@ namespace Rodin::Variational
    * operator as <tt>Integral(c * u, v)</tt>, respectively
    * <tt>Integral(u, v)</tt>, including the quadrature order that path picks.
    *
+   * Trial and test functions are borrowed and must outlive the form and its
+   * copies, together with their spaces and mesh. Coefficient expressions are
+   * cloned; a @ref GridFunction coefficient keeps a live reference to the field,
+   * which must also outlive the form. Temporary value/function expressions are
+   * owned, but cloning does not extend the lifetime of their external captures.
+   * Constructors assemble immediately; call assemble() after changing a field
+   * coefficient to update the stored operator.
+   *
    * @tparam CoefficientDerived Derived type of the scalar coefficient, or
    * @c void for none.
    */

@@ -79,6 +79,14 @@ namespace Rodin::Variational
    * parameter reports, counting an unknown order as zero, plus the orders of
    * the two bases. Vector-valued spaces whose dimension matches the mesh's.
    *
+   * Trial and test functions are borrowed and must outlive the form and its
+   * copies, together with their spaces and mesh. Coefficient expressions are
+   * cloned; a @ref GridFunction coefficient keeps a live reference to the field,
+   * which must also outlive the form. Temporary value/function expressions are
+   * owned, but cloning does not extend the lifetime of their external captures.
+   * Constructors assemble immediately; call assemble() after changing a field
+   * coefficient to update the stored operator.
+   *
    * @tparam LambdaDerived Derived type of the first Lamé parameter.
    * @tparam MuDerived Derived type of the shear modulus.
    */

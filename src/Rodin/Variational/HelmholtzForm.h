@@ -73,6 +73,14 @@ namespace Rodin::Variational
    * operator, a positive one the reaction-diffusion operator used by the
    * Hilbertian regularizations. Scalar spaces only.
    *
+   * Trial and test functions are borrowed and must outlive the form and its
+   * copies, together with their spaces and mesh. Coefficient expressions are
+   * cloned; a @ref GridFunction coefficient keeps a live reference to the field,
+   * which must also outlive the form. Temporary value/function expressions are
+   * owned, but cloning does not extend the lifetime of their external captures.
+   * Constructors assemble immediately; call assemble() after changing a field
+   * coefficient to update the stored operator.
+   *
    * @tparam DiffusionDerived Derived type of the diffusion coefficient.
    * @tparam MassDerived Derived type of the mass coefficient.
    */
