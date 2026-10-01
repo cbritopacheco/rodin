@@ -317,7 +317,8 @@ namespace Rodin::Tests::Unit
         BilinearForm expected(u, v);
         expected = LinearElasticityIntegral(u, v)(gf, gfMu);
         expected.assemble();
-        expectNear(actual.getOperator(), expected.getOperator(), where + " grid functions");
+        expectNear(
+          actual.getOperator(), expected.getOperator(), where + " grid functions");
       }
       {
         const auto mu = smooth(3);
@@ -630,8 +631,9 @@ namespace Rodin::Tests::Unit
       exercise([&] { return DiffusionForm(smooth(), u, v); },
         [&](auto& f) { f = Integral(smooth() * Grad(u), Grad(v)); });
       exercise([&] { return HelmholtzForm(smooth(), smooth(3), u, v); },
-        [&](auto& f) { f = Integral(smooth() * Grad(u), Grad(v)) +
-          Integral(smooth(3) * u, v); });
+        [&](auto& f) {
+          f = Integral(smooth() * Grad(u), Grad(v)) + Integral(smooth(3) * u, v);
+        });
     };
     P1 linear(mesh);
     H1 quadratic(std::integral_constant<size_t, 2>{}, mesh);
@@ -683,10 +685,12 @@ namespace Rodin::Tests::Unit
       expectNear(copy.getOperator(), expected.getOperator(), "copied live coefficient");
       expected = Integral(coefficient * Grad(u), Grad(v));
       expected.assemble();
-      expectNear(diffusion.getOperator(), expected.getOperator(), "changing P2 diffusion");
+      expectNear(
+        diffusion.getOperator(), expected.getOperator(), "changing P2 diffusion");
       expected = Integral(coefficient * Grad(u), Grad(v)) + Integral(Real(-2) * u, v);
       expected.assemble();
-      expectNear(helmholtz.getOperator(), expected.getOperator(), "changing P2 Helmholtz");
+      expectNear(
+        helmholtz.getOperator(), expected.getOperator(), "changing P2 Helmholtz");
     }
   }
 
@@ -707,10 +711,12 @@ namespace Rodin::Tests::Unit
       Integral(f, v) + DirichletBC(u, f);
     named.assemble();
     integral.assemble();
-    expectNear(named.getLinearSystem().getOperator(), integral.getLinearSystem().getOperator(),
-      "P2 constrained matrix");
-    EXPECT_NEAR((named.getLinearSystem().getVector() -
-      integral.getLinearSystem().getVector()).norm(), 0, 1e-12);
+    expectNear(named.getLinearSystem().getOperator(),
+      integral.getLinearSystem().getOperator(), "P2 constrained matrix");
+    EXPECT_NEAR(
+      (named.getLinearSystem().getVector() - integral.getLinearSystem().getVector())
+        .norm(),
+      0, 1e-12);
   }
 
 }

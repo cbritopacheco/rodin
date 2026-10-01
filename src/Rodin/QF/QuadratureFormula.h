@@ -119,8 +119,7 @@ namespace Rodin::QF
 
     private:
       inline static std::atomic<size_t> s_nextCacheIdentity{0};
-      size_t m_identity =
-        s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
+      size_t m_identity = s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
   };
 }
 

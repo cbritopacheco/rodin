@@ -78,13 +78,15 @@ namespace Rodin::Tests::Benchmarks
         {
           const Point& p = m_points[sample];
           const IntegrationPoint ip(p, &m_qf, sample % m_qf.getSize());
-          for (const auto& value : {m_field.getValue(ip), m_field.getValue(ip), m_field.getValue(p)})
+          for (const auto& value :
+            {m_field.getValue(ip), m_field.getValue(ip), m_field.getValue(p)})
           {
             if constexpr (!Vector)
               m_setupError = std::max(m_setupError, std::abs(value - analytic(p)));
             else
               for (size_t d = 0; d < m_dimension; ++d)
-                m_setupError = std::max(m_setupError, std::abs(value(d) - (d + 1) * analytic(p)));
+                m_setupError =
+                  std::max(m_setupError, std::abs(value(d) - (d + 1) * analytic(p)));
           }
         }
       }
@@ -96,7 +98,8 @@ namespace Rodin::Tests::Benchmarks
         const bool pointwise = state.range(2) != 0;
         const size_t repeats = workload == 0 ? 1 : workload == 1 ? 4 : 32;
         const size_t evaluations = m_points.size() * repeats;
-        const Real expected = workload == 3 ? evaluations * m_firstExpected : repeats * m_expectedSum;
+        const Real expected =
+          workload == 3 ? evaluations * m_firstExpected : repeats * m_expectedSum;
         Range value{};
         // Ensures pure-hit timing starts with its single sample already cached.
         const IntegrationPoint first(m_points.front(), &m_qf, 0);
@@ -136,14 +139,16 @@ namespace Rodin::Tests::Benchmarks
           }
           benchmark::DoNotOptimize(total);
         }
-        const Real relativeError = std::abs(total - expected) / std::max(Real(1), std::abs(expected));
+        const Real relativeError =
+          std::abs(total - expected) / std::max(Real(1), std::abs(expected));
         state.counters["relative_error"] = relativeError;
         state.counters["cells"] = m_mesh.getCellCount();
         state.counters["dofs"] = m_space.getSize();
         state.counters["samples"] = m_points.size();
         state.counters["evaluations_per_sweep"] = evaluations;
-        state.counters["basis_hit_fraction"] = pointwise ? 0 :
-          workload == 3 ? 1 : Real(repeats - 1) / repeats;
+        state.counters["basis_hit_fraction"] = pointwise ? 0
+          : workload == 3                                ? 1
+                                                         : Real(repeats - 1) / repeats;
         if (!std::isfinite(relativeError) || relativeError > 1e-9 || m_setupError > 1e-10)
           state.SkipWithError("Large interpolation sweep disagrees with analytic field");
         state.SetItemsProcessed(state.iterations() * evaluations);
@@ -152,9 +157,9 @@ namespace Rodin::Tests::Benchmarks
     private:
       static LocalMesh makeMesh(size_t dimension)
       {
-        LocalMesh mesh = dimension == 2 ?
-          LocalMesh::UniformGrid(Polytope::Type::Triangle, {129, 129}) :
-          LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {17, 17, 17});
+        LocalMesh mesh = dimension == 2
+          ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {129, 129})
+          : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {17, 17, 17});
         for (size_t d = dimension; d > 0; --d)
           mesh.getConnectivity().compute(d, d - 1);
         return mesh;
@@ -219,7 +224,8 @@ namespace Rodin::Tests::Benchmarks
     static std::array<std::unique_ptr<LargeInterpolationData<Order, Vector>>, 2> data;
     const size_t index = state.range(0) - 2;
     if (!data[index])
-      data[index] = std::make_unique<LargeInterpolationData<Order, Vector>>(state.range(0));
+      data[index] =
+        std::make_unique<LargeInterpolationData<Order, Vector>>(state.range(0));
     data[index]->run(state);
   }
 
@@ -231,18 +237,23 @@ namespace Rodin::Tests::Benchmarks
         const std::string suffix = std::string(workloads[workload]) +
           (alternative == 0 ? "/Quadrature" : "/Pointwise");
         const auto args = [&](auto* registration) {
-          registration->Args({2, static_cast<int64_t>(workload), static_cast<int64_t>(alternative)})
+          registration
+            ->Args({2, static_cast<int64_t>(workload), static_cast<int64_t>(alternative)})
             ->Args({3, static_cast<int64_t>(workload), static_cast<int64_t>(alternative)})
             ->ArgNames({"dimension", "workload", "pointwise"});
         };
-        args(benchmark::RegisterBenchmark(("LargeInterpolation/P1Scalar/" + suffix).c_str(),
-          &largeInterpolation<1, false>));
-        args(benchmark::RegisterBenchmark(("LargeInterpolation/P1Vector/" + suffix).c_str(),
-          &largeInterpolation<1, true>));
-        args(benchmark::RegisterBenchmark(("LargeInterpolation/P2Scalar/" + suffix).c_str(),
-          &largeInterpolation<2, false>));
-        args(benchmark::RegisterBenchmark(("LargeInterpolation/P2Vector/" + suffix).c_str(),
-          &largeInterpolation<2, true>));
+        args(
+          benchmark::RegisterBenchmark(("LargeInterpolation/P1Scalar/" + suffix).c_str(),
+            &largeInterpolation<1, false>));
+        args(
+          benchmark::RegisterBenchmark(("LargeInterpolation/P1Vector/" + suffix).c_str(),
+            &largeInterpolation<1, true>));
+        args(
+          benchmark::RegisterBenchmark(("LargeInterpolation/P2Scalar/" + suffix).c_str(),
+            &largeInterpolation<2, false>));
+        args(
+          benchmark::RegisterBenchmark(("LargeInterpolation/P2Vector/" + suffix).c_str(),
+            &largeInterpolation<2, true>));
       }
     return true;
   }();

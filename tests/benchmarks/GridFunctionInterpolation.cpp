@@ -34,9 +34,10 @@ namespace Rodin::Tests::Benchmarks
   void interpolation(benchmark::State& state)
   {
     const size_t dimension = state.range(0);
-    const auto geometry = dimension == 2 ? Polytope::Type::Triangle : Polytope::Type::Tetrahedron;
-    LocalMesh mesh = dimension == 2 ? LocalMesh::UniformGrid(geometry, {4, 4}) :
-      LocalMesh::UniformGrid(geometry, {4, 4, 4});
+    const auto geometry =
+      dimension == 2 ? Polytope::Type::Triangle : Polytope::Type::Tetrahedron;
+    LocalMesh mesh = dimension == 2 ? LocalMesh::UniformGrid(geometry, {4, 4})
+                                    : LocalMesh::UniformGrid(geometry, {4, 4, 4});
     for (size_t d = dimension; d > 0; --d)
       mesh.getConnectivity().compute(d, d - 1);
     const auto makeSpace = [&] {
@@ -168,14 +169,18 @@ namespace Rodin::Tests::Benchmarks
           ->Args({3, static_cast<int64_t>(operation)})
           ->ArgNames({"dimension", "operation"});
       };
-      args(benchmark::RegisterBenchmark((std::string("Interpolation/P1Scalar/") +
-        operations[operation]).c_str(), &interpolation<1, false>));
-      args(benchmark::RegisterBenchmark((std::string("Interpolation/P1Vector/") +
-        operations[operation]).c_str(), &interpolation<1, true>));
-      args(benchmark::RegisterBenchmark((std::string("Interpolation/P2Scalar/") +
-        operations[operation]).c_str(), &interpolation<2, false>));
-      args(benchmark::RegisterBenchmark((std::string("Interpolation/P2Vector/") +
-        operations[operation]).c_str(), &interpolation<2, true>));
+      args(benchmark::RegisterBenchmark(
+        (std::string("Interpolation/P1Scalar/") + operations[operation]).c_str(),
+        &interpolation<1, false>));
+      args(benchmark::RegisterBenchmark(
+        (std::string("Interpolation/P1Vector/") + operations[operation]).c_str(),
+        &interpolation<1, true>));
+      args(benchmark::RegisterBenchmark(
+        (std::string("Interpolation/P2Scalar/") + operations[operation]).c_str(),
+        &interpolation<2, false>));
+      args(benchmark::RegisterBenchmark(
+        (std::string("Interpolation/P2Vector/") + operations[operation]).c_str(),
+        &interpolation<2, true>));
     }
     return true;
   }();

@@ -364,7 +364,6 @@ TEST_F(GaussLegendreTest, EdgeCases)
   EXPECT_DOUBLE_EQ(gl_min.getWeight(0), 1.0);
 }
 
-
 /// @brief Copies and moves receive identities distinct from their source.
 TEST_F(GaussLegendreTest, CacheIdentityDistinguishesCopiesAndMoves)
 {

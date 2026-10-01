@@ -1237,13 +1237,14 @@ namespace Rodin::Variational
         // Mapped face samples can share a formula/index but have different cell
         // coordinates. Exact component representations prevent approximate hits
         // and distinguish signed zeros without allocating coordinate storage.
-        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinates.size(); ++j)
-          sameReferenceCoordinates = std::memcmp(
-            &cache.referenceCoordinates(j), &referenceCoordinates(j), sizeof(Real)) == 0;
+        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinates.size();
+             ++j)
+          sameReferenceCoordinates = std::memcmp(&cache.referenceCoordinates(j),
+                                       &referenceCoordinates(j), sizeof(Real)) == 0;
         if (!cache.hasBasisValues || cache.owner != this ||
           cache.ownerIdentity != m_identity || cache.fes != fes ||
-          cache.element != element || cache.d != d || cache.i != i ||
-          cache.qf != qf || cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
+          cache.element != element || cache.d != d || cache.i != i || cache.qf != qf ||
+          cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
           !sameReferenceCoordinates)
         {
           const auto& fe = *element;

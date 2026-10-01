@@ -22,10 +22,10 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Tests::Unit::RangeTransformingSpace>
   {
-    using MeshType = Geometry::LocalMesh;
-    using ScalarType = Real;
-    using RangeType = Math::SpatialVector<Real>;
-    using ElementType = Variational::P1Element<RangeType>;
+      using MeshType = Geometry::LocalMesh;
+      using ScalarType = Real;
+      using RangeType = Math::SpatialVector<Real>;
+      using ElementType = Variational::P1Element<RangeType>;
   };
 }
 
@@ -691,8 +691,8 @@ namespace Rodin::Tests::Unit
     {
       gf.reset();
       fes.reset();
-      mesh.emplace(LocalMesh::UniformGrid(Polytope::Type::Triangle,
-        {resolution, resolution}));
+      mesh.emplace(
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {resolution, resolution}));
       fes.emplace(*mesh);
       gf.emplace(*fes);
       gf->project(RealFunction([](const Point& p) { return p.x() + 10 * p.y(); }));
@@ -751,14 +751,12 @@ namespace Rodin::Tests::Unit
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
     const Point point(cell, qf.getPoint(0));
     const IntegrationPoint ip(point, &qf, 0);
-    auto check = [&](const auto& fes)
-    {
+    auto check = [&](const auto& fes) {
       GridFunction gf(fes);
       for (Real scale : {1.0, -2.0, 0.0, 3.0})
       {
-        const auto fn = RealFunction([scale](const Point& p) {
-          return scale * (1 + p.x() + 10 * p.y());
-        });
+        const auto fn = RealFunction(
+          [scale](const Point& p) { return scale * (1 + p.x() + 10 * p.y()); });
         gf.project(fn);
         EXPECT_NEAR(gf.getValue(ip), fn(point), 1e-11);
         EXPECT_NEAR(gf.getValue(ip), gf.getValue(point), 1e-11);
@@ -786,9 +784,8 @@ namespace Rodin::Tests::Unit
     const IntegrationPoint ip(point, &qf, 0);
     for (Real scale : {1.0, -2.0, 0.0, 3.0})
     {
-      const auto fn = RealFunction([scale](const Point& p) {
-        return scale * (1 + p.x() + 10 * p.y());
-      });
+      const auto fn = RealFunction(
+        [scale](const Point& p) { return scale * (1 + p.x() + 10 * p.y()); });
       source.project(fn);
       target = source;
       EXPECT_EQ(&target.getFiniteElementSpace(), &targetSpace);
@@ -830,8 +827,7 @@ namespace Rodin::Tests::Unit
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
     const Point point(cell, qf.getPoint(0));
     const IntegrationPoint ip(point, &qf, 0);
-    auto check = [&](const auto& fes)
-    {
+    auto check = [&](const auto& fes) {
       GridFunction gf(fes);
       for (Real scale : {1.0, -2.0, 0.0, 3.0})
       {
@@ -866,11 +862,14 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(&firstSpace.getFiniteElement(2, 0), &secondSpace.getFiniteElement(2, 0));
     const IndexArray firstDOFs = firstSpace.getDOFs(2, 0);
     ASSERT_TRUE((firstDOFs != secondSpace.getDOFs(2, 0)).any());
-    EXPECT_NEAR(target.getValue(IntegrationPoint(firstPoint, &qf, 0)), fn(firstPoint), 1e-12);
+    EXPECT_NEAR(
+      target.getValue(IntegrationPoint(firstPoint, &qf, 0)), fn(firstPoint), 1e-12);
     target = std::move(source);
     EXPECT_EQ(&target.getFiniteElementSpace(), &secondSpace);
-    EXPECT_NEAR(target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
-    EXPECT_NEAR(target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+    EXPECT_NEAR(
+      target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+    EXPECT_NEAR(
+      target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
   }
 
   /// @brief Immutable mesh connectivity does not imply an immutable vector-space definition.
@@ -881,8 +880,7 @@ namespace Rodin::Tests::Unit
     P1 replacement(mesh, 3);
     GridFunction gf(fes);
     const auto initial = VectorFunction{
-      [](const Point& p) { return 1 + p.x(); },
-      [](const Point& p) { return 2 + p.y(); }};
+      [](const Point& p) { return 1 + p.x(); }, [](const Point& p) { return 2 + p.y(); }};
     gf.project(initial);
     const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
     const Point point(Polytope(2, 0, mesh), qf.getPoint(0));
@@ -892,8 +890,7 @@ namespace Rodin::Tests::Unit
     fes = replacement;
     ASSERT_NE(&fes.getFiniteElement(2, 0), previousElement);
     gf.getData().resize(fes.getSize());
-    const auto updated = VectorFunction{
-      [](const Point& p) { return -1 + p.x(); },
+    const auto updated = VectorFunction{[](const Point& p) { return -1 + p.x(); },
       [](const Point& p) { return 3 - p.y(); },
       [](const Point& p) { return 4 + p.x() + p.y(); }};
     gf.project(updated);
@@ -922,8 +919,10 @@ namespace Rodin::Tests::Unit
     gf.getData().resize(fes.getSize());
     gf.project(fn);
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
-    EXPECT_NEAR(gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
-    EXPECT_NEAR(gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+    EXPECT_NEAR(
+      gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+    EXPECT_NEAR(
+      gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
   }
 
   /// @brief A face formula/index does not uniquely identify a mapped cell point.
@@ -931,16 +930,15 @@ namespace Rodin::Tests::Unit
   {
     for (size_t dimension : {2, 3})
     {
-      LocalMesh mesh = dimension == 2 ?
-        LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2}) :
-        LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+      LocalMesh mesh = dimension == 2
+        ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2})
+        : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
       for (size_t d = dimension; d > 0; --d)
         mesh.getConnectivity().compute(d, d - 1);
       const Polytope cell(dimension, 0, mesh);
-      const auto& qf = QF::PolytopeQuadratureFormula::get(1,
-        dimension == 2 ? Polytope::Type::Segment : Polytope::Type::Triangle);
-      auto check = [&](const auto& fes)
-      {
+      const auto& qf = QF::PolytopeQuadratureFormula::get(
+        1, dimension == 2 ? Polytope::Type::Segment : Polytope::Type::Triangle);
+      auto check = [&](const auto& fes) {
         GridFunction gf(fes);
         for (Index i = 0; i < gf.getSize(); ++i)
           gf.getData()(i) = 1 + Real(i) / 7;
