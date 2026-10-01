@@ -280,7 +280,11 @@
 #define RODIN_MAXIMUM_POLYTOPE_VERTICES 8
 
 /**
- * @brief Represents the constant used for fuzzy comparison.
+ * @brief Legacy default tolerance intended for fuzzy scalar comparisons.
+ *
+ * Absolute threshold in the compared values' units; the value is a numerical
+ * policy, not a scale-independent error bound. Currently unused in Rodin's
+ * implementation; retained as a configuration macro for downstream users.
  */
 #define RODIN_FUZZY_CONSTANT 1e-5
 

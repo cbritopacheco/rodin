@@ -14,6 +14,8 @@
 
 #include "LegendrePolynomial.h"
 
+// Absolute Newton node-update tolerance in dimensionless reference coordinates.
+// Numerical policy retained for compatibility; not a bound on interpolation error.
 #define RODIN_VARIATIONAL_H1_GLL_TOLERANCE 1e-14
 #define RODIN_VARIATIONAL_H1_GLL_TAYLOR_TERMS 14
 #define RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS 25

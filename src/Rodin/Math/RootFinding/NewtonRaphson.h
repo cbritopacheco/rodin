@@ -71,8 +71,10 @@ namespace Rodin::Math::RootFinding
        * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$)
        * @param[in] maxIter Maximum number of iterations (default: 25)
        */
-      NewtonRaphson(Scalar absTTol = 1e-12, Scalar relTTol = 1e-9, Scalar absGTol = 1e-12,
-        std::size_t maxIter = 25)
+      NewtonRaphson(Scalar absTTol = DefaultAbsoluteIntervalTolerance,
+        Scalar relTTol = DefaultRelativeIntervalTolerance,
+        Scalar absGTol = DefaultAbsoluteFunctionTolerance,
+        std::size_t maxIter = DefaultMaxIterations)
         : m_absTTol(absTTol),
           m_relTTol(relTTol),
           m_absGTol(absGTol),
@@ -210,6 +212,15 @@ namespace Rodin::Math::RootFinding
       }
 
     private:
+      /// @brief Absolute bracket-width tolerance in root-coordinate units.
+      static constexpr Scalar DefaultAbsoluteIntervalTolerance = 1e-12;
+      /// @brief Dimensionless bracket-width tolerance relative to the root-coordinate scale.
+      static constexpr Scalar DefaultRelativeIntervalTolerance = 1e-9;
+      /// @brief Absolute root residual tolerance in function-value units.
+      static constexpr Scalar DefaultAbsoluteFunctionTolerance = 1e-12;
+      /// @brief Root-solve work budget; does not guarantee convergence.
+      static constexpr std::size_t DefaultMaxIterations = 25;
+
       Scalar m_absTTol; ///< Absolute tolerance for interval width
       Scalar m_relTTol; ///< Relative tolerance for interval width
       Scalar m_absGTol; ///< Absolute tolerance for function value
