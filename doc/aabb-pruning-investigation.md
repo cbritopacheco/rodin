@@ -210,8 +210,8 @@ is not used for timing claims. The call-count regression independently observed
 three evaluations per basis/axis for a 3D physical map before the change, and
 one afterward.
 
-The 72 new `Parametric/Transform`, `Parametric/Jacobian`, and `ParametricNative`
-Google Benchmark cases cover all eight geometries at P1, P2 and P4, with both
+The 96 new `Parametric/Transform`, `Parametric/Jacobian`, and `ParametricNative`
+Google Benchmark cases cover all eight geometries at P1, P2, P3 and P4, with both
 native physical dimensions and three-dimensional embeddings.
 The tables are warmed outside the timed loop. CPU times below are medians of
 three alternating baseline/current runs, each with a 0.08-second minimum per
@@ -273,7 +273,7 @@ The diagnostic executables produced 384 identical per-query records across
 both pruning settings: candidates, transforms, Jacobians, Newton loop entries,
 seed retries, box candidates, projection rejections and retained index bytes
 all matched. The seven transformation tests and 51 AABB tests pass. New exact
-scalar-baseline comparisons cover P1/P2/P4 on every geometry, at the centroid
+scalar-baseline comparisons cover P1/P2/P3/P4 on every geometry, at the centroid
 and every reference vertex (including the pyramid apex), with all supported
 physical embeddings. The derivative-call regression was observed failing before
 and passing after the change.
@@ -341,7 +341,25 @@ current executable:
 
 ```sh
 build/tests/benchmarks/RodinBenchmarks \
-  --benchmark_filter='^Parametric/' \
+  --benchmark_filter='^Parametric' \
   --benchmark_min_time=0.10s --benchmark_repetitions=3
 build/tests/benchmarks/RodinAABBWorkload 0.03 Tetrahedron 4/1/8 2
 ```
+
+
+### P3 coverage extension
+
+The AABB curved-enclosure regression already exercises P3 on every nonpoint
+geometry, with both pruning settings. The later geometry-evaluation follow-up
+extends exact scalar-baseline comparisons and derivative-call regressions to
+every degree from P1 through P4. Isolated evaluation benchmarks now include P3
+in native and embedded dimensions, and the paired workload accepts P3 fixtures.
+The historical scaling matrix and before/after tables above retain their
+original P1/P2/P4 sampling; they do not claim a measured P3 speedup. The current
+full workload enumerates 253 mesh configurations instead of the original 190.
+
+The expanded derivative-call regression was observed failing against the
+original evaluator and passing with the fix, including P3. All seven
+transformation tests and 51 AABB tests pass. All 24 P3 evaluation benchmark
+cases executed with three repetitions, and the cubic tetrahedron paired
+workload completed with matching pruning-on/off membership and references.

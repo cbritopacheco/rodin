@@ -224,6 +224,9 @@ namespace
         case 2:
           deform<2>(mesh, type, distortion, warpDegree);
           break;
+        case 3:
+          deform<3>(mesh, type, distortion, warpDegree);
+          break;
         case 4:
           deform<4>(mesh, type, distortion, warpDegree);
           break;
@@ -371,7 +374,7 @@ int main(int argc, char** argv)
       const std::vector<size_t> sizes = dim == 1 ? std::vector<size_t>{16, 64, 256}
         : dim == 2                               ? std::vector<size_t>{4, 8, 16}
                                                  : std::vector<size_t>{3, 5, 8};
-      for (size_t degree : {1, 2, 4})
+      for (size_t degree : {1, 2, 3, 4})
         for (Real distortion : {Real(0), Real(1), Real(4)})
           for (size_t size : sizes)
           {

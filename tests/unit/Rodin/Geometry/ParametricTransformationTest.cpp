@@ -235,10 +235,12 @@ namespace Rodin::Tests::Unit
   {
     // A pure basis evaluation with an observable call count checks collaboration
     // with generic scalar elements, including embedded transformations.
+    template <size_t K>
     struct CountedElement
     {
         using RangeType = Real;
-        Variational::RealH1Element<2> element;
+        using Element = Variational::RealH1Element<K>;
+        Element element;
         size_t* evaluations;
 
         auto getGeometry() const
@@ -256,7 +258,7 @@ namespace Rodin::Tests::Unit
 
         struct Basis
         {
-            Variational::RealH1Element<2>::BasisFunction basis;
+            typename Element::BasisFunction basis;
             size_t* evaluations;
             Real operator()(const Math::SpatialPoint& r) const
             {
@@ -265,8 +267,7 @@ namespace Rodin::Tests::Unit
             template <size_t Order>
             struct Derivative
             {
-                typename Variational::RealH1Element<
-                  2>::BasisFunction::template DerivativeFunction<Order>
+                typename Element::BasisFunction::template DerivativeFunction<Order>
                   derivative;
                 size_t* evaluations;
                 Real operator()(const Math::SpatialPoint& r) const
@@ -348,6 +349,7 @@ namespace Rodin::Tests::Unit
       SCOPED_TRACE(static_cast<int>(geometry));
       checkEvaluation<1>(geometry);
       checkEvaluation<2>(geometry);
+      checkEvaluation<3>(geometry);
       checkEvaluation<4>(geometry);
     }
   }
@@ -359,14 +361,22 @@ namespace Rodin::Tests::Unit
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
            Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
-      size_t evaluations = 0;
-      CountedElement fe{Variational::RealH1Element<2>(geometry), &evaluations};
-      PointCloud nodes(3, fe.getCount());
-      nodes.setZero();
-      ParametricTransformation transformation(std::move(nodes), fe);
-      Math::SpatialMatrix<Real> J;
-      transformation.jacobian(J, Polytope::Traits(geometry).getCentroid());
-      EXPECT_EQ(evaluations, fe.getCount() * Polytope::Traits(geometry).getDimension());
+      auto check = [&]<size_t K>() {
+        SCOPED_TRACE(K);
+        size_t evaluations = 0;
+        CountedElement<K> fe{Variational::RealH1Element<K>(geometry), &evaluations};
+        PointCloud nodes(3, fe.getCount());
+        nodes.setZero();
+        ParametricTransformation transformation(std::move(nodes), fe);
+        Math::SpatialMatrix<Real> J;
+        transformation.jacobian(J, Polytope::Traits(geometry).getCentroid());
+        EXPECT_EQ(evaluations, fe.getCount() * Polytope::Traits(geometry).getDimension());
+      };
+      SCOPED_TRACE(static_cast<int>(geometry));
+      check.template operator()<1>();
+      check.template operator()<2>();
+      check.template operator()<3>();
+      check.template operator()<4>();
     }
   }
 }

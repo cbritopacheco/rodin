@@ -78,6 +78,9 @@ namespace Rodin::Tests::Benchmarks
           benchmark::RegisterBenchmark((prefix + operation + "/P2/" + name).c_str(),
             &BM_ParametricEvaluation<2>, jacobian)
             ->Args({static_cast<int>(geometry), static_cast<int>(physicalDimension)});
+          benchmark::RegisterBenchmark((prefix + operation + "/P3/" + name).c_str(),
+            &BM_ParametricEvaluation<3>, jacobian)
+            ->Args({static_cast<int>(geometry), static_cast<int>(physicalDimension)});
           benchmark::RegisterBenchmark((prefix + operation + "/P4/" + name).c_str(),
             &BM_ParametricEvaluation<4>, jacobian)
             ->Args({static_cast<int>(geometry), static_cast<int>(physicalDimension)});
