@@ -943,6 +943,8 @@ namespace
 
     AABB locator(mesh);
     locator.setExhaustiveFallback(false);
+    AABB pruned(mesh);
+    pruned.setProjectionPruning(true);
 
     const Polytope::Traits traits(type);
     const size_t nv = traits.getVertexCount();
@@ -974,6 +976,14 @@ namespace
         const auto located = locator.locate(x);
         ASSERT_TRUE(located.has_value()) << "type=" << static_cast<int>(type)
                                          << " K=" << K << " cell=" << cell->getIndex();
+
+        const auto filtered = pruned.locate(x);
+        ASSERT_TRUE(filtered.has_value());
+        EXPECT_EQ(filtered->getPolytope().getIndex(), located->getPolytope().getIndex());
+        EXPECT_LT(
+          (filtered->getReferenceCoordinates() - located->getReferenceCoordinates())
+            .norm(),
+          1e-9);
 
         if (located->getPolytope().getIndex() == cell->getIndex())
         {
@@ -1062,12 +1072,16 @@ class QuadraticShear : public PolytopeTransformation
     void jacobian(
       Math::SpatialMatrix<Real>& j, const Math::SpatialPoint& r) const override
     {
+      ++jacobianCalls;
       j.resize(2, 2);
       j(0, 0) = 1;
       j(0, 1) = 0;
       j(1, 0) = 4 - 8 * r[0];
       j(1, 1) = 1;
     }
+    /// Counts dependency calls without altering the fixture map.
+    mutable size_t jacobianCalls = 0;
+
     QuadraticShear* copy() const noexcept override
     {
       return new QuadraticShear(*this);
@@ -1257,4 +1271,31 @@ TEST(Location_AABB, ProjectionPruningCanBeDisabledAndReenabled)
       EXPECT_TRUE(locator.locate(physicalCentroid(mesh, *cell)).has_value());
     EXPECT_FALSE(locator.locate(point({-1, -1, -1})).has_value());
   }
+}
+
+TEST(Location_AABB, ProjectionPruningIsOptIn)
+{
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
+  mesh.setPolytopeTransformation({2, 0}, new QuadraticShear());
+  const auto& transformation =
+    static_cast<const QuadraticShear&>(mesh.getPolytopeTransformation(2, 0));
+  const auto x = point({0.5, 1.5});
+  AABB locator(mesh);
+  const auto defaultHit = locator.locate(x);
+  ASSERT_TRUE(defaultHit.has_value());
+  // This query is exactly the mapped centroid and requires no Newton solve.
+  // The default must also avoid the Jacobian used to construct hull normals.
+  EXPECT_EQ(transformation.jacobianCalls, 0u);
+  locator.setProjectionPruning(true);
+  const auto prunedHit = locator.locate(x);
+  ASSERT_TRUE(prunedHit.has_value());
+  EXPECT_GT(transformation.jacobianCalls, 0u);
+  EXPECT_EQ(defaultHit->getPolytope().getIndex(), prunedHit->getPolytope().getIndex());
+  EXPECT_EQ(
+    (defaultHit->getReferenceCoordinates() - prunedHit->getReferenceCoordinates()).norm(),
+    0);
+  transformation.jacobianCalls = 0;
+  locator.setProjectionPruning(false);
+  ASSERT_TRUE(locator.locate(x).has_value());
+  EXPECT_EQ(transformation.jacobianCalls, 0u);
 }

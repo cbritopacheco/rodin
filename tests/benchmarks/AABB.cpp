@@ -113,23 +113,24 @@ namespace Rodin::Tests::Benchmarks
       state.counters["cells"] = static_cast<double>(mesh.getCellCount());
     }
 
-    void BM_AABBBuildWithoutProjections(benchmark::State& state, G type)
+    void BM_AABBBuildWithProjections(benchmark::State& state, G type)
     {
       const MeshType mesh = makeMesh(type);
       const auto queries = mappedQueries(mesh, type);
       for (auto _ : state)
       {
         Location::AABB locator(mesh);
-        locator.setProjectionPruning(false);
+        locator.setProjectionPruning(true);
         benchmark::DoNotOptimize(locator.locate(queries.front()).has_value());
       }
     }
 
-    void BM_AABBHit(benchmark::State& state, G type)
+    void BM_AABBHit(benchmark::State& state, G type, bool pruning = false)
     {
       const MeshType mesh = makeMesh(type);
       const auto queries = mappedQueries(mesh, type);
       Location::AABB locator(mesh);
+      locator.setProjectionPruning(pruning);
       if (!allLocated(locator, queries))
       {
         state.SkipWithError("AABB missed a mapped query");
@@ -160,12 +161,13 @@ namespace Rodin::Tests::Benchmarks
       state.counters["cells"] = static_cast<double>(mesh.getCellCount());
     }
 
-    void BM_AABBCurvedHit(benchmark::State& state, G type)
+    void BM_AABBCurvedHit(benchmark::State& state, G type, bool pruning = false)
     {
       MeshType mesh = makeMesh(type, true);
       curveMesh(mesh, type);
       const auto queries = mappedQueries(mesh, type);
       Location::AABB locator(mesh);
+      locator.setProjectionPruning(pruning);
       if (!allLocated(locator, queries))
       {
         state.SkipWithError("AABB missed a mapped curved query");
@@ -181,7 +183,7 @@ namespace Rodin::Tests::Benchmarks
     }
 
     template <size_t K>
-    void BM_AABBCurvedBuild(benchmark::State& state, G type)
+    void BM_AABBCurvedBuild(benchmark::State& state, G type, bool pruning = false)
     {
       MeshType mesh = makeMesh(type, true);
       curveMesh<K>(mesh, type);
@@ -189,6 +191,7 @@ namespace Rodin::Tests::Benchmarks
       for (auto _ : state)
       {
         Location::AABB locator(mesh);
+        locator.setProjectionPruning(pruning);
         benchmark::DoNotOptimize(locator.locate(queries.front()).has_value());
       }
       // Includes per-cell sampling, conversion and BVH build. The process-wide
@@ -328,14 +331,43 @@ namespace Rodin::Tests::Benchmarks
   BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, FirstP4Wedge, G::Wedge)
     ->Iterations(1)
     ->Repetitions(1);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Point, G::Point);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Segment, G::Segment);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Triangle, G::Triangle);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Quadrilateral, G::Quadrilateral);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Tetrahedron, G::Tetrahedron);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Hexahedron, G::Hexahedron);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Pyramid, G::Pyramid);
-  BENCHMARK_CAPTURE(BM_AABBBuildWithoutProjections, Wedge, G::Wedge);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Point, G::Point);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Segment, G::Segment);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Triangle, G::Triangle);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Quadrilateral, G::Quadrilateral);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Tetrahedron, G::Tetrahedron);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Hexahedron, G::Hexahedron);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Pyramid, G::Pyramid);
+  BENCHMARK_CAPTURE(BM_AABBBuildWithProjections, Wedge, G::Wedge);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedPoint, G::Point, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedSegment, G::Segment, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedSegment, G::Segment, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Segment, G::Segment, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Segment, G::Segment, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedTriangle, G::Triangle, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedTriangle, G::Triangle, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Triangle, G::Triangle, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Triangle, G::Triangle, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedQuadrilateral, G::Quadrilateral, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedQuadrilateral, G::Quadrilateral, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Quadrilateral, G::Quadrilateral, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Quadrilateral, G::Quadrilateral, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedTetrahedron, G::Tetrahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedTetrahedron, G::Tetrahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Tetrahedron, G::Tetrahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Tetrahedron, G::Tetrahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedHexahedron, G::Hexahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedHexahedron, G::Hexahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Hexahedron, G::Hexahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Hexahedron, G::Hexahedron, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedPyramid, G::Pyramid, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedPyramid, G::Pyramid, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Pyramid, G::Pyramid, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Pyramid, G::Pyramid, true);
+  BENCHMARK_CAPTURE(BM_AABBHit, PrunedWedge, G::Wedge, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedHit, PrunedWedge, G::Wedge, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<2>, PrunedP2Wedge, G::Wedge, true);
+  BENCHMARK_CAPTURE(BM_AABBCurvedBuild<4>, PrunedP4Wedge, G::Wedge, true);
   BENCHMARK(BM_AABBEmbeddedCurvedHit);
   BENCHMARK(BM_AABBGradedHit);
   BENCHMARK(BM_AABBTriangleNarrowMiss);

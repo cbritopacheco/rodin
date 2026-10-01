@@ -52,7 +52,8 @@ namespace Rodin::Location
    *     T_K(\widehat K) \subset B_K .
    *   @f]
    *   Tree nodes reject groups of polytopes, and leaf entries reject
-   *   individual polytopes, using only componentwise box containment.
+   *   individual polytopes, using componentwise box containment. Optional
+   *   control-hull projections reject further candidates before inversion.
    *
    * - Narrow phase. For each surviving candidate, the actual transformation
    *   is inverted by controlled Newton iteration, retrying from other
@@ -69,9 +70,8 @@ namespace Rodin::Location
    * bound the image in exact arithmetic. Numerical boxes include a conversion
    * roundoff allowance. Degree-one
    * factors need no conversion: the mapped vertices are already the control
-   * points, so affine and multilinear cells keep the cheap vertex box. Should
-   * a geometry ever fall outside this construction the box degrades to a
-   * box that cannot be computed reliably, that entry remains unpruned. An
+   * points, so affine and multilinear cells keep the cheap vertex box. If a
+   * box cannot be computed reliably, that entry remains unpruned. An
    * exhaustive narrow-phase fallback can also be enabled with
    * setExhaustiveFallback(). The degree is obtained from
    * PolytopeTransformation::getFactorOrder(); its default total-degree bound
@@ -96,7 +96,7 @@ namespace Rodin::Location
           m_referenceTolerance(DefaultReferenceTolerance),
           m_maxNewtonIterations(DefaultMaxNewtonIterations),
           m_exhaustiveFallback(false),
-          m_projectionPruning(true),
+          m_projectionPruning(false),
           m_index(mesh.getDimension() + 1)
       {
         computeScale();
@@ -152,9 +152,9 @@ namespace Rodin::Location
       /**
        * @brief Enables control-hull projections in addition to axis-aligned boxes.
        *
-       * Enabled by default to reduce Newton retries on overlapping boxes.
-       * Disable for short-lived locators when construction cost and storage
-       * matter more than repeated-query throughput. Membership checks and
+       * Disabled by default because construction and storage costs depend on
+       * geometry and query reuse. Enable to reduce Newton retries on overlapping
+       * boxes during repeated point location. Membership checks and
        * Newton seed retries are unchanged. Invalidates the existing index.
        */
       AABB& setProjectionPruning(bool enabled)

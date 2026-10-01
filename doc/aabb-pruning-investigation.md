@@ -1,0 +1,221 @@
+# AABB projection pruning investigation
+
+## Decision
+
+Projection pruning is opt-in: `locator.setProjectionPruning(true)` enables it.
+The default avoids additional index construction and storage. This follows the
+new-capability policy in `doc/agents/testing.md` and is supported by the measured
+tradeoff: large query gains on overlapping cells, but extra storage and setup
+with little benefit on regular tensor grids. Repeated point-location workloads
+on simplex, curved, or sheared meshes are good candidates for explicit enabling.
+
+This is a synthetic workload study, not a claim about the distribution of
+queries or memory budgets in an application. The correctness fixes and Newton
+seed retries apply in both modes. Those retries can make unpruned curved queries
+substantially slower than the earlier inversion that incorrectly stopped at an
+exterior root. Keeping pruning off favors setup and storage; it is not a claim
+that unpruned lookup became faster.
+
+## Method
+
+Release Clang 19 / MPICH, PETSc off, on the local macOS arm64 host. All eight
+geometries were exercised: Point, Segment, Triangle, Quadrilateral, Tetrahedron,
+Hexahedron, Pyramid, and Wedge. The matrix has 190 mesh configurations and
+30,836 paired query samples (61,672 diagnostic query executions).
+
+Nonpoint maps use `RealH1Element<K>`, K = 1, 2, 4. The integer-lattice uniform
+mesh is normalized to a unit domain, then its nodal coordinates are mapped by
+`x_last += a*x_first^K`, with a = 0, 1, 4. In dimension >= 2 this is an injective
+triangular shear; the one-dimensional version is monotone. Thus a changes
+orientation and curvature without introducing inverted cells. The K=1 cases
+use the H1 representation, not the mesh's default `RealP1Element` implementation.
+Absolute evaluation costs need not match those of the default element.
+
+Resolution counts vertices per axis: 16/64/256 in 1D, 4/8/16 in 2D, and 3/5/8 in
+3D. At most 64 deterministic spatially distributed queries per class are used:
+
+- Interior: a reference point between the centroid and vertex zero, excluding
+  the centroid itself so that a solve is required.
+- Shared: barycentres of internal reference faces (shared vertices in 1D).
+- Miss: points just above the upper domain face, displaced by 1e-4 divided by
+  the resolution before applying the shear. Unwarped misses can be rejected at
+  the root box; warped misses can enter the tree despite being outside the mesh.
+
+Both modes must return identical membership and cell indices, with reference
+coordinates within 1e-8, before timing. The same validation passed in the diagnostic
+run. Boundary-cell selection is therefore checked, not merely membership.
+
+Timings use the ordinary executable without counters. Seven interleaved query
+groups cover the whole sample set; mode order alternates by group. Cheap groups
+repeat for at least 0.01 seconds of elapsed time; expensive groups run at least
+once. The reported query cost is the sample-weighted mean CPU time per query,
+using `std::clock`, excluding fixture generation and index construction. Build
+cost includes locator construction, the first query that builds the index, and
+destruction; the process-wide basis cache is warm. Builds were paired and repeated
+at least three times, with their median reported. The initial configurations used
+seven construction repetitions; the final harness uses three to bound the cost of
+large P4 pyramid builds. Existing `FirstP4` benchmarks cover cold conversion caches.
+
+An initial elapsed-time pass was discarded: regular quadrilateral queries showed
+large apparent differences despite identical operation counts. A CPU-time repeat
+reduced that case to approximately 268 ns off and 257 ns on. Scheduling pauses
+can contaminate short elapsed-time comparisons. Small percentage changes in the
+remaining results are not treated as evidence of a speedup.
+
+Counters are injected into a generated header for a separate diagnostic executable.
+The production header and ordinary timing binary contain no counter increments.
+Counts include work until the first accepted cell; candidates never visited after
+that acceptance are not counted. Iterations count entries into the Newton loop,
+including convergence checks that need no Jacobian. Retries count alternate seeds
+after each candidate's centroid seed. Point location uses a distance check, so its
+Newton-candidate count is zero.
+
+Memory is retained vector capacity for nodes, entries, boxes, projections and
+projection ranges. It excludes mesh storage, the shared basis cache, temporary
+construction buffers, allocator metadata and the locator's small fixed fields;
+it is not peak RSS.
+
+## Query cost and work
+
+Largest mesh of each type, K=4, a=4. Costs are CPU microseconds per interior
+query. Counts are means per query. Differences between geometries also reflect
+cell count, element evaluation and mesh decomposition; only on/off within a row
+is a controlled comparison.
+
+| Geometry | Cells | CPU off / on (us) | Newton candidates off / on | Index off / on (KiB) |
+| --- | ---: | ---: | ---: | ---: |
+| Triangle | 450 | 256.0 / 22.3 | 4.12 / 1.31 | 38.9 / 109.9 |
+| Quadrilateral | 225 | 18.1 / 2.7 | 1.64 / 1.00 | 19.6 / 55.1 |
+| Tetrahedron | 2058 | 9208.8 / 1398.3 | 8.73 / 1.78 | 177.0 / 721.2 |
+| Hexahedron | 343 | 1156.8 / 144.7 | 1.92 / 1.08 | 29.6 / 163.0 |
+| Pyramid | 2058 | 72607.1 / 4990.3 | 4.73 / 1.31 | 177.0 / 721.2 |
+| Wedge | 686 | 2195.2 / 189.9 | 3.11 / 1.16 | 59.1 / 197.9 |
+
+For the largest strongly sheared P4 tetrahedral mesh (2,058 cells), all requested
+operation counts are shown below. Transforms and Jacobians count query work only.
+
+| Query | Pruning | Candidates | Transforms | Jacobians | Iterations | Seed retries | CPU (us) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| interior | off | 8.73 | 445.38 | 178.97 | 178.97 | 61.88 | 9208.8 |
+| interior | on | 1.78 | 103.41 | 24.94 | 24.94 | 6.25 | 1398.3 |
+| shared | off | 9.73 | 746.23 | 243.50 | 243.50 | 69.88 | 12994.5 |
+| shared | on | 1.58 | 19.34 | 12.56 | 12.56 | 4.62 | 623.2 |
+| miss | off | 13.78 | 594.14 | 319.16 | 319.16 | 110.25 | 16150.0 |
+| miss | on | 1.97 | 53.19 | 35.56 | 35.56 | 15.75 | 1744.8 |
+
+Shared faces can be more expensive than interior hits without pruning because
+several overlapping boxes are inverted before finding a containing cell. Nearby
+misses remain expensive even with pruning: surviving candidates may exhaust all
+seeds. Physical distance to the mesh is therefore a poor predictor of cost.
+
+The slow tail matters. In the tetrahedral interior case, the 95th-percentile
+Newton-candidate count falls from 22 to 3 (maximum 40 to 4). Transform calls fall
+from 1,281 to 737 at the 95th percentile (maximum 4,714 to 1,068). Pruning reduces
+the tail but does not eliminate expensive inversions on surviving candidates.
+
+Point and Segment have no projection planes in either mode and their exact work
+counts and index storage match. Regular tensor interior queries typically reach
+one candidate already; pruning cannot remove that inversion. Regular tetrahedral
+interior queries on the largest mesh fall from 3.70 candidates to 1.00.
+Three additional 0.03-second repetitions of the regular H1 P1 hexahedral case
+show no material query benefit: median interior costs are approximately 596 ns
+off and 598 ns on, and shared-face costs are 610 ns off and 615 ns on.
+
+## Construction and memory
+
+On the largest regular H1 P1 tetrahedral fixture, construction rises from
+0.713 ms to 2.400 ms while interior queries fall from 3.136 us to 0.926 us.
+That is approximately 764 interior queries to amortize construction in this
+particular fixture. On the strongly sheared P4 tetrahedral fixture, construction
+rises from 200.596 ms to 291.008 ms while interior queries fall from 9.209 ms to
+1.398 ms: approximately 12 such queries amortize construction. Neither count is
+an application-wide threshold.
+
+The P4 tetrahedral index grows from 181,296 to 738,512 bytes (4.07 times). The P4
+hexahedral index grows from 30,344 to 166,904 bytes (5.50 times). These ratios are
+for the locator's retained vectors, not the whole mesh or process.
+
+The current exact-nonzero test for projection direction components can retain
+nearly axis-aligned normals caused by floating-point noise. On the regular H1 P1
+fixtures, quadrilateral index storage grows from 20,024 to 27,720 bytes, and
+hexahedral storage grows from 30,344 to 52,216 bytes, despite unchanged inversion
+counts. Filtering numerically redundant directions is a concrete follow-up; any
+threshold should be a documented policy constant, and skipping such a filter
+must preserve membership results. It is not included in this default decision.
+
+## Growth with mesh size and distortion
+
+For K=4, a=4 tetrahedra, mean interior Newton candidates are:
+
+| Cells | Off | On |
+| --- | ---: | ---: |
+| 48 | 4.75 | 2.10 |
+| 384 | 7.14 | 1.67 |
+| 2058 | 8.73 | 1.78 |
+
+Pruning keeps this candidate count near one or two despite increasing resolution.
+Tree traversal still grows with the mesh. Samples change with resolution, and
+nonlinear seed behavior is not monotone; this table is not a universal complexity
+law.
+
+At 2,058 cells and K=4, increasing shear gives:
+
+| Shear a | Candidates off / on | Transform calls off / on |
+| --- | ---: | ---: |
+| 0 | 3.58 / 1.00 | 48.41 / 2.00 |
+| 1 | 4.70 / 1.11 | 154.30 / 20.53 |
+| 4 | 8.73 / 1.78 | 445.38 / 103.41 |
+
+The primary matrix changes both representation order and the power of the shear.
+It cannot alone attribute a time increase to element order. A supplementary
+comparison holds the quadratic physical map fixed while representing it at P2
+and P4; its results are recorded below.
+
+For the same quadratic shear (a=1) on 2,058 tetrahedra, representation
+order alone raises the evaluation cost. With pruning enabled, both interior
+cases perform exactly one inversion, three transformations and two Jacobians
+per query, with no seed retries:
+
+| Representation | CPU per interior query, off / on (us) | Transformations on | Jacobians on |
+| --- | ---: | ---: | ---: |
+| P2 | 389.81 / 9.23 | 3 | 2 |
+| P4 | 4286.83 / 98.39 | 3 | 2 |
+
+The pruned P4 query is about 10.7 times more expensive than P2 despite identical
+inversion work counts. The extra cost is in evaluating the higher-order
+transformation/Jacobian representation, not in additional tree candidates or
+Newton iterations. This is evidence for investigating geometry evaluation and
+reusing evaluations next; it is not a reason to reduce the seed budget, which
+protects the exterior-root regression. The unpruned candidate sequences are
+slightly different because degree-dependent hull recovery and floating-point
+iteration behavior differ even when the physical polynomial is the same.
+
+
+## Reproduction
+
+Configure a Release Ninja build with `CMAKE_EXPORT_COMPILE_COMMANDS=ON` and tests
+and benchmarks enabled. Paths below use `build` and a scratch output directory.
+The optional fourth positional argument selects `degree/shear/resolution`; the
+fifth fixes the shear power independently of the representation order.
+
+```sh
+cmake --build build --target RodinAABBWorkload RodinBenchmarks
+build/tests/benchmarks/RodinAABBWorkload 0.01 > timing.csv
+python3 dev/profile_aabb.py --build build --output /tmp/aabb-profile
+/tmp/aabb-profile/RodinAABBWorkloadDiagnostic > counts.csv
+build/tests/benchmarks/RodinAABBWorkload 0.03 Tetrahedron 2/1/8 2
+build/tests/benchmarks/RodinAABBWorkload 0.03 Tetrahedron 4/1/8 2
+/tmp/aabb-profile/RodinAABBWorkloadDiagnostic 0.03 Tetrahedron 2/1/8 2
+/tmp/aabb-profile/RodinAABBWorkloadDiagnostic 0.03 Tetrahedron 4/1/8 2
+build/tests/benchmarks/RodinBenchmarks --benchmark_filter=AABB
+```
+
+Google Benchmark has paired regular/curved hit and construction cases; names
+containing `Pruned` or `WithProjections` explicitly enable pruning. Other cases
+use the default. The standalone diagnostic copy deliberately fails generation
+when a source anchor changes, preventing silently incomplete counters.
+
+The existing AABB correctness regressions remain enabled in both modes. The
+opt-in regression checks that default construction avoids the Jacobian used for
+projection normals, explicit enabling performs it, and disabling restores the
+original dependency-call behavior without changing the returned point.

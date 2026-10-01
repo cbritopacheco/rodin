@@ -18,3 +18,7 @@ target_link_libraries(RodinBenchmarks
   Rodin::Solver
   benchmark::benchmark
   benchmark::benchmark_main)
+
+# Standalone paired timing harness: no diagnostic counters in this target.
+add_executable(RodinAABBWorkload AABBWorkload.cpp)
+target_link_libraries(RodinAABBWorkload PRIVATE Rodin::Variational)
