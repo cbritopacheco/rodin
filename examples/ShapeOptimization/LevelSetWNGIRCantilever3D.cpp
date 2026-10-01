@@ -659,7 +659,7 @@ int run(int argc, char** argv)
             << " classify=" << classifyEvery << " redistance=" << redistanceMode << "/"
             << redistanceEvery << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
-            << "\n  WNGIR metric: kappaBulk=" << wp.kappaBulk << " rDiv=" << wp.rDiv
+            << "\n  WNGIR metric: kappaBulk=" << wp.kappaBulk << " kappaC=" << wp.kappaC << " kappaReg=" << wp.kappaReg
             << '\n';
 
   auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {

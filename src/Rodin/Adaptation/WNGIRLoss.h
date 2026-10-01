@@ -19,7 +19,8 @@ namespace Rodin::Adaptation
    *
    * For a residual @f$r@f$, the influence and weight satisfy
    * @f$\rho'(r)=w(r)r@f$. The same loss is used by the objective, first
-   * variation, and observation metric throughout one nonlinear solve.
+   * variation, and directional curvature throughout one nonlinear solve.
+   * The canonical observation metric is unweighted squared-fit curvature.
    */
   class WNGIRLoss
   {
@@ -30,6 +31,9 @@ namespace Rodin::Adaptation
       {
         assert(scale > Real(0));
       }
+
+      /// @brief Returns the squared robust residual scale.
+      Real getScaleSquared() const noexcept { return m_scale2; }
 
       /// @brief Evaluates @f$\rho(r)@f$.
       Real getValue(Real residual) const

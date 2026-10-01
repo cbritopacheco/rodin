@@ -31,7 +31,6 @@ namespace Rodin::Examples
       std::size_t maxIterations = Adaptation::WNGIRParameters{}.maxIterations;
       std::size_t quadratureOrder = 0;
       Real kappaBulk = Adaptation::WNGIRParameters{}.kappaBulk;
-      Real rDiv = 1;
       Real kappaJ = 1;
       Real kappaQ = 1;
       Real tauRmsHFloor = Adaptation::WNGIRParameters{}.tauRmsHFloor;
@@ -148,12 +147,35 @@ namespace Rodin::Examples
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
+    constexpr const char* options[] = {"wngir-kappa-bulk", "wngir-kappa-obs",
+      "wngir-robust-scale", "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
+      "wngir-quality-guard", "wngir-kappa-c", "wngir-kappa-reg",
+      "wngir-directional-newton", "wngir-directional-newton-max-alpha",
+      "wngir-quality-witness", "wngir-direct-solver", "wngir-direct-threads",
+      "wngir-geometric-sup-tol", "wngir-primal-barrier-iterations",
+      "wngir-primal-barrier-relative-tol", "wngir-mu-hat", "wngir-primal-barrier-mu",
+      "wngir-omega-min", "wngir-alpha-min", "wngir-armijo", "wngir-descent-fraction",
+      "wngir-direction-norm-factor", "wngir-jls", "wngir-rms-floor", "wngir-sup-floor",
+      "wngir-rms-normal-jump-factor", "wngir-sup-normal-jump-factor", "wngir-rms-tol",
+      "wngir-sup-tol", "wngir-energy-stag-tol", "wngir-step-tol", "wngir-step-h-tol",
+      "wngir-steps", "wngir-max-iters", "wngir-cg-rtol", "wngir-cg-strict-tol",
+      "wngir-cg-max-iters", "wngir-trace", "wngir-rigid-diagnostics"};
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string argument(argv[i]);
+      if (!argument.starts_with("--wngir-"))
+        continue;
+      const auto name = argument.substr(2,
+        argument.find('=') == std::string::npos ? std::string::npos
+                                                : argument.find('=') - 2);
+      if (std::none_of(std::begin(options), std::end(options),
+            [&](const char* option) { return name == option; }))
+        Alert::Exception() << "Unknown or removed WNGIR option: " << name << Alert::Raise;
+    }
     Adaptation::WNGIRParameters p;
     p.h = h;
 
     p.kappaBulk = realOption(argc, argv, "wngir-kappa-bulk", defaults.kappaBulk);
-    p.rDiv =
-      realOption(argc, argv, "wngir-r-div", "wngir-divergence-ratio", defaults.rDiv);
 
     p.kappaObs = realOption(argc, argv, "wngir-kappa-obs", Real(1));
     p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
@@ -162,14 +184,35 @@ namespace Rodin::Examples
     p.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
     p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
+    p.qualityGuard = realOption(argc, argv, "wngir-quality-guard", p.qualityGuard);
+    p.kappaC = realOption(argc, argv, "wngir-kappa-c", p.kappaC);
+    p.kappaReg = realOption(argc, argv, "wngir-kappa-reg", p.kappaReg);
+    p.directionalNewton =
+      boolOption(argc, argv, "wngir-directional-newton", p.directionalNewton);
+    p.directionalNewtonMaxAlpha = realOption(
+      argc, argv, "wngir-directional-newton-max-alpha", p.directionalNewtonMaxAlpha);
+    p.traceQualityWitness = boolOption(argc, argv, "wngir-quality-witness", false);
+    const auto defaultSolver =
+      p.directSolver == Adaptation::WNGIRParameters::DirectSolver::MUMPS ? "mumps"
+                                                                         : "sparse-lu";
+    const auto directSolver =
+      stringOption(argc, argv, "wngir-direct-solver", defaultSolver);
+    if (directSolver == "mumps")
+      p.directSolver = Adaptation::WNGIRParameters::DirectSolver::MUMPS;
+    else if (directSolver == "sparse-lu")
+      p.directSolver = Adaptation::WNGIRParameters::DirectSolver::SparseLU;
+    else if (directSolver == "cg")
+      p.directSolver = Adaptation::WNGIRParameters::DirectSolver::CG;
+    else
+      Alert::Exception() << "Unknown WNGIR solver: " << directSolver << Alert::Raise;
+    p.directSolverThreads = sizeOption(argc, argv, "wngir-direct-threads", 0);
+    p.geometricSupTolerance = realOption(argc, argv, "wngir-geometric-sup-tol", 0);
     p.primalBarrierIterations = std::max<std::size_t>(1,
       sizeOption(
         argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
     p.primalBarrierRelativeTolerance = realOption(
       argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
     p.muHat = realOption(argc, argv, "wngir-mu-hat", "wngir-primal-barrier-mu", p.muHat);
-    p.thetaBoundary = realOption(
-      argc, argv, "wngir-theta-boundary", "wngir-fraction-to-boundary", p.thetaBoundary);
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
     p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
@@ -201,10 +244,10 @@ namespace Rodin::Examples
     if (defaults.parseLegacyMaxIterations)
       p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
 
-    p.rigidStabilisationLevel =
-      realOption(argc, argv, "wngir-rigid-stabilisation", p.rigidStabilisationLevel);
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
+    p.cgStrictTolerance =
+      boolOption(argc, argv, "wngir-cg-strict-tol", p.cgStrictTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;

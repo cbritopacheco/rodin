@@ -17,7 +17,7 @@ from run_p1_2d_parameter_campaign import int_values, real_values, save_case_trac
 
 
 FIELDS = (
-    "stage", "n", "elements", "lobes", "kappa_bulk", "rho", "mu_hat",
+    "stage", "n", "elements", "lobes", "kappa_bulk", "kappa_reg", "mu_hat",
     "steps", "facets", "inside", "outside", "fit0", "fit", "geom_rms",
     "geom_sup", "normal_rms", "iterations", "min_j", "max_qrel",
     "active_rms_hg", "linear_iterations", "linear_solves", "linear_mean",
@@ -27,7 +27,7 @@ FIELDS = (
 PAIRS = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)=([^\s]+)")
 ELEMENTS = re.compile(r"^\s*elements=(\d+)", re.MULTILINE)
 DEFAULT_KAPPA_BULK = (
-    "0,1e-6,3e-6,1e-5,3e-5,1e-4,3e-4,1e-3,3e-3,"
+    "1e-6,3e-6,1e-5,3e-5,1e-4,3e-4,1e-3,3e-3,"
     "1e-2,3e-2,0.1,0.2,0.5,1"
 )
 
@@ -49,7 +49,7 @@ def mesh_samples_per_wave(n, lobes, r0, amp):
     return 2 * math.pi * (r0 - amp) / (lobes * h)
 
 
-def command(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
+def command(args, n, lobes, kappa_bulk, kappa_reg, mu_hat, steps):
     h = 1 / (n - 1)
     cmd = [
         str(args.exe), f"--n={n}", f"--lobes={lobes}",
@@ -57,14 +57,14 @@ def command(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
         f"--amp={args.amp:.14g}", f"--R0={args.r0:.14g}",
         f"--classifier-eps={1.25*h:.14g}", "--classifier-lambda=0.008",
         f"--wngir-kappa-bulk={kappa_bulk:.14g}",
-        f"--wngir-rigid-stabilisation={rho:.14g}",
+        f"--wngir-kappa-reg={kappa_reg:.14g}",
         f"--wngir-mu-hat={mu_hat:.14g}",
-        "--wngir-kappa-j=1", "--wngir-kappa-q=1", "--wngir-r-div=1",
-        "--wngir-kappa-obs=1", "--wngir-robust-scale=0",
-        "--wngir-jsafe=1e-2", "--wngir-qmax=10",
+        "--wngir-kappa-j=1", "--wngir-kappa-q=1",
+        "--wngir-kappa-obs=1", "--wngir-kappa-c=1", "--wngir-quality-guard=0.1", "--wngir-robust-scale=0",
+        "--wngir-direct-solver=mumps", "--wngir-jsafe=1e-2", "--wngir-qmax=10",
         f"--wngir-primal-barrier-iterations={args.barrier_max_iters}",
         "--wngir-primal-barrier-relative-tol=1e-3",
-        "--wngir-theta-boundary=0.95", "--j-min=1e-8",
+        "--j-min=1e-8",
         "--wngir-jls=1e-2", "--wngir-armijo=1e-4",
         "--wngir-descent-fraction=1e-4",
         "--wngir-direction-norm-factor=10", "--wngir-alpha-min=1e-4",
@@ -82,15 +82,15 @@ def command(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
     return cmd
 
 
-def run_case(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
+def run_case(args, n, lobes, kappa_bulk, kappa_reg, mu_hat, steps):
     env = dict(os.environ)
     env.update({"OMP_NUM_THREADS": str(args.threads),
-                "OPENBLAS_NUM_THREADS": "1", "VECLIB_MAXIMUM_THREADS": "1",
+                "OPENBLAS_NUM_THREADS": str(args.threads), "VECLIB_MAXIMUM_THREADS": str(args.threads),
                 "DYLD_LIBRARY_PATH": args.dyld_library_path})
     start = time.monotonic()
     try:
         proc = subprocess.run(
-            command(args, n, lobes, kappa_bulk, rho, mu_hat, steps),
+            command(args, n, lobes, kappa_bulk, kappa_reg, mu_hat, steps),
             cwd=args.scratch, env=env, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, timeout=args.timeout)
         output, returncode = proc.stdout, proc.returncode
@@ -102,8 +102,8 @@ def run_case(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
     if args.log_iterations:
         save_case_trace(args.out_dir,
                         dict(stage=args.stage, n=n, lobes=lobes, kappa_bulk=kappa_bulk,
-                             rho=rho, mu_hat=mu_hat),
-                        command(args, n, lobes, kappa_bulk, rho, mu_hat, steps), output)
+                             kappa_reg=kappa_reg, mu_hat=mu_hat),
+                        command(args, n, lobes, kappa_bulk, kappa_reg, mu_hat, steps), output)
     final = parse_metrics(output, "WNGIR it=")
     timing = parse_metrics(output, "wngir timing:")
     geometry = parse_metrics(output, "debug: facets=")
@@ -111,7 +111,7 @@ def run_case(args, n, lobes, kappa_bulk, rho, mu_hat, steps):
     return {
         "stage": args.stage, "n": n,
         "elements": int(elements.group(1)) if elements else 6 * (n - 1) ** 3,
-        "lobes": lobes, "kappa_bulk": kappa_bulk, "rho": rho,
+        "lobes": lobes, "kappa_bulk": kappa_bulk, "kappa_reg": kappa_reg,
         "mu_hat": mu_hat, "steps": steps,
         "facets": int(geometry.get("facets", -1)),
         "inside": int(geometry.get("inside", -1)),
@@ -150,7 +150,7 @@ def read_rows(path):
 def key(row):
     return (row["stage"], int(row["n"]), int(row["lobes"]),
             round(float(row["kappa_bulk"]), 14),
-            round(float(row["rho"]), 14),
+            round(float(row["kappa_reg"]), 14),
             round(float(row["mu_hat"]), 14))
 
 
@@ -169,7 +169,7 @@ def main():
     parser.add_argument("--n", required=True, help="comma-separated grid-point counts")
     parser.add_argument("--lobes", help="default: all for preflight, 0,5,10 for screen")
     parser.add_argument("--kappa-bulk", default=DEFAULT_KAPPA_BULK)
-    parser.add_argument("--rho", default="0.1:1.0:0.1")
+    parser.add_argument("--kappa-reg", default="1")
     parser.add_argument("--mu-hat", default="0.1:1.0:0.1")
     parser.add_argument("--steps", type=int, default=30)
     parser.add_argument("--log-iterations", action="store_true",
@@ -217,11 +217,13 @@ def main():
         parser.error("the target requires 0 < amp < R0")
     if not args.exe.is_file():
         parser.error(f"executable not found: {args.exe}")
-    controls = (real_values(args.kappa_bulk), real_values(args.rho),
+    controls = (real_values(args.kappa_bulk), real_values(args.kappa_reg),
                 real_values(args.mu_hat))
     if any(not values for values in controls):
         parser.error("coefficient grids must be nonempty")
-    values = [(1e-4, 0.1, 0.9)] if args.stage == "preflight" else list(
+    if any(value <= 0 for value in controls[0] + controls[1]):
+        parser.error("kappa-bulk and kappa-reg grids must be strictly positive")
+    values = [(1e-4, 1, 90)] if args.stage == "preflight" else list(
         itertools.product(*controls))
     cases = [(n, lobe, *triple) for n in ns for lobe in lobes for triple in values]
     print(f"{args.stage}: {len(cases)} cases; executable={args.exe}", flush=True)
@@ -245,10 +247,11 @@ def main():
                 preflight_manifest["amp"] != args.amp or
                 preflight_manifest["r0"] != args.r0):
             parser.error("preflight used a different binary or target")
-    manifest = {"stage": args.stage, "n": ns, "lobes": lobes,
+    manifest = {"model": "O+C+K-affine-quadratic-hinges-v1", "kappa_c": 1,
+                "quality_guard": 0.1, "stage": args.stage, "n": ns, "lobes": lobes,
                 "kappa_bulk": controls[0] if args.stage == "screen" else [1e-4],
-                "rho": controls[1] if args.stage == "screen" else [0.1],
-                "mu_hat": controls[2] if args.stage == "screen" else [0.9],
+                "kappa_reg": controls[1] if args.stage == "screen" else [1],
+                "mu_hat": controls[2] if args.stage == "screen" else [90],
                 "steps": 0 if args.stage == "preflight" else args.steps,
                 "target": "R0 + A/3 sum_i cos(lobes*n_i)",
                 "amp": args.amp, "r0": args.r0,
@@ -260,7 +263,7 @@ def main():
                              "step_absolute_over_h2": 1e-3,
                              "accepted_step_over_h2": 1e-3,
                              "consecutive_small_steps": 5},
-                "linear": {"backend": "CG", "relative_tolerance": args.cg_rtol,
+                "linear": {"backend": "MUMPS", "relative_tolerance": args.cg_rtol,
                            "max_iterations_per_solve": 1000},
                 "executable": str(args.exe), "sha256": digest}
     if args.log_iterations:
@@ -284,18 +287,18 @@ def main():
                                  "is under-resolved; refine or explicitly override")
     done = {key(row) for row in read_rows(csv_path)}
     new = 0
-    for n, lobe, kb, rho, mu in cases:
-        case_key = (args.stage, n, lobe, round(kb, 14), round(rho, 14),
+    for n, lobe, kb, kappa_reg, mu in cases:
+        case_key = (args.stage, n, lobe, round(kb, 14), round(kappa_reg, 14),
                     round(mu, 14))
         if case_key in done:
             continue
         if args.max_cases and new >= args.max_cases:
             break
-        row = run_case(args, n, lobe, kb, rho, mu,
+        row = run_case(args, n, lobe, kb, kappa_reg, mu,
                        0 if args.stage == "preflight" else args.steps)
         append_row(csv_path, row)
         new += 1
-        print(f"{new} n={n} lobes={lobe} kb={kb:g} rho={rho:g} mu={mu:g} "
+        print(f"{new} n={n} lobes={lobe} kb={kb:g} kappa_reg={kappa_reg:g} mu={mu:g} "
               f"facets={row['facets']} D={row['geom_rms']:.4g} "
               f"it={row['iterations']} exit={row['exit']} sec={row['seconds']:.2f}",
               flush=True)

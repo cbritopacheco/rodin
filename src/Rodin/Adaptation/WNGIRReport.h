@@ -58,6 +58,8 @@ namespace Rodin::Adaptation
       std::size_t lastPrimalBarrierIterations = 0;
       /// @brief Whether the final primal-barrier inner solve met its tolerance.
       bool primalBarrierConverged = false;
+      /// @brief Number of inner merit backtracks accumulated over the solve.
+      std::size_t primalBarrierBacktracks = 0;
       /// @brief Norm or magnitude of the last accepted step.
       Real acceptedStep = 0;
       /// @brief Minimum sampled Jacobian determinant.
@@ -99,11 +101,6 @@ namespace Rodin::Adaptation
       /// @brief Smallest-to-largest rigid-mode observation eigenvalue ratio.
       Real rigidModeCoercivityRatio = 0;
 
-      /// @brief Fraction of the accepted displacement carried by translation.
-      Real rigidTranslationFraction = 0;
-
-      /// @brief Fraction of the accepted displacement carried by rotation.
-      Real rigidRotationFraction = 0;
       /// @brief Dimension of the uncontrolled rigid-motion space.
       std::size_t rigidModeDimension = 0;
       /// @brief Effective RMS-over-(h times level-set gradient) tolerance.
@@ -124,11 +121,16 @@ namespace Rodin::Adaptation
       const char* exitReason = "iter-budget";
       // Wall-clock breakdown (seconds, accumulated over iterations).
       Real tAssembly = 0; ///< WNGIR variational problem assembly.
+      std::size_t metricInertiaChecks = 0; ///< Numeric LDLT inertia audits.
+      Real tMetricAudit = 0; ///< Time spent auditing inertia, without repair.
       Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
       Real tBulk = 0; ///< One-time constant bulk metric assembly.
       Real tFactor = 0; ///< CG setup/preconditioner.
       Real tSolve = 0; ///< CG iterations.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
+      Real tPrimalBarrierLineSearch = 0; ///< fixed-inner-merit evaluation and backtracking.
+      Real tPrimalBarrierAssembly = 0; ///< Inner direction-system assembly.
+      Real tPrimalBarrierSolve = 0; ///< Inner linear solves, excluding the predictor.
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
       std::size_t linearSolveCount = 0; ///< Number of linear solves performed.
       std::size_t maxLinearIterations = 0; ///< Largest iteration count of one solve.

@@ -143,6 +143,42 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(analytic, numeric, 1e-6);
   }
 
+  TEST(Rodin_Adaptation_CellDeformation, NormalizedInversionEnergyAndCurvature)
+  {
+    for (const size_t d : {2u, 3u})
+    {
+      Math::SpatialMatrix<Real> F = Math::SpatialMatrix<Real>::Identity(d, d);
+      F(0, 0) = Real(1.3);
+      F(0, 1) = Real(0.2);
+      F(1, 1) = Real(0.8);
+      Math::SpatialMatrix<Real> G = Math::SpatialMatrix<Real>::Identity(d, d);
+      G(0, 1) = Real(0.3);
+      const auto energy = [d](const Math::SpatialMatrix<Real>& matrix) {
+        return -std::log(matrix.determinant()) + Real(d) / Real(2) *
+          std::log(matrix.squaredNorm() / Real(d));
+      };
+      CellDeformation deformation(d);
+      deformation.setDeformationGradient(F);
+      const Real Q = deformation.getRelativeDistortion();
+      EXPECT_NEAR(energy(F), Real(d) / Real(2) * std::log(Q), Real(1e-14));
+      for (const Real scale : {Real(0.1), Real(1), Real(5)})
+        EXPECT_NEAR(energy(Math::SpatialMatrix<Real>(scale * F)), energy(F), Real(1e-14));
+      const auto hessian = [&](const Math::SpatialMatrix<Real>& direction) {
+        const Real action = deformation.getRelativeDistortionAction(direction);
+        return Real(d) / Real(2) *
+          (deformation.getRelativeDistortionSecondAction(direction, direction) / Q -
+            action * action / (Q * Q));
+      };
+      EXPECT_NEAR(hessian(F), Real(0), Real(1e-13));
+      constexpr Real eps = Real(1e-4);
+      const Real difference = (energy(Math::SpatialMatrix<Real>(F + eps * G)) -
+        Real(2) * energy(F) + energy(Math::SpatialMatrix<Real>(F - eps * G))) / (eps * eps);
+      EXPECT_NEAR(hessian(G), difference, Real(1e-6));
+      F(1, 1) = Real(1e-6);
+      EXPECT_GT(energy(F), Real(5));
+    }
+  }
+
   /// @brief The distortion action is the directional derivative of @f$Q@f$.
   TEST(Rodin_Adaptation_CellDeformation, DistortionAction_MatchesFiniteDifference)
   {

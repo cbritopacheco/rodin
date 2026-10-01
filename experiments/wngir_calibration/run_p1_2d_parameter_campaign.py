@@ -44,7 +44,7 @@ TIMING_RE = re.compile(
 
 
 FIELDS = [
-    "dataset", "n", "elements", "lobes", "kappa_bulk", "rho", "mu_hat", "kappa_j", "kappa_q",
+    "dataset", "n", "elements", "lobes", "kappa_bulk", "kappa_reg", "mu_hat", "kappa_j", "kappa_q",
     "fit", "geom_rms", "geom_sup", "normal_rms", "iterations", "alpha", "step",
     "min_j", "max_j", "max_qrel",
     "active_rms", "active_sup", "active_rms_hg", "act_frac", "cR", "rej_j", "rej_q", "rej_e",
@@ -120,7 +120,7 @@ def read_done(path):
                 int(float(row["n"])),
                 int(float(row["lobes"])),
                 round(float(row["kappa_bulk"]), 14),
-                round(float(row["rho"]), 14),
+                round(float(row["kappa_reg"]), 14),
                 round(float(row["mu_hat"]), 14),
                 round(float(row["kappa_j"]), 14),
                 round(float(row["kappa_q"]), 14)))
@@ -143,16 +143,7 @@ def ensure_schema(path):
         reader = csv.DictReader(f)
         if reader.fieldnames == FIELDS:
             return
-        rows = list(reader)
-        unknown = set(reader.fieldnames or ()) - set(FIELDS)
-        if unknown:
-            raise ValueError(f"cannot migrate CSV with unknown fields: {sorted(unknown)}")
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    with temporary.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
-    temporary.replace(path)
+        raise ValueError("CSV schema differs from canonical WNGIR; use a fresh out-dir")
 
 
 def element_count(n):
@@ -178,7 +169,7 @@ def save_case_trace(out_dir, identity, command, output):
     return path
 
 
-def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa_q):
+def run_case(args, exe, stage, n, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j, kappa_q):
     cmd = [
         str(exe),
         f"--n={n}",
@@ -191,18 +182,17 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         f"--classifier-eps={1.25 / (n - 1):.14g}",
         "--classifier-lambda=0.008",
         f"--wngir-kappa-bulk={kappa_bulk:.14g}",
-        f"--wngir-rigid-stabilisation={rho:.14g}",
+        f"--wngir-kappa-reg={kappa_reg:.14g}",
         f"--wngir-mu-hat={mu_hat:.14g}",
         f"--wngir-kappa-j={kappa_j:.14g}",
         f"--wngir-kappa-q={kappa_q:.14g}",
-        "--wngir-r-div=1",
-        "--wngir-kappa-obs=1",
+        "--wngir-kappa-obs=1", "--wngir-kappa-c=1", "--wngir-quality-guard=0.1",
         "--wngir-robust-scale=0",
-        "--wngir-jsafe=1e-2",
+        "--wngir-direct-solver=mumps", "--wngir-jsafe=1e-2",
         "--wngir-qmax=10",
         f"--wngir-primal-barrier-iterations={args.barrier_max_iters}",
-        "--wngir-primal-barrier-relative-tol=1e-3",
-        "--wngir-theta-boundary=0.95",
+        f"--wngir-primal-barrier-relative-tol={getattr(args, 'inner_rtol', 1e-3):.14g}",
+
         "--j-min=1e-8",
         "--wngir-jls=1e-2",
         "--wngir-armijo=1e-4",
@@ -224,7 +214,7 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         # without prescribing that response's geometry-dependent coefficient.
         f"--wngir-step-tol={1e-3 / (n - 1) ** 2:.14g}",
         f"--wngir-step-h-tol={1e-3 / (n - 1):.14g}",
-        "--wngir-cg-rtol=1e-9",
+        f"--wngir-cg-rtol={getattr(args, 'cg_rtol', 1e-9):.14g}",
         "--wngir-cg-max-iters=1000",
         f"--wngir-steps={args.steps}",
         "--output=0",
@@ -235,11 +225,13 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         cmd.extend(["--trace=1", "--wngir-trace=1"])
     env = dict(os.environ)
     env["OMP_NUM_THREADS"] = str(args.threads)
+    env["OPENBLAS_NUM_THREADS"] = str(args.threads)
+    env["VECLIB_MAXIMUM_THREADS"] = str(args.threads)
     env["DYLD_LIBRARY_PATH"] = args.dyld_library_path
     t0 = time.time()
     proc = subprocess.run(
         cmd,
-        cwd=args.root,
+        cwd=getattr(args, "work_dir", args.root),
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -248,7 +240,7 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
     if args.log_iterations:
         save_case_trace(args.out_dir,
                         dict(dataset=stage, n=n, lobes=lobes, kappa_bulk=kappa_bulk,
-                             rho=rho, mu_hat=mu_hat, kappa_j=kappa_j, kappa_q=kappa_q),
+                             kappa_reg=kappa_reg, mu_hat=mu_hat, kappa_j=kappa_j, kappa_q=kappa_q),
                         cmd, proc.stdout)
     elements_match = ELEMENTS_RE.search(proc.stdout)
     elements = int(elements_match.group("elements")) if elements_match else element_count(int(n))
@@ -260,7 +252,7 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
         "elements": elements,
         "lobes": lobes,
         "kappa_bulk": kappa_bulk,
-        "rho": rho,
+        "kappa_reg": kappa_reg,
         "mu_hat": mu_hat,
         "kappa_j": kappa_j,
         "kappa_q": kappa_q,
@@ -350,11 +342,11 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa
     return row
 
 
-def cases_for(stage, ns, lobes, kappa_bulk, rho, mu_hat, kappa_j, kappa_q):
+def cases_for(stage, ns, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j, kappa_q):
     for n in ns:
         for l in lobes:
             for kb in kappa_bulk:
-                for r in rho:
+                for r in kappa_reg:
                     for mu in mu_hat:
                         for kj in kappa_j:
                             for kq in kappa_q:
@@ -376,16 +368,16 @@ def main():
     parser.add_argument("--amp", type=float, default=0.08)
     parser.add_argument("--r0", type=float, default=0.24)
     parser.add_argument("--extra", default="")
+    parser.add_argument("--scratch", default="/tmp/wngir-p1-2d-canonical")
     parser.add_argument("--dyld-library-path", default="/opt/local/lib/julia:/opt/local/lib")
-    parser.add_argument("--plot-every", type=int, default=500)
-    parser.add_argument("--dataset", default="coarse_p1_2d",
+    parser.add_argument("--dataset", default="canonical_p1_2d",
                         help="dataset name; the campaign reads and appends to <out-dir>/<dataset>.csv")
     parser.add_argument("--n", default="5,10,20,50,100")
     parser.add_argument("--lobes", default="0:10")
     parser.add_argument("--kappa-bulk",
-                        default="0,1e-6,3e-6,1e-5,3e-5,1e-4,3e-4,1e-3,3e-3,"
+                        default="1e-6,3e-6,1e-5,3e-5,1e-4,3e-4,1e-3,3e-3,"
                                 "1e-2,3e-2,0.1,0.2,0.5,1.0")
-    parser.add_argument("--rho", default="0.1:1.0:0.1")
+    parser.add_argument("--kappa-reg", default="1")
     parser.add_argument("--mu-hat", default="0.1:1.0:0.1")
     parser.add_argument("--kappa-j", default="1")
     parser.add_argument("--kappa-q", default="1")
@@ -407,6 +399,8 @@ def main():
         out_dir = args.root / out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     args.out_dir = out_dir
+    args.work_dir = Path(args.scratch)
+    args.work_dir.mkdir(parents=True, exist_ok=True)
     csv_path = out_dir / f"{args.dataset}.csv"
     ensure_schema(csv_path)
     deadline = deadline_from(args.deadline)
@@ -415,39 +409,44 @@ def main():
          int_values(args.n),
          int_values(args.lobes),
          real_values(args.kappa_bulk),
-         real_values(args.rho),
+         real_values(args.kappa_reg),
          real_values(args.mu_hat)),
     ]
+    if any(value <= 0 for value in stages[0][3] + stages[0][4]):
+        parser.error("kappa-bulk and kappa-reg grids must be strictly positive")
     kappa_j = real_values(args.kappa_j)
     kappa_q = real_values(args.kappa_q)
     expected_cases = sum(
-        len(ns) * len(lobes) * len(kbs) * len(rhos) * len(mus)
+        len(ns) * len(lobes) * len(kbs) * len(kappa_regs) * len(mus)
         * len(kappa_j) * len(kappa_q)
-        for _, ns, lobes, kbs, rhos, mus in stages)
+        for _, ns, lobes, kbs, kappa_regs, mus in stages)
     manifest = {
+        "model": "O+C+K-affine-quadratic-hinges-v1",
+        "executable": str(exe.resolve()),
+        "sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
         "dataset": args.dataset,
         "expected_cases": expected_cases,
         "n": stages[0][1],
         "lobes": stages[0][2],
         "kappa_bulk": stages[0][3],
-        "rho": stages[0][4],
+        "kappa_reg": stages[0][4],
         "mu_hat": stages[0][5],
         "kappa_j": kappa_j,
         "kappa_q": kappa_q,
         "target": {"center": [0.5, 0.5], "R0": args.r0, "amplitude": args.amp, "phase": 0},
         "classifier": {"epsilon_over_h": 1.25, "lambda_c": 0.008},
         "fixed_profile": {
-            "r_div": 1, "kappa_obs": 1, "robust_scale": "automatic",
+            "model": "O+C+K-affine-quadratic-hinges-v1", "kappa_c": 1, "quality_guard": 0.1, "kappa_obs": 1, "robust_scale": "automatic",
             "j_safe": 1e-2, "q_max": 10,
             "barrier_iterations": args.barrier_max_iters, "barrier_relative_tolerance": 1e-3,
-            "fraction_to_boundary": 0.95, "j_min": 1e-8, "j_line_search": 1e-2,
+            "j_min": 1e-8, "j_line_search": 1e-2,
             "armijo": 1e-4, "descent_fraction": 1e-4, "direction_norm_factor": 10,
             "alpha_min": 1e-4, "omega_min": 0.1,
             "tau_rms_h_floor": 0, "tau_inf_h_floor": 0,
             "tau_jump_rms": 0, "tau_jump_inf": 0,
             "tau_rms": 1e-12, "tau_inf": 1e-12, "energy_stagnation": 1e-8,
             "absolute_step": "0.001 h^2", "accepted_step_over_h": "0.001 h",
-            "cg_relative_tolerance": 1e-9, "cg_max_iterations": 1000,
+            "linear_backend": "MUMPS", "cg_relative_tolerance": 1e-9, "cg_max_iterations": 1000,
             "cell_quadrature_order": "automatic: max(2, 2 * FE order)",
             "interface_quadrature_order": "automatic: max(4, 2 * FE order + 2)",
             "geometric_validation_order": "automatic: max(6, 2 * FE order + 4)",
@@ -471,8 +470,8 @@ def main():
     sys.stdout.flush()
 
     completed = 0
-    for stage, ns, lobes, kbs, rhos, mus in stages:
-        all_cases = list(cases_for(stage, ns, lobes, kbs, rhos, mus, kappa_j, kappa_q))
+    for stage, ns, lobes, kbs, kappa_regs, mus in stages:
+        all_cases = list(cases_for(stage, ns, lobes, kbs, kappa_regs, mus, kappa_j, kappa_q))
         missing = [c for c in all_cases if (
             c[0], c[1], c[2], round(c[3], 14), round(c[4], 14),
             round(c[5], 14), round(c[6], 14), round(c[7], 14)) not in done]
@@ -494,7 +493,7 @@ def main():
             append_row(csv_path, row)
             done.add((
                 row["dataset"], int(row["n"]), int(row["lobes"]),
-                round(float(row["kappa_bulk"]), 14), round(float(row["rho"]), 14),
+                round(float(row["kappa_bulk"]), 14), round(float(row["kappa_reg"]), 14),
                 round(float(row["mu_hat"]), 14), round(float(row["kappa_j"]), 14),
                 round(float(row["kappa_q"]), 14)))
             completed += 1
@@ -502,7 +501,7 @@ def main():
             eta = elapsed * (len(missing) - i) / i if i else 0
             sys.stdout.write(
                 f"{stage} {i}/{len(missing)} elements={row['elements']} lobes={row['lobes']} "
-                f"kb={float(row['kappa_bulk']):.4g} rho={float(row['rho']):.3g} "
+                f"kb={float(row['kappa_bulk']):.4g} kappa_reg={float(row['kappa_reg']):.3g} "
                 f"mu={float(row['mu_hat']):.3g} fit={float(row['fit']):.4g} "
                 f"it={row['iterations']} Q={float(row['max_qrel']):.3g} "
                 f"sec={float(row['seconds']):.2f} eta={eta/3600:.2f}h\n")

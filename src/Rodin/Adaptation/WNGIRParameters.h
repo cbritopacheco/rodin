@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstddef>
 
+#include "Rodin/Configure.h"
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Types.h"
 
@@ -30,25 +31,45 @@ namespace Rodin::Adaptation
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
+      /// Affine quadratic-hinge guard widths, relative to the identity margins.
+      Real qualityGuard = Real(0.1);
+      /// Shape-curvature and current-strain weights; both scale with h*kappaBulk.
+      Real kappaC = 1;
+      Real kappaReg = 1;
+      /// Robust directional Newton seed, omitting the level-set Hessian.
+      bool directionalNewton = true;
+      Real directionalNewtonMaxAlpha = 100;
+      enum class DirectSolver
+      {
+        CG,
+        SparseLU,
+        MUMPS
+      };
+#ifdef RODIN_USE_MUMPS
+      DirectSolver directSolver = DirectSolver::MUMPS;
+#else
+      DirectSolver directSolver = DirectSolver::SparseLU;
+#endif
+      Index directSolverThreads = 0;
+      /// Physical full-interface sampled distance target; zero preserves legacy stopping.
+      Real geometricSupTolerance = 0;
       Real robustScale =
         0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
       Real h = 0; ///< reference mesh size (required).
       Real kappaBulk = Real(1e-4); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
-      ///< bulk-strain coefficient.
-      Real rDiv = 1; ///< @f$r_D@f$, divergence/deviatoric bulk-coefficient ratio.
+      ///< common shape-curvature / regularity scale.
       Real kappaObs =
         1; ///< @f$\kappa_{\mathrm{obs}}@f$, surface observation metric weight.
-      Real kappaJ = 1; ///< @f$\kappa_j@f$, Jacobian barrier row weight.
-      Real kappaQ = 1; ///< @f$\kappa_Q@f$, relative-distortion barrier row weight.
+      Real kappaJ = 1; ///< @f$\kappa_j@f$, Jacobian hinge row weight.
+      Real kappaQ = 1; ///< @f$\kappa_Q@f$, relative-distortion hinge row weight.
       Real jSafe = 1e-2; ///< @f$j_{\mathrm{safe}}@f$, barrier floor on normalised j.
       Real qMax = 10; ///< @f$Q_{\max}@f$, barrier + line-search ceiling on Q.
       std::size_t primalBarrierIterations =
-        15; ///< Maximum Newton corrections of the QP barrier.
+        15; ///< Maximum Newton corrections of the hinge-penalized QP.
       Real primalBarrierRelativeTolerance =
-        Real(1e-3); ///< Relative Newton-correction tolerance for the QP barrier.
-      Real muHat = Real(0.9); ///< @f$\widehat\mu@f$, dimensionless
+        Real(1e-3); ///< Relative Newton-correction tolerance for the hinge-penalized QP.
+      Real muHat = Real(90); ///< @f$\widehat\mu@f$, dimensionless
         ///< barrier/model-decrease ratio.
-      Real thetaBoundary = Real(0.95); ///< @f$\tau@f$, strict-feasibility fraction.
       Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
       Real alphaMin = 1e-4; ///< @f$\alpha_{\min}@f$, line-search floor.
       Real armijoCoefficient =
@@ -86,12 +107,10 @@ namespace Rodin::Adaptation
       Real stepTol = 0; ///< ≤0 ⇒ 1e-4·h.
       Real acceptedStepOverHTol =
         Real(5e-4); ///< >0 stops best-effort when accepted step/h is small.
-      Real rigidStabilisationLevel =
-        Real(0.1); ///< @f$\rho@f$, lifts weakly observed rigid modes to this
-      ///< fraction of the stiffest rigid mode; zero disables the
-      ///< stabilisation.
       Real cgRelativeTolerance =
         1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for CG.
+      bool cgStrictTolerance =
+        false; ///< Require the requested residual without the legacy 1e-6 floor.
       std::size_t cgMaxIterations =
         1000; ///< Maximum iterations for each CG linear solve.
       std::size_t maxIterations = 30; ///< Maximum nonlinear WNGIR iterations.
@@ -102,7 +121,10 @@ namespace Rodin::Adaptation
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
-      bool trace = false; ///< Print inner diagnostics and validate each accepted outer geometry.
+      bool trace =
+        false; ///< Print inner diagnostics and validate each accepted outer geometry.
+      bool traceQualityWitness =
+        false; ///< Record same-point quality predictions at each trial's limiting cell.
       /// @brief Compute the rigid-observation coercivity diagnostics.
       ///
       /// The initial and final rigid-mode states are reported but never read
