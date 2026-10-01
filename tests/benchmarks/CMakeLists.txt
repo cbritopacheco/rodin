@@ -9,6 +9,7 @@ set(RodinBenchmarks_SRCS
   Integrators.cpp
   Quadrature.cpp
   AABB.cpp
+  ParametricTransformation.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})

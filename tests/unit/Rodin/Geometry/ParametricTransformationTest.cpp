@@ -231,4 +231,142 @@ namespace Rodin::Tests::Unit
       EXPECT_GT(J.determinant(), Real(0));
     }
   }
+  namespace
+  {
+    // A pure basis evaluation with an observable call count checks collaboration
+    // with generic scalar elements, including embedded transformations.
+    struct CountedElement
+    {
+        using RangeType = Real;
+        Variational::RealH1Element<2> element;
+        size_t* evaluations;
+
+        auto getGeometry() const
+        {
+          return element.getGeometry();
+        }
+        size_t getCount() const
+        {
+          return element.getCount();
+        }
+        size_t getOrder() const
+        {
+          return element.getOrder();
+        }
+
+        struct Basis
+        {
+            Variational::RealH1Element<2>::BasisFunction basis;
+            size_t* evaluations;
+            Real operator()(const Math::SpatialPoint& r) const
+            {
+              return basis(r);
+            }
+            template <size_t Order>
+            struct Derivative
+            {
+                typename Variational::RealH1Element<
+                  2>::BasisFunction::template DerivativeFunction<Order>
+                  derivative;
+                size_t* evaluations;
+                Real operator()(const Math::SpatialPoint& r) const
+                {
+                  ++*evaluations;
+                  return derivative(r);
+                }
+            };
+            template <size_t Order>
+            auto getDerivative(size_t axis) const
+            {
+              return Derivative<Order>{
+                basis.template getDerivative<Order>(axis), evaluations};
+            }
+        };
+        Basis getBasis(size_t local) const
+        {
+          return {element.getBasis(local), evaluations};
+        }
+    };
+
+    template <size_t K>
+    void checkEvaluation(Polytope::Type geometry)
+    {
+      const Polytope::Traits traits(geometry);
+      Variational::RealH1Element<K> fe(geometry);
+      for (size_t physicalDimension = std::max(size_t(1), traits.getDimension());
+           physicalDimension <= 3; ++physicalDimension)
+      {
+        PointCloud nodes(physicalDimension, fe.getCount());
+        // Alternating coefficients exercise cancellation and every basis term.
+        for (size_t a = 0; a < fe.getCount(); ++a)
+          for (size_t j = 0; j < physicalDimension; ++j)
+            nodes(j, a) = Real(a + j + 1) / Real(fe.getCount()) * (a % 2 ? -1 : 1);
+        ParametricTransformation transformation(nodes, fe);
+        std::vector<Math::SpatialPoint> references{traits.getCentroid()};
+        for (size_t v = 0; v < traits.getVertexCount(); ++v)
+          references.push_back(traits.getVertex(v));
+        for (const auto& reference : references)
+        {
+          Math::SpatialPoint actualPoint;
+          Math::SpatialMatrix<Real> actualJacobian;
+          transformation.transform(actualPoint, reference);
+          transformation.jacobian(actualJacobian, reference);
+          Math::SpatialPoint expectedPoint(physicalDimension);
+          Math::SpatialMatrix<Real> expectedJacobian(
+            physicalDimension, traits.getDimension());
+          expectedPoint.setZero();
+          expectedJacobian.setZero();
+          // Preserve the original evaluation and accumulation order as oracle.
+          for (size_t a = 0; a < fe.getCount(); ++a)
+          {
+            expectedPoint += nodes[a] * fe.getBasis(a)(reference);
+            for (size_t i = 0; i < traits.getDimension(); ++i)
+              for (size_t j = 0; j < physicalDimension; ++j)
+                expectedJacobian(j, i) +=
+                  nodes(j, a) * fe.getBasis(a).template getDerivative<1>(i)(reference);
+          }
+          for (size_t j = 0; j < physicalDimension; ++j)
+          {
+            EXPECT_EQ(actualPoint[j], expectedPoint[j]);
+            for (size_t i = 0; i < traits.getDimension(); ++i)
+              EXPECT_EQ(actualJacobian(j, i), expectedJacobian(j, i));
+          }
+        }
+      }
+    }
+  }
+
+  /// @brief Checks exact agreement with scalar evaluation on all geometries and embeddings.
+  TEST(
+    Rodin_Geometry_ParametricTransformation, AllGeometryEvaluationMatchesScalarBaseline)
+  {
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkEvaluation<1>(geometry);
+      checkEvaluation<2>(geometry);
+      checkEvaluation<4>(geometry);
+    }
+  }
+
+  /// @brief Evaluates a basis derivative once, independently of physical dimension.
+  TEST(Rodin_Geometry_ParametricTransformation, JacobianEvaluatesDerivativeOnce)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      size_t evaluations = 0;
+      CountedElement fe{Variational::RealH1Element<2>(geometry), &evaluations};
+      PointCloud nodes(3, fe.getCount());
+      nodes.setZero();
+      ParametricTransformation transformation(std::move(nodes), fe);
+      Math::SpatialMatrix<Real> J;
+      transformation.jacobian(J, Polytope::Traits(geometry).getCentroid());
+      EXPECT_EQ(evaluations, fe.getCount() * Polytope::Traits(geometry).getDimension());
+    }
+  }
 }

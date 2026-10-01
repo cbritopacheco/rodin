@@ -191,6 +191,105 @@ slightly different because degree-dependent hull recovery and floating-point
 iteration behavior differ even when the physical polynomial is the same.
 
 
+## Geometry evaluation follow-up
+
+The next comparison uses `4b6925135` as the production baseline. A minimal
+change to `ParametricTransformation::jacobian` evaluates each scalar reference
+basis derivative once per basis/axis, then multiplies that value by every
+physical coordinate coefficient. Previously the derivative call was inside the
+physical-coordinate loop. Accumulation order and basis formulas are unchanged;
+no cache, reduced seed budget, or changed convergence threshold is introduced.
+
+### Profile and isolated benchmarks
+
+Instruments Time Profiler sampled the original P4 tetrahedron Jacobian benchmark
+for 12 seconds. Of 10,950 samples containing the evaluation benchmark, 10,677
+(97.5%) contained the scalar basis derivative evaluator. The launched process
+was stopped at the recording time limit; this trace identifies the hotspot and
+is not used for timing claims. The call-count regression independently observed
+three evaluations per basis/axis for a 3D physical map before the change, and
+one afterward.
+
+The new `Parametric/Transform` and `Parametric/Jacobian` Google Benchmarks cover
+all eight geometries at P1, P2 and P4, embedded in three physical dimensions.
+The tables are warmed outside the timed loop. CPU times below are medians of
+three alternating baseline/current runs, each with a 0.10-second minimum per
+case. Each row is a single evaluation, rather than a point-location query.
+
+| Geometry | P4 Jacobian before (us) | After (us) | Speedup |
+| --- | ---: | ---: | ---: |
+| Segment | 0.120 | 0.055 | 2.18x |
+| Triangle | 4.414 | 1.878 | 2.35x |
+| Quadrilateral | 1.427 | 0.598 | 2.39x |
+| Tetrahedron | 44.640 | 15.283 | 2.92x |
+| Hexahedron | 29.953 | 9.628 | 3.11x |
+| Pyramid | 549.822 | 184.037 | 2.99x |
+| Wedge | 27.874 | 9.736 | 2.86x |
+
+The segment and surface results here include the benefit of embedding in 3D;
+ordinary nonembedded cases have fewer physical components to share. P1 and P2
+also improved for every nonpoint geometry in the initial three-repetition pass.
+The initial chronological pass showed a systematic 1--4% increase even in
+unchanged transform evaluations. Alternating executables removed that apparent
+regression: P4 transform median ratios after/before ranged from 0.996 to 1.004.
+This control demonstrates drift between the earlier measurement blocks.
+
+Point has no reference axes or derivative work. Its isolated P4 zero-column
+Jacobian call changed from about 4.36 to 4.56 ns in the alternating runs.
+Disassembly shows a different generated prologue before the zero-axis exit,
+including an additional move and stack store; the timing change is consistent
+with changed compiler bookkeeping, rather than derivative evaluation. AABB point
+queries do not call this Jacobian. This small cost is retained explicitly rather
+than claiming that every benchmark improved.
+
+### End-to-end controlled workload
+
+The same quadratic shear (`a=1`), P4 representation and 2,058 tetrahedra were
+measured with the ordinary counter-free workload, using 0.03-second timing
+blocks. Each query class contains 64 samples.
+
+| Query | Off before / after (us) | On before / after (us) |
+| --- | ---: | ---: |
+| Interior | 4315.55 / 1822.97 | 98.86 / 39.73 |
+| Shared boundary | 7726.17 / 3514.46 | 100.50 / 41.87 |
+| Nearby miss | 6049.06 / 2438.52 | 955.66 / 383.38 |
+
+The diagnostic executables produced 384 identical per-query records across
+both pruning settings: candidates, transforms, Jacobians, Newton loop entries,
+seed retries, box candidates, projection rejections and retained index bytes
+all matched. The seven transformation tests and 51 AABB tests pass. New exact
+scalar-baseline comparisons cover P1/P2/P4 on every geometry, at the centroid
+and every reference vertex (including the pyramid apex), with all supported
+physical embeddings. The derivative-call regression was observed failing before
+and passing after the change.
+
+The existing curved P2 AABB hit benchmarks were also run before and after,
+with three repetitions and a 0.06-second minimum (CPU medians):
+
+| Geometry | Default off before / after (us) | Pruned before / after (us) |
+| --- | ---: | ---: |
+| Triangle | 6.967 / 4.341 | 1.491 / 0.976 |
+| Quadrilateral | 2.675 / 2.103 | 0.748 / 0.697 |
+| Tetrahedron | 240.280 / 92.881 | 9.286 / 3.553 |
+| Hexahedron | 13.908 / 7.462 | 4.993 / 2.665 |
+| Pyramid | 699.474 / 265.502 | 51.841 / 19.595 |
+| Wedge | 48.475 / 21.905 | 6.100 / 3.140 |
+
+These gains depend on the fixture's share of Jacobian work; the embedded 3D
+microbenchmark speedups should not be applied directly to every locator query.
+A nonembedded segment has only one physical coordinate and therefore no repeated
+physical-component derivative work to remove.
+
+The remaining large cost is repeated modal evaluation across nodal basis
+functions and reference derivative axes. For example, each tetrahedron nodal
+basis derivative traverses every Dubiner mode and computes all three modal
+gradient components, then uses only the selected component. Reusing those modal
+values and gradients within an element evaluation is a separate optimization
+candidate. Its acceptance must preserve accumulation order, apex behavior,
+generic finite-element compatibility, and Newton iteration records; the present
+change does not introduce an alternative geometry evaluation path.
+
+
 ## Reproduction
 
 Configure a Release Ninja build with `CMAKE_EXPORT_COMPILE_COMMANDS=ON` and tests
@@ -219,3 +318,15 @@ The existing AABB correctness regressions remain enabled in both modes. The
 opt-in regression checks that default construction avoids the Jacobian used for
 projection normals, explicit enabling performs it, and disabling restores the
 original dependency-call behavior without changing the returned point.
+
+
+To reproduce the isolated evaluation comparison, save the baseline benchmark
+executable before changing production evaluation, then alternate it with the
+current executable:
+
+```sh
+build/tests/benchmarks/RodinBenchmarks \
+  --benchmark_filter='^Parametric/' \
+  --benchmark_min_time=0.10s --benchmark_repetitions=3
+build/tests/benchmarks/RodinAABBWorkload 0.03 Tetrahedron 4/1/8 2
+```

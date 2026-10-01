@@ -152,8 +152,10 @@ namespace Rodin::Geometry
           for (size_t i = 0; i < rdim; i++)
           {
             const auto derivative = basis.template getDerivative<1>(i);
+            // The reference derivative is shared by all physical components.
+            const Real value = derivative(rc);
             for (size_t j = 0; j < pdim; j++)
-              pc(j, i) += m_pm(j, local) * derivative(rc);
+              pc(j, i) += m_pm(j, local) * value;
           }
         }
       }
