@@ -44,7 +44,7 @@ TIMING_RE = re.compile(
 
 
 FIELDS = [
-    "dataset", "n", "elements", "lobes", "kappa_bulk", "kappa_reg", "mu_hat", "kappa_j", "kappa_q",
+    "dataset", "n", "elements", "lobes", "kappa_f", "kappa_s", "kappa_d", "mu_hat", "kappa_j", "kappa_q",
     "fit", "geom_rms", "geom_sup", "normal_rms", "iterations", "alpha", "step",
     "min_j", "max_j", "max_qrel",
     "active_rms", "active_sup", "active_rms_hg", "act_frac", "cR", "rej_j", "rej_q", "rej_e",
@@ -119,8 +119,8 @@ def read_done(path):
                 row["dataset"],
                 int(float(row["n"])),
                 int(float(row["lobes"])),
-                round(float(row["kappa_bulk"]), 14),
-                round(float(row["kappa_reg"]), 14),
+                round(float(row["kappa_s"]), 14),
+                round(float(row["kappa_d"]), 14),
                 round(float(row["mu_hat"]), 14),
                 round(float(row["kappa_j"]), 14),
                 round(float(row["kappa_q"]), 14)))
@@ -169,7 +169,7 @@ def save_case_trace(out_dir, identity, command, output):
     return path
 
 
-def run_case(args, exe, stage, n, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j, kappa_q):
+def run_case(args, exe, stage, n, lobes, kappa_s, kappa_d, mu_hat, kappa_j, kappa_q):
     cmd = [
         str(exe),
         f"--n={n}",
@@ -181,12 +181,12 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j,
         f"--R0={args.r0}",
         f"--classifier-eps={1.25 / (n - 1):.14g}",
         "--classifier-lambda=0.008",
-        f"--wngir-kappa-bulk={kappa_bulk:.14g}",
-        f"--wngir-kappa-reg={kappa_reg:.14g}",
+        f"--wngir-kappa-s={kappa_s:.14g}",
+        f"--wngir-kappa-d={kappa_d:.14g}",
         f"--wngir-mu-hat={mu_hat:.14g}",
         f"--wngir-kappa-j={kappa_j:.14g}",
         f"--wngir-kappa-q={kappa_q:.14g}",
-        "--wngir-kappa-obs=1", "--wngir-kappa-c=1", "--wngir-quality-guard=0.1",
+        f"--wngir-kappa-f={args.kappa_f:.14g}", "--wngir-quality-guard=0.1",
         "--wngir-robust-scale=0",
         "--wngir-direct-solver=mumps", "--wngir-jsafe=1e-2",
         "--wngir-qmax=10",
@@ -239,8 +239,8 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j,
     seconds = time.time() - t0
     if args.log_iterations:
         save_case_trace(args.out_dir,
-                        dict(dataset=stage, n=n, lobes=lobes, kappa_bulk=kappa_bulk,
-                             kappa_reg=kappa_reg, mu_hat=mu_hat, kappa_j=kappa_j, kappa_q=kappa_q),
+                        dict(dataset=stage, n=n, lobes=lobes, kappa_f=args.kappa_f, kappa_s=kappa_s,
+                             kappa_d=kappa_d, mu_hat=mu_hat, kappa_j=kappa_j, kappa_q=kappa_q),
                         cmd, proc.stdout)
     elements_match = ELEMENTS_RE.search(proc.stdout)
     elements = int(elements_match.group("elements")) if elements_match else element_count(int(n))
@@ -251,8 +251,9 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j,
         "n": n,
         "elements": elements,
         "lobes": lobes,
-        "kappa_bulk": kappa_bulk,
-        "kappa_reg": kappa_reg,
+        "kappa_f": args.kappa_f,
+        "kappa_s": kappa_s,
+        "kappa_d": kappa_d,
         "mu_hat": mu_hat,
         "kappa_j": kappa_j,
         "kappa_q": kappa_q,
@@ -342,11 +343,11 @@ def run_case(args, exe, stage, n, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j,
     return row
 
 
-def cases_for(stage, ns, lobes, kappa_bulk, kappa_reg, mu_hat, kappa_j, kappa_q):
+def cases_for(stage, ns, lobes, kappa_s, kappa_d, mu_hat, kappa_j, kappa_q):
     for n in ns:
         for l in lobes:
-            for kb in kappa_bulk:
-                for r in kappa_reg:
+            for kb in kappa_s:
+                for r in kappa_d:
                     for mu in mu_hat:
                         for kj in kappa_j:
                             for kq in kappa_q:
@@ -374,14 +375,16 @@ def main():
                         help="dataset name; the campaign reads and appends to <out-dir>/<dataset>.csv")
     parser.add_argument("--n", default="5,10,20,50,100")
     parser.add_argument("--lobes", default="0:10")
-    parser.add_argument("--kappa-bulk",
-                        default="1e-6,3e-6,1e-5,3e-5,1e-4,3e-4,1e-3,3e-3,"
-                                "1e-2,3e-2,0.1,0.2,0.5,1.0")
-    parser.add_argument("--kappa-reg", default="1")
-    parser.add_argument("--mu-hat", default="0.1:1.0:0.1")
+    parser.add_argument("--kappa-s", default="1")
+    parser.add_argument("--kappa-d", default="1")
+    parser.add_argument("--kappa-f", type=float, default=1,
+                        help="fixed fitting metric coefficient")
+    parser.add_argument("--mu-hat", default="90")
     parser.add_argument("--kappa-j", default="1")
     parser.add_argument("--kappa-q", default="1")
     args = parser.parse_args()
+    if not math.isfinite(args.kappa_f) or args.kappa_f <= 0:
+        parser.error("kappa-f must be finite and strictly positive")
     if not 1 <= args.steps <= 200:
         parser.error("--steps must be between 1 and the campaign cap of 200")
     if args.barrier_max_iters < 1:
@@ -408,35 +411,36 @@ def main():
         (args.dataset,
          int_values(args.n),
          int_values(args.lobes),
-         real_values(args.kappa_bulk),
-         real_values(args.kappa_reg),
+         real_values(args.kappa_s),
+         real_values(args.kappa_d),
          real_values(args.mu_hat)),
     ]
     if any(value <= 0 for value in stages[0][3] + stages[0][4]):
-        parser.error("kappa-bulk and kappa-reg grids must be strictly positive")
+        parser.error("kappa-s and kappa-d grids must be strictly positive")
     kappa_j = real_values(args.kappa_j)
     kappa_q = real_values(args.kappa_q)
     expected_cases = sum(
-        len(ns) * len(lobes) * len(kbs) * len(kappa_regs) * len(mus)
+        len(ns) * len(lobes) * len(kbs) * len(kappa_ds) * len(mus)
         * len(kappa_j) * len(kappa_q)
-        for _, ns, lobes, kbs, kappa_regs, mus in stages)
+        for _, ns, lobes, kbs, kappa_ds, mus in stages)
     manifest = {
-        "model": "O+C+K-affine-quadratic-hinges-v1",
+        "model": "F+S+D-affine-quadratic-hinges-v2",
         "executable": str(exe.resolve()),
         "sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
         "dataset": args.dataset,
         "expected_cases": expected_cases,
         "n": stages[0][1],
         "lobes": stages[0][2],
-        "kappa_bulk": stages[0][3],
-        "kappa_reg": stages[0][4],
+        "kappa_f": args.kappa_f,
+        "kappa_s": stages[0][3],
+        "kappa_d": stages[0][4],
         "mu_hat": stages[0][5],
         "kappa_j": kappa_j,
         "kappa_q": kappa_q,
         "target": {"center": [0.5, 0.5], "R0": args.r0, "amplitude": args.amp, "phase": 0},
         "classifier": {"epsilon_over_h": 1.25, "lambda_c": 0.008},
         "fixed_profile": {
-            "model": "O+C+K-affine-quadratic-hinges-v1", "kappa_c": 1, "quality_guard": 0.1, "kappa_obs": 1, "robust_scale": "automatic",
+            "model": "F+S+D-affine-quadratic-hinges-v2", "quality_guard": 0.1, "robust_scale": "automatic",
             "j_safe": 1e-2, "q_max": 10,
             "barrier_iterations": args.barrier_max_iters, "barrier_relative_tolerance": 1e-3,
             "j_min": 1e-8, "j_line_search": 1e-2,
@@ -470,8 +474,8 @@ def main():
     sys.stdout.flush()
 
     completed = 0
-    for stage, ns, lobes, kbs, kappa_regs, mus in stages:
-        all_cases = list(cases_for(stage, ns, lobes, kbs, kappa_regs, mus, kappa_j, kappa_q))
+    for stage, ns, lobes, kbs, kappa_ds, mus in stages:
+        all_cases = list(cases_for(stage, ns, lobes, kbs, kappa_ds, mus, kappa_j, kappa_q))
         missing = [c for c in all_cases if (
             c[0], c[1], c[2], round(c[3], 14), round(c[4], 14),
             round(c[5], 14), round(c[6], 14), round(c[7], 14)) not in done]
@@ -493,7 +497,7 @@ def main():
             append_row(csv_path, row)
             done.add((
                 row["dataset"], int(row["n"]), int(row["lobes"]),
-                round(float(row["kappa_bulk"]), 14), round(float(row["kappa_reg"]), 14),
+                round(float(row["kappa_s"]), 14), round(float(row["kappa_d"]), 14),
                 round(float(row["mu_hat"]), 14), round(float(row["kappa_j"]), 14),
                 round(float(row["kappa_q"]), 14)))
             completed += 1
@@ -501,7 +505,7 @@ def main():
             eta = elapsed * (len(missing) - i) / i if i else 0
             sys.stdout.write(
                 f"{stage} {i}/{len(missing)} elements={row['elements']} lobes={row['lobes']} "
-                f"kb={float(row['kappa_bulk']):.4g} kappa_reg={float(row['kappa_reg']):.3g} "
+                f"kappa_s={float(row['kappa_s']):.4g} kappa_d={float(row['kappa_d']):.3g} "
                 f"mu={float(row['mu_hat']):.3g} fit={float(row['fit']):.4g} "
                 f"it={row['iterations']} Q={float(row['max_qrel']):.3g} "
                 f"sec={float(row['seconds']):.2f} eta={eta/3600:.2f}h\n")

@@ -30,7 +30,9 @@ namespace Rodin::Examples
   {
       std::size_t maxIterations = Adaptation::WNGIRParameters{}.maxIterations;
       std::size_t quadratureOrder = 0;
-      Real kappaBulk = Adaptation::WNGIRParameters{}.kappaBulk;
+      Real kappaF = 1;
+      Real kappaS = 1;
+      Real kappaD = 1;
       Real kappaJ = 1;
       Real kappaQ = 1;
       Real tauRmsHFloor = Adaptation::WNGIRParameters{}.tauRmsHFloor;
@@ -147,19 +149,19 @@ namespace Rodin::Examples
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
-    constexpr const char* options[] = {"wngir-kappa-bulk", "wngir-kappa-obs",
-      "wngir-robust-scale", "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
-      "wngir-quality-guard", "wngir-kappa-c", "wngir-kappa-reg",
-      "wngir-directional-newton", "wngir-directional-newton-max-alpha",
-      "wngir-quality-witness", "wngir-direct-solver", "wngir-direct-threads",
-      "wngir-geometric-sup-tol", "wngir-primal-barrier-iterations",
-      "wngir-primal-barrier-relative-tol", "wngir-mu-hat", "wngir-primal-barrier-mu",
-      "wngir-omega-min", "wngir-alpha-min", "wngir-armijo", "wngir-descent-fraction",
-      "wngir-direction-norm-factor", "wngir-jls", "wngir-rms-floor", "wngir-sup-floor",
-      "wngir-rms-normal-jump-factor", "wngir-sup-normal-jump-factor", "wngir-rms-tol",
-      "wngir-sup-tol", "wngir-energy-stag-tol", "wngir-step-tol", "wngir-step-h-tol",
-      "wngir-steps", "wngir-max-iters", "wngir-cg-rtol", "wngir-cg-strict-tol",
-      "wngir-cg-max-iters", "wngir-trace", "wngir-rigid-diagnostics"};
+    constexpr const char* options[] = {"wngir-kappa-f", "wngir-robust-scale",
+      "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
+      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d", "wngir-directional-newton",
+      "wngir-directional-newton-max-alpha", "wngir-quality-witness",
+      "wngir-direct-solver", "wngir-direct-threads", "wngir-geometric-sup-tol",
+      "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol",
+      "wngir-mu-hat", "wngir-primal-barrier-mu", "wngir-omega-min", "wngir-alpha-min",
+      "wngir-armijo", "wngir-descent-fraction", "wngir-direction-norm-factor",
+      "wngir-jls", "wngir-rms-floor", "wngir-sup-floor", "wngir-rms-normal-jump-factor",
+      "wngir-sup-normal-jump-factor", "wngir-rms-tol", "wngir-sup-tol",
+      "wngir-energy-stag-tol", "wngir-step-tol", "wngir-step-h-tol", "wngir-steps",
+      "wngir-max-iters", "wngir-cg-rtol", "wngir-cg-strict-tol", "wngir-cg-max-iters",
+      "wngir-trace", "wngir-rigid-diagnostics"};
     for (int i = 1; i < argc; ++i)
     {
       const std::string argument(argv[i]);
@@ -175,9 +177,7 @@ namespace Rodin::Examples
     Adaptation::WNGIRParameters p;
     p.h = h;
 
-    p.kappaBulk = realOption(argc, argv, "wngir-kappa-bulk", defaults.kappaBulk);
-
-    p.kappaObs = realOption(argc, argv, "wngir-kappa-obs", Real(1));
+    p.kappaF = realOption(argc, argv, "wngir-kappa-f", defaults.kappaF);
     p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
 
     p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
@@ -185,8 +185,8 @@ namespace Rodin::Examples
     p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
     p.qualityGuard = realOption(argc, argv, "wngir-quality-guard", p.qualityGuard);
-    p.kappaC = realOption(argc, argv, "wngir-kappa-c", p.kappaC);
-    p.kappaReg = realOption(argc, argv, "wngir-kappa-reg", p.kappaReg);
+    p.kappaS = realOption(argc, argv, "wngir-kappa-s", defaults.kappaS);
+    p.kappaD = realOption(argc, argv, "wngir-kappa-d", defaults.kappaD);
     p.directionalNewton =
       boolOption(argc, argv, "wngir-directional-newton", p.directionalNewton);
     p.directionalNewtonMaxAlpha = realOption(

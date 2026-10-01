@@ -478,7 +478,9 @@ int run(int argc, char** argv)
   std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  phase=" << phase << "  kappaF=" << wngirParams.kappaF
+            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -709,10 +711,10 @@ int run(int argc, char** argv)
                   << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    const bool converged =
-      wngirParams.geometricSupTolerance > Real(0)
-        ? geometricSup <= wngirParams.geometricSupTolerance
-        : (fitTol > Real(0) ? interfaceFit <= fitTol : geometricRMS <= geometricRMSTolerance);
+    const bool converged = wngirParams.geometricSupTolerance > Real(0)
+      ? geometricSup <= wngirParams.geometricSupTolerance
+      : (fitTol > Real(0) ? interfaceFit <= fitTol
+                          : geometricRMS <= geometricRMSTolerance);
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);

@@ -51,7 +51,8 @@ namespace Rodin::Adaptation
    * @brief Curvature-informed WNGIR mesh-fitting solver for the local backend.
    *
    * Fits the interface skeleton of a mesh to the zero level set of @f$\phi@f$
-   * with M = O + C + K and affine quadratic hinges. Each outer iteration
+   * with M = F + S + D (Fitting, Shape, Distribution) and affine quadratic hinges.
+   * The three independent weights are kappaF, kappaS and kappaD. Each outer iteration
    * freezes the metric, force and constraint rows; inner Newton uses merit
    * backtracking. Directional Newton seeds the outer true-geometry line search.
    *
@@ -174,12 +175,11 @@ namespace Rodin::Adaptation
           Alert::Exception() << "WNGIR MUMPS solves require RODIN_USE_MUMPS."
                              << Alert::Raise;
 #endif
-        if (!std::isfinite(parameters.kappaC) || parameters.kappaC < Real(0) ||
-          !std::isfinite(parameters.kappaReg) || !(parameters.kappaReg > Real(0)) ||
-          !std::isfinite(parameters.kappaBulk) || !(parameters.kappaBulk > Real(0)) ||
-          !std::isfinite(parameters.kappaObs) || !(parameters.kappaObs > Real(0)))
+        if (!std::isfinite(parameters.kappaS) || parameters.kappaS < Real(0) ||
+          !std::isfinite(parameters.kappaD) || !(parameters.kappaD > Real(0)) ||
+          !std::isfinite(parameters.kappaF) || !(parameters.kappaF > Real(0)))
           Alert::Exception() << "WNGIR requires nonnegative shape curvature and positive "
-                                "observation/regularity weights."
+                                "fitting/distribution weights."
                              << Alert::Raise;
         if (!std::isfinite(parameters.directionalNewtonMaxAlpha) ||
           parameters.directionalNewtonMaxAlpha < Real(1))
@@ -451,7 +451,7 @@ namespace Rodin::Adaptation
           Detail::WNGIRQualityMetric qualityMetric(m_duStep, m_vStep, u, p);
           m_localMetricForm = obsMetric + qualityMetric;
           m_localMetricForm.assemble();
-          const Real coefficient = p.h * p.kappaBulk * p.kappaReg;
+          const Real coefficient = p.h * p.kappaD;
           size_t order = 2;
           for (auto cell = mesh.getCell(); cell; ++cell)
             order = std::max(
@@ -497,7 +497,8 @@ namespace Rodin::Adaptation
               if (p.trace)
                 std::cout << "      wngir metric: outer=" << rep.iterations
                           << "  inertia_checks=1"
-                          << "  negative=" << negative << "  regularity=" << p.kappaReg
+                          << "  negative=" << negative << "  kappa_f=" << p.kappaF
+                          << "  kappa_s=" << p.kappaS << "  kappa_d=" << p.kappaD
                           << "  seconds=" << secondsSince(checkStart) << std::endl;
               if (negative != 0)
               {

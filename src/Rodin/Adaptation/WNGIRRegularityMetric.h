@@ -76,7 +76,7 @@ namespace Rodin::Adaptation::Detail
     return Real(0.5) * (gradient + Variational::Transpose(gradient));
   }
 
-  /// K_strain = integral j*eps(v):eps(z) - b(v)b(z)/(d*integral j).
+  /// Distribution core = integral j*eps(v):eps(z) - b(v)b(z)/(d*integral j).
   /// Only uniform current-configuration dilation is projected out.
   template <class TestFunction, class Displacement>
   std::vector<Math::Vector<Real>> wngirCurrentStrainCouplings(const TestFunction& test,

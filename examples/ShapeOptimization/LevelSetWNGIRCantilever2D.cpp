@@ -605,12 +605,12 @@ int main(int argc, char** argv)
             << "\n  domain [0," << L << "]x[0," << H << "]"
             << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
-            << "\n  WNGIR: kappaBulk=" << wp.kappaBulk << " kappaC=" << wp.kappaC << " kappaReg=" << wp.kappaReg
-            << " rmsTol=" << wp.tauRms << " supTol=" << wp.tauInf
-            << " steps=" << wp.maxIterations << "  classify=" << classifyEvery
-            << "  redistance=" << redistanceMode << "/" << redistanceEvery
-            << " transfer=" << redistanceTransfer << " adaptive=" << adaptiveRedistance
-            << " eikTol=" << redistanceEikonalTol
+            << "\n  WNGIR: kappaF=" << wp.kappaF << " kappaS=" << wp.kappaS
+            << " kappaD=" << wp.kappaD << " rmsTol=" << wp.tauRms
+            << " supTol=" << wp.tauInf << " steps=" << wp.maxIterations
+            << "  classify=" << classifyEvery << "  redistance=" << redistanceMode << "/"
+            << redistanceEvery << " transfer=" << redistanceTransfer
+            << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
             << " poissonTransferInterfaceWeight=" << poissonTransferInterfaceWeight
             << "  outputEvery=" << outputEvery << '\n';
   std::ofstream fObj(Rodin::Examples::wngirOutput("LevelSetWNGIRCantilever2D.obj.txt"));

@@ -15,7 +15,7 @@ namespace Rodin::Adaptation::Detail
   /**
    * @brief Full frozen shape curvature for WNGIR increments.
    *
-   * Assembles h*kappaBulk*kappaC times the Hessian of (d/4)(Q-1).
+   * Assembles h*kappaS times the Hessian of (d/4)(Q-1).
    * The tensor is not clipped and introduces no additional quality force.
    * It is frozen at the outer displacement and reused by the inner QP.
    */
@@ -64,7 +64,7 @@ namespace Rodin::Adaptation::Detail
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto trialJacobian = Variational::Jacobian(m_trial.get());
         auto testJacobian = Variational::Jacobian(m_test.get());
-        const Real coefficient = parameters.h * parameters.kappaBulk * parameters.kappaC;
+        const Real coefficient = parameters.h * parameters.kappaS;
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);

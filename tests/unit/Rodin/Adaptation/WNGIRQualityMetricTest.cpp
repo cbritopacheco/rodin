@@ -51,8 +51,7 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
     TestFunction test(fes);
     WNGIRParameters parameters;
     parameters.h = Real(0.5);
-    parameters.kappaBulk = Real(0.7);
-    parameters.kappaC = Real(1.3);
+    parameters.kappaS = Real(1.3);
     BilinearForm metric(trial, test);
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
@@ -75,7 +74,7 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
             (deformation.getRelativeDistortion() - Real(1));
         }
       }
-      return parameters.h * parameters.kappaBulk * parameters.kappaC * result;
+      return parameters.h * parameters.kappaS * result;
     };
     const Real actual =
       direction.getData().dot(metric.getOperator() * direction.getData());
@@ -88,7 +87,7 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
     Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(dense);
     ASSERT_EQ(eigen.info(), Eigen::Success);
     EXPECT_LT(eigen.eigenvalues().minCoeff(), Real(-1e-7));
-    parameters.kappaC *= Real(2);
+    parameters.kappaS *= Real(2);
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
     EXPECT_NEAR(direction.getData().dot(metric.getOperator() * direction.getData()),

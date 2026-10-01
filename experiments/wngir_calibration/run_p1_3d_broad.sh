@@ -20,8 +20,8 @@ run_stage() {
 
   python3 "$runner" preflight "${common[@]}"
   python3 "$runner" screen "${common[@]}" --steps=20 \
-    --kappa-bulk=1e-6,3e-6,1e-5,3e-5,1e-4,3e-4,1e-3,3e-3,1e-2,3e-2,0.1,0.2,0.5,1 \
-    --kappa-reg=1 --mu-hat=90
+    --kappa-f=1 --kappa-s=1 \
+    --kappa-d=1 --mu-hat=90
 }
 
 run_stage 5 0,1 600

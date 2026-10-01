@@ -24,14 +24,14 @@ namespace Rodin::Tests::Unit
     TEST(Rodin_Adaptation_WNGIRSolver, CanonicalDefaults)
     {
       const WNGIRParameters parameters;
-      EXPECT_EQ(parameters.kappaBulk, Real(1e-4));
+      EXPECT_EQ(parameters.kappaF, Real(1));
       EXPECT_EQ(parameters.muHat, Real(90));
       EXPECT_EQ(parameters.primalBarrierIterations, 15);
       EXPECT_EQ(parameters.primalBarrierRelativeTolerance, Real(1e-3));
       EXPECT_EQ(parameters.cgMaxIterations, 1000);
       EXPECT_FALSE(parameters.cgStrictTolerance);
-      EXPECT_EQ(parameters.kappaC, Real(1));
-      EXPECT_EQ(parameters.kappaReg, Real(1));
+      EXPECT_EQ(parameters.kappaS, Real(1));
+      EXPECT_EQ(parameters.kappaD, Real(1));
       EXPECT_EQ(parameters.directSolverThreads, 0u);
       EXPECT_EQ(parameters.maxIterations, 30);
       EXPECT_TRUE(parameters.directionalNewton);
@@ -228,9 +228,9 @@ namespace Rodin::Tests::Unit
           (Real(4) * eps * eps);
         const Real omitted = Real(2) * (Real(2) + x.squaredNorm()) * v.dot(z);
         EXPECT_NEAR(v.dot(actual * z), mixed - omitted, Real(2e-6));
-        p.kappaObs = Real(0.5);
+        p.kappaF = Real(0.5);
         EXPECT_LT((coefficient.getValue(ip) - Real(0.5) * expected).norm(), Real(1e-12));
-        p.kappaObs = Real(1);
+        p.kappaF = Real(1);
       }
     }
   }
@@ -452,19 +452,16 @@ namespace Rodin::Tests::Unit
     for (const Real invalid : {Real(-1), std::numeric_limits<Real>::quiet_NaN()})
     {
       WNGIRParameters p;
-      p.kappaC = invalid;
+      p.kappaS = invalid;
       EXPECT_THROW(solver.setParameters(p), Alert::Exception);
     }
     for (const Real invalid : {Real(0), Real(-1), std::numeric_limits<Real>::infinity()})
     {
       WNGIRParameters p;
-      p.kappaReg = invalid;
+      p.kappaD = invalid;
       EXPECT_THROW(solver.setParameters(p), Alert::Exception);
       p = WNGIRParameters{};
-      p.kappaBulk = invalid;
-      EXPECT_THROW(solver.setParameters(p), Alert::Exception);
-      p = WNGIRParameters{};
-      p.kappaObs = invalid;
+      p.kappaF = invalid;
       EXPECT_THROW(solver.setParameters(p), Alert::Exception);
     }
     for (const Real invalid : {Real(0), Real(1), std::numeric_limits<Real>::quiet_NaN()})

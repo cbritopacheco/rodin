@@ -72,10 +72,12 @@ attributes (`Geometry::MinSTCut` is the classifier primitive), geometry
 fitting owns node positions and never decides topology.
 
 On this branch the module is **WNGIR**: Welsch natural-gradient interface
-fitting. The unique model is M = O + C + K with affine quadratic hinges.
-O is normalized half-squared fitting curvature without the level-set Hessian;
-C is the full Hessian of (d/4)(Q-1); K is pulled-back current symmetric strain
-with global uniform dilation projected out. C and K scale with h*kappaBulk.
+fitting. The unique model is M = F + S + D with affine quadratic hinges.
+F is normalized half-squared fitting curvature without the level-set Hessian;
+S is the full Hessian of (d/4)(Q-1); D is pulled-back current symmetric strain
+with global uniform dilation projected out. Their independent coefficients
+are kappaF, kappaS and kappaD, all defaulting to one. S and D retain the mesh
+factor h; there is no shared kappaBulk multiplier.
 The fitting energy/force remain robust Welsch. Inner Newton uses a frozen merit
 line search; directional Newton seeds the outer energy/actual-j/Q line search.
 There is no clipping, mass completion, diagonal shift, logarithmic barrier, or

@@ -454,7 +454,9 @@ int main(int argc, char** argv)
   std::cout << "Wavy-circle WNGIR sweep on " << n << "x" << n << " unit-square mesh, "
             << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
-            << "  orbit R=" << orbitR << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  orbit R=" << orbitR << "  kappaF=" << wngirParams.kappaF
+            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;

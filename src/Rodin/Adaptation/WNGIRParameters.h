@@ -33,9 +33,10 @@ namespace Rodin::Adaptation
   {
       /// Affine quadratic-hinge guard widths, relative to the identity margins.
       Real qualityGuard = Real(0.1);
-      /// Shape-curvature and current-strain weights; both scale with h*kappaBulk.
-      Real kappaC = 1;
-      Real kappaReg = 1;
+      /// Independent fitting, shape and distribution weights; volume terms scale with h.
+      Real kappaF = 1; ///< Fitting curvature weight.
+      Real kappaS = 1; ///< Shape curvature weight.
+      Real kappaD = 1; ///< Distribution (current-strain regularity) weight.
       /// Robust directional Newton seed, omitting the level-set Hessian.
       bool directionalNewton = true;
       Real directionalNewtonMaxAlpha = 100;
@@ -56,10 +57,6 @@ namespace Rodin::Adaptation
       Real robustScale =
         0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
       Real h = 0; ///< reference mesh size (required).
-      Real kappaBulk = Real(1e-4); ///< @f$\kappa_{\mathrm{bulk}}@f$, dimensionless
-      ///< common shape-curvature / regularity scale.
-      Real kappaObs =
-        1; ///< @f$\kappa_{\mathrm{obs}}@f$, surface observation metric weight.
       Real kappaJ = 1; ///< @f$\kappa_j@f$, Jacobian hinge row weight.
       Real kappaQ = 1; ///< @f$\kappa_Q@f$, relative-distortion hinge row weight.
       Real jSafe = 1e-2; ///< @f$j_{\mathrm{safe}}@f$, barrier floor on normalised j.
