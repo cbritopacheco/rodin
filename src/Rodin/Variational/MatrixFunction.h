@@ -339,8 +339,8 @@ namespace Rodin::Variational
 
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class Scalar>
-  MatrixFunction(const Math::SpatialMatrix<Scalar>&)
-    -> MatrixFunction<Math::SpatialMatrix<Scalar>>;
+  MatrixFunction(
+    const Math::SpatialMatrix<Scalar>&) -> MatrixFunction<Math::SpatialMatrix<Scalar>>;
 }
 
 namespace Rodin::Variational

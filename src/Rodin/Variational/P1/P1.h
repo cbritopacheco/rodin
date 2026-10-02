@@ -847,8 +847,8 @@ namespace Rodin::Variational
 
   /// @brief Deduces a matrix range from explicit rows and columns.
   template <class Context>
-  P1(const Geometry::Mesh<Context>&, size_t, size_t)
-    -> P1<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>&, size_t,
+    size_t) -> P1<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued continuous linear finite element space.
   template <class Mesh>

@@ -854,8 +854,8 @@ namespace Rodin::Variational
    */
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<Dot<
     ShapeFunctionBase<
       Mult<FunctionBase<CoefficientDerived>,
@@ -1855,8 +1855,8 @@ namespace Rodin::Variational
    */
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
     Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
           P1<LHSRange, LHSMesh>, TrialSpace>,
@@ -3249,8 +3249,8 @@ namespace Rodin::Variational
    */
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3645,8 +3645,8 @@ namespace Rodin::Variational
    */
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                    P1<LHSRange, LHSMesh>, TrialSpace>>,

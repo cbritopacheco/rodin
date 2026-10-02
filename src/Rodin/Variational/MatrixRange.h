@@ -259,7 +259,7 @@ namespace Rodin::Variational::Detail
         const auto& mesh = getMesh();
         m_dofs.resize(mesh.getDimension() + 1);
         for (size_t d = CellsOnly ? mesh.getDimension() : 0; d <= mesh.getDimension();
-          ++d)
+             ++d)
         {
           const size_t count = mesh.getConnectivity().getCount(d);
           m_dofs[d].reserve(count);

@@ -468,12 +468,12 @@ namespace Rodin::Variational
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class FES, class Data>
     requires FormLanguage::IsMatrixRange<
-      typename FormLanguage::Traits<FES>::RangeType>::Value
+               typename FormLanguage::Traits<FES>::RangeType>::Value
   Jacobian(const GridFunction<FES, Data>&) -> Jacobian<GridFunction<FES, Data>>;
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
     requires FormLanguage::IsMatrixRange<
-      typename FormLanguage::Traits<FES>::RangeType>::Value
+               typename FormLanguage::Traits<FES>::RangeType>::Value
   Jacobian(const ShapeFunction<Derived, FES, Space>&)
     -> Jacobian<ShapeFunction<Derived, FES, Space>>;
 }

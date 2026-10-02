@@ -551,8 +551,8 @@ namespace Rodin::Variational
 
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class Context>
-  P0g(const Geometry::Mesh<Context>&, size_t, size_t)
-    -> P0g<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  P0g(const Geometry::Mesh<Context>&, size_t,
+    size_t) -> P0g<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued globally constant finite element space.
   template <class Mesh>

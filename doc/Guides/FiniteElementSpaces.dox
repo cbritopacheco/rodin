@@ -384,9 +384,11 @@
   while basis and grid-function evaluations return matrices of the specified
   shape. Transpose and matrix-component expressions can be used in forms.
 
-  This range support does not introduce a rank-three gradient type or new
-  tensor differential operators. P0 and P0g retain their existing real scalar
-  restriction; P1 and H1 also support complex matrix ranges.
+  All four families support real and complex matrix entries. Matrix gradients
+  and Jacobians return rank-three SpatialTensor values with the derivative
+  axis last. Matrix divergence contracts the column and derivative indices,
+  and Derivative selects one physical derivative direction. See
+  @ref guides-spatial-matrix for tensor coefficients and backend details.
 
   @section fem-spaces-choosing Choosing the Right Space
 

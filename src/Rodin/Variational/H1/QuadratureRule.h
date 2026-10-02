@@ -774,8 +774,8 @@ namespace Rodin::Variational
    */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<Dot<
     ShapeFunctionBase<
       Mult<FunctionBase<CoefficientDerived>,
@@ -971,7 +971,7 @@ namespace Rodin::Variational
               const ScalarType phi_te = teTab.getBasis(qp, ib);
               for (size_t ia = 0; ia < scalarCountTr; ++ia)
               {
-                const ScalarType basis_prod = wdet * phi_te * trTab.getBasis(qp, ia);
+                const ScalarType basisProduct = wdet * phi_te * trTab.getBasis(qp, ia);
                 if constexpr (FormLanguage::IsMatrixRange<typename FormLanguage::Traits<
                                 TrialFESType>::RangeType>::Value)
                 {
@@ -982,14 +982,14 @@ namespace Rodin::Variational
                       for (size_t rowTrial = 0; rowTrial < rows; ++rowTrial)
                         A[(ib * vdim + rowTest * cols + column) * ntr +
                           (ia * vdim + rowTrial * cols + column)] +=
-                          basis_prod * m_cmv(rowTest, rowTrial);
+                          basisProduct * m_cmv(rowTest, rowTrial);
                 }
                 else
                 {
                   for (size_t dd = 0; dd < vdim; ++dd)
                     for (size_t cc = 0; cc < vdim; ++cc)
                       A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] +=
-                        basis_prod * m_cmv(dd, cc);
+                        basisProduct * m_cmv(dd, cc);
                 }
               }
             }
@@ -1413,8 +1413,8 @@ namespace Rodin::Variational
    */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
     Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
@@ -1620,12 +1620,13 @@ namespace Rodin::Variational
     Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>,
-        TestSpace>>>&) -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
-    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>&)
+    -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+      Dot<
+        ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>>;
+        ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2220,8 +2221,8 @@ namespace Rodin::Variational
    */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-    requires(!FormLanguage::IsTensorRange<
-      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+    requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+               FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,

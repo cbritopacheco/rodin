@@ -615,13 +615,13 @@ namespace Rodin::Variational
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class FES, class Data>
     requires FormLanguage::IsMatrixRange<
-      typename FormLanguage::Traits<FES>::RangeType>::Value
-  Derivative(size_t, const GridFunction<FES, Data>&)
-    -> Derivative<GridFunction<FES, Data>>;
+               typename FormLanguage::Traits<FES>::RangeType>::Value
+  Derivative(
+    size_t, const GridFunction<FES, Data>&) -> Derivative<GridFunction<FES, Data>>;
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
     requires FormLanguage::IsMatrixRange<
-      typename FormLanguage::Traits<FES>::RangeType>::Value
+               typename FormLanguage::Traits<FES>::RangeType>::Value
   Derivative(size_t, const ShapeFunction<Derived, FES, Space>&)
     -> Derivative<ShapeFunction<Derived, FES, Space>>;
 }

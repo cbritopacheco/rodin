@@ -706,8 +706,8 @@ namespace Rodin::Variational
    * @brief Deduction guide for ShapeFunction component extraction.
    */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t, size_t)
-    -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t>;
+  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t,
+    size_t) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t>;
 }
 
 namespace Rodin::Variational
@@ -771,8 +771,8 @@ namespace Rodin::Variational
   };
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class Derived>
-  Component(const FunctionBase<Derived>&, size_t, size_t, size_t)
-    -> Component<FunctionBase<Derived>, size_t, size_t, size_t>;
+  Component(const FunctionBase<Derived>&, size_t, size_t,
+    size_t) -> Component<FunctionBase<Derived>, size_t, size_t, size_t>;
 
   /** @brief One entry of a tensor-valued trial or test basis. */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
@@ -854,8 +854,8 @@ namespace Rodin::Variational
   };
   /// @brief Deduces the matrix space or coefficient type from constructor arguments.
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t, size_t, size_t)
-    -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t>;
+  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t, size_t,
+    size_t) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t>;
 }
 
 #endif

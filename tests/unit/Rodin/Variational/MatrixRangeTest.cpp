@@ -52,7 +52,8 @@ namespace
     GridFunction field(fes);
     field = value;
     const FES copied(fes);
-    const FES moved(std::move(FES(copied)));
+    FES toMove(copied);
+    const FES moved(std::move(toMove));
     FES assigned(copied);
     assigned = fes;
     EXPECT_EQ(moved.getSize(), fes.getSize());
@@ -509,7 +510,7 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
           energy += field[dofs[a]] * stiffness.integrate(a, b) * field[dofs[b]];
       EXPECT_NEAR(energy, evaluated.squaredNorm() * cell->getMeasure(), 1e-6);
     };
-    for (const auto shape : matrixShapes())
+    for (const auto& shape : matrixShapes())
     {
       const auto [rows, cols] = shape;
       P0 p0(mesh, rows, cols);
@@ -915,12 +916,16 @@ TEST(MatrixRange, StressVelocityCouplingPreservesPhysicalIndices)
         {
           const size_t row = (a % (2 * D)) / D, column = a % D;
           if (column == direction)
+          {
             EXPECT_NEAR(divergence.integrate(a, b),
               row == b % 2 ? derivative.integrate(a / (2 * D), b / 2) : 0, 1e-9);
+          }
           const size_t testRow = (a % (2 * D)) / D;
           if (column == direction)
+          {
             EXPECT_NEAR(jacobian.integrate(b, a),
               testRow == b % 2 ? derivative.integrate(b / 2, a / (2 * D)) : 0, 1e-9);
+          }
         }
     }
     BilinearForm assembled(stress, velocityTest);
