@@ -1,5 +1,12 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalWeightedComplexQuadratureTest
+  WeightedComplexQuadratureTest.cpp)
+target_link_libraries(RodinVariationalWeightedComplexQuadratureTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalWeightedComplexQuadratureTest
+  PROPERTIES LABELS unit TIMEOUT 300)
+
 # Add H1 subdirectory for H1Element component tests
 add_subdirectory(H1)
 
