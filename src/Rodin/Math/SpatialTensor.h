@@ -28,7 +28,8 @@ namespace Rodin::Math
    * entries are stored lexicographically, with the last index varying fastest.
    * Rank three represents @f$ G_{ijk}=\partial_k A_{ij} @f$; contracting
    * its last axis with a vector gives @f$ (Gv)_{ij}=\sum_k G_{ijk}v_k @f$.
-   * Products conjugate the second operand, as in the rest of @ref Rodin::Math.
+   * Inner products conjugate the second operand, as in @ref Rodin::Math.
+   * Tensor actions on vectors and matrices use ordinary linear contractions.
    *
    * @par Architecture
    * Runtime extents determine the active contiguous prefix of a fixed-size

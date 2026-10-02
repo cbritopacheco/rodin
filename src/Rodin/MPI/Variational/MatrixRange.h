@@ -56,7 +56,7 @@ namespace Rodin::Variational::Detail
       /// @brief Maps a local component DOF to its global coefficient index.
       Index getGlobalIndex(Index local) const
       {
-        assert(local >= 0 && static_cast<size_t>(local) < m_shard.getSize());
+        assert(static_cast<size_t>(local) < m_shard.getSize());
         const Index components = this->getVectorDimension();
         return this->getScalarSpace().getGlobalIndex(local / components) * components +
           local % components;
