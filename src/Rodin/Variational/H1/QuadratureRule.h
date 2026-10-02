@@ -931,7 +931,8 @@ namespace Rodin::Variational
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+            std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coeff.getValue(ip);
             for (size_t ib = 0; ib < scalarCountTe; ++ib)
@@ -1283,7 +1284,8 @@ namespace Rodin::Variational
             assert(false);
           }
 
-          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+            std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coeff.getValue(ip);
             for (size_t b = 0; b < nte; ++b)
@@ -2459,7 +2461,8 @@ namespace Rodin::Variational
             assert(false);
           }
 
-          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+            std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coeff.getValue(ip);
 
