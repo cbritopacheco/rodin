@@ -233,7 +233,7 @@ TEST(DistributedMatrixRange, AllSpaces)
     for (size_t d = 1; d <= shard.getDimension(); ++d)
       for (size_t lower = 0; lower < d; ++lower)
         shard.getConnectivity().compute(d, lower);
-    for (const auto shape : matrixShapes())
+    for (const auto& shape : matrixShapes())
     {
       const auto [rows, cols] = shape;
       P0<BackendScalar, Geometry::Mesh<Context::MPI>> p0(mesh);
