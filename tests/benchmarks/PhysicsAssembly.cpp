@@ -62,7 +62,11 @@ namespace Rodin::Tests::Benchmarks
           PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
 
         form.assemble();
-        const auto baseline = form.getOperator();
+        BilinearForm original(u, v);
+        PhysicsForm<Elasticity>::template configure<true>(
+          u, v, original, dim, conductivity);
+        original.assemble();
+        const auto baseline = original.getOperator();
         const auto& coefficients = u.getSolution().getData();
         const auto valid = [&]() {
           const auto& matrix = form.getOperator();

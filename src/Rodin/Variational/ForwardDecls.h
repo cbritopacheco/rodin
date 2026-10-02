@@ -30,6 +30,10 @@
 
 namespace Rodin::Variational
 {
+  /** @brief Finite-element interpolation selected by the space's context. */
+  template <class FES>
+  class Interpolation;
+
   /**
    * @ingroup RodinVariational
    * @brief Enumeration for shape function space types.

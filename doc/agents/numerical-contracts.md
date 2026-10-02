@@ -24,6 +24,35 @@ Do not read coefficients as values except where the space guarantees that
 contract. P1 nodal spaces store vertex values. High-order H1 uses
 Fekete/Dubiner machinery, so coefficients are not plain nodal values.
 
+### Distributed interpolation
+
+PETSc region interpolation on an MPI mesh uses the backend-independent
+MPI specialization of `Interpolation<FES>`. The space supplies its context,
+scalar field, DOF mappings, and functionals. For each owned global DOF $i$,
+an eligible incident entity $K_i$ is selected by its smallest distributed
+entity index.
+The existing finite-element pullback and functional define the coefficient:
+
+$$
+c_i = \ell_{i,K_i}(f).
+$$
+
+The predicate and source function must agree on replicas of the same entity.
+The vertex overlap supplies the incident entities for owned DOFs in $P_0$,
+$P_1$, and $H^1$. For globally supported $P_{0g}$, the smallest eligible entity
+is selected globally and its evaluated coefficients are communicated to the
+DOF owner, which may have an empty shard. For a nonconstant source in
+$P_{0g}$ this defines a deterministic interpolation sample, not a mean or an
+$L^2$ projection. Interpolation of a representable constant is independent of
+the selected source.
+
+All selected coefficients are evaluated before the destination is updated.
+Only owners commit coefficients, followed by an owner-to-ghost refresh.
+Unselected coefficients are preserved, including when the eligible region is
+empty. Direct mutable grid-function access retains its separate `acquire()` /
+`flush()` contract; it is not an indexed remote-write interface. $P_0$
+interpolation requires cells; its DOFs do not define face interpolation.
+
 ## Problem sign convention
 
 Rodin problem assignment states a residual equation with everything moved to

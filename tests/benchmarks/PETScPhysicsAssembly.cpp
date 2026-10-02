@@ -86,7 +86,10 @@ namespace Rodin::Tests::Benchmarks
         const Real expected =
           PhysicsForm<Elasticity>::configure(u, v, form, dim, conductivity);
         form.assemble();
-        const auto baseline = form;
+        BilinearForm baseline(u, v);
+        PhysicsForm<Elasticity>::template configure<true>(
+          u, v, baseline, dim, conductivity);
+        baseline.assemble();
         PetscReal baselineNorm = 0;
         auto ierr = MatNorm(baseline.getOperator(), NORM_FROBENIUS, &baselineNorm);
         assert(ierr == PETSC_SUCCESS);

@@ -47,6 +47,8 @@
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
+#include <vector>
+
 #include "Rodin/FormLanguage/IsSpecialized.h"
 
 #include "ForwardDecls.h"
@@ -430,6 +432,13 @@ namespace Rodin::Variational
    * @f]
    * or a more general integrand of the same expression-template type.
    *
+   * At each quadrature point, the test expressions are evaluated into owning
+   * values before the trial/test pair loop. For @f$N_Q@f$ points and
+   * @f$n_r,n_t@f$ local trial/test functions, this requires @f$N_Q n_t@f$
+   * test evaluations instead of @f$N_Q n_r n_t@f$, without changing the
+   * dot products or the quadrature accumulation order. Values are refreshed
+   * at every point; no expression values are cached across cell binds.
+   *
    * The quadrature formula is chosen from the integrand order if available,
    * otherwise from the finite element orders.
    */
@@ -456,6 +465,9 @@ namespace Rodin::Variational
       using IntegrandType = Dot<LHSType, RHSType>;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      /// @brief Owning range used for point-local test-expression tabulation.
+      using TestValueType = typename FormLanguage::RangeOf<std::remove_cvref_t<
+        decltype(std::declval<const RHSType&>().getBasis(size_t{}))>>::Type;
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -511,7 +523,8 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_mat(std::move(other.m_mat))
+          m_mat(std::move(other.m_mat)),
+          m_testValues(std::move(other.m_testValues))
       {}
 
       /**
@@ -583,6 +596,7 @@ namespace Rodin::Variational
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
+        m_testValues.resize(nte);
 
         // Eigen is assumed ColMajor. Columns are filled contiguously.
         ScalarType* __restrict M = m_mat.data();
@@ -602,6 +616,11 @@ namespace Rodin::Variational
           const IntegrationPoint ip(p, m_qf, qp);
           integrand.setIntegrationPoint(ip);
 
+          // Own expression values and refresh them at every quadrature point,
+          // including after rebinds and coefficient changes.
+          for (size_t te = 0; te < nte; ++te)
+            m_testValues[te] = test.getBasis(te);
+
           for (size_t tr = 0; tr < ntr; ++tr)
           {
             ScalarType* __restrict col = M + static_cast<Eigen::Index>(tr) * ld;
@@ -609,7 +628,7 @@ namespace Rodin::Variational
 
             for (size_t te = 0; te < nte; ++te)
             {
-              const auto& phi_te = test.getBasis(te);
+              const auto& phi_te = m_testValues[te];
               col[static_cast<Eigen::Index>(te)] += wdet * Math::dot(phi_tr, phi_te);
             }
           }
@@ -650,6 +669,7 @@ namespace Rodin::Variational
       size_t m_order;                                           ///< Cached quadrature order
       Geometry::Polytope::Type m_geometry;                      ///< Cached geometry type
       Math::Matrix<ScalarType> m_mat;                           ///< Local matrix, rows=test, cols=trial
+      std::vector<TestValueType> m_testValues; ///< Point-local owning scratch
   };
 
   /**

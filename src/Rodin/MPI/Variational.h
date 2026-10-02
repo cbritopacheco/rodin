@@ -26,5 +26,6 @@
 #include "Variational/P1.h"
 #include "Variational/H1.h"
 #include "Variational/FiniteElementSpace.h"
+#include "Variational/Interpolation.h"
 
 #endif

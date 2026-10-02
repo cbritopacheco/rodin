@@ -22,6 +22,14 @@ target_link_libraries(RodinMPIP0gTest
   Rodin::Variational
   Rodin::MPI)
 
+add_executable(RodinMPIInterpolationTest InterpolationTest.cpp)
+target_link_libraries(RodinMPIInterpolationTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI)
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -36,6 +44,17 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 foreach(np 1 2 3 4)
+  add_test(
+    NAME RodinMPIInterpolationTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIInterpolationTest>)
+  set_tests_properties(RodinMPIInterpolationTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 60
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIInterpolationTest_np${np})
+
   add_test(
     NAME RodinMPISubMeshGridFunctionTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}

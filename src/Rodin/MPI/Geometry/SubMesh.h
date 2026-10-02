@@ -184,7 +184,6 @@ namespace Rodin::Geometry
           m_parent = std::move(other.m_parent);
           m_s2ps = std::move(other.m_s2ps);
           m_ancestors = std::move(other.m_ancestors);
-          m_dimension = other.m_dimension;
         }
         return *this;
       }
@@ -211,20 +210,6 @@ namespace Rodin::Geometry
        * @returns True if the point belongs to this submesh or its local shard.
        */
       bool isLocalPoint(const Point& p) const override;
-
-      /**
-       * @brief Gets the collective topological dimension of the distributed submesh.
-       *
-       * This is the maximum included entity dimension across all ranks, not the
-       * dimension of the rank-local shard. Empty ranks therefore report the same
-       * logical submesh dimension as ranks that own selected entities.
-       *
-       * @returns Collective topological dimension.
-       */
-      size_t getDimension() const override
-      {
-        return m_dimension;
-      }
 
       /**
        * @brief Gets the immediate parent mesh.
@@ -278,7 +263,6 @@ namespace Rodin::Geometry
         m_parent;  ///< Parent mesh reference
       std::vector<PolytopeMap> m_s2ps; ///< Submesh-to-parent index maps
       Deque<Ancestor> m_ancestors; ///< Ancestor mesh chain
-      size_t m_dimension = 0; ///< Collective submesh dimension
   };
 }
 

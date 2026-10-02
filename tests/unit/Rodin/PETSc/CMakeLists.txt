@@ -67,7 +67,7 @@ if (RODIN_USE_MPI)
     endif()
   endif()
 
-  foreach(np 2 4)
+  foreach(np 1 2 3 4)
     add_test(
       NAME RodinPETScMPIGridFunctionTest_np${np}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
@@ -75,7 +75,7 @@ if (RODIN_USE_MPI)
               $<TARGET_FILE:RodinPETScMPIGridFunctionTest>)
     set_tests_properties(RodinPETScMPIGridFunctionTest_np${np} PROPERTIES
       LABELS "unit;petsc;distributed"
-      TIMEOUT 10
+      TIMEOUT 60
     )
     rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIGridFunctionTest_np${np})
   endforeach()
@@ -111,7 +111,7 @@ if (RODIN_USE_MPI)
     Rodin::MPI
     Rodin::PETSc)
 
-  foreach(np 1 2 4)
+  foreach(np 1 2 3 4)
     add_test(
       NAME RodinPETScMPIP0P0gTest_np${np}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}

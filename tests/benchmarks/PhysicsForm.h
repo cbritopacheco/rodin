@@ -8,6 +8,7 @@
 #define RODIN_TESTS_BENCHMARKS_PHYSICSFORM_H
 
 #include "Rodin/Variational.h"
+#include "../QuadratureReference.h"
 
 namespace Rodin::Tests::Benchmarks
 {
@@ -16,10 +17,16 @@ namespace Rodin::Tests::Benchmarks
   class PhysicsForm
   {
     public:
-      template <class U, class V, class Form>
+      template <bool Reference = false, class U, class V, class Form>
       static Real configure(U& u, V& v, Form& form, size_t dim, bool conductivity)
       {
         using namespace Variational;
+        const auto wrap = [](const auto& integral) {
+          if constexpr (Reference)
+            return Tests::ReferenceIntegral(integral);
+          else
+            return integral;
+        };
         if constexpr (Elasticity)
         {
           auto volumetric = Integral(1.5 * Div(u), Div(v));
@@ -27,7 +34,7 @@ namespace Rodin::Tests::Benchmarks
             0.5 * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T()));
           volumetric.setOrder(6);
           shear.setOrder(6);
-          form = volumetric + shear;
+          form = wrap(volumetric) + wrap(shear);
           u.getSolution() = VectorFunction(dim, [dim](const Geometry::Point& p) {
             Real s = 0;
             for (size_t j = 0; j < dim; ++j)
@@ -52,7 +59,7 @@ namespace Rodin::Tests::Benchmarks
           });
           auto diffusion = Integral(gamma * Grad(u), Grad(v));
           diffusion.setOrder(6);
-          form = diffusion;
+          form = wrap(diffusion);
           u.getSolution() = RealFunction([dim](const Geometry::Point& p) {
             Real value = 0;
             for (size_t j = 0; j < dim; ++j)

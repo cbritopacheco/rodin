@@ -24,6 +24,7 @@ set(RodinVariational_HEADERS
   TestFunction.h
   IdentityMatrix.h
   Integral.h
+  Interpolation.h
   Sum.h
   UnaryMinus.h
   Mult.h

@@ -124,6 +124,7 @@
 
 #ifdef RODIN_USE_MPI
 #include "Rodin/MPI/Context.h"
+#include "Rodin/MPI/Variational/Interpolation.h"
 #endif
 
 namespace Rodin::Variational
@@ -1047,8 +1048,18 @@ namespace Rodin::Variational
        * @p pred to each polytope, and for those that pass, sets the
        * corresponding DOF values by evaluating the function @p v.
        *
-       * The method calls `acquire()` before the loop and `flush()` after
-       * it, so the caller does not need to manage array access manually.
+       * In local mode the method acquires and flushes array access around
+       * the entity loop. In MPI mode interpolation is collective: the
+       * backend-independent @ref Interpolation selects and evaluates
+       * functionals, then each owner commits its coefficients and refreshes
+       * ghost copies. Unselected coefficients retain their previous values.
+       * In MPI mode source values are evaluated before any destination
+       * coefficient is replaced, including when the source references this
+       * grid function.
+       *
+       * @pre In MPI mode the predicate and source function must agree on
+       * replicas of the same entity. Pending direct writes must obey the
+       * existing collective @ref sync() contract.
        *
        * @tparam Function Callable type compatible with the finite element
        *                  space's projection interface.
@@ -1065,6 +1076,35 @@ namespace Rodin::Variational
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
+
+#ifdef RODIN_USE_MPI
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          this->sync();
+          Interpolation interpolation(fes, region, pred);
+          IndexMap<typename FESType::ScalarType> values;
+          interpolation.assemble(values, v);
+          // Evaluation can acquire a read array through a reference to this
+          // destination. Release it before committing the staged coefficients.
+          static_cast<const GridFunction&>(*this).flush();
+          PetscScalar* owned = nullptr;
+          PetscErrorCode ierr = VecGetArray(m_data, &owned);
+          assert(ierr == PETSC_SUCCESS);
+          for (const auto& [global, value] : values)
+          {
+            assert(m_begin <= global && global < m_end);
+            owned[global - m_begin] = value;
+          }
+          ierr = VecRestoreArray(m_data, &owned);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+          return *this;
+        }
+#endif
 
         Geometry::PolytopeIterator it;
         switch (region)
