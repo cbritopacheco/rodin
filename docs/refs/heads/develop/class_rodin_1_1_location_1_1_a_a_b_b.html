@@ -218,7 +218,7 @@ $ B_K $
 <use x='218.453888' y='-1.195529' xlink:href='#eq7-g2-75'/>
 <use x='226.656557' y='-2.988792' xlink:href='#eq7-g3-58'/>
 </g>
-</svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using only componentwise box containment.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by Newton iteration. The candidate is accepted only when the physical residual is below tolerance and the recovered reference coordinate lies in the reference polytope. Consequently, the AABB never certifies membership; it only decides which candidates are worth testing.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image exactly for every polytope type and order. Degree-one factors need no conversion: the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. Should a geometry ever fall outside this construction the box degrades to a heuristic inflation, and an exhaustive narrow-phase fallback can be enabled with setExhaustiveFallback(). The degree is taken from PolytopeTransformation::getOrder(), so a transformation that understates its own order understates its box.</p><p>Tolerances are relative to the mesh bounding-box diagonal. Queries are thread-safe: the lazy per-dimension build is guarded by a mutex and transformations are immutable after construction.</p></section>
+</svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using componentwise box containment. Optional control-hull projections reject further candidates before inversion.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by controlled Newton iteration, retrying from other reference points if the centroid attempt fails. A reference coordinate slightly outside the polytope is clipped back to it, then accepted only if the clipped point maps within physical tolerance of the query. The AABB never certifies membership; it only selects candidates to test.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image in exact arithmetic. Numerical boxes include a conversion roundoff allowance. Degree-one factors need no conversion: the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. If a box cannot be computed reliably, that entry remains unpruned. An exhaustive narrow-phase fallback can also be enabled with setExhaustiveFallback(). The degree is obtained from PolytopeTransformation::getFactorOrder(); its default total-degree bound is conservative for custom polynomial maps.</p><p>Physical tolerance is relative to the mesh bounding-box diagonal. The reference tolerance only permits a small inversion overshoot before clipping; physical residual is checked again after clipping. Queries are thread-safe for concurrent queries on a fixed mesh and configuration: setters and mesh mutation must not overlap queries. The lazy build is guarded by a mutex and transformations are immutable after construction.</p></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -242,15 +242,19 @@ $ B_K $
             <dt id="acbd2172e8f33da1492e91afe5dc25b42">
               <span class="m-doc-wrap-bumper">auto <a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc-self">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Reference-space containment slack (reference coordinates are O(1)).</dd>
+            <dd>Maximum reference-space overshoot before clipping and residual check.</dd>
             <dt id="a87d84c72f462752e93738d1427b02635">
               <span class="m-doc-wrap-bumper">auto <a href="#a87d84c72f462752e93738d1427b02635" class="m-doc-self">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
             </dt>
-            <dd>Sets the reference-space containment slack.</dd>
+            <dd>Sets the maximum reference-space overshoot before clipping.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
             </dt>
             <dd>Enables the exhaustive narrow-phase fallback on broad-phase miss.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+            </dt>
+            <dd>Enables control-hull projections in addition to axis-aligned boxes.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
@@ -272,7 +276,17 @@ $ B_K $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f13be3b8fa48212335ca5761617f49" class="m-doc-self">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool fallback)</span></span>
             </h3>
             <p>Enables the exhaustive narrow-phase fallback on broad-phase miss.</p>
-<p>Only useful for transformations of order three or higher, whose true extent may exceed the sampled, inflated boxes. Costs one full narrow-phase sweep per miss.</p>
+<p>Useful as a diagnostic when a transformation&#x27;s degree metadata does not describe its image. Unreliable control-point conversions already leave their entries unpruned. Costs one full narrow-phase sweep per miss.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8ca4fa70401fca758cc999bf754c02a6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class MeshType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp; Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc-self">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled)</span></span>
+            </h3>
+            <p>Enables control-hull projections in addition to axis-aligned boxes.</p>
+<p>Disabled by default because construction and storage costs depend on geometry and query reuse. Enable to reduce Newton retries on overlapping boxes during repeated point location. Membership checks and Newton seed retries are unchanged. Invalidates the existing index.</p>
           </div></section>
           <section class="m-doc-details" id="af65dae747e0bf8c3345fdf083dff5dd6"><div>
             <h3>

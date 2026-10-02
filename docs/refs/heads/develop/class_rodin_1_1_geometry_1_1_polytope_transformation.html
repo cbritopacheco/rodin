@@ -373,6 +373,10 @@ $ s $
             </dt>
             <dd>Gets the polynomial order of the transformation.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a220d50baa65da35e4d4936848c27dc7c" class="m-doc">getFactorOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Conservative degree in each factor of the control-point basis.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -505,6 +509,13 @@ $ s $
               </tfoot>
             </table>
 <p>For linear transformations, returns 1. For higher-order geometric approximations (e.g., quadratic elements), returns the appropriate order.</p>
+          </div></section>
+          <section class="m-doc-details" id="a220d50baa65da35e4d4936848c27dc7c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a220d50baa65da35e4d4936848c27dc7c" class="m-doc-self">getFactorOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Conservative degree in each factor of the control-point basis.</p>
+<p>Defaults to the total polynomial order, which bounds every individual factor degree. Isotropic tensor and collapsed-coordinate elements may override this with their known factor degree. A total degree alone must not be divided by the number of factors for an arbitrary transformation.</p>
           </div></section>
           <section class="m-doc-details" id="a1cebe38715f95dd2bcca579a27e476bb"><div>
             <h3>
