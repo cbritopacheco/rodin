@@ -13,7 +13,8 @@ import subprocess
 import time
 from pathlib import Path
 
-from run_p1_2d_parameter_campaign import int_values, real_values, save_case_trace
+from run_p1_2d_parameter_campaign import (
+    int_values, real_values, save_case_trace, parse_responses, RESPONSE_FIELDS)
 
 
 FIELDS = (
@@ -22,7 +23,7 @@ FIELDS = (
     "geom_sup", "normal_rms", "iterations", "min_j", "max_qrel",
     "active_rms_hg", "linear_iterations", "linear_solves", "linear_mean",
     "linear_max", "linear_error", "assembly",
-    "solve", "exit", "seconds", "returncode",
+    "solve", "exit", "seconds", "returncode", *RESPONSE_FIELDS,
 )
 PAIRS = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)=([^\s]+)")
 ELEMENTS = re.compile(r"^\s*elements=(\d+)", re.MULTILINE)
@@ -63,12 +64,9 @@ def command(args, n, lobes, kappa_s, kappa_d, mu_hat, steps):
         "--wngir-primal-barrier-relative-tol=1e-3",
         "--j-min=1e-8",
         "--wngir-jls=1e-2", "--wngir-armijo=1e-4",
-        "--wngir-descent-fraction=1e-4",
-        "--wngir-direction-norm-factor=10", "--wngir-alpha-min=1e-4",
-        "--wngir-omega-min=0.1", "--wngir-rms-floor=0",
-        "--wngir-sup-floor=0", "--wngir-rms-normal-jump-factor=0",
-        "--wngir-sup-normal-jump-factor=0", "--wngir-rms-tol=1e-12",
-        "--wngir-sup-tol=1e-12", "--wngir-energy-stag-tol=1e-8",
+        "--wngir-alpha-min=1e-4",
+        "--wngir-omega-min=0.1", f"--wngir-geometric-sup-tol={h*h:.14g}",
+        "--wngir-energy-stag-tol=1e-8",
         f"--wngir-step-tol={1e-3*h*h:.14g}",
         f"--wngir-step-h-tol={1e-3*h:.14g}",
         f"--wngir-cg-rtol={args.cg_rtol:.14g}", "--wngir-cg-max-iters=1000",
@@ -101,6 +99,7 @@ def run_case(args, n, lobes, kappa_s, kappa_d, mu_hat, steps):
                         dict(stage=args.stage, n=n, lobes=lobes, kappa_f=args.kappa_f, kappa_s=kappa_s,
                              kappa_d=kappa_d, mu_hat=mu_hat),
                         command(args, n, lobes, kappa_s, kappa_d, mu_hat, steps), output)
+    responses = parse_responses(output)
     final = parse_metrics(output, "WNGIR it=")
     timing = parse_metrics(output, "wngir timing:")
     geometry = parse_metrics(output, "debug: facets=")
@@ -129,8 +128,11 @@ def run_case(args, n, lobes, kappa_s, kappa_d, mu_hat, steps):
         "linear_error": parse_number(timing, "cgErr"),
         "assembly": parse_number(timing, "assembly"),
         "solve": parse_number(timing, "solve"),
-        "exit": "timeout" if returncode == 124 else final.get("exit", "parse-fail"),
+        "exit": ("timeout" if returncode == 124 else
+                 "missing-canonical-responses" if not math.isfinite(responses["target_hit"])
+                 else final.get("exit", "parse-fail")),
         "seconds": time.monotonic() - start, "returncode": returncode,
+        **responses,
     }
 
 
@@ -171,7 +173,7 @@ def main():
                         help="fixed fitting metric coefficient")
     parser.add_argument("--mu-hat", default="90")
     parser.add_argument("--steps", type=int, default=30)
-    parser.add_argument("--log-iterations", action="store_true",
+    parser.add_argument("--log-iterations", action="store_true", default=True,
                         help="save inner Newton and accepted-geometry traces for every case")
     parser.add_argument("--barrier-max-iters", type=int, default=15,
                         help="inner Newton cap; use 25 to audit cap failures")
@@ -248,7 +250,7 @@ def main():
                 preflight_manifest["amp"] != args.amp or
                 preflight_manifest["r0"] != args.r0):
             parser.error("preflight used a different binary or target")
-    manifest = {"model": "F+S+D-affine-quadratic-hinges-v2",
+    manifest = {"model": "F+S+D-affine-quadratic-hinges-psd-residual-dinf-v4",
                 "kappa_f": args.kappa_f, "quality_guard": 0.1, "stage": args.stage, "n": ns, "lobes": lobes,
                 "kappa_s": controls[0] if args.stage == "screen" else [1],
                 "kappa_d": controls[1] if args.stage == "screen" else [1],
@@ -257,9 +259,9 @@ def main():
                 "target": "R0 + A/3 sum_i cos(lobes*n_i)",
                 "amp": args.amp, "r0": args.r0,
                 "classifier": {"epsilon_over_h": 1.25, "lambda_c": 0.008},
-                "barrier": {"relative_correction": 1e-3,
+                "barrier": {"relative_residual": 1e-3, "absolute_residual": 1e-12,
                             "max_iterations": args.barrier_max_iters},
-                "stopping": {"rms": 1e-12, "sup": 1e-12,
+                "stopping": {"geometric_sup": "h^2 (sampled normalized residual including vertices)",
                              "energy_relative": 1e-8,
                              "step_absolute_over_h2": 1e-3,
                              "accepted_step_over_h2": 1e-3,

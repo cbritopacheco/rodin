@@ -15,11 +15,11 @@
 namespace Rodin::Adaptation::Detail
 {
   /**
-   * @brief Full frozen shape curvature for WNGIR increments.
+   * @brief Positive-semidefinite frozen shape curvature for WNGIR increments.
    *
    * Assembles h*kappaS times the Hessian of (d/4)(Q-1).
-   * The tensor is unclipped by default; positiveShapeCurvature projects its
-   * local spectrum onto the nonnegative half-line. Neither adds a quality force.
+   * The tensor is projected onto its positive-semidefinite part, retaining its
+   * nonnegative eigenvalues. This adds no quality force.
    * It is frozen at the outer displacement and reused by the inner QP.
    */
   template <class TrialFunction, class TestFunction, class Displacement>
@@ -89,7 +89,6 @@ namespace Rodin::Adaptation::Detail
               curvature(a, b) =
                 Real(d) / Real(4) * deformation.getRelativeDistortionSecondAction(G, H);
             }
-          if (parameters.positiveShapeCurvature)
           {
             curvature = (Real(0.5) * (curvature + curvature.transpose())).eval();
             Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(curvature);

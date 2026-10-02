@@ -298,7 +298,6 @@ int main(int argc, char** argv)
 
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
@@ -350,8 +349,6 @@ int main(int argc, char** argv)
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
-  if (fitTol > Real(0))
-    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -532,7 +529,7 @@ int main(int argc, char** argv)
               << "  fit0=" << interfaceFit << "\n";
   }
 
-  Real geometricRMSTolerance = std::numeric_limits<Real>::infinity();
+  bool geometricTargetReached = false;
   Real minJ = Real(1);
   Real maxJ = Real(1);
   Real maxQRel = Real(1);
@@ -553,7 +550,8 @@ int main(int argc, char** argv)
   const char* exitReason = "iter-budget";
   {
     const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-    geometricRMSTolerance = wngirRep.getGeometricRMSTolerance(h);
+    Rodin::Examples::printWNGIRResponses(wngirRep);
+    geometricTargetReached = wngirRep.geometricTargetReached;
     std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
               << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
               << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -589,8 +587,7 @@ int main(int argc, char** argv)
                 << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
   }
 
-  const bool converged =
-    fitTol > Real(0) ? interfaceFit <= fitTol : geometricRMS <= geometricRMSTolerance;
+  const bool converged = geometricTargetReached;
 
   const std::size_t D = mesh.getDimension();
   for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)

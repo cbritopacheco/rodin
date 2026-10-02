@@ -2,15 +2,14 @@
 
 WNGIR now has one model: M = F + S + D (Fitting, Shape, Distribution), affine quadratic hinges,
 directional Newton, frozen inner-merit backtracking, and actual outer j/Q
-and fitting-energy checks. There is no selectable logarithmic model, PSD
-clipping by default, coefficient-space completion, mass term, or nonlinear-hinge path.
-The experimental `--wngir-positive-shape-curvature=1` projects the local
-Hessian of (d/4)(Q-1) onto its PSD spectrum before assembly. It adds no force
-and does not guarantee invertibility of the total metric.
+and fitting-energy Armijo checks. S_+ is the sole shape metric: the local Hessian
+of (d/4)(Q-1) is projected onto its nonnegative spectrum before assembly.
+There is no selectable full-Hessian or logarithmic model, coefficient-space
+completion, mass term, or nonlinear-hinge path. PSD does not imply invertibility.
 
 - F is kappa_f times the normalized Hessian of half the squared level-set residual with
   the level-set Hessian omitted. It is not robust-weighted.
-- S is h*kappa_s times D2[(d/4)(Q-1)], without clipping.
+- S_+ is h*kappa_s times the positive spectral part of D2[(d/4)(Q-1)].
 - D is h*kappa_d times current-configuration symmetric strain,
   with global uniform dilation projected out. It permits rigid motions.
 - The fitting energy and force remain robust Welsch.
@@ -18,14 +17,16 @@ and does not guarantee invertibility of the total metric.
   model-decrease-scaled hinge weight is mu_hat=90.
 - Defaults are 30 outer / 15 inner corrections and kappa_f=kappa_s=kappa_d=1.
   There is no shared bulk coefficient. These are choices, not a new calibration result.
-  The previous default metric is reproduced by (kappa_f,kappa_s,kappa_d)=(1,1e-4,1e-4).
+  The previous coefficient magnitudes were (kappa_f,kappa_s,kappa_d)=(1,1e-4,1e-4);
+  switching from full to PSD curvature does not reproduce the old metric away from identity.
   More generally, old weights map to (kappa_obs,kappa_bulk*kappa_c,kappa_bulk*kappa_reg).
 
 There is no separate inertia audit or automatic metric repair. Linear residual,
 direction, inner merit and actual outer quality/energy checks remain in place.
 Fitting must resolve the similarity modes that D leaves free;
 for example, a planar interface cannot identify tangential translation.
-Full shape curvature is not globally PSD. No general coercivity claim is made.
+All three metric terms are PSD on admissible states; unresolved similarity modes
+can still prevent coercivity. No general invertibility claim is made.
 The distribution integrators tabulate frozen current strain once per basis and
 quadrature point, rather than reevaluating the inverse deformation for each
 basis pair. MUMPS retains symbolic analysis while the sparsity pattern matches,
@@ -43,12 +44,32 @@ Geometry traces record inactive-hinge skips and analysis/factorization counts.
 | Quality budget | j_safe, q_max; actual line-search Jacobian floor | 0.01, 10; 0.01 |
 | Robust fitting | robust_scale | automatic |
 | Iteration limits | outer, inner; CG per linear solve | 30, 15; 1000 |
-| Inner stopping | relative Newton correction | 1e-3 |
-| Geometry target | geometric_sup_tolerance | 0 (explicit target disabled) |
+| Inner stopping | stationarity residual relative / absolute | 1e-3 / 1e-12 |
+| Geometry target | geometric_sup_tolerance | 0 selects h^(p+1), hence h^2 for P1 |
 
-Line-search, stagnation, legacy active-fit tolerances, diagnostics and backend
-controls remain unchanged. The primary calibration controls are the three metric
+Legacy active-fit tolerance paths and predictor fallbacks are removed. The primary calibration controls are the three metric
 weights and mu_hat; the quality budget is prescribed rather than inferred from fit.
+
+Termination is uniform:
+- Success requires the full-interface sampled D_inf target and the actual sampled j/Q budget.
+- Inner convergence requires ||Mv-f+DB(v)||_2 <= atol + rtol*scale, where
+  scale=max(initial inner residual norm, ||f||_2). The accepted inner iterate is
+  reassembled and checked, including after the last permitted correction.
+- Accepted physical displacement is evaluated from the FE field at cell vertices
+  and validation quadrature, not from modal coefficients. Small steps or small
+  relative energy changes must persist for the same five-iteration window.
+- Stagnation, caps, invalid diagnostics and failed solves are not target success.
+- Linear solves must meet the requested residual; no hidden acceptance floor remains.
+
+D_inf here is explicitly a sampled normalized level-set residual |phi|/|grad phi|.
+Interface vertices supplement quadrature maxima. This is not a certified
+Hausdorff distance or proof of geometric order. Invalid samples invalidate the
+whole diagnostic irrespective of the target value. The automatic h^(p+1) target
+is a screening budget with constant one, not a measured approximation constant.
+
+The running 68,750-case full-versus-PSD campaign retains its frozen binary and
+legacy stopping protocol. It is intentionally not interrupted or mixed with new
+results. New schemas/model identifiers reject resuming that campaign.
 
 ## Model
 
@@ -58,7 +79,7 @@ normalization N, the metric is
 
 ```text
 F[v,z] = kappa_f N integral_interface (g_k.v)(g_k.z)
-S[v,z] = h kappa_s integral_volume (d/4) D2Q(A_k)[grad v,grad z]
+S_+[v,z] = h kappa_s integral_volume [(d/4) D2Q(A_k)]_+[grad v,grad z]
 D[v,z] = h kappa_d [
   integral_volume j_k e_k(v):e_k(z)
   - (integral_volume j_k tr e_k(v))(integral_volume j_k tr e_k(z))/(d V_k)]
@@ -76,7 +97,7 @@ delta_Q=guard*(Q_max-1), the inner objective is
 ```text
 0.5 M[v,v] - f_k[v]
 + 0.5 mu_k integral_volume sum_{a=J,Q} kappa_a (1-s_a(v)/delta_a)_+^2
-mu_k = mu_hat * (0.5 f_k[predictor]) / reference_domain_volume
+mu_k = mu_hat * (0.5 max(0,f_k[predictor])) / reference_domain_volume
 f_k = -DE_W(u_k)
 ```
 
@@ -87,10 +108,8 @@ and sufficient decrease of E_W. Metrics do not add a quality force to E_W.
 
 The 2D runner uses MUMPS and independent --kappa-f/--kappa-s/--kappa-d grids,
 each defaulting to 1e-4,1e-3,1e-2,0.1,1. With mu_hat=0.1,1,10,100,1000,
-all five resolutions and eleven lobe counts give 34,375 cases per shape variant.
-`--shape-curvature=full,psd` compares both (68,750 cases), interleaved for each
-coefficient tuple. The schema, resume keys, logs and manifest distinguish the
-variants; the stopped fixed-F campaign is preserved separately.
+all five resolutions and eleven lobe counts give 34,375 canonical PSD cases.
+The full-curvature flag is removed; `--shape-curvature=psd` is the only runner value.
 The 3D runner still uses fixed --kappa-f and --kappa-s/--kappa-d grids.
 Executable defaults remain all one. Executables use
 --wngir-kappa-f, --wngir-kappa-s and --wngir-kappa-d; the old metric flags
@@ -107,7 +126,8 @@ Neither runner is launched automatically by this change.
 Each case saves a lossless trace in `<out-dir>/iteration_logs/`, with its case
 identity and command in the first two lines. New CSV records identify
 kappa_f, kappa_s and kappa_d and cannot resume older coefficient schemas.
-Inner rows contain Newton correction and iterate norms, relative correction,
+Inner rows contain stationarity residual, its tolerance and relative residual, plus
+Newton correction and iterate norms as diagnostics,
 step factor, linear iteration count/error, and convergence status; failed linear
 solves and infeasible corrections also produce rows. Geometry rows contain
 complete-interface RMS/maximum distance, normal error, Jacobian and distortion,
@@ -138,7 +158,25 @@ count, cumulative completed Newton corrections, and time. Missing hits remain
 missing rather than being replaced by the iteration cap. A sampled target hit at
 one resolution does not establish an error order or certify a Hausdorff bound.
 
-## Cleanup Regression
+## Historical Cleanup Regression
+
+The 2026-10-02 PSD-only/residual-stop cleanup passed 35 scoped C++ tests,
+five manufactured assembly tests and 12 runner/trace tests. The 2D and 3D
+reconstruction and sweep targets build. Disabling interface agreement and
+automatic-target validity checks made their regressions fail; replacing d/4
+by d/2 failed the independent projected-curvature oracle in P1/P2 and 2D/3D.
+An exact P2 quadratic interior-maximum test also distinguishes physical-field
+measurement from a coefficient maximum.
+
+End-to-end response checks used single-thread MUMPS in
+`/tmp/wngir-canonical-smoke.kLPd9f`. At n=10, four lobes, coefficients
+(F,S,D,mu_hat)=(1,1e-4,1e-3,0.1), the 2D three-step check reached the sampled
+h^2 target (D_inf=0.010402491178703134); the 3D one-step check retained quality
+but did not reach it (D_inf=0.039010266465819246). These are output/termination
+checks, not a calibration comparison. The attempted 3D n=5 check had no
+classified interface (zero inside cells and zero facets), so it exited
+`empty-interface` without fitting; this is a classifier-resolution limitation,
+not fast optimization convergence. None of these runs is pooled with the live campaign.
 
 Before separating the coefficients, the canonical executables were compared with the frozen full-baseline-affine
 MUMPS runs, using the original explicit 20 outer / 10 inner caps and identical

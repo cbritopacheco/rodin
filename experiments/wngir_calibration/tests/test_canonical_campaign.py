@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from run_p1_2d_parameter_campaign import FIELDS, cases_for, ensure_schema, main, read_done, run_case
+from run_p1_2d_parameter_campaign import FIELDS, cases_for, ensure_schema, main, read_done, run_case, parse_responses
 from run_p1_3d_screen import command
 
 
@@ -38,7 +38,7 @@ class CanonicalCampaignTest(unittest.TestCase):
                 for kf in grid:
                     writer.writerow(dict(dataset="canonical", n=20, lobes=4,
                                          kappa_f=kf, kappa_s=.001, kappa_d=.001,
-                                         shape_curvature="full", mu_hat=.1, kappa_j=1, kappa_q=1))
+                                         shape_curvature="psd", mu_hat=.1, kappa_j=1, kappa_q=1))
             _, done = read_done(path)
             self.assertEqual(len(done), 5)
             self.assertTrue(done.issubset(set(cases)))
@@ -56,24 +56,34 @@ class CanonicalCampaignTest(unittest.TestCase):
                 main()
                 run.assert_not_called()
             manifest = json.loads((Path(directory) / "canonical_p1_2d_manifest.json").read_text())
-            self.assertEqual(manifest["expected_cases"], 68750)
-            self.assertEqual(manifest["shape_curvature"], ["full", "psd"])
+            self.assertEqual(manifest["expected_cases"], 34375)
+            self.assertEqual(manifest["shape_curvature"], ["psd"])
             for key in ("kappa_f", "kappa_s", "kappa_d"):
                 self.assertEqual(manifest[key], [1e-4, 1e-3, 1e-2, .1, 1])
 
-    def test_shape_variants_have_separate_cases_and_commands(self):
-        cases = list(cases_for("canonical", [20], [4], [1], [.001], [.001],
-                               [.1], [1], [1], ["full", "psd"]))
-        self.assertEqual(len(set(cases)), 2)
+    def test_full_shape_variant_is_rejected(self):
         args = SimpleNamespace(amp=.08, r0=.24, steps=30, barrier_max_iters=15,
                                extra="", log_iterations=False, threads=4,
                                dyld_library_path="", root=Path("/tmp"))
-        for case, expected in zip(cases, (0, 1)):
-            with patch("run_p1_2d_parameter_campaign.subprocess.run") as run:
-                run.return_value = SimpleNamespace(stdout="", returncode=0)
-                row = run_case(args, Path("/tmp/example"), *case)
-                self.assertIn(f"--wngir-positive-shape-curvature={expected}", run.call_args.args[0])
-                self.assertEqual(row["shape_curvature"], case[-1])
+        with patch("run_p1_2d_parameter_campaign.subprocess.run") as run:
+            with self.assertRaises(ValueError):
+                run_case(args, Path("/tmp/example"), "canonical", 20, 4,
+                         1, .001, .001, .1, 1, 1, "full")
+            run.assert_not_called()
+
+    def test_primary_responses_preserve_precision_and_inner_counts(self):
+        output = ("wngir responses: energy=1.2345678901234567e-5 "
+                  "geom_sup=0.0012345678901234567 geom_sup_target=0.002 "
+                  "target_hit=1 quality_ok=1 inner_total=19 inner_max=4 "
+                  "inner_last=2 inner_converged=1 inner_residual=1e-9 "
+                  "inner_relative_residual=1e-4 inner_residual_tolerance=1e-8 "
+                  "min_j=0.0100000000123 max_qrel=9.999999999987")
+        fields = parse_responses(output)
+        self.assertEqual(fields["geom_sup"], .0012345678901234567)
+        self.assertEqual(fields["inner_total"], 19)
+        self.assertEqual(fields["inner_max"], 4)
+        self.assertLessEqual(fields["inner_residual"], fields["inner_residual_tolerance"])
+        self.assertLess(fields["max_qrel"], 10)
 
     def test_3d_command_uses_same_model(self):
         args = SimpleNamespace(exe=Path("/tmp/example"), kappa_f=1, amp=.08, r0=.24,
@@ -96,6 +106,9 @@ class CanonicalCampaignTest(unittest.TestCase):
         self.assertIn("--wngir-direct-solver=mumps", args)
         self.assertIn("--wngir-primal-barrier-iterations=15", args)
         self.assertIn("--wngir-steps=30", args)
+        self.assertTrue(any(arg.startswith("--wngir-geometric-sup-tol=") for arg in args))
+        self.assertFalse(any("rms-tol" in arg or "rms-floor" in arg or "descent-fraction" in arg
+                             or "positive-shape-curvature" in arg for arg in args))
         self.assertFalse(any("rigid-stabilisation" in arg or "quality-model" in arg
                              or "theta-boundary" in arg or "r-div" in arg or "kappa-bulk" in arg
                              or "kappa-obs" in arg or "kappa-reg" in arg

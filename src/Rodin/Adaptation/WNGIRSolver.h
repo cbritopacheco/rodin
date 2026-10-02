@@ -47,6 +47,47 @@
 
 namespace Rodin::Adaptation
 {
+  namespace Detail
+  {
+    /// @brief Sampled componentwise physical displacement norm, independent of FE coefficients.
+    template <class Mesh, class FES, class Displacement>
+    Real wngirPhysicalDisplacementNorm(const Mesh& mesh, const FES& fes,
+      const std::vector<Index>& cells, const Displacement& step,
+      std::size_t validationOrder = 0)
+    {
+      if constexpr (requires { step.acquire(); })
+        step.acquire();
+      Real maximum = 0;
+      for (const Index index : cells)
+      {
+        const auto cell = mesh.getCell(index);
+        const Geometry::Polytope::Traits traits(cell->getGeometry());
+        const auto evaluate = [&](const Geometry::Point& point) {
+          const auto value = step.getValue(point);
+          Real norm = 0;
+          for (std::size_t component = 0; component < mesh.getDimension(); ++component)
+          {
+            if (!std::isfinite(value(component)))
+              return std::numeric_limits<Real>::infinity();
+            norm = std::max(norm, std::abs(value(component)));
+          }
+          return norm;
+        };
+        for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+          maximum = std::max(maximum, evaluate(Geometry::Point(*cell, traits.getVertex(vertex))));
+        const auto& fe = fes.getFiniteElement(cell->getDimension(), index);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+          validationOrder > 0 ? validationOrder : wngirGeometricValidationOrder(fe.getOrder()),
+          cell->getGeometry());
+        const auto& quadrature = cell->getQuadrature(qf);
+        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          maximum = std::max(maximum, evaluate(quadrature.getPoint(q)));
+      }
+      return maximum;
+    }
+
+  }
+
   /**
    * @brief Curvature-informed WNGIR mesh-fitting solver for the local backend.
    *
@@ -183,6 +224,24 @@ namespace Rodin::Adaptation
           Alert::Exception() << "WNGIR requires nonnegative shape curvature and positive "
                                 "fitting/distribution weights."
                              << Alert::Raise;
+        for (const Real value : {parameters.kappaJ, parameters.kappaQ,
+               parameters.primalBarrierAbsoluteTolerance, parameters.energyStagTol,
+               parameters.stepTol, parameters.acceptedStepOverHTol, parameters.robustScale})
+          if (!std::isfinite(value) || value < Real(0))
+            Alert::Exception() << "WNGIR weights and tolerances must be finite and nonnegative."
+                               << Alert::Raise;
+        if (!std::isfinite(parameters.primalBarrierRelativeTolerance) ||
+          !(parameters.primalBarrierRelativeTolerance > Real(0)) ||
+          !std::isfinite(parameters.cgRelativeTolerance) ||
+          !(parameters.cgRelativeTolerance > Real(0)) ||
+          !(parameters.alphaMin > Real(0) && parameters.alphaMin <= Real(1)) ||
+          !(parameters.armijoCoefficient > Real(0) && parameters.armijoCoefficient < Real(1)) ||
+          !(parameters.omegaMin > Real(0) && parameters.omegaMin <= Real(1)) ||
+          !(parameters.jMinRatio > Real(0) && parameters.jMinRatio < Real(1)) ||
+          !(parameters.jLineSearchRatio > Real(0) && parameters.jLineSearchRatio < Real(1)) ||
+          parameters.primalBarrierIterations == 0 || parameters.stagnationIterations == 0)
+          Alert::Exception() << "WNGIR requires valid residual tolerances, budgets and line search."
+                             << Alert::Raise;
         if (!std::isfinite(parameters.directionalNewtonMaxAlpha) ||
           parameters.directionalNewtonMaxAlpha < Real(1))
           Alert::Exception()
@@ -235,8 +294,14 @@ namespace Rodin::Adaptation
 
         WNGIRReport rep;
         const Real h = p.h;
+        if (!std::isfinite(h) || !(h > Real(0)))
+          Alert::Exception() << "WNGIR requires a finite positive reference mesh size."
+                             << Alert::Raise;
+        if (&mesh != &fes.getMesh())
+          Alert::Exception() << "WNGIR mesh must match the displacement space."
+                             << Alert::Raise;
         const Real acceptedJacobianFloor = std::max(p.jLineSearchRatio, p.jSafe);
-        const Real stepTol = p.stepTol > Real(0) ? p.stepTol : Real(1e-4) * h;
+        const Real stepTol = p.stepTol;
         using Clock = std::chrono::steady_clock;
         auto secondsSince = [](Clock::time_point t0) -> Real {
           return std::chrono::duration<Real>(Clock::now() - t0).count();
@@ -248,9 +313,6 @@ namespace Rodin::Adaptation
         // Field values come from GridFunction::getValue (cached), so the
         // tables store quadrature geometry only.
         // ============================================================
-        const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
-        rep.normalJumpRMS = normalJump.rms;
-        rep.normalJumpMax = normalJump.max;
         std::vector<Index> validationCells;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
@@ -262,15 +324,6 @@ namespace Rodin::Adaptation
           }
           validationCells.push_back(cellIndex);
         }
-        const Real floorRMS = p.tauRmsHFloor;
-        const Real floorSup = p.tauInfHFloor;
-        // The dimensional floors are raised to the resolution of the classified
-        // skeleton itself, so the iteration does not pursue an error finer than
-        // the kink between adjacent facets.
-        const Real tauRmsH = std::max(floorRMS, p.tauJumpRms * rep.normalJumpRMS);
-        const Real tauInfH = std::max(floorSup, p.tauJumpInf * rep.normalJumpMax);
-        rep.effectiveTauRmsH = tauRmsH;
-        rep.effectiveTauInfH = tauInfH;
 
         if (!p.hasInterfaceAttribute)
         {
@@ -288,6 +341,26 @@ namespace Rodin::Adaptation
           m_report = rep;
           return rep;
         }
+        std::vector<Index> markedFacets;
+        for (auto face = mesh.getFace(); face; ++face)
+          if (face->getAttribute() == p.interfaceAttribute)
+            markedFacets.push_back(face->getIndex());
+        auto suppliedFacets = interfaceFacets;
+        std::sort(markedFacets.begin(), markedFacets.end());
+        std::sort(suppliedFacets.begin(), suppliedFacets.end());
+        if (markedFacets != suppliedFacets)
+          Alert::Exception() << "WNGIR facet list must exactly match the interface attribute."
+                             << Alert::Raise;
+        const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
+        rep.normalJumpRMS = normalJump.rms;
+        rep.normalJumpMax = normalJump.max;
+        const Real geometricTarget = p.geometricSupTolerance > Real(0)
+          ? p.geometricSupTolerance
+          : std::pow(h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
+        if (!std::isfinite(geometricTarget) || !(geometricTarget > Real(0)))
+          Alert::Exception() << "WNGIR requires a finite positive geometric target."
+                             << Alert::Raise;
+        rep.geometricSupTarget = geometricTarget;
         const auto robustScale = getRobustScale(mesh, fes, phi, grad, interfaceFacets, h);
         if (!(robustScale.gradientScale > Real(0)) ||
           !std::isfinite(robustScale.gradientScale))
@@ -301,10 +374,6 @@ namespace Rodin::Adaptation
         const Real levelSetMeshScale = h * robustScale.gradientScale;
         const Real dataNormalization =
           Real(1) / (robustScale.gradientScale * robustScale.gradientScale);
-        const Real tauRms = p.tauRms > Real(0) ? p.tauRms : Real(4) * levelSetMeshScale;
-        const Real tauInf = p.tauInf > Real(0) ? p.tauInf : Real(10) * levelSetMeshScale;
-        rep.effectiveTauRms = tauRms;
-        rep.effectiveTauInf = tauInf;
         const WNGIRLoss loss(sigma);
         rep.sigma = sigma;
         rep.levelSetGradientScale = robustScale.gradientScale;
@@ -356,7 +425,7 @@ namespace Rodin::Adaptation
           rep.maxJ = initialAdm.maxJ;
           rep.maxQRel = initialAdm.maxQ;
         }
-        if (initialAdm.inadmissibleCount > 0 || initialAdm.minJ <= p.jSafe ||
+        if (initialAdm.inadmissibleCount > 0 || initialAdm.minJ <= acceptedJacobianFloor ||
           initialAdm.maxQ >= p.qMax)
         {
           rep.exitReason = "initial-state-not-strictly-feasible";
@@ -397,6 +466,10 @@ namespace Rodin::Adaptation
                     << "  inner_total=" << rep.primalBarrierIterations
                     << "  inner_last=" << rep.lastPrimalBarrierIterations
                     << "  inner_converged=" << rep.primalBarrierConverged
+                    << "  inner_residual=" << rep.primalBarrierResidual
+                    << "  inner_relative_residual=" << rep.primalBarrierRelativeResidual
+                    << "  inner_residual_tolerance=" << rep.primalBarrierResidualTolerance
+                    << "  geom_sup_target=" << geometricTarget
                     << "  inactive_hinge_skips=" << rep.inactiveHingeSkips
                     << "  direct_analyses=" << rep.directAnalyses
                     << "  direct_factorizations=" << rep.directFactorizations
@@ -408,18 +481,30 @@ namespace Rodin::Adaptation
           std::cout.flags(flags);
           std::cout.precision(precision);
         };
-        if (p.trace || p.geometricSupTolerance > Real(0))
         {
           const auto geometry = getInterfaceGeometryState(
             mesh, fes, u, phi, grad, interfaceFacets, meshDim, locator);
           if (p.trace)
             traceGeometry(geometry, 0, "initial");
-          if (p.geometricSupTolerance > Real(0) &&
-            geometry.sup <= p.geometricSupTolerance)
+          rep.geometricRMS = geometry.rms;
+          rep.geometricSup = geometry.sup;
+          rep.normalRMS = geometry.normalRMS;
+          rep.energy = ePrev;
+          rep.qualityBudgetSatisfied = true;
+          if (!std::isfinite(geometry.sup))
+          {
+            rep.exitReason = "geometric-validation-failed";
+            m_report = rep;
+            return rep;
+          }
+          if (geometry.sup <= geometricTarget)
           {
             rep.geometricRMS = geometry.rms;
             rep.geometricSup = geometry.sup;
             rep.normalRMS = geometry.normalRMS;
+            rep.geometricTargetReached = true;
+            rep.qualityBudgetSatisfied = true;
+            rep.energy = ePrev;
             rep.exitReason = "full-interface-geometric-sup-converged";
             m_report = rep;
             return rep;
@@ -430,6 +515,7 @@ namespace Rodin::Adaptation
         // Nonlinear iteration.
         // ============================================================
         std::size_t consecutiveSmallAcceptedSteps = 0;
+        std::size_t consecutiveSmallEnergyChanges = 0;
         const auto recordLinearSolve = [&rep](std::size_t iterations, Real error) {
           rep.linearIterations += iterations;
           ++rep.linearSolveCount;
@@ -505,13 +591,12 @@ namespace Rodin::Adaptation
           }
 
           predictor = vK;
-          predictorAction = std::max(Real(0),
-            getSurfaceForceAction(mesh, fes, u, predictor, phi, grad, interfaceFacets,
-              sigma2, dataNormalization, meshDim, locator));
-          rep.stationarityNorm = std::sqrt(predictorAction);
+          predictorAction = getSurfaceForceAction(mesh, fes, u, predictor, phi, grad, interfaceFacets,
+              sigma2, dataNormalization, meshDim, locator);
+          rep.predictorAction = predictorAction;
 
           {
-            const Real modelDecrease = Real(0.5) * predictorAction;
+            const Real modelDecrease = Real(0.5) * std::max(Real(0), predictorAction);
             const Real barrierCoefficient =
               domainMeasure > Real(0) ? p.muHat * modelDecrease / domainMeasure : Real(0);
             rep.primalBarrierCoefficient = barrierCoefficient;
@@ -528,20 +613,33 @@ namespace Rodin::Adaptation
               rep.minPrimalBarrierAlpha = 1;
               rep.fullPrimalBarrierSteps = 0;
               tic = Clock::now();
-              for (std::size_t inner = 0; inner < innerIterations; ++inner)
+              Real residualScale = fixedForce.norm();
+              for (std::size_t inner = 0; inner <= innerIterations; ++inner)
               {
-                if (inner == 0 && p.primalBarrierRelativeTolerance > Real(0) &&
+                if (inner == 0 &&
                   !hasActivePrimalHinges(mesh, fes, validationCells, u, vK,
                     meshDim, barrierCoefficient))
                 {
-                  // The accepted predictor already solves the hinge-free inner model.
-                  innerConverged = true;
+                  Math::Vector<Real> image;
+                  applyMetric(fixedMetric, fixedProjection, vK.getData(), image);
+                  rep.primalBarrierResidual = (image - fixedForce).norm();
+                  rep.primalBarrierResidualTolerance = p.primalBarrierAbsoluteTolerance +
+                    p.primalBarrierRelativeTolerance * residualScale;
+                  rep.primalBarrierRelativeResidual = residualScale > Real(0)
+                    ? rep.primalBarrierResidual / residualScale : rep.primalBarrierResidual;
+                  innerConverged = rep.primalBarrierResidual <= rep.primalBarrierResidualTolerance;
+                  rep.primalBarrierConverged = innerConverged;
                   rep.primalBarrierRelativeCorrection = Real(0);
-                  ++rep.inactiveHingeSkips;
                   if (p.trace)
                     std::cout << "        barrier skip: outer=" << rep.iterations
-                              << "  reason=inactive-hinges  converged=1\n";
-                  break;
+                              << "  reason=inactive-hinges  residual=" << rep.primalBarrierResidual
+                              << "  rel=" << rep.primalBarrierRelativeResidual
+                              << "  converged=" << innerConverged << '\n';
+                  if (innerConverged)
+                  {
+                    ++rep.inactiveHingeSkips;
+                    break;
+                  }
                 }
                 Detail::WNGIRPrimalBarrierMetric barrierMetric(
                   m_duStep, m_vStep, u, vK, p, barrierCoefficient);
@@ -555,6 +653,27 @@ namespace Rodin::Adaptation
                 const Real innerAssemblySeconds = secondsSince(tic);
                 rep.tAssembly += innerAssemblySeconds;
                 rep.tPrimalBarrierAssembly += innerAssemblySeconds;
+
+                Math::Vector<Real> residualImage;
+                const auto& innerSystem = m_stepProblem.getLinearSystem();
+                applyMetric(innerSystem.getOperator(), fixedProjection, vK.getData(), residualImage);
+                rep.primalBarrierResidual = (residualImage - innerSystem.getVector()).norm();
+                if (inner == 0)
+                  residualScale = std::max(residualScale, rep.primalBarrierResidual);
+                rep.primalBarrierResidualTolerance = p.primalBarrierAbsoluteTolerance +
+                  p.primalBarrierRelativeTolerance * residualScale;
+                rep.primalBarrierRelativeResidual = residualScale > Real(0)
+                  ? rep.primalBarrierResidual / residualScale : rep.primalBarrierResidual;
+                innerConverged = std::isfinite(rep.primalBarrierResidual) &&
+                  rep.primalBarrierResidual <= rep.primalBarrierResidualTolerance;
+                if (p.trace)
+                  std::cout << "        barrier residual: outer=" << rep.iterations
+                            << "  inner=" << inner << "  residual=" << rep.primalBarrierResidual
+                            << "  rel=" << rep.primalBarrierRelativeResidual
+                            << "  tolerance=" << rep.primalBarrierResidualTolerance
+                            << "  converged=" << innerConverged << '\n';
+                if (innerConverged || inner == innerIterations)
+                  break;
 
                 tic = Clock::now();
                 std::size_t barrierIterations = 0;
@@ -589,6 +708,8 @@ namespace Rodin::Adaptation
                 rep.primalBarrierRelativeCorrection = relativeCorrection;
                 ++rep.primalBarrierIterations;
                 ++rep.lastPrimalBarrierIterations;
+                rep.maxPrimalBarrierIterations =
+                  std::max(rep.maxPrimalBarrierIterations, rep.lastPrimalBarrierIterations);
                 Real innerAlpha = Real(1);
                 if constexpr (std::is_same_v<typename FormLanguage::Traits<
                                                LinearSystemType>::OperatorType,
@@ -629,8 +750,7 @@ namespace Rodin::Adaptation
                         std::max(before.second, trial.second);
                       if (std::isfinite(before.first) && std::isfinite(after) &&
                         std::isfinite(slope) &&
-                        (slope <= Real(0) ||
-                          relativeCorrection <= p.primalBarrierRelativeTolerance) &&
+                        slope < Real(0) &&
                         after <= before.first +
                             Real(1e-4) * innerAlpha * std::min(Real(0), slope) + rounding)
                       {
@@ -683,23 +803,17 @@ namespace Rodin::Adaptation
                             << "  linear_ok=1  cg_it=" << barrierIterations
                             << "  cg_err=" << barrierError
                             << "  mu_eff=" << barrierCoefficient << "  converged="
-                            << (p.primalBarrierRelativeTolerance > Real(0) &&
-                                 relativeCorrection <= p.primalBarrierRelativeTolerance)
+                            << innerConverged
                             << std::endl;
                   std::cout.precision(precision);
                 }
                 scratch *= innerAlpha;
                 vK += scratch;
-                // Convergence is measured on the full correction, before merit damping.
-                innerConverged = p.primalBarrierRelativeTolerance > Real(0) &&
-                  relativeCorrection <= p.primalBarrierRelativeTolerance;
+                // Reassemble at the accepted inner iterate to certify its stationarity residual.
                 tic = Clock::now();
-                if (innerConverged)
-                  break;
               }
               rep.primalBarrierConverged = innerConverged;
-              if (solveOk && p.primalBarrierRelativeTolerance > Real(0) &&
-                !innerConverged)
+              if (solveOk && !innerConverged)
               {
                 rep.exitReason = "primal-barrier-inner-not-converged";
                 solveOk = false;
@@ -724,37 +838,14 @@ namespace Rodin::Adaptation
           const Real predictorNorm =
             std::max(std::abs(predictor.max()), std::abs(predictor.min()));
           Real directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
-          const bool insufficientDescent = p.descentFraction > Real(0) &&
-            predictorAction > Real(0) &&
-            directionAction < p.descentFraction * predictorAction;
-          const bool excessiveDirection = p.directionNormFactor > Real(0) &&
-            predictorNorm > Real(0) &&
-            directionNorm > p.directionNormFactor * predictorNorm;
-          if (insufficientDescent || excessiveDirection)
-          {
-            vK = predictor;
-            directionAction = getSurfaceForceAction(mesh, fes, u, vK, phi, grad,
-              interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-            directionNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
-          }
           rep.directionAction = directionAction;
           rep.descentRatio =
             predictorAction > Real(0) ? directionAction / predictorAction : Real(0);
           rep.directionNormRatio =
             predictorNorm > Real(0) ? directionNorm / predictorNorm : Real(0);
-          if (p.armijoCoefficient > Real(0) &&
-            (!(directionAction > Real(0)) ||
-              (p.descentFraction > Real(0) && predictorAction > Real(0) &&
-                directionAction < p.descentFraction * predictorAction)))
+          if (!(std::isfinite(directionAction) && directionAction > Real(0)))
           {
-            rep.exitReason = "no-gradient-related-feasible-direction";
-            break;
-          }
-
-          const Real maxStep = std::max(std::abs(vK.max()), std::abs(vK.min()));
-          if (maxStep <= stepTol)
-          {
-            rep.exitReason = "best-effort-step-stagnation";
+            rep.exitReason = "no-descent-direction";
             break;
           }
 
@@ -877,10 +968,11 @@ namespace Rodin::Adaptation
 
           rep.lastAlpha = alpha;
           {
-            // acceptedStep = max_i |u_i - previousU_i|
+            // Measure the accepted FE field, not its coefficient vector.
             scratch = u;
             scratch -= previousU;
-            rep.acceptedStep = std::max(std::abs(scratch.max()), std::abs(scratch.min()));
+            rep.acceptedStep = Detail::wngirPhysicalDisplacementNorm(
+              mesh, fes, validationCells, scratch, p.geometricValidationOrder);
           }
           rep.minJ = acceptedAdm.minJ;
           rep.maxJ = acceptedAdm.maxJ;
@@ -895,14 +987,12 @@ namespace Rodin::Adaptation
             : Real(0);
           recordSurfaceState(surf);
           bool geometricTargetReached = false;
-          if (p.trace || p.geometricSupTolerance > Real(0))
           {
             const auto geometry = getInterfaceGeometryState(
               mesh, fes, u, phi, grad, interfaceFacets, meshDim, locator);
             if (p.trace)
               traceGeometry(geometry, rep.iterations + 1, "accepted");
-            geometricTargetReached = p.geometricSupTolerance > Real(0) &&
-              geometry.sup <= p.geometricSupTolerance;
+            geometricTargetReached = geometry.sup <= geometricTarget;
           }
           if (!(surf.activeLen > Real(0)))
           {
@@ -923,7 +1013,9 @@ namespace Rodin::Adaptation
                       << "  muEff=" << rep.primalBarrierCoefficient
                       << "  pbIt=" << rep.lastPrimalBarrierIterations
                       << "  pbRel=" << rep.primalBarrierRelativeCorrection
-                      << "  stat=" << rep.stationarityNorm
+                      << "  predictor_action=" << rep.predictorAction
+                      << "  inner_residual=" << rep.primalBarrierResidual
+                      << "  inner_relative_residual=" << rep.primalBarrierRelativeResidual
                       << "  desc=" << rep.descentRatio
                       << "  dirNorm=" << rep.directionNormRatio
                       << "  ared/pred=" << rep.actualPredictedDecrease
@@ -938,51 +1030,21 @@ namespace Rodin::Adaptation
             ++rep.iterations;
             break;
           }
-          if (p.geometricSupTolerance <= Real(0) && surf.activeRMS <= tauRms)
+          const Real stepThreshold =
+            stepTol + h * p.acceptedStepOverHTol;
+          consecutiveSmallAcceptedSteps = rep.acceptedStep <= stepThreshold
+            ? consecutiveSmallAcceptedSteps + 1 : 0;
+          const Real energyScale =
+            std::max({std::abs(ePrev), std::abs(eNow), std::numeric_limits<Real>::min()});
+          const Real energyChange = std::abs(ePrev - eNow) / energyScale;
+          consecutiveSmallEnergyChanges = p.energyStagTol > Real(0) &&
+              energyChange <= p.energyStagTol
+            ? consecutiveSmallEnergyChanges + 1 : 0;
+          if (consecutiveSmallAcceptedSteps >= p.stagnationIterations ||
+            consecutiveSmallEnergyChanges >= p.stagnationIterations)
           {
-            rep.exitReason = "numerical-rms-converged";
-            ++rep.iterations;
-            break;
-          }
-          if (p.geometricSupTolerance <= Real(0) && surf.activeSup <= tauInf)
-          {
-            rep.exitReason = "numerical-sup-converged";
-            ++rep.iterations;
-            break;
-          }
-          if (p.geometricSupTolerance <= Real(0) && tauRmsH > Real(0) &&
-            levelSetMeshScale > Real(0) && surf.activeRMS / levelSetMeshScale <= tauRmsH)
-          {
-            rep.exitReason = "geometric-rms-converged";
-            ++rep.iterations;
-            break;
-          }
-          if (p.geometricSupTolerance <= Real(0) && tauInfH > Real(0) &&
-            levelSetMeshScale > Real(0) && surf.activeSup / levelSetMeshScale <= tauInfH)
-          {
-            rep.exitReason = "geometric-sup-converged";
-            ++rep.iterations;
-            break;
-          }
-          if (p.acceptedStepOverHTol > Real(0) && h > Real(0) &&
-            rep.acceptedStep / h <= p.acceptedStepOverHTol)
-          {
-            ++consecutiveSmallAcceptedSteps;
-          }
-          else
-          {
-            consecutiveSmallAcceptedSteps = 0;
-          }
-          if (consecutiveSmallAcceptedSteps >= 5)
-          {
-            rep.exitReason = "best-effort-scale-step-stagnation";
-            ++rep.iterations;
-            break;
-          }
-          const Real eRel = std::abs(ePrev - eNow) / std::max(ePrev, Real(1e-30));
-          if (eRel < p.energyStagTol)
-          {
-            rep.exitReason = "best-effort-energy-stagnation";
+            rep.exitReason = consecutiveSmallAcceptedSteps >= p.stagnationIterations
+              ? "best-effort-step-stagnation" : "best-effort-energy-stagnation";
             ++rep.iterations;
             break;
           }
@@ -1003,6 +1065,8 @@ namespace Rodin::Adaptation
         rep.geometricRMS = geometry.rms;
         rep.geometricSup = geometry.sup;
         rep.normalRMS = geometry.normalRMS;
+        rep.qualityBudgetSatisfied = rep.minJ > acceptedJacobianFloor && rep.maxQRel < p.qMax;
+        rep.geometricTargetReached = rep.qualityBudgetSatisfied && geometry.sup <= geometricTarget;
         if (p.trace)
           traceGeometry(geometry, rep.iterations, "final");
 
@@ -1415,10 +1479,16 @@ namespace Rodin::Adaptation
               const Real j = deformation.getJacobian();
               minJ = std::min(minJ, j);
               maxJ = std::max(maxJ, j);
-              if (j <= m_parameters.jMinRatio)
+              if (!std::isfinite(j) || j <= m_parameters.jMinRatio || !deformation.isAdmissible())
                 ++inadmissibleCount;
               if (deformation.isAdmissible())
-                maxQ = std::max(maxQ, deformation.getRelativeDistortion());
+              {
+                const Real quality = deformation.getRelativeDistortion();
+                if (!std::isfinite(quality))
+                  ++inadmissibleCount;
+                else
+                  maxQ = std::max(maxQ, quality);
+              }
               if (current)
               {
                 const auto gradient = currentJacobian.getValue(ip);
@@ -1587,6 +1657,19 @@ namespace Rodin::Adaptation
             const auto& fe = fes.getFiniteElement(face->getDimension(), facetIndex);
             const auto& qf = getGeometricValidationQuadrature(*face, fes);
             const auto& quadrature = face->getQuadrature(qf);
+            // Endpoints/vertices contribute to the maximum, not the surface quadrature integral.
+            const Geometry::Polytope::Traits traits(face->getGeometry());
+            for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+            {
+              const Geometry::Point point(*face, traits.getVertex(vertex));
+              const auto& moved = deformation.getMovedPoint(Variational::IntegrationPoint(point));
+              const Real norm = grad.getValue(moved).norm();
+              const Real distance = std::abs(phi.getValue(moved)) / norm;
+              if (!(norm > gradientFloor) || !std::isfinite(norm) || !std::isfinite(distance))
+                ++state.invalidCount;
+              else
+                state.maximumDistance = std::max(state.maximumDistance, distance);
+            }
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
@@ -1643,7 +1726,8 @@ namespace Rodin::Adaptation
               const Real gradientNorm = targetGradient.norm();
               const Real fittedNormalNorm = fittedNormal.norm();
               if (!(mappedMeasure > gradientFloor && gradientNorm > gradientFloor &&
-                    fittedNormalNorm > gradientFloor))
+                    fittedNormalNorm > gradientFloor) || !std::isfinite(mappedMeasure) ||
+                  !std::isfinite(gradientNorm) || !std::isfinite(fittedNormalNorm))
               {
                 ++state.invalidCount;
                 continue;
@@ -1652,8 +1736,7 @@ namespace Rodin::Adaptation
               fittedNormal /= fittedNormalNorm;
               const SpatialVec targetNormal = targetGradient / gradientNorm;
               const Real distance = std::abs(phi.getValue(movedPoint)) / gradientNorm;
-              if (m_parameters.geometricSupTolerance > Real(0) &&
-                !std::isfinite(distance))
+              if (!std::isfinite(distance))
               {
                 ++state.invalidCount;
                 continue;
@@ -1680,7 +1763,7 @@ namespace Rodin::Adaptation
           total.invalidCount += state.invalidCount;
         }
         if (!(total.measure > Real(0)) ||
-          (m_parameters.geometricSupTolerance > Real(0) && total.invalidCount > 0))
+          total.invalidCount > 0)
           return {};
         return {std::sqrt(std::max(Real(0), total.squaredDistance) / total.measure),
           total.maximumDistance,
@@ -1962,10 +2045,7 @@ namespace Rodin::Adaptation
           ++iterations;
         }
         error = r.norm() / rhsNorm;
-        const Real acceptanceTolerance = m_parameters.cgStrictTolerance
-          ? relativeTolerance
-          : std::max(relativeTolerance, Real(1e-6));
-        return std::isfinite(error) && error <= acceptanceTolerance;
+        return std::isfinite(error) && error <= relativeTolerance;
       }
 
       // Solves the currently-assembled step problem and copies the

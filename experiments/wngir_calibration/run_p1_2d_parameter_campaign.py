@@ -14,33 +14,47 @@ from pathlib import Path
 
 
 FINAL_RE = re.compile(
-    r"WNGIR it=(?P<it>\d+)\s+fit=(?P<fit>[0-9.eE+-]+)\s+"
-    r"alpha=(?P<alpha>[0-9.eE+-]+)\s+step=(?P<step>[0-9.eE+-]+)\s+"
-    r"min_j=(?P<min_j>[0-9.eE+-]+)\s+max_j=(?P<max_j>[0-9.eE+-]+)\s+"
-    r"max_qrel=(?P<max_qrel>[0-9.eE+-]+)\s+"
-    r"active_rms=(?P<active_rms>[0-9.eE+-]+)\s+"
-    r"active_sup=(?P<active_sup>[0-9.eE+-]+)\s+"
-    r"active_rms_hg=(?P<active_rms_hg>[0-9.eE+-]+)\s+"
-    r"act_frac=(?P<act_frac>[0-9.eE+-]+)\s+cR=(?P<cR>[0-9.eE+-]+)\s+"
-    r"pb_alpha=(?P<pb_alpha>[0-9.eE+-]+)\s+"
-    r"pb_min_alpha=(?P<pb_min_alpha>[0-9.eE+-]+)\s+"
+    r"WNGIR it=(?P<it>\d+)\s+fit=(?P<fit>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"alpha=(?P<alpha>(?:[0-9.eE+-]+|inf|nan))\s+step=(?P<step>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"min_j=(?P<min_j>(?:[0-9.eE+-]+|inf|nan))\s+max_j=(?P<max_j>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"max_qrel=(?P<max_qrel>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"active_rms=(?P<active_rms>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"active_sup=(?P<active_sup>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"active_rms_hg=(?P<active_rms_hg>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"act_frac=(?P<act_frac>(?:[0-9.eE+-]+|inf|nan))\s+cR=(?P<cR>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"pb_alpha=(?P<pb_alpha>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"pb_min_alpha=(?P<pb_min_alpha>(?:[0-9.eE+-]+|inf|nan))\s+"
     r"pb_full_steps=(?P<pb_full_steps>\d+)\s+"
     r"rej_j=(?P<rej_j>\d+)\s+rej_q=(?P<rej_q>\d+)\s+rej_e=(?P<rej_e>\d+)\s+"
     r"converged=(?P<converged>\S+)\s+exit=(?P<exit>\S+)\s+"
-    r"geom_rms=(?P<geom_rms>[0-9.eE+-]+)\s+"
-    r"geom_sup=(?P<geom_sup>[0-9.eE+-]+)\s+"
-    r"normal_rms=(?P<normal_rms>[0-9.eE+-]+)")
+    r"geom_rms=(?P<geom_rms>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"geom_sup=(?P<geom_sup>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"normal_rms=(?P<normal_rms>(?:[0-9.eE+-]+|inf|nan))")
 
 ELEMENTS_RE = re.compile(r"^\s*elements=(?P<elements>\d+)", re.MULTILINE)
 
 TIMING_RE = re.compile(
     r"wngir timing: it=(?P<timing_it>\d+)\s+"
-    r"assembly=(?P<assembly>[0-9.eE+-]+)\s+setup=(?P<setup>[0-9.eE+-]+)\s+"
-    r"solve=(?P<solve>[0-9.eE+-]+)\s+cgIt=(?P<cg_it>\d+)\s+"
-    r"cgSolves=(?P<cg_solves>\d+)\s+cgMean=(?P<cg_it_mean>[0-9.eE+-]+)\s+"
+    r"assembly=(?P<assembly>(?:[0-9.eE+-]+|inf|nan))\s+setup=(?P<setup>(?:[0-9.eE+-]+|inf|nan))\s+"
+    r"solve=(?P<solve>(?:[0-9.eE+-]+|inf|nan))\s+cgIt=(?P<cg_it>\d+)\s+"
+    r"cgSolves=(?P<cg_solves>\d+)\s+cgMean=(?P<cg_it_mean>(?:[0-9.eE+-]+|inf|nan))\s+"
     r"cgMax=(?P<cg_it_max>\d+)\s+"
-    r"cgErr=(?P<cg_err>[0-9.eE+-]+)\s+ls=(?P<ls>[0-9.eE+-]+)\s+"
+    r"cgErr=(?P<cg_err>(?:[0-9.eE+-]+|inf|nan))\s+ls=(?P<ls>(?:[0-9.eE+-]+|inf|nan))\s+"
     r"exit=(?P<timing_exit>\S+)")
+
+
+RESPONSE_FIELDS = ("energy", "geom_sup_target", "target_hit", "quality_ok",
+                   "inner_total", "inner_max", "inner_last", "inner_converged",
+                   "inner_residual", "inner_relative_residual", "inner_residual_tolerance")
+
+
+def parse_responses(output):
+    lines = [line for line in output.splitlines() if "wngir responses:" in line]
+    if not lines:
+        return {key: float("nan") for key in RESPONSE_FIELDS}
+    fields = dict(re.findall(r"(\w+)=([^\s]+)", lines[-1]))
+    return {key: float(fields.get(key, "nan"))
+            for key in (*RESPONSE_FIELDS, "geom_sup", "min_j", "max_qrel")}
 
 
 FIELDS = [
@@ -51,7 +65,7 @@ FIELDS = [
     "pb_alpha", "pb_min_alpha", "pb_full_steps",
     "assembly", "setup", "solve", "cg_it", "cg_solves", "cg_it_mean", "cg_it_max",
     "cg_err", "ls", "converged", "exit",
-    "seconds", "returncode"]
+    "seconds", "returncode", *RESPONSE_FIELDS]
 
 
 def int_values(text):
@@ -171,7 +185,9 @@ def save_case_trace(out_dir, identity, command, output):
 
 
 def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kappa_j, kappa_q,
-             shape_curvature="full"):
+             shape_curvature="psd"):
+    if shape_curvature != "psd":
+        raise ValueError("only canonical PSD shape curvature is supported")
     cmd = [
         str(exe),
         f"--n={n}",
@@ -189,7 +205,6 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
         f"--wngir-kappa-j={kappa_j:.14g}",
         f"--wngir-kappa-q={kappa_q:.14g}",
         f"--wngir-kappa-f={kappa_f:.14g}", "--wngir-quality-guard=0.1",
-        f"--wngir-positive-shape-curvature={int(shape_curvature == 'psd')}",
         "--wngir-robust-scale=0",
         "--wngir-direct-solver=mumps", "--wngir-jsafe=1e-2",
         "--wngir-qmax=10",
@@ -199,22 +214,11 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
         "--j-min=1e-8",
         "--wngir-jls=1e-2",
         "--wngir-armijo=1e-4",
-        "--wngir-descent-fraction=1e-4",
-        "--wngir-direction-norm-factor=10",
         "--wngir-alpha-min=1e-4",
         "--wngir-omega-min=0.1",
-        # Do not stop on the geometric response: its P1 approximation floor is
-        # itself O(h^2), with a geometry-dependent coefficient. Converge the
-        # optimization to h^2-scaled stationarity and measure that response.
-        "--wngir-rms-floor=0",
-        "--wngir-sup-floor=0",
-        "--wngir-rms-normal-jump-factor=0",
-        "--wngir-sup-normal-jump-factor=0",
-        "--wngir-rms-tol=1e-12",
-        "--wngir-sup-tol=1e-12",
+        f"--wngir-geometric-sup-tol={1 / (n - 1) ** 2:.14g}",
         "--wngir-energy-stag-tol=1e-8",
-        # Drive the optimizer below the expected O(h^2) geometric response
-        # without prescribing that response's geometry-dependent coefficient.
+        # Small steps indicate stagnation, not geometric success.
         f"--wngir-step-tol={1e-3 / (n - 1) ** 2:.14g}",
         f"--wngir-step-h-tol={1e-3 / (n - 1):.14g}",
         f"--wngir-cg-rtol={getattr(args, 'cg_rtol', 1e-9):.14g}",
@@ -248,6 +252,7 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
                         cmd, proc.stdout)
     elements_match = ELEMENTS_RE.search(proc.stdout)
     elements = int(elements_match.group("elements")) if elements_match else element_count(int(n))
+    responses = parse_responses(proc.stdout)
     final_matches = list(FINAL_RE.finditer(proc.stdout))
     timing_matches = list(TIMING_RE.finditer(proc.stdout))
     row = {
@@ -345,11 +350,17 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
             "cg_err": float("nan"),
             "ls": float("nan"),
         })
+    row.update(responses)
+    if not math.isfinite(row["target_hit"]):
+        row["converged"] = "parse-fail"
+        row["exit"] = "missing-canonical-responses"
+    else:
+        row["converged"] = "yes" if row["target_hit"] else "best-effort"
     return row
 
 
 def cases_for(stage, ns, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kappa_j, kappa_q,
-              shape_curvatures=("full",)):
+              shape_curvatures=("psd",)):
     for n in ns:
         for l in lobes:
             for kf in kappa_f:
@@ -372,7 +383,7 @@ def main():
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--steps", type=int, default=30)
     parser.add_argument("--barrier-max-iters", type=int, default=15)
-    parser.add_argument("--log-iterations", action="store_true",
+    parser.add_argument("--log-iterations", action="store_true", default=True,
                         help="save inner Newton and accepted-geometry traces for every case")
     parser.add_argument("--amp", type=float, default=0.08)
     parser.add_argument("--r0", type=float, default=0.24)
@@ -389,14 +400,14 @@ def main():
     parser.add_argument("--kappa-f", default=metric_grid,
                         help="fitting metric coefficient grid")
     parser.add_argument("--mu-hat", default="90")
-    parser.add_argument("--shape-curvature", default="full,psd",
-                        help="comma-separated full/psd shape-curvature variants")
+    parser.add_argument("--shape-curvature", default="psd",
+                        help="canonical psd shape curvature")
     parser.add_argument("--kappa-j", default="1")
     parser.add_argument("--kappa-q", default="1")
     args = parser.parse_args()
     shape_curvatures = list(dict.fromkeys(args.shape_curvature.split(",")))
-    if not shape_curvatures or any(value not in ("full", "psd") for value in shape_curvatures):
-        parser.error("shape-curvature must contain full and/or psd")
+    if not shape_curvatures or any(value != "psd" for value in shape_curvatures):
+        parser.error("only canonical psd shape curvature is supported")
     if not 1 <= args.steps <= 200:
         parser.error("--steps must be between 1 and the campaign cap of 200")
     if args.barrier_max_iters < 1:
@@ -438,7 +449,7 @@ def main():
         * len(kappa_j) * len(kappa_q) * len(shape_curvatures)
         for _, ns, lobes, kfs, kbs, kappa_ds, mus in stages)
     manifest = {
-        "model": "F+S+D-affine-quadratic-hinges-no-inertia-v4",
+        "model": "F+S+D-affine-quadratic-hinges-psd-residual-dinf-v6",
         "executable": str(exe.resolve()),
         "sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
         "dataset": args.dataset,
@@ -455,15 +466,16 @@ def main():
         "target": {"center": [0.5, 0.5], "R0": args.r0, "amplitude": args.amp, "phase": 0},
         "classifier": {"epsilon_over_h": 1.25, "lambda_c": 0.008},
         "fixed_profile": {
-            "model": "F+S+D-affine-quadratic-hinges-no-inertia-v4", "quality_guard": 0.1, "robust_scale": "automatic",
+            "model": "F+Splus+D-affine-quadratic-hinges-residual-dinf-v6", "quality_guard": 0.1, "robust_scale": "automatic",
             "j_safe": 1e-2, "q_max": 10,
             "barrier_iterations": args.barrier_max_iters, "barrier_relative_tolerance": 1e-3,
             "j_min": 1e-8, "j_line_search": 1e-2,
-            "armijo": 1e-4, "descent_fraction": 1e-4, "direction_norm_factor": 10,
+            "armijo": 1e-4,
             "alpha_min": 1e-4, "omega_min": 0.1,
-            "tau_rms_h_floor": 0, "tau_inf_h_floor": 0,
-            "tau_jump_rms": 0, "tau_jump_inf": 0,
-            "tau_rms": 1e-12, "tau_inf": 1e-12, "energy_stagnation": 1e-8,
+            "geometric_sup_target": "h^2 (sampled normalized residual including vertices)",
+            "inner_residual_absolute_tolerance": 1e-12,
+            "inner_residual_scale": "max(initial residual norm, fitting force norm)",
+            "stagnation_iterations": 5, "energy_stagnation": 1e-8,
             "absolute_step": "0.001 h^2", "accepted_step_over_h": "0.001 h",
             "linear_backend": "MUMPS", "cg_relative_tolerance": 1e-9, "cg_max_iterations": 1000,
             "cell_quadrature_order": "automatic: max(2, 2 * FE order)",

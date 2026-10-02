@@ -14,7 +14,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Adaptation;
 
-TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
+TEST(Rodin_Adaptation_WNGIRQualityMetric, PositiveShapeCurvatureP1P2In2D3D)
 {
   const auto check = []<size_t Order, size_t Dimension>() {
     auto mesh = [&] {
@@ -78,22 +78,60 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
     };
     const Real actual =
       direction.getData().dot(metric.getOperator() * direction.getData());
+    Real projectedAction = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const auto& qf = QF::PolytopeQuadratureFormula::get(2 * Order, cell->getGeometry());
+      const auto& quadrature = cell->getQuadrature(qf);
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& point = quadrature.getPoint(q);
+        const IntegrationPoint ip(point, &qf, q);
+        CellDeformation deformation(Dimension);
+        deformation.setDisplacementGradient(gradient.getValue(ip));
+        Math::Matrix<Real> tensor(Dimension * Dimension, Dimension * Dimension);
+        Math::Vector<Real> vector(Dimension * Dimension);
+        const auto G = increment.getValue(ip);
+        for (size_t a = 0; a < Dimension * Dimension; ++a)
+        {
+          vector(a) = G(a / Dimension, a % Dimension);
+          Math::SpatialMatrix<Real> A(Dimension, Dimension);
+          A.setZero();
+          A(a / Dimension, a % Dimension) = Real(1);
+          for (size_t b = 0; b < Dimension * Dimension; ++b)
+          {
+            Math::SpatialMatrix<Real> B(Dimension, Dimension);
+            B.setZero();
+            B(b / Dimension, b % Dimension) = Real(1);
+            tensor(a, b) = Real(Dimension) / Real(4) *
+              deformation.getRelativeDistortionSecondAction(A, B);
+          }
+        }
+        Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> localEigen(tensor);
+        ASSERT_EQ(localEigen.info(), Eigen::Success);
+        const Math::Vector<Real> coordinates = localEigen.eigenvectors().transpose() * vector;
+        projectedAction += parameters.h * parameters.kappaS * qf.getWeight(q) *
+          point.getDistortion() *
+          coordinates.dot(localEigen.eigenvalues().cwiseMax(Real(0)).cwiseProduct(coordinates));
+      }
+    }
+    EXPECT_NEAR(actual, projectedAction, Real(1e-10));
     constexpr Real eps = Real(1e-4);
     const Real expected =
       (energy(eps) - Real(2) * energy(0) + energy(-eps)) / (eps * eps);
-    EXPECT_NEAR(actual, expected, Real(2e-6) * std::max(Real(1), std::abs(expected)));
+    // Spectral projection adds a PSD correction to the raw shape Hessian.
+    EXPECT_GE(actual + Real(2e-6) * std::max(Real(1), std::abs(expected)), expected);
     const Math::Matrix<Real> dense(metric.getOperator());
     EXPECT_LT((dense - dense.transpose()).norm(), Real(1e-12));
     Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(dense);
     ASSERT_EQ(eigen.info(), Eigen::Success);
-    EXPECT_LT(eigen.eigenvalues().minCoeff(), Real(-1e-7));
+    EXPECT_GE(eigen.eigenvalues().minCoeff(), Real(-1e-10));
     parameters.kappaS *= Real(2);
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
     EXPECT_NEAR(direction.getData().dot(metric.getOperator() * direction.getData()),
       Real(2) * actual, Real(1e-12));
     parameters.kappaS /= Real(2);
-    parameters.positiveShapeCurvature = true;
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
     const Math::Matrix<Real> positive(metric.getOperator());
@@ -111,7 +149,6 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, FullShapeCurvatureP1P2In2D3D)
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
     const Math::Matrix<Real> identityPositive(metric.getOperator());
-    parameters.positiveShapeCurvature = false;
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
     EXPECT_LT((identityPositive - Math::Matrix<Real>(metric.getOperator())).norm(), Real(1e-10));

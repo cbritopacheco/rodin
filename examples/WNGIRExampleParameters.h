@@ -13,13 +13,41 @@
 #include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <iomanip>
+#include <limits>
 #include <string>
 
 #include <Rodin/Adaptation/WNGIRParameters.h>
+#include <Rodin/Adaptation/WNGIRReport.h>
 #include <Rodin/MMG/MeshOptimizer.h>
 
 namespace Rodin::Examples
 {
+  /// @brief Lossless canonical responses, separate from the human-readable summary.
+  inline void printWNGIRResponses(const Adaptation::WNGIRReport& report)
+  {
+    const auto flags = std::cout.flags();
+    const auto precision = std::cout.precision();
+    std::cout << std::scientific << std::setprecision(std::numeric_limits<Real>::max_digits10)
+              << "    wngir responses: energy=" << report.energy
+              << " geom_sup=" << report.geometricSup
+              << " geom_sup_target=" << report.geometricSupTarget
+              << " target_hit=" << report.geometricTargetReached
+              << " quality_ok=" << report.qualityBudgetSatisfied
+              << " outer=" << report.iterations
+              << " inner_total=" << report.primalBarrierIterations
+              << " inner_max=" << report.maxPrimalBarrierIterations
+              << " inner_last=" << report.lastPrimalBarrierIterations
+              << " inner_converged=" << report.primalBarrierConverged
+              << " inner_residual=" << report.primalBarrierResidual
+              << " inner_relative_residual=" << report.primalBarrierRelativeResidual
+              << " inner_residual_tolerance=" << report.primalBarrierResidualTolerance
+              << " min_j=" << report.minJ << " max_qrel=" << report.maxQRel
+              << " exit=" << report.exitReason << '\n';
+    std::cout.flags(flags);
+    std::cout.precision(precision);
+  }
+
   inline std::string wngirOutput(const std::string& name)
   {
     std::filesystem::create_directories("wngir");
@@ -35,9 +63,6 @@ namespace Rodin::Examples
       Real kappaD = 1;
       Real kappaJ = 1;
       Real kappaQ = 1;
-      Real tauRmsHFloor = Adaptation::WNGIRParameters{}.tauRmsHFloor;
-      Real tauInfHFloor = Adaptation::WNGIRParameters{}.tauInfHFloor;
-      bool parseLegacyMaxIterations = false;
   };
 
   inline bool findOption(
@@ -151,17 +176,16 @@ namespace Rodin::Examples
   {
     constexpr const char* options[] = {"wngir-kappa-f", "wngir-robust-scale",
       "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
-      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d", "wngir-positive-shape-curvature",
+      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d",
       "wngir-directional-newton",
       "wngir-directional-newton-max-alpha", "wngir-quality-witness",
       "wngir-direct-solver", "wngir-direct-threads", "wngir-geometric-sup-tol",
-      "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol",
-      "wngir-mu-hat", "wngir-primal-barrier-mu", "wngir-omega-min", "wngir-alpha-min",
-      "wngir-armijo", "wngir-descent-fraction", "wngir-direction-norm-factor",
-      "wngir-jls", "wngir-rms-floor", "wngir-sup-floor", "wngir-rms-normal-jump-factor",
-      "wngir-sup-normal-jump-factor", "wngir-rms-tol", "wngir-sup-tol",
+      "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol", "wngir-primal-barrier-absolute-tol", "wngir-stagnation-iterations",
+      "wngir-mu-hat", "wngir-omega-min", "wngir-alpha-min",
+      "wngir-armijo",
+      "wngir-jls",
       "wngir-energy-stag-tol", "wngir-step-tol", "wngir-step-h-tol", "wngir-steps",
-      "wngir-max-iters", "wngir-cg-rtol", "wngir-cg-strict-tol", "wngir-cg-max-iters",
+      "wngir-cg-rtol", "wngir-cg-max-iters",
       "wngir-trace", "wngir-rigid-diagnostics"};
     for (int i = 1; i < argc; ++i)
     {
@@ -179,8 +203,6 @@ namespace Rodin::Examples
     p.h = h;
 
     p.kappaF = realOption(argc, argv, "wngir-kappa-f", defaults.kappaF);
-    p.positiveShapeCurvature = boolOption(
-      argc, argv, "wngir-positive-shape-curvature", p.positiveShapeCurvature);
     p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
 
     p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
@@ -215,28 +237,20 @@ namespace Rodin::Examples
         argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
     p.primalBarrierRelativeTolerance = realOption(
       argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
-    p.muHat = realOption(argc, argv, "wngir-mu-hat", "wngir-primal-barrier-mu", p.muHat);
+    p.primalBarrierAbsoluteTolerance = realOption(argc, argv,
+      "wngir-primal-barrier-absolute-tol", p.primalBarrierAbsoluteTolerance);
+    p.stagnationIterations = sizeOption(argc, argv,
+      "wngir-stagnation-iterations", p.stagnationIterations);
+    p.muHat = realOption(argc, argv, "wngir-mu-hat", p.muHat);
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
     p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
-    p.descentFraction =
-      realOption(argc, argv, "wngir-descent-fraction", p.descentFraction);
-    p.directionNormFactor =
-      realOption(argc, argv, "wngir-direction-norm-factor", p.directionNormFactor);
 
     p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
     p.jLineSearchRatio =
       realOption(argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
-    p.tauRmsHFloor = realOption(argc, argv, "wngir-rms-floor", defaults.tauRmsHFloor);
-    p.tauInfHFloor = realOption(argc, argv, "wngir-sup-floor", defaults.tauInfHFloor);
-    p.tauJumpRms = realOption(argc, argv, "wngir-rms-normal-jump-factor", p.tauJumpRms);
-    p.tauJumpInf = realOption(argc, argv, "wngir-sup-normal-jump-factor", p.tauJumpInf);
-    // Zero delegates the physical tolerance to WNGIR, where the sampled
-    // level-set gradient converts mesh length to field units.
-    p.tauRms = realOption(argc, argv, "wngir-rms-tol", p.tauRms);
-    p.tauInf = realOption(argc, argv, "wngir-sup-tol", p.tauInf);
     p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", p.energyStagTol);
-    p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
+    p.stepTol = realOption(argc, argv, "wngir-step-tol", p.stepTol);
     p.acceptedStepOverHTol =
       realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
 
@@ -244,13 +258,9 @@ namespace Rodin::Examples
     p.geometricValidationOrder =
       sizeOption(argc, argv, "geometric-validation-order", p.geometricValidationOrder);
     p.maxIterations = sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
-    if (defaults.parseLegacyMaxIterations)
-      p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
 
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
-    p.cgStrictTolerance =
-      boolOption(argc, argv, "wngir-cg-strict-tol", p.cgStrictTolerance);
     p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;

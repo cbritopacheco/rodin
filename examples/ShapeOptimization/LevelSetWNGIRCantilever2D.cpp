@@ -606,8 +606,7 @@ int main(int argc, char** argv)
             << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
             << "\n  WNGIR: kappaF=" << wp.kappaF << " kappaS=" << wp.kappaS
-            << " kappaD=" << wp.kappaD << " rmsTol=" << wp.tauRms
-            << " supTol=" << wp.tauInf << " steps=" << wp.maxIterations
+            << " kappaD=" << wp.kappaD << " DinfTarget=" << wp.geometricSupTolerance << " steps=" << wp.maxIterations
             << "  classify=" << classifyEvery << "  redistance=" << redistanceMode << "/"
             << redistanceEvery << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
@@ -1006,8 +1005,9 @@ int main(int argc, char** argv)
                 << "  activeRMS=" << std::scientific << std::setprecision(2)
                 << rep.activeRMS << "  activeRMS/(hG)=" << activeRMSOverH
                 << "  activeSup/(hG)=" << activeSupOverH
-                << "  tolRMS/(hG)=" << rep.effectiveTauRmsH
-                << "  tolSup/(hG)=" << rep.effectiveTauInfH
+                << "  Dinf=" << rep.geometricSup
+                << "  DinfTarget=" << rep.geometricSupTarget
+                << "  innerResidual=" << rep.primalBarrierResidual
                 << "  nJumpRMS=" << rep.normalJumpRMS << "  max|u|/h=" << maxUoverH
                 << '\n';
     }

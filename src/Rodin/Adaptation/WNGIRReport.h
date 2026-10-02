@@ -22,8 +22,8 @@ namespace Rodin::Adaptation
       Real sigma = 0;
     /// @brief Maximum sampled target level-set gradient on the interface.
       Real levelSetGradientScale = 0;
-    /// @brief Natural-gradient norm obtained from the unconstrained predictor.
-      Real stationarityNorm = 0;
+    /// @brief Signed fitting-force action on the unconstrained predictor; not stationarity.
+      Real predictorAction = 0;
     /// @brief Action of the negative energy derivative on the accepted direction.
       Real directionAction = 0;
     /// @brief Direction action divided by the unconstrained predictor action.
@@ -46,6 +46,11 @@ namespace Rodin::Adaptation
       Real primalBarrierCoefficient = 0;
       /// @brief Last primal-barrier Newton correction relative to the current iterate.
       Real primalBarrierRelativeCorrection = 0;
+      /// @brief Euclidean norm of Mv-f+DB(v), at the last inner iterate.
+      Real primalBarrierResidual = std::numeric_limits<Real>::infinity();
+      /// @brief Residual divided by max(initial inner residual, fitting-force norm).
+      Real primalBarrierRelativeResidual = std::numeric_limits<Real>::infinity();
+      Real primalBarrierResidualTolerance = 0;
       /// @brief Step factor accepted by the last primal-barrier correction.
       Real lastPrimalBarrierAlpha = 0;
       /// @brief Smallest step factor accepted by the final primal-barrier solve.
@@ -56,11 +61,13 @@ namespace Rodin::Adaptation
       std::size_t primalBarrierIterations = 0;
       /// @brief Number of primal-barrier Newton corrections in the final outer step.
       std::size_t lastPrimalBarrierIterations = 0;
+      /// @brief Largest number of Newton corrections in any outer iteration.
+      std::size_t maxPrimalBarrierIterations = 0;
       /// @brief Whether the final primal-barrier inner solve met its tolerance.
       bool primalBarrierConverged = false;
       /// @brief Number of inner merit backtracks accumulated over the solve.
       std::size_t primalBarrierBacktracks = 0;
-      /// @brief Norm or magnitude of the last accepted step.
+      /// @brief Maximum sampled component magnitude of the accepted physical displacement.
       Real acceptedStep = 0;
       /// @brief Minimum sampled Jacobian determinant.
       Real minJ = 1;
@@ -81,17 +88,9 @@ namespace Rodin::Adaptation
       /// @brief RMS unoriented normal discrepancy over the complete fitted interface.
       Real normalRMS = std::numeric_limits<Real>::infinity();
 
-      /// @brief Physical RMS-distance tolerance represented by the scale-aware test.
-      Real getGeometricRMSTolerance(Real h) const
-      {
-        return h * effectiveTauRmsH;
-      }
-
-      /// @brief Whether independent validation reaches the physical RMS target.
-      bool hasGeometricRMSConverged(Real h) const
-      {
-        return effectiveTauRmsH > Real(0) && geometricRMS <= getGeometricRMSTolerance(h);
-      }
+      Real geometricSupTarget = 0;
+      bool geometricTargetReached = false;
+      bool qualityBudgetSatisfied = false;
       /// @brief Measure of the active interface quadrature set.
       Real activeMeasure = 0;
       /// @brief Measure of the complete interface quadrature set.
@@ -103,14 +102,6 @@ namespace Rodin::Adaptation
 
       /// @brief Dimension of the uncontrolled rigid-motion space.
       std::size_t rigidModeDimension = 0;
-      /// @brief Effective RMS-over-(h times level-set gradient) tolerance.
-      Real effectiveTauRmsH = 0;
-      /// @brief Effective sup-over-(h times level-set gradient) tolerance.
-      Real effectiveTauInfH = 0;
-      /// @brief Effective RMS tolerance in level-set units.
-      Real effectiveTauRms = 0;
-      /// @brief Effective supremum tolerance in level-set units.
-      Real effectiveTauInf = 0;
       /// @brief RMS jump of the normal field across the interface.
       Real normalJumpRMS = 0;
       /// @brief Maximum jump of the normal field across the interface.
@@ -121,15 +112,12 @@ namespace Rodin::Adaptation
       const char* exitReason = "iter-budget";
       // Wall-clock breakdown (seconds, accumulated over iterations).
       Real tAssembly = 0; ///< WNGIR variational problem assembly.
-      std::size_t metricInertiaChecks = 0; ///< Legacy counter; no separate inertia audit.
-      Real tMetricAudit = 0; ///< Legacy timing; zero without the removed audit.
       std::size_t inactiveHingeSkips = 0; ///< Predictor already solves the inactive-hinge model.
       std::size_t directAnalyses = 0; ///< MUMPS symbolic analyses initiated by WNGIR.
       std::size_t directFactorizations = 0; ///< MUMPS numeric factorizations initiated by WNGIR.
       Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
-      Real tBulk = 0; ///< One-time constant bulk metric assembly.
-      Real tFactor = 0; ///< CG setup/preconditioner.
-      Real tSolve = 0; ///< CG iterations.
+      Real tFactor = 0; ///< Linear solver setup/preconditioner.
+      Real tSolve = 0; ///< Predictor and inner linear solves.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
       Real tPrimalBarrierLineSearch = 0; ///< fixed-inner-merit evaluation and backtracking.
       Real tPrimalBarrierAssembly = 0; ///< Inner direction-system assembly.

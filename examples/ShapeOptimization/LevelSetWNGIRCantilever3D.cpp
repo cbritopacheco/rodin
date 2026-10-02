@@ -874,8 +874,9 @@ int run(int argc, char** argv)
               << " activeSup/(hG)="
               << (levelSetMeshScale > Real(0) ? report.activeSup / levelSetMeshScale
                                               : Real(0))
-              << " tolRMS/(hG)=" << report.effectiveTauRmsH
-              << " tolSup/(hG)=" << report.effectiveTauInfH
+              << " Dinf=" << report.geometricSup
+              << " DinfTarget=" << report.geometricSupTarget
+              << " innerResidual=" << report.primalBarrierResidual
               << " nJumpRMS=" << report.normalJumpRMS << '\n';
     tWNGIR = iterTimer.reset();
 
@@ -1252,7 +1253,7 @@ int run(int argc, char** argv)
       std::cout << "  timing:"
                 << " classify=" << std::scientific << std::setprecision(2) << tClassify
                 << " grad=" << tGrad << " wngir=" << tWNGIR
-                << " wngirSetup=" << report.tSetup << " wngirBulk=" << report.tBulk
+                << " wngirSetup=" << report.tSetup
                 << " wngirAsm=" << report.tAssembly << " wngirSolve=" << report.tSolve
                 << " wngirLS=" << report.tLineSearch << " moveTrim=" << tMoveTrim
                 << " elas=" << tElasticity << " hilbert=" << tHilbert
