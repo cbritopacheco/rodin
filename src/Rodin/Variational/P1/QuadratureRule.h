@@ -422,7 +422,8 @@ namespace Rodin::Variational
               m_vec(local) += wdet * fval * fe.getBasis(local)(rc);
           }
         }
-        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value ||
+          FormLanguage::IsMatrixRange<RHSRangeType>::Value)
         {
           assert(m_quadrature);
           const auto& q = *m_quadrature;
@@ -442,9 +443,9 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(
-            std::is_same_v<RHSRangeType, ScalarType>
-            || FormLanguage::IsVectorRange<RHSRangeType>::Value,
+          static_assert(std::is_same_v<RHSRangeType, ScalarType> ||
+              FormLanguage::IsVectorRange<RHSRangeType>::Value ||
+              FormLanguage::IsMatrixRange<RHSRangeType>::Value,
             "Unsupported P1 Integral(f.v) range type.");
         }
 
@@ -666,7 +667,8 @@ namespace Rodin::Variational
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
         const size_t vdim = [&]() {
-          if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
+          if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value ||
+            FormLanguage::IsMatrixRange<LHSRangeType>::Value)
           {
             const size_t trialVdim = trialfes.getVectorDimension();
             assert(trialVdim == testfes.getVectorDimension());
@@ -727,7 +729,8 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value ||
+            FormLanguage::IsMatrixRange<LHSRangeType>::Value)
           {
             if (symmetric)
             {
@@ -849,32 +852,24 @@ namespace Rodin::Variational
    * evaluation to a single point. This specialization only applies to P1
    * finite element spaces by construction.
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+  class QuadratureRule<Dot<
+    ShapeFunctionBase<
+      Mult<FunctionBase<CoefficientDerived>,
+        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
+          P1<LHSRange, LHSMesh>, TrialSpace>>,
+      P1<LHSRange, LHSMesh>, TrialSpace>,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+      P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Dot<
+        ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
           ShapeFunctionBase<
-            ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
-            P1<LHSRange, LHSMesh>, TrialSpace>>,
-        P1<LHSRange, LHSMesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
-        P1<RHSRange, RHSMesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                FunctionBase<CoefficientDerived>,
-                ShapeFunctionBase<
-                  ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>>>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>
-        ::ScalarType>
+            ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::
+          ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -1034,7 +1029,8 @@ namespace Rodin::Variational
         assert(nte == testfe.getCount());
 
         const size_t vdim = [&]() {
-          if constexpr (FormLanguage::IsVectorRange<MultiplicandRangeType>::Value)
+          if constexpr (FormLanguage::IsVectorRange<MultiplicandRangeType>::Value ||
+            FormLanguage::IsMatrixRange<MultiplicandRangeType>::Value)
           {
             const size_t trialVdim = trialfes.getVectorDimension();
             assert(trialVdim == testfes.getVectorDimension());
@@ -1100,8 +1096,10 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::Value);
-            static_assert(FormLanguage::IsVectorRange<RHSRangeType>::Value);
+            static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::Value ||
+              FormLanguage::IsMatrixRange<MultiplicandRangeType>::Value);
+            static_assert(FormLanguage::IsVectorRange<RHSRangeType>::Value ||
+              FormLanguage::IsMatrixRange<RHSRangeType>::Value);
 
             Math::SpatialMatrix<ScalarType> cmv;
             cmv = coeff.getValue(ip);
@@ -1115,7 +1113,17 @@ namespace Rodin::Variational
               {
                 const size_t ca = ia % vdim;
                 const ScalarType phi_tr = m_basis(qp, ia / vdim);
-                m_matrix(ib, ia) += wdet * phi_te * cmv(cb, ca) * phi_tr;
+                if constexpr (FormLanguage::IsMatrixRange<MultiplicandRangeType>::Value)
+                {
+                  const size_t cols = trialfes.getColumns();
+                  assert(
+                    cmv.rows() == trialfes.getRows() && cmv.cols() == trialfes.getRows());
+                  if (cb % cols == ca % cols)
+                    m_matrix(ib, ia) +=
+                      wdet * phi_te * cmv(cb / cols, ca / cols) * phi_tr;
+                }
+                else
+                  m_matrix(ib, ia) += wdet * phi_te * cmv(cb, ca) * phi_tr;
               }
             }
           }
@@ -1202,21 +1210,21 @@ namespace Rodin::Variational
    * A single centroid evaluation is used and mixed P1 trial/test spaces are
    * accommodated.
    */
-  template <class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>, P1<LHSRange, LHSMesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>, P1<RHSRange, RHSMesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>, P1<LHSRange, LHSMesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>, P1<RHSRange, RHSMesh>, TestSpace>>>
-        ::ScalarType>
+  template <class LHSDerived, class RHSDerived, class LHSRange, class RHSRange,
+    class LHSMesh, class RHSMesh>
+    requires(!FormLanguage::IsMatrixRange<LHSRange>::Value)
+  class QuadratureRule<Dot<
+    ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+      P1<LHSRange, LHSMesh>, TrialSpace>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
+      P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<
+              Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+              P1<LHSRange, LHSMesh>, TrialSpace>,
+          ShapeFunctionBase<
+            Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
+            P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -1467,35 +1475,28 @@ namespace Rodin::Variational
    * The rule evaluates the coefficient and gradients at the centroid and
    * permits distinct P1 trial and test spaces.
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+    requires(((!FormLanguage::IsMatrixRange<LHSRange>::Value)) &&
+      (!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+          FunctionBase<CoefficientDerived>>::RangeType>::Value))
   class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-            P1<LHSRange, LHSMesh>, TrialSpace>>,
-        P1<LHSRange, LHSMesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
+    Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                            ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
+                                                P1<LHSRange, LHSMesh>, TrialSpace>>,
+                              P1<LHSRange, LHSMesh>, TrialSpace>>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
         P1<RHSRange, RHSMesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                FunctionBase<CoefficientDerived>,
-                ShapeFunctionBase<
-                  Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-                  P1<LHSRange, LHSMesh>, TrialSpace>>,
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                                ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
+                                                    P1<LHSRange, LHSMesh>, TrialSpace>>,
+                                  P1<LHSRange, LHSMesh>, TrialSpace>>,
               P1<LHSRange, LHSMesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
-              P1<RHSRange, RHSMesh>, TestSpace>>>
-        ::ScalarType>
+          ShapeFunctionBase<
+            Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
+            P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -1852,26 +1853,19 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
-  class QuadratureRule<
-    Mult<
-      FunctionBase<CoefficientDerived>,
-      Dot<
-        ShapeFunctionBase<
-          ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+  class QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
           P1<LHSRange, LHSMesh>, TrialSpace>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
-          P1<RHSRange, RHSMesh>, TestSpace>>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+        P1<RHSRange, RHSMesh>, TestSpace>>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Dot<
+        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::
+          ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -2029,7 +2023,8 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value ||
+            FormLanguage::IsMatrixRange<LHSRangeType>::Value)
           {
             for (size_t ib = 0; ib < nte; ++ib)
             {
@@ -3252,35 +3247,28 @@ namespace Rodin::Variational
    * Uses a single centroid quadrature point and supports different P1 trial
    * and test spaces.
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-            P1<LHSRange, LHSMesh>, TrialSpace>>,
-        P1<LHSRange, LHSMesh>, TrialSpace>,
+    Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                P1<LHSRange, LHSMesh>, TrialSpace>>,
+                              P1<LHSRange, LHSMesh>, TrialSpace>>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
         Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
         P1<RHSRange, RHSMesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                FunctionBase<CoefficientDerived>,
-                ShapeFunctionBase<
-                  Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-                  P1<LHSRange, LHSMesh>, TrialSpace>>,
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                                ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                    P1<LHSRange, LHSMesh>, TrialSpace>>,
+                                  P1<LHSRange, LHSMesh>, TrialSpace>>,
               P1<LHSRange, LHSMesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
-              P1<RHSRange, RHSMesh>, TestSpace>>>
-        ::ScalarType>
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
+            P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -3655,34 +3643,26 @@ namespace Rodin::Variational
    * Evaluates at the element centroid. Supports distinct P1 trial and test
    * spaces. Implements the linearized convection term for Navier-Stokes.
    */
-  template <
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-            P1<LHSRange, LHSMesh>, TrialSpace>,
-          FunctionBase<CoefficientDerived>>,
-        P1<LHSRange, LHSMesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+    Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                   P1<LHSRange, LHSMesh>, TrialSpace>>,
+                                 P1<LHSRange, LHSMesh>, TrialSpace>,
+                            FunctionBase<CoefficientDerived>>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
         P1<RHSRange, RHSMesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                ShapeFunctionBase<
-                  Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-                  P1<LHSRange, LHSMesh>, TrialSpace>,
-                FunctionBase<CoefficientDerived>>,
-              P1<LHSRange, LHSMesh>, TrialSpace>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
-              P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Dot<
+        ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                   P1<LHSRange, LHSMesh>, TrialSpace>>,
+                                 P1<LHSRange, LHSMesh>, TrialSpace>,
+                            FunctionBase<CoefficientDerived>>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+          P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -3938,9 +3918,9 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
+  /// @brief Deduction guide for @c QuadratureRule.
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
     class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(
     const Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                          P1<Range, Mesh>, TrialSpace>>,

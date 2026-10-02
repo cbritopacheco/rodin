@@ -134,7 +134,11 @@ namespace Rodin::Variational
            */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, r);
+            const Geometry::Point p = m_polytope.getDimension() == 0
+              ? Geometry::Point(m_polytope, r,
+                  Geometry::Vertex(m_polytope.getIndex(), m_polytope.getMesh())
+                    .getCoordinates())
+              : Geometry::Point(m_polytope, r);
             return m_v(p);
           }
 
@@ -148,7 +152,11 @@ namespace Rodin::Variational
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, r);
+            const Geometry::Point p = m_polytope.getDimension() == 0
+              ? Geometry::Point(m_polytope, r,
+                  Geometry::Vertex(m_polytope.getIndex(), m_polytope.getMesh())
+                    .getCoordinates())
+              : Geometry::Point(m_polytope, r);
             return m_v(res, p);
           }
 
@@ -1048,7 +1056,11 @@ namespace Rodin::Variational
            */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, r);
+            const Geometry::Point p = m_polytope.getDimension() == 0
+              ? Geometry::Point(m_polytope, r,
+                  Geometry::Vertex(m_polytope.getIndex(), m_polytope.getMesh())
+                    .getCoordinates())
+              : Geometry::Point(m_polytope, r);
             return m_v(p);
           }
 
@@ -1062,7 +1074,11 @@ namespace Rodin::Variational
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, r);
+            const Geometry::Point p = m_polytope.getDimension() == 0
+              ? Geometry::Point(m_polytope, r,
+                  Geometry::Vertex(m_polytope.getIndex(), m_polytope.getMesh())
+                    .getCoordinates())
+              : Geometry::Point(m_polytope, r);
             return m_v(res, p);
           }
 
@@ -1378,6 +1394,37 @@ namespace Rodin::MPI
   template <size_t K>
   using VectorH1 =
       Variational::H1<K, Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>;
+}
+
+#include "Rodin/MPI/Variational/MatrixRange.h"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-range finite element or expression specialization.
+  template <size_t K, class Scalar>
+  class H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>> final
+    : public Detail::DistributedMatrixSpace<
+        H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>,
+        H1<K, Scalar, Geometry::Mesh<Context::MPI>>,
+        H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = Detail::DistributedMatrixSpace<
+        H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>,
+        H1<K, Scalar, Geometry::Mesh<Context::MPI>>,
+        H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>>;
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Geometry::Mesh<Context::MPI>;
+      /// @brief Constructs a matrix space of compile-time polynomial degree on the supplied mesh.
+      H1(std::integral_constant<size_t, K> degree, const MeshType& mesh, size_t rows,
+        size_t cols)
+        : Parent(H1<K, Scalar, Geometry::Mesh<Context::MPI>>(degree, mesh),
+            H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>(
+              degree, mesh.getShard(), rows, cols),
+            rows, cols)
+      {}
+  };
 }
 
 #endif // RODIN_MPI_VARIATIONAL_H1_H1_H

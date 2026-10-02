@@ -16,6 +16,7 @@ set(RodinMath_HEADERS
   SparseMatrix.h
   SpatialVector.h
   SpatialMatrix.h
+  SpatialTensor.h
   Unit.h
   Rad.h
   Deg.h

@@ -407,12 +407,26 @@ namespace Rodin::Variational
               m_vec(local) += wdet * fval(comp) * tab.getBasis(qp, scalarLocal);
             }
           }
+          else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value)
+          {
+            const size_t components = fes.getVectorDimension();
+            const size_t cols = fes.getColumns();
+            assert(nte == scalarFE.getCount() * components);
+            assert(fval.rows() == fes.getRows() && fval.cols() == cols);
+            for (size_t local = 0; local < nte; ++local)
+            {
+              const size_t comp = local % components;
+              m_vec(local) += wdet * fval(comp / cols, comp % cols) *
+                tab.getBasis(qp, local / components);
+            }
+          }
           else
           {
-            static_assert(
-              std::is_same_v<RHSRangeType, ScalarType>
-              || FormLanguage::IsVectorRange<RHSRangeType>::Value,
-              "Unsupported H1 Integral(f,v) RHS range type. Expected scalar or vector-valued shape function.");
+            static_assert(std::is_same_v<RHSRangeType, ScalarType> ||
+                FormLanguage::IsVectorRange<RHSRangeType>::Value ||
+                FormLanguage::IsMatrixRange<RHSRangeType>::Value,
+              "Unsupported H1 Integral(f,v) RHS range type. Expected scalar or "
+              "vector-valued shape function.");
           }
         }
 
@@ -625,6 +639,12 @@ namespace Rodin::Variational
         assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
         const size_t vdim = ntr / scalarCountTr;
         assert(vdim == nte / scalarCountTe);
+        if constexpr (FormLanguage::IsMatrixRange<
+                        typename FormLanguage::Traits<TrialFESType>::RangeType>::Value)
+        {
+          assert(trialfes.getRows() == testfes.getRows());
+          assert(trialfes.getColumns() == testfes.getColumns());
+        }
 
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
@@ -752,35 +772,26 @@ namespace Rodin::Variational
    * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                FunctionBase<CoefficientDerived>,
-                ShapeFunctionBase<
-                  ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+  class QuadratureRule<Dot<
+    ShapeFunctionBase<
+      Mult<FunctionBase<CoefficientDerived>,
+        ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+      H1<KTest, Scalar, Mesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                                ShapeFunctionBase<ShapeFunction<LHSDerived,
+                                                    H1<KTrial, Scalar, Mesh>, TrialSpace>,
+                                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
               H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+          ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+            H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -914,6 +925,12 @@ namespace Rodin::Variational
         assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
         const size_t vdim = ntr / scalarCountTr;
         assert(vdim == nte / scalarCountTe);
+        if constexpr (FormLanguage::IsMatrixRange<
+                        typename FormLanguage::Traits<TrialFESType>::RangeType>::Value)
+        {
+          assert(trialfes.getRows() == testfes.getRows());
+          assert(trialfes.getColumns() == testfes.getColumns());
+        }
 
         const auto& trTab = trialScalarFE.getTabulation(*m_qf);
         const auto& teTab = testScalarFE .getTabulation(*m_qf);
@@ -954,11 +971,26 @@ namespace Rodin::Variational
               const ScalarType phi_te = teTab.getBasis(qp, ib);
               for (size_t ia = 0; ia < scalarCountTr; ++ia)
               {
-                const ScalarType basisProd = wdet * phi_te * trTab.getBasis(qp, ia);
-                for (size_t dd = 0; dd < vdim; ++dd)
-                  for (size_t cc = 0; cc < vdim; ++cc)
-                    A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] +=
-                      basisProd * m_cmv(dd, cc);
+                const ScalarType basis_prod = wdet * phi_te * trTab.getBasis(qp, ia);
+                if constexpr (FormLanguage::IsMatrixRange<typename FormLanguage::Traits<
+                                TrialFESType>::RangeType>::Value)
+                {
+                  const size_t rows = trialfes.getRows(), cols = trialfes.getColumns();
+                  assert(m_cmv.rows() == rows && m_cmv.cols() == rows);
+                  for (size_t column = 0; column < cols; ++column)
+                    for (size_t rowTest = 0; rowTest < rows; ++rowTest)
+                      for (size_t rowTrial = 0; rowTrial < rows; ++rowTrial)
+                        A[(ib * vdim + rowTest * cols + column) * ntr +
+                          (ia * vdim + rowTrial * cols + column)] +=
+                          basis_prod * m_cmv(rowTest, rowTrial);
+                }
+                else
+                {
+                  for (size_t dd = 0; dd < vdim; ++dd)
+                    for (size_t cc = 0; cc < vdim; ++cc)
+                      A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] +=
+                        basis_prod * m_cmv(dd, cc);
+                }
               }
             }
           }
@@ -996,9 +1028,9 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(const Dot<
     ShapeFunctionBase<
       Mult<FunctionBase<CoefficientDerived>,
@@ -1037,35 +1069,28 @@ namespace Rodin::Variational
    * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                FunctionBase<CoefficientDerived>,
-                ShapeFunctionBase<
-                  Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+    requires(((!FormLanguage::IsMatrixRange<Scalar>::Value)) &&
+      (!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
+          FunctionBase<CoefficientDerived>>::RangeType>::Value))
+  class QuadratureRule<Dot<
+    ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
+                                            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                          H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+      H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+      H1<KTest, Scalar, Mesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Dot<
+        ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                            ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
+                                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                              H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<
+          Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -1344,9 +1369,9 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(const Dot<
     ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
@@ -1386,31 +1411,22 @@ namespace Rodin::Variational
    * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
-  class QuadratureRule<
-    Mult<
-      FunctionBase<CoefficientDerived>,
-      Dot<
-        ShapeFunctionBase<
-          ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
+  class QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-          H1<KTest, Scalar, Mesh>, TestSpace>>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Mult<
-            FunctionBase<CoefficientDerived>,
-            Dot<
-              ShapeFunctionBase<
-                ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-                H1<KTrial, Scalar, Mesh>, TrialSpace>,
-              ShapeFunctionBase<
-                ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-                H1<KTest, Scalar, Mesh>, TestSpace>>>>::ScalarType>
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Mult<
+        FunctionBase<CoefficientDerived>,
+        Dot<ShapeFunctionBase<
+              ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+              H1<KTrial, Scalar, Mesh>, TrialSpace>,
+          ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+            H1<KTest, Scalar, Mesh>, TestSpace>>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -1597,20 +1613,19 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(const Mult<FunctionBase<CoefficientDerived>,
     Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>&)
-    -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
-      Dot<
-        ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        H1<KTest, Scalar, Mesh>,
+        TestSpace>>>&) -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
-        ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-          H1<KTest, Scalar, Mesh>, TestSpace>>>>;
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1635,6 +1650,8 @@ namespace Rodin::Variational
    */
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
+    requires(!FormLanguage::IsMatrixRange<TrialRange>::Value &&
+      !FormLanguage::IsMatrixRange<TestRange>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<
           Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
@@ -1880,9 +1897,9 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(
     const Dot<ShapeFunctionBase<
                 Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
@@ -1918,6 +1935,8 @@ namespace Rodin::Variational
    */
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
+    requires(!FormLanguage::IsMatrixRange<TrialRange>::Value &&
+      !FormLanguage::IsMatrixRange<TestRange>::Value)
   class QuadratureRule<Dot<
     ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       H1<KTrial, TrialRange, Mesh>, TrialSpace>,
@@ -2162,9 +2181,9 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(const Dot<
     ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       H1<KTrial, TrialRange, Mesh>, TrialSpace>,
@@ -2199,35 +2218,28 @@ namespace Rodin::Variational
    * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
    * @f]
    */
-  template <
-    size_t KTrial, size_t KTest,
-    class CoefficientDerived, class LHSDerived, class RHSDerived,
-    class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
+    class RHSDerived, class Scalar, class Mesh>
+    requires(!FormLanguage::IsTensorRange<
+      typename FormLanguage::Traits<FunctionBase<CoefficientDerived>>::RangeType>::Value)
   class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-        H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                              H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
         Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
         H1<KTest, Scalar, Mesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
-              Mult<
-                FunctionBase<CoefficientDerived>,
-                ShapeFunctionBase<
-                  Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,
-              H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<Dot<
+        ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+                              H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+          H1<KTrial, Scalar, Mesh>, TrialSpace>,
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+          H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -2573,9 +2585,9 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
+  /// @brief Deduction guide for @c QuadratureRule.
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
-  /// @brief Deduction guide for @c QuadratureRule.
   QuadratureRule(const Dot<
     ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                         ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -2777,17 +2789,42 @@ namespace Rodin::Variational
         m_mat.setZero();
         ScalarType* A = m_mat.data();
 
-        const auto& trTab = trialfe.getTabulation(*m_qf);
-        const auto& teTab = testfe .getTabulation(*m_qf);
+        const auto& scalarTrial = [&]() -> const auto& {
+          if constexpr (FormLanguage::IsMatrixRange<Scalar>::Value)
+            return trialfe.getScalarElement();
+          else
+            return trialfe;
+        }();
+        const auto& scalarTest = [&]() -> const auto& {
+          if constexpr (FormLanguage::IsMatrixRange<Scalar>::Value)
+            return testfe.getScalarElement();
+          else
+            return testfe;
+        }();
+        const size_t scalarTrialCount = scalarTrial.getCount();
+        const size_t scalarTestCount = scalarTest.getCount();
+        const size_t components = ntr / scalarTrialCount;
+        assert(components == nte / scalarTestCount);
+        if constexpr (FormLanguage::IsMatrixRange<Scalar>::Value)
+        {
+          assert(trialfes.getRows() == testfes.getRows());
+          assert(trialfes.getColumns() == testfes.getColumns());
+        }
+        const auto& trTab = scalarTrial.getTabulation(*m_qf);
+        const auto& teTab = scalarTest.getTabulation(*m_qf);
 
         // Scratch for physical gradients at this qp.
         static thread_local std::vector<Math::SpatialVector<ScalarType>> Gtr;
         static thread_local std::vector<Math::SpatialVector<ScalarType>> Gte;
 
-        if (Gtr.size() < ntr) Gtr.resize(ntr);
-        if (Gte.size() < nte) Gte.resize(nte);
-        for (size_t a = 0; a < ntr; ++a) Gtr[a].resize(static_cast<std::uint8_t>(d));
-        for (size_t b = 0; b < nte; ++b) Gte[b].resize(static_cast<std::uint8_t>(d));
+        if (Gtr.size() < scalarTrialCount)
+          Gtr.resize(scalarTrialCount);
+        if (Gte.size() < scalarTestCount)
+          Gte.resize(scalarTestCount);
+        for (size_t a = 0; a < scalarTrialCount; ++a)
+          Gtr[a].resize(static_cast<std::uint8_t>(d));
+        for (size_t b = 0; b < scalarTestCount; ++b)
+          Gte[b].resize(static_cast<std::uint8_t>(d));
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -2806,7 +2843,7 @@ namespace Rodin::Variational
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
             const ScalarType a02 = Jinv(0,2), a12 = Jinv(1,2), a22 = Jinv(2,2);
 
-            for (size_t a = 0; a < ntr; ++a)
+            for (size_t a = 0; a < scalarTrialCount; ++a)
             {
               const auto g = trTab.getGradient(qp, a);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -2814,7 +2851,7 @@ namespace Rodin::Variational
               Gtr[a][1] = a01*gx + a11*gy + a21*gz;
               Gtr[a][2] = a02*gx + a12*gy + a22*gz;
             }
-            for (size_t b = 0; b < nte; ++b)
+            for (size_t b = 0; b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -2828,14 +2865,14 @@ namespace Rodin::Variational
             const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0);
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1);
 
-            for (size_t a = 0; a < ntr; ++a)
+            for (size_t a = 0; a < scalarTrialCount; ++a)
             {
               const auto g = trTab.getGradient(qp, a);
               const ScalarType gx = g[0], gy = g[1];
               Gtr[a][0] = a00*gx + a10*gy;
               Gtr[a][1] = a01*gx + a11*gy;
             }
-            for (size_t b = 0; b < nte; ++b)
+            for (size_t b = 0; b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1];
@@ -2846,12 +2883,12 @@ namespace Rodin::Variational
           else if (d == 1)
           {
             const ScalarType a00 = Jinv(0,0);
-            for (size_t a = 0; a < ntr; ++a)
+            for (size_t a = 0; a < scalarTrialCount; ++a)
             {
               const auto g = trTab.getGradient(qp, a);
               Gtr[a][0] = a00 * g[0];
             }
-            for (size_t b = 0; b < nte; ++b)
+            for (size_t b = 0; b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               Gte[b][0] = a00 * g[0];
@@ -2862,7 +2899,17 @@ namespace Rodin::Variational
             assert(false);
           }
 
-          if (symmetric)
+          if constexpr (FormLanguage::IsMatrixRange<Scalar>::Value)
+          {
+            for (size_t b = 0; b < scalarTestCount; ++b)
+              for (size_t a = 0; a < (symmetric ? b + 1 : scalarTrialCount); ++a)
+              {
+                const ScalarType entry = wdet * Math::dot(Gtr[a], Gte[b]);
+                for (size_t c = 0; c < components; ++c)
+                  A[(b * components + c) * ntr + a * components + c] += entry;
+              }
+          }
+          else if (symmetric)
           {
             // Accumulate only lower triangle (i,j with j <= i)
             // Use trial index as column, test index as row: A[row*ntr + col]
@@ -3878,10 +3925,10 @@ namespace Rodin::Variational
         Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
     };
 
-  // CTAD helper
+    // CTAD helper
+    /// @brief Deduction guide for @c QuadratureRule.
     template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
       class RHSDerived, class Scalar, class Mesh>
-    /// @brief Deduction guide for @c QuadratureRule.
     QuadratureRule(const Dot<
       ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,

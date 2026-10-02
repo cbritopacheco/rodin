@@ -1050,8 +1050,8 @@ namespace Rodin::Variational
             return out;
           }
 
-          template <size_t Order>
           /// @brief Gets the derivative of the basis function.
+          template <size_t Order>
           constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
             return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
@@ -1252,5 +1252,20 @@ namespace Rodin::Variational
 }
 
 #include "H1Element.hpp"
+
+#include "Rodin/Variational/MatrixRange.h"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued reference element built from scalar nodal functionals.
+  template <size_t K, class Scalar>
+  class H1Element<K, Math::SpatialMatrix<Scalar>> final
+    : public Detail::MatrixElement<H1Element<K, Scalar>>
+  {
+    public:
+      using Parent = Detail::MatrixElement<H1Element<K, Scalar>>;
+      using Parent::Parent;
+  };
+}
 
 #endif

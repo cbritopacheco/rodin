@@ -442,4 +442,19 @@ namespace Rodin::Variational
   };
 }
 
+#include "Rodin/Variational/MatrixRange.h"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued reference element built from scalar nodal functionals.
+  template <class Scalar>
+  class P0gElement<Math::SpatialMatrix<Scalar>> final
+    : public Detail::MatrixElement<P0gElement<Scalar>>
+  {
+    public:
+      using Parent = Detail::MatrixElement<P0gElement<Scalar>>;
+      using Parent::Parent;
+  };
+}
+
 #endif

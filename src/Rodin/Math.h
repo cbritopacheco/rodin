@@ -28,6 +28,7 @@
 #include "Math/SparseMatrix.h"
 #include "Math/SpatialVector.h"
 #include "Math/SpatialMatrix.h"
+#include "Math/SpatialTensor.h"
 #include "Math/Unit.h"
 #include "Math/Rad.h"
 #include "Math/Deg.h"

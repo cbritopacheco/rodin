@@ -70,9 +70,9 @@ namespace Rodin::Variational
    * @tparam Data Data storage type
    */
   template <size_t K, class Scalar, class Mesh, class Data>
+    requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
   class Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>> final
-    : public DerivativeBase<
-        GridFunction<H1<K, Scalar, Mesh>, Data>,
+    : public DerivativeBase<GridFunction<H1<K, Scalar, Mesh>, Data>,
         Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>>
   {
     public:

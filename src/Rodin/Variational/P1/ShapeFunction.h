@@ -318,4 +318,26 @@ namespace Rodin::Variational
   };
 }
 
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued shape-function specialization with cached scalar basis tabulation.
+  template <class Derived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
+  class ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
+    : public Detail::MatrixShape<
+        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>, Derived,
+        P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = Detail::MatrixShape<
+        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>, Derived,
+        P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>;
+      using Parent::Parent;
+      ShapeFunction* copy() const noexcept override
+      {
+        return static_cast<const Derived&>(*this).copy();
+      }
+  };
+}
+
 #endif

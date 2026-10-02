@@ -74,6 +74,14 @@ namespace Rodin::Variational
    *
    * This is the global analogue of P0 (which is elementwise constant).
    */
+  /**
+   * @brief Supported P0g range specializations.
+   * | Range | Local context | MPI context |
+   * |-------|---------------|-------------|
+   * | Scalar | Supported | Supported |
+   * | SpatialVector | Supported | Supported |
+   * | SpatialMatrix | Explicit rows and columns | Component-wise ownership and ghosts |
+   */
   template <class Range, class Mesh>
   class P0g;
 
@@ -496,6 +504,59 @@ namespace Rodin::Variational
   /// @brief Cellwise-constant vector-valued space with a global basis.
   template <class Mesh>
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Scalar, class Mesh>
+  struct Traits<Variational::P0g<Math::SpatialMatrix<Scalar>, Mesh>>
+  {
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Mesh;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = Scalar;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<Scalar>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename Traits<Mesh>::ContextType;
+      /// @brief Reference finite element type.
+      using ElementType = Variational::P0gElement<Math::SpatialMatrix<Scalar>>;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class Scalar>
+  class P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>> final
+    : public Detail::MatrixSpace<
+        P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>,
+        P0g<Scalar, Geometry::Mesh<Context::Local>>,
+        P0gElement<Math::SpatialMatrix<Scalar>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = Detail::MatrixSpace<
+        P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>,
+        P0g<Scalar, Geometry::Mesh<Context::Local>>,
+        P0gElement<Math::SpatialMatrix<Scalar>>>;
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Geometry::Mesh<Context::Local>;
+      /// @brief Constructs a globally constant matrix space on the supplied mesh.
+      P0g(const MeshType& mesh, size_t rows, size_t cols)
+        : Parent(P0g<Scalar, Geometry::Mesh<Context::Local>>(mesh), rows, cols)
+      {}
+  };
+
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class Context>
+  P0g(const Geometry::Mesh<Context>&, size_t, size_t)
+    -> P0g<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+
+  /// @brief Matrix-valued globally constant finite element space.
+  template <class Mesh>
+  using MatrixP0g = P0g<Math::SpatialMatrix<Real>, Mesh>;
 }
 
 #endif

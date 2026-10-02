@@ -70,6 +70,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref P0 "P0<SpatialMatrix<Scalar>, Mesh<Context::Local>>" | Full rectangular matrix range with interleaved row-major components. |
+   * | @ref P0 "P0<SpatialMatrix<Scalar>, Mesh<Context::MPI>>" | Distributed full matrix range with expanded scalar ownership and ghost maps. |
    * | @ref P0 "P0<Range, Mesh<Context::Local>>" | Real or complex scalar/vector local-mesh discontinuous piecewise constant space. |
    * | @ref P0 "P0<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh discontinuous piecewise constant space. |
    */
@@ -227,6 +229,7 @@ namespace Rodin::Variational
        */
       P0(const P0& other)
         : Parent(other),
+          m_dofs(other.m_dofs),
           m_mesh(other.m_mesh)
       {}
 
@@ -236,6 +239,7 @@ namespace Rodin::Variational
        */
       P0(P0&& other)
         : Parent(std::move(other)),
+          m_dofs(std::move(other.m_dofs)),
           m_mesh(other.m_mesh)
       {}
 
@@ -247,6 +251,8 @@ namespace Rodin::Variational
        * @return Reference to this P0 space
        */
       P0& operator=(P0&& other) = default;
+      /// @brief Assigns the scalar basis and matrix component dimensions.
+      P0& operator=(const P0& other) = default;
 
       /**
        * @brief Gets the finite element associated with a polytope.
@@ -578,6 +584,59 @@ namespace Rodin::Variational
   /// Alias for a scalar complex-valued P0 finite element space
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Scalar, class Mesh>
+  struct Traits<Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>>
+  {
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Mesh;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = Scalar;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<Scalar>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename Traits<Mesh>::ContextType;
+      /// @brief Reference finite element type.
+      using ElementType = Variational::P0Element<Math::SpatialMatrix<Scalar>>;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued finite element space with component-wise scalar basis replication.
+  template <class Scalar>
+  class P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>> final
+    : public Detail::MatrixSpace<
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>,
+        P0<Scalar, Geometry::Mesh<Context::Local>>,
+        P0Element<Math::SpatialMatrix<Scalar>>, true>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = Detail::MatrixSpace<
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>,
+        P0<Scalar, Geometry::Mesh<Context::Local>>,
+        P0Element<Math::SpatialMatrix<Scalar>>, true>;
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Geometry::Mesh<Context::Local>;
+      /// @brief Constructs a discontinuous matrix space on the supplied mesh.
+      P0(const MeshType& mesh, size_t rows, size_t cols)
+        : Parent(P0<Scalar, Geometry::Mesh<Context::Local>>(mesh), rows, cols)
+      {}
+  };
+
+  /// @brief Deduces a matrix range from explicit rows and columns.
+  template <class Context>
+  P0(const Geometry::Mesh<Context>&, size_t, size_t)
+    -> P0<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+
+  /// @brief Matrix-valued discontinuous constant finite element space.
+  template <class Mesh>
+  using MatrixP0 = P0<Math::SpatialMatrix<Real>, Mesh>;
 }
 
 #endif

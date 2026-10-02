@@ -365,38 +365,30 @@ namespace Rodin::IO
     template <class T>
     hid_t getNativeType();
 
+    /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
     template <>
-    inline
-      /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
-      hid_t
-      getNativeType<U64>()
+    inline hid_t getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
     }
 
+    /// @brief Returns the native HDF5 type for signed 32-bit integers.
     template <>
-    inline
-      /// @brief Returns the native HDF5 type for signed 32-bit integers.
-      hid_t
-      getNativeType<I32>()
+    inline hid_t getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
     }
 
+    /// @brief Returns the native HDF5 type for 64-bit floating point values.
     template <>
-    inline
-      /// @brief Returns the native HDF5 type for 64-bit floating point values.
-      hid_t
-      getNativeType<F64>()
+    inline hid_t getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
     }
 
+    /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
     template <>
-    inline
-      /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
-      hid_t
-      getNativeType<U8>()
+    inline hid_t getNativeType<U8>()
     {
       return H5T_NATIVE_UCHAR;
     }
@@ -1184,31 +1176,28 @@ namespace Rodin::IO
     }
 
     /**
-     * @brief Writes a row-major packed vector as a 2D HDF5 dataset.
+     * @brief Writes packed matrix entries as a rank-two or rank-three HDF5 dataset.
      * @tparam T        Element type.
      * @param[in] file    Open HDF5 file identifier (writable).
      * @param[in] path    Absolute dataset path to create.
      * @param[in] values  Row-major packed matrix data (`rows × cols` elements).
      * @param[in] rows    Number of rows.
      * @param[in] cols    Number of columns.
+     * @param[in] depth Optional third extent; zero writes a rank-two dataset.
      */
     template <class T>
-    void writeMatrixDataset(
-        hid_t file,
-        const std::string& path,
-        const std::vector<T>& values,
-        hsize_t rows,
-        hsize_t cols)
+    void writeMatrixDataset(hid_t file, const std::string& path,
+      const std::vector<T>& values, hsize_t rows, hsize_t cols, hsize_t depth = 0)
     {
-      if (values.size() != static_cast<size_t>(rows * cols))
+      if (values.size() != static_cast<size_t>(rows * cols * (depth ? depth : 1)))
       {
         Alert::Exception()
           << "Invalid HDF5 matrix payload size for dataset: " << path
           << Alert::Raise;
       }
 
-      const hsize_t dims[2] = { rows, cols };
-      const auto space = Space(H5Screate_simple(2, dims, nullptr));
+      const hsize_t dims[3] = {rows, cols, depth};
+      const auto space = Space(H5Screate_simple(depth ? 3 : 2, dims, nullptr));
       if (!space)
       {
         Alert::Exception()
@@ -1917,7 +1906,12 @@ namespace Rodin::IO
               const Geometry::Point p(*gfCell, rc, pc);
               const auto value = gf(p);
               for (size_t c = 0; c < vdim; ++c)
-                values[out * vdim + c] = static_cast<HDF5::F64>(value[c]);
+                values[out * vdim + c] = static_cast<HDF5::F64>([&]() {
+                  if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+                    return value(c / gf.getColumns(), c % gf.getColumns());
+                  else
+                    return value[c];
+                }());
               ++out;
             }
           }
@@ -1928,8 +1922,12 @@ namespace Rodin::IO
                                << " — visMesh and gfMesh cardinalities disagree."
                                << Alert::Raise;
           }
-          HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
-            static_cast<hsize_t>(nv), static_cast<hsize_t>(vdim));
+          if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+            HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values, nv,
+              gf.getRows(), gf.getColumns());
+          else
+            HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
+              static_cast<hsize_t>(nv), static_cast<hsize_t>(vdim));
         }
         return;
       }
@@ -1958,15 +1956,20 @@ namespace Rodin::IO
           const auto value = gf(p);
 
           for (size_t c = 0; c < vdim; ++c)
-            values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>(value[c]);
+            values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>([&]() {
+              if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+                return value(c / gf.getColumns(), c % gf.getColumns());
+              else
+                return value[c];
+            }());
         }
 
-        HDF5::writeMatrixDataset(
-            file.get(),
-            Path::GridFunctionValuesData,
-            values,
-            static_cast<hsize_t>(nv),
-            static_cast<hsize_t>(vdim));
+        if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+          HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values, nv,
+            gf.getRows(), gf.getColumns());
+        else
+          HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
+            static_cast<hsize_t>(nv), static_cast<hsize_t>(vdim));
       }
     }
 
@@ -2094,7 +2097,12 @@ namespace Rodin::IO
           const Geometry::Point centroid(*polytope, ts.getCentroid());
           const auto value = gf(centroid);
           for (size_t c = 0; c < vdim; ++c)
-            values.push_back(static_cast<HDF5::F64>(value[c]));
+            values.push_back(static_cast<HDF5::F64>([&]() {
+              if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+                return value(c / gf.getColumns(), c % gf.getColumns());
+              else
+                return value[c];
+            }()));
         }
         if (values.size() != nc * vdim)
         {
@@ -2103,12 +2111,12 @@ namespace Rodin::IO
                              << " — visMesh and gfMesh cell cardinalities disagree."
                              << Alert::Raise;
         }
-        HDF5::writeMatrixDataset(
-            file.get(),
-            Path::GridFunctionValuesData,
-            values,
-            static_cast<hsize_t>(nc),
-            static_cast<hsize_t>(vdim));
+        if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+          HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values, nc,
+            gf.getRows(), gf.getColumns());
+        else
+          HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
+            static_cast<hsize_t>(nc), static_cast<hsize_t>(vdim));
       }
     }
   }
@@ -2845,9 +2853,38 @@ namespace Rodin::IO
             << Alert::Raise;
         }
 
+        if constexpr (FormLanguage::IsMatrixRange<
+                        typename FormLanguage::Traits<FES>::RangeType>::Value)
+        {
+          const auto rows =
+            HDF5::readScalarDataset<HDF5::U64>(file.get(), "/GridFunction/Meta/Rows");
+          const auto cols =
+            HDF5::readScalarDataset<HDF5::U64>(file.get(), "/GridFunction/Meta/Columns");
+          if (rows != gf.getRows() || cols != gf.getColumns())
+            Alert::Exception() << "HDF5 matrix range shape mismatch." << Alert::Raise;
+        }
+        std::vector<HDF5::F64> imaginary(values.size(), 0);
+        if (H5Lexists(file.get(), "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
+        {
+          imaginary = HDF5::readVectorDataset<HDF5::F64>(
+            file.get(), "/GridFunction/Values/ImaginaryData");
+          if (imaginary.size() != values.size())
+            Alert::Exception() << "Invalid imaginary field data size." << Alert::Raise;
+        }
         auto& data = gf.getData();
         for (size_t i = 0; i < values.size(); ++i)
-          data[i] = static_cast<typename std::remove_reference_t<decltype(data[0])>>(values[i]);
+        {
+          if constexpr (std::is_same_v<Scalar, Complex>)
+            data[i] = Complex(values[i], imaginary[i]);
+          else
+          {
+            if (imaginary[i] != 0)
+              Alert::Exception()
+                << "Complex field cannot be loaded into real coefficients."
+                << Alert::Raise;
+            data[i] = values[i];
+          }
+        }
       }
   };
 
@@ -2971,7 +3008,23 @@ namespace Rodin::IO
         const auto& data = gf.getData();
         std::vector<HDF5::F64> values(static_cast<size_t>(data.size()));
         for (size_t i = 0; i < values.size(); ++i)
-          values[i] = static_cast<HDF5::F64>(data[i]);
+          values[i] = static_cast<HDF5::F64>(std::real(data[i]));
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          std::vector<HDF5::F64> imaginary(values.size());
+          for (size_t i = 0; i < imaginary.size(); ++i)
+            imaginary[i] = std::imag(data[i]);
+          HDF5::writeVectorDataset(
+            file.get(), "/GridFunction/Values/ImaginaryData", imaginary);
+        }
+        if constexpr (FormLanguage::IsMatrixRange<
+                        typename FormLanguage::Traits<FES>::RangeType>::Value)
+        {
+          HDF5::writeScalarDataset(
+            file.get(), "/GridFunction/Meta/Rows", static_cast<HDF5::U64>(gf.getRows()));
+          HDF5::writeScalarDataset(file.get(), "/GridFunction/Meta/Columns",
+            static_cast<HDF5::U64>(gf.getColumns()));
+        }
 
         HDF5::writeVectorDataset(file.get(), HDF5::Path::GridFunctionValuesData, values);
         HDF5::writeScalarDataset(file.get(), HDF5::Path::GridFunctionMetaSize, static_cast<HDF5::U64>(gf.getSize()));

@@ -43,6 +43,7 @@
 #include <cstdlib>
 
 #include "ForwardDecls.h"
+#include "Grad.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
@@ -73,6 +74,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref Derivative "Derivative<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
+   * | @ref Derivative "Derivative<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
    * | @ref Derivative "Derivative<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Directional derivative of an H1 shape function. |
    * | @ref Derivative "Derivative<P1<Range, Mesh>, GridFunction<P1<Range, Mesh>, Data>>" | Directional derivative of a P1 grid function. |
    */
@@ -255,6 +258,8 @@ namespace Rodin::Variational
 
   /// @brief Partial derivative of a shape function.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>
+    requires(
+      !FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
   class Derivative<ShapeFunction<NestedDerived, FES, SpaceType>> final
     : public ShapeFunctionBase<Derivative<ShapeFunction<NestedDerived, FES, SpaceType>>>
   {
@@ -410,6 +415,215 @@ namespace Rodin::Variational
   {
     return Derivative(2, u);
   }
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class FES, class Data>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Derivative<Variational::GridFunction<FES, Data>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+  };
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Derivative<Variational::ShapeFunction<Derived, FES, Space>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Trial or test shape-function space.
+      static constexpr auto SpaceType = Space;
+  };
+}
+namespace Rodin::Variational
+{
+  /**
+   * @ingroup DerivativeSpecializations
+   * @brief Matrix-field derivative, @f$ D_k A_{ij}=\partial_k A_{ij} @f$.
+   */
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Derivative<GridFunction<FES, Data>> final
+    : public FunctionBase<Derivative<GridFunction<FES, Data>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = FunctionBase<Derivative>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = GridFunction<FES, Data>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Constructs a derivative along the selected ambient coordinate.
+      Derivative(size_t direction, const OperandType& operand)
+        : m_gradient(operand),
+          m_direction(direction)
+      {}
+      /// @brief Constructs a derivative along the selected ambient coordinate.
+      Derivative(const Derivative& other)
+        : Parent(other),
+          m_gradient(other.m_gradient),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Constructs a derivative along the selected ambient coordinate.
+      Derivative(Derivative&& other)
+        : Parent(std::move(other)),
+          m_gradient(std::move(other.m_gradient)),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_gradient.getOperand();
+      }
+      /// @brief Evaluates the expression at the supplied physical or integration point.
+      template <class Point>
+      RangeType getValue(const Point& point) const
+      {
+        auto gradientExpression = m_gradient;
+        gradientExpression.traceOf(this->getTraceDomain());
+        const auto gradient = gradientExpression.getValue(point);
+        if (m_direction >= gradient.getDimension(2))
+          Alert::Exception()
+            << "Partial derivative direction exceeds the spatial dimension."
+            << Alert::Raise;
+        RangeType value(gradient.getDimension(0), gradient.getDimension(1));
+        for (size_t row = 0; row < value.rows(); ++row)
+          for (size_t col = 0; col < value.cols(); ++col)
+            value(row, col) = gradient(row, col, m_direction);
+        return value;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_gradient.getOrder(poly);
+      }
+      Derivative* copy() const noexcept override
+      {
+        return new Derivative(*this);
+      }
+
+    private:
+      Grad<OperandType> m_gradient;
+      size_t m_direction;
+  };
+
+  /**
+   * @ingroup DerivativeSpecializations
+   * @brief Matrix-basis derivative, @f$ D_k A_{ij}=\partial_k A_{ij} @f$.
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Derivative<ShapeFunction<Derived, FES, Space>> final
+    : public ShapeFunctionBase<Derivative<ShapeFunction<Derived, FES, Space>>, FES, Space>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = ShapeFunctionBase<Derivative, FES, Space>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunction<Derived, FES, Space>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Constructs a derivative along the selected ambient coordinate.
+      Derivative(size_t direction, const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_gradient(operand),
+          m_direction(direction)
+      {}
+      /// @brief Constructs a derivative along the selected ambient coordinate.
+      Derivative(const Derivative& other)
+        : Parent(other),
+          m_gradient(other.m_gradient),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Constructs a derivative along the selected ambient coordinate.
+      Derivative(Derivative&& other)
+        : Parent(std::move(other)),
+          m_gradient(std::move(other.m_gradient)),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_gradient.getOperand();
+      }
+      /// @brief Returns the leaf shape function used for assembly.
+      const auto& getLeaf() const
+      {
+        return m_gradient.getLeaf();
+      }
+      /// @brief Returns the local basis count for the selected polytope.
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return m_gradient.getDOFs(poly);
+      }
+      /// @brief Returns the currently bound integration point.
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_gradient.getIntegrationPoint();
+      }
+      /// @brief Binds the integration point and prepares local basis values.
+      Derivative& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_gradient.setIntegrationPoint(point);
+        return *this;
+      }
+      /// @brief Returns a basis value at the bound integration point.
+      RangeType getBasis(size_t local) const
+      {
+        const auto gradient = m_gradient.getBasis(local);
+        if (m_direction >= gradient.getDimension(2))
+          Alert::Exception()
+            << "Partial derivative direction exceeds the spatial dimension."
+            << Alert::Raise;
+        RangeType value(gradient.getDimension(0), gradient.getDimension(1));
+        for (size_t row = 0; row < value.rows(); ++row)
+          for (size_t col = 0; col < value.cols(); ++col)
+            value(row, col) = gradient(row, col, m_direction);
+        return value;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_gradient.getOrder(poly);
+      }
+      Derivative* copy() const noexcept override
+      {
+        return new Derivative(*this);
+      }
+
+    private:
+      Grad<OperandType> m_gradient;
+      size_t m_direction;
+  };
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  Derivative(size_t, const GridFunction<FES, Data>&)
+    -> Derivative<GridFunction<FES, Data>>;
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  Derivative(size_t, const ShapeFunction<Derived, FES, Space>&)
+    -> Derivative<ShapeFunction<Derived, FES, Space>>;
 }
 
 #endif

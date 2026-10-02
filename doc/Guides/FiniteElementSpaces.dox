@@ -352,6 +352,42 @@
   xdmf.write();
   @endcode
 
+  @section fem-spaces-matrix Matrix-valued solution spaces
+
+  The local and MPI variants of P0, P0g, P1, and H1 support
+  @ref Rodin::Math::SpatialMatrix as their range. Specify the row and column
+  counts independently; each must lie between one and three.
+
+  @code{.cpp}
+  P0 cellStress(mesh, 3, 3);
+  P0g constantStress(mesh, 3, 3);
+  P1 stressSpace(mesh, 3, 3);
+  H1 higherOrderStress(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
+
+  GridFunction stress(stressSpace);
+  Math::SpatialMatrix<Real> initial(3, 3);
+  initial.setZero();
+  stress = initial;
+
+  TrialFunction sigma(stressSpace);
+  TestFunction tau(stressSpace);
+  auto mass = Integral(sigma, tau);
+  auto entryMass = Integral(Component(sigma, 0, 1), Component(tau, 0, 1));
+  @endcode
+
+  Each scalar basis function is replicated for every matrix entry. For a range
+  with @f$ r @f$ rows and @f$ c @f$ columns, the basis is
+  @f$ \phi_a E_{ij} @f$, the component index is @f$ ic+j @f$, and the global
+  DOF index is @f$ (rc)g_a+ic+j @f$. No symmetry or Voigt scaling is imposed.
+  Matrix contractions use the Frobenius product (conjugating the second
+  operand for complex entries). The scalar solver coefficients remain flat,
+  while basis and grid-function evaluations return matrices of the specified
+  shape. Transpose and matrix-component expressions can be used in forms.
+
+  This range support does not introduce a rank-three gradient type or new
+  tensor differential operators. P0 and P0g retain their existing real scalar
+  restriction; P1 and H1 also support complex matrix ranges.
+
   @section fem-spaces-choosing Choosing the Right Space
 
   | Problem type | Recommended space | Reason |
@@ -381,3 +417,89 @@
   - @ref examples-pdes-elasticity "Elasticity example" — Vector-valued spaces
 
   */
+
+/**
+ * @page guides-spatial-matrix Matrix solutions and spatial tensors
+ *
+ * @section spatial-matrix-model Mathematical range and ordering
+ *
+ * P0, P0g, P1 and H1 accept @c Math::SpatialMatrix<Scalar> ranges for
+ * @c Real and @c Complex entries. Rows and columns are explicit, independently
+ * between one and @c RODIN_MAXIMAL_SPACE_DIMENSION. Symmetry is not imposed.
+ * A matrix space is the tensor product of its scalar space with the matrix
+ * units: @f$ V_h^{m\times n}=V_h\otimes\mathbb{K}^{m\times n} @f$.
+ * Local and global coefficient indices are interleaved in row-major order:
+ * @f$ a(mn)+in+j @f$. No Voigt scaling or symmetry reduction is applied.
+ *
+ * @code{.cpp}
+ * H1 stressSpace(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
+ * GridFunction stress(stressSpace);
+ * TrialFunction sigma(stressSpace);
+ * TestFunction tau(stressSpace);
+ * BilinearForm mass(sigma, tau);
+ * mass = Integral(sigma, tau);
+ * @endcode
+ *
+ * @section spatial-matrix-operators Differential and constitutive operators
+ *
+ * Inner products use @f$ A:B=\sum_{ij}A_{ij}\overline{B_{ij}} @f$.
+ * Grad and Jacobian return @c SpatialTensor<Scalar,3> with
+ * @f$ G_{ijk}=\partial_k A_{ij} @f$. Derivative selects its last axis.
+ * Div uses row-wise divergence @f$ (\operatorname{div}A)_i=\sum_j\partial_jA_{ij} @f$
+ * and requires the column count to match the ambient spatial dimension.
+ * A matrix coefficient multiplying a matrix solution acts on its rows;
+ * a fourth-order tensor coefficient couples arbitrary matrix entries:
+ * @f$ (\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl} @f$.
+ * TensorFunction wraps constant or callable tensor coefficients. Tensor rank
+ * is a compile-time parameter; extents are runtime values with stack storage.
+ * Tensor-valued solution spaces are not introduced by this matrix-range API.
+ *
+ * @code{.cpp}
+ * Math::SpatialTensor<Real, 4> elasticity(3, 3, 3, 3);
+ * elasticity.setZero();
+ * // Fill the constitutive entries, then assemble without a Voigt conversion.
+ * auto constitutive = Integral(TensorFunction(elasticity) * sigma, tau);
+ * @endcode
+ *
+ * Callable MatrixFunction coefficients accept explicit dimensions and
+ * @c setOrder for polynomial quadrature selection. Integrator @c setOrder
+ * specifies the integration degree. Rational pyramid bases and curved
+ * transformations require quadrature chosen for the mapped integrand;
+ * polynomial reference-degree defaults alone do not guarantee exactness.
+ * Grid-function derivatives on interfaces require a @c traceOf domain, as
+ * for scalar fields. Shape-function derivatives on a boundary are derivatives
+ * of the boundary element, matching the scalar finite element semantics.
+ *
+ * @section spatial-matrix-backends Backend and format support
+ *
+ * The same range and DOF maps are consumed by Eigen dense/sparse sequential
+ * and OpenMP assembly and by local/distributed PETSc assembly. MPI spaces
+ * expand scalar ownership and ghost maps component-wise. They cache collective
+ * global sizes at construction so local evaluations do not enter collectives.
+ *
+ * HDF5 persistence preserves raw coefficients, matrix rows/columns and complex
+ * imaginary parts. PETSc persistence stores the owned portion per shard.
+ * XDMF writes full matrix-valued arrays, including nonsymmetric entries.
+ * MFEM uses the scalar family's node conversion for each matrix entry; matrix
+ * dimensions must be supplied by the destination space because MFEM records
+ * only component count. Its existing unsupported collections remain unsupported
+ * (in particular the global constant P0g collection).
+ * MEDIT uses separate scalar vertex fields for every entry. Vertex formats
+ * interpolate higher-order fields from vertices and cannot preserve their
+ * arbitrary interior coefficients; use HDF5 for exact persistence.
+ *
+ * @section spatial-matrix-validation Validation coverage
+ *
+ * Native tests exercise all eight reference geometries, every matrix shape
+ * between one and three axes, nodal duality through cubic H1 and additional
+ * fourth/fifth-order representatives. Assembly and differential tests cover
+ * every non-point cell geometry, P0/P0g/P1/H1, rectangular and square ranges,
+ * complex entries, fourth-order material coupling, physical finite differences,
+ * curved and embedded triangles, boundary traces, cache lifetime, and Dirichlet
+ * data. Manufactured reaction-diffusion tests exercise complete solve paths.
+ * MPI/PETSc tests exercise ownership, ghosts, assembly and solves at one through
+ * four ranks. IO tests check real/complex HDF5, MEDIT vertex fields, MFEM node
+ * permutations and XDMF matrix metadata. This is finite regression coverage,
+ * rather than an assertion that arbitrary order, geometry and coefficient
+ * combinations have all been enumerated.
+ */

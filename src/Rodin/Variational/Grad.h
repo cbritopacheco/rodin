@@ -18,6 +18,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialTensor.h"
 
 #include "VectorFunction.h"
 #include "IntegrationPoint.h"
@@ -69,6 +70,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref Grad "Grad<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
+   * | @ref Grad "Grad<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
    * | @ref GradBase "GradBase<GridFunction<FES, Data>, Derived>" | Generic gradient base for scalar grid functions. |
    * | @ref Grad "Grad<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Gradient of an H1 grid function. |
    * | @ref Grad "Grad<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Gradient of an H1 shape-function expression. |
@@ -327,6 +330,205 @@ namespace Rodin::Variational
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   Grad(const ShapeFunction<NestedDerived, FES, Space>&)
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class FES, class Data>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = Variational::GridFunction<FES, Data>;
+  };
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Grad<Variational::ShapeFunction<Derived, FES, Space>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = Variational::ShapeFunction<Derived, FES, Space>;
+      /// @brief Trial or test shape-function space.
+      static constexpr auto SpaceType = Space;
+  };
+}
+namespace Rodin::Variational
+{
+  /**
+   * @ingroup GradSpecializations
+   * @brief Gradient of a matrix solution, @f$ G_{ijk}=\partial_k A_{ij} @f$.
+   * Uses the space's basis and physical Jacobian for every geometry/backend.
+   */
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Grad<GridFunction<FES, Data>> final
+    : public FunctionBase<Grad<GridFunction<FES, Data>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = FunctionBase<Grad>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = GridFunction<FES, Data>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Constructs the matrix gradient with the derivative axis last.
+      explicit Grad(const OperandType& operand)
+        : m_operand(operand)
+      {}
+      /// @brief Constructs the matrix gradient with the derivative axis last.
+      Grad(const Grad& other)
+        : Parent(other),
+          m_operand(other.m_operand)
+      {}
+      /// @brief Constructs the matrix gradient with the derivative axis last.
+      Grad(Grad&& other)
+        : Parent(std::move(other)),
+          m_operand(other.m_operand)
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_operand.get();
+      }
+      /// @brief Evaluates the expression at the supplied physical or integration point.
+      RangeType getValue(const Geometry::Point& point) const
+      {
+        const auto& fes = getOperand().getFiniteElementSpace();
+        const auto p = fes.getDerivativePoint(point, this->getTraceDomain());
+        const auto& poly = p.getPolytope();
+        const auto& dofs = fes.getDOFs(poly.getDimension(), poly.getIndex());
+        RangeType value(
+          fes.getRows(), fes.getColumns(), fes.getMesh().getSpaceDimension());
+        value.setZero();
+        for (size_t a = 0; a < static_cast<size_t>(dofs.size()); ++a)
+          value += getOperand()[dofs[a]] * fes.getGradientBasis(a, p);
+        return value;
+      }
+      /// @brief Evaluates the expression at the supplied physical or integration point.
+      RangeType getValue(const IntegrationPoint& point) const
+      {
+        return getValue(point.getPoint());
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto order = getOperand().getOrder(poly);
+        return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
+      }
+      Grad* copy() const noexcept override
+      {
+        return new Grad(*this);
+      }
+
+    private:
+      std::reference_wrapper<const OperandType> m_operand;
+  };
+
+  /**
+   * @ingroup GradSpecializations
+   * @brief Matrix basis gradients as rank-three tensors.
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Grad<ShapeFunction<Derived, FES, Space>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<Derived, FES, Space>>, FES, Space>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = ShapeFunctionBase<Grad, FES, Space>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunction<Derived, FES, Space>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Constructs the matrix gradient with the derivative axis last.
+      explicit Grad(const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_operand(operand.copy())
+      {}
+      /// @brief Constructs the matrix gradient with the derivative axis last.
+      Grad(const Grad& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy())
+      {}
+      /// @brief Constructs the matrix gradient with the derivative axis last.
+      Grad(Grad&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand))
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return *m_operand;
+      }
+      /// @brief Returns the leaf shape function used for assembly.
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+      /// @brief Returns the local basis count for the selected polytope.
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return getOperand().getDOFs(poly);
+      }
+      /// @brief Returns the currently bound integration point.
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        assert(m_point);
+        return *m_point;
+      }
+      /// @brief Binds the integration point and prepares local basis values.
+      Grad& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_point = &point;
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& p = point.getPoint();
+        const auto& poly = p.getPolytope();
+        const size_t count =
+          fes.getFiniteElement(poly.getDimension(), poly.getIndex()).getCount();
+        m_basis.resize(count);
+        for (size_t a = 0; a < count; ++a)
+          m_basis[a] = fes.getGradientBasis(a, p);
+        return *this;
+      }
+      /// @brief Returns a basis value at the bound integration point.
+      const RangeType& getBasis(size_t local) const
+      {
+        return m_basis.at(local);
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto order = getOperand().getOrder(poly);
+        return order ? Optional<size_t>(*order ? *order - 1 : 0) : std::nullopt;
+      }
+      Grad* copy() const noexcept override
+      {
+        return new Grad(*this);
+      }
+
+    private:
+      std::unique_ptr<OperandType> m_operand;
+      const IntegrationPoint* m_point = nullptr;
+      std::vector<RangeType> m_basis;
+  };
 }
 
 #endif

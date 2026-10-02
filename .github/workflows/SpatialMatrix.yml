@@ -1,0 +1,56 @@
+name: Spatial matrix backend coverage
+on:
+  pull_request:
+    paths:
+      - 'src/Rodin/**'
+      - 'tests/**'
+      - '.github/workflows/SpatialMatrix.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'src/Rodin/**'
+      - 'tests/**'
+      - '.github/workflows/SpatialMatrix.yml'
+jobs:
+  petsc-matrix:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        scalar: [real, complex]
+        multithreaded: ['ON', 'OFF']
+    env:
+      OMP_NUM_THREADS: 2
+      OMPI_ALLOW_RUN_AS_ROOT: 1
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libboost-all-dev libeigen3-dev libhdf5-dev libscotch-dev libmetis-dev libomp-dev mpi-default-dev libpetsc-${{ matrix.scalar }}-dev
+      - name: Configure
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
+          -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_USE_MUMPS=OFF -DRODIN_USE_PARU=OFF
+          -DRODIN_USE_CHOLMOD=OFF -DRODIN_USE_SPQR=OFF -DRODIN_USE_UMFPACK=OFF
+      - name: Build matrix coverage
+        run: >-
+          cmake --build build -j2 --target
+          RodinVariationalMatrixRangeTest RodinIOSpatialMatrixTest
+          RodinManufacturedSpatialMatrix RodinMPIMatrixRangeTest
+      - name: Run native and backend matrix coverage
+        run: |
+          build/tests/unit/Rodin/Variational/RodinVariationalMatrixRangeTest
+          build/tests/unit/Rodin/IO/RodinIOSpatialMatrixTest
+          build/tests/manufactured/Rodin/H1/RodinManufacturedSpatialMatrix
+          ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np[1-4]$' --output-on-failure

@@ -639,4 +639,34 @@ namespace Rodin::MPI
   using P0 = Variational::P0<Real, Geometry::Mesh<Context::MPI>>;
 }
 
+#include "Rodin/MPI/Variational/MatrixRange.h"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class Scalar>
+  class P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>> final
+    : public Detail::DistributedMatrixSpace<
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>,
+        P0<Scalar, Geometry::Mesh<Context::MPI>>,
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>, true>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = Detail::DistributedMatrixSpace<
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>,
+        P0<Scalar, Geometry::Mesh<Context::MPI>>,
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>, true>;
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Geometry::Mesh<Context::MPI>;
+      /// @brief Constructs a discontinuous matrix space on the supplied mesh.
+      P0(const MeshType& mesh, size_t rows, size_t cols)
+        : Parent(P0<Scalar, Geometry::Mesh<Context::MPI>>(mesh),
+            P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>(
+              mesh.getShard(), rows, cols),
+            rows, cols)
+      {}
+  };
+}
+
 #endif

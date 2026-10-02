@@ -211,8 +211,8 @@ namespace Rodin::Variational
             return 1;
           }
 
-          template <size_t Order>
           /// @brief Gets the derivative of the basis function.
+          template <size_t Order>
           constexpr DerivativeFunction<Order> getDerivative(size_t) const
           {
             return DerivativeFunction<Order>();
@@ -241,6 +241,12 @@ namespace Rodin::Variational
       {}
 
       virtual constexpr ~P0Element() override = default;
+
+      /// @brief Assigns the scalar basis and matrix component dimensions.
+      constexpr P0Element& operator=(const P0Element&) = default;
+
+      /// @brief Assigns the scalar basis and matrix component dimensions.
+      constexpr P0Element& operator=(P0Element&&) = default;
 
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
@@ -598,6 +604,21 @@ namespace Rodin::Variational
 
       std::vector<LinearForm>  m_lfs;       ///< Linear forms per DOF
       std::vector<BasisFunction> m_bs;      ///< Basis functions per DOF
+  };
+}
+
+#include "Rodin/Variational/MatrixRange.h"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued reference element built from scalar nodal functionals.
+  template <class Scalar>
+  class P0Element<Math::SpatialMatrix<Scalar>> final
+    : public Detail::MatrixElement<P0Element<Scalar>>
+  {
+    public:
+      using Parent = Detail::MatrixElement<P0Element<Scalar>>;
+      using Parent::Parent;
   };
 }
 

@@ -147,3 +147,8 @@ gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     "${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
     PROPERTIES
     LABELS slow manufactured)
+
+add_executable(RodinManufacturedSpatialMatrix SpatialMatrix.cpp)
+target_link_libraries(RodinManufacturedSpatialMatrix
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational Rodin::Assembly Rodin::Solver)
+gtest_discover_tests(RodinManufacturedSpatialMatrix PROPERTIES LABELS manufactured)

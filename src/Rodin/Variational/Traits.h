@@ -193,6 +193,14 @@ namespace Rodin::FormLanguage
    *
    * Deduces the range by first determining the result type, then mapping it to a range type.
    */
+  template <class Scalar, size_t Rank>
+  struct RangeOf<Math::SpatialTensor<Scalar, Rank>>
+  {
+      /// @brief Deduced range type.
+      using Type = Math::SpatialTensor<Scalar, Rank>;
+  };
+
+  /// @brief Type traits for the matrix or tensor expression specialization.
   template <class Derived>
   struct RangeOf<Variational::FunctionBase<Derived>>
   {

@@ -28,7 +28,9 @@ namespace Rodin::FormLanguage
   /// @brief Type traits for @c Grad over a grid function: exposes the finite element
   /// space and the operand type.
   template <class Range, class Data, class Mesh>
-  struct Traits<Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>, Data>>>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  struct Traits<
+    Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>, Data>>>
   {
       /// @brief Finite element space type.
       using FESType = Variational::P0<Range, Mesh>;
@@ -38,10 +40,11 @@ namespace Rodin::FormLanguage
 
   /// @brief Type traits for @c Grad over a shape function: exposes the finite element
   /// space, the shape function space and the operand type.
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Grad<
-      Variational::ShapeFunction<NestedDerived, Variational::P0<Range, Mesh>, Space>>>
+  template <class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  struct Traits<Variational::Grad<
+    Variational::ShapeFunction<NestedDerived, Variational::P0<Range, Mesh>, Space>>>
   {
       /// @brief Finite element space type.
       using FESType = Variational::P0<Range, Mesh>;
@@ -62,8 +65,10 @@ namespace Rodin::Variational
    * their gradient is identically zero: @f$ \nabla u|_K = 0 @f$.
    */
   template <class Range, class Data, class Mesh>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class Grad<GridFunction<P0<Range, Mesh>, Data>> final
-    : public GradBase<GridFunction<P0<Range, Mesh>, Data>, Grad<GridFunction<P0<Range, Mesh>, Data>>>
+    : public GradBase<GridFunction<P0<Range, Mesh>, Data>,
+        Grad<GridFunction<P0<Range, Mesh>, Data>>>
   {
     public:
       /// @brief Range (evaluation value) type.
@@ -200,9 +205,12 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P0 ShapeFunction
    */
-  template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
+  template <class NestedDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType SpaceType>
+    requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
   class Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>>>
+    : public ShapeFunctionBase<
+        Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>>>
   {
     public:
       /// @brief Range (evaluation value) type.

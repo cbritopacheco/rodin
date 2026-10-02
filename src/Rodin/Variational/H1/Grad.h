@@ -39,9 +39,9 @@ namespace Rodin::Variational
    * @brief Gradient of a GridFunction on H1<K> space
    */
   template <size_t K, class Scalar, class Mesh, class Data>
+    requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
   class Grad<GridFunction<H1<K, Scalar, Mesh>, Data>> final
-    : public GradBase<
-        GridFunction<H1<K, Scalar, Mesh>, Data>,
+    : public GradBase<GridFunction<H1<K, Scalar, Mesh>, Data>,
         Grad<GridFunction<H1<K, Scalar, Mesh>, Data>>>
   {
     public:
@@ -192,9 +192,12 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a ShapeFunction on H1<K> space
    */
-  template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
+  template <size_t K, class NestedDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType SpaceType>
+    requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
   class Grad<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, SpaceType>>>
+    : public ShapeFunctionBase<
+        Grad<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, SpaceType>>>
   {
     public:
       /// @brief Finite element space type.

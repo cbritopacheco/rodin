@@ -31,3 +31,7 @@ if (RODIN_USE_MPI)
     Rodin::Variational
     benchmark::benchmark)
 endif()
+
+add_executable(RodinSpatialMatrixBenchmarks SpatialMatrix.cpp)
+target_link_libraries(RodinSpatialMatrixBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)

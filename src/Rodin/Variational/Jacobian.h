@@ -43,6 +43,7 @@
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
 #include "ForwardDecls.h"
+#include "Grad.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "MatrixFunction.h"
 #include "IntegrationPoint.h"
@@ -56,6 +57,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref Jacobian "Jacobian<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
+   * | @ref Jacobian "Jacobian<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
    * | @ref JacobianBase "JacobianBase<GridFunction<FES, Data>, Derived>" | Generic Jacobian base for vector-valued grid functions. |
    * | @ref Jacobian "Jacobian<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Jacobian of a discontinuous P0g grid function. |
    * | @ref Jacobian "Jacobian<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Jacobian of a P0g shape-function expression. |
@@ -289,6 +292,190 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
   };
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class FES, class Data>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Jacobian<Variational::GridFunction<FES, Data>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+  };
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Jacobian<Variational::ShapeFunction<Derived, FES, Space>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Trial or test shape-function space.
+      static constexpr auto SpaceType = Space;
+  };
+}
+namespace Rodin::Variational
+{
+  /**
+   * @ingroup JacobianSpecializations
+   * @brief Matrix-field jacobian, @f$ J_{ijk}=\partial_k A_{ij} @f$.
+   */
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Jacobian<GridFunction<FES, Data>> final
+    : public FunctionBase<Jacobian<GridFunction<FES, Data>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = FunctionBase<Jacobian>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = GridFunction<FES, Data>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Constructs a rank-three matrix Jacobian.
+      Jacobian(const OperandType& operand)
+        : m_gradient(operand)
+      {}
+      /// @brief Constructs a rank-three matrix Jacobian.
+      Jacobian(const Jacobian& other)
+        : Parent(other),
+          m_gradient(other.m_gradient)
+      {}
+      /// @brief Constructs a rank-three matrix Jacobian.
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other)),
+          m_gradient(std::move(other.m_gradient))
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_gradient.getOperand();
+      }
+      /// @brief Evaluates the expression at the supplied physical or integration point.
+      template <class Point>
+      RangeType getValue(const Point& point) const
+      {
+        auto gradientExpression = m_gradient;
+        gradientExpression.traceOf(this->getTraceDomain());
+        const auto gradient = gradientExpression.getValue(point);
+        return gradient;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_gradient.getOrder(poly);
+      }
+      Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
+      }
+
+    private:
+      Grad<OperandType> m_gradient;
+  };
+
+  /**
+   * @ingroup JacobianSpecializations
+   * @brief Matrix-basis jacobian, @f$ J_{ijk}=\partial_k A_{ij} @f$.
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Jacobian<ShapeFunction<Derived, FES, Space>> final
+    : public ShapeFunctionBase<Jacobian<ShapeFunction<Derived, FES, Space>>, FES, Space>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = ShapeFunctionBase<Jacobian, FES, Space>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunction<Derived, FES, Space>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialTensor<ScalarType>;
+      /// @brief Constructs a rank-three matrix Jacobian.
+      Jacobian(const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_gradient(operand)
+      {}
+      /// @brief Constructs a rank-three matrix Jacobian.
+      Jacobian(const Jacobian& other)
+        : Parent(other),
+          m_gradient(other.m_gradient)
+      {}
+      /// @brief Constructs a rank-three matrix Jacobian.
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other)),
+          m_gradient(std::move(other.m_gradient))
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_gradient.getOperand();
+      }
+      /// @brief Returns the leaf shape function used for assembly.
+      const auto& getLeaf() const
+      {
+        return m_gradient.getLeaf();
+      }
+      /// @brief Returns the local basis count for the selected polytope.
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return m_gradient.getDOFs(poly);
+      }
+      /// @brief Returns the currently bound integration point.
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_gradient.getIntegrationPoint();
+      }
+      /// @brief Binds the integration point and prepares local basis values.
+      Jacobian& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_gradient.setIntegrationPoint(point);
+        return *this;
+      }
+      /// @brief Returns a basis value at the bound integration point.
+      RangeType getBasis(size_t local) const
+      {
+        const auto gradient = m_gradient.getBasis(local);
+        return gradient;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_gradient.getOrder(poly);
+      }
+      Jacobian* copy() const noexcept override
+      {
+        return new Jacobian(*this);
+      }
+
+    private:
+      Grad<OperandType> m_gradient;
+  };
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  Jacobian(const GridFunction<FES, Data>&) -> Jacobian<GridFunction<FES, Data>>;
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  Jacobian(const ShapeFunction<Derived, FES, Space>&)
+    -> Jacobian<ShapeFunction<Derived, FES, Space>>;
 }
 
 #endif

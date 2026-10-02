@@ -75,6 +75,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref H1 "H1<K, SpatialMatrix<Scalar>, Mesh<Context::Local>>" | Full rectangular matrix range with interleaved row-major components. |
+   * | @ref H1 "H1<K, SpatialMatrix<Scalar>, Mesh<Context::MPI>>" | Distributed full matrix range with expanded scalar ownership and ghost maps. |
    * | @ref H1 "H1<K, Scalar, Mesh<Context::Local>>" | Scalar-valued local-mesh Lagrange space of degree @f$K@f$. |
    * | @ref H1 "H1<K, SpatialVector<Scalar>, Mesh<Context::Local>>" | Vector-valued local-mesh Lagrange space of degree @f$K@f$. |
    * | @ref H1 "H1<K, Scalar, Mesh<Context::MPI>>" | Scalar-valued distributed-mesh Lagrange space of degree @f$K@f$. |
@@ -199,7 +201,11 @@ namespace Rodin::Variational
           /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
-            const Geometry::Point p(m_polytope, r);
+            const Geometry::Point p = m_polytope.getDimension() == 0
+              ? Geometry::Point(m_polytope, r,
+                  Geometry::Vertex(m_polytope.getIndex(), m_polytope.getMesh())
+                    .getCoordinates())
+              : Geometry::Point(m_polytope, r);
             return m_v(p);
           }
 
@@ -288,9 +294,9 @@ namespace Rodin::Variational
       H1(const H1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
+          m_size(other.m_size),
           m_visited(other.m_visited),
-          m_closure(other.m_closure),
-          m_size(other.m_size)
+          m_closure(other.m_closure)
       {}
 
       /**
@@ -300,9 +306,9 @@ namespace Rodin::Variational
       H1(H1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
+          m_size(std::move(other.m_size)),
           m_visited(std::move(other.m_visited)),
-          m_closure(std::move(other.m_closure)),
-          m_size(std::move(other.m_size))
+          m_closure(std::move(other.m_closure))
       {}
 
       virtual ~H1() = default;
@@ -634,7 +640,11 @@ namespace Rodin::Variational
           /// @brief Evaluates at a point on the reference element.
           auto operator()(const Math::SpatialPoint& r) const
           {
-            const Geometry::Point p(m_polytope, r);
+            const Geometry::Point p = m_polytope.getDimension() == 0
+              ? Geometry::Point(m_polytope, r,
+                  Geometry::Vertex(m_polytope.getIndex(), m_polytope.getMesh())
+                    .getCoordinates())
+              : Geometry::Point(m_polytope, r);
             return m_v(p);
           }
 
@@ -891,5 +901,59 @@ namespace Rodin::Variational
 }
 
 #include "H1.hpp"
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <size_t K, class Scalar, class Mesh>
+  struct Traits<Variational::H1<K, Math::SpatialMatrix<Scalar>, Mesh>>
+  {
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Mesh;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = Scalar;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<Scalar>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename Traits<Mesh>::ContextType;
+      /// @brief Reference finite element type.
+      using ElementType = Variational::H1Element<K, Math::SpatialMatrix<Scalar>>;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued finite element space with component-wise scalar basis replication.
+  template <size_t K, class Scalar>
+  class H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>> final
+    : public Detail::MatrixSpace<
+        H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>,
+        H1<K, Scalar, Geometry::Mesh<Context::Local>>,
+        H1Element<K, Math::SpatialMatrix<Scalar>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = Detail::MatrixSpace<
+        H1<K, Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>,
+        H1<K, Scalar, Geometry::Mesh<Context::Local>>,
+        H1Element<K, Math::SpatialMatrix<Scalar>>>;
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Geometry::Mesh<Context::Local>;
+      /// @brief Constructs a matrix space of compile-time polynomial degree on the supplied mesh.
+      H1(std::integral_constant<size_t, K> degree, const MeshType& mesh, size_t rows,
+        size_t cols)
+        : Parent(H1<K, Scalar, Geometry::Mesh<Context::Local>>(degree, mesh), rows, cols)
+      {}
+  };
+
+  /// @brief Deduces a matrix range from explicit rows and columns.
+  template <size_t K, class Context>
+  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&, size_t, size_t)
+    -> H1<K, Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+
+  /// @brief Matrix-valued continuous finite element space of compile-time degree.
+  template <size_t K, class Mesh>
+  using MatrixH1 = H1<K, Math::SpatialMatrix<Real>, Mesh>;
+}
 
 #endif
