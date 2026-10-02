@@ -58,6 +58,14 @@ class CanonicalCampaignTest(unittest.TestCase):
             manifest = json.loads((Path(directory) / "canonical_p1_2d_manifest.json").read_text())
             self.assertEqual(manifest["expected_cases"], 34375)
             self.assertEqual(manifest["shape_curvature"], ["psd"])
+            self.assertEqual(manifest["model"], "F+Splus+D-current-stretch-surface12-v8")
+            profile = manifest["fixed_profile"]
+            self.assertEqual(profile["model"], manifest["model"])
+            self.assertEqual(profile["interface_quadrature_order"],
+                             "automatic: max(12, 2 * FE order + 2)")
+            self.assertEqual(profile["geometric_validation_order"],
+                             "automatic: max(14, 2 * FE order + 4)")
+            self.assertEqual(profile["shape_restriction"], "current deviatoric stretch")
             for key in ("kappa_f", "kappa_s", "kappa_d"):
                 self.assertEqual(manifest[key], [1e-4, 1e-3, 1e-2, .1, 1])
 

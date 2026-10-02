@@ -56,6 +56,15 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, PositiveShapeCurvatureP1P2In2D3D)
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();
     const auto gradient = Jacobian(current), increment = Jacobian(direction);
+    const auto stretch = [](const CellDeformation& deformation, const auto& G) {
+      const Math::SpatialMatrix<Real> L(
+        G * deformation.getInverseTranspose().transpose());
+      Math::SpatialMatrix<Real> E(Real(0.5) * (L + L.transpose()));
+      const Real mean = E.trace() / Real(Dimension);
+      for (size_t axis = 0; axis < Dimension; ++axis)
+        E(axis, axis) -= mean;
+      return Math::SpatialMatrix<Real>(E * deformation.getDeformationGradient());
+    };
     const auto energy = [&](Real t) {
       Real result = 0;
       for (auto cell = mesh.getCell(); cell; ++cell)
@@ -68,8 +77,10 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, PositiveShapeCurvatureP1P2In2D3D)
           const auto& point = quadrature.getPoint(q);
           const IntegrationPoint ip(point, &qf, q);
           CellDeformation deformation(Dimension);
-          deformation.setDisplacementGradient(Math::SpatialMatrix<Real>(
-            gradient.getValue(ip) + t * increment.getValue(ip)));
+          deformation.setDisplacementGradient(gradient.getValue(ip));
+          const auto G = stretch(deformation, increment.getValue(ip));
+          deformation.setDisplacementGradient(
+            Math::SpatialMatrix<Real>(gradient.getValue(ip) + t * G));
           result += qf.getWeight(q) * point.getDistortion() * Real(Dimension) / Real(4) *
             (deformation.getRelativeDistortion() - Real(1));
         }
@@ -91,7 +102,7 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, PositiveShapeCurvatureP1P2In2D3D)
         deformation.setDisplacementGradient(gradient.getValue(ip));
         Math::Matrix<Real> tensor(Dimension * Dimension, Dimension * Dimension);
         Math::Vector<Real> vector(Dimension * Dimension);
-        const auto G = increment.getValue(ip);
+        const auto G = stretch(deformation, increment.getValue(ip));
         for (size_t a = 0; a < Dimension * Dimension; ++a)
         {
           vector(a) = G(a / Dimension, a % Dimension);
@@ -126,6 +137,28 @@ TEST(Rodin_Adaptation_WNGIRQualityMetric, PositiveShapeCurvatureP1P2In2D3D)
     Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(dense);
     ASSERT_EQ(eigen.info(), Eigen::Success);
     EXPECT_GE(eigen.eigenvalues().minCoeff(), Real(-1e-10));
+    GridFunction neutral(fes);
+    for (size_t mode = 0; mode < 3; ++mode)
+    {
+      neutral = VectorFunction(Dimension, [&](const Point& point) {
+        Math::SpatialVector<Real> value(point.getCoordinates() + current.getValue(point));
+        if (mode == 0)
+        {
+          for (size_t axis = 0; axis < Dimension; ++axis)
+            value(axis) = Real(1);
+        }
+        else if (mode == 1)
+        {
+          const Real first = value(0);
+          value(0) = -value(1);
+          value(1) = first;
+          for (size_t axis = 2; axis < Dimension; ++axis)
+            value(axis) = 0;
+        }
+        return value;
+      });
+      EXPECT_LT((metric.getOperator() * neutral.getData()).norm(), Real(1e-11));
+    }
     parameters.kappaS *= Real(2);
     metric = Detail::WNGIRQualityMetric(trial, test, current, parameters);
     metric.assemble();

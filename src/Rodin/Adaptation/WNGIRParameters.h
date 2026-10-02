@@ -16,16 +16,18 @@
 
 namespace Rodin::Adaptation
 {
-  /// @brief Interface-assembly order for a finite-element order.
+  /// @brief Surface order including the non-polynomial composed level set.
+  /// The minimum resolves the coarse curved-interface integration regression;
+  /// it is not an exactness guarantee for arbitrary analytic coefficients.
   inline std::size_t wngirInterfaceQuadratureOrder(std::size_t feOrder)
   {
-    return std::max<std::size_t>(4, 2 * feOrder + 2);
+    return std::max<std::size_t>(12, 2 * feOrder + 2);
   }
 
   /// @brief Independent geometric-validation order for a finite-element order.
   inline std::size_t wngirGeometricValidationOrder(std::size_t feOrder)
   {
-    return std::max<std::size_t>(6, 2 * feOrder + 4);
+    return std::max<std::size_t>(14, 2 * feOrder + 4);
   }
 
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
@@ -37,9 +39,9 @@ namespace Rodin::Adaptation
       Real kappaF = 1; ///< Fitting curvature weight.
       Real kappaS = 1; ///< Shape curvature weight.
       Real kappaD = 1; ///< Distribution (current-strain regularity) weight.
-      /// Robust directional Newton seed, omitting the level-set Hessian.
+      /// Robust directional scaling of the inner model, omitting the level-set Hessian.
       bool directionalNewton = true;
-      Real directionalNewtonMaxAlpha = 100;
+      Real directionalNewtonMaxStepOverH = 1; ///< Maximum predictor motion divided by h.
       enum class DirectSolver
       {
         CG,
@@ -69,7 +71,7 @@ namespace Rodin::Adaptation
       Real muHat = Real(90); ///< @f$\widehat\mu@f$, dimensionless
         ///< barrier/model-decrease ratio.
       Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
-      Real alphaMin = 1e-4; ///< @f$\alpha_{\min}@f$, line-search floor.
+      size_t maxBacktracks = 32; ///< Maximum halvings of a physical trial increment.
       Real armijoCoefficient =
         Real(1e-4); ///< @f$c_A@f$, Armijo sufficient-decrease coefficient.
       Real jMinRatio = 1e-8; ///< @f$j_{\min}@f$, hard inadmissibility floor.
@@ -89,7 +91,7 @@ namespace Rodin::Adaptation
       std::size_t quadratureOrder =
         0; ///< @f$p_{\mathrm{quad}}@f$ override; zero selects automatic orders.
       std::size_t geometricValidationOrder =
-        0; ///< Geometric-response order; 0 ⇒ max(6, 2·(FE order) + 4).
+        0; ///< Geometric-response order; zero selects max(14, 2*(FE order) + 4).
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.

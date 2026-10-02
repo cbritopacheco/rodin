@@ -24,7 +24,11 @@ namespace Rodin::Adaptation
       Real levelSetGradientScale = 0;
     /// @brief Signed fitting-force action on the unconstrained predictor; not stationarity.
       Real predictorAction = 0;
-    /// @brief Action of the negative energy derivative on the accepted direction.
+      /// @brief Directional scaling applied before constructing the hinge model.
+      Real predictorScale = 1;
+      /// @brief Similarity modes assigned zero by the last linear solve, not by the metric.
+      size_t unresolvedSimilarityModes = 0;
+      /// @brief Action of the negative energy derivative on the accepted direction.
       Real directionAction = 0;
     /// @brief Direction action divided by the unconstrained predictor action.
       Real descentRatio = 0;
@@ -48,7 +52,7 @@ namespace Rodin::Adaptation
       Real primalBarrierRelativeCorrection = 0;
       /// @brief Euclidean norm of Mv-f+DB(v), at the last inner iterate.
       Real primalBarrierResidual = std::numeric_limits<Real>::infinity();
-      /// @brief Residual divided by max(initial inner residual, fitting-force norm).
+      /// @brief Residual divided by the fixed fitting-force norm.
       Real primalBarrierRelativeResidual = std::numeric_limits<Real>::infinity();
       Real primalBarrierResidualTolerance = 0;
       /// @brief Step factor accepted by the last primal-barrier correction.
@@ -106,7 +110,7 @@ namespace Rodin::Adaptation
       Real normalJumpRMS = 0;
       /// @brief Maximum jump of the normal field across the interface.
       Real normalJumpMax = 0;
-      /// @brief Final WNGIR energy.
+      /// @brief Final Welsch fitting energy.
       Real energy = 0;
       /// @brief Textual reason the iteration stopped.
       const char* exitReason = "iter-budget";

@@ -4,16 +4,21 @@
 
 namespace Rodin::Adaptation
 {
+  TEST(Rodin_Adaptation_WNGIRLoss, SmallWelschResidualDoesNotCancel)
+  {
+    const WNGIRLoss loss(1);
+    EXPECT_NEAR(loss.getValue(Real(1e-10)), Real(0.5e-20), Real(1e-35));
+  }
+
   TEST(Rodin_Adaptation_WNGIRLoss, DroppedLevelSetHessianCurvature)
   {
     const WNGIRLoss loss(Real(0.3));
     constexpr Real eps = Real(1e-6);
     for (const Real r : {Real(0), Real(0.1), Real(0.3), Real(-0.7)})
     {
-      const Real curvature = loss.getWeight(r) *
-        (Real(1) - Real(2) * r * r / loss.getScaleSquared());
-      EXPECT_NEAR(curvature,
-        (loss.getInfluence(r + eps) - loss.getInfluence(r - eps)) / (Real(2) * eps), Real(1e-9));
+      EXPECT_NEAR(loss.getCurvature(r),
+        (loss.getInfluence(r + eps) - loss.getInfluence(r - eps)) / (Real(2) * eps),
+        Real(1e-9));
     }
   }
   /// @brief Verifies that the analytic influence equals the loss derivative.

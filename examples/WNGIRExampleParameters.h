@@ -176,17 +176,14 @@ namespace Rodin::Examples
   {
     constexpr const char* options[] = {"wngir-kappa-f", "wngir-robust-scale",
       "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
-      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d",
-      "wngir-directional-newton",
-      "wngir-directional-newton-max-alpha", "wngir-quality-witness",
+      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d", "wngir-directional-newton",
+      "wngir-directional-newton-max-step-h", "wngir-quality-witness",
       "wngir-direct-solver", "wngir-direct-threads", "wngir-geometric-sup-tol",
-      "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol", "wngir-primal-barrier-absolute-tol", "wngir-stagnation-iterations",
-      "wngir-mu-hat", "wngir-omega-min", "wngir-alpha-min",
-      "wngir-armijo",
-      "wngir-jls",
+      "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol",
+      "wngir-primal-barrier-absolute-tol", "wngir-stagnation-iterations", "wngir-mu-hat",
+      "wngir-omega-min", "wngir-max-backtracks", "wngir-armijo", "wngir-jls",
       "wngir-energy-stag-tol", "wngir-step-tol", "wngir-step-h-tol", "wngir-steps",
-      "wngir-cg-rtol", "wngir-cg-max-iters",
-      "wngir-trace", "wngir-rigid-diagnostics"};
+      "wngir-cg-rtol", "wngir-cg-max-iters", "wngir-trace", "wngir-rigid-diagnostics"};
     for (int i = 1; i < argc; ++i)
     {
       const std::string argument(argv[i]);
@@ -214,8 +211,8 @@ namespace Rodin::Examples
     p.kappaD = realOption(argc, argv, "wngir-kappa-d", defaults.kappaD);
     p.directionalNewton =
       boolOption(argc, argv, "wngir-directional-newton", p.directionalNewton);
-    p.directionalNewtonMaxAlpha = realOption(
-      argc, argv, "wngir-directional-newton-max-alpha", p.directionalNewtonMaxAlpha);
+    p.directionalNewtonMaxStepOverH = realOption(
+      argc, argv, "wngir-directional-newton-max-step-h", p.directionalNewtonMaxStepOverH);
     p.traceQualityWitness = boolOption(argc, argv, "wngir-quality-witness", false);
     const auto defaultSolver =
       p.directSolver == Adaptation::WNGIRParameters::DirectSolver::MUMPS ? "mumps"
@@ -243,7 +240,7 @@ namespace Rodin::Examples
       "wngir-stagnation-iterations", p.stagnationIterations);
     p.muHat = realOption(argc, argv, "wngir-mu-hat", p.muHat);
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
-    p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
+    p.maxBacktracks = sizeOption(argc, argv, "wngir-max-backtracks", p.maxBacktracks);
     p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
 
     p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));

@@ -35,16 +35,47 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.directSolverThreads, 0u);
       EXPECT_EQ(parameters.maxIterations, 30);
       EXPECT_TRUE(parameters.directionalNewton);
-      EXPECT_EQ(parameters.directionalNewtonMaxAlpha, Real(100));
+      EXPECT_EQ(parameters.directionalNewtonMaxStepOverH, Real(1));
       EXPECT_EQ(parameters.qualityGuard, Real(0.1));
       EXPECT_EQ(parameters.geometricSupTolerance, Real(0));
       EXPECT_EQ(parameters.geometricValidationOrder, 0);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(1), 4);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(2), 6);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(3), 8);
-      EXPECT_EQ(wngirGeometricValidationOrder(1), 6);
-      EXPECT_EQ(wngirGeometricValidationOrder(2), 8);
-      EXPECT_EQ(wngirGeometricValidationOrder(3), 10);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(1), 12);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(2), 12);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(3), 12);
+      EXPECT_EQ(wngirInterfaceQuadratureOrder(7), 16);
+      EXPECT_EQ(wngirGeometricValidationOrder(1), 14);
+      EXPECT_EQ(wngirGeometricValidationOrder(2), 14);
+      EXPECT_EQ(wngirGeometricValidationOrder(3), 14);
+    }
+
+    TEST(Rodin_Adaptation_WNGIRSolver, CurvedSurfaceQuadratureResolvesNonpolynomialFit)
+    {
+      const auto integrate = [](size_t order) {
+        const auto& rule =
+          QF::PolytopeQuadratureFormula::get(order, Polytope::Type::Segment);
+        const WNGIRLoss loss(Real(0.31927236562898026));
+        Math::Vector<Real> integral = Math::Vector<Real>::Zero(3);
+        for (size_t q = 0; q < rule.getSize(); ++q)
+        {
+          const Real t = rule.getPoint(q)(0);
+          const Real x = Real(0.73092457) * (1 - t) + Real(0.60939475) * t - Real(0.5);
+          const Real y = Real(0.59087505) * (1 - t) + Real(0.60939475) * t - Real(0.5);
+          const Real r = std::hypot(x, y), theta = std::atan2(y, x);
+          const Real residual = r - Real(0.24) - Real(0.08) * std::cos(Real(4) * theta);
+          const Real angular = Real(0.32) * std::sin(Real(4) * theta) / (r * r);
+          integral(0) += rule.getWeight(q) * loss.getValue(residual);
+          integral(1) +=
+            rule.getWeight(q) * loss.getInfluence(residual) * (x / r - angular * y);
+          integral(2) +=
+            rule.getWeight(q) * loss.getInfluence(residual) * (y / r + angular * x);
+        }
+        return integral;
+      };
+      const auto reference = integrate(24),
+                 actual = integrate(wngirInterfaceQuadratureOrder(1));
+      EXPECT_LT((actual - reference).norm() / reference.norm(), Real(1e-4));
+      EXPECT_LT(std::abs(actual(0) - reference(0)) / reference(0), Real(1e-4));
+      EXPECT_GT(std::abs(integrate(4)(0) - reference(0)) / reference(0), Real(0.1));
     }
 
     TEST(Rodin_Adaptation_WNGIRSolver, DirectionalNewtonParameters)
@@ -56,13 +87,13 @@ namespace Rodin::Tests::Unit
       WNGIR solver(trial, test);
       WNGIRParameters p;
       EXPECT_NO_THROW(solver.setParameters(p));
-      for (const Real invalid : {Real(0.5), std::numeric_limits<Real>::infinity(),
+      for (const Real invalid : {Real(0), Real(-1), std::numeric_limits<Real>::infinity(),
              std::numeric_limits<Real>::quiet_NaN()})
       {
-        p.directionalNewtonMaxAlpha = invalid;
+        p.directionalNewtonMaxStepOverH = invalid;
         EXPECT_THROW(solver.setParameters(p), Alert::Exception);
       }
-      p.directionalNewtonMaxAlpha = Real(1);
+      p.directionalNewtonMaxStepOverH = Real(0.5);
       EXPECT_NO_THROW(solver.setParameters(p));
       p.directionalNewton = false;
       EXPECT_NO_THROW(solver.setParameters(p));
@@ -197,8 +228,9 @@ namespace Rodin::Tests::Unit
         p.maxIterations = 1;
       });
     EXPECT_EQ(state.report.iterations, 1u);
-    EXPECT_GT(state.report.lastAlpha, Real(1));
-    EXPECT_LT(state.report.acceptedStep / state.report.lastAlpha, tolerance);
+    EXPECT_LE(state.report.lastAlpha, Real(1));
+    EXPECT_GT(state.report.predictorScale, Real(1));
+    EXPECT_LT(state.report.acceptedStep / state.report.predictorScale, tolerance);
     EXPECT_GT(state.report.acceptedStep, tolerance);
     EXPECT_STRNE(state.report.exitReason, "best-effort-step-stagnation");
     EXPECT_GT(state.report.minJ, Real(0.01));
@@ -524,6 +556,70 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(state.report.linearSolveCount, 0u);
     EXPECT_GT(state.report.minJ, Real(0.01));
     EXPECT_LT(state.report.maxQRel, Real(10));
+    EXPECT_GE(state.report.unresolvedSimilarityModes, 1u);
+    EXPECT_TRUE(state.report.geometricTargetReached);
+    // A plane does not distinguish translation from uniform dilation about it.
+    // The coefficient-minimum solution may combine them, but must remain a similarity.
+    EXPECT_NEAR(state.report.minJ, state.report.maxJ, Real(1e-10));
+    EXPECT_NEAR(state.report.maxQRel, Real(1), Real(1e-10));
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, CommonMetricScalePreservesTheHingeModelP1P2)
+  {
+    const auto check = []<size_t Order>() {
+      const auto solve = [](Real scale) {
+        return solveTranslatedLine<Order>(1, 0, false, 0, false, 1000, true,
+          WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-6), Real(1000),
+          [=](WNGIRParameters& p) {
+            p.kappaF = scale;
+            p.kappaS = scale * Real(0.1);
+            p.kappaD = scale;
+            p.qualityGuard = Real(0.9);
+            p.maxIterations = 3;
+          });
+      };
+      const auto reference = solve(1);
+      ASSERT_GT(reference.report.iterations, 0u);
+      ASSERT_GT(reference.report.primalBarrierIterations, 0u);
+      for (const Real scale : {Real(1e-4), Real(1e3)})
+      {
+        const auto scaled = solve(scale);
+        EXPECT_EQ(reference.report.iterations, scaled.report.iterations);
+        EXPECT_EQ(reference.report.primalBarrierIterations,
+          scaled.report.primalBarrierIterations);
+        EXPECT_STREQ(reference.report.exitReason, scaled.report.exitReason);
+        EXPECT_NEAR((reference.displacement - scaled.displacement).norm(), 0, 1e-8);
+        EXPECT_NEAR(reference.report.primalBarrierCoefficient,
+          scaled.report.primalBarrierCoefficient, 1e-9);
+      }
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, InnerResidualUsesTheFixedForceScale)
+  {
+    testing::internal::CaptureStdout();
+    const auto state = solveTranslatedLine(1, 0, true, 0, false, 1000, true,
+      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(1000),
+      [](WNGIRParameters& p) {
+        p.qualityGuard = Real(0.95);
+        p.maxIterations = 1;
+      });
+    const auto output = testing::internal::GetCapturedStdout();
+    EXPECT_GT(state.report.primalBarrierIterations, 0u);
+    std::istringstream lines(output);
+    std::string line;
+    size_t checked = 0;
+    while (std::getline(lines, line))
+      if (line.find("barrier residual:") != std::string::npos)
+      {
+        const Real force = std::stod(line.substr(line.find("force_norm=") + 11));
+        const Real threshold = std::stod(line.substr(line.find("tolerance=") + 10));
+        EXPECT_NEAR(threshold, Real(1e-12) + Real(1e-3) * force, Real(1e-9) * force);
+        ++checked;
+      }
+    EXPECT_GT(checked, 1u);
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsInvalidCanonicalWeights)
@@ -686,7 +782,7 @@ namespace Rodin::Tests::Unit
     std::vector<Index> cells;
     for (auto current = mesh.getCell(); current; ++current)
       cells.push_back(current->getIndex());
-    const Real norm = Detail::wngirPhysicalDisplacementNorm(mesh, fes, cells, field);
+    const Real norm = Detail::wngirPhysicalDisplacementNorm(mesh, fes, cells, field, 8);
     EXPECT_NEAR(norm, Real(1), Real(1e-12));
     EXPECT_LT(field.getData().cwiseAbs().maxCoeff(), norm - Real(1e-8));
   }

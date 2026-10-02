@@ -15,7 +15,7 @@
 namespace Rodin::Adaptation
 {
   /**
-   * @brief Fixed-scale Welsch loss and its consistent IRLS weight.
+   * @brief Fixed-scale Welsch loss with consistent influence and curvature.
    *
    * For a residual @f$r@f$, the influence and weight satisfy
    * @f$\rho'(r)=w(r)r@f$. The same loss is used by the objective, first
@@ -39,10 +39,10 @@ namespace Rodin::Adaptation
       Real getValue(Real residual) const
       {
         const Real s2 = residual * residual / m_scale2;
-        return Real(0.5) * m_scale2 * (Real(1) - std::exp(-s2));
+        return -Real(0.5) * m_scale2 * std::expm1(-s2);
       }
 
-      /// @brief Evaluates the Welsch weight @f$w(r)=\rho'(r)/r@f$.
+      /// @brief Evaluates the weight @f$w(r)=\rho'(r)/r@f$.
       Real getWeight(Real residual) const
       {
         const Real s2 = residual * residual / m_scale2;
@@ -53,6 +53,12 @@ namespace Rodin::Adaptation
       Real getInfluence(Real residual) const
       {
         return getWeight(residual) * residual;
+      }
+
+      /// @brief Second derivative in the scalar residual, without level-set Hessian.
+      Real getCurvature(Real residual) const
+      {
+        return getWeight(residual) * (Real(1) - Real(2) * residual * residual / m_scale2);
       }
 
     private:

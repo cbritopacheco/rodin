@@ -64,7 +64,7 @@ def command(args, n, lobes, kappa_s, kappa_d, mu_hat, steps):
         "--wngir-primal-barrier-relative-tol=1e-3",
         "--j-min=1e-8",
         "--wngir-jls=1e-2", "--wngir-armijo=1e-4",
-        "--wngir-alpha-min=1e-4",
+        "--wngir-max-backtracks=32",
         "--wngir-omega-min=0.1", f"--wngir-geometric-sup-tol={h*h:.14g}",
         "--wngir-energy-stag-tol=1e-8",
         f"--wngir-step-tol={1e-3*h*h:.14g}",
@@ -250,7 +250,10 @@ def main():
                 preflight_manifest["amp"] != args.amp or
                 preflight_manifest["r0"] != args.r0):
             parser.error("preflight used a different binary or target")
-    manifest = {"model": "F+S+D-affine-quadratic-hinges-psd-residual-dinf-v4",
+    manifest = {"model": "F+Splus+D-current-stretch-surface12-v8",
+                "shape_restriction": "current deviatoric stretch",
+                "interface_quadrature_order": "automatic: max(12, 2 * FE order + 2)",
+                "geometric_validation_order": "automatic: max(14, 2 * FE order + 4)",
                 "kappa_f": args.kappa_f, "quality_guard": 0.1, "stage": args.stage, "n": ns, "lobes": lobes,
                 "kappa_s": controls[0] if args.stage == "screen" else [1],
                 "kappa_d": controls[1] if args.stage == "screen" else [1],

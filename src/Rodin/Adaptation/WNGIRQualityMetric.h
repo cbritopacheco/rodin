@@ -17,9 +17,11 @@ namespace Rodin::Adaptation::Detail
   /**
    * @brief Positive-semidefinite frozen shape curvature for WNGIR increments.
    *
-   * Assembles h*kappaS times the Hessian of (d/4)(Q-1).
-   * The tensor is projected onto its positive-semidefinite part, retaining its
-   * nonnegative eigenvalues. This adds no quality force.
+   * Assembles @f$h\kappa_S P_F^* [D^2(d(Q-1)/4)]_+ P_F@f$, where
+   * @f$P_FG=\operatorname{dev}\operatorname{sym}(GF^{-1})F@f$.
+   * Restriction to current stretch preserves the rotation and dilation kernel
+   * away from identity, which clipping the additive Hessian alone does not.
+   * The tensor remains positive semidefinite and adds no quality force.
    * It is frozen at the outer displacement and reused by the inner QP.
    */
   template <class TrialFunction, class TestFunction, class Displacement>
@@ -74,6 +76,16 @@ namespace Rodin::Adaptation::Detail
           const Variational::IntegrationPoint ip(point, &qf, q);
           CellDeformation deformation(d);
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+          const Math::SpatialMatrix<Real> inverse(
+            deformation.getInverseTranspose().transpose());
+          const auto stretch = [&](const auto& gradient) {
+            const Math::SpatialMatrix<Real> L(gradient * inverse);
+            Math::SpatialMatrix<Real> E(Real(0.5) * (L + L.transpose()));
+            const Real mean = E.trace() / Real(d);
+            for (size_t axis = 0; axis < d; ++axis)
+              E(axis, axis) -= mean;
+            return Math::SpatialMatrix<Real>(E * deformation.getDeformationGradient());
+          };
           trialJacobian.setIntegrationPoint(ip);
           testJacobian.setIntegrationPoint(ip);
           Math::Matrix<Real> curvature(d * d, d * d);
@@ -103,7 +115,7 @@ namespace Rodin::Adaptation::Detail
           std::vector<Math::Vector<Real>> trialImages(trialFE.getCount());
           for (size_t trial = 0; trial < trialFE.getCount(); ++trial)
           {
-            const auto& G = trialJacobian.getBasis(trial);
+            const auto G = stretch(trialJacobian.getBasis(trial));
             Math::Vector<Real> g(d * d);
             for (size_t a = 0; a < d * d; ++a)
               g(a) = G(a / d, a % d);
@@ -111,7 +123,7 @@ namespace Rodin::Adaptation::Detail
           }
           for (size_t test = 0; test < testFE.getCount(); ++test)
           {
-            const auto& H = testJacobian.getBasis(test);
+            const auto H = stretch(testJacobian.getBasis(test));
             Math::Vector<Real> h(d * d);
             for (size_t a = 0; a < d * d; ++a)
               h(a) = H(a / d, a % d);
