@@ -85,6 +85,31 @@
   Integral(k * u, v)
   @endcode
 
+  @subsection guides-variational-forms-named Named cell forms
+
+  For repeated assembly of common cell operators, Rodin provides
+  @ref Rodin::Variational::MassForm "MassForm",
+  @ref Rodin::Variational::DiffusionForm "DiffusionForm",
+  @ref Rodin::Variational::HelmholtzForm "HelmholtzForm", and
+  @ref Rodin::Variational::LinearElasticityForm "LinearElasticityForm".
+  They assemble the same discrete operators, including quadrature orders, as
+  the corresponding integrals. The first assembly constructs the sparse
+  pattern; later assemblies reuse its map to matrix values. The named forms
+  currently use local sparse matrices with Sequential or OpenMP assembly.
+
+  @code{.cpp}
+  MassForm mass(c, u, v);                 // Integral(c * u, v)
+  DiffusionForm diffusion(a, u, v);       // Integral(a * Grad(u), Grad(v))
+  HelmholtzForm helmholtz(a, c, u, v);    // Diffusion and mass terms
+  LinearElasticityForm elasticity(lambda, mu, w, z);
+  @endcode
+
+  Here @c u and @c v use scalar spaces for diffusion and Helmholtz; mass
+  also accepts vector spaces. Elasticity uses vector-valued @c w and @c z
+  whose dimension matches the mesh. Each form can restrict its cell integral
+  with @c .over(attribute). The elasticity form is declared by
+  @c Rodin/Solid.h; the other three are declared by @c Rodin/Variational.h.
+
   @subsection guides-variational-forms-linear Linear Forms
 
   A linear form @f$ \ell(v) @f$ involves only the test function @f$ v @f$:

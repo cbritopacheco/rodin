@@ -8,6 +8,9 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinVariational_HEADERS
   FiniteElement.h
   BilinearForm.h
+  MassForm.h
+  DiffusionForm.h
+  HelmholtzForm.h
   BilinearFormIntegrator.h
   DirichletBC.h
   Derivative.h
