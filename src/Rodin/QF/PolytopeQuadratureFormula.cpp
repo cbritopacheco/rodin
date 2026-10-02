@@ -52,6 +52,7 @@ namespace Rodin::QF
      */
     struct HotCache
     {
+        // Heuristic per-thread working-set budget, limiting linear scans and storage.
         static constexpr size_t Capacity = 8;
 
         struct Entry

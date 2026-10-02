@@ -418,21 +418,29 @@ namespace Rodin::Geometry
       const Key& key) const
   {
     using U64 = std::uint64_t;
+    // Fixed seeds and salts for canonical, sorted vertex positions. Each sorted
+    // slot receives a distinct salt before XOR mixing. These values preserve
+    // the existing hash mapping; they do not guarantee absence of collisions.
+    constexpr U64 hashSeed = 0x243f6a8885a308d3ull;
+    constexpr U64 emptyKeySeed = 0x6eed0e9da4d94a4full;
+    constexpr U64 vertexSalts[] = {0x9e3779b97f4a7c15ull, 0xbf58476d1ce4e5b9ull,
+      0x94d049bb133111ebull, 0xd6e8feb86659fd93ull, 0xa0761d6478bd642full,
+      0xe7037ed1a0b428dbull, 0x8ebc6af09c88c6e3ull, 0x589965cc75374cc3ull};
 
     switch (key.m_n)
     {
       case 0:
       {
-        return static_cast<std::size_t>(sm64(0x6eed0e9da4d94a4full));
+        return static_cast<std::size_t>(sm64(emptyKeySeed));
       }
 
       case 1:
       {
         const U64 x0 = static_cast<U64>(key.m_vertices[0]);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x01ull);
-        h ^= sm64(x0 + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(x0 + vertexSalts[0]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -442,10 +450,10 @@ namespace Rodin::Geometry
         Index x1 = key.m_vertices[1];
         cswap(x0, x1);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x02ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -459,11 +467,11 @@ namespace Rodin::Geometry
         cswap(x1, x2);
         cswap(x0, x1);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x03ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
-        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
+        h ^= sm64(static_cast<U64>(x2) + vertexSalts[2]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -480,12 +488,12 @@ namespace Rodin::Geometry
         cswap(x1, x3);
         cswap(x1, x2);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x04ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
-        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
-        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
+        h ^= sm64(static_cast<U64>(x2) + vertexSalts[2]);
+        h ^= sm64(static_cast<U64>(x3) + vertexSalts[3]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -507,13 +515,13 @@ namespace Rodin::Geometry
         cswap(x1, x3);
         cswap(x1, x2);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x05ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
-        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
-        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
-        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
+        h ^= sm64(static_cast<U64>(x2) + vertexSalts[2]);
+        h ^= sm64(static_cast<U64>(x3) + vertexSalts[3]);
+        h ^= sm64(static_cast<U64>(x4) + vertexSalts[4]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -539,14 +547,14 @@ namespace Rodin::Geometry
         cswap(x1, x3);
         cswap(x2, x3);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x06ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
-        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
-        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
-        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
-        h ^= sm64(static_cast<U64>(x5) + 0xe7037ed1a0b428dbull);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
+        h ^= sm64(static_cast<U64>(x2) + vertexSalts[2]);
+        h ^= sm64(static_cast<U64>(x3) + vertexSalts[3]);
+        h ^= sm64(static_cast<U64>(x4) + vertexSalts[4]);
+        h ^= sm64(static_cast<U64>(x5) + vertexSalts[5]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -579,15 +587,15 @@ namespace Rodin::Geometry
         cswap(x1, x2);
         cswap(x0, x1);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x07ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
-        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
-        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
-        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
-        h ^= sm64(static_cast<U64>(x5) + 0xe7037ed1a0b428dbull);
-        h ^= sm64(static_cast<U64>(x6) + 0x8ebc6af09c88c6e3ull);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
+        h ^= sm64(static_cast<U64>(x2) + vertexSalts[2]);
+        h ^= sm64(static_cast<U64>(x3) + vertexSalts[3]);
+        h ^= sm64(static_cast<U64>(x4) + vertexSalts[4]);
+        h ^= sm64(static_cast<U64>(x5) + vertexSalts[5]);
+        h ^= sm64(static_cast<U64>(x6) + vertexSalts[6]);
         return static_cast<std::size_t>(sm64(h));
       }
 
@@ -622,16 +630,16 @@ namespace Rodin::Geometry
         cswap(x3, x4);
         cswap(x5, x6);
 
-        U64 h = 0x243f6a8885a308d3ull;
+        U64 h = hashSeed;
         h ^= sm64(0x08ull);
-        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
-        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
-        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
-        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
-        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
-        h ^= sm64(static_cast<U64>(x5) + 0xe7037ed1a0b428dbull);
-        h ^= sm64(static_cast<U64>(x6) + 0x8ebc6af09c88c6e3ull);
-        h ^= sm64(static_cast<U64>(x7) + 0x589965cc75374cc3ull);
+        h ^= sm64(static_cast<U64>(x0) + vertexSalts[0]);
+        h ^= sm64(static_cast<U64>(x1) + vertexSalts[1]);
+        h ^= sm64(static_cast<U64>(x2) + vertexSalts[2]);
+        h ^= sm64(static_cast<U64>(x3) + vertexSalts[3]);
+        h ^= sm64(static_cast<U64>(x4) + vertexSalts[4]);
+        h ^= sm64(static_cast<U64>(x5) + vertexSalts[5]);
+        h ^= sm64(static_cast<U64>(x6) + vertexSalts[6]);
+        h ^= sm64(static_cast<U64>(x7) + vertexSalts[7]);
         return static_cast<std::size_t>(sm64(h));
       }
     }

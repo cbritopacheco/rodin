@@ -392,20 +392,31 @@ namespace Rodin::Heart::CCMLC2014::Solver
 
       static Scalar normalizeActiveStiffness(Scalar kc)
       {
-        if (kc < Scalar(0) && std::abs(kc) < Scalar(1e-14))
+        if (kc < Scalar(0) && std::abs(kc) < NegativeStiffnessRoundoffTolerance)
           return Scalar(0);
         return kc;
       }
 
     private:
+      /// @brief Absolute tolerance in active-stiffness units for clipping small negative values; heuristic.
+      static constexpr Scalar NegativeStiffnessRoundoffTolerance = Scalar(1e-14);
+      /// @brief Absolute Newton residual-norm tolerance; depends on the model residual scaling.
+      static constexpr Scalar DefaultAbsoluteTolerance = Scalar(1e-10);
+      /// @brief Dimensionless Newton residual tolerance relative to the initial residual.
+      static constexpr Scalar DefaultRelativeTolerance = Scalar(1e-10);
+      /// @brief Newton correction-norm stopping tolerance in the unknown-vector scaling.
+      static constexpr Scalar DefaultStepTolerance = Scalar(1e-12);
+      /// @brief Newton work budget per time step; not a convergence guarantee.
+      static constexpr size_t DefaultMaxIterations = 50;
+
       Input m_input;
       State m_state;
       History m_history;
 
-      Scalar m_atol = Scalar(1e-10);
-      Scalar m_rtol = Scalar(1e-10);
-      Scalar m_stol = Scalar(1e-12);
-      size_t m_maxIt = 50;
+      Scalar m_atol = DefaultAbsoluteTolerance;
+      Scalar m_rtol = DefaultRelativeTolerance;
+      Scalar m_stol = DefaultStepTolerance;
+      size_t m_maxIt = DefaultMaxIterations;
       Scalar m_damping = Scalar(1.0);
 
       Report m_report;

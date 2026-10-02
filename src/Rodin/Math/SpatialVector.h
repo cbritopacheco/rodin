@@ -871,14 +871,17 @@ namespace Rodin::Math
     return r;
   }
 
-  /// @brief Scalar-times-vector product.
-  template <class LHS, class Scalar,
-    std::enable_if_t<std::is_arithmetic_v<std::decay_t<LHS>>, int> = 0>
-  [[nodiscard]] inline
-  SpatialVector<Scalar>
-  operator*(const LHS& s, const SpatialVector<Scalar>& v) noexcept
+  /// @brief Scalar-times-vector product with real/complex promotion.
+  template <class LHS, class Scalar>
+    requires(std::is_arithmetic_v<LHS> || std::is_same_v<LHS, Complex>)
+  [[nodiscard]] inline auto operator*(
+    const LHS& value, const SpatialVector<Scalar>& v) noexcept
   {
-    SpatialVector<Scalar> r(v.size());
+    using Coefficient =
+      std::conditional_t<std::is_same_v<Scalar, Complex> && std::is_arithmetic_v<LHS>,
+        Real, LHS>;
+    const Coefficient s = value;
+    SpatialVector<typename FormLanguage::Mult<Coefficient, Scalar>::Type> r(v.size());
     switch (v.size())
     {
       case 3:
@@ -898,13 +901,16 @@ namespace Rodin::Math
     return r;
   }
 
-  /// @brief Vector-times-scalar product.
+  /// @brief Vector-times-scalar product with real/complex promotion.
   template <class Scalar, class RHS>
-  auto operator*(
-      const SpatialVector<Scalar>& v,
-      const RHS& s)
+    requires(std::is_arithmetic_v<RHS> || std::is_same_v<RHS, Complex>)
+  [[nodiscard]] inline auto operator*(const SpatialVector<Scalar>& v, const RHS& value)
   {
-    SpatialVector<Scalar> r(v.size());
+    using Coefficient =
+      std::conditional_t<std::is_same_v<Scalar, Complex> && std::is_arithmetic_v<RHS>,
+        Real, RHS>;
+    const Coefficient s = value;
+    SpatialVector<typename FormLanguage::Mult<Scalar, Coefficient>::Type> r(v.size());
     switch (v.size())
     {
       case 3:

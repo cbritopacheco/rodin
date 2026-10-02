@@ -1063,7 +1063,8 @@ namespace Rodin::Variational
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+            std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coeff.getValue(ip);
 
@@ -1701,7 +1702,8 @@ namespace Rodin::Variational
           const auto& trialRefGrad = m_trialRefGrad[qp];
           const auto& testRefGrad = m_testRefGrad[qp];
 
-          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+            std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coeff.getValue(ip);
 
@@ -1767,7 +1769,8 @@ namespace Rodin::Variational
           }
         }
 
-        if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+        if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+          std::is_same_v<CoefficientRangeType, Real>)
         {
           if (trialfes == testfes)
           {
@@ -3488,7 +3491,8 @@ namespace Rodin::Variational
           const auto& trialRefJac = m_trialRefJac[qp];
           const auto& testRefJac = m_testRefJac[qp];
 
-          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+          if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+            std::is_same_v<CoefficientRangeType, Real>)
           {
             const ScalarType csv = coeff.getValue(ip);
 
@@ -3559,7 +3563,8 @@ namespace Rodin::Variational
           }
         }
 
-        if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
+        if constexpr (std::is_same_v<CoefficientRangeType, ScalarType> ||
+          std::is_same_v<CoefficientRangeType, Real>)
         {
           if (trialfes == testfes)
           {
