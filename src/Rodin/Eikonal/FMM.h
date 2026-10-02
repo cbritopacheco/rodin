@@ -501,7 +501,8 @@ namespace Rodin::Eikonal
         const Real mu1 = inv11 * s1 + inv12 * s2;
         const Real mu2 = inv12 * s1 + inv22 * s2;
 
-        // Allow tiny numerical noise if you want: eps ~ 1e-14 * t
+        // Strict upwind admissibility: no negative barycentric contribution
+        // is accepted, even when its magnitude could arise from roundoff.
         const Real eps = Real(0);
         if (std::isnan(mu1) || std::isnan(mu2) || mu1 < -eps || mu2 < -eps)
           return std::numeric_limits<Real>::infinity();

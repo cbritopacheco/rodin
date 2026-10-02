@@ -64,6 +64,11 @@ namespace Rodin::QF
    */
   class GaussLegendre final : public QuadratureFormulaBase
   {
+      /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
+      static constexpr size_t DefaultRootMaxIterations = 100;
+      /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
+      static constexpr Real DefaultRootTolerance = 1e-14;
+
     public:
       /**
        * @brief @f$ n @f$-point Gauss--Jacobi rule on @f$ [0,1] @f$ for the
@@ -105,7 +110,7 @@ namespace Rodin::QF
        * Legendre polynomial @f$ P_n(x) @f$, found using Newton's method.
        */
       static void gl1dUnit(size_t n, std::vector<Real>& x, std::vector<Real>& w,
-        size_t maxIt = 100, Real tol = 1e-14);
+        size_t maxIt = DefaultRootMaxIterations, Real tol = DefaultRootTolerance);
 
       /// Parent class type
       using Parent = QuadratureFormulaBase;
