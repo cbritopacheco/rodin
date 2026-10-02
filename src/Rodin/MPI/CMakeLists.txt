@@ -11,6 +11,7 @@ set(RodinMPI_HEADERS
   Geometry/Sharder.h
   Assembly/MPI.h
   Assembly/BoundaryDOFs.h
+  Variational/Interpolation.h
   IO/HDF5.h
   IO/MFEM.h
   IO/MEDIT.h

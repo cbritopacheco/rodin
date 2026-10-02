@@ -39,6 +39,8 @@ namespace Rodin::Geometry
   {
     MPIMesh mesh(m_context);
     mesh.m_shard = std::move(m_shard);
+    mesh.m_dimension = boost::mpi::all_reduce(m_context.getCommunicator(),
+      mesh.m_shard.getDimension(), boost::mpi::maximum<size_t>());
     mesh.m_quadratures.initialize(mesh.getSpaceDimension());
     return mesh;
   }
@@ -47,7 +49,8 @@ namespace Rodin::Geometry
   MPIMesh::Mesh(const Mesh& other)
     : MeshBase(other),
       m_context(other.m_context),
-      m_shard(other.m_shard)
+      m_shard(other.m_shard),
+      m_dimension(other.m_dimension)
   {
     m_quadratures.initialize(getSpaceDimension());
   }
@@ -55,7 +58,8 @@ namespace Rodin::Geometry
   MPIMesh::Mesh(Mesh&& other)
     : MeshBase(std::move(other)),
       m_context(std::move(other.m_context)),
-      m_shard(std::move(other.m_shard))
+      m_shard(std::move(other.m_shard)),
+      m_dimension(other.m_dimension)
   {
     m_quadratures.initialize(getSpaceDimension());
   }
@@ -67,6 +71,7 @@ namespace Rodin::Geometry
       MeshBase::operator=(other);
       m_context = other.m_context;
       m_shard = Shard(other.m_shard);
+      m_dimension = other.m_dimension;
       m_quadratures.clear();
       m_quadratures.initialize(getSpaceDimension());
     }
@@ -80,6 +85,7 @@ namespace Rodin::Geometry
       MeshBase::operator=(std::move(other));
       m_context = std::move(other.m_context);
       m_shard = std::move(other.m_shard);
+      m_dimension = other.m_dimension;
       m_quadratures.clear();
       m_quadratures.initialize(getSpaceDimension());
     }
@@ -111,7 +117,7 @@ namespace Rodin::Geometry
 
   size_t MPIMesh::getDimension() const
   {
-    return this->getShard().getDimension();
+    return m_dimension;
   }
 
   size_t MPIMesh::getSpaceDimension() const
@@ -249,7 +255,7 @@ namespace Rodin::Geometry
     std::vector<Index> indices;
     const auto& shard = getShard();
     const size_t d = getDimension() - 1;
-    const size_t count = shard.getFaceCount();
+    const size_t count = getDimension() == 0 ? 0 : shard.getPolytopeCount(d);
     for (Index i = 0; i < count; ++i)
     {
       if (shard.isOwned(d, i) && shard.isInterface(i))
@@ -541,6 +547,8 @@ namespace Rodin::Geometry
       {
         auto& shard = this->getShard();
         shard.load(filename, fmt);
+        m_dimension = boost::mpi::all_reduce(m_context.getCommunicator(),
+          shard.getDimension(), boost::mpi::maximum<size_t>());
         break;
       }
     }
@@ -593,7 +601,7 @@ namespace Rodin::Geometry
     const auto& comm = m_context.getCommunicator();
     const int rank   = comm.rank();
 
-    const size_t D = shard.getDimension();
+    const size_t D = getDimension();
     assert(d <= D);
 
     // Vertices and top cells are assumed already reconciled.
@@ -603,17 +611,19 @@ namespace Rodin::Geometry
     // Need:
     // - D -> d to visit subentities through incident top cells
     // - d -> 0 to build canonical keys from distributed vertex ids
-    RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, D, d);
-    RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, d, 0);
+    const size_t nd = shard.getPolytopeCount(d);
+    const size_t nc = shard.getPolytopeCount(D);
+    if (nc > 0)
+    {
+      RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, D, d);
+    }
+    if (nd > 0)
+    {
+      RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, d, 0);
+    }
 
     const auto& D2d = conn.getIncidence(D, d);
     const auto& d20 = conn.getIncidence(d, 0);
-
-    const size_t nd = shard.getPolytopeCount(d);
-    const size_t nc = shard.getPolytopeCount(D);
-
-    if (nd == 0)
-      return *this;
 
     using Key = Polytope::Key;
     using KeyMap = UnorderedMap<
