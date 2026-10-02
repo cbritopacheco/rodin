@@ -172,6 +172,13 @@ endif()
 
 add_subdirectory(IO)
 
+add_executable(RodinPETScSNESStateTest SNESStateTest.cpp)
+target_link_libraries(RodinPETScSNESStateTest
+  PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScSNESStateTest COMMAND $<TARGET_FILE:RodinPETScSNESStateTest>)
+set_tests_properties(RodinPETScSNESStateTest PROPERTIES LABELS "unit;petsc" TIMEOUT 60)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScSNESStateTest)
+
 add_executable(RodinPETScKSPFactorizationReuseTest KSPFactorizationReuseTest.cpp)
 target_link_libraries(RodinPETScKSPFactorizationReuseTest
   PUBLIC

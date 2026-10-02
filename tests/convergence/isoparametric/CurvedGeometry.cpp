@@ -28,6 +28,7 @@
 #include <gtest/gtest.h>
 
 #include "Convergence.h"
+#include "CurvedGeometry.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/SparseLU.h"
 
@@ -38,74 +39,6 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::Isoparametric
 {
-  constexpr Real Warp = Real(0.1);
-
-  Math::SpatialPoint mapToPhysical(Math::SpatialPoint point)
-  {
-    assert(point.size() >= 1);
-    point(point.size() - 1) += Warp * point(0) * point(0);
-    return point;
-  }
-
-  Math::SpatialPoint referencePosition(const Polytope& polytope,
-    const std::vector<Math::SpatialPoint>& vertices, const Math::SpatialPoint& rc)
-  {
-    RealP1Element affine(polytope.getGeometry());
-    Math::SpatialPoint point(vertices.front().size());
-    point.setZero();
-    const auto polytopeVertices = polytope.getVertices();
-    for (size_t local = 0; local < affine.getCount(); ++local)
-      point += vertices.at(polytopeVertices[local]) * affine.getBasis(local)(rc);
-    return point;
-  }
-
-  /**
-   * @brief Curves every positive-dimensional entity consistently.
-   *
-   * The original vertex positions are retained while the mesh vertices are
-   * moved. Control points are then evaluated from that original affine mesh;
-   * this avoids interpolating the already-warped P1 geometry a second time.
-   */
-  template <size_t GeometryOrder>
-  void installGeometry(LocalMesh& mesh)
-  {
-    const size_t dim = mesh.getSpaceDimension();
-    std::vector<Math::SpatialPoint> vertices;
-    vertices.reserve(mesh.getVertexCount());
-    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-      vertices.push_back(mesh.getVertexCoordinates(vertex));
-
-    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-      mesh.setVertexCoordinates(vertex, mapToPhysical(vertices.at(vertex)));
-
-    if constexpr (GeometryOrder == 1)
-    {
-      return;
-    }
-    else
-    {
-      for (size_t entityDimension = 1; entityDimension <= dim; ++entityDimension)
-      {
-        for (Index index = 0; index < mesh.getPolytopeCount(entityDimension); ++index)
-        {
-          const auto polytope = mesh.getPolytope(entityDimension, index);
-          RealH1Element<GeometryOrder> geometryElement(polytope->getGeometry());
-          PointCloud nodes(dim, geometryElement.getCount());
-          for (size_t local = 0; local < geometryElement.getCount(); ++local)
-          {
-            const auto point = mapToPhysical(
-              referencePosition(*polytope, vertices, geometryElement.getNode(local)));
-            for (size_t coordinate = 0; coordinate < dim; ++coordinate)
-              nodes(coordinate, local) = point(coordinate);
-          }
-          mesh.setPolytopeTransformation({entityDimension, index},
-            new ParametricTransformation<RealH1Element<GeometryOrder>>(
-              std::move(nodes), std::move(geometryElement)));
-        }
-      }
-    }
-  }
-
   ErrorNorms solveP2(const LocalMesh& mesh)
   {
     const size_t dim = mesh.getSpaceDimension();
@@ -232,12 +165,8 @@ namespace Rodin::Tests::Convergence::Isoparametric
     const auto geometry = GetParam();
     UniformGrid grid(geometry);
     auto mesh = grid.makeMesh(grid.getDimension() == 3 ? 3 : 5);
-    std::vector<Math::SpatialPoint> vertices;
-    vertices.reserve(mesh.getVertexCount());
-    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-      vertices.push_back(mesh.getVertexCoordinates(vertex));
-
-    installGeometry<2>(mesh);
+    CurvedGeometry curved(mesh);
+    curved.install<2>();
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
       const auto& transformation = cell->getTransformation();
@@ -249,7 +178,7 @@ namespace Rodin::Tests::Convergence::Isoparametric
       rc /= Real(element.getCount());
       Math::SpatialPoint physical;
       transformation.transform(physical, rc);
-      const auto expected = mapToPhysical(referencePosition(*cell, vertices, rc));
+      const auto expected = curved.mapToPhysical(curved.referencePosition(*cell, rc));
       EXPECT_LT((physical - expected).norm(), 1e-11);
     }
   }
@@ -272,7 +201,8 @@ namespace Rodin::Tests::Convergence::Isoparametric
     {
       const auto reference = grid.makeMesh(pointsPerAxis);
       auto curved = grid.makeMesh(pointsPerAxis);
-      installGeometry<1>(curved);
+      CurvedGeometry mapping(curved);
+      mapping.install<1>();
       Real squaredError = 0;
       for (Index index = 0; index < reference.getCellCount(); ++index)
       {
@@ -285,7 +215,7 @@ namespace Rodin::Tests::Convergence::Isoparametric
         {
           const auto& point = quadrature.getPoint(qp);
           const Point mapped(*curvedCell, point.getReferenceCoordinates());
-          const auto expected = mapToPhysical(point.getPhysicalCoordinates());
+          const auto expected = mapping.mapToPhysical(point.getPhysicalCoordinates());
           squaredError += qf.getWeight(qp) * point.getDistortion() *
             (mapped.getPhysicalCoordinates() - expected).squaredNorm();
         }
@@ -324,7 +254,8 @@ namespace Rodin::Tests::Convergence::Isoparametric
     for (const size_t pointsPerAxis : levels)
     {
       auto mesh = grid.makeMesh(pointsPerAxis);
-      installGeometry<2>(mesh);
+      CurvedGeometry mapping(mesh);
+      mapping.install<2>();
       history.append(Real(1) / Real(pointsPerAxis - 1), solveP2(mesh));
     }
     expectOptimalP2Rates(history);
@@ -340,7 +271,8 @@ namespace Rodin::Tests::Convergence::Isoparametric
     for (const size_t pointsPerAxis : levels)
     {
       auto mesh = grid.makeMesh(pointsPerAxis);
-      installGeometry<2>(mesh);
+      CurvedGeometry mapping(mesh);
+      mapping.install<2>();
       history.append(Real(1) / Real(pointsPerAxis - 1), solveConductivityP2(mesh));
     }
     expectOptimalP2Rates(history);

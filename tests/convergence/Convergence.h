@@ -393,19 +393,24 @@ namespace Rodin::Tests::Convergence
       }
 
       /**
-       * @brief Computes the L2 norm of the divergence of a vector field.
+       * @brief Computes the L2 norm of the divergence of a real vector field.
        *
        * The Jacobian is evaluated directly because this diagnostic concerns
        * the trace of a vector-field derivative rather than a scalar H1 norm.
+       * MPI meshes contribute owned cells only, with a global squared-norm
+       * reduction before taking the square root.
        */
-      template <class GF>
+      template <class Mesh, class GF>
       static Real computeDivergenceL2(
-        const Geometry::LocalMesh& mesh, const GF& uh, size_t quadratureOrder = 8)
+        const Mesh& mesh, const GF& uh, size_t quadratureOrder = 8)
       {
         const auto jacobian = Variational::Jacobian(uh);
         Real squared = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
+          if constexpr (requires { mesh.getShard(); })
+            if (!mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
+              continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
           const auto& quadrature = cell->getQuadrature(qf);
@@ -422,6 +427,11 @@ namespace Rodin::Tests::Convergence
             squared += qf.getWeight(qp) * p.getDistortion() * divergence * divergence;
           }
         }
+#ifdef RODIN_USE_MPI
+        if constexpr (requires { mesh.getShard(); })
+          squared = boost::mpi::all_reduce(
+            mesh.getContext().getCommunicator(), squared, std::plus<Real>());
+#endif
         return std::sqrt(squared);
       }
 

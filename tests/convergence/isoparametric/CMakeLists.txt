@@ -11,3 +11,5 @@ gtest_discover_tests(RodinConvergenceIsoparametric
   PROPERTIES
     LABELS "convergence;slow"
 )
+
+add_subdirectory(Helmholtz)
