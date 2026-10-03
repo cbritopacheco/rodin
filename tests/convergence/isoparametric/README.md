@@ -5,7 +5,7 @@ cell map is itself a finite-element field. Geometry and field spaces are
 refined in a controlled way so that a geometry-map error cannot be mistaken for
 a solution-space error.
 
-`CurvedGeometry.cpp` uses the regular quadratic map
+The shared `CurvedGeometry` class uses the regular quadratic map
 
 $$
   \Phi(\xi)_i=\xi_i\quad(i\lt d-1),\qquad
@@ -58,3 +58,13 @@ As a negative control, replacing $\gamma\nabla u$ by $\nabla u$ in the
 conductivity stiffness while retaining the manufactured load caused all
 seven geometry rate tests to fail. The variable coefficient was restored
 before the passing run.
+
+The [complex Helmholtz suite](Helmholtz/README.md) uses the same exact P2
+geometry with P1 and P2 physical fields. All seven geometries use
+$n=5,9,17$ for P1 and $n=3,5,9$ for P2. Native local and complex-PETSc
+local/MPI drivers share field-rate, representable-patch, omitted-mass,
+quadrature/solver sensitivity, and analytic geometry/volume acceptance.
+MPI ranks 1–4 additionally check the known complex norm on curved meshes,
+including empty partitions. P1 on P2 geometry is superparametric, whereas
+P2 on P2 geometry is strictly isoparametric. The exact map fixes the domain
+at every mesh level; nonpolynomial geometry approximation remains separate.

@@ -1,0 +1,120 @@
+# Semilinear Poisson on quadratic geometry
+
+## Problem, boundary lifting and architecture
+
+On $\Omega=\Phi((0,1)^d)$ with the exact quadratic map
+$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}$, the physical problem is
+
+$$
+-\Delta u+u+u^3=f,\qquad
+u=g\ \text{on }\partial\Omega.
+$$
+
+The common physical reference is $u(x)=\prod_{j=0}^{d-1}\sin(\pi x_j)$,
+with analytic gradient and $f=(d\pi^2+1)u+u^3$. Its trace is generally
+nonzero on the mapped boundary. The discrete lifting $g_h=I_hu$ is the
+finite-element interpolant, not a mass projection. The unknown is a
+homogeneous correction $w_h$ and $u_h=g_h+w_h$.
+
+For $v_h$ with homogeneous trace, the residual and tangent are
+
+$$
+F_h(w_h)[v_h]=\int_\Omega
+\nabla(g_h+w_h)\cdot\nabla v_h+
+(g_h+w_h+(g_h+w_h)^3-f)v_h\,dx,
+$$
+
+$$
+J_h(w_h)[z_h,v_h]=\int_\Omega
+\nabla z_h\cdot\nabla v_h+
+(1+3(g_h+w_h)^2)z_hv_h\,dx.
+$$
+
+The reaction derivative is positive, so the tangent is coercive.
+Native Newton begins from $g_h$ and uses homogeneous increments.
+PETSc SNES begins from zero correction; each callback reconstructs
+$g_h+w_h$, including synchronized MPI halos. Neither path changes the
+prescribed trace during iteration. The shared test workloads are extended
+with opt-in lifting and representable data; existing flat-mesh defaults
+remain homogeneous sine data with no lifting. Production solvers are unchanged.
+
+Workload owns the mesh and installs exact P2 maps before constructing
+spaces. Native and PETSc use scalar H1 elements of degree $k\in\{1,2\}$.
+P1 fields on quadratic geometry are superparametric; P2 is strictly
+isoparametric. Maps are installed on cells, boundary traces and MPI halos.
+
+## Refinement and acceptance
+
+All seven positive-dimensional geometries are covered: Segment, Triangle,
+Quadrilateral, Tetrahedron, Pyramid, Hexahedron and Wedge. A spatial
+diffusion refinement study is not defined on a point geometry.
+
+| Field degree | Grid points per coordinate | Subdivisions |
+| --- | --- | --- |
+| $P_1$ | $5,9,17$ | $4,8,16$ |
+| $P_2$ | $3,5,9$ | $2,4,8$ |
+
+With $h=(n-1)^{-1}$, independent physical integration measures
+
+$$
+E_0(h)=\|u_h-u\|_{L^2(\Omega)},\qquad
+E_1(h)=|u_h-u|_{H^1(\Omega)}.
+$$
+
+Under smoothness, uniform map regularity, shape-regular refinement and
+the requisite dual regularity, the expected orders are $k+1$ and $k$.
+Every adjacent interval must have finite, positive, decreasing errors and
+
+$$
+r_{m,\ell}=
+\frac{\log(E_m(h_{\ell-1})/E_m(h_\ell))}
+{\log(h_{\ell-1}/h_\ell)},\qquad
+|r_{0,\ell}-(k+1)|<0.55,\quad |r_{1,\ell}-k|<0.45.
+$$
+
+These are finite-resolution acceptance windows, not a proof of the
+asymptotic theorem. MPI norms sum squared contributions on owned cells
+only before taking the global square root.
+
+## Patches, derivatives and independent controls
+
+The constant $u=1$ is a P1 patch. Physical affine
+$u=1+\sum_jx_j$ has quadratic pullback and is a P2 patch.
+For either, $f=u+u^3$, and both physical error norms must be below $10^{-9}$.
+These patches may converge without a Newton correction because their
+interpolants already solve the discrete problem.
+
+The tangent check uses the physical state $I_hu$ and the homogeneous
+direction $z_h=\tfrac14 I_h(\prod_j\sin(\pi\xi_j))$. The original mesh chart
+supplies $\xi$ independently of the physical field data. With
+$\epsilon=10^{-5}$, the central-difference defect is
+
+$$
+D=\frac{\|J_hz_h-
+(F_h(w_h+\epsilon z_h)-F_h(w_h-\epsilon z_h))/(2\epsilon)\|_2}
+{\|(F_h(w_h+\epsilon z_h)-F_h(w_h-\epsilon z_h))/(2\epsilon)\|_2}.
+$$
+
+Both P1 and P2 require $D<10^{-6}$. Replacing $3u_h^2$ by $u_h^2$
+in the P2 tangent must yield $D>10^{-3}$.
+
+Two separate affine-patch controls retain the exact physical source:
+omitting the cubic reaction, or omitting the nonzero boundary lifting.
+Each wrong problem must have $E_0>10^{-3}$ and $E_1>10^{-2}$.
+The quantities are dimensionless on the stated unit-scale domains.
+These controls separate physical correctness from a self-consistent tangent.
+
+Quadrature order twelve is compared separately with sixteen, and nonlinear
+tolerance $10^{-11}$ with $10^{-12}$ at both degrees. Relative changes in
+each positive norm must be below $10^{-6}$. Mapped/nonpolynomial integrands
+are not claimed polynomial-exact. Native Newton uses SparseLU; PETSc SNES
+uses Newton line search with CG/Jacobi tangents. Both require nonlinear
+convergence and independently reassemble the final residual.
+Native residual normalized by $\max(1,\|F_h(w_{h,0})\|_2)$ is below $10^{-9}$;
+PETSc requires $10^{-10}$. Linear solver success is checked whenever a
+correction was computed; exact initial patches need no linear solve.
+
+CMake registers native local and real-PETSc local/MPI suites with one to four
+ranks. Sequential/OpenMP is selected by the build. Complex-PETSc builds do
+not register this real suite. Registrations are labelled slow, have
+1800-second timeouts, and serialize pyramid cases through a resource lock.

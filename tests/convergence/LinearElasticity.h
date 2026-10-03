@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Manufactured vector elasticity data shared by p and hp studies. */
+/** @file @brief Manufactured vector elasticity data shared by convergence studies. */
 
 #ifndef RODIN_TESTS_CONVERGENCE_LINEARELASTICITY_H
 #define RODIN_TESTS_CONVERGENCE_LINEARELASTICITY_H
@@ -29,30 +29,52 @@ namespace Rodin::Tests::Convergence::LinearElasticity
    * @f$\sigma=\lambda(\nabla\cdot u)I+\mu(\nabla u+\nabla u^T)@f$,
    * the source is @f$f_i=-e^{\sum_jx_j}
    * [\mu d(i+1)+(\lambda+\mu)\sum_j(j+1)]@f$.
+   * The constant field @f$u_i=1@f$ has zero source and Jacobian.
+   * The default exponential field is retained for the existing p/hp studies.
+   * Optional affine and quadratic fields use
+   * @f$u_i=1+(i+1)s@f$ and @f$u_i=1+(i+1)s^2@f$, respectively,
+   * where @f$s=\sum_jx_j@f$. Their sources are zero and
+   * @f$-2[\mu d(i+1)+(\lambda+\mu)\sum_j(j+1)]@f$.
    */
   class ManufacturedSolution
   {
+    public:
+      enum class Field
+      {
+        Constant,
+        Affine,
+        Quadratic,
+        Exponential
+      };
+
     private:
       size_t m_dim;
       Real m_lambda;
       Real m_mu;
+      Field m_field;
 
     public:
-      ManufacturedSolution(size_t dim, Real lambda, Real mu)
+      ManufacturedSolution(
+        size_t dim, Real lambda, Real mu, Field field = Field::Exponential)
         : m_dim(dim),
           m_lambda(lambda),
           m_mu(mu),
+          m_field(field),
           exact(dim,
-            [dim](const Geometry::Point& p) {
+            [dim, field](const Geometry::Point& p) {
               Real exponent = 0;
               for (size_t j = 0; j < dim; ++j)
                 exponent += p(j);
               Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
               for (size_t i = 0; i < dim; ++i)
-                value(i) = Real(i + 1) * std::exp(exponent);
+                value(i) = field == Field::Constant ? Real(1)
+                  : field == Field::Exponential     ? Real(i + 1) * std::exp(exponent)
+                                                    : 1 +
+                    Real(i + 1) *
+                      (field == Field::Affine ? exponent : exponent * exponent);
               return value;
             }),
-          forcing(dim, [dim, lambda, mu](const Geometry::Point& p) {
+          forcing(dim, [dim, lambda, mu, field](const Geometry::Point& p) {
             Real exponent = 0;
             Real coefficientSum = 0;
             for (size_t j = 0; j < dim; ++j)
@@ -62,7 +84,9 @@ namespace Rodin::Tests::Convergence::LinearElasticity
             }
             Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
             for (size_t i = 0; i < dim; ++i)
-              value(i) = -std::exp(exponent) *
+              value(i) = -(field == Field::Exponential   ? std::exp(exponent)
+                             : field == Field::Quadratic ? Real(2)
+                                                         : Real(0)) *
                 (mu * Real(dim) * Real(i + 1) + (lambda + mu) * coefficientSum);
             return value;
           })
@@ -77,13 +101,55 @@ namespace Rodin::Tests::Convergence::LinearElasticity
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
           for (size_t j = 0; j < m_dim; ++j)
-            value(i, j) = Real(i + 1) * std::exp(exponent);
+            value(i, j) = Real(i + 1) *
+              (m_field == Field::Exponential    ? std::exp(exponent)
+                  : m_field == Field::Quadratic ? 2 * exponent
+                  : m_field == Field::Constant  ? Real(0)
+                                                : Real(1));
         return value;
       }
 
       size_t getDimension() const
       {
         return m_dim;
+      }
+
+      /** @brief Analytic symmetric gradient, independent of discrete operators. */
+      Math::SpatialMatrix<Real> strain(const Geometry::Point& p) const
+      {
+        Real sum = 0;
+        for (size_t j = 0; j < m_dim; ++j)
+          sum += p(j);
+        const Real factor = m_field == Field::Exponential ? std::exp(sum)
+          : m_field == Field::Quadratic                   ? 2 * sum
+          : m_field == Field::Constant                    ? Real(0)
+                                                          : Real(1);
+        Math::SpatialMatrix<Real> value(
+          static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
+        for (size_t i = 0; i < m_dim; ++i)
+          for (size_t j = 0; j < m_dim; ++j)
+            value(i, j) = Real(i + j + 2) * factor / 2;
+        return value;
+      }
+
+      /** @brief Analytic Cauchy stress for the stated isotropic law. */
+      Math::SpatialMatrix<Real> stress(const Geometry::Point& p) const
+      {
+        Real sum = 0;
+        for (size_t j = 0; j < m_dim; ++j)
+          sum += p(j);
+        const Real factor = m_field == Field::Exponential ? std::exp(sum)
+          : m_field == Field::Quadratic                   ? 2 * sum
+          : m_field == Field::Constant                    ? Real(0)
+                                                          : Real(1);
+        const Real coefficientSum = Real(m_dim * (m_dim + 1)) / 2;
+        Math::SpatialMatrix<Real> value(
+          static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
+        for (size_t i = 0; i < m_dim; ++i)
+          for (size_t j = 0; j < m_dim; ++j)
+            value(i, j) =
+              factor * (m_mu * Real(i + j + 2) + m_lambda * coefficientSum * (i == j));
+        return value;
       }
       Real getLambda() const
       {

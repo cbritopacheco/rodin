@@ -132,15 +132,20 @@ namespace Rodin::Solver
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
 #if PETSC_VERSION_GE(3, 20, 0)
-    PetscObjectState state;
-    PetscErrorCode ierr = VecGetState(x, &state);
+    PetscObjectId id;
+    PetscErrorCode ierr = PetscObjectGetId(reinterpret_cast<PetscObject>(x), &id);
     if (ierr)
       return ierr;
-    if (self->m_updated && *self->m_updated == state)
+    PetscObjectState state;
+    ierr = VecGetState(x, &state);
+    if (ierr)
+      return ierr;
+    const auto key = std::make_pair(id, state);
+    if (self->m_updated && *self->m_updated == key)
       return PETSC_SUCCESS;
     if (self->m_update)
       self->m_update(x);
-    self->m_updated = state;
+    self->m_updated = key;
 #else
     if (self->m_update)
       self->m_update(x);

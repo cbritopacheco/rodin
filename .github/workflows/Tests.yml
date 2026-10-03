@@ -71,8 +71,17 @@ jobs:
           --output-on-failure -j 2
 
   PETScConvergence:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    # Includes resolved vector and coupled studies on all geometries and 1-4 ranks.
+    # The sequential job exhausted 90 minutes, including dependency/build time.
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -109,7 +118,7 @@ jobs:
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
           -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_MULTITHREADED=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
 
@@ -118,11 +127,139 @@ jobs:
           cmake --build build -j 2 --target
           RodinConvergenceHPETScPoisson
           RodinConvergenceHPETScMPIPoisson
+          RodinConvergenceHPETScConductivity
+          RodinConvergenceHPETScLinearElasticity
+          RodinConvergenceHPETScReactionDiffusion
+          RodinConvergenceHPETScNonlinearPoisson
+          RodinConvergenceHPETScStokes
+          RodinConvergencePPETScStokes
+          RodinConvergenceHPPETScStokes
 
       - name: Run PETSc convergence suite
         run: >-
-          ctest --test-dir build/tests -R RodinConvergenceHPETSc
+          ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc'
           --output-on-failure -j 1
+
+  PETScCurvedConvergence:
+    runs-on: ubuntu-24.04
+    # Resolved curved studies get a separate budget from the flat PDE matrix.
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
+          libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+
+      - name: Configure curved PETSc convergence build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=OFF
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
+
+      - name: Build curved PETSc convergence suites
+        run: >-
+          cmake --build build -j 2 --target
+          RodinConvergenceIsoparametricPETScLinearElasticity
+          RodinConvergenceIsoparametricPETScStokes
+          RodinConvergenceIsoparametricPETScReactionDiffusion
+          RodinConvergenceIsoparametricPETScNonlinearPoisson
+          RodinConvergenceIsoparametricPETScP0Projection
+          RodinConvergenceIsoparametricPETScDiffusion
+          RodinConvergenceIsoparametricPETScGeometryApproximation
+
+      - name: Run curved PETSc convergence suites
+        run: >-
+          ctest --test-dir build/tests
+          -R '^RodinConvergenceIsoparametricPETSc(MPI)?(LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson|P0Projection|Diffusion|GeometryApproximation)_'
+          --output-on-failure -j 1
+
+  PETScComplexConvergence:
+    # Pin the PETSc 3.19 compatibility gate, independently of the real build.
+    runs-on: ubuntu-24.04
+    # Curved-pyramid studies retain resolved meshes and serialize heavy entries.
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install complex PETSc dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
+          libscotch-dev libmetis-dev libhdf5-dev libomp-dev
+          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
+
+      - name: Configure complex PETSc convergence build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=ON
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
+          -DPETSc_DIR="$(pkg-config --variable=prefix PETSc)"
+
+      - name: Build complex PETSc convergence suite
+        run: >-
+          cmake --build build -j 2 --target
+          RodinConvergenceHPETScHelmholtz RodinPETScSNESStateTest
+          RodinConvergenceIsoparametricPETScHelmholtz
+          RodinConvergenceIsoparametricPETScP0Projection
+
+      - name: Run complex PETSc convergence suite
+        run: >-
+          ctest --test-dir build/tests -R 'RodinConvergence(H|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest'
+          --output-on-failure -j 2
 
   Unit:
     runs-on: ubuntu-latest
