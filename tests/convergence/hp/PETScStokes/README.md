@@ -84,9 +84,16 @@ bound. Direct factorization has no iterative tolerance parameter.
 
 MPI norms sum owned-cell squared contributions globally before taking
 square roots. Higher-order halo/empty-partition norm diagnostics are
-registered in the shared-data PETSc p suite. MUMPS retains the h-suite
-centralized RHS/solution defaults; assembly/factorization are distributed,
-but iterative scalability is not claimed.
+registered in the shared-data PETSc p suite. The shared workload uses
+`ICNTL(20)=0` for a centralized RHS and `ICNTL(14)=100` for a 100%
+factor-workspace margin above the symbolic estimate. The latter accommodates
+delayed pivots without changing the discrete problem or numerical acceptance;
+the [p-suite specification](../../p/PETScStokes/README.md) records the
+older-stack reproduction. MUMPS factorization and PETSc preconditioner
+status are checked explicitly, with factor diagnostics reported on failure.
+PETSc manages the distributed solution. Assembly/factorization remain
+distributed, but iterative scalability is not claimed. Explicit PETSc options
+retain precedence over the test defaults.
 
 ## Execution scope
 

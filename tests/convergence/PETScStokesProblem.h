@@ -9,6 +9,7 @@
 #define RODIN_TESTS_CONVERGENCE_PETSC_STOKES_PROBLEM_H
 
 #include <functional>
+#include <utility>
 #include <gtest/gtest.h>
 
 #include "Stokes.h"
@@ -30,7 +31,8 @@ namespace Rodin::Tests::Convergence
    * and global mean-multiplier spaces, along with a fresh PETSc system.
    * Local and MPI meshes consume the same variational form without DOF-layout
    * assumptions or matrix resizing. PREONLY/LU/MUMPS handles the saddle-point
-   * operator. Solver status, an independently recomputed coefficient residual,
+   * operator, with a 100-percent factor-workspace margin for delayed pivots.
+   * MUMPS factorization status, solver status, an independent coefficient residual,
    * and the pressure mean are checked before physical-cell error integration.
    * MPI errors sum owned-cell contributions globally, excluding halo copies.
    */
@@ -49,6 +51,8 @@ namespace Rodin::Tests::Convergence
       StokesErrors solve(Real viscosity = 1) const
       {
         static_assert(K >= 2);
+        SCOPED_TRACE(::testing::Message()
+          << "velocity degree=" << K << " quadrature order=" << m_order);
         using namespace Variational;
         const auto& mesh = m_mesh.get();
         H1<K, Math::SpatialVector<Real>, MeshType> velocitySpace(
@@ -77,6 +81,17 @@ namespace Rodin::Tests::Convergence
         Problem problem(u, p, lambda, v, q, mu);
         problem = diffusion - pressureVelocity + incompressibility + gaugePressure +
           gaugeMean - body + DirichletBC(u, m_data.getVelocity());
+        // Delayed pivots in the indefinite system can exceed MUMPS's default
+        // factor-workspace estimate. Reserve space without changing the matrix.
+        // Explicit runtime options retain precedence over these test defaults.
+        for (const auto& [name, value] : {std::pair{"-mat_mumps_icntl_14", "100"},
+               std::pair{"-mat_mumps_icntl_20", "0"}})
+        {
+          PetscBool set = PETSC_FALSE;
+          EXPECT_EQ(PetscOptionsHasName(nullptr, nullptr, name, &set), PETSC_SUCCESS);
+          if (!set)
+            EXPECT_EQ(PetscOptionsSetValue(nullptr, name, value), PETSC_SUCCESS);
+        }
         PETSc::Solver::KSP solver(problem);
         solver.setType(KSPPREONLY);
         PC pc = nullptr;
@@ -84,6 +99,16 @@ namespace Rodin::Tests::Convergence
         EXPECT_EQ(PCSetType(pc, PCLU), PETSC_SUCCESS);
         EXPECT_EQ(PCFactorSetMatSolverType(pc, MATSOLVERMUMPS), PETSC_SUCCESS);
         solver.solve();
+        PCFailedReason failure = PC_NOERROR;
+        EXPECT_EQ(PCGetFailedReason(pc, &failure), PETSC_SUCCESS);
+        Mat factor = nullptr;
+        EXPECT_EQ(PCFactorGetMatrix(pc, &factor), PETSC_SUCCESS);
+        PetscInt info = 0, detail = 0;
+        EXPECT_EQ(MatMumpsGetInfog(factor, 1, &info), PETSC_SUCCESS);
+        EXPECT_EQ(MatMumpsGetInfog(factor, 2, &detail), PETSC_SUCCESS);
+        EXPECT_EQ(failure, PC_NOERROR)
+          << "MUMPS INFOG(1)=" << info << " INFOG(2)=" << detail;
+        EXPECT_EQ(info, 0) << "MUMPS INFOG(2)=" << detail;
         KSPConvergedReason reason = KSP_CONVERGED_ITERATING;
         EXPECT_EQ(KSPGetConvergedReason(solver.getHandle(), &reason), PETSC_SUCCESS);
         EXPECT_GT(reason, 0);

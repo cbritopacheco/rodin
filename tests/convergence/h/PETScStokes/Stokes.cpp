@@ -192,16 +192,6 @@ int main(int argc, char** argv)
 {
   if (PetscInitialize(&argc, &argv, nullptr, nullptr) != PETSC_SUCCESS)
     return 1;
-  // Match the existing MPI factorization-reuse suite: centralized RHS and
-  // solution avoid a distributed-scatter fault in the installed MUMPS build.
-  for (const char* name : {"-mat_mumps_icntl_20", "-mat_mumps_icntl_21"})
-  {
-    PetscBool set = PETSC_FALSE;
-    if (PetscOptionsHasName(nullptr, nullptr, name, &set) != PETSC_SUCCESS)
-      return 1;
-    if (!set && PetscOptionsSetValue(nullptr, name, "0") != PETSC_SUCCESS)
-      return 1;
-  }
   int result;
   {
 #ifdef RODIN_USE_MPI

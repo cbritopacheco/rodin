@@ -73,7 +73,8 @@ jobs:
   PETScConvergence:
     runs-on: ubuntu-24.04
     # Includes resolved vector and coupled studies on all geometries and 1-4 ranks.
-    timeout-minutes: 90
+    # The sequential job exhausted 90 minutes, including dependency/build time.
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:

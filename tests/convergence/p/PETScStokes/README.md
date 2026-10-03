@@ -74,11 +74,22 @@ case raises assembly/error order to 18 and requires relative change below
 $10^{-6}$ in every field quantity. The direct factorization has no
 iterative tolerance to tighten.
 
-MUMPS uses the existing h-suite defaults `ICNTL(20)=ICNTL(21)=0` for
-centralized right-hand side and solution, avoiding the installed MUMPS
-distributed-RHS scatter fault. Matrix assembly/factorization remain
-distributed; no iterative-solver scalability claim is made. Explicit PETSc
-options may override these defaults.
+MUMPS uses the shared h/p/hp defaults `ICNTL(20)=0` for a centralized
+right-hand side and `ICNTL(14)=100` for a 100% factor-workspace margin above
+the symbolic estimate. The latter accommodates delayed pivots without
+altering the matrix, pressure gauge, pivot threshold, or error tolerances.
+On the four-rank `n=3` pyramid P4/P3 system, PETSc 3.19.6/MUMPS 5.6.2
+exhausts factor workspace at the solver's default 20% margin; the same
+exported operator and right-hand side solve with the 100% margin and
+normalized residual approximately $7.7\times10^{-14}$. This is a
+solver-resource control, not evidence of a singular finite element system.
+MUMPS `INFOG(1)` and PETSc preconditioner status must indicate success;
+`INFOG(2)` and the degree/quadrature order identify failures.
+
+PETSc manages the distributed solution; `ICNTL(21)` is not exposed as a
+runtime override by this interface. Matrix assembly/factorization remain
+distributed; no iterative-solver scalability claim is made. Explicit
+PETSc options retain precedence over the shared test defaults.
 
 ## Polynomial, physical, and distributed controls
 

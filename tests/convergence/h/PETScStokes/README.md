@@ -20,11 +20,17 @@ $$
 Only velocity has essential boundary constraints; pressure is not pinned
 at an arbitrarily selected node. This is an indefinite mixed system, not
 an SPD problem. PETSc PREONLY with LU/MUMPS is used in both mesh contexts.
-MUMPS `ICNTL(20)=ICNTL(21)=0` centralizes the right-hand side and solution,
-matching Rodin's existing distributed factorization-reuse suite and avoiding
-a distributed-RHS scatter fault in the local MUMPS installation. Matrix
-assembly and the factorization remain distributed; this is not a scalable
-iterative-solver benchmark. Explicit PETSc options may override these defaults.
+The shared workload sets MUMPS `ICNTL(20)=0` for a centralized right-hand
+side, avoiding a distributed-RHS scatter fault in the local MUMPS installation.
+PETSc manages the distributed solution; `ICNTL(21)` is not a supported
+runtime override in this interface. Matrix assembly and factorization remain
+distributed; this is not a scalable iterative-solver benchmark.
+The factor-workspace margin is `ICNTL(14)=100`, reserving 100% above the
+symbolic estimate for delayed pivots in this indefinite system. This changes
+storage provision, not the operator, pressure gauge, pivot threshold, or
+acceptance tolerances. Explicit PETSc options retain precedence over these
+test defaults. MUMPS `INFOG(1)` and PETSc preconditioner status are checked
+alongside the convergence reason, with `INFOG(2)` reported on failure.
 Real PETSc with MUMPS support is required; CMake reports exclusion when
 that factorization is unavailable. CI builds the target explicitly so that
 loss of the required support cannot silently remove this gate.
