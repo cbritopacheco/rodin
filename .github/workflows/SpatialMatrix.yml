@@ -11,10 +11,13 @@ on:
       - 'src/Rodin/**'
       - 'tests/**'
       - '.github/workflows/SpatialMatrix.yml'
+concurrency:
+  group: SpatialMatrix-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   petsc-matrix:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -22,6 +25,9 @@ jobs:
         multithreaded: ['ON', 'OFF']
     env:
       OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
+      # Let each MPI rank schedule both OpenMP workers on the runner.
+      OMPI_MCA_hwloc_base_binding_policy: none
       OMPI_ALLOW_RUN_AS_ROOT: 1
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
     steps:
@@ -48,9 +54,17 @@ jobs:
           cmake --build build -j2 --target
           RodinVariationalMatrixRangeTest RodinIOSpatialMatrixTest
           RodinManufacturedSpatialMatrix RodinMPIMatrixRangeTest
-      - name: Run native and backend matrix coverage
-        run: |
-          build/tests/unit/Rodin/Variational/RodinVariationalMatrixRangeTest
-          build/tests/unit/Rodin/IO/RodinIOSpatialMatrixTest
-          build/tests/manufactured/Rodin/H1/RodinManufacturedSpatialMatrix
-          ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np[1-4]$' --output-on-failure
+      - name: Run native matrix coverage
+        run: build/tests/unit/Rodin/Variational/RodinVariationalMatrixRangeTest
+      - name: Run matrix IO coverage
+        run: build/tests/unit/Rodin/IO/RodinIOSpatialMatrixTest
+      - name: Run manufactured matrix solves
+        run: build/tests/manufactured/Rodin/H1/RodinManufacturedSpatialMatrix
+      - name: Run matrix coverage with one MPI rank
+        run: ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np1$' --output-on-failure
+      - name: Run matrix coverage with two MPI ranks
+        run: ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np2$' --output-on-failure
+      - name: Run matrix coverage with three MPI ranks
+        run: ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np3$' --output-on-failure
+      - name: Run matrix coverage with four MPI ranks
+        run: ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np4$' --output-on-failure
