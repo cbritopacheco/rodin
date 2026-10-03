@@ -47,6 +47,4 @@ The separate `RodinSpatialMatrixBenchmarks` executable measures finite-element
 assembly against nine scalar assemblies. It uses total process CPU time, including
 OpenMP workers, and separates complete assembly, triplet generation, element
 binding, cached entry scans and sparse conversion. Those assembly costs should
-not be inferred from these value-operation timings. See
-[the SpatialMatrix guide](../../doc/Guides/FiniteElementSpaces.dox) (Assembly CPU investigation section) for commands,
-controlled comparisons, measured results and remaining scope.
+not be inferred from these value-operation timings.
