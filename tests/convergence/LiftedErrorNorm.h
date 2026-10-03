@@ -11,7 +11,7 @@
 #include "Convergence.h"
 namespace Rodin::Tests::Convergence
 {
-  /** @brief Real/complex scalar field, geometry and total exact-domain error norms.
+  /** @brief Real/complex scalar/vector exact-domain error decomposition.
    * @pre Meshes are full-dimensional and share ordered logical cell vertices;
    * the exact map is regular and orientation-preserving on the original box.
    * @par Architecture
@@ -22,6 +22,9 @@ namespace Rodin::Tests::Convergence
    * @f$x_h=\Phi_h(\xi)@f$, the lift is @f$u_h^\ell(x)=u_h(x_h)@f$.
    * Its physical gradient is
    * @f$D\Phi^{-T}D\Phi_h^T\nabla u_h(x_h)@f$.
+   * For vector fields with component-row Jacobians, the lifted derivative is
+   * @f$Ju_h(x_h)D\Phi_hD\Phi^{-1}@f$. An optional observer receives
+   * the three derivative defects and the exact-domain quadrature weight.
    * Field and geometry defects add pointwise, but their norms do not.
    * Complex scalar and gradient errors use the full modulus squared; the
    * real geometric differential acts on both real and imaginary components.
@@ -39,8 +42,35 @@ namespace Rodin::Tests::Convergence
       static Result compute(const Mesh& reference, const Mesh& represented, const GF& uh,
         const Data& data, const Map& exactMap, size_t order)
       {
+        return compute(
+          reference, represented, uh, data, exactMap, order, [](const auto&, Real) {});
+      }
+
+      template <class Mesh, class GF, class Data, class Map, class Observer>
+      static Result compute(const Mesh& reference, const Mesh& represented, const GF& uh,
+        const Data& data, const Map& exactMap, size_t order, Observer&& observe)
+      {
+        using Space = typename FormLanguage::Traits<GF>::FESType;
+        using Range = typename FormLanguage::Traits<Space>::RangeType;
+        using Scalar = typename FormLanguage::Traits<Range>::ScalarType;
+        constexpr bool IsVector = FormLanguage::IsVectorRange<Range>::Value;
+        static_assert(std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>);
+        static_assert(IsVector || std::is_same_v<Range, Scalar>);
+        using Derivative = std::conditional_t<IsVector, Math::SpatialMatrix<Scalar>,
+          Math::SpatialVector<Scalar>>;
         std::array<Real, 6> squared{};
-        const auto gradient = Variational::Grad(uh);
+        const auto gradient = [&] {
+          if constexpr (IsVector)
+            return Variational::Jacobian(uh);
+          else
+            return Variational::Grad(uh);
+        }();
+        const auto exactGradient = [&data](const Math::SpatialPoint& x) {
+          if constexpr (IsVector)
+            return data.getJacobian(x);
+          else
+            return data.getGradient(x);
+        };
         const size_t dim = reference.getSpaceDimension();
         for (auto cell = reference.getCell(); cell; ++cell)
         {
@@ -72,29 +102,32 @@ namespace Rodin::Tests::Convergence
             const Real weight =
               qf.getWeight(qp) * original.getDistortion() * exactJacobian.determinant();
             assert(original.getDistortion() > 0 && exactJacobian.determinant() > 0);
-            using Space = typename FormLanguage::Traits<GF>::FESType;
-            using Scalar = typename FormLanguage::Traits<Space>::RangeType;
-            static_assert(
-              std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>);
-            const Scalar value = uh(ip);
-            const Scalar representedValue =
+            const Range value = uh(ip);
+            const Range representedValue =
               data.getSolution(point.getPhysicalCoordinates());
-            const Scalar exactValue = data.getSolution(exactPosition);
-            const Math::SpatialVector<Scalar> derivative = gradient(ip);
+            const Range exactValue = data.getSolution(exactPosition);
+            const Derivative derivative = gradient(ip);
             const auto representedDerivative =
-              data.getGradient(point.getPhysicalCoordinates());
-            const auto exactDerivative = data.getGradient(exactPosition);
-            const std::array<Scalar, 3> values{value - representedValue,
+              exactGradient(point.getPhysicalCoordinates());
+            const auto exactDerivative = exactGradient(exactPosition);
+            const auto transform = [&lift](const Derivative& derivative) -> Derivative {
+              if constexpr (IsVector)
+                return derivative * lift.transpose();
+              else
+                return lift * derivative;
+            };
+            const std::array<Range, 3> values{value - representedValue,
               representedValue - exactValue, value - exactValue};
-            const std::array<Math::SpatialVector<Scalar>, 3> derivatives{
-              lift * (derivative - representedDerivative),
-              lift * representedDerivative - exactDerivative,
-              lift * derivative - exactDerivative};
+            const std::array<Derivative, 3> derivatives{
+              transform(derivative - representedDerivative),
+              transform(representedDerivative) - exactDerivative,
+              transform(derivative) - exactDerivative};
             for (size_t i = 0; i < values.size(); ++i)
             {
               squared[2 * i] += weight * ErrorNorm::squaredMagnitude(values[i]);
               squared[2 * i + 1] += weight * ErrorNorm::squaredMagnitude(derivatives[i]);
             }
+            observe(derivatives, weight);
           }
         }
 #ifdef RODIN_USE_MPI

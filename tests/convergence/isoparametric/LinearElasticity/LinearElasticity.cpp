@@ -7,7 +7,7 @@
 
 /**
  * @file
- * @brief Displacement, strain and stress convergence on exact quadratic maps.
+ * @brief Curved elasticity convergence and independent vector-lift metric oracles.
  *
  * The physical problem is @f$-\operatorname{div}\sigma(u)=f@f$ with full
  * Dirichlet trace and @f$\sigma(u)=\lambda\operatorname{div}(u)I+
@@ -16,8 +16,12 @@
  * the exponential field tests approximation rates rather than reproduction.
  */
 
+#include <array>
+
 #include "../../LinearElasticity.h"
 #include "../../CurvedGeometry.h"
+#include "../../LiftedErrorNorm.h"
+#include "../../SineMap.h"
 
 #ifdef RODIN_CURVED_ELASTICITY_PETSC
 #include "Rodin/PETSc.h"
@@ -65,10 +69,17 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
       Real stress;
   };
 
+  struct LiftedErrors
+  {
+      LiftedErrorNorm::Result displacement;
+      std::array<Real, 3> strain{}, stress{};
+  };
+
   /**
    * @brief A mapped elasticity workload with backend-independent observables.
    * @par Architecture
-   * A fresh mesh owns its exact P2 transformations. Each solve creates fresh
+   * A fresh mesh owns its P2 transformations, exact for the quadratic map or
+   * interpolated for the sine map. Each solve creates fresh
    * vector spaces and a linear system. Shared manufactured physical data are
    * consumed by native/PETSc assembly; the solver policy remains explicit.
    * ErrorNorm integrates physical quantities on owned cells and reduces MPI
@@ -78,10 +89,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   class Workload
   {
     public:
-      Workload(Polytope::Type geometry, size_t n)
+      using Map = typename CurvedGeometry<Mesh<ContextType>>::Map;
+      Workload(Polytope::Type geometry, size_t n, Map map = Map::Quadratic,
+        bool lifted = false, Real amplitude = 0.1)
         : m_mesh(makeMesh(geometry, n)),
-          m_geometry(m_mesh)
+          m_geometry(m_mesh, map, amplitude)
       {
+        if (lifted)
+          m_reference.emplace(m_mesh);
         m_geometry.template install<2>();
       }
 
@@ -89,12 +104,17 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
       {
         return m_mesh;
       }
+      const auto& getReference() const
+      {
+        return m_reference.value();
+      }
 
       template <size_t K>
       Errors solve(Data::Field field, bool omitVolumetric = false,
-        size_t order = AssemblyOrder, Real tolerance = SolverTolerance) const
+        size_t order = AssemblyOrder, Real tolerance = SolverTolerance,
+        size_t normOrder = 0, LiftedErrors* lifted = nullptr) const
       {
-        const size_t dim = m_mesh.getDimension();
+        const size_t dim = m_mesh.getSpaceDimension();
         const Data data(dim, Lambda, Mu, field);
         auto space = [&] {
 #ifndef RODIN_CURVED_ELASTICITY_PETSC
@@ -160,14 +180,46 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         const auto stress = [&jacobian](const IntegrationPoint& ip) {
           return tensor(jacobian(ip), true);
         };
+        const size_t integrationOrder = normOrder == 0 ? order + 2 : normOrder;
+        if (lifted)
+        {
+          assert(m_reference);
+          std::array<Real, 6> squared{};
+          // Constitutive norms consume the same owned-cell quadrature traversal.
+          // Applying the linear law to derivative defects gives tensor defects.
+          const auto observe =
+            [&squared](
+              const std::array<Math::SpatialMatrix<Real>, 3>& derivatives, Real weight) {
+              for (size_t i = 0; i < derivatives.size(); ++i)
+              {
+                squared[2 * i] +=
+                  weight * ErrorNorm::squaredMagnitude(tensor(derivatives[i], false));
+                squared[2 * i + 1] +=
+                  weight * ErrorNorm::squaredMagnitude(tensor(derivatives[i], true));
+              }
+            };
+          lifted->displacement = LiftedErrorNorm::compute(*m_reference, m_mesh,
+            u.getSolution(), data, SineMap(), integrationOrder, observe);
+#ifdef RODIN_USE_MPI
+          if constexpr (requires { m_mesh.getShard(); })
+            for (Real& value : squared)
+              value = boost::mpi::all_reduce(
+                m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
+#endif
+          for (size_t i = 0; i < lifted->strain.size(); ++i)
+          {
+            lifted->strain[i] = std::sqrt(squared[2 * i]);
+            lifted->stress[i] = std::sqrt(squared[2 * i + 1]);
+          }
+        }
         return {ErrorNorm::computeVector(
-                  m_mesh, u.getSolution(), data.exact, exactJacobian, order + 2),
+                  m_mesh, u.getSolution(), data.exact, exactJacobian, integrationOrder),
           ErrorNorm::computeL2(
             m_mesh, strain, [&data](const Point& p) { return data.strain(p); },
-            order + 2),
+            integrationOrder),
           ErrorNorm::computeL2(
             m_mesh, stress, [&data](const Point& p) { return data.stress(p); },
-            order + 2)};
+            integrationOrder)};
       }
 
     private:
@@ -196,6 +248,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 #endif
       }
       Mesh<ContextType> m_mesh;
+      Optional<Mesh<ContextType>> m_reference;
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
 
@@ -203,6 +256,124 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   class CurvedLinearElasticityTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
+      void checkComplexVectorMetric() const
+      {
+        using Map = typename Workload<ContextType>::Map;
+        Workload<ContextType> problem(this->GetParam(), 3, Map::Sine, true, 0);
+        const size_t dim = problem.getMesh().getSpaceDimension();
+        struct ComplexData
+        {
+            Data real;
+            Math::SpatialVector<Complex> getSolution(const Math::SpatialPoint& x) const
+            {
+              return Complex(1, 1) * real.getSolution(x);
+            }
+            Math::SpatialMatrix<Complex> getJacobian(const Math::SpatialPoint& x) const
+            {
+              return Complex(1, 1) * real.getJacobian(x);
+            }
+        };
+        const ComplexData data{Data(dim, Lambda, Mu, Data::Field::AsymmetricAffine)};
+        H1<2, Math::SpatialVector<Complex>, Mesh<ContextType>> space(
+          std::integral_constant<size_t, 2>{}, problem.getMesh(), dim);
+        GridFunction u(space);
+        u = VectorFunction(dim, [data](const Point& p) {
+          return data.getSolution(p.getPhysicalCoordinates());
+        });
+        constexpr size_t MetricOrder = 18;
+        constexpr Real Amplitude = 0.1;
+        const auto e = LiftedErrorNorm::compute(
+          problem.getReference(), problem.getMesh(), u, data, SineMap(), MetricOrder);
+        Real columnSquared = 0;
+        for (size_t i = 0; i < dim; ++i)
+        {
+          const Real coefficient = Real(dim * (i + 1)) + (i == 0);
+          columnSquared += coefficient * coefficient;
+        }
+        const Real slope = Amplitude * Math::Constants::pi();
+        const Real l2 = Amplitude * std::sqrt(columnSquared);
+        const Real h1 = std::sqrt(2 * columnSquared) *
+          (dim == 1 ? std::sqrt(Real(1) / std::sqrt(Real(1) - slope * slope) - 1)
+                    : slope / std::sqrt(Real(2)));
+        EXPECT_TRUE(e.field.isFinite());
+        EXPECT_LT(e.field.getL2(), PatchTolerance);
+        EXPECT_LT(e.field.getH1Seminorm(), PatchTolerance);
+        for (const auto& norm : {e.geometry, e.total})
+        {
+          EXPECT_TRUE(norm.isFinite());
+          EXPECT_NEAR(norm.getL2(), l2, PatchTolerance);
+          EXPECT_NEAR(norm.getH1Seminorm(), h1, PatchTolerance);
+        }
+      }
+
+      void checkLiftedMetric() const
+      {
+        using Map = typename Workload<ContextType>::Map;
+        Workload<ContextType> problem(this->GetParam(), 3, Map::Sine, true, 0);
+        LiftedErrors error;
+        constexpr size_t MetricOrder = 18;
+        const auto represented = problem.template solve<2>(Data::Field::AsymmetricAffine,
+          false, AssemblyOrder, SolverTolerance, MetricOrder, &error);
+        const size_t dim = problem.getMesh().getSpaceDimension();
+        constexpr Real Amplitude = 0.1;
+        const Real slope = Amplitude * Math::Constants::pi();
+        // Last column of A_ij=(i+1)(j+1)+delta_i0 delta_j,d-1.
+        // Its norm differs from the first column and the last row in d>=2.
+        Real columnSquared = 0;
+        for (size_t i = 0; i < dim; ++i)
+        {
+          const Real coefficient = Real(dim * (i + 1)) + (i == 0);
+          columnSquared += coefficient * coefficient;
+        }
+        const Real first = Real(dim + 1);
+        const Real l2 = Amplitude * std::sqrt(columnSquared / 2);
+        const Real h1 = std::sqrt(columnSquared) *
+          (dim == 1 ? std::sqrt(Real(1) / std::sqrt(Real(1) - slope * slope) - 1)
+                    : slope / std::sqrt(Real(2)));
+        const Real strain =
+          dim == 1 ? h1 : slope * std::sqrt((columnSquared + first * first) / 4);
+        const Real stress = dim == 1 ? (Lambda + 2 * Mu) * h1
+                                     : slope / std::sqrt(Real(2)) *
+            std::sqrt(2 * Mu * Mu * columnSquared +
+              (Real(dim) * Lambda * Lambda + 4 * Lambda * Mu + 2 * Mu * Mu) * first *
+                first);
+        for (const auto& e : {represented.displacement, error.displacement.field})
+        {
+          EXPECT_TRUE(e.isFinite());
+          EXPECT_LT(e.getL2(), PatchTolerance);
+          EXPECT_LT(e.getH1Seminorm(), PatchTolerance);
+        }
+        EXPECT_LT(represented.strain, PatchTolerance);
+        EXPECT_LT(represented.stress, PatchTolerance);
+        EXPECT_LT(error.strain[0], PatchTolerance);
+        EXPECT_LT(error.stress[0], PatchTolerance);
+        for (const auto& e : {error.displacement.geometry, error.displacement.total})
+        {
+          EXPECT_TRUE(e.isFinite());
+          EXPECT_NEAR(e.getL2(), l2, PatchTolerance);
+          EXPECT_NEAR(e.getH1Seminorm(), h1, PatchTolerance);
+        }
+        for (size_t i : {1u, 2u})
+        {
+          EXPECT_NEAR(error.strain[i], strain, PatchTolerance);
+          EXPECT_NEAR(error.stress[i], stress, PatchTolerance);
+        }
+        const auto& reference = problem.getReference();
+        for (auto cell = problem.getMesh().getCell(); cell; ++cell)
+        {
+          const auto original = reference.getCell(cell->getIndex());
+          EXPECT_EQ(cell->getGeometry(), original->getGeometry());
+          const auto vertices = cell->getVertices(),
+                     originalVertices = original->getVertices();
+          ASSERT_EQ(vertices.size(), originalVertices.size());
+          for (size_t i = 0; i < vertices.size(); ++i)
+            EXPECT_EQ(vertices[i], originalVertices[i]);
+          if constexpr (requires { reference.getShard(); })
+            EXPECT_EQ(reference.getShard().isOwned(dim, cell->getIndex()),
+              problem.getMesh().getShard().isOwned(dim, cell->getIndex()));
+        }
+      }
+
       template <size_t K>
       void checkRates() const
       {
@@ -316,6 +487,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   };
 
   using LocalTest = CurvedLinearElasticityTest<Context::Local>;
+  TEST_P(LocalTest, LiftedAsymmetricAffineMetricOracle)
+  {
+    checkLiftedMetric();
+  }
+  TEST_P(LocalTest, LiftedComplexVectorMetricOracle)
+  {
+    checkComplexVectorMetric();
+  }
   TEST_P(LocalTest, P1OptimalRates)
   {
     checkRates<1>();
@@ -354,6 +533,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 
 #if defined(RODIN_CURVED_ELASTICITY_PETSC) && defined(RODIN_USE_MPI)
   using MPITest = CurvedLinearElasticityTest<Context::MPI>;
+  TEST_P(MPITest, LiftedAsymmetricAffineMetricOracle)
+  {
+    checkLiftedMetric();
+  }
+  TEST_P(MPITest, LiftedComplexVectorMetricOracle)
+  {
+    checkComplexVectorMetric();
+  }
   TEST_P(MPITest, P1OptimalRates)
   {
     checkRates<1>();

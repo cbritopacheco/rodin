@@ -235,6 +235,10 @@ axis, $h=1/(n-1)$, and field degree $p$:
   measures displacement, strain and stress; its
   [suite specification](isoparametric/LinearElasticity/README.md) states the
   physical-coordinate patch and omitted-volumetric-term controls.
+  Its fixed-mesh vector-lift oracles use `n=3` and norm order 18,
+  independently checking displacement, strain and stress on the exact
+  sine-map domain. A separate complex-vector interpolation oracle checks
+  the full complex norm; it is not a complex-PETSc elasticity solve.
   Curved Taylor–Hood Stokes uses `n=3→5→9` in 2D and `n=3→4→5`
   in 3D; its [suite specification](isoparametric/Stokes/README.md) states
   velocity/pressure rates, the physical pressure gauge, and divergence controls.

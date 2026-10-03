@@ -100,3 +100,62 @@ where applicable). Each geometry is independently registered with a
 30-minute safety timeout for instrumented CI; this is not a performance claim.
 Pyramid registrations share a resource lock to avoid overlapping the largest
 curved workloads within a CTest run.
+
+## Exact-domain vector lift and metric controls
+
+The shared `LiftedErrorNorm` also accepts real and complex vector fields.
+Let $x=\Phi(\xi)$ and $x_h=\Phi_h(\xi)$, and define
+$u_h^\ell(x)=u_h(x_h)$. With component-row Jacobians, the chain rule is
+
+$$
+J(u_h^\ell)=Ju_h(x_h)D\Phi_h(\xi)D\Phi(\xi)^{-1}.
+$$
+
+The derivative defects of the field, geometry and total errors are evaluated
+in one owned-cell quadrature traversal. An observer applies the linear strain
+and stress laws to these defects, before reducing squared tensor norms.
+Pulling back an already formed stress tensor is not the same operation.
+Reference and represented cells are paired by logical indices and ordered
+vertices, not by coordinate tolerances.
+
+An independent metric oracle takes the represented map to be the identity
+and the exact map to be $\Phi(\xi)=\xi+a\sin(\pi\xi_0)e_{d-1}$,
+with $a=0.1$. The physical affine field is $u(x)=\mathbf{1}+Ax$, where
+
+$$
+A_{ij}=(i+1)(j+1)+\delta_{i0}\delta_{j,d-1},\qquad
+c=Ae_{d-1},\qquad C^2=\|c\|_2^2,\qquad s=a\pi.
+$$
+
+The field error vanishes for a P2 solve on the identity mesh. Geometry and
+total errors therefore coincide. Their displacement norms are
+
+$$
+E_{G,0}=aC/\sqrt{2},\qquad
+E_{G,1}=\begin{cases}
+C\sqrt{(1-s^2)^{-1/2}-1},&d=1,\\
+sC/\sqrt{2},&d\in\{2,3\}.
+\end{cases}
+$$
+
+For $d\in\{2,3\}$, their constitutive norms are independently given by
+
+$$
+E_{G,\varepsilon}=s\sqrt{(C^2+c_0^2)/4},\qquad
+E_{G,\sigma}=\frac{s}{\sqrt{2}}
+\sqrt{2\mu^2 C^2+(d\lambda^2+4\lambda\mu+2\mu^2)c_0^2}.
+$$
+
+In one dimension these reduce to $E_{G,\varepsilon}=E_{G,1}$ and
+$E_{G,\sigma}=(\lambda+2\mu)E_{G,1}$. The nonsymmetric matrix has
+distinct relevant row and column norms in higher dimensions; the oracle
+therefore detects an incorrectly transposed or left-multiplied lift.
+These tests use $n=3$, quadrature order 18 and absolute tolerance $10^{-9}$,
+on all seven geometries, in native and real-PETSc local/MPI configurations.
+
+A separate complex-vector interpolation oracle uses $(1+\mathrm{i})u$.
+Its displacement norms must be $\sqrt{2}$ times the real values, with
+vanishing field error. It checks complex vector interpolation and lifting
+on local and distributed meshes; it does not certify a complex-PETSc
+elasticity solve. Smooth approximated-domain elasticity rate studies remain
+a separate extension from these fixed-mesh metric controls.

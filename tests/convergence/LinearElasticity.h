@@ -35,6 +35,10 @@ namespace Rodin::Tests::Convergence::LinearElasticity
    * @f$u_i=1+(i+1)s@f$ and @f$u_i=1+(i+1)s^2@f$, respectively,
    * where @f$s=\sum_jx_j@f$. Their sources are zero and
    * @f$-2[\mu d(i+1)+(\lambda+\mu)\sum_j(j+1)]@f$.
+   * The asymmetric affine oracle uses @f$u=\mathbf{1}+Ax@f$ with
+   * @f$A_{ij}=(i+1)(j+1)+\delta_{i0}\delta_{j,d-1}@f$ and zero source.
+   * Coordinate overloads permit exact-domain lift evaluation without constructing
+   * an artificial Geometry::Point; Point-based field factories delegate to them.
    */
   class ManufacturedSolution
   {
@@ -44,7 +48,8 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         Constant,
         Affine,
         Quadratic,
-        Exponential
+        Exponential,
+        AsymmetricAffine
       };
 
     private:
@@ -52,6 +57,30 @@ namespace Rodin::Tests::Convergence::LinearElasticity
       Real m_lambda;
       Real m_mu;
       Field m_field;
+
+      static Math::SpatialVector<Real> solution(
+        size_t dim, Field field, const Math::SpatialPoint& x)
+      {
+        Real exponent = 0;
+        for (size_t j = 0; j < dim; ++j)
+          exponent += x(j);
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        for (size_t i = 0; i < dim; ++i)
+        {
+          if (field == Field::AsymmetricAffine)
+          {
+            value(i) = 1;
+            for (size_t j = 0; j < dim; ++j)
+              value(i) += (Real((i + 1) * (j + 1)) + (i == 0 && j == dim - 1)) * x(j);
+          }
+          else
+            value(i) = field == Field::Constant ? Real(1)
+              : field == Field::Exponential     ? Real(i + 1) * std::exp(exponent)
+                                                : 1 +
+                Real(i + 1) * (field == Field::Affine ? exponent : exponent * exponent);
+        }
+        return value;
+      }
 
     public:
       ManufacturedSolution(
@@ -62,17 +91,7 @@ namespace Rodin::Tests::Convergence::LinearElasticity
           m_field(field),
           exact(dim,
             [dim, field](const Geometry::Point& p) {
-              Real exponent = 0;
-              for (size_t j = 0; j < dim; ++j)
-                exponent += p(j);
-              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-              for (size_t i = 0; i < dim; ++i)
-                value(i) = field == Field::Constant ? Real(1)
-                  : field == Field::Exponential     ? Real(i + 1) * std::exp(exponent)
-                                                    : 1 +
-                    Real(i + 1) *
-                      (field == Field::Affine ? exponent : exponent * exponent);
-              return value;
+              return solution(dim, field, p.getPhysicalCoordinates());
             }),
           forcing(dim, [dim, lambda, mu, field](const Geometry::Point& p) {
             Real exponent = 0;
@@ -94,18 +113,30 @@ namespace Rodin::Tests::Convergence::LinearElasticity
 
       Math::SpatialMatrix<Real> jacobian(const Geometry::Point& p) const
       {
+        return getJacobian(p.getPhysicalCoordinates());
+      }
+
+      Math::SpatialVector<Real> getSolution(const Math::SpatialPoint& x) const
+      {
+        return solution(m_dim, m_field, x);
+      }
+
+      Math::SpatialMatrix<Real> getJacobian(const Math::SpatialPoint& x) const
+      {
         Real exponent = 0;
         for (size_t j = 0; j < m_dim; ++j)
-          exponent += p(j);
+          exponent += x(j);
         Math::SpatialMatrix<Real> value(
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
           for (size_t j = 0; j < m_dim; ++j)
-            value(i, j) = Real(i + 1) *
-              (m_field == Field::Exponential    ? std::exp(exponent)
-                  : m_field == Field::Quadratic ? 2 * exponent
-                  : m_field == Field::Constant  ? Real(0)
-                                                : Real(1));
+            value(i, j) = m_field == Field::AsymmetricAffine
+              ? Real((i + 1) * (j + 1)) + (i == 0 && j == m_dim - 1)
+              : Real(i + 1) *
+                (m_field == Field::Exponential    ? std::exp(exponent)
+                    : m_field == Field::Quadratic ? 2 * exponent
+                    : m_field == Field::Constant  ? Real(0)
+                                                  : Real(1));
         return value;
       }
 
@@ -128,7 +159,10 @@ namespace Rodin::Tests::Convergence::LinearElasticity
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
           for (size_t j = 0; j < m_dim; ++j)
-            value(i, j) = Real(i + j + 2) * factor / 2;
+            value(i, j) = m_field == Field::AsymmetricAffine
+              ? Real((i + 1) * (j + 1)) +
+                Real((i == 0 && j == m_dim - 1) + (j == 0 && i == m_dim - 1)) / 2
+              : Real(i + j + 2) * factor / 2;
         return value;
       }
 
@@ -147,8 +181,13 @@ namespace Rodin::Tests::Convergence::LinearElasticity
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
           for (size_t j = 0; j < m_dim; ++j)
-            value(i, j) =
-              factor * (m_mu * Real(i + j + 2) + m_lambda * coefficientSum * (i == j));
+            value(i, j) = m_field == Field::AsymmetricAffine
+              ? 2 * m_mu * Real((i + 1) * (j + 1)) +
+                m_mu * ((i == 0 && j == m_dim - 1) + (j == 0 && i == m_dim - 1)) +
+                m_lambda *
+                  (Real(m_dim * (m_dim + 1) * (2 * m_dim + 1)) / 6 + (m_dim == 1)) *
+                  (i == j)
+              : factor * (m_mu * Real(i + j + 2) + m_lambda * coefficientSum * (i == j));
         return value;
       }
       Real getLambda() const
