@@ -540,9 +540,18 @@ TEST(MatrixRange, TensorCoefficientCouplesAllMatrixEntries)
   auto check = [&](const auto& fes) {
     TrialFunction trial(fes);
     TestFunction test(fes);
-    auto weighted = Integral(TensorFunction(material) * trial, test);
+    auto image = TensorFunction(material) * trial;
+    static_assert(
+      std::is_same_v<typename FormLanguage::Traits<decltype(image)>::RangeType, Matrix>);
+    auto weighted = Integral(image, test);
     auto mass = Integral(trial, test);
+    VectorFunction velocity{2.0, -1.0};
+    auto advected = Grad(trial) * velocity;
+    static_assert(std::is_same_v<decltype(advected.getBasis(size_t{})), Matrix>);
+    auto transport = Integral(advected, test);
+    transport.setOrder(5);
     auto cell = mesh.getCell();
+    transport.setPolytope(*cell);
     weighted.setPolytope(*cell);
     mass.setPolytope(*cell);
     const size_t count = fes.getFiniteElement(2, cell->getIndex()).getCount();
@@ -554,6 +563,31 @@ TEST(MatrixRange, TensorCoefficientCouplesAllMatrixEntries)
           material(cb / 3, cb % 3, ca / 3, ca % 3) * mass.integrate(a / 6 * 6, b / 6 * 6),
           1e-10);
       }
+    using ScalarFES = std::remove_cvref_t<decltype(fes.getScalarSpace())>;
+    if constexpr (std::is_same_v<ScalarFES, P0<Real>> ||
+      std::is_same_v<ScalarFES, P0g<Real, LocalMesh>>)
+    {
+      for (size_t a = 0; a < count; ++a)
+        for (size_t b = 0; b < count; ++b)
+          EXPECT_EQ(transport.integrate(a, b), 0);
+    }
+    else
+    {
+      TrialFunction scalarTrial(fes.getScalarSpace());
+      TestFunction scalarTest(fes.getScalarSpace());
+      auto dx = Integral(Component(Grad(scalarTrial), 0), scalarTest);
+      auto dy = Integral(Component(Grad(scalarTrial), 1), scalarTest);
+      dx.setOrder(5);
+      dy.setOrder(5);
+      dx.setPolytope(*cell);
+      dy.setPolytope(*cell);
+      for (size_t a = 0; a < count; ++a)
+        for (size_t b = 0; b < count; ++b)
+          EXPECT_NEAR(transport.integrate(a, b),
+            a % 6 == b % 6 ? 2 * dx.integrate(a / 6, b / 6) - dy.integrate(a / 6, b / 6)
+                           : 0,
+            1e-10);
+    }
   };
   P0 p0(mesh, 2, 3);
   check(p0);
