@@ -430,6 +430,11 @@
  * between one and @c RODIN_MAXIMAL_SPACE_DIMENSION. Symmetry is not imposed.
  * A matrix space is the tensor product of its scalar space with the matrix
  * units: @f$ V_h^{m\times n}=V_h\otimes\mathbb{K}^{m\times n} @f$.
+ * Matrix specializations live beside the scalar and vector specializations
+ * in each space family. Reference bases, physical mappings and DOF distribution
+ * belong to that family. The componentwise construction here describes P0,
+ * P0g, P1 and H1; future @f$H(\mathrm{div})@f$ and @f$H(\mathrm{curl})@f$
+ * families must supply their own conforming bases and Piola mappings.
  * Local and global coefficient indices are interleaved in row-major order:
  * @f$ a(mn)+in+j @f$. No Voigt scaling or symmetry reduction is applied.
  *

@@ -323,20 +323,109 @@ namespace Rodin::Variational
   /// @brief Matrix-valued shape-function specialization with cached scalar basis tabulation.
   template <class Derived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
   class ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
-    : public Detail::MatrixShape<
-        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>, Derived,
+    : public ShapeFunctionBase<
+        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>,
         P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>
   {
     public:
       /// @brief CRTP or finite element base class.
-      using Parent = Detail::MatrixShape<
-        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>, Derived,
-        P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>;
-      using Parent::Parent;
+      using FES = P1<Math::SpatialMatrix<Scalar>, Mesh>;
+      /// @brief Current shape-function specialization.
+      using Shape = ShapeFunction;
+      /// @brief Existing shape-function interface.
+      using Parent = ShapeFunctionBase<
+        ShapeFunction<Derived, P1<Math::SpatialMatrix<Scalar>, Mesh>, Space>, FES, Space>;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
+      /// @brief Constructs matrix basis tabulation on the supplied finite element space.
+      explicit ShapeFunction(const FES& fes)
+        : Parent(fes)
+      {}
+      /// @brief Constructs matrix basis tabulation on the supplied finite element space.
+      ShapeFunction(const ShapeFunction& other)
+        : Parent(other)
+      {}
+      /// @brief Constructs matrix basis tabulation on the supplied finite element space.
+      ShapeFunction(ShapeFunction&& other)
+        : Parent(std::move(other))
+      {}
+
+      /// @brief Returns the local basis count for the selected polytope.
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return this->getFiniteElementSpace()
+          .getFiniteElement(poly.getDimension(), poly.getIndex())
+          .getCount();
+      }
+
+      /// @brief Returns the currently bound integration point.
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        assert(m_ip);
+        return *m_ip;
+      }
+
+      /// @brief Binds the integration point and prepares local basis values.
+      Shape& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_ip = &ip;
+        const auto& poly = ip.getPoint().getPolytope();
+        const auto& fe = this->getFiniteElementSpace().getFiniteElement(
+          poly.getDimension(), poly.getIndex());
+        if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
+          m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
+        {
+          m_basis.resize(fe.getCount());
+          const auto& scalar = fe.getScalarElement();
+          const size_t components = fe.getRows() * fe.getColumns();
+          const auto& point = ip.getPoint().getReferenceCoordinates();
+          for (size_t a = 0; a < scalar.getCount(); ++a)
+          {
+            const auto value = scalar.getBasis(a)(point);
+            for (size_t c = 0; c < components; ++c)
+            {
+              auto& basis = m_basis[a * components + c];
+              basis.resize(fe.getRows(), fe.getColumns());
+              basis.setZero();
+              basis(c / fe.getColumns(), c % fe.getColumns()) = value;
+            }
+          }
+          m_qf = ip.getQuadratureFormula();
+          m_qp = ip.getIndex();
+          m_geometry = poly.getGeometry();
+        }
+        return static_cast<Shape&>(*this);
+      }
+
+      /// @brief Returns a basis value at the bound integration point.
+      const RangeType& getBasis(size_t local) const
+      {
+        return m_basis.at(local);
+      }
+      /// @brief Returns the leaf shape function used for assembly.
+      const auto& getLeaf() const
+      {
+        return static_cast<const Derived&>(*this).getLeaf();
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return this->getFiniteElementSpace()
+          .getFiniteElement(poly.getDimension(), poly.getIndex())
+          .getOrder();
+      }
+
       ShapeFunction* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
       }
+
+    private:
+      const IntegrationPoint* m_ip = nullptr;
+      const QF::QuadratureFormulaBase* m_qf = nullptr;
+      size_t m_qp = 0;
+      Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
+      std::vector<RangeType> m_basis;
   };
 }
 
