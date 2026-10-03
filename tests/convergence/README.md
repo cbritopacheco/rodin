@@ -173,11 +173,11 @@ exists yet.
 
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
-| Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
+| Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 maps; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI P1/P2 | P1–P4 | P1–P3 | P1/P2 fields on exact curved P2 maps; native and complex-PETSc local/MPI |
 | Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | P1/P2 displacement, strain and stress on exact P2 maps; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact curved P2 maps; native local and real-PETSc local/MPI |
-| Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | Curved P2 |
+| Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 maps; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 maps; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
@@ -201,6 +201,11 @@ axis, $h=1/(n-1)$, and field degree $p$:
 - isoparametric: curved P2 Poisson and conductivity use `n=5→9→17`
   in 1D/2D and `n=3→4→5` in 3D. A separate P1 geometry-map error
   study uses `n=5→9→17` in 1D/2D and `n=3→5→9` in 3D.
+  The shared curved Poisson/conductivity backend suite uses `n=5→9→17`
+  for P1 and `n=3→5→9` for P2 on all seven geometries; its
+  [suite specification](isoparametric/Diffusion/README.md) states the
+  physical fields, coefficient/source pairing, residuals and wrong-operator
+  controls. Geometry remains exact and fixed in these field-rate studies.
   Curved complex Helmholtz instead uses `n=5→9→17` for P1 and
   `n=3→5→9` for P2 on every positive-dimensional geometry.
   Curved linear elasticity uses the same P1/P2 sequences and separately
@@ -307,7 +312,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | Priority | Extension | Required evidence |
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
-| 2 | Curved Poisson/conductivity backend extensions and curved Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
+| 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
 | 3 | Nonpolynomial geometry approximated at multiple geometry degrees | Separate geometry-map error from field error; state the comparison domain or pullback, map regularity, and geometry/field refinement sequence |
 | 4 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |

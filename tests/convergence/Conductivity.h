@@ -13,12 +13,16 @@
 
 namespace Rodin::Tests::Convergence
 {
-  /** Manufactured data for -div(gamma grad(u)) with gamma = 1 + sum(x_i). */
+  /** Manufactured data for @f$-\nabla\cdot(\gamma\nabla u)@f$ with
+   * @f$\gamma=1+\sum_i x_i@f$, or @f$\gamma=1@f$ for Poisson.
+   * Constant, affine and quadratic physical patches supplement the smooth field.
+   */
   class ConductivityData
   {
     public:
       enum class Field
       {
+        Constant,
         Affine,
         Quadratic,
         Smooth
@@ -46,6 +50,8 @@ namespace Rodin::Tests::Convergence
         return Variational::RealFunction(
           [dim = m_dimension, field = m_field](const Geometry::Point& p) {
             Real value = 1;
+            if (field == Field::Constant)
+              return value;
             if (field == Field::Smooth)
             {
               value = 1;
@@ -67,7 +73,9 @@ namespace Rodin::Tests::Convergence
             const Real pi = Math::Constants::pi();
             for (size_t d = 0; d < dim; ++d)
             {
-              value(d) = field == Field::Affine ? 1 : 2 * p(d);
+              value(d) = field == Field::Constant ? 0
+                : field == Field::Affine          ? 1
+                                                  : 2 * p(d);
               if (field == Field::Smooth)
               {
                 value(d) = pi * std::cos(pi * p(d));
@@ -80,26 +88,28 @@ namespace Rodin::Tests::Convergence
           });
       }
 
-      auto getSource() const
+      auto getSource(bool constantCoefficient = false) const
       {
-        const auto gamma = getCoefficient();
+        const auto gamma = getCoefficient(constantCoefficient);
         const auto gradient = getGradient();
-        return Variational::RealFunction([dim = m_dimension, field = m_field, gamma,
-                                           gradient](const Geometry::Point& p) {
-          Real laplacian = field == Field::Quadratic ? 2 * Real(dim) : 0;
-          if (field == Field::Smooth)
-          {
-            const Real pi = Math::Constants::pi();
-            laplacian = -Real(dim) * pi * pi;
-            for (size_t d = 0; d < dim; ++d)
-              laplacian *= std::sin(pi * p(d));
-          }
-          const auto derivative = gradient(p);
-          Real source = -gamma(p) * laplacian;
-          for (size_t d = 0; d < dim; ++d)
-            source -= derivative(d);
-          return source;
-        });
+        return Variational::RealFunction(
+          [dim = m_dimension, field = m_field, gamma, gradient, constantCoefficient](
+            const Geometry::Point& p) {
+            Real laplacian = field == Field::Quadratic ? 2 * Real(dim) : 0;
+            if (field == Field::Smooth)
+            {
+              const Real pi = Math::Constants::pi();
+              laplacian = -Real(dim) * pi * pi;
+              for (size_t d = 0; d < dim; ++d)
+                laplacian *= std::sin(pi * p(d));
+            }
+            const auto derivative = gradient(p);
+            Real source = -gamma(p) * laplacian;
+            if (!constantCoefficient)
+              for (size_t d = 0; d < dim; ++d)
+                source -= derivative(d);
+            return source;
+          });
       }
 
     private:
