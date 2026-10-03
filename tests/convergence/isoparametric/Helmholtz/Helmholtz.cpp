@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Native-complex Helmholtz P1/P2 convergence on exact P2 geometry. */
+/** @file @brief Native-complex Helmholtz on exact and approximated P2 geometry. */
 
 #include "Helmholtz.h"
 #include "Rodin/Assembly.h"
@@ -20,10 +20,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   class NativeProblem
   {
     public:
-      NativeProblem(Polytope::Type geometry, size_t n)
+      NativeProblem(Polytope::Type geometry, size_t n,
+        CurvedGeometry<LocalMesh>::Map map = CurvedGeometry<LocalMesh>::Map::Quadratic,
+        bool lifted = false, Real amplitude = 0.1)
         : m_mesh(UniformGrid(geometry).makeMesh(n)),
-          m_geometry(m_mesh)
+          m_geometry(m_mesh, map, amplitude)
       {
+        if (lifted)
+          m_reference.emplace(m_mesh);
         m_geometry.install<2>();
       }
 
@@ -35,10 +39,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
       {
         return m_geometry;
       }
+      const auto& getReference() const
+      {
+        return m_reference.value();
+      }
 
       template <size_t K>
       ErrorNorms solve(HelmholtzData::Field field, bool omitMass = false,
-        size_t order = AssemblyOrder, Real tolerance = 1e-13) const
+        size_t order = AssemblyOrder, Real tolerance = 1e-13, size_t normOrder = 0,
+        LiftedErrorNorm::Result* lifted = nullptr) const
       {
         const HelmholtzData data(m_mesh.getDimension(), field);
         auto space = [&] {
@@ -67,12 +76,20 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           residual.norm() / std::max(Real(1), system.getVector().norm());
         EXPECT_TRUE(std::isfinite(relative));
         EXPECT_LT(relative, 1e-11);
-        return ErrorNorm::compute(
-          m_mesh, u.getSolution(), data.getSolution(), data.getGradient(), order + 2);
+        const size_t integrationOrder = normOrder == 0 ? order + 2 : normOrder;
+        if (lifted)
+        {
+          assert(m_reference);
+          *lifted = LiftedErrorNorm::compute(
+            *m_reference, m_mesh, u.getSolution(), data, SineMap(), integrationOrder);
+        }
+        return ErrorNorm::compute(m_mesh, u.getSolution(), data.getSolution(),
+          data.getGradient(), integrationOrder);
       }
 
     private:
       LocalMesh m_mesh;
+      Optional<LocalMesh> m_reference;
       CurvedGeometry<LocalMesh> m_geometry;
   };
 
@@ -80,6 +97,30 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   TEST_P(NativeHelmholtzTest, P1OptimalRates)
   {
     checkRates<1>();
+  }
+  TEST_P(NativeHelmholtzTest, ComplexLiftedMetricOracle)
+  {
+    checkComplexLiftedMetric();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedAffinePatchRejectsOmittedMass)
+  {
+    checkApproximatedPatchAndControl();
   }
   TEST_P(NativeHelmholtzTest, P2OptimalRates)
   {

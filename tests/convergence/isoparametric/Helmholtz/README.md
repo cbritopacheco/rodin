@@ -1,4 +1,4 @@
-# Complex Helmholtz on exact quadratic geometry
+# Complex Helmholtz on exact and approximated geometry
 
 This suite isolates field approximation on curved cells from approximation
 of the physical domain. Let $Q=(0,1)^d$, $d\in\{1,2,3\}$, and define
@@ -63,8 +63,8 @@ $$
 =\pi^2\left(d-1+\frac1{1.1^2}\right)>\frac14.
 $$
 
-Consequently, $a(v,v)\ge(1-\kappa^2/\lambda_1(B))
-\lVert\nabla v\rVert_{L^2(\Omega)}^2$ on homogeneous traces.
+Consequently, $a(v,v)\ge(1-\kappa^2/\lambda_1(B))\lVert\nabla v\rVert_{L^2(\Omega)}^2$
+on homogeneous traces.
 The Hermitian positive-definite constrained system is solved by CG;
 this argument does not cover arbitrary wave numbers or resonance.
 
@@ -180,6 +180,116 @@ change mesh levels, quadrature, solver settings, or numerical acceptance.
 The larger pyramid limit accommodates repeated parametric-Jacobian
 evaluation on the finest grid; it is not a relaxed field-error budget.
 
-Mixed boundary conditions, arbitrary field/geometry degrees, nonpolynomial
-domain approximation, complex coefficients, and resonant or high-frequency
-Helmholtz workloads remain outside this suite's claim.
+## Nonpolynomial geometry and exact-domain comparisons
+
+A separate hierarchy replaces the quadratic map by
+
+$$
+\Phi(\xi)=\xi+a\sin(\pi\xi_0)e_{d-1},\qquad a=0.1,
+\qquad \Omega=\Phi(Q),\qquad \Omega_h=\Phi_h(Q),
+$$
+
+where $\Phi_h$ is the degree-two nodal geometry interpolant on the
+original grid. The same physical Helmholtz data are evaluated on
+$\Omega_h$; the discrete equation is solved there, not on an implicitly
+identified exact domain. For $d=1$, $|a|\pi<1$ ensures regularity of the
+exact map; in higher dimensions its determinant equals one. Positive
+represented-cell metric factors are required by norm integration.
+For $d\ge2$, the unchanged first coordinate is exactly reproduced by
+geometry interpolation. Thus $\Omega_h$ lies in the slab
+$(0,1)\times\mathbb R^{d-1}$; one-dimensional Poincaré inequalities on
+zero-extended slices give $\lambda_1(\Omega_h)\ge\pi^2>1/4$,
+without a claim about interpolation overshoot in the last coordinate.
+In one dimension, the derivative of a quadratic sine interpolant is
+linear on each interval. Each endpoint derivative is twice a half-interval
+secant minus the full-interval secant, hence its magnitude is at most
+$3\pi$. Therefore $\Phi_h'\ge1-3a\pi>0$, and its unchanged endpoints
+give $\Omega_h=(0,1)$ and the same eigenvalue bound. These bounds justify
+CG in this selected regime. Geometry interpolation, rather than the
+Helmholtz scalar range, changes the domain.
+
+The shared `LiftedErrorNorm` uses the unchanged logical cell and ordered
+vertex indices of the original and represented meshes. No coordinate
+matching or inverse point location is involved. At matching chart points,
+write $x=\Phi(\xi)$, $x_h=\Phi_h(\xi)$ and
+
+$$
+u_h^\ell(x)=u_h(x_h),\qquad
+B(\xi)=D\Phi(\xi)^{-T}D\Phi_h(\xi)^T.
+$$
+
+The three complex defects are
+
+$$
+e_F(x)=u_h(x_h)-u_*(x_h),\qquad
+e_G(x)=u_*(x_h)-u_*(x),\qquad
+e_T=e_F+e_G.
+$$
+
+Their gradients are respectively $B(\nabla u_h(x_h)-\nabla u_*(x_h))$,
+$B\nabla u_*(x_h)-\nabla u_*(x)$ and
+$B\nabla u_h(x_h)-\nabla u_*(x)$. Norms are integrated over
+$\Omega$ with exact-map determinant weights. Complex magnitudes satisfy
+$|z|^2=z\overline z$ and $|w|^2=\sum_jw_j\overline{w_j}$;
+discarding imaginary components is not admissible.
+The represented-domain field error is also measured independently.
+For both $L^2$ and the $H^1$ seminorm, the measured components must satisfy
+the triangle and reverse-triangle inequalities within $10^{-11}$.
+
+For smooth $u_*=e^{is(x)}$, the expected orders are
+
+| Quantity | $L^2$ order | $H^1$-seminorm order |
+| --- | --- | --- |
+| Represented-domain field error and lifted field defect | $k+1$ | $k$ |
+| Lifted geometry defect, geometry degree two | $3$ | $2$ |
+| Lifted total error | $\min(k,2)+1$ | $\min(k,2)$ |
+
+Approximation estimates provide upper bounds under regularity and
+uniform-map assumptions; they do not preclude cancellation or prove a
+lower error bound. Thus the total rate is measured directly, not inferred
+by adding component norms. Every adjacent interval requires positive,
+finite, decreasing errors and rates within $0.55$ of the stated $L^2$
+order and $0.45$ of the stated gradient order.
+Degree-one levels are $n=5,9,17$; degree-two levels are $n=3,5,9$,
+except the segment hierarchy uses $n=5,9,17,33$ to resolve the sine
+parametrization. These are finite-workload observations, not a uniform
+Helmholtz convergence theorem.
+
+Separate order-11 assembly, order-13 norm, and relative solver-tolerance
+$10^{-13}$ baselines are used. At $n=5$, assembly order is raised to
+16 while norm order remains 13; norm order is independently raised to
+18; solver tolerance is independently tightened to $10^{-14}$.
+All four norm pairs must change by less than $10^{-6}$ relatively.
+The physical affine P2 patch has represented and lifted field errors
+below $10^{-9}$. Omitting the mass term, while retaining its source and
+trace, must produce represented and lifted field errors above
+$10^{-3}$ in $L^2$ and $10^{-2}$ in the gradient seminorm. Its total
+errors must exceed twice the correct total errors, whereas its geometry
+errors must remain exactly unchanged.
+
+An independent metric oracle uses the identity represented map, the exact
+sine map above, and $u_*=1+2i+c\sum_jx_j$, $c=1+i/2$. Hence
+
+$$
+E_{G,0}=|c|\frac{a}{\sqrt2},\qquad |c|=\frac{\sqrt5}{2},
+\qquad
+E_{G,1}=
+\begin{cases}
+|c|\sqrt{(1-(a\pi)^2)^{-1/2}-1},&d=1,\\
+|c|a\pi/\sqrt2,&d\in\{2,3\}.
+\end{cases}
+$$
+
+The exactly reproduced affine field makes the total norms equal to these
+geometry norms within $10^{-9}$, at $n=3$ and norm order 18. This oracle
+checks the inverse-transpose lift, exact-domain measure and imaginary
+components independently of the smooth-field rate study. MPI sums
+owned-cell squared contributions before taking square roots, including
+empty partitions. The six additional tests per geometry run separately
+under names containing `Approximated`, with a 1800-second limit and the
+same pyramid resource lock. Native and complex-PETSc local/MPI ranks 1–4
+are registered; real PETSc does not register the complex tests.
+
+Mixed boundary conditions, arbitrary field/geometry degrees, complex
+coefficients, and resonant or high-frequency Helmholtz workloads remain
+outside this suite's claim.

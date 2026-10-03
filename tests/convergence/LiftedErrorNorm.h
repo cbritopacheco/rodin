@@ -7,10 +7,11 @@
 #ifndef RODIN_TESTS_CONVERGENCE_LIFTED_ERROR_NORM_H
 #define RODIN_TESTS_CONVERGENCE_LIFTED_ERROR_NORM_H
 #include <array>
+#include <type_traits>
 #include "Convergence.h"
 namespace Rodin::Tests::Convergence
 {
-  /** @brief Scalar field, geometry and total error norms on an exact domain.
+  /** @brief Real/complex scalar field, geometry and total exact-domain error norms.
    * @pre Meshes are full-dimensional and share ordered logical cell vertices;
    * the exact map is regular and orientation-preserving on the original box.
    * @par Architecture
@@ -22,6 +23,8 @@ namespace Rodin::Tests::Convergence
    * Its physical gradient is
    * @f$D\Phi^{-T}D\Phi_h^T\nabla u_h(x_h)@f$.
    * Field and geometry defects add pointwise, but their norms do not.
+   * Complex scalar and gradient errors use the full modulus squared; the
+   * real geometric differential acts on both real and imaginary components.
    * MPI integrates owned original cells, reduces squared contributions, then
    * takes square roots. No inverse point location or coordinate matching is used.
    */
@@ -69,17 +72,21 @@ namespace Rodin::Tests::Convergence
             const Real weight =
               qf.getWeight(qp) * original.getDistortion() * exactJacobian.determinant();
             assert(original.getDistortion() > 0 && exactJacobian.determinant() > 0);
-            const Real value = uh(ip);
-            const Real representedValue =
+            using Space = typename FormLanguage::Traits<GF>::FESType;
+            using Scalar = typename FormLanguage::Traits<Space>::RangeType;
+            static_assert(
+              std::is_same_v<Scalar, Real> || std::is_same_v<Scalar, Complex>);
+            const Scalar value = uh(ip);
+            const Scalar representedValue =
               data.getSolution(point.getPhysicalCoordinates());
-            const Real exactValue = data.getSolution(exactPosition);
-            const Math::SpatialVector<Real> derivative = gradient(ip);
+            const Scalar exactValue = data.getSolution(exactPosition);
+            const Math::SpatialVector<Scalar> derivative = gradient(ip);
             const auto representedDerivative =
               data.getGradient(point.getPhysicalCoordinates());
             const auto exactDerivative = data.getGradient(exactPosition);
-            const std::array<Real, 3> values{value - representedValue,
+            const std::array<Scalar, 3> values{value - representedValue,
               representedValue - exactValue, value - exactValue};
-            const std::array<Math::SpatialVector<Real>, 3> derivatives{
+            const std::array<Math::SpatialVector<Scalar>, 3> derivatives{
               lift * (derivative - representedDerivative),
               lift * representedDerivative - exactDerivative,
               lift * derivative - exactDerivative};

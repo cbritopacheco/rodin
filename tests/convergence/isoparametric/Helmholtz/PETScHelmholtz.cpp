@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief PETSc local/MPI complex Helmholtz convergence on exact P2 maps. */
+/** @file @brief PETSc local/MPI complex Helmholtz on exact/approximated P2 maps. */
 
 #include "Helmholtz.h"
 #include "Rodin/Assembly.h"
@@ -35,10 +35,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   class PETScProblem
   {
     public:
-      PETScProblem(Polytope::Type geometry, size_t n)
+      PETScProblem(Polytope::Type geometry, size_t n,
+        typename CurvedGeometry<Mesh<ContextType>>::Map map =
+          CurvedGeometry<Mesh<ContextType>>::Map::Quadratic,
+        bool lifted = false, Real amplitude = 0.1)
         : m_mesh(makeMesh(geometry, n)),
-          m_geometry(m_mesh)
+          m_geometry(m_mesh, map, amplitude)
       {
+        if (lifted)
+          m_reference.emplace(m_mesh);
         m_geometry.template install<2>();
       }
 
@@ -50,10 +55,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
       {
         return m_geometry;
       }
+      const auto& getReference() const
+      {
+        return m_reference.value();
+      }
 
       template <size_t K>
       ErrorNorms solve(HelmholtzData::Field field, bool omitMass = false,
-        size_t order = AssemblyOrder, Real tolerance = 1e-13) const
+        size_t order = AssemblyOrder, Real tolerance = 1e-13, size_t normOrder = 0,
+        LiftedErrorNorm::Result* lifted = nullptr) const
       {
         const HelmholtzData data(m_mesh.getSpaceDimension(), field);
         H1<K, Complex, Mesh<ContextType>> space(
@@ -87,8 +97,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
         EXPECT_TRUE(std::isfinite(relative));
         EXPECT_LT(relative, 1e-11);
         EXPECT_EQ(VecDestroy(&residual), PETSC_SUCCESS);
-        return ErrorNorm::compute(
-          m_mesh, u.getSolution(), data.getSolution(), data.getGradient(), order + 2);
+        const size_t integrationOrder = normOrder == 0 ? order + 2 : normOrder;
+        if (lifted)
+        {
+          assert(m_reference);
+          *lifted = LiftedErrorNorm::compute(
+            *m_reference, m_mesh, u.getSolution(), data, SineMap(), integrationOrder);
+        }
+        return ErrorNorm::compute(m_mesh, u.getSolution(), data.getSolution(),
+          data.getGradient(), integrationOrder);
       }
 
     private:
@@ -104,6 +121,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
       }
 
       Mesh<ContextType> m_mesh;
+      Optional<Mesh<ContextType>> m_reference;
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
 
@@ -111,6 +129,30 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   TEST_P(PETScHelmholtzLocalTest, P1OptimalRates)
   {
     checkRates<1>();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ComplexLiftedMetricOracle)
+  {
+    checkComplexLiftedMetric();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedAffinePatchRejectsOmittedMass)
+  {
+    checkApproximatedPatchAndControl();
   }
   TEST_P(PETScHelmholtzLocalTest, P2OptimalRates)
   {
@@ -153,6 +195,30 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   TEST_P(PETScHelmholtzMPITest, P1OptimalRates)
   {
     checkRates<1>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ComplexLiftedMetricOracle)
+  {
+    checkComplexLiftedMetric();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedAffinePatchRejectsOmittedMass)
+  {
+    checkApproximatedPatchAndControl();
   }
   TEST_P(PETScHelmholtzMPITest, P2OptimalRates)
   {

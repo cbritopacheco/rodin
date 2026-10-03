@@ -205,8 +205,10 @@ jobs:
   PETScComplexConvergence:
     # Pin the PETSc 3.19 compatibility gate, independently of the real build.
     runs-on: ubuntu-24.04
-    # Curved-pyramid studies retain resolved meshes and serialize heavy entries.
-    timeout-minutes: 90
+    # Exact and approximated-domain studies retain resolved meshes and serialize
+    # curved pyramids. The additional local/MPI matrix takes about 15 minutes
+    # on the local sequential stack; retain headroom for dependency/build time.
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:

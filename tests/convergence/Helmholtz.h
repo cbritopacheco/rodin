@@ -39,38 +39,46 @@ namespace Rodin::Tests::Convergence
 
       auto getSolution() const
       {
-        return Variational::ComplexFunction(
-          [dim = m_dimension, field = m_field](const Geometry::Point& p) {
-            Real s = 0;
-            for (size_t j = 0; j < dim; ++j)
-              s += p(j);
-            if (field == Field::Smooth)
-              return std::exp(Complex(0, s));
-            if (field == Field::Constant)
-              return Complex(1, 2);
-            return Complex(1, 2) + Complex(1, 0.5) * (field == Field::Affine ? s : s * s);
-          });
+        return Variational::ComplexFunction([data = *this](const Geometry::Point& p) {
+          return data.getSolution(p.getPhysicalCoordinates());
+        });
+      }
+
+      Complex getSolution(const Math::SpatialPoint& x) const
+      {
+        Real s = 0;
+        for (size_t j = 0; j < m_dimension; ++j)
+          s += x(j);
+        if (m_field == Field::Smooth)
+          return std::exp(Complex(0, s));
+        if (m_field == Field::Constant)
+          return Complex(1, 2);
+        return Complex(1, 2) + Complex(1, 0.5) * (m_field == Field::Affine ? s : s * s);
       }
 
       auto getGradient() const
       {
-        const auto exact = getSolution();
-        return [dim = m_dimension, field = m_field, exact](const Geometry::Point& p) {
-          Real s = 0;
-          for (size_t j = 0; j < dim; ++j)
-            s += p(j);
-          Complex derivative(1, 0.5);
-          if (field == Field::Constant)
-            derivative = 0;
-          else if (field == Field::Quadratic)
-            derivative *= 2 * s;
-          else if (field == Field::Smooth)
-            derivative = Complex(0, 1) * exact(p);
-          Math::SpatialVector<Complex> value(static_cast<std::uint8_t>(dim));
-          for (size_t j = 0; j < dim; ++j)
-            value(j) = derivative;
-          return value;
+        return [data = *this](const Geometry::Point& p) {
+          return data.getGradient(p.getPhysicalCoordinates());
         };
+      }
+
+      Math::SpatialVector<Complex> getGradient(const Math::SpatialPoint& x) const
+      {
+        Real s = 0;
+        for (size_t j = 0; j < m_dimension; ++j)
+          s += x(j);
+        Complex derivative(1, 0.5);
+        if (m_field == Field::Constant)
+          derivative = 0;
+        else if (m_field == Field::Quadratic)
+          derivative *= 2 * s;
+        else if (m_field == Field::Smooth)
+          derivative = Complex(0, 1) * getSolution(x);
+        Math::SpatialVector<Complex> value(static_cast<std::uint8_t>(m_dimension));
+        for (size_t j = 0; j < m_dimension; ++j)
+          value(j) = derivative;
+        return value;
       }
 
       auto getSource() const
