@@ -19,6 +19,7 @@ project(Rodin VERSION 0.0.1 LANGUAGES CXX C)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(RodinUtilities)
+include(RodinThirdParty)
 include(RodinInstall)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -343,8 +344,7 @@ if (RODIN_BUILD_SRC)
   if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS OR
       RODIN_BUILD_MANUFACTURED_TESTS OR RODIN_BUILD_CONVERGENCE_TESTS)
     # ---- GoogleTest ----
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
+    rodin_add_googletest()
     # GoogleTest builds itself with -Wall; GCC then flags gtest-death-test.cc
     # with -Wmaybe-uninitialized. Vendored code, so silence instead of patch.
     foreach(_gtest_target gtest gtest_main gmock gmock_main)
@@ -354,12 +354,7 @@ if (RODIN_BUILD_SRC)
       endif()
     endforeach()
     if (RODIN_BUILD_BENCHMARKS)
-      if (RODIN_LTO)
-        set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
-      endif()
-      set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-      set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
-      add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
+      rodin_add_benchmark()
     endif()
 
     add_subdirectory(tests)
