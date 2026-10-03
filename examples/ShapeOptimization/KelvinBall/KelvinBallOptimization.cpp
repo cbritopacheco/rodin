@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdio>
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -42,6 +41,7 @@
 #include "Configuration.h"
 #include "Metrics.h"
 #include "RotatedCharacteristicContinuation.h"
+#include "TransportProjection.h"
 #include "RotatedNitscheIntegrator.h"
 #include "SewedOutput.h"
 #include "Thickness.h"
@@ -548,11 +548,10 @@ namespace KelvinBall
         Alert::Info()
           << "Usage" << Alert::NewLine << "  " << executable << " [options]"
           << Alert::NewLine << Alert::Notation("--n=<points>")
-          << "              Background points per edge (default: 13)."
-          << Alert::NewLine
+          << "              Background points per edge (default: 13)." << Alert::NewLine
           << Alert::Notation("--h=<size>")
-          << "                Initial grid spacing; alternative to --n."
-          << Alert::NewLine << Alert::Notation("--hmin-factor=<value>")
+          << "                Initial grid spacing; alternative to --n." << Alert::NewLine
+          << Alert::Notation("--hmin-factor=<value>")
           << "       Minimum MMG size / reference spacing h0 (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--hmax-factor=<value>")
           << "       Maximum MMG size / reference spacing h0 (default: 10)."
@@ -573,15 +572,10 @@ namespace KelvinBall
           << Alert::NewLine << Alert::Notation("--level-set-penalty=<value>")
           << " Rotated trace penalty of the level set (default: 1)." << Alert::NewLine
           << Alert::Notation("--thickness-min=<value>")
-          << "      Absolute minimum body thickness (default: 0, off)."
-          << Alert::NewLine
-          << Alert::Notation("--motion-every=<count>")
-          << "      Write the rigid motion every count iterates (default: 0, off)."
-          << Alert::NewLine << Alert::Notation("--motion-force=<fx,fy,fz>")
-          << "  Force driving the motion (default: 0,0,1)." << Alert::NewLine
-          << Alert::Notation("--motion-frames=<count>")
-          << "     Frames over one revolution (default: 24)." << Alert::NewLine
-          << Alert::Notation("--advection-quadrature=<order>")
+          << "      Absolute minimum body thickness (default: 0, off)." << Alert::NewLine
+          << Alert::Notation("--motion-force=<fx,fy,fz>")
+          << "  Force for the Motion field at each iterate (default: 1,0,0)."
+          << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
           << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
           << "  Interface reconstruction: mmg or wngir (default: mmg)." << Alert::NewLine
@@ -592,11 +586,12 @@ namespace KelvinBall
           << Alert::Notation("--mmg-adapt")
           << "                Adapt near the interface after each reconstruction:"
           << Alert::NewLine
-          << "                              MMG cut or WNGIR fit, including the initial design."
+          << "                              MMG cut or WNGIR fit, including the initial "
+             "design."
           << Alert::NewLine
-          << "                              Adaptation uses the fixed size factors times h0."
-          << Alert::NewLine
-          << Alert::Notation("--mmg-adapt-gradation=<value>")
+          << "                              Adaptation uses the fixed size factors times "
+             "h0."
+          << Alert::NewLine << Alert::Notation("--mmg-adapt-gradation=<value>")
           << "  Adaptation gradation (default: 1.3)." << Alert::NewLine
           << Alert::Notation("--mmg-snap=<value>")
           << "         MMG path: snap edge crossings closer than this fraction"
@@ -613,20 +608,21 @@ namespace KelvinBall
           << Alert::NewLine
           << "                              also --j-safe, --j-ls, --j-min)."
           << Alert::NewLine << Alert::Notation("--wngir-kappa-f=<value>")
-          << "  Fitting curvature weight (default: 1)."
-          << Alert::NewLine << Alert::Notation("--wngir-kappa-s=<value>")
-          << "  Shape curvature weight (default: 1)."
-          << Alert::NewLine << Alert::Notation("--wngir-kappa-d=<value>")
-          << "  Distribution weight (default: 1)."
-          << Alert::NewLine << Alert::Notation("--wngir-direct-solver=<name>")
-          << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when built)."
+          << "  Fitting curvature weight (default: 1)." << Alert::NewLine
+          << Alert::Notation("--wngir-kappa-s=<value>")
+          << "  Shape curvature weight (default: 1)." << Alert::NewLine
+          << Alert::Notation("--wngir-kappa-d=<value>")
+          << "  Distribution weight (default: 1)." << Alert::NewLine
+          << Alert::Notation("--wngir-direct-solver=<name>")
+          << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
+             "built)."
           << Alert::NewLine << Alert::Notation("--wngir-directional-newton[=0|1]")
           << "  Scale the frozen model with directional Newton (default: 1)."
           << Alert::NewLine << Alert::Notation("--wngir-mu-hat=<value>")
-          << "  Dimensionless quadratic-hinge weight (default: 90)."
-          << Alert::NewLine << Alert::Notation("--wngir-quality-guard=<fraction>")
-          << "  Soft guard fraction for that penalty (default: 0.1)."
-          << Alert::NewLine << Alert::Notation("--geometry-only")
+          << "  Dimensionless quadratic-hinge weight (default: 90)." << Alert::NewLine
+          << Alert::Notation("--wngir-quality-guard=<fraction>")
+          << "  Soft guard fraction for that penalty (default: 0.1)." << Alert::NewLine
+          << Alert::Notation("--geometry-only")
           << "             Stop after initial reconstruction." << Alert::NewLine
           << Alert::Notation("--state-only")
           << "                Stop after the first Stokes evaluation." << Alert::NewLine
@@ -772,10 +768,12 @@ namespace KelvinBall
       {
         const auto diagnostics = getMeshDiagnostics(mesh);
         Alert::Info() << substageHeading("Material partition") << Alert::NewLine
-                      << diagnosticLabel("Obstacle cells:")
+                      << diagnosticLabel("Solid cells:")
                       << Alert::Notation::Number(diagnostics.obstacleCells)
                       << Alert::NewLine << diagnosticLabel("Fluid cells:")
                       << Alert::Notation::Number(diagnostics.fluidCells) << Alert::NewLine
+                      << diagnosticLabel("Total cells:")
+                      << Alert::Notation::Number(diagnostics.cells) << Alert::NewLine
                       << diagnosticLabel("Interface triangles:")
                       << Alert::Notation::Number(diagnostics.interfaceTriangles)
                       << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
@@ -784,8 +782,7 @@ namespace KelvinBall
                       << Alert::Notation::Number(diagnostics.meanQuality)
                       << Alert::NewLine << diagnosticLabel("Maximum tetrahedron quality:")
                       << Alert::Notation::Number(diagnostics.maximumQuality)
-                      << Alert::NewLine
-                      << diagnosticLabel("Mean tetra edge length h:")
+                      << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
                       << Alert::Notation::Number(diagnostics.meanElementSize)
                       << Alert::Raise;
       }
@@ -1035,6 +1032,7 @@ namespace KelvinBall
         }
         crossingInfo << Alert::Raise;
         MMG::Mesh reconstructed = discretizer.discretize(sanitized);
+        sphere.projectFixedGeometry(reconstructed);
 
         splitSelfPairedCut(reconstructed);
         const MeshDiagnostics reconstructionDiagnostics =
@@ -1049,11 +1047,13 @@ namespace KelvinBall
           << Alert::Notation::Number(requiredTriangles) << Alert::NewLine
           << diagnosticLabel("Cell count:") << Alert::Notation::Number(previousCells)
           << " -> " << Alert::Notation::Number(reconstructionDiagnostics.cells)
-          << Alert::NewLine << diagnosticLabel("Obstacle cells:")
+          << Alert::NewLine << diagnosticLabel("Solid cells:")
           << Alert::Notation::Number(reconstructionDiagnostics.obstacleCells)
           << Alert::NewLine << diagnosticLabel("Fluid cells:")
           << Alert::Notation::Number(reconstructionDiagnostics.fluidCells)
-          << Alert::NewLine << diagnosticLabel("Interface triangles:")
+          << Alert::NewLine << diagnosticLabel("Total cells:")
+          << Alert::Notation::Number(reconstructionDiagnostics.cells) << Alert::NewLine
+          << diagnosticLabel("Interface triangles:")
           << Alert::Notation::Number(inputDiagnostics.interfaceTriangles) << " -> "
           << Alert::Notation::Number(reconstructionDiagnostics.interfaceTriangles)
           << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
@@ -1062,8 +1062,7 @@ namespace KelvinBall
           << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
           << Alert::Notation::Number(inputDiagnostics.meanQuality) << " -> "
           << Alert::Notation::Number(reconstructionDiagnostics.meanQuality)
-          << Alert::NewLine
-          << diagnosticLabel("Mean tetra edge length h:")
+          << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
           << Alert::Notation::Number(inputDiagnostics.meanElementSize) << " -> "
           << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize)
           << Alert::Raise;
@@ -1083,6 +1082,7 @@ namespace KelvinBall
             .setGradation(remeshGradation)
             .setAngleDetection(false)
             .optimize(reconstructed);
+          sphere.projectFixedGeometry(reconstructed);
           splitSelfPairedCut(reconstructed);
         }
         const size_t requiredTrianglesAfterOptimization =
@@ -1178,12 +1178,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Real stepFactor = 0.1;
   Real levelSetPenalty = 1;
   Real minimumThickness = 0;
-  size_t motionEvery = 0;
-  size_t motionFrames = 24;
   Math::SpatialVector<Real> motionForce(3);
-  motionForce(0) = 0;
+  motionForce(0) = 1;
   motionForce(1) = 0;
-  motionForce(2) = 1;
+  motionForce(2) = 0;
   size_t advectionQuadratureOrder = 8;
   std::string reconstructionMethod = "mmg";
   for (int argument = 1; argument < argc; ++argument)
@@ -1203,10 +1201,6 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       levelSetPenalty = std::stod(std::string(mode.substr(20)));
     else if (mode.rfind("--thickness-min=", 0) == 0)
       minimumThickness = std::stod(std::string(mode.substr(16)));
-    else if (mode.rfind("--motion-every=", 0) == 0)
-      motionEvery = std::stoul(std::string(mode.substr(15)));
-    else if (mode.rfind("--motion-frames=", 0) == 0)
-      motionFrames = std::stoul(std::string(mode.substr(16)));
     else if (mode.rfind("--motion-force=", 0) == 0)
     {
       std::istringstream components{std::string(mode.substr(15))};
@@ -1258,10 +1252,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The level-set trace penalty must be positive.");
   if (!std::isfinite(minimumThickness) || minimumThickness < 0)
     throw std::runtime_error("--thickness-min must be nonnegative.");
-  if (motionFrames == 0)
-    throw std::runtime_error("The motion needs at least one frame.");
-  if (!(motionForce.norm() > 0))
-    throw std::runtime_error("The motion force must be nonzero.");
+  if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
+    throw std::runtime_error("The motion force must be finite and nonzero.");
   if (advectionQuadratureOrder == 0)
     throw std::runtime_error("The advection quadrature order must be positive.");
   if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
@@ -1428,7 +1420,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
   std::ofstream history("kelvin-ball.csv");
   history.precision(17);
-  history << "iteration,outer_radius,initial_grid_spacing,hmin_factor,hmax_factor,requested_hmin,requested_hmax,"
+  history << "iteration,outer_radius,initial_grid_spacing,hmin_factor,hmax_factor,"
+             "requested_hmin,requested_hmax,"
              "h,dt,advection_quadrature_order,"
              "regularization_length,nitsche_penalty,"
              "stabilization_factor,assembly_backend,direct_solver,"
@@ -1469,7 +1462,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "eikonal_rotated_jump,projected_rotated_jump,distance_correction,"
              "interface_shift_max,advection_increment,advected_rotated_jump,"
              "min_crossing_fraction,snapped_vertices,reconstruction_scale,"
-             "z_x,z_y,z_z,omega_x,omega_y,omega_z\n";
+             "z_x,z_y,z_z,omega_x,omega_y,omega_z,"
+             "transport_attempted_points,transport_omitted_points,"
+             "transport_omitted_weight_fraction,transport_fallback_cells,"
+             "motion_force_x,motion_force_y,motion_force_z\n";
   IO::XDMF xdmf("KelvinBall");
   auto chamber = xdmf.grid("Chamber");
   chamber.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
@@ -1504,6 +1500,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       }
     }
     const Real h = meanElementSize(mesh);
+    const auto meshDiagnostics = getMeshDiagnostics(mesh);
     const Real hilbertLength = regularizationFactor * initialGridSpacing;
     const Real normalLength = normalRegularizationFactor * initialGridSpacing;
     const Real dt = stepFactor * initialGridSpacing;
@@ -1524,6 +1521,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(dt) << Alert::Raise;
     const auto stage2Start = Clock::now();
     announce("Stage 2: Preparing the chamber fluid mesh.");
+    Alert::Info() << substageHeading("Chamber cell counts") << Alert::NewLine
+                  << diagnosticLabel("Solid cells:")
+                  << Alert::Notation::Number(meshDiagnostics.obstacleCells)
+                  << Alert::NewLine << diagnosticLabel("Fluid cells:")
+                  << Alert::Notation::Number(meshDiagnostics.fluidCells) << Alert::NewLine
+                  << diagnosticLabel("Total cells:")
+                  << Alert::Notation::Number(meshDiagnostics.cells) << Alert::Raise;
     auto& connectivity = mesh.getConnectivity();
     connectivity.discover(3, 2);
     connectivity.discover(3, 1);
@@ -1558,13 +1562,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real k = metrics.k;
     const Real c = metrics.c;
     const Real q = metrics.q;
+    const Real resistanceDeterminant = k * q - c * c;
+    const Math::SpatialVector<Real> motionTranslation =
+      (q / resistanceDeterminant) * motionForce;
+    const Math::SpatialVector<Real> motionAngular =
+      (-c / resistanceDeterminant) * motionForce;
     const Real rho = metrics.rho;
     const Real couplingSymmetry = metrics.couplingSymmetry;
     const Real volume = mesh.getVolume(Obstacle);
     const Real nitscheJump = metrics.nitscheJump;
     const auto chamberBoundingBox = boundingBoxSize(mesh);
     const auto sewnBoundingBox = sewnBoundingBoxSize(mesh);
-    const auto meshDiagnostics = getMeshDiagnostics(mesh);
     const Real actualRhoChange = previousRho ? rho - *previousRho : nan;
     const Real incomingPredictedRhoChange =
       predictedRhoChange ? *predictedRhoChange : nan;
@@ -1609,6 +1617,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         Real interfaceShift = std::numeric_limits<Real>::quiet_NaN();
         Real advectionIncrement = std::numeric_limits<Real>::quiet_NaN();
         Real advectedJump = std::numeric_limits<Real>::quiet_NaN();
+        Real transportAttempted = std::numeric_limits<Real>::quiet_NaN();
+        Real transportOmitted = std::numeric_limits<Real>::quiet_NaN();
+        Real transportOmittedFraction = std::numeric_limits<Real>::quiet_NaN();
+        Real transportFallbackCells = std::numeric_limits<Real>::quiet_NaN();
     } stageDiagnostics;
     const auto writeHistory = [&](Real nullSpaceMultiplier, Real xiRhoInfinityNorm,
                                 Real thetaInfinityNorm, Real dRhoTheta, Real dVolumeTheta,
@@ -1650,11 +1662,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       const Real determinant = k * q - c * c;
       history << ',' << q / determinant << ',' << -c / determinant << ','
               << k / determinant << ','
-              << (c != 0 ? 2 * M_PI * determinant / std::abs(c) : nan) << ','
+              << (c != 0 ? 2 * M_PI / motionAngular.norm() : nan) << ','
               << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
-              << ',' << levelSetPenalty << ',' << minimumThickness << ','
-              << normalLength << ','
-              << stageDiagnostics.thicknessPenalty << ','
+              << ',' << levelSetPenalty << ',' << minimumThickness << ',' << normalLength
+              << ',' << stageDiagnostics.thicknessPenalty << ','
               << stageDiagnostics.thicknessNominalPenalty << ','
               << stageDiagnostics.thicknessGuardDistance << ','
               << stageDiagnostics.thicknessActiveMultiplier << ','
@@ -1689,12 +1700,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << stageDiagnostics.advectionIncrement << ','
               << stageDiagnostics.advectedJump << ',' << reconstruction.minimumCrossing
               << ',' << reconstruction.snappedVertices << ',' << reconstruction.scale;
-      // Z and omega themselves, for the unit force along --motion-force.
-      const Math::SpatialVector<Real> unitForce = motionForce / motionForce.norm();
+      // Z and omega for the supplied force, including its magnitude.
       for (Eigen::Index component = 0; component < 3; ++component)
-        history << ',' << q / determinant * unitForce(component);
+        history << ',' << motionTranslation(component);
       for (Eigen::Index component = 0; component < 3; ++component)
-        history << ',' << -c / determinant * unitForce(component);
+        history << ',' << motionAngular(component);
+      history << ',' << stageDiagnostics.transportAttempted << ','
+              << stageDiagnostics.transportOmitted << ','
+              << stageDiagnostics.transportOmittedFraction << ','
+              << stageDiagnostics.transportFallbackCells;
+      for (Eigen::Index component = 0; component < 3; ++component)
+        history << ',' << motionForce(component);
       history << '\n';
       history.flush();
     };
@@ -1732,19 +1748,16 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << diagnosticLabel("Coupling symmetry residual:")
                   << Alert::Notation::Number(couplingSymmetry) << Alert::Raise;
     {
-      // Free motion under a unit force along --motion-force, without torque.
-      const Real determinant = k * q - c * c;
-      const Math::SpatialVector<Real> force = motionForce / motionForce.norm();
-      const Math::SpatialVector<Real> translation = (q / determinant) * force;
-      const Math::SpatialVector<Real> angular = (-c / determinant) * force;
-      Alert::Info() << substageHeading("Free motion under a unit force") << Alert::NewLine
-                    << diagnosticLabel("Force direction:") << vectorText(force)
-                    << Alert::NewLine << diagnosticLabel("Translational velocity Z:")
-                    << vectorText(translation) << Alert::NewLine
-                    << diagnosticLabel("Angular velocity omega:") << vectorText(angular)
-                    << Alert::NewLine << diagnosticLabel("Period of one revolution:")
+      Alert::Info() << substageHeading("Free motion under the prescribed force")
+                    << Alert::NewLine << diagnosticLabel("Force:")
+                    << vectorText(motionForce) << Alert::NewLine
+                    << diagnosticLabel("Translational velocity Z:")
+                    << vectorText(motionTranslation) << Alert::NewLine
+                    << diagnosticLabel("Angular velocity omega:")
+                    << vectorText(motionAngular) << Alert::NewLine
+                    << diagnosticLabel("Period of one revolution:")
                     << Alert::Notation::Number(
-                         c != 0 ? 2 * M_PI * determinant / std::abs(c) : nan)
+                         c != 0 ? 2 * M_PI / motionAngular.norm() : nan)
                     << Alert::NewLine << diagnosticLabel("Pitch:")
                     << Alert::Notation::Number(c != 0 ? 2 * M_PI * q / std::abs(c) : nan)
                     << Alert::NewLine << diagnosticLabel("Resistance length sqrt(q/k):")
@@ -2245,6 +2258,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     fluidState.add("Pressure_Rotation_0", pR0, IO::XDMF::Center::Node);
     fluidState.add("Pressure_Rotation_1", pR1, IO::XDMF::Center::Node);
     fluidState.add("Pressure_Rotation_2", pR2, IO::XDMF::Center::Node);
+    GridFunction chamberMotion(Vh);
+    chamberMotion.getData() = motionTranslation(0) * uT0.getData() +
+      motionTranslation(1) * uT1.getData() + motionTranslation(2) * uT2.getData() +
+      motionAngular(0) * uR0.getData() + motionAngular(1) * uR1.getData() +
+      motionAngular(2) * uR2.getData();
+    fluidState.add("Motion", chamberMotion, IO::XDMF::Center::Node);
 
     KelvinBall::SewedOutput sewedDesign(mesh, FlatSet<Attribute>{Gamma, Outer});
     P1 sewedDesignScalar(sewedDesign.getMesh());
@@ -2283,6 +2302,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     SubMesh<Context::Local> sewedInterfaceMesh = sewedInterfaceBuilder.finalize();
     P1 sewedInterfaceVectorSpace(sewedInterfaceMesh, 3);
     P1 sewedInterfaceScalarSpace(sewedInterfaceMesh);
+    GridFunction bodyMotion(sewedInterfaceVectorSpace);
+    bodyMotion =
+      VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
+        const Math::SpatialVector<Real> velocity =
+          motionTranslation + motionAngular.cross(point.getPhysicalCoordinates());
+        return velocity;
+      });
     GridFunction sewedInterfaceGeometricNormal(sewedInterfaceVectorSpace);
     GridFunction sewedInterfaceNormal(sewedInterfaceVectorSpace);
     GridFunction sewedInterfaceRayDirection(sewedInterfaceVectorSpace);
@@ -2367,86 +2393,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     sewedFluidOutput.add("Pressure_Rotation_0", sewedPR0, IO::XDMF::Center::Node);
     sewedFluidOutput.add("Pressure_Rotation_1", sewedPR1, IO::XDMF::Center::Node);
     sewedFluidOutput.add("Pressure_Rotation_2", sewedPR2, IO::XDMF::Center::Node);
-
-    if (motionEvery > 0 &&
-      ((iteration + 1) % motionEvery == 0 || iteration + 1 == maxIterations))
-    {
-      // The body is free and pushed by F without torque, so R [Z; w] = [F; 0]
-      // with K = kI, C = cI, Q = qI gives a screw motion about F.
-      const Real determinant = k * q - c * c;
-      const Math::SpatialVector<Real> translation = (q / determinant) * motionForce;
-      const Math::SpatialVector<Real> angular = (-c / determinant) * motionForce;
-      const Real angularSpeed = angular.norm();
-      const Real period = angularSpeed > 0 ? 2 * M_PI / angularSpeed : Real(1);
-      Alert::Info() << substageHeading("Rigid motion") << Alert::NewLine
-                    << diagnosticLabel("Force:") << vectorText(motionForce)
-                    << Alert::NewLine << diagnosticLabel("Translational velocity Z:")
-                    << vectorText(translation) << Alert::NewLine
-                    << diagnosticLabel("Angular velocity omega:") << vectorText(angular)
-                    << Alert::NewLine << diagnosticLabel("Period of one revolution:")
-                    << Alert::Notation::Number(period) << Alert::NewLine
-                    << diagnosticLabel("Pitch (travel per revolution):")
-                    << Alert::Notation::Number(translation.norm() * period)
-                    << Alert::Raise;
-
-      // Velocity of the fluid for that motion, by linearity of the states.
-      std::vector<Math::SpatialVector<Real>> motionVelocity(
-        sewedFluid.getMesh().getVertexCount(), Math::SpatialVector<Real>::Zero(3));
-      const auto sewedTranslations = std::array{&sewedUT0, &sewedUT1, &sewedUT2};
-      const auto sewedRotations = std::array{&sewedUR0, &sewedUR1, &sewedUR2};
-      for (Index vertex = 0; vertex < sewedFluid.getMesh().getVertexCount(); ++vertex)
-      {
-        const auto dofs = sewedVelocitySpace.getDOFs(0, vertex);
-        for (size_t load = 0; load < 3; ++load)
-          for (Eigen::Index component = 0; component < 3; ++component)
-            motionVelocity[vertex](component) +=
-              translation(load) * sewedTranslations[load]->getData()(dofs(component)) +
-              angular(load) * sewedRotations[load]->getData()(dofs(component));
-      }
-
-      char name[64];
-      std::snprintf(name, sizeof(name), "KelvinBallMotion-%06zu", iteration + 1);
-      IO::XDMF motionXdmf(name);
-      auto bodyOutput = motionXdmf.grid("Body");
-      auto fluidOutput = motionXdmf.grid("Fluid");
-      const Math::SpatialVector<Real> axis = angularSpeed > 0
-        ? Math::SpatialVector<Real>(angular / angularSpeed)
-        : Math::SpatialVector<Real>(motionForce / motionForce.norm());
-      for (size_t frame = 0; frame < motionFrames; ++frame)
-      {
-        const Real time =
-          period * static_cast<Real>(frame) / static_cast<Real>(motionFrames);
-        const Math::SpatialMatrix<Real> rotation = Eigen::AngleAxis<Real>(
-          angularSpeed * time, Eigen::Matrix<Real, 3, 1>(axis(0), axis(1), axis(2)))
-                                                     .toRotationMatrix();
-        const Math::SpatialVector<Real> shift = time * translation;
-        LocalMesh body = sewedDesign.getMesh();
-        for (Index vertex = 0; vertex < body.getVertexCount(); ++vertex)
-          body.setVertexCoordinates(
-            vertex, rotation * body.getVertexCoordinates(vertex) + shift);
-        LocalMesh moving = sewedFluid.getMesh();
-        for (Index vertex = 0; vertex < moving.getVertexCount(); ++vertex)
-          moving.setVertexCoordinates(
-            vertex, rotation * moving.getVertexCoordinates(vertex) + shift);
-        VelocitySpace movingSpace = makeVelocitySpace(moving);
-        GridFunction velocity(movingSpace);
-        for (Index vertex = 0; vertex < moving.getVertexCount(); ++vertex)
-        {
-          const auto dofs = movingSpace.getDOFs(0, vertex);
-          const Math::SpatialVector<Real> value = rotation * motionVelocity[vertex];
-          for (Eigen::Index component = 0; component < 3; ++component)
-            velocity.getData()(dofs(component)) = value(component);
-        }
-        bodyOutput.clear();
-        bodyOutput.setMesh(body, IO::XDMF::MeshPolicy::Transient);
-        fluidOutput.clear();
-        fluidOutput.setMesh(moving, IO::XDMF::MeshPolicy::Transient);
-        fluidOutput.add("Velocity", velocity, IO::XDMF::Center::Node);
-        // The period is long while the coupling is weak, so the series is
-        // indexed by the fraction of a revolution rather than by time.
-        motionXdmf.write(time / period).flush();
-      }
-    }
+    GridFunction fluidMotion(sewedVelocitySpace);
+    fluidMotion.getData() = motionTranslation(0) * sewedUT0.getData() +
+      motionTranslation(1) * sewedUT1.getData() +
+      motionTranslation(2) * sewedUT2.getData() + motionAngular(0) * sewedUR0.getData() +
+      motionAngular(1) * sewedUR1.getData() + motionAngular(2) * sewedUR2.getData();
+    sewedFluidOutput.add("Motion", fluidMotion, IO::XDMF::Center::Node);
+    sewedInterfaceOutput.add("Motion", bodyMotion, IO::XDMF::Center::Node);
 
     if (iteration + 1 == maxIterations)
     {
@@ -2534,14 +2487,41 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
       -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
     Problem transport(advected, test);
-    auto transportedDistance = Integral(Flow(-dt, advectionDistance,
-      advectionDirection, Math::RungeKutta::RK4{}, rotationalContinuation), test);
-    transportedDistance.setOrder(advectionQuadratureOrder);
-    transport = Integral(advected, test) - transportedDistance;
+    const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
+      Math::RungeKutta::RK4{}, rotationalContinuation);
+    // P1 mass products are quadratic. A lower-order sampling rule cannot
+    // determine all local coefficients, even with complete coverage.
+    const size_t transportQuadratureOrder = std::max(size_t(2), advectionQuadratureOrder);
+    const KelvinBall::TransportProjection projection(
+      advectionMesh, advectionDistance, characteristic, transportQuadratureOrder);
+    const RealFunction retained(
+      [&](const Geometry::Point& point) { return projection.mask(point); });
+    const RealFunction transported(
+      [&](const Geometry::Point& point) { return projection.value(point); });
+    auto mass = Integral(retained * advected, test);
+    mass.setOrder(transportQuadratureOrder);
+    auto transportedDistance = Integral(transported, test);
+    transportedDistance.setOrder(transportQuadratureOrder);
+    transport = mass - transportedDistance;
     transport.assemble();
     advectionCoupling.assembleScalarTracePenalty(advectionLevelSetSpace,
       transport.getLinearSystem(), levelSetPenalty, advectionDistance);
     Solver::CG(transport).solve();
+    stageDiagnostics.transportAttempted = projection.getAttemptedCount();
+    stageDiagnostics.transportOmitted = projection.getOmittedCount();
+    stageDiagnostics.transportOmittedFraction = projection.getOmittedWeightFraction();
+    stageDiagnostics.transportFallbackCells = projection.getFallbackCellCount();
+    Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
+                  << diagnosticLabel("Projection quadrature order:")
+                  << transportQuadratureOrder << Alert::NewLine
+                  << diagnosticLabel("Attempted quadrature points:")
+                  << projection.getAttemptedCount() << Alert::NewLine
+                  << diagnosticLabel("Omitted quadrature points:")
+                  << projection.getOmittedCount() << Alert::NewLine
+                  << diagnosticLabel("Omitted integration fraction:")
+                  << projection.getOmittedWeightFraction() << Alert::NewLine
+                  << diagnosticLabel("Previous-distance fallback cells:")
+                  << projection.getFallbackCellCount() << Alert::Raise;
     const auto& advectedDistance = advected.getSolution();
     const auto& transportSystem = transport.getLinearSystem();
     const Real transportResidual =

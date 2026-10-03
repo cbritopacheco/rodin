@@ -5,14 +5,42 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <Rodin/Assembly.h>
 
 #include "examples/ShapeOptimization/KelvinBall/RotatedNitscheIntegrator.h"
+#include "examples/ShapeOptimization/KelvinBall/TransportProjection.h"
+#include "examples/ShapeOptimization/KelvinBall/RotatedCharacteristicContinuation.h"
 
 namespace KelvinBall
 {
   class CutCoverageTest : public ::testing::Test
   {
     protected:
+      struct SamplingFlow
+      {
+          Real cutoff;
+          struct Trace
+          {
+              const Geometry::Point& point;
+              bool failed;
+              bool exited() const
+              {
+                return failed;
+              }
+              const Geometry::Point& getPoint() const
+              {
+                return point;
+              }
+              Real getCorrection() const
+              {
+                return 0;
+              }
+          };
+          Trace trace(const Geometry::Point& point) const
+          {
+            return {point, point.getReferenceCoordinates()(0) < cutoff};
+          }
+      };
       Mesh makeMesh(Real shift)
       {
         Mesh::Builder builder;
@@ -64,6 +92,107 @@ namespace KelvinBall
         return system;
       }
   };
+
+  TEST_F(CutCoverageTest, MissingRotatedCharacteristicReturnsFailureWithoutThrowing)
+  {
+    auto mesh = makeMesh(2);
+    AttributeFaceLocator locator(mesh, FlatSet<Attribute>{SigmaPlus, SigmaMinus});
+    RotatedCharacteristicContinuation continuation(-0.1, mesh, locator, RotationPairs);
+    bool checked = false;
+    for (auto cell = mesh.getPolytope(3); cell; ++cell)
+    {
+      const auto& faces = mesh.getConnectivity().getIncidence({3, 2}, cell->getIndex());
+      for (size_t local = 0; local < faces.size(); ++local)
+      {
+        const auto face = mesh.getPolytope(2, faces[local]);
+        if (face->getAttribute() != SigmaMinus)
+          continue;
+        const auto& formula = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+        const auto& point = face->getQuadrature(formula).getPoint(0);
+        Math::SpatialPoint reference;
+        cell->getTransformation().inverse(reference, point.getPhysicalCoordinates());
+        Index index = cell->getIndex();
+        Real time = -0.1, correction = 0;
+        BoundaryHit hit{time, index, reference, local, correction};
+        EXPECT_FALSE(continuation(hit));
+        checked = true;
+      }
+    }
+    EXPECT_TRUE(checked);
+  }
+
+  TEST_F(CutCoverageTest, TransportCompleteCoverageKeepsAllSamples)
+  {
+    auto mesh = makeMesh(0);
+    P1 space(mesh);
+    GridFunction distance(space);
+    distance = Real(3);
+    TransportProjection projection(mesh, distance, SamplingFlow{-1}, 2);
+    EXPECT_EQ(projection.getOmittedCount(), 0);
+    EXPECT_EQ(projection.getFallbackCellCount(), 0);
+    EXPECT_EQ(projection.getOmittedWeightFraction(), 0);
+    for (auto cell = mesh.getPolytope(3); cell; ++cell)
+    {
+      const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
+      const auto& quadrature = cell->getQuadrature(formula);
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        EXPECT_EQ(projection.mask(quadrature.getPoint(q)), 1);
+        EXPECT_NEAR(projection.value(quadrature.getPoint(q)), 3, 1e-14);
+      }
+    }
+  }
+
+  TEST_F(CutCoverageTest, TransportMissingSamplesRetainPreviousDistanceWhenRankDeficient)
+  {
+    auto mesh = makeMesh(0);
+    P1 space(mesh);
+    GridFunction distance(space);
+    distance = RealFunction(
+      [](const Geometry::Point& p) { return Real(2) + p.getPhysicalCoordinates()(0); });
+    TransportProjection projection(mesh, distance, SamplingFlow{2}, 2);
+    EXPECT_EQ(projection.getOmittedCount(), projection.getAttemptedCount());
+    EXPECT_EQ(projection.getFallbackCellCount(), mesh.getCellCount());
+    EXPECT_NEAR(projection.getOmittedWeightFraction(), 1, 1e-14);
+    for (auto cell = mesh.getPolytope(3); cell; ++cell)
+    {
+      const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
+      const auto& quadrature = cell->getQuadrature(formula);
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& p = quadrature.getPoint(q);
+        EXPECT_EQ(projection.mask(p), 1);
+        EXPECT_NEAR(projection.value(p), distance.getValue(p), 1e-14);
+      }
+    }
+  }
+
+  TEST_F(CutCoverageTest, TransportPartialOmissionUsesIdenticalMassAndLoadMasks)
+  {
+    auto mesh = makeMesh(0);
+    P1 space(mesh);
+    GridFunction distance(space);
+    distance = Real(3);
+    TransportProjection projection(mesh, distance, SamplingFlow{0.03}, 4);
+    EXPECT_GT(projection.getOmittedCount(), 0);
+    EXPECT_LT(projection.getOmittedCount(), projection.getAttemptedCount());
+    EXPECT_EQ(projection.getFallbackCellCount(), 0);
+    TrialFunction u(space);
+    TestFunction v(space);
+    RealFunction mask([&](const Geometry::Point& p) { return projection.mask(p); });
+    RealFunction value([&](const Geometry::Point& p) { return projection.value(p); });
+    auto mass = Integral(mask * u, v);
+    auto load = Integral(value, v);
+    mass.setOrder(4);
+    load.setOrder(4);
+    Problem problem(u, v);
+    problem = mass - load;
+    problem.assemble();
+    const auto& system = problem.getLinearSystem();
+    const auto constant = Math::Vector<Real>::Constant(space.getSize(), 3);
+    EXPECT_LT((system.getOperator() * constant - system.getVector()).norm(), 1e-12);
+    EXPECT_GT(system.getOperator().norm(), 0);
+  }
 
   TEST_F(CutCoverageTest, CompletelyMissingTraceAddsNeitherMatrixNorLoad)
   {

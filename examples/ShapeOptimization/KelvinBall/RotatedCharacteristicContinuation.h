@@ -72,8 +72,7 @@ namespace KelvinBall
         mesh.getPolytopeTransformation(dimension, hit.cell).transform(physical, hit.rref);
         const auto mapped = m_locator.get().locate(target, transform * physical);
         if (!mapped)
-          throw std::runtime_error(
-            "A characteristic could not cross an identified rotational chamber cut.");
+          return false;
         const auto& incidence = mesh.getConnectivity().getIncidence(
           {dimension - 1, dimension}, mapped->getPolytope().getIndex());
         if (incidence.size() != 1)

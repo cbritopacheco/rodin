@@ -96,13 +96,24 @@ namespace KelvinBall
        * when @p cuts is set: a level-set cut splits their triangles where
        * Gamma meets them, and required triangles there freeze the flat
        * tetrahedra the split can leave on the plane. Otherwise MMG may
-       * retriangulate each plane, and with angle detection disabled it keeps
-       * the planes flat only if their borders are given as features: every
+       * retriangulate each plane. Features guide this remeshing, while
+       * projectFixedGeometry restores the exact planes afterward: every
        * edge between differently labelled faces, one of them a fixed face,
        * becomes a reference edge, and a ridge unless both faces lie in the
        * same plane; every vertex on three or more labels becomes a corner.
        */
       size_t protectFixedGeometry(MMG::Mesh& mesh, bool cuts) const;
+
+      /**
+       * @brief Orthogonally projects labelled fixed-boundary vertices onto
+       * their prescribed planes, or their intersection at shared vertices.
+       *
+       * Applied after MMG, outside its optimization solve. Coordinates are
+       * committed only if every tetrahedron retains its orientation and a
+       * nondegenerate Jacobian. Interior vertices and Gamma-only vertices are
+       * unchanged; no rotational rim compatibility is imposed.
+       */
+      void projectFixedGeometry(MMG::Mesh& mesh) const;
 
     private:
       Mesh makeUniformChamber() const;

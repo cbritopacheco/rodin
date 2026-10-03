@@ -776,24 +776,22 @@ Each iterate is written to three XDMF series.
   before the next finite-element spaces are built. Each snapshot is flushed
   immediately, including when using `--geometry-only` for the initial design.
 
-With `--motion-every=N`, every $N$-th iterate and the last one also write
-`KelvinBallMotion-<iterate>.xdmf`: the free motion of the body under a force
-$F$ = `--motion-force` (default $e_z$) without torque. Since
+Every design snapshot includes a vector field `Motion` for the force
+$F$ = `--motion-force` (default $e_x$), without applied torque. Since
 $\mathcal R [Z;\omega] = [F; 0]$ with $K = kI$, $C = cI$, $Q = qI$,
 
 ```math
 Z = \frac{q}{kq - c^2}\,F, \qquad \omega = -\frac{c}{kq - c^2}\,F ,
 ```
 
-a screw motion about $F$. The series has `--motion-frames` frames (default 24)
-over one revolution $T = 2\pi/|\omega|$, indexed by the fraction of the
-revolution $t/T \in [0, 1)$ rather than by the time, which is large while the
-coupling is weak. The grid `Body` is the sewn design,
-whose cell labels separate body and fluid, and the grid `Fluid` carries the
-fluid velocity of that motion, $\sum_i Z_i u^T_i + \omega_i u^R_i$. Both move
-rigidly, $x \mapsto e^{t[\omega]_\times} x + Z t$, with the velocity rotated
-accordingly. The printout gives $Z$, $\omega$, the period and the pitch
-$|Z|\,T$, which is large while the coupling is weak.
+the fluid field is $u_{\mathrm{Motion}}=\sum_i Z_i u^T_i+\omega_i u^R_i$.
+It is written on the `Fluid` grid in both chamber and sewn XDMF output.
+The sewn `Interface` grid carries the rigid surface velocity
+$Z+\omega\times x$ under the same name. Mesh coordinates are not moved,
+and no animation files are generated. In ParaView, use `Glyph` on `Motion`
+to display velocity arrows. The force magnitude is retained, not normalised;
+the CSV records the force, $Z$, $\omega$, period and pitch consistently.
+The obsolete `--motion-every` and `--motion-frames` options are removed.
 
 `kelvin-ball.csv` has one row per design: run parameters, mesh and material
 counts, tetrahedron quality, the reconstruction settings, $k$, $c$, $q$, $\rho$,

@@ -171,6 +171,109 @@ namespace KelvinBall
     return count;
   }
 
+  void Sphere::projectFixedGeometry(MMG::Mesh& mesh) const
+  {
+    constexpr unsigned outer = 1, xy = 2, plus = 4, minus = 8;
+    // Relative roundoff floor, not an additional mesh-quality budget.
+    constexpr Real roundoff = 64 * std::numeric_limits<Real>::epsilon();
+    std::vector<unsigned> constraints(mesh.getVertexCount(), 0);
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      const auto attribute = face->getAttribute();
+      if (!attribute)
+        continue;
+      const unsigned constraint = *attribute == Outer               ? outer
+        : (*attribute == SigmaXYPlus || *attribute == SigmaXYMinus) ? xy
+        : *attribute == SigmaPlus                                   ? plus
+        : *attribute == SigmaMinus                                  ? minus
+                                                                    : 0;
+      for (const Index vertex : face->getVertices())
+        constraints[vertex] |= constraint;
+    }
+
+    std::vector<Math::SpatialPoint> coordinates;
+    coordinates.reserve(mesh.getVertexCount());
+    Real maximumCorrection = 0;
+    size_t correctedVertices = 0;
+    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+    {
+      const auto original = mesh.getVertexCoordinates(vertex);
+      Math::SpatialPoint projected = original;
+      std::array<Math::SpatialPoint, 3> basis;
+      std::array<Real, 3> offsets{};
+      size_t rank = 0;
+      // Orthogonalize the affine equations together. Successive projections
+      // onto the original planes would not preserve their intersections.
+      for (const unsigned constraint : {outer, xy, plus, minus})
+      {
+        if (!(constraints[vertex] & constraint))
+          continue;
+        Math::SpatialPoint normal(3);
+        normal(0) = (constraint == outer || constraint == xy) ? 1 : 0;
+        normal(1) = constraint == outer ? 0 : constraint == xy ? -1 : 1;
+        normal(2) = constraint == plus ? -1 : constraint == minus ? 1 : 0;
+        Real offset = constraint == outer ? m_configuration.outerRadius : 0;
+        for (size_t i = 0; i < rank; ++i)
+        {
+          const Real coefficient = normal.dot(basis[i]);
+          normal -= coefficient * basis[i];
+          offset -= coefficient * offsets[i];
+        }
+        const Real norm = normal.norm();
+        if (norm <= roundoff)
+        {
+          if (std::abs(offset) > roundoff * m_configuration.outerRadius)
+            throw std::runtime_error(
+              "Incompatible fixed-boundary labels at a chamber vertex.");
+          continue;
+        }
+        basis[rank] = normal / norm;
+        offsets[rank] = offset / norm;
+        ++rank;
+      }
+      for (size_t i = 0; i < rank; ++i)
+        projected += (offsets[i] - basis[i].dot(original)) * basis[i];
+      const Real correction = (projected - original).norm();
+      maximumCorrection = std::max(maximumCorrection, correction);
+      correctedVertices += correction > roundoff * m_configuration.outerRadius;
+      coordinates.push_back(std::move(projected));
+    }
+
+    // Validate the proposed geometry before mutating the mesh, including
+    // cells incident to vertices shared by cuts and the material interface.
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const auto& vertices = cell->getVertices();
+      Math::SpatialMatrix<Real> before(3, 3), after(3, 3);
+      for (size_t i = 0; i < 3; ++i)
+      {
+        const auto oldEdge = mesh.getVertexCoordinates(vertices(i + 1)) -
+          mesh.getVertexCoordinates(vertices(0));
+        const auto newEdge = coordinates[vertices(i + 1)] - coordinates[vertices(0)];
+        for (size_t j = 0; j < 3; ++j)
+        {
+          before(j, i) = oldEdge(j);
+          after(j, i) = newEdge(j);
+        }
+      }
+      const Real determinant = after.determinant();
+      const Real scale = after.col(0).norm() * after.col(1).norm() * after.col(2).norm();
+      if (!std::isfinite(determinant) || determinant * before.determinant() <= 0 ||
+        std::abs(determinant) <= roundoff * scale)
+        throw std::runtime_error(
+          "Fixed-boundary projection would invert or degenerate a tetrahedron.");
+    }
+    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      if (constraints[vertex])
+        mesh.setVertexCoordinates(vertex, coordinates[vertex]);
+    Alert::Text<Alert::YellowT> heading(Alert::Yellow, "Fixed-boundary projection");
+    Alert::Info() << heading.setBold() << Alert::NewLine
+                  << "Corrected vertices:                 "
+                  << Alert::Notation::Number(correctedVertices) << Alert::NewLine
+                  << "Maximum displacement:               "
+                  << Alert::Notation::Number(maximumCorrection) << Alert::Raise;
+  }
+
   SphereDiscretization Sphere::discretize(bool conformingCuts,
     Real requestedWelschScale) const
   {
@@ -195,6 +298,7 @@ namespace KelvinBall
       .setBoundaryReference(Gamma)
       .setAngleDetection(false);
     mesh = discretizer.discretize(sphere);
+    projectFixedGeometry(mesh);
     splitSelfPairedCut(mesh);
     if (m_configuration.adapt && !conformingCuts)
     {
@@ -210,6 +314,7 @@ namespace KelvinBall
         .setGradation(2)
         .setAngleDetection(false)
         .optimize(mesh);
+      projectFixedGeometry(mesh);
       splitSelfPairedCut(mesh);
     }
     const size_t requiredTriangles = protectFixedGeometry(mesh, conformingCuts);
@@ -263,6 +368,7 @@ namespace KelvinBall
         .setAngleDetection(false)
         .optimize(mesh);
     }
+    projectFixedGeometry(mesh);
     splitSelfPairedCut(mesh);
     const size_t requiredTriangles = protectFixedGeometry(mesh, !m_configuration.adapt);
 
@@ -303,6 +409,7 @@ namespace KelvinBall
       .setGradation(m_configuration.adaptGradation)
       .setAngleDetection(false)
       .adapt(mesh, size);
+    projectFixedGeometry(mesh);
     splitSelfPairedCut(mesh);
   }
 }
