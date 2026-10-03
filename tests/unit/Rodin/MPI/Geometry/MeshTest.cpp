@@ -177,7 +177,9 @@ TEST(MPI_Geometry_Mesh, SubMeshDimensionsWithEmptyRootAcrossGeometries)
     auto boundary = builder.finalize();
     EXPECT_EQ(boundary.getDimension(), dimension - 1);
     if (world->size() > 1 && world->rank() == 0)
+    {
       EXPECT_EQ(boundary.getShard().getDimension(), 0u);
+    }
     if (world->rank() == 0)
     {
       Mesh<Context::MPI> baseCopy(boundary);

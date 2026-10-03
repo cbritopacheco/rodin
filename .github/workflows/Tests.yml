@@ -242,6 +242,7 @@ jobs:
         run: cmake --build ${{ github.workspace }}/build
 
       - name: Run unit tests
+        id: unit_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -LE "slow|distributed"
@@ -249,13 +250,14 @@ jobs:
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
       - name: Rerun failed unit tests (verbose)
-        if: failure()
+        if: failure() && steps.unit_tests.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -LE "slow|distributed"
           --rerun-failed -V --output-on-failure
 
       - name: Run distributed tests
+        id: distributed_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -L distributed -LE slow
@@ -263,7 +265,7 @@ jobs:
           -j 1
 
       - name: Rerun failed distributed tests (verbose)
-        if: failure()
+        if: failure() && steps.distributed_tests.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -L distributed -LE slow
@@ -358,6 +360,7 @@ jobs:
         run: cmake --build ${{ github.workspace }}/build
 
       - name: Run manufactured tests
+        id: manufactured_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L manufactured -LE "slow|distributed"
@@ -365,13 +368,14 @@ jobs:
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
       - name: Rerun failed manufactured tests (verbose)
-        if: failure()
+        if: failure() && steps.manufactured_tests.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L manufactured -LE "slow|distributed"
           --rerun-failed -V --output-on-failure
 
       - name: Run manufactured distributed tests
+        id: manufactured_distributed_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L manufactured -L distributed -LE slow
@@ -379,7 +383,7 @@ jobs:
           -j 1
 
       - name: Rerun failed manufactured distributed tests (verbose)
-        if: failure()
+        if: failure() && steps.manufactured_distributed_tests.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L manufactured -L distributed -LE slow
@@ -450,6 +454,7 @@ jobs:
         run: cmake --build ${{ github.workspace }}/build
 
       - name: Run slow tests
+        id: slow_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
@@ -457,7 +462,7 @@ jobs:
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
       - name: Rerun failed slow tests (verbose)
-        if: failure()
+        if: failure() && steps.slow_tests.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
