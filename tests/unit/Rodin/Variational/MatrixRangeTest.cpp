@@ -746,6 +746,48 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
               expected(i, j, k) += difference(i, j) * inverse(l, k);
       }
       EXPECT_LE((gradient - expected).norm(), 1e-7);
+      TrialFunction trial(fes);
+      TestFunction test(fes);
+      auto stiffness = Integral(Grad(trial), Grad(test));
+      stiffness.setOrder(6);
+      stiffness.setPolytope(*cell);
+      const auto& formula = QF::PolytopeQuadratureFormula::get(6, G::Triangle);
+      const auto& quadrature = cell->getQuadrature(formula);
+      Real integratedGradient = 0, scalarGradientEnergy = 0;
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& p = quadrature.getPoint(q);
+        const auto g = Grad(field).getValue(p);
+        const Real weight = formula.getWeight(q) * p.getDistortion();
+        integratedGradient += weight * g.squaredNorm();
+        for (size_t k = 0; k < spaceDimension; ++k)
+          scalarGradientEnergy += weight * g(0, 0, k) * g(0, 0, k);
+      }
+      const auto& dofs = fes.getDOFs(2, cell->getIndex());
+      Real assembledEnergy = 0;
+      for (size_t a = 0; a < dofs.size(); ++a)
+        for (size_t b = 0; b < dofs.size(); ++b)
+          assembledEnergy += field[dofs[a]] * stiffness.integrate(a, b) * field[dofs[b]];
+      EXPECT_NEAR(assembledEnergy, integratedGradient,
+        1e-9 * std::max(Real(1), integratedGradient));
+      using ScalarFES = std::remove_cvref_t<decltype(fes.getScalarSpace())>;
+      if constexpr (std::is_same_v<ScalarFES, H1<1, Real>> ||
+        std::is_same_v<ScalarFES, H1<2, Real>> || std::is_same_v<ScalarFES, H1<3, Real>>)
+      {
+        TrialFunction scalarTrial(fes.getScalarSpace());
+        TestFunction scalarTest(fes.getScalarSpace());
+        auto scalarStiffness = Integral(Grad(scalarTrial), Grad(scalarTest));
+        scalarStiffness.setOrder(6);
+        scalarStiffness.setPolytope(*cell);
+        const size_t components = fes.getRows() * fes.getColumns();
+        Real scalarEnergy = 0;
+        for (size_t a = 0; a < dofs.size() / components; ++a)
+          for (size_t b = 0; b < dofs.size() / components; ++b)
+            scalarEnergy += field[dofs[a * components]] *
+              scalarStiffness.integrate(a, b) * field[dofs[b * components]];
+        EXPECT_NEAR(scalarEnergy, scalarGradientEnergy,
+          1e-9 * std::max(Real(1), scalarGradientEnergy));
+      }
     };
     check(P0(mesh, 2, 3));
     check(P0g(mesh, 2, 3));
@@ -894,6 +936,19 @@ TEST(MatrixRange, ZeroDimensionalFields)
       *vertex, Polytope::Traits(G::Point).getCentroid(), vertex->getCoordinates());
     EXPECT_LE((field.getValue(point) - value).norm(), 1e-12);
     EXPECT_NEAR(Grad(field).getValue(point).norm(), 0, 1e-12);
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    auto mass = Integral(trial, test);
+    auto stiffness = Integral(Grad(trial), Grad(test));
+    mass.setPolytope(*vertex);
+    stiffness.setPolytope(*vertex);
+    const size_t count = fes.getFiniteElement(0, vertex->getIndex()).getCount();
+    for (size_t a = 0; a < count; ++a)
+      for (size_t b = 0; b < count; ++b)
+      {
+        EXPECT_NEAR(mass.integrate(a, b), a == b ? 1 : 0, 1e-12);
+        EXPECT_NEAR(stiffness.integrate(a, b), 0, 1e-12);
+      }
   };
   for (auto [r, c] : matrixShapes())
   {

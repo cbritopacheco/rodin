@@ -2790,6 +2790,11 @@ namespace Rodin::Variational
         m_mat.setZero();
         ScalarType* A = m_mat.data();
 
+        // A point has no reference derivatives.
+        if (d == 0)
+          return *this;
+        const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
+
         const auto& scalarTrial = [&]() -> const auto& {
           if constexpr (FormLanguage::IsMatrixRange<Scalar>::Value)
             return trialfe.getScalarElement();
@@ -2823,9 +2828,9 @@ namespace Rodin::Variational
         if (Gte.size() < scalarTestCount)
           Gte.resize(scalarTestCount);
         for (size_t a = 0; a < scalarTrialCount; ++a)
-          Gtr[a].resize(static_cast<std::uint8_t>(d));
+          Gtr[a].resize(static_cast<std::uint8_t>(spaceDimension));
         for (size_t b = 0; b < scalarTestCount; ++b)
-          Gte[b].resize(static_cast<std::uint8_t>(d));
+          Gte[b].resize(static_cast<std::uint8_t>(spaceDimension));
 
         assert(m_quadrature);
         const auto& q = *m_quadrature;
@@ -2837,8 +2842,27 @@ namespace Rodin::Variational
 
           const auto Jinv = p.getJacobianInverse();
 
-          // Build physical gradients for trial and test
-          if (d == 3)
+          // Embedded cells have one physical derivative per ambient axis.
+          if (spaceDimension != d)
+          {
+            for (size_t a = 0; a < scalarTrialCount; ++a)
+            {
+              const auto g = trTab.getGradient(qp, a);
+              Gtr[a].setZero();
+              for (size_t k = 0; k < spaceDimension; ++k)
+                for (size_t l = 0; l < d; ++l)
+                  Gtr[a][k] += Jinv(l, k) * g[l];
+            }
+            for (size_t b = 0; b < scalarTestCount; ++b)
+            {
+              const auto g = teTab.getGradient(qp, b);
+              Gte[b].setZero();
+              for (size_t k = 0; k < spaceDimension; ++k)
+                for (size_t l = 0; l < d; ++l)
+                  Gte[b][k] += Jinv(l, k) * g[l];
+            }
+          }
+          else if (d == 3)
           {
             const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0), a20 = Jinv(2,0);
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
