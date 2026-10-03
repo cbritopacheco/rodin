@@ -295,7 +295,6 @@ int main(int argc, char** argv)
 
   const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
@@ -347,8 +346,6 @@ int main(int argc, char** argv)
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
-  if (fitTol > Real(0))
-    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -386,7 +383,9 @@ int main(int argc, char** argv)
   std::cout << "Lobed-sphere WNGIR sweep on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
-            << "  orbit R=" << orbitR << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  orbit R=" << orbitR << "  kappaF=" << wngirParams.kappaF
+            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -544,18 +543,17 @@ int main(int argc, char** argv)
 
     Math::Vector<Real> bestU = u.getData();
     Real bestFit = interfaceFit;
-    Real effectiveFitTol = fitTol;
     Real minJ = Real(1);
     Real maxQRel = Real(1);
     Real lastAlpha = Real(0);
     Real acceptedStep = Real(0);
     std::size_t iterations = 0;
+    bool geometricTargetReached = false;
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = fitTol > Real(0)
-        ? fitTol
-        : h * wngirRep.levelSetGradientScale * wngirRep.effectiveTauRmsH;
+      Rodin::Examples::printWNGIRResponses(wngirRep);
+      geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -582,7 +580,7 @@ int main(int argc, char** argv)
     u.getData() = bestU;
     interfaceFit = bestFit;
 
-    const bool converged = interfaceFit <= effectiveFitTol;
+    const bool converged = geometricTargetReached;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);

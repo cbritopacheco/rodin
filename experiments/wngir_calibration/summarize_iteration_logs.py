@@ -34,12 +34,22 @@ def summarize(path, coefficients, order=2, j_floor=1e-2, q_max=10):
     for row in inner:
         outer = int(row["outer"])
         counts[outer] = counts.get(outer, 0) + 1
+    for row in accepted:
+        if row["phase"] == "accepted":
+            outer = int(row["outer"]) - 1
+            if "inner_last" in row:
+                counts[outer] = int(row["inner_last"])
+            else:
+                counts.setdefault(outer, 0)
     return dict(identity, log=str(path), reference_coefficient=coefficient,
                 error_order=order, geometry_records=len(accepted),
                 inner_attempts=len(inner),
                 inner_mean=statistics.mean(counts.values()) if counts else "",
                 inner_median=statistics.median(counts.values()) if counts else "",
                 inner_max=max(counts.values(), default=0),
+                inner_certified_outer=sum(g.get("inner_converged") == "1"
+                                          for g in accepted if g["phase"] == "accepted"),
+                final_inner_residual=geometry[-1].get("inner_residual", "") if geometry else "",
                 inner_linear_failures=sum(r.get("linear_ok") == "0" for r in inner),
                 inner_damped_steps=sum(0 < float(r.get("alpha", "nan")) < 1 for r in inner),
                 target_hit=int(hit is not None),

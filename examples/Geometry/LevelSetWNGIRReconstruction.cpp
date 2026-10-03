@@ -24,9 +24,6 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-#include <Rodin/PETSc.h>
-#endif
 
 #include "../WNGIRExampleParameters.h"
 
@@ -372,7 +369,6 @@ int run(int argc, char** argv)
 
   auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
@@ -426,39 +422,19 @@ int run(int argc, char** argv)
   VectorFES vectorFes(mesh, 2);
 #endif
 
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PETSc::Variational::GridFunction phiGf(scalarFes);
-#else
   GridFunction phiGf(scalarFes);
-#endif
   phiGf.setName("phi");
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PETSc::Variational::GridFunction cellLabel(p0Fes);
-#else
   GridFunction cellLabel(p0Fes);
-#endif
   cellLabel.setName("cell_label");
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PETSc::Variational::GridFunction phaseMoment(p0Fes);
-  PETSc::Variational::TrialFunction wngirTrial(vectorFes);
-  PETSc::Variational::TestFunction wngirTest(vectorFes);
-#else
   GridFunction phaseMoment(p0Fes);
   TrialFunction wngirTrial(vectorFes);
   TestFunction wngirTest(vectorFes);
-#endif
   phaseMoment.setName("phase_moment");
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PETSc::Variational::GridFunction du(vectorFes);
-#else
   GridFunction du(vectorFes);
-#endif
   du.setName("wngir_step");
   auto wngirSolveParams = wngirParams;
-  if (fitTol > Real(0))
-    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -469,21 +445,11 @@ int run(int argc, char** argv)
     std::integral_constant<std::size_t, 2>{},
 #endif
     moved);
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PETSc::Variational::GridFunction movedLabel(p0FesMoved);
-#else
   GridFunction movedLabel(p0FesMoved);
-#endif
   movedLabel.setName("cell_label");
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PETSc::Variational::GridFunction phiMoved(scalarFesMoved);
-  PETSc::Variational::GridFunction jMoved(p0FesMoved);
-  PETSc::Variational::GridFunction qRelMoved(p0FesMoved);
-#else
   GridFunction phiMoved(scalarFesMoved);
   GridFunction jMoved(p0FesMoved);
   GridFunction qRelMoved(p0FesMoved);
-#endif
   phiMoved.setName("phi_moved");
   jMoved.setName("j");
   qRelMoved.setName("q_rel");
@@ -509,7 +475,9 @@ int run(int argc, char** argv)
   std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  phase=" << phase << "  kappaF=" << wngirParams.kappaF
+            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -675,7 +643,7 @@ int run(int argc, char** argv)
                 << "  outside=" << (classified.labels.size() - insideCount)
                 << "  fit0=" << interfaceFit << "\n";
     }
-    Real geometricRMSTolerance = std::numeric_limits<Real>::infinity();
+    bool geometricTargetReached = false;
     Real minJ = Real(1);
     Real maxJ = Real(1);
     Real maxQRel = Real(1);
@@ -701,7 +669,8 @@ int run(int argc, char** argv)
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      geometricRMSTolerance = wngirRep.getGeometricRMSTolerance(h);
+      Rodin::Examples::printWNGIRResponses(wngirRep);
+      geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
@@ -740,8 +709,7 @@ int run(int argc, char** argv)
                   << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    const bool converged =
-      fitTol > Real(0) ? interfaceFit <= fitTol : geometricRMS <= geometricRMSTolerance;
+    const bool converged = geometricTargetReached;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);
@@ -840,27 +808,5 @@ int run(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-#if defined(RODIN_WNGIR_PETSC_GAMG) || defined(RODIN_WNGIR_PETSC_LU)
-  PetscErrorCode petscError = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-  assert(petscError == PETSC_SUCCESS);
-#ifdef RODIN_WNGIR_PETSC_GAMG
-  petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", "cg");
-  assert(petscError == PETSC_SUCCESS);
-  petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-pc_type", "gamg");
-  assert(petscError == PETSC_SUCCESS);
-#else
-  petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", "preonly");
-  assert(petscError == PETSC_SUCCESS);
-  petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-pc_type", "lu");
-  assert(petscError == PETSC_SUCCESS);
-  petscError = PetscOptionsSetValue(PETSC_NULLPTR, "-pc_factor_shift_type", "nonzero");
-  assert(petscError == PETSC_SUCCESS);
-#endif
-  const int result = run(argc, argv);
-  petscError = PetscFinalize();
-  assert(petscError == PETSC_SUCCESS);
-  return result;
-#else
   return run(argc, argv);
-#endif
 }

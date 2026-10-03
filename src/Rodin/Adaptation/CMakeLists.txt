@@ -17,6 +17,9 @@ set(RodinAdaptation_HEADERS
   WNGIRPrimalBarrierForce.h
   WNGIRPrimalBarrierMetric.h
   WNGIRPrimalBarrierState.h
+  WNGIRQualityMetric.h
+  WNGIRRegularityMetric.h
+  WNGIRDirectionalNewton.h
   WNGIRReport.h
   WNGIRSolver.h
   WNGIRObservationCoefficient.h

@@ -10,7 +10,7 @@
 
 namespace Rodin::Adaptation::Detail
 {
-  /// @brief Newton Hessian of the primal barrier for the linearized QP.
+    /// @brief Affine hinge Hessian or nonlinear hinge Gauss-Newton tangent.
   template <class TrialFunction, class TestFunction, class Displacement>
   class WNGIRPrimalBarrierMetric final
     : public Variational::LocalBilinearFormIntegratorBase<
@@ -98,8 +98,8 @@ namespace Rodin::Adaptation::Detail
           for (std::size_t local = 0; local < nTrial; ++local)
           {
             const auto gradient = trialJacobian.getBasis(local);
-            m_jTrial[local] = -deformation.getJacobianAction(gradient);
-            m_qTrial[local] = deformation.getRelativeDistortionAction(gradient);
+            m_jTrial[local] = state.getJacobianRow(gradient);
+            m_qTrial[local] = state.getDistortionRow(gradient);
           }
           if (sameSpace)
           {
@@ -112,8 +112,8 @@ namespace Rodin::Adaptation::Detail
             for (std::size_t local = 0; local < nTest; ++local)
             {
               const auto gradient = testJacobian.getBasis(local);
-              m_jTest[local] = -deformation.getJacobianAction(gradient);
-              m_qTest[local] = deformation.getRelativeDistortionAction(gradient);
+              m_jTest[local] = state.getJacobianRow(gradient);
+              m_qTest[local] = state.getDistortionRow(gradient);
             }
           }
 

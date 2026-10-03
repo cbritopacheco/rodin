@@ -33,6 +33,19 @@ gtest_discover_tests(RodinAdaptationWNGIRLossTest
 )
 
 add_executable(RodinAdaptationWNGIRSolverTest WNGIRSolverTest.cpp)
+add_executable(RodinAdaptationWNGIRQualityMetricTest WNGIRQualityMetricTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRQualityMetricTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRQualityMetricTest PROPERTIES LABELS unit)
+
+add_executable(RodinAdaptationWNGIRRegularityMetricTest WNGIRRegularityMetricTest.cpp)
+add_executable(RodinAdaptationWNGIRDirectionalNewtonTest WNGIRDirectionalNewtonTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRDirectionalNewtonTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRDirectionalNewtonTest PROPERTIES LABELS unit)
+target_link_libraries(RodinAdaptationWNGIRRegularityMetricTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRRegularityMetricTest PROPERTIES LABELS unit)
 target_link_libraries(RodinAdaptationWNGIRSolverTest
   PUBLIC
   GTest::gtest

@@ -193,7 +193,8 @@ if(RODIN_LINKER_NO_WARN_DUPLICATE_LIBRARIES)
 endif()
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
-add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
+# Do not override Apple's SDK deployment macro here.  CMake/the compiler set it
+# from CMAKE_OSX_DEPLOYMENT_TARGET; forcing 10.8 breaks current libc++ headers.
 
 if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
