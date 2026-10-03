@@ -2222,7 +2222,8 @@ namespace Rodin::Variational
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
     requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
-               FunctionBase<CoefficientDerived>>::RangeType>::Value)
+               FunctionBase<CoefficientDerived>>::RangeType>::Value &&
+      !FormLanguage::IsMatrixRange<Scalar>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3201,6 +3202,10 @@ namespace Rodin::Variational
           m_mat.setZero();
           ScalarType* A = m_mat.data(); // row-major (rows=test, cols=trial)
 
+          if (d == 0)
+            return *this;
+          const size_t spaceDimension = polytope.getMesh().getSpaceDimension();
+
           // Use scalar tabulations (fast, cached in H1Element<K, Scalar>::getTabulation)
           const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
           const auto& teTabS = testScalarElement.getTabulation(*m_qf);
@@ -3213,9 +3218,9 @@ namespace Rodin::Variational
           if (GteS.size() < testScalarCount)
             GteS.resize(testScalarCount);
           for (size_t a = 0; a < trialScalarCount; ++a)
-            GtrS[a].resize(static_cast<std::uint8_t>(d));
+            GtrS[a].resize(static_cast<std::uint8_t>(spaceDimension));
           for (size_t b = 0; b < testScalarCount; ++b)
-            GteS[b].resize(static_cast<std::uint8_t>(d));
+            GteS[b].resize(static_cast<std::uint8_t>(spaceDimension));
 
           assert(m_quadrature);
           const auto& q = *m_quadrature;
@@ -3227,67 +3232,24 @@ namespace Rodin::Variational
 
             const auto Jinv = p.getJacobianInverse();
 
-            // Map scalar reference gradients to physical gradients (once per scalar DOF)
-            if (d == 3)
+            // Physical gradients have an entry for every ambient coordinate,
+            // including on embedded cells where the inverse Jacobian is rectangular.
+            for (size_t axis = 0; axis < spaceDimension; ++axis)
             {
-              const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0), a20 = Jinv(2, 0);
-              const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1), a21 = Jinv(2, 1);
-              const ScalarType a02 = Jinv(0, 2), a12 = Jinv(1, 2), a22 = Jinv(2, 2);
-
               for (size_t a = 0; a < trialScalarCount; ++a)
               {
-                const auto g = trTabS.getGradient(qp, a);
-                const ScalarType gx = g[0], gy = g[1], gz = g[2];
-                GtrS[a][0] = a00 * gx + a10 * gy + a20 * gz;
-                GtrS[a][1] = a01 * gx + a11 * gy + a21 * gz;
-                GtrS[a][2] = a02 * gx + a12 * gy + a22 * gz;
+                ScalarType value = 0;
+                for (size_t r = 0; r < d; ++r)
+                  value += trTabS.getGradient(qp, a)[r] * Jinv(r, axis);
+                GtrS[a][axis] = value;
               }
               for (size_t b = 0; b < testScalarCount; ++b)
               {
-                const auto g = teTabS.getGradient(qp, b);
-                const ScalarType gx = g[0], gy = g[1], gz = g[2];
-                GteS[b][0] = a00 * gx + a10 * gy + a20 * gz;
-                GteS[b][1] = a01 * gx + a11 * gy + a21 * gz;
-                GteS[b][2] = a02 * gx + a12 * gy + a22 * gz;
+                ScalarType value = 0;
+                for (size_t r = 0; r < d; ++r)
+                  value += teTabS.getGradient(qp, b)[r] * Jinv(r, axis);
+                GteS[b][axis] = value;
               }
-            }
-            else if (d == 2)
-            {
-              const ScalarType a00 = Jinv(0, 0), a10 = Jinv(1, 0);
-              const ScalarType a01 = Jinv(0, 1), a11 = Jinv(1, 1);
-
-              for (size_t a = 0; a < trialScalarCount; ++a)
-              {
-                const auto g = trTabS.getGradient(qp, a);
-                const ScalarType gx = g[0], gy = g[1];
-                GtrS[a][0] = a00 * gx + a10 * gy;
-                GtrS[a][1] = a01 * gx + a11 * gy;
-              }
-              for (size_t b = 0; b < testScalarCount; ++b)
-              {
-                const auto g = teTabS.getGradient(qp, b);
-                const ScalarType gx = g[0], gy = g[1];
-                GteS[b][0] = a00 * gx + a10 * gy;
-                GteS[b][1] = a01 * gx + a11 * gy;
-              }
-            }
-            else if (d == 1)
-            {
-              const ScalarType a00 = Jinv(0, 0);
-              for (size_t a = 0; a < trialScalarCount; ++a)
-              {
-                const auto g = trTabS.getGradient(qp, a);
-                GtrS[a][0] = a00 * g[0];
-              }
-              for (size_t b = 0; b < testScalarCount; ++b)
-              {
-                const auto g = teTabS.getGradient(qp, b);
-                GteS[b][0] = a00 * g[0];
-              }
-            }
-            else
-            {
-              assert(false);
             }
 
             // Assemble: for each component c, add the same scalar matrix into block (c,c)
@@ -3403,6 +3365,7 @@ namespace Rodin::Variational
    */
     template <size_t KTrial, size_t KTest, class CoeffDerived, class LHSDerived,
       class RHSDerived, class Scalar, class Mesh>
+      requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
     class QuadratureRule<
       Dot<ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
                               ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3686,6 +3649,7 @@ namespace Rodin::Variational
    */
     template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
       class RHSDerived, class Scalar, class Mesh>
+      requires(!FormLanguage::IsMatrixRange<Scalar>::Value)
     class QuadratureRule<Dot<
       ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                  H1<KTrial, Scalar, Mesh>, TrialSpace>>,

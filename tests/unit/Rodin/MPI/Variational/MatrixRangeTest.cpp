@@ -62,7 +62,7 @@ namespace
     PETSc::Variational::TestFunction v(fes);
     auto mass = Integral(u, v);
     auto load = Integral(exact, v);
-    auto stiffness = Integral(Grad(u), Grad(v));
+    auto stiffness = Integral(Jacobian(u), Jacobian(v));
     // Collapsed pyramid bases require more than the polynomial degree rule.
     mass.setOrder(12);
     load.setOrder(12);
@@ -165,6 +165,10 @@ namespace
     TrialFunction trial(matrix);
     TestFunction test(matrix);
     auto mass = Integral(trial, test);
+    auto jacobian = Integral(Jacobian(trial), Jacobian(test));
+    auto gradient = Integral(Grad(trial), Grad(test));
+    jacobian.setOrder(6);
+    gradient.setOrder(6);
     for (auto it = matrix.getMesh().getCell(); it; ++it)
     {
       const auto& dofs = matrix.getDOFs(it->getDimension(), it->getIndex());
@@ -178,6 +182,13 @@ namespace
       }
       mass.setPolytope(*it);
       EXPECT_GT(std::abs(mass.integrate(0, 0)), 0);
+      jacobian.setPolytope(*it);
+      gradient.setPolytope(*it);
+      const size_t count =
+        matrix.getFiniteElement(it->getDimension(), it->getIndex()).getCount();
+      for (size_t a : {size_t(0), count / 2, count - 1})
+        for (size_t b : {size_t(0), count / 2, count - 1})
+          EXPECT_LE(std::abs(jacobian.integrate(a, b) - gradient.integrate(a, b)), 1e-9);
 #ifdef RODIN_TEST_WITH_PETSC
       Geometry::Point point(*it, Polytope::Traits(it->getGeometry()).getCentroid());
       const auto actual = field.getValue(point);

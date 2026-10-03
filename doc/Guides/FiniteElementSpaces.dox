@@ -463,6 +463,36 @@
  * TensorFunction wraps constant or callable tensor coefficients. Tensor rank
  * is a compile-time parameter; extents are runtime values with stack storage.
  * Tensor-valued solution spaces are not introduced by this matrix-range API.
+ * A linear form must have a scalar integrand. Bare @c Integral(v) is therefore
+ * rejected for vector- and matrix-valued test functions; @c Integral(F,v)
+ * contracts a matching coefficient with the test function to form a scalar.
+ *
+ * Matrix Jacobians have rank three. The vector-only P1 Jacobian handlers and
+ * the weighted, rank-one and advection H1 handlers are restricted to their
+ * supported ranges. Matrix expressions use the existing generic quadrature
+ * rule for these forms; the componentwise unweighted H1 Jacobian handler
+ * supports matrix ranges directly. An explicit quadrature order remains
+ * appropriate for rational pyramid bases and curved mappings.
+ *
+ * @section spatial-matrix-nonlocal Nonlocal P1 forms
+ *
+ * The existing P1 potential quadrature handler accepts matrix trial and test
+ * functions. A kernel returning a scalar multiplies every component. A kernel
+ * filling a @c SpatialMatrix acts on rows, while a kernel filling a
+ * @c SpatialTensor<Scalar,4> couples all entries:
+ * @f[
+ *   (K A)_{ij}(x)=\int_\Omega
+ *      \sum_{kl}\mathcal K_{ijkl}(x,y)A_{kl}(y)\,dy.
+ * @f]
+ * The callback signatures are @c kernel(x,y), @c kernel(matrix,x,y) and
+ * @c kernel(tensor,x,y), respectively. Output extents must match the field
+ * dimensions. The existing collapsed quadrature on coincident triangles and
+ * centroid rules on other panel pairs are retained; nonsingular constant
+ * kernels do not establish accuracy for arbitrary singular kernels. This
+ * handler is specific to P1; nonlocal handlers for the other space families
+ * are not introduced here. The nonlocal regressions cover local Eigen and
+ * OpenMP assembly; distributed nonlocal assembly is not validated by the
+ * Jacobian and reaction-diffusion MPI tests.
  *
  * @code{.cpp}
  * Math::SpatialTensor<Real, 4> elasticity(3, 3, 3, 3);

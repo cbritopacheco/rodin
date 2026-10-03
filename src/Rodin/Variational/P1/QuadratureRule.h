@@ -2621,25 +2621,24 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    */
-  template <class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  template <class LHSDerived, class RHSDerived, class LHSRange, class RHSRange,
+    class LHSMesh, class RHSMesh>
+    requires(FormLanguage::IsVectorRange<LHSRange>::Value &&
+      FormLanguage::IsVectorRange<RHSRange>::Value)
   class QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+    Dot<ShapeFunctionBase<
+          Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
           P1<LHSRange, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
         Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
-          P1<RHSRange, RHSMesh>, TestSpace>>>
-    : public LocalBilinearFormIntegratorBase<
-        typename FormLanguage::Traits<
-          Dot<
-            ShapeFunctionBase<
+        P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<
+        Dot<ShapeFunctionBase<
               Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
-                P1<LHSRange, LHSMesh>, TrialSpace>,
-            ShapeFunctionBase<
-              Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
-                P1<RHSRange, RHSMesh>, TestSpace>>>
-        ::ScalarType>
+              P1<LHSRange, LHSMesh>, TrialSpace>,
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
+            P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
   {
     public:
       /// @brief Reports this handler as an optimized specialization.
@@ -2940,6 +2939,8 @@ namespace Rodin::Variational
    */
   template <class CoeffDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
+    requires(FormLanguage::IsVectorRange<LHSRange>::Value &&
+      FormLanguage::IsVectorRange<RHSRange>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3250,7 +3251,9 @@ namespace Rodin::Variational
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
     requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
-               FunctionBase<CoefficientDerived>>::RangeType>::Value)
+               FunctionBase<CoefficientDerived>>::RangeType>::Value &&
+      !FormLanguage::IsMatrixRange<LHSRange>::Value &&
+      !FormLanguage::IsMatrixRange<RHSRange>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3646,7 +3649,9 @@ namespace Rodin::Variational
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class LHSRange,
     class RHSRange, class LHSMesh, class RHSMesh>
     requires(!FormLanguage::IsTensorRange<typename FormLanguage::Traits<
-               FunctionBase<CoefficientDerived>>::RangeType>::Value)
+               FunctionBase<CoefficientDerived>>::RangeType>::Value &&
+      !FormLanguage::IsMatrixRange<LHSRange>::Value &&
+      !FormLanguage::IsMatrixRange<RHSRange>::Value)
   class QuadratureRule<
     Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                    P1<LHSRange, LHSMesh>, TrialSpace>>,
@@ -3980,6 +3985,12 @@ namespace Rodin::Variational
       /// @brief Cell kernel type.
       using KernelType = Kernel;
 
+      /// @brief Kernel action on a matrix range, or the existing vector action.
+      using KernelValue = std::conditional_t<FormLanguage::IsMatrixRange<Range>::Value &&
+          std::is_invocable_v<const KernelType&, Math::SpatialTensor<ScalarType, 4>&,
+            const Geometry::Point&, const Geometry::Point&>,
+        Math::SpatialTensor<ScalarType, 4>, Math::SpatialMatrix<ScalarType>>;
+
       /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
 
@@ -4104,7 +4115,10 @@ namespace Rodin::Variational
           }
         }
 
-        if constexpr (std::is_same_v<Range, ScalarType>)
+        if constexpr (std::is_same_v<Range, ScalarType> ||
+          (FormLanguage::IsMatrixRange<Range>::Value &&
+            std::is_invocable_v<const KernelType&, const Geometry::Point&,
+              const Geometry::Point&>))
         {
 
           if (trp == tep)
@@ -4272,10 +4286,10 @@ namespace Rodin::Variational
                 m_sk = kernel(x, y);
                 for (size_t l = 0; l < testfe.getCount(); ++l)
                 {
-                  const ScalarType teb = testfe.getBasis(l)(ry);
+                  const auto teb = testfe.getBasis(l)(ry);
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
-                    const ScalarType trb = trialfe.getBasis(m)(rx);
+                    const auto trb = trialfe.getBasis(m)(rx);
                     m_matrix(l, m) = m_sk * Math::dot(trb, teb);
                   }
                 }
@@ -4303,16 +4317,17 @@ namespace Rodin::Variational
             m_sk = kernel(x, y);
             for (size_t l = 0; l < testfe.getCount(); ++l)
             {
-              const ScalarType teb = testfe.getBasis(l)(ry);
+              const auto teb = testfe.getBasis(l)(ry);
               for (size_t m = 0; m < trialfe.getCount(); ++m)
               {
-                const ScalarType trb = trialfe.getBasis(m)(rx);
+                const auto trb = trialfe.getBasis(m)(rx);
                 m_matrix(l, m) = m_sk * Math::dot(trb, teb);
               }
             }
           }
         }
-        else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
+        else if constexpr (FormLanguage::IsVectorRange<Range>::Value ||
+          FormLanguage::IsMatrixRange<Range>::Value)
         {
 
           if (trp == tep)
@@ -4567,10 +4582,10 @@ namespace Rodin::Variational
       Real m_distortion;
 
       ScalarType m_sk;
-      Math::SpatialMatrix<ScalarType> m_mk;
+      KernelValue m_mk;
 
-      Math::SpatialVector<ScalarType> m_trv, m_tev;
-      Math::SpatialMatrix<ScalarType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
+      Range m_trv, m_tev;
+      KernelValue m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
 
       Math::Matrix<ScalarType> m_matrix;
   };
