@@ -16,8 +16,11 @@
 namespace Rodin::Tests::Convergence
 {
   /**
-   * @brief Installs the quadratic map
-   * @f$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}@f$ on a unit-box grid.
+   * @brief Installs a prescribed map on a unit-box grid.
+   * The default is @f$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}@f$.
+   * Opt-in sine data use @f$\Phi(\xi)=\xi+a\sin(\pi\xi_0)e_{d-1}@f$;
+   * finite geometry degrees approximate rather than exactly reproduce it.
+   * The amplitude is a dimensionless scale on the unit box; its default is 0.1.
    * @par Architecture
    * Original vertex positions are retained before any coordinate mutation.
    * Geometry control points are evaluated from the original P1 chart, then
@@ -28,15 +31,23 @@ namespace Rodin::Tests::Convergence
    * enumerate local entities (including halos); global MPI counts are never
    * used as local-index bounds. The mesh must
    * remain alive and its topology must not change while this object is used.
-   * In dimensions two and three, @f$\det D\Phi=1@f$; in dimension one,
-   * @f$\Phi'=1+0.2\xi_0>0@f$. P2 geometry represents the map exactly.
+    * For the default map, in dimensions two and three, @f$\det D\Phi=1@f$; in dimension one,
+   * @f$\Phi'=1+0.2\xi_0>0@f$. P2 geometry represents the default map exactly.
    */
   template <class MeshType>
   class CurvedGeometry
   {
     public:
-      explicit CurvedGeometry(MeshType& mesh)
-        : m_mesh(mesh)
+      enum class Map
+      {
+        Quadratic,
+        Sine
+      };
+      explicit CurvedGeometry(
+        MeshType& mesh, Map map = Map::Quadratic, Real amplitude = 0.1)
+        : m_mesh(mesh),
+          m_map(map),
+          m_amplitude(amplitude)
       {
         for (auto vertex = mesh.getVertex(); vertex; ++vertex)
         {
@@ -48,7 +59,9 @@ namespace Rodin::Tests::Convergence
       Math::SpatialPoint mapToPhysical(Math::SpatialPoint point) const
       {
         assert(point.size() >= 1);
-        point(point.size() - 1) += Real(0.1) * point(0) * point(0);
+        point(point.size() - 1) += m_amplitude *
+          (m_map == Map::Quadratic ? point(0) * point(0)
+                                   : std::sin(Math::Constants::pi() * point(0)));
         return point;
       }
 
@@ -98,6 +111,8 @@ namespace Rodin::Tests::Convergence
 
     private:
       std::reference_wrapper<MeshType> m_mesh;
+      Map m_map;
+      Real m_amplitude;
       std::vector<Math::SpatialPoint> m_vertices;
   };
 }

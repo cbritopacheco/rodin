@@ -182,6 +182,7 @@ exists yet.
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 maps; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
+| Geometry approximation / Poisson patch | Map/derivative rates at fixed geometry degrees $q=1,2,3$ | Not yet implemented | Not yet implemented | Sine-map approximation and affine Poisson patches with $p=q$; native and real-PETSc local/MPI |
 
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:
@@ -225,6 +226,14 @@ axis, $h=1/(n-1)$, and field degree $p$:
   Curved P0 projection uses `n=5→9→17` on all seven geometries; its
   [suite specification](isoparametric/P0Projection/README.md) describes
   physical cell moments, interpolation rejection and analytic P0g means.
+  Nonpolynomial geometry approximation uses `n=3→5→9` separately for
+  geometry degrees $q=1,2,3$, requiring both adjacent map-error orders
+  $q+1$ and derivative-error orders $q$. Matched-degree affine Poisson
+  patches measure field error on each approximated domain, not solution
+  error on the exact domain. The
+  [suite specification](isoparametric/GeometryApproximation/README.md)
+  defines the independent sine-map oracle, logical chart correspondence,
+  quadrature sensitivity, and separate wrong-map/wrong-trace controls.
 
 These are rate-test levels, not one-mesh patch-test levels. The P1
 mixed-traction elasticity test on tetrahedra uses `n=9→17→33` because its
@@ -313,7 +322,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
-| 3 | Nonpolynomial geometry approximated at multiple geometry degrees | Separate geometry-map error from field error; state the comparison domain or pullback, map regularity, and geometry/field refinement sequence |
+| 3 | Smooth PDE field rates on approximated nonpolynomial geometry and exact-domain comparisons | Geometry degrees 1–3 now have map/derivative rate tests and matched-degree affine Poisson patches; remaining work must specify the solution comparison domain or pullback and separate field error from domain error |
 | 4 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
 | Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |
