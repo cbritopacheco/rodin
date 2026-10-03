@@ -483,6 +483,10 @@ namespace Rodin::Tests::Convergence
           return f(ip.getPoint());
       }
 
+    public:
+      /** @brief Squared modulus or componentwise Frobenius magnitude.
+       * Shared by physical error norms and independently integrated moments.
+       */
       template <class Scalar>
       static Real squaredMagnitude(const Scalar& value)
       {

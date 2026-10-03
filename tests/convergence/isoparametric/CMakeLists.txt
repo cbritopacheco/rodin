@@ -13,3 +13,8 @@ gtest_discover_tests(RodinConvergenceIsoparametric
 )
 
 add_subdirectory(Helmholtz)
+add_subdirectory(LinearElasticity)
+add_subdirectory(Stokes)
+add_subdirectory(ReactionDiffusion)
+add_subdirectory(NonlinearPoisson)
+add_subdirectory(P0Projection)

@@ -21,6 +21,10 @@ namespace Rodin::Tests::Convergence
    * residual and Jacobian callbacks operate on the same variational problem.
    * Each new workload owns new fields and solvers, without resizing a system.
    * The derivative oracle uses SNES callbacks on distinct perturbed vectors.
+   * With opt-in lifting, SNES stores the homogeneous correction @f$w_h@f$.
+   * Callback updates reconstruct @f$u_h=I_hu+w_h@f$ through grid-function
+   * accumulation, including MPI ghost synchronization. Default flat-mesh
+   * behavior retains zero lifting.
    */
   template <size_t K, class MeshType>
   class PETScNonlinearPoissonProblem
@@ -35,19 +39,25 @@ namespace Rodin::Tests::Convergence
 
       explicit PETScNonlinearPoissonProblem(const MeshType& mesh,
         size_t quadratureOrder = 12, Real amplitude = 1, bool omitCubic = false,
-        bool wrongTangent = false)
+        bool wrongTangent = false, bool liftBoundary = false,
+        NonlinearPoissonData::Field field = NonlinearPoissonData::Field::Sine)
         : m_mesh(mesh),
           m_order(quadratureOrder),
-          m_data(mesh.getDimension(), amplitude),
+          m_data(mesh.getDimension(), amplitude, field),
           m_space(std::integral_constant<size_t, K>{}, mesh),
           m_state(m_space),
+          m_lift(m_space),
+          m_liftBoundary(liftBoundary),
           m_du(m_space),
           m_v(m_space),
           m_problem(m_du, m_v),
           m_ksp(m_problem)
       {
         using namespace Variational;
-        m_state = Zero();
+        m_lift = Zero();
+        if (m_liftBoundary)
+          m_lift = m_data.getSolution();
+        m_state = m_lift;
         const Real gamma = omitCubic ? 0 : 1;
         auto a = Integral(Grad(m_du), Grad(m_v));
         auto c =
@@ -67,7 +77,7 @@ namespace Rodin::Tests::Convergence
       ErrorNorms solve(Real tolerance = 1e-11)
       {
         Solver::SNES snes(m_ksp);
-        snes.setStateUpdate([&](const PETSc::Math::Vector& x) { m_state.setData(x); });
+        snes.setStateUpdate([&](const PETSc::Math::Vector& x) { updateState(x); });
         snes.setType(SNESNEWTONLS).setTolerances(tolerance, tolerance, 1e-14, 20, 1000);
         // SNES uses the KSP handle directly, rather than invoking KSP::solve.
         EXPECT_EQ(KSPSetType(m_ksp.getHandle(), KSPCG), PETSC_SUCCESS);
@@ -81,15 +91,24 @@ namespace Rodin::Tests::Convergence
         EXPECT_EQ(
           VecNorm(m_problem.getLinearSystem().getVector(), NORM_2, &initialResidual),
           PETSC_SUCCESS);
-        EXPECT_GT(initialResidual, 0);
+        if (!m_liftBoundary)
+        {
+          EXPECT_GT(initialResidual, 0);
+        }
         snes.solve();
         EXPECT_TRUE(snes.converged());
-        EXPECT_GT(snes.getIterationNumber(), 0);
+        if (!m_liftBoundary)
+        {
+          EXPECT_GT(snes.getIterationNumber(), 0);
+        }
         KSPConvergedReason reason = KSP_CONVERGED_ITERATING;
         EXPECT_EQ(KSPGetConvergedReason(m_ksp.getHandle(), &reason), PETSC_SUCCESS);
-        EXPECT_GT(reason, 0);
+        if (snes.getIterationNumber() > 0)
+        {
+          EXPECT_GT(reason, 0);
+        }
         // Recompute after synchronizing explicitly, independently of the SNES cache.
-        m_state.setData(m_problem.getLinearSystem().getSolution());
+        updateState(m_problem.getLinearSystem().getSolution());
         m_problem.assemble(Variational::AssemblyTarget::RHS);
         EXPECT_EQ(
           VecNorm(m_problem.getLinearSystem().getVector(), NORM_2, &finalResidual),
@@ -102,11 +121,20 @@ namespace Rodin::Tests::Convergence
 
       Real tangentDefect()
       {
-        m_state = 0.5 * m_data.getSolution();
+        return tangentDefect(m_data.getSolution());
+      }
+
+      template <class Direction>
+      Real tangentDefect(const Direction& exactDirection)
+      {
+        if (m_liftBoundary)
+          m_state = Variational::Zero();
+        else
+          m_state = 0.5 * m_data.getSolution();
         StateType direction(m_space);
-        direction = 0.25 * m_data.getSolution();
+        direction = 0.25 * exactDirection;
         Solver::SNES snes(m_ksp);
-        snes.setStateUpdate([&](const PETSc::Math::Vector& x) { m_state.setData(x); });
+        snes.setStateUpdate([&](const PETSc::Math::Vector& x) { updateState(x); });
         ::Vec baseline = nullptr, plus = nullptr, minus = nullptr;
         ::Vec action = nullptr, difference = nullptr, residual = nullptr;
         const auto layout = m_problem.getLinearSystem().getSolution();
@@ -146,11 +174,19 @@ namespace Rodin::Tests::Convergence
       }
 
     private:
+      void updateState(const PETSc::Math::Vector& x)
+      {
+        m_state.setData(x);
+        if (m_liftBoundary)
+          m_state.axpy(1, m_lift);
+      }
       std::reference_wrapper<const MeshType> m_mesh;
       size_t m_order;
       NonlinearPoissonData m_data;
       SpaceType m_space;
       StateType m_state;
+      StateType m_lift;
+      bool m_liftBoundary;
       TrialType m_du;
       TestType m_v;
       ProblemType m_problem;

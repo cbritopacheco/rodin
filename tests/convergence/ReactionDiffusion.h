@@ -19,7 +19,8 @@ namespace Rodin::Tests::Convergence
   /** @brief Data for two coupled diffusion fields with reaction matrix
    * @f$R=\begin{pmatrix}1&0.2\\0.2&1\end{pmatrix}@f$ and
    * diffusion coefficients @f$\kappa=(1,2)@f$.
-   * Component indices are zero-based. Polynomial patches use
+   * Component indices are zero-based. Constant patches use @f$u_i=i+1@f$.
+   * Polynomial patches use
    * @f$u_i=(i+1)(1+s)@f$ or @f$u_i=(i+1)(1+s^2)@f$;
    * smooth fields use @f$u_0=e^s, u_1=2e^{-s}@f$, with
    * @f$s=\sum_j x_j@f$. Sources follow from
@@ -30,6 +31,7 @@ namespace Rodin::Tests::Convergence
     public:
       enum class Field
       {
+        Constant,
         Affine,
         Quadratic,
         Smooth
@@ -49,6 +51,8 @@ namespace Rodin::Tests::Convergence
             for (size_t j = 0; j < dim; ++j)
               s += p(j);
             const Real c = Real(component + 1);
+            if (field == Field::Constant)
+              return c;
             if (field == Field::Smooth)
               return c * std::exp(component == 0 ? s : -s);
             return c * (1 + (field == Field::Affine ? s : s * s));
@@ -65,7 +69,9 @@ namespace Rodin::Tests::Convergence
             for (size_t j = 0; j < dim; ++j)
               s += p(j);
             Real derivative = Real(component + 1);
-            if (field == Field::Quadratic)
+            if (field == Field::Constant)
+              derivative = 0;
+            else if (field == Field::Quadratic)
               derivative *= 2 * s;
             else if (field == Field::Smooth)
               derivative = (component == 0 ? 1 : -1) * exact(p);
