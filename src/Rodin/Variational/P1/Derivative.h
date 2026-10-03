@@ -75,8 +75,10 @@ namespace Rodin::Variational
    * @brief Derivative of a P1 GridFunction
    */
   template <class Range, class Data, class Mesh>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class Derivative<GridFunction<P1<Range, Mesh>, Data>> final
-    : public DerivativeBase<GridFunction<P1<Range, Mesh>, Data>, Derivative<GridFunction<P1<Range, Mesh>, Data>>>
+    : public DerivativeBase<GridFunction<P1<Range, Mesh>, Data>,
+        Derivative<GridFunction<P1<Range, Mesh>, Data>>>
   {
     public:
       /// @brief Finite element space type.

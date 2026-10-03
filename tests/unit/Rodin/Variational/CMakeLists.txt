@@ -730,3 +730,12 @@ gtest_discover_tests(RodinVariationalQuadratureRuleSpecializationTest
   PROPERTIES
     LABELS unit
 )
+add_executable(RodinVariationalMatrixRangeTest MatrixRangeTest.cpp)
+target_link_libraries(RodinVariationalMatrixRangeTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixRangeTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalMatrixQuadratureTest MatrixQuadratureTest.cpp)
+target_link_libraries(RodinVariationalMatrixQuadratureTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixQuadratureTest PROPERTIES LABELS unit)

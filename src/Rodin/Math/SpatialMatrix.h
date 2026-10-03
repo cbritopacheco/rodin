@@ -460,8 +460,8 @@ namespace Rodin::Math
       }
 
       /// @brief Returns the squared Frobenius norm.
-      [[nodiscard]] constexpr
-      ScalarType squaredNorm() const noexcept
+      [[nodiscard]] constexpr typename Eigen::NumTraits<ScalarType>::Real
+      squaredNorm() const noexcept
       {
         const auto r = m_rows;
         const auto c = m_cols;
@@ -477,49 +477,49 @@ namespace Rodin::Math
           case 4u:  // 1x0
           case 8u:  // 2x0
           case 12u: // 3x0
-            return ScalarType(0);
+            return typename Eigen::NumTraits<ScalarType>::Real(0);
 
           case 5u: // 1x1
-            return Math::pow2(A(0, 0));
+            return std::norm(A(0, 0));
 
           case 6u: // 1x2
-            return Math::pow2(A(0, 0)) + Math::pow2(A(0, 1));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1));
 
           case 7u: // 1x3
-            return Math::pow2(A(0, 0)) + Math::pow2(A(0, 1)) + Math::pow2(A(0, 2));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(0, 2));
 
           case 9u: // 2x1
-            return Math::pow2(A(0, 0)) + Math::pow2(A(1, 0));
+            return std::norm(A(0, 0)) + std::norm(A(1, 0));
 
           case 10u: // 2x2
-            return Math::pow2(A(0, 0)) + Math::pow2(A(0, 1)) + Math::pow2(A(1, 0)) +
-              Math::pow2(A(1, 1));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(1, 0)) +
+              std::norm(A(1, 1));
 
           case 11u: // 2x3
-            return Math::pow2(A(0, 0)) + Math::pow2(A(0, 1)) + Math::pow2(A(0, 2)) +
-              Math::pow2(A(1, 0)) + Math::pow2(A(1, 1)) + Math::pow2(A(1, 2));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(0, 2)) +
+              std::norm(A(1, 0)) + std::norm(A(1, 1)) + std::norm(A(1, 2));
 
           case 13u: // 3x1
-            return Math::pow2(A(0, 0)) + Math::pow2(A(1, 0)) + Math::pow2(A(2, 0));
+            return std::norm(A(0, 0)) + std::norm(A(1, 0)) + std::norm(A(2, 0));
 
           case 14u: // 3x2
-            return Math::pow2(A(0, 0)) + Math::pow2(A(0, 1)) + Math::pow2(A(1, 0)) +
-              Math::pow2(A(1, 1)) + Math::pow2(A(2, 0)) + Math::pow2(A(2, 1));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(1, 0)) +
+              std::norm(A(1, 1)) + std::norm(A(2, 0)) + std::norm(A(2, 1));
 
           case 15u: // 3x3
-            return Math::pow2(A(0, 0)) + Math::pow2(A(0, 1)) + Math::pow2(A(0, 2)) +
-              Math::pow2(A(1, 0)) + Math::pow2(A(1, 1)) + Math::pow2(A(1, 2)) +
-              Math::pow2(A(2, 0)) + Math::pow2(A(2, 1)) + Math::pow2(A(2, 2));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(0, 2)) +
+              std::norm(A(1, 0)) + std::norm(A(1, 1)) + std::norm(A(1, 2)) +
+              std::norm(A(2, 0)) + std::norm(A(2, 1)) + std::norm(A(2, 2));
 
           default:
             assert(false);
-            return ScalarType(0);
+            return typename Eigen::NumTraits<ScalarType>::Real(0);
         }
       }
 
       /// @brief Returns the Frobenius norm.
-      [[nodiscard]] constexpr
-      ScalarType norm() const noexcept
+      [[nodiscard]] constexpr typename Eigen::NumTraits<ScalarType>::Real
+      norm() const noexcept
       {
         return Math::sqrt(this->squaredNorm());
       }
@@ -528,6 +528,9 @@ namespace Rodin::Math
       constexpr
       ScalarType dot(const SpatialMatrix& other) const noexcept
       {
+        if constexpr (std::is_same_v<ScalarType, Complex>)
+          return Math::dot(m_data.topLeftCorner(m_rows, m_cols),
+            other.getData().topLeftCorner(other.rows(), other.cols()));
         assert(m_rows == other.m_rows);
         assert(m_cols == other.m_cols);
 
@@ -2500,6 +2503,23 @@ namespace Rodin::Math
       static_cast<Eigen::Index>(m.rows()),
       static_cast<Eigen::Index>(m.cols()));
     return os;
+  }
+}
+
+namespace Rodin::Math
+{
+  /// @brief Divide every active matrix entry by a scalar.
+  template <class Scalar, class Value>
+    requires(std::is_arithmetic_v<Value> || std::is_same_v<Value, Complex>)
+  auto operator/(const SpatialMatrix<Scalar>& matrix, const Value& divisor)
+  {
+    using Result = std::common_type_t<Scalar, Value>;
+    SpatialMatrix<Result> value(matrix.rows(), matrix.cols());
+    for (size_t row = 0; row < matrix.rows(); ++row)
+      for (size_t col = 0; col < matrix.cols(); ++col)
+        value(row, col) =
+          static_cast<Result>(matrix(row, col)) / static_cast<Result>(divisor);
+    return value;
   }
 }
 

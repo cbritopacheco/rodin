@@ -665,7 +665,14 @@ namespace Rodin::Variational
   Scalar H1Element<K, Scalar>::BasisFunction::DerivativeFunction<Order>::operator()(
       const Math::SpatialPoint& r) const
   {
-    if constexpr (Order == 0)
+    if constexpr (!std::is_same_v<Scalar, Real>)
+    {
+      // Reference polynomials and their coordinates are real even when the
+      // coefficients of the finite element field are complex.
+      return typename H1Element<K, Real>::BasisFunction(m_local, m_g)
+        .template getDerivative<Order>(m_i)(r);
+    }
+    else if constexpr (Order == 0)
     {
       return BasisFunction(m_local, m_g)(r);
     }
