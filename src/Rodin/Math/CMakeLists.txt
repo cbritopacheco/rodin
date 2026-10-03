@@ -46,6 +46,7 @@ target_compile_definitions(RodinMath
 target_link_libraries(RodinMath
   INTERFACE
     Eigen3::Eigen
+    Rodin::Alert
 )
 
 # Expose headers for IDEs when building from source
