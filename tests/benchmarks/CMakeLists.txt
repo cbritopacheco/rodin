@@ -35,6 +35,10 @@ add_executable(RodinMassAssemblyBenchmarks MassAssembly.cpp)
 target_link_libraries(RodinMassAssemblyBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+add_executable(RodinConstrainedAssemblyBenchmarks ConstrainedAssembly.cpp)
+target_link_libraries(RodinConstrainedAssemblyBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 if (RODIN_USE_MPI)
   add_executable(RodinMPIConstructionBenchmarks MPIConstruction.cpp)
   target_link_libraries(RodinMPIConstructionBenchmarks PRIVATE
@@ -44,6 +48,9 @@ if (RODIN_USE_MPI)
 endif()
 
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  add_executable(RodinPETScConstrainedAssemblyBenchmarks PETScConstrainedAssembly.cpp)
+  target_link_libraries(RodinPETScConstrainedAssemblyBenchmarks PRIVATE
+    Rodin::PETSc Rodin::MPI benchmark::benchmark)
   add_executable(RodinPETScMassAssemblyBenchmarks PETScMassAssembly.cpp)
   target_link_libraries(RodinPETScMassAssemblyBenchmarks PRIVATE
     Rodin::PETSc Rodin::MPI benchmark::benchmark)

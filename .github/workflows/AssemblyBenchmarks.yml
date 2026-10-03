@@ -49,6 +49,7 @@ jobs:
           cmake --build build --target RodinPhysicsAssemblyBenchmarks
           RodinPhysicsStageBenchmarks RodinQuadratureExpressionBenchmarks
           RodinMassAssemblyBenchmarks
+          RodinConstrainedAssemblyBenchmarks
           RodinVariationalQuadratureExpressionTest RodinMathSpatialScalarProductTest
           RodinVariationalQuadratureRuleDispatchTest -j2
       - name: Check expression reuse, complex promotion, and unchanged dispatch
@@ -76,6 +77,11 @@ jobs:
           build/tests/benchmarks/RodinMassAssemblyBenchmarks
           --benchmark_filter='/3/real_time$' --benchmark_min_time=1x
           --benchmark_out=assembly-mass-smoke.json --benchmark_out_format=json
+      - name: Check constrained physics operators, loads, and boundary updates
+        run: >-
+          build/tests/benchmarks/RodinConstrainedAssemblyBenchmarks
+          --benchmark_filter='/3/real_time$' --benchmark_min_time=1x
+          --benchmark_out=assembly-constrained-smoke.json --benchmark_out_format=json
       - uses: actions/upload-artifact@v4
         with:
           name: assembly-smoke-openmp-${{ matrix.openmp }}
@@ -84,6 +90,7 @@ jobs:
             assembly-stages-smoke.json
             assembly-expressions-smoke.json
             assembly-mass-smoke.json
+            assembly-constrained-smoke.json
 
   PETScNumericalSmoke:
     runs-on: ubuntu-latest
@@ -118,7 +125,7 @@ jobs:
       - name: Build PETSc physics benchmarks
         run: >-
           cmake --build build --target RodinPETScPhysicsAssemblyBenchmarks
-          RodinPETScMassAssemblyBenchmarks -j2
+          RodinPETScMassAssemblyBenchmarks RodinPETScConstrainedAssemblyBenchmarks -j2
       - name: Check local and distributed numerical oracles
         run: |
           executable=build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks
@@ -139,7 +146,67 @@ jobs:
               --benchmark_filter='/3/iterations:3/manual_time$' \
               --benchmark_out="assembly-petsc-mass-np${np}.json" --benchmark_out_format=json
           done
+      - name: Check PETSc constrained operators, loads, and boundary updates
+        run: |
+          executable=build/tests/benchmarks/RodinPETScConstrainedAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-petsc-constrained-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-petsc-constrained-np${np}.json" --benchmark_out_format=json
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: assembly-petsc-smoke-openmp-${{ matrix.openmp }}
           path: assembly-petsc-*.json
+
+  PETScComplexConstrainedSmoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp: [OFF, ON]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_DYNAMIC: "FALSE"
+      OPENBLAS_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install complex PETSc dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libeigen3-dev libscotch-dev libhdf5-dev
+          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
+      - name: Configure complex constrained benchmark
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_BENCHMARKS=ON -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MCSS=OFF
+          -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
+          -DRODIN_MULTITHREADED=${{ matrix.openmp }}
+          -DRODIN_USE_OPENMP=${{ matrix.openmp }}
+          -DPETSc_DIR="$(pkg-config --variable=prefix PETSc)"
+      - name: Build complex constrained benchmark
+        run: >-
+          cmake --build build --target RodinPETScConstrainedAssemblyBenchmarks -j2
+      - name: Check complex local and distributed constrained problems
+        run: |
+          executable=build/tests/benchmarks/RodinPETScConstrainedAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-complex-constrained-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-complex-constrained-np${np}.json" --benchmark_out_format=json
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assembly-complex-constrained-openmp-${{ matrix.openmp }}
+          path: assembly-complex-constrained-*.json

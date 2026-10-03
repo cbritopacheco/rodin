@@ -310,13 +310,77 @@ over shard dimensions, while an empty shard retains local dimension zero.
 Numerical smoke runs establish correctness checks, not isolated performance
 baselines.
 
+## Full constrained scalar problems
+
+`RodinConstrainedAssemblyBenchmarks` measures complete Eigen problem assembly,
+including volume loads, nonhomogeneous Dirichlet evaluation/elimination, and
+matrix/vector completion. `RodinPETScConstrainedAssemblyBenchmarks` measures
+the same forms in PETSc local/MPI contexts. Mesh/space/problem construction,
+interpolation, reference assembly, checks, and solves are excluded. There is
+no solve in this workload. The PETSc target requires MPI support even for
+single-rank local mode. Eigen uses wall time; PETSc uses three aligned
+iterations and maximum-rank wall time, excluding the preceding barrier and
+timing reduction as in the existing distributed benchmarks.
+
+The unit-box problem is
+
+$$
+-\nabla\cdot(\gamma\nabla u)+\rho u=f\quad\text{in }\Omega=(0,1)^d,
+\qquad u=g\quad\text{on }\partial\Omega.
+$$
+
+Poisson uses $\gamma=s$, $\rho=0$; conductivity uses
+$\gamma=s(1+\sum_jx_j)$, $\rho=0$; reaction--diffusion uses the latter
+diffusion coefficient and $\rho=s$. The manufactured field is
+
+$$
+g=u=\eta t\left[1+\sum_{j=1}^{d}(x_j+\chi x_j^2)\right],
+\qquad f=-\nabla\cdot(\gamma\nabla u)+\rho u,
+$$
+
+where $\chi=0$ at degree one and $\chi=1$ at degrees two/three;
+$\eta=1$ for real fields and $\eta=1+2i$ for complex fields. Thus degree-one
+Poisson has zero volume forcing, while conductivity and reaction--diffusion
+exercise nonzero loads at every degree. The other Poisson cases have nonzero
+forcing. Fields are interpolated through DOF functionals, not coefficient
+layout assumptions. All seven positive-dimensional geometries, H1 degrees
+one through three, and `n=3,5,9` are registered: 378 Eigen cases across both
+scalar fields, and 189 PETSc cases for the installed scalar field. P0/P0g
+are excluded because these conforming diffusion problems require H1 spaces;
+point/0D physics and curved maps remain separate workplan items.
+
+The production constrained operator is compared against the original-loop
+quadrature reference, assembled through the same backend and constraints.
+The load reference shares the production load integrator; its independent
+check is the manufactured residual, not an independent entrywise load oracle.
+With $z=I_hu$, each initial, repeated, timed-final and changed-state assembly
+must satisfy
+
+$$
+\frac{\|Az-b\|_2}{\max(1,\|b\|_2)}<10^{-10},\qquad
+\|A-A_{\mathrm{ref}}\|_F<10^{-11}\max(1,\|A_{\mathrm{ref}}\|_F),
+$$
+
+and $\|b-b_{\mathrm{ref}}\|_2<10^{-11}\max(1,\|b\|_2)$.
+An intentionally incorrect coefficient vector $z+\mathbf{1}$ must give a
+normalized residual greater than $10^{-4}$; this checks sensitivity of the
+oracle, not a physically constant field in a nonnodal basis. After timing,
+$s$ changes from $1$ to $1.5$ and $t$ from $1$ to $2$, exercising both
+coefficient re-evaluation and changing essential data. Quadrature order is
+eight at degree one and twelve otherwise; these choices are part of the
+workload and are reported, not a blanket exactness claim on rational bases.
+CI checks every smallest-mesh registration, including PETSc local and MPI
+at one through four ranks in both OpenMP configurations. Small segment
+partitions include empty shards. An empty benchmark filter or failed oracle
+returns nonzero. Performance claims require separate isolated repeated runs.
+
 ## Remaining performance workplan
 
 | Extension | Required measurement or evidence |
 | --- | --- |
-| Extended PETSc workload/constraint parity | Loads, boundary constraints, and independent operator-action comparisons beyond affine energy; retain maximum-rank timing and ownership metadata |
+| Extended workload/constraint parity | Full constrained scalar Poisson/conductivity/reaction--diffusion assembly is implemented; extend to vector physics, mixed boundary conditions and identification constraints |
 | Complex Helmholtz, coupled reaction–diffusion, Taylor–Hood Stokes, nonlinear Poisson | Loads/block forms and residual/tangent assembly at a prescribed state; supported scalar/backend paths; stable mixed spaces |
-| Projection solves, global couplings, and higher-order H1 physics | Mass/reaction operator and projection-load assembly is implemented; extend to projection solves, mixed/global-integrator couplings, higher-order diffusion/elasticity, and meaningful point/0D forms |
+| Projection solves, global couplings, and higher-order H1 physics | Mass/reaction and constrained scalar diffusion through degree three are implemented; extend to projection solves, mixed/global-integrator couplings, degree-four/vector physics, and meaningful point/0D forms |
 | Remaining setup and stage isolation | Cold allocation, mesh/space setup, PETSc/MPI insertion and completion, constraints, solve, and norm timings; warmed sequential binding/kernel/triplet/finalization scopes are implemented |
 | Curved geometry and boundary variants | Map degree/regularity, quadrature-point counts, constraints and boundary workload metadata |
 | Scaling and regression baselines | At least three sizes; fixed-global-work strong scaling and fixed-per-rank-work weak scaling; controlled runner and established variance before thresholds |
