@@ -179,6 +179,15 @@ namespace Rodin::Adaptation
         return getJacobian() * getInverseTranspose().dot(G);
       }
 
+      /// @brief Mixed second variation of the Jacobian; requires an invertible state.
+      Real getJacobianSecondAction(const Math::SpatialMatrix<Real>& G,
+        const Math::SpatialMatrix<Real>& H) const
+      {
+        const auto inverse = getInverseTranspose().transpose();
+        return getJacobian() * (getInverseTranspose().dot(G) * getInverseTranspose().dot(H) -
+          (inverse * G * inverse * H).trace());
+      }
+
       /**
        * @brief The linearised action of the relative distortion,
        * @f$a_Q(G)=\partial_F Q_{\operatorname{rel}}:G@f$; requires
@@ -187,6 +196,22 @@ namespace Rodin::Adaptation
       Real getRelativeDistortionAction(const Math::SpatialMatrix<Real>& G) const
       {
         return getRelativeDistortionGradient().dot(G);
+      }
+
+      /// @brief Mixed second variation of relative distortion; requires a positive Jacobian.
+      Real getRelativeDistortionSecondAction(const Math::SpatialMatrix<Real>& G,
+        const Math::SpatialMatrix<Real>& H) const
+      {
+        assert(isAdmissible());
+        const Real d = static_cast<Real>(m_d);
+        const Real a = Real(2) / d;
+        const auto inverse = getInverseTranspose().transpose();
+        const Real traceG = getInverseTranspose().dot(G);
+        const Real traceH = getInverseTranspose().dot(H);
+        return std::pow(getJacobian(), -a) *
+          (a * G.dot(H) - a * a * (m_F.dot(G) * traceH + m_F.dot(H) * traceG) +
+            (m_F.squaredNorm() / d) *
+              (a * a * traceG * traceH + a * (inverse * G * inverse * H).trace()));
       }
 
     private:

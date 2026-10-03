@@ -86,14 +86,12 @@ namespace
     const LocalMesh& mesh, LocalMesh& moved, const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
-    const auto& uData = u.getData();
     const Index vn = mesh.getVertexCount();
     for (Index vertex = 0; vertex < vn; ++vertex)
     {
       const Vec2 x = mesh.getVertexCoordinates(vertex);
       const auto& dofs = uFes.getDOFs(0, vertex);
-      moved.setVertexCoordinates(
-        vertex, vec2(x(0) + uData(dofs[0]), x(1) + uData(dofs[1])));
+      moved.setVertexCoordinates(vertex, vec2(x(0) + u[dofs[0]], x(1) + u[dofs[1]]));
     }
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
@@ -108,8 +106,8 @@ namespace
       {
         const auto& rc = geomFe.getNode(a);
         cell.getTransformation().transform(X, rc);
-        const Real ux = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
-        const Real uy = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
+        const Real ux = u[uFes.getGlobalIndex({D, cell.getIndex()}, a * 2)];
+        const Real uy = u[uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1)];
         pm(0, a) = X(0) + ux;
         pm(1, a) = X(1) + uy;
       }
@@ -346,7 +344,7 @@ namespace
 
 }
 
-int main(int argc, char** argv)
+int run(int argc, char** argv)
 {
   const std::size_t n = parseSizeTOption(argc, argv, "n", 50);
   constexpr std::size_t nFrames = 1;
@@ -371,8 +369,6 @@ int main(int argc, char** argv)
 
   auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol = parseRealOption(argc, argv, "fit-tol", Real(0));
-  const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
@@ -431,16 +427,14 @@ int main(int argc, char** argv)
   GridFunction cellLabel(p0Fes);
   cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);
-  phaseMoment.setName("phase_moment");
   TrialFunction wngirTrial(vectorFes);
   TestFunction wngirTest(vectorFes);
+  phaseMoment.setName("phase_moment");
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   GridFunction du(vectorFes);
   du.setName("wngir_step");
   auto wngirSolveParams = wngirParams;
-  if (fitTol > Real(0))
-    wngirSolveParams.tauRms = fitTol;
   Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
@@ -454,10 +448,10 @@ int main(int argc, char** argv)
   GridFunction movedLabel(p0FesMoved);
   movedLabel.setName("cell_label");
   GridFunction phiMoved(scalarFesMoved);
-  phiMoved.setName("phi_moved");
   GridFunction jMoved(p0FesMoved);
-  jMoved.setName("j");
   GridFunction qRelMoved(p0FesMoved);
+  phiMoved.setName("phi_moved");
+  jMoved.setName("j");
   qRelMoved.setName("q_rel");
 
   IO::XDMF xdmf(Rodin::Examples::wngirOutput("LevelSetWNGIRReconstruction"));
@@ -478,9 +472,12 @@ int main(int argc, char** argv)
 
   std::cout << "Wavy-circle WNGIR reconstruction on " << n << "x" << n
             << " unit-square mesh\n";
+  std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase << "  kappaBulk=" << wngirParams.kappaBulk << '\n';
+            << "  phase=" << phase << "  kappaF=" << wngirParams.kappaF
+            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -590,8 +587,8 @@ int main(int argc, char** argv)
       },
       /*dimension=*/2);
 
-    u.getData().setZero();
-    du.getData().setZero();
+    u *= Real(0);
+    du *= Real(0);
 
     auto computeInterfaceFit = [&]() -> Real {
       Real interfacePhi = 0;
@@ -603,7 +600,9 @@ int main(int argc, char** argv)
         const auto face = mesh.getFace(facet);
         const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
         const std::size_t nLocal = fe.getCount();
-        const std::size_t qFitOrder = std::max<std::size_t>(qOrder, 2 * fe.getOrder());
+        const std::size_t qFitOrder = wngirParams.geometricValidationOrder > 0
+          ? wngirParams.geometricValidationOrder
+          : wngirGeometricValidationOrder(fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
         const auto& quad = face->getQuadrature(qf);
@@ -619,8 +618,8 @@ int main(int argc, char** argv)
           for (std::size_t l = 0; l < nLocal; ++l)
           {
             const auto bv = fe.getBasis(l)(rc);
-            ux(0) += bv(0) * u.getData()(dofs[l]);
-            ux(1) += bv(1) * u.getData()(dofs[l]);
+            ux(0) += bv(0) * u[dofs[l]];
+            ux(1) += bv(1) * u[dofs[l]];
           }
           const Vec2 y = vec2(Xp(0) + ux(0), Xp(1) + ux(1));
           const Real phiVal = levelSet.phi(y);
@@ -644,13 +643,17 @@ int main(int argc, char** argv)
                 << "  outside=" << (classified.labels.size() - insideCount)
                 << "  fit0=" << interfaceFit << "\n";
     }
-    Real effectiveFitTol = fitTol;
+    bool geometricTargetReached = false;
     Real minJ = Real(1);
     Real maxJ = Real(1);
     Real maxQRel = Real(1);
     Real activeRMS = Real(0);
+    Real activeSup = Real(0);
     Real levelSetGradientScale = Real(0);
     Real activeFraction = Real(0);
+    Real geometricRMS = std::numeric_limits<Real>::infinity();
+    Real geometricSup = std::numeric_limits<Real>::infinity();
+    Real normalRMS = std::numeric_limits<Real>::infinity();
     Real rigidModeCoercivity = Real(0);
     std::size_t jacobianRejections = 0;
     std::size_t distortionRejections = 0;
@@ -658,27 +661,43 @@ int main(int argc, char** argv)
     Real lastAlpha = Real(0);
     Real maxStep = Real(0);
     Real acceptedStep = Real(0);
+    Real lastPrimalBarrierAlpha = Real(0);
+    Real minPrimalBarrierAlpha = Real(1);
+    std::size_t fullPrimalBarrierSteps = 0;
     std::size_t iterations = 0;
 
     const char* exitReason = "iter-budget";
     {
       const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      effectiveFitTol = wngirRep.effectiveTauRms;
+      Rodin::Examples::printWNGIRResponses(wngirRep);
+      geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
+                << "  cgSolves=" << wngirRep.linearSolveCount << "  cgMean="
+                << (wngirRep.linearSolveCount > 0
+                       ? Real(wngirRep.linearIterations) / Real(wngirRep.linearSolveCount)
+                       : Real(0))
+                << "  cgMax=" << wngirRep.maxLinearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       iterations = wngirRep.iterations;
       lastAlpha = wngirRep.lastAlpha;
       acceptedStep = wngirRep.acceptedStep;
+      lastPrimalBarrierAlpha = wngirRep.lastPrimalBarrierAlpha;
+      minPrimalBarrierAlpha = wngirRep.minPrimalBarrierAlpha;
+      fullPrimalBarrierSteps = wngirRep.fullPrimalBarrierSteps;
       minJ = wngirRep.minJ;
       maxJ = wngirRep.maxJ;
       maxQRel = wngirRep.maxQRel;
       activeRMS = wngirRep.activeRMS;
+      activeSup = wngirRep.activeSup;
       levelSetGradientScale = wngirRep.levelSetGradientScale;
       activeFraction = wngirRep.activeFraction;
+      geometricRMS = wngirRep.geometricRMS;
+      geometricSup = wngirRep.geometricSup;
+      normalRMS = wngirRep.normalRMS;
       rigidModeCoercivity = wngirRep.rigidModeCoercivity;
       jacobianRejections = wngirRep.jacobianRejections;
       distortionRejections = wngirRep.distortionRejections;
@@ -690,10 +709,7 @@ int main(int argc, char** argv)
                   << "  (3hG=" << Real(3) * h * wngirRep.levelSetGradientScale << ")\n";
     }
 
-    const std::string_view exit(exitReason);
-    const bool residualConverged =
-      exit.starts_with("numerical-") || exit.starts_with("geometric-");
-    const bool converged = residualConverged && interfaceFit <= effectiveFitTol;
+    const bool converged = geometricTargetReached;
     if (converged)
       ++framesConverged;
     finalFitPerFrame.push_back(interfaceFit);
@@ -704,8 +720,8 @@ int main(int argc, char** argv)
       const Index cellIdx = cellIt->getIndex();
       const std::size_t local = cellToLocal.at(cellIdx);
       const Index dof = p0Fes.getGlobalIndex({D, cellIdx}, 0);
-      cellLabel.getData()(dof) = static_cast<Real>(classified.labels[local]);
-      phaseMoment.getData()(dof) = cellMoments[local].moment;
+      cellLabel[dof] = static_cast<Real>(classified.labels[local]);
+      phaseMoment[dof] = cellMoments[local].moment;
     }
 
     updateMovedMeshFromDisplacement(mesh, moved, u);
@@ -737,11 +753,10 @@ int main(int argc, char** argv)
       const auto& dst = dstCache[dstLocal];
       const Real sigDetAu = static_cast<Real>(src.sigmaK) * dst.detAK;
       const Real jK = sigDetAu / src.Jscale;
-      jMoved.getData()(dof) = jK;
+      jMoved[dof] = jK;
       const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
-      qRelMoved.getData()(dof) = F.squaredNorm() / (Real(2) * std::max(jK, Real(1e-30)));
-      movedLabel.getData()(dof) =
-        static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
+      qRelMoved[dof] = F.squaredNorm() / (Real(2) * std::max(jK, Real(1e-30)));
+      movedLabel[dof] = static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
     }
 
     phiMoved = [&](const Geometry::Point& p) -> Real {
@@ -753,15 +768,19 @@ int main(int argc, char** argv)
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
               << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
               << "  max_qrel=" << maxQRel << "  active_rms=" << activeRMS
-              << "  active_rms_hg="
+              << "  active_sup=" << activeSup << "  active_rms_hg="
               << (h * levelSetGradientScale > Real(0)
                      ? activeRMS / (h * levelSetGradientScale)
                      : Real(0))
               << "  act_frac=" << activeFraction << "  cR=" << rigidModeCoercivity
+              << "  pb_alpha=" << lastPrimalBarrierAlpha
+              << "  pb_min_alpha=" << minPrimalBarrierAlpha
+              << "  pb_full_steps=" << fullPrimalBarrierSteps
               << "  rej_j=" << jacobianRejections << "  rej_q=" << distortionRejections
               << "  rej_e=" << energyRejections
               << "  converged=" << (converged ? "yes" : "best-effort")
-              << "  exit=" << exitReason << '\n';
+              << "  exit=" << exitReason << "  geom_rms=" << geometricRMS
+              << "  geom_sup=" << geometricSup << "  normal_rms=" << normalRMS << '\n';
 
     xdmf.write(t).flush();
   }
@@ -785,4 +804,9 @@ int main(int argc, char** argv)
   }
 
   return 0;
+}
+
+int main(int argc, char** argv)
+{
+  return run(argc, argv);
 }

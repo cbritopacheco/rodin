@@ -87,8 +87,8 @@ namespace Rodin::Adaptation::Detail
           for (std::size_t local = 0; local < fe.getCount(); ++local)
           {
             const auto gradient = testJacobian.getBasis(local);
-            const Real rowJ = -deformation.getJacobianAction(gradient);
-            const Real rowQ = deformation.getRelativeDistortionAction(gradient);
+            const Real rowJ = state.getJacobianRow(gradient);
+            const Real rowQ = state.getDistortionRow(gradient);
             m_vector(static_cast<Eigen::Index>(local)) +=
               weight * (coefficientJ * rowJ + coefficientQ * rowQ);
           }

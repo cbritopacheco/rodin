@@ -969,7 +969,6 @@ int main(int argc, char** argv)
 
       u.getData().setZero();
       Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-      wngirDefaults.parseLegacyMaxIterations = true;
       const auto wngir = Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, interfaceAttribute, wngirDefaults);
       Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);

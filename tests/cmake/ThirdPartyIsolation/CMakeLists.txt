@@ -1,0 +1,71 @@
+cmake_minimum_required(VERSION 3.16)
+project(ThirdPartyIsolation LANGUAGES C CXX)
+
+get_filename_component(RODIN_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+include(${RODIN_SOURCE_DIR}/cmake/RodinThirdParty.cmake)
+set(PROJECT_SOURCE_DIR "${RODIN_SOURCE_DIR}")
+
+# Contradictory parent settings must remain intact, but must not enable MMG's
+# Scotch, tests or documentation. Test both new and already-populated caches.
+set(RODIN_USE_SCOTCH ON)
+if(ISOLATION_EXISTING_CACHE)
+  set(USE_SCOTCH ON CACHE STRING "Parent Scotch choice" FORCE)
+  set_property(CACHE USE_SCOTCH PROPERTY STRINGS ON OFF)
+  set(BUILD_TESTING ON CACHE BOOL "Parent testing choice" FORCE)
+  set(BUILD_DOC ON CACHE BOOL "Parent documentation choice" FORCE)
+  set(CMAKE_C_FLAGS_MAINTAINER "-DPARENT_MAINTAINER" CACHE STRING
+    "Parent compiler flags" FORCE)
+endif()
+
+get_cmake_property(_before CACHE_VARIABLES)
+list(FILTER _before INCLUDE REGEX
+  "^(USE_SCOTCH|BUILD_TESTING|BUILD_DOC|CMAKE_BUILD_TYPE|CMAKE_.*_FLAGS_.*)$")
+foreach(_variable IN LISTS _before)
+  get_property(_saved_${_variable} CACHE ${_variable} PROPERTY VALUE)
+endforeach()
+rodin_add_mmg()
+foreach(_variable IN LISTS _before)
+  get_property(_value CACHE ${_variable} PROPERTY VALUE)
+  if(NOT "${_value}" STREQUAL "${_saved_${_variable}}")
+    message(FATAL_ERROR "MMG changed parent cache entry ${_variable}")
+  endif()
+endforeach()
+if(NOT ISOLATION_EXISTING_CACHE)
+  foreach(_variable USE_SCOTCH BUILD_TESTING BUILD_DOC CMAKE_C_FLAGS_MAINTAINER)
+    if(DEFINED CACHE{${_variable}})
+      message(FATAL_ERROR "MMG leaked ${_variable} into the parent cache")
+    endif()
+  endforeach()
+endif()
+if(NOT RODIN_USE_SCOTCH)
+  message(FATAL_ERROR "Rodin Scotch support was disabled")
+endif()
+get_directory_property(_definitions DIRECTORY
+  "${RODIN_SOURCE_DIR}/third-party/mmg" COMPILE_DEFINITIONS)
+if("USE_SCOTCH" IN_LIST _definitions)
+  message(FATAL_ERROR "MMG was compiled with Scotch")
+endif()
+get_target_property(_links libmmg3d_a LINK_LIBRARIES)
+if("${_links}" MATCHES "[Ss][Cc][Oo][Tt][Cc][Hh]")
+  message(FATAL_ERROR "MMG links Scotch: ${_links}")
+endif()
+
+set(gtest_force_shared_crt OFF CACHE BOOL "Parent CRT choice" FORCE)
+set(BENCHMARK_ENABLE_TESTING ON CACHE BOOL "Parent benchmark tests" FORCE)
+set(BENCHMARK_ENABLE_WERROR ON CACHE BOOL "Parent benchmark warnings" FORCE)
+set(BENCHMARK_ENABLE_LTO OFF CACHE BOOL "Parent benchmark LTO" FORCE)
+set(RODIN_LTO ON)
+rodin_add_googletest()
+rodin_add_benchmark()
+if(NOT "$CACHE{gtest_force_shared_crt}" STREQUAL "OFF" OR
+   NOT "$CACHE{BENCHMARK_ENABLE_TESTING}" STREQUAL "ON" OR
+   NOT "$CACHE{BENCHMARK_ENABLE_WERROR}" STREQUAL "ON" OR
+   NOT "$CACHE{BENCHMARK_ENABLE_LTO}" STREQUAL "OFF")
+  message(FATAL_ERROR "Bundled test libraries overwrote parent cache choices")
+endif()
+get_directory_property(_benchmark_tests DIRECTORY
+  "${RODIN_SOURCE_DIR}/third-party/benchmark" DEFINITION BENCHMARK_ENABLE_TESTING)
+if(_benchmark_tests)
+  message(FATAL_ERROR "Private benchmark testing override was ignored")
+endif()
+message(STATUS "Third-party isolation checks passed")

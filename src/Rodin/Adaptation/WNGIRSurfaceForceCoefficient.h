@@ -34,12 +34,12 @@ namespace Rodin::Adaptation::Detail
 
       /// @brief Constructs the WNGIR surface force coefficient.
       WNGIRSurfaceForceCoefficient(const PhiType& phi, const GradType& grad,
-        const Displacement& current, const LocatorType& locator, Real sigma2,
+        const Displacement& current, const LocatorType& locator, const WNGIRLoss& loss,
         Real normalization, std::size_t dimension)
         : m_phi(phi.copy()),
           m_grad(grad.copy()),
           m_deformation(current, locator),
-          m_loss(std::sqrt(sigma2)),
+          m_loss(loss),
           m_normalization(normalization),
           m_dimension(dimension)
       {}
@@ -92,7 +92,7 @@ namespace Rodin::Adaptation::Detail
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
   WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
     const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
-    const LocatorType&, Real, Real, std::size_t)
+    const LocatorType&, const WNGIRLoss&, Real, std::size_t)
     -> WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 

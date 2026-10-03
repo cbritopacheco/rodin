@@ -71,17 +71,53 @@ Moving-interface mesh adaptation under the layering invariant
 attributes (`Geometry::MinSTCut` is the classifier primitive), geometry
 fitting owns node positions and never decides topology.
 
-On this branch the module is **WNGIR** — Welsch natural-gradient interface
-fitting: `WNGIR.h` public include; `WNGIRParameters`/`WNGIRReport`,
-backend-independent `WNGIRSolver`, form-language surface coefficients,
-primal-barrier admissibility coefficients, and optional normal-offset coefficients. The solver
-retains one `Problem`, one linear solver, and a preassembled bulk form; only
-coefficients depending on the current deformation are reassembled. It is the default
-displacement model for fitting a mesh interface to a level set;
-dimension-generic, built in the form language; the 2D examples use the
-native Eigen path (PETSc-backed 3D solver variants live on the
-module/Adaptation lineage). `AnalyticFunctionAdapters.h` lifts analytic lambdas
-into `FunctionBase`; `CellGeomCache` caches per-cell geometry.
+On this branch the module is **WNGIR**: Welsch natural-gradient interface
+fitting. The unique model is \(M=F+S+D\) with affine quadratic hinges.
+\(F\) is normalized half-squared fitting curvature without the level-set Hessian;
+\(S\) is the PSD part of the Hessian of \((d/4)(Q-1)\), restricted to current
+deviatoric stretch on both arguments:
+\(P_FG=\operatorname{dev}\operatorname{sym}(GF^{-1})F\). This preserves the
+current rotation and uniform-dilation kernel away from identity; clipping the
+additive Hessian alone does not. \(D\) is pulled-back pointwise deviatoric current
+strain: \(h\kappa_D\int j\,\operatorname{dev}\epsilon(v):
+\operatorname{dev}\epsilon(z)\), where \(\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})\).
+It does not penalize local infinitesimal rotations or isotropic strain. There is
+no global dilation coupling. Higher-order spaces can contain additional conformal
+kernel modes not covered by the similarity gauge; this term alone is not an
+\(H^1\) norm. Their independent coefficients
+are kappaF, kappaS and kappaD, all defaulting to one. S and D retain the mesh
+factor \(h\); there is no shared kappaBulk multiplier.
+The fitting energy/force remain robust Welsch. Minimizing this integral is not
+equivalent to minimizing the maximum geometric residual. Power-loss experiments
+are isolated diagnostics, not a production option or schedule.
+Surface integration uses at least order 12 and geometric sampling at least 14
+(vertices are included separately). These are safeguards for non-polynomial
+targets, not exact-integration or Hausdorff guarantees; bulk integration and
+physical displacement sampling retain their own order rules.
+Inner Newton uses a frozen merit
+line search and a stationarity residual relative to the fixed fitting force.
+Directional Newton scales the predictor and frozen quadratic form before the
+hinge solve, bounded by physical predictor motion divided by \(h\). Nonpositive
+robust directional curvature falls back to positive weighted fitting curvature.
+The outer Armijo line search only backtracks, enforcing the actual \(j\) and \(Q\)
+budgets. The geometric stopping target is sampled \(D_\infty\), not robust RMS.
+There is no mass completion, diagonal shift, logarithmic barrier, nonlinear-hinge
+alternative or separate inertia factorization. Each linear solve selects zero
+along unresolved similarity modes using a tiny restricted eigensolve. This gauge
+is not part of the objective and releases modes when active hinges resolve them;
+it is not a global coercivity certificate.
+
+`WNGIR.h` is the public include; parameters/report and form-language
+coefficients live beside `WNGIRSolver.h`. The local Eigen backend supports CG,
+SparseLU, and optional MUMPS solving the same pointwise deviatoric operator.
+The sparse metric is symmetrized before factorization and residual evaluation,
+so triangular direct solvers and the true-residual test use the same operator.
+One Problem and metric forms are retained, but deformation-dependent forms are
+reassembled per outer iteration. MUMPS retains symbolic analysis while the
+augmented sparsity pattern is unchanged and numeric factors for identical systems.
+`AnalyticFunctionAdapters.h` lifts analytic lambdas into FunctionBase;
+`CellGeomCache` caches per-cell geometry. Historical experimental comparisons
+remain in experiments/wngir_calibration; they are not current implementations.
 
 Standing principle regardless of branch: interface-fitting constraints
 inside variational solves are smooth penalties, never hard projections

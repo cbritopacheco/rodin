@@ -19,6 +19,7 @@ project(Rodin VERSION 0.0.1 LANGUAGES CXX C)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(RodinUtilities)
+include(RodinThirdParty)
 include(RodinInstall)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -194,7 +195,8 @@ if(RODIN_LINKER_NO_WARN_DUPLICATE_LIBRARIES)
 endif()
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
-add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
+# Do not override Apple's SDK deployment macro here.  CMake/the compiler set it
+# from CMAKE_OSX_DEPLOYMENT_TARGET; forcing 10.8 breaks current libc++ headers.
 
 if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
@@ -343,8 +345,7 @@ if (RODIN_BUILD_SRC)
   if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS OR
       RODIN_BUILD_MANUFACTURED_TESTS OR RODIN_BUILD_CONVERGENCE_TESTS)
     # ---- GoogleTest ----
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
+    rodin_add_googletest()
     # GoogleTest builds itself with -Wall; GCC then flags gtest-death-test.cc
     # with -Wmaybe-uninitialized. Vendored code, so silence instead of patch.
     foreach(_gtest_target gtest gtest_main gmock gmock_main)
@@ -354,12 +355,7 @@ if (RODIN_BUILD_SRC)
       endif()
     endforeach()
     if (RODIN_BUILD_BENCHMARKS)
-      if (RODIN_LTO)
-        set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
-      endif()
-      set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-      set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
-      add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
+      rodin_add_benchmark()
     endif()
 
     add_subdirectory(tests)

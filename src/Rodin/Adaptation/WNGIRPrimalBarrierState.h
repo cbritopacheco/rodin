@@ -5,12 +5,14 @@
 #ifndef RODIN_ADAPTATION_WNGIRPRIMALBARRIERSTATE_H
 #define RODIN_ADAPTATION_WNGIRPRIMALBARRIERSTATE_H
 
+#include <limits>
+
 #include "CellDeformation.h"
 #include "WNGIRParameters.h"
 
 namespace Rodin::Adaptation::Detail
 {
-  /// @brief Pointwise slacks and Newton coefficients of the primal QP barrier.
+  /// @brief Pointwise slacks and Newton coefficients of the affine quadratic hinges.
   class WNGIRPrimalBarrierState
   {
     public:
@@ -18,35 +20,59 @@ namespace Rodin::Adaptation::Detail
       WNGIRPrimalBarrierState(const CellDeformation& deformation,
         const Math::SpatialMatrix<Real>& innerGradient, const WNGIRParameters& parameters,
         Real barrierCoefficient)
+        : m_rowDeformation(deformation)
       {
         if (!deformation.isAdmissible())
           return;
-        m_jAction = -deformation.getJacobianAction(innerGradient);
-        m_qAction = deformation.getRelativeDistortionAction(innerGradient);
+        m_jAction = getJacobianRow(innerGradient);
+        m_qAction = getDistortionRow(innerGradient);
         m_jSlack = deformation.getJacobian() - parameters.jSafe - m_jAction;
         m_qSlack = parameters.qMax - deformation.getRelativeDistortion() - m_qAction;
-        if (m_jSlack <= Real(0) || m_qSlack <= Real(0))
-          return;
-
-        if (parameters.kappaJ > Real(0))
-        {
-          const Real coefficient = barrierCoefficient * parameters.kappaJ;
-          m_jHessian = coefficient / (m_jSlack * m_jSlack);
-          m_jForce = m_jHessian * m_jAction - coefficient / m_jSlack;
-        }
-        if (parameters.kappaQ > Real(0))
-        {
-          const Real coefficient = barrierCoefficient * parameters.kappaQ;
-          m_qHessian = coefficient / (m_qSlack * m_qSlack);
-          m_qForce = m_qHessian * m_qAction - coefficient / m_qSlack;
-        }
+        const auto coefficients = [&](Real action, Real slack, Real delta, Real weight,
+                                    Real& hessian, Real& force) {
+          if (weight <= Real(0) || slack >= delta)
+            return;
+          hessian = barrierCoefficient * weight / (delta * delta);
+          force = hessian * (action - (delta - slack));
+        };
+        coefficients(m_jAction, m_jSlack,
+          parameters.qualityGuard * (Real(1) - parameters.jSafe), parameters.kappaJ,
+          m_jHessian, m_jForce);
+        coefficients(m_qAction, m_qSlack,
+          parameters.qualityGuard * (parameters.qMax - Real(1)), parameters.kappaQ,
+          m_qHessian, m_qForce);
         m_feasible = true;
+      }
+
+      /// @brief Affine quality energy with the construction parameters, evaluated only on demand.
+      Real getEnergy(const WNGIRParameters& parameters, Real barrierCoefficient) const
+      {
+        if (!m_feasible)
+          return std::numeric_limits<Real>::infinity();
+        const auto energy = [&](Real slack, Real delta, Real weight) {
+          const Real violation = std::max(Real(0), Real(1) - slack / delta);
+          return Real(0.5) * barrierCoefficient * weight * violation * violation;
+        };
+        return energy(m_jSlack, parameters.qualityGuard * (Real(1) - parameters.jSafe),
+                 parameters.kappaJ) +
+          energy(m_qSlack, parameters.qualityGuard * (parameters.qMax - Real(1)),
+            parameters.kappaQ);
       }
 
       /// @brief Whether feasible.
       bool isFeasible() const
       {
         return m_feasible;
+      }
+      /// Negative Jacobian differential at the frozen outer state.
+      Real getJacobianRow(const Math::SpatialMatrix<Real>& gradient) const
+      {
+        return -m_rowDeformation.getJacobianAction(gradient);
+      }
+      /// Distortion differential at the frozen outer state.
+      Real getDistortionRow(const Math::SpatialMatrix<Real>& gradient) const
+      {
+        return m_rowDeformation.getRelativeDistortionAction(gradient);
       }
       /// @brief The jacobian action.
       Real getJacobianAction() const
@@ -90,6 +116,7 @@ namespace Rodin::Adaptation::Detail
       }
 
     private:
+      CellDeformation m_rowDeformation;
       bool m_feasible = false;
       Real m_jAction = 0;
       Real m_qAction = 0;
