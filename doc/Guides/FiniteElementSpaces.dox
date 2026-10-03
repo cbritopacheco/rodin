@@ -437,6 +437,9 @@
  * families must supply their own conforming bases and Piola mappings.
  * Local and global coefficient indices are interleaved in row-major order:
  * @f$ a(mn)+in+j @f$. No Voigt scaling or symmetry reduction is applied.
+ * This coefficient numbering is independent of matrix memory storage;
+ * @ref guides-ordering "Matrix storage and finite-element component ordering"
+ * describes both conventions and their consequences for assembly.
  *
  * @code{.cpp}
  * H1 stressSpace(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
