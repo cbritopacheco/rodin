@@ -44,5 +44,9 @@ entries, respectively. The object size counter also includes their extents and
 active-entry count.
 
 The separate `RodinSpatialMatrixBenchmarks` executable measures finite-element
-assembly against nine scalar assemblies. Those assembly costs should not be
-inferred from these value-operation timings.
+assembly against nine scalar assemblies. It uses total process CPU time, including
+OpenMP workers, and separates complete assembly, triplet generation, element
+binding, cached entry scans and sparse conversion. Those assembly costs should
+not be inferred from these value-operation timings. See
+[the CPU investigation](../../doc/spatial-matrix-assembly-cpu.md) for commands,
+controlled comparisons, measured results and remaining scope.
