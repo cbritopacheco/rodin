@@ -20,6 +20,17 @@ introduced or removed, especially in numerical convergence and stopping logic.
 If the implementation differs from a paper or specification, establish whether
 the difference was deliberate before editing the code.
 
+## Numerical constants
+
+Avoid unexplained numeric thresholds, safety factors, and iteration limits.
+Use named `constexpr` constants in the owning class or method; use macros only
+when preprocessing requires them. Document each constant's purpose, units or
+scale, and the reason for its value. State when a value is a heuristic policy
+choice rather than a mathematical bound. Derive related values, such as squared
+tolerances or factors, from one named constant so they cannot drift apart.
+Literal coordinate indices, zero and one, and explicit mathematical identities
+do not need artificial names.
+
 ## Anomalies
 
 **An unexplained measurement is a finding, not a footnote. Do not ship a
