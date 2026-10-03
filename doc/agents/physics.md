@@ -78,8 +78,13 @@ fitting. The unique model is \(M=F+S+D\) with affine quadratic hinges.
 deviatoric stretch on both arguments:
 \(P_FG=\operatorname{dev}\operatorname{sym}(GF^{-1})F\). This preserves the
 current rotation and uniform-dilation kernel away from identity; clipping the
-additive Hessian alone does not. \(D\) is pulled-back current symmetric strain
-with global uniform dilation projected out. Their independent coefficients
+additive Hessian alone does not. \(D\) is pulled-back pointwise deviatoric current
+strain: \(h\kappa_D\int j\,\operatorname{dev}\epsilon(v):
+\operatorname{dev}\epsilon(z)\), where \(\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})\).
+It does not penalize local infinitesimal rotations or isotropic strain. There is
+no global dilation coupling. Higher-order spaces can contain additional conformal
+kernel modes not covered by the similarity gauge; this term alone is not an
+\(H^1\) norm. Their independent coefficients
 are kappaF, kappaS and kappaD, all defaulting to one. S and D retain the mesh
 factor \(h\); there is no shared kappaBulk multiplier.
 The fitting energy/force remain robust Welsch. Minimizing this integral is not
@@ -104,7 +109,7 @@ it is not a global coercivity certificate.
 
 `WNGIR.h` is the public include; parameters/report and form-language
 coefficients live beside `WNGIRSolver.h`. The local Eigen backend supports CG,
-SparseLU, and optional MUMPS solving the same dilation-projected operator.
+SparseLU, and optional MUMPS solving the same pointwise deviatoric operator.
 The sparse metric is symmetrized before factorization and residual evaluation,
 so triangular direct solvers and the true-residual test use the same operator.
 One Problem and metric forms are retained, but deformation-dependent forms are

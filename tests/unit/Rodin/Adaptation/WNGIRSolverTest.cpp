@@ -456,7 +456,7 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Sparse augmented LU retains the same low-rank rigid operator as CG.
-  TEST(Rodin_Adaptation_WNGIRSolver, DirectAugmentedSolveRetainsDilationProjection)
+  TEST(Rodin_Adaptation_WNGIRSolver, DirectAugmentedSolvePreservesSimilarityGauge)
   {
     const auto solve = [](WNGIRParameters::DirectSolver backend) {
       return solveTranslatedLine(
@@ -491,7 +491,7 @@ namespace Rodin::Tests::Unit
       true, WNGIRParameters::DirectSolver::MUMPS, false, Real(0), Real(0)), Alert::Exception);
   }
 
-  TEST(Rodin_Adaptation_WNGIRSolver, MUMPSAugmentedSolveRetainsDilationProjection)
+  TEST(Rodin_Adaptation_WNGIRSolver, MUMPSAugmentedSolvePreservesSimilarityGauge)
   {
     const auto solve = [](WNGIRParameters::DirectSolver directSolver) {
       return solveTranslatedLine(
@@ -563,6 +563,64 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(state.report.minJ, state.report.maxJ, Real(1e-10));
     EXPECT_NEAR(state.report.maxQRel, Real(1), Real(1e-10));
   }
+
+#ifdef RODIN_USE_MUMPS
+  TEST(Rodin_Adaptation_WNGIRSolver, SimilarityGaugePreservesPlaneTranslation3D)
+  {
+    constexpr size_t n = 3;
+    constexpr Real h = Real(0.5);
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
+    mesh.scale(h);
+    for (size_t from = 1; from <= 3; ++from)
+      for (size_t to = 0; to <= 3; ++to)
+        if (from != to)
+          mesh.getConnectivity().compute(from, to);
+    std::vector<Index> facets;
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      bool onInterface = true;
+      for (const Index vertex : face->getVertices())
+        onInterface &=
+          std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+      if (onInterface)
+      {
+        facets.push_back(face->getIndex());
+        mesh.setAttribute({2, face->getIndex()}, Interface);
+      }
+    }
+    ASSERT_FALSE(facets.empty());
+    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 3);
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    WNGIR solver(trial, test);
+    WNGIRParameters p;
+    p.h = h;
+    p.directSolver = WNGIRParameters::DirectSolver::MUMPS;
+    p.directSolverThreads = 1;
+    p.maxIterations = 12;
+    p.hasInterfaceAttribute = true;
+    p.interfaceAttribute = Interface;
+    p.geometricSupTolerance = Real(1e-6);
+    p.cgRelativeTolerance = Real(1e-10);
+    solver.setParameters(p);
+    RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
+    Math::Vector<Real> normal(3);
+    normal << Real(1), Real(0), Real(0);
+    const VectorFunction gradient(normal);
+    const auto report = solver.solve(mesh, facets, phi, gradient);
+    EXPECT_TRUE(report.geometricTargetReached);
+    EXPECT_EQ(report.unresolvedSimilarityModes, 4u);
+    EXPECT_LE(report.linearError, p.cgRelativeTolerance);
+    EXPECT_NEAR(report.minJ, Real(1), Real(1e-10));
+    EXPECT_NEAR(report.maxJ, Real(1), Real(1e-10));
+    EXPECT_NEAR(report.maxQRel, Real(1), Real(1e-10));
+    GridFunction expected(fes);
+    normal *= Real(0.05);
+    expected = VectorFunction(normal);
+    EXPECT_LT((trial.getSolution().getData() - expected.getData()).norm(),
+      Real(1e-6) * std::sqrt(Real(fes.getSize())));
+  }
+#endif
 
   TEST(Rodin_Adaptation_WNGIRSolver, CommonMetricScalePreservesTheHingeModelP1P2)
   {

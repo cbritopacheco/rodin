@@ -101,7 +101,7 @@ namespace Rodin::Adaptation
    * before constructing the hinges. Armijo then backtracks from the full increment.
    *
    * The form-language assembly uses the local Eigen backend, with CG, SparseLU
-   * or MUMPS solving the same dilation-projected operator. Shape curvature is
+   * or MUMPS solving the same pointwise deviatoric current-strain operator. Shape curvature is
    * restricted to current deviatoric stretch after PSD projection. Linear systems select zero
    * along unresolved similarity modes; this does not modify the inner objective.
    * There is no full-space completion or inertia gate. Linear
@@ -553,8 +553,6 @@ namespace Rodin::Adaptation
           m_regularityForm = Detail::WNGIRCurrentStrainMetric(
             m_duStep, m_vStep, u, coefficient, order);
           m_regularityForm.assemble();
-          m_dilationCouplings =
-            Detail::wngirCurrentStrainCouplings(m_vStep, u, meshDim, coefficient, order);
           m_surfaceForm = surfaceForce;
           m_surfaceForm.assemble();
           bool solveOk = true;
@@ -576,7 +574,6 @@ namespace Rodin::Adaptation
               const auto& system = m_stepProblem.getLinearSystem();
               fixedMetric = system.getOperator();
               fixedForce = system.getVector();
-              fixedProjection = getRegularityProjection();
               m_similarityModes = getSimilarityModes(u);
             }
           }
@@ -1982,13 +1979,6 @@ namespace Rodin::Adaptation
           std::vector<Real> weights;
       };
 
-      /// Negative rank-one coupling removes uniform dilation from current strain.
-      RegularityProjection getRegularityProjection() const
-      {
-        return {
-          m_dilationCouplings, std::vector<Real>(m_dilationCouplings.size(), Real(-1))};
-      }
-
       /// @brief Assemble one symmetric operator for the model, factors and residuals.
       void assembleStep()
       {
@@ -2176,7 +2166,7 @@ namespace Rodin::Adaptation
         {
           const auto& rhs = axb.getVector();
           const auto projection =
-            fixedProjection ? *fixedProjection : getRegularityProjection();
+            fixedProjection ? *fixedProjection : RegularityProjection{};
           auto gauged = projection;
           const size_t unresolved = gaugeSimilarityModes(axb.getOperator(), rhs, gauged);
           if (report)
@@ -2339,7 +2329,6 @@ namespace Rodin::Adaptation
       std::unique_ptr<Solver::MUMPS<LinearSystemType>> m_mumps;
 #endif
       BilinearFormType m_regularityForm;
-      std::vector<Math::Vector<Real>> m_dilationCouplings;
       Math::Matrix<Real> m_similarityModes;
       /// @brief Observation metric and fitting force at the outer displacement.
       ///

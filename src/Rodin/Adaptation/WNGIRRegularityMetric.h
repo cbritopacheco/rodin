@@ -5,8 +5,6 @@
 #ifndef RODIN_ADAPTATION_WNGIRREGULARITYMETRIC_H
 #define RODIN_ADAPTATION_WNGIRREGULARITYMETRIC_H
 
-#include <cmath>
-#include <limits>
 #include <vector>
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
@@ -15,12 +13,14 @@
 namespace Rodin::Adaptation::Detail
 {
   /**
-   * @brief Frozen current-strain bilinear form, excluding the global dilation correction.
+   * @brief Frozen pointwise deviatoric current-strain bilinear form.
    *
    * Binds cached geometry and basis Jacobians, evaluates j and F^-1 once per
-   * quadrature point, then tabulates sym(grad v F^-1) before contracting pairs.
-   * This is the same integral as wngirCurrentStrain, without repeated coefficient
-   * evaluation inside the basis-pair loop. Assembly clones isolate bind state.
+   * quadrature point, then tabulates dev sym(grad v F^-1) before contracting pairs.
+   * Computes @f$\int j\,\operatorname{dev}\epsilon(v):
+   * \operatorname{dev}\epsilon(z)@f$, allowing pointwise isotropic strain.
+   * Assembly clones isolate bind state. Higher-order spaces can contain conformal
+   * kernel modes beyond global similarities; this form alone is not an H1 norm.
    */
   template <class TrialFunction, class TestFunction, class Displacement>
   class WNGIRCurrentStrainMetric final
@@ -70,6 +70,9 @@ namespace Rodin::Adaptation::Detail
           {
             const Math::SpatialMatrix<Real> L(trialJacobian.getBasis(local) * inverse);
             m_trialStrains[local] = Real(0.5) * (L + L.transpose());
+            const Real mean = m_trialStrains[local].trace() / Real(d);
+            for (size_t axis = 0; axis < d; ++axis)
+              m_trialStrains[local](axis, axis) -= mean;
           }
           if (trialFES == testFES)
             m_testStrains = m_trialStrains;
@@ -80,6 +83,9 @@ namespace Rodin::Adaptation::Detail
             {
               const Math::SpatialMatrix<Real> L(testJacobian.getBasis(local) * inverse);
               m_testStrains[local] = Real(0.5) * (L + L.transpose());
+              const Real mean = m_testStrains[local].trace() / Real(d);
+              for (size_t axis = 0; axis < d; ++axis)
+                m_testStrains[local](axis, axis) -= mean;
             }
           }
           const Real weight = m_coefficient * qf.getWeight(q) * point.getDistortion() *
@@ -113,60 +119,6 @@ namespace Rodin::Adaptation::Detail
       std::vector<Math::SpatialMatrix<Real>> m_trialStrains, m_testStrains;
   };
 
-  /// Frozen linear trace coupling, using one coefficient evaluation per quadrature point.
-  template <class TestFunction, class Displacement>
-  class WNGIRCurrentStrainTrace final
-    : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
-  {
-    public:
-      using ScalarType = typename TestFunction::ScalarType;
-      using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
-      WNGIRCurrentStrainTrace(const TestFunction& test, const Displacement& current, size_t order)
-        : Parent(test.getLeaf()), m_test(test), m_current(current), m_order(order)
-      {}
-      const Geometry::Polytope& getPolytope() const final override
-      {
-        assert(m_polytope);
-        return *m_polytope;
-      }
-      WNGIRCurrentStrainTrace& setPolytope(const Geometry::Polytope& cell) final override
-      {
-        m_polytope = &cell;
-        const auto d = cell.getDimension();
-        const auto n = m_test.get().getFiniteElementSpace().getFiniteElement(d, cell.getIndex()).getCount();
-        const auto& qf = QF::PolytopeQuadratureFormula::get(m_order, cell.getGeometry());
-        const auto& quadrature = cell.getQuadrature(qf);
-        m_vector = Math::Vector<Real>::Zero(n);
-        auto currentJacobian = Variational::Jacobian(m_current.get());
-        auto testJacobian = Variational::Jacobian(m_test.get());
-        for (size_t q = 0; q < quadrature.getSize(); ++q)
-        {
-          const auto& point = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(point, &qf, q);
-          CellDeformation deformation(d);
-          deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-          const Math::SpatialMatrix<Real> inverse(deformation.getInverseTranspose().transpose());
-          const Real weight = qf.getWeight(q) * point.getDistortion() *
-            deformation.getJacobian() / std::sqrt(Real(d));
-          testJacobian.setIntegrationPoint(ip);
-          for (size_t local = 0; local < n; ++local)
-            m_vector(local) += weight * (testJacobian.getBasis(local) * inverse).trace();
-        }
-        return *this;
-      }
-      ScalarType integrate(size_t local) final override { return m_vector(local); }
-      Geometry::Region getRegion() const final override { return Geometry::Region::Cells; }
-      WNGIRCurrentStrainTrace* copy() const noexcept final override
-      {
-        return new WNGIRCurrentStrainTrace(*this);
-      }
-    private:
-      std::reference_wrapper<const TestFunction> m_test;
-      std::reference_wrapper<const Displacement> m_current;
-      size_t m_order;
-      const Geometry::Polytope* m_polytope = nullptr;
-      Math::Vector<Real> m_vector;
-  };
   /// Frozen inverse deformation gradient, expressed as a form-language coefficient.
   template <class Displacement>
   class WNGIRCurrentInverse final
@@ -226,34 +178,5 @@ namespace Rodin::Adaptation::Detail
       Variational::Jacobian(function) * WNGIRCurrentInverse(current, dimension);
     return Real(0.5) * (gradient + Variational::Transpose(gradient));
   }
-
-  /// Distribution core = integral j*eps(v):eps(z) - b(v)b(z)/(d*integral j).
-  /// Only uniform current-configuration dilation is projected out.
-  template <class TestFunction, class Displacement>
-  std::vector<Math::Vector<Real>> wngirCurrentStrainCouplings(const TestFunction& test,
-    const Displacement& current, size_t dimension, Real coefficient, size_t order)
-  {
-    if (coefficient == Real(0))
-      return {};
-    if (!(coefficient > Real(0)))
-      Alert::Exception() << "Current strain regularity requires positive coefficient."
-                         << Alert::Raise;
-    Variational::LinearForm form(test);
-    form = WNGIRCurrentStrainTrace(test, current, order);
-    form.assemble();
-    Variational::GridFunction dilation(test.getFiniteElementSpace());
-    dilation = Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
-      return Math::SpatialVector<Real>(point.getCoordinates());
-    });
-    dilation += current;
-    dilation *= Real(1) / std::sqrt(Real(dimension));
-    const Real measure = form.getVector().dot(dilation.getData());
-    if (!(measure > Real(0)) || !std::isfinite(measure))
-      Alert::Exception()
-        << "Current strain regularity requires positive finite current volume."
-        << Alert::Raise;
-    return {Math::Vector<Real>(std::sqrt(coefficient / measure) * form.getVector())};
-  }
-
 }
 #endif
