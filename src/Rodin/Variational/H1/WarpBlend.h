@@ -19,6 +19,8 @@
 #include "LagrangeBasis.h" // LagrangeBasis1D<K>
 #include "GLL.h"           // GLL<K>
 
+// Absolute node/coefficient comparison tolerance in dimensionless reference coordinates.
+// Numerical policy retained for compatibility; not a bound on interpolation error.
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
 namespace Rodin::Variational

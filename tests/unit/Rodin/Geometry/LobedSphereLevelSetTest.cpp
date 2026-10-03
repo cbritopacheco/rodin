@@ -24,8 +24,8 @@ namespace Rodin::Tests::Unit
     target.amp = Real(0.08);
     target.lobes = 0;
     target.phase = Real(0.71);
-    for (const Vec3& direction : {Vec3{1, 0, 0}, Vec3{0, 1, 0},
-           Vec3{0, 0, 1}, Vec3{1, 2, 3}})
+    for (const Vec3& direction :
+      {Vec3{1, 0, 0}, Vec3{0, 1, 0}, Vec3{0, 0, 1}, Vec3{1, 2, 3}})
     {
       const Vec3 n = direction / direction.norm();
       const Vec3 point = target.c + (target.R0 + target.amp) * n;
@@ -48,8 +48,8 @@ namespace Rodin::Tests::Unit
       const Vec3 pz = target.c + Vec3{0, 0, 1};
       EXPECT_NEAR(target.radius(px), target.radius(py), 1e-14);
       EXPECT_NEAR(target.radius(px), target.radius(pz), 1e-14);
-      for (const Vec3& direction : {Vec3{1, 1, 1}, Vec3{1, 2, 3},
-             Vec3{-2, 1, 3}, Vec3{3, -1, -2}})
+      for (const Vec3& direction :
+        {Vec3{1, 1, 1}, Vec3{1, 2, 3}, Vec3{-2, 1, 3}, Vec3{3, -1, -2}})
       {
         const Vec3 point = target.c + direction / direction.norm();
         EXPECT_GE(target.radius(point), target.R0 - target.amp - 1e-14);
@@ -68,8 +68,8 @@ namespace Rodin::Tests::Unit
     const Real cosine = std::cos(phase);
     const Real sine = std::sin(phase);
     const Vec3 x = point - target.c;
-    const Vec3 rotated = target.c + Vec3{
-      cosine * x(0) - sine * x(1), sine * x(0) + cosine * x(1), x(2)};
+    const Vec3 rotated =
+      target.c + Vec3{cosine * x(0) - sine * x(1), sine * x(0) + cosine * x(1), x(2)};
     target.phase = phase;
     EXPECT_NEAR(target.radius(rotated), baseRadius, 1e-14);
   }
@@ -84,8 +84,8 @@ namespace Rodin::Tests::Unit
     for (const int lobes : {0, 1, 2, 5, 10})
     {
       target.lobes = lobes;
-      for (const Vec3& direction : {Vec3{1, 0, 0}, Vec3{0, 0, 1},
-             Vec3{1, 2, 3}, Vec3{-2, 1, 3}})
+      for (const Vec3& direction :
+        {Vec3{1, 0, 0}, Vec3{0, 0, 1}, Vec3{1, 2, 3}, Vec3{-2, 1, 3}})
       {
         const Vec3 point = target.c + Real(0.26) * direction / direction.norm();
         const Vec3 analytic = target.grad(point);
@@ -95,8 +95,8 @@ namespace Rodin::Tests::Unit
           Vec3 minus = point;
           plus(i) += delta;
           minus(i) -= delta;
-          const Real numerical = (target.phi(plus) - target.phi(minus)) /
-            (Real(2) * delta);
+          const Real numerical =
+            (target.phi(plus) - target.phi(minus)) / (Real(2) * delta);
           EXPECT_NEAR(analytic(i), numerical, 2e-8)
             << "lobes=" << lobes << " component=" << i;
         }

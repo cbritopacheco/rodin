@@ -245,23 +245,19 @@ namespace Rodin::Variational
        * @param bp  Boundary policy.
        */
       template <class VVel, class S = StepType, class B = BoundaryPolicy>
-      Flow(const Real& t,
-           const Operand& u,
-           VVel&& vel,
-           S&& st = S{},
-           B&& bp = B{})
-        : m_maxZeroHops(128),
-          m_maxBisections(16),
-          m_maxSubdivisions(8),
-          m_maxOuterIterations(100000),
-          m_maxStagnations(512),
-          m_faceTrials(6),
-          m_bracketGrowth(Real(2.0)),
-          m_maxBracketExpansions(3),
-          m_stepSafety(Real(0.5)),
-          m_minStepFactor(Real(10)),
-          m_tolFactor(Real(50)),
-          m_clampFactor(Real(10)),
+      Flow(const Real& t, const Operand& u, VVel&& vel, S&& st = S{}, B&& bp = B{})
+        : m_maxZeroHops(DefaultMaxZeroHops),
+          m_maxBisections(DefaultMaxBisections),
+          m_maxSubdivisions(DefaultMaxSubdivisions),
+          m_maxOuterIterations(DefaultMaxOuterIterations),
+          m_maxStagnations(DefaultMaxStagnations),
+          m_faceTrials(DefaultFaceTrials),
+          m_bracketGrowth(DefaultBracketGrowth),
+          m_maxBracketExpansions(DefaultMaxBracketExpansions),
+          m_stepSafety(DefaultStepSafety),
+          m_minStepFactor(DefaultMinStepFactor),
+          m_tolFactor(DefaultTolFactor),
+          m_clampFactor(DefaultClampFactor),
           m_t(t),
           m_operand(u.copy()),
           m_velocity(std::forward<VVel>(vel)),
@@ -479,7 +475,7 @@ namespace Rodin::Variational
               return s;
             };
 
-            const Real epsNdv0 = Real(10) * sqrtEps;
+            const Real epsNdv0 = TangentialVelocityRoundoffFactor * sqrtEps;
             if (std::abs(ndv0) <= epsNdv0)
             {
               const Real s0 = interiorScore(c0, rc0);
@@ -766,7 +762,8 @@ namespace Rodin::Variational
             const Real rcMove2 = (sRc - rcBeforeLoop).squaredNorm();
             const bool sameTau = !(tau < tauBeforeLoop);
             const bool sameCell = (sCell == cellBeforeLoop);
-            const bool sameRc = rcMove2 <= Real(100) * epsMachine;
+            const bool sameRc =
+              rcMove2 <= ReferenceProgressRoundoffFactorSquared * epsMachine;
 
             if (sameTau && sameCell && sameRc)
             {
@@ -928,7 +925,7 @@ namespace Rodin::Variational
             if (foundEvent)
               break;
 
-            tauCell *= Real(0.5);
+            tauCell *= SubdivisionContraction;
             if (tauCell <= dtMin || !isFinite(tauCell))
               break;
           }
@@ -954,7 +951,8 @@ namespace Rodin::Variational
 
             const Real rcMove2 = (sRc - rcBefore).squaredNorm();
             const bool timeProgress = (tau < tauBefore);
-            const bool spaceProgress = rcMove2 > Real(100) * epsMachine;
+            const bool spaceProgress =
+              rcMove2 > ReferenceProgressRoundoffFactorSquared * epsMachine;
 
             if (!timeProgress && !spaceProgress)
             {
@@ -974,8 +972,8 @@ namespace Rodin::Variational
           }
 
           const Real ndv0 = dot(hs.matrix.row(jStar).transpose(), v0);
-          const Real dtTol =
-            std::max<Real>(Real(1e-12), epsPhi / std::max<Real>(ndv0, vFloor));
+          const Real dtTol = std::max<Real>(
+            AbsoluteBracketTimeFloor, epsPhi / std::max<Real>(ndv0, vFloor));
 
           Real lo = Real(0);
           Real hi = hiStar;
@@ -1028,7 +1026,8 @@ namespace Rodin::Variational
 
             const Real rcMove2 = (sRc - rcBeforeBp).squaredNorm();
             const bool progressed = (tau < tauBeforeBp) || (sCell != cellBeforeBp) ||
-              (rcMove2 > Real(100) * epsMachine) || (correction != correctionBeforeBp);
+              (rcMove2 > ReferenceProgressRoundoffFactorSquared * epsMachine) ||
+              (correction != correctionBeforeBp);
 
             if (!progressed)
             {
@@ -1276,6 +1275,39 @@ namespace Rodin::Variational
       }
 
     private:
+      /// @brief Heuristic sqrt(epsilon) multiplier for near-tangential reference normal velocity.
+      static constexpr Real TangentialVelocityRoundoffFactor = Real(10);
+      /// @brief Squared reference-motion threshold multiplier of epsilon: (10 sqrt(epsilon)) squared.
+      static constexpr Real ReferenceProgressRoundoffFactorSquared = Real(100);
+      /// @brief Halves a rejected cell substep during subdivision.
+      static constexpr Real SubdivisionContraction = Real(0.5);
+      /// @brief Absolute face-crossing bracket resolution floor in tracing-time units; heuristic.
+      static constexpr Real AbsoluteBracketTimeFloor = Real(1e-12);
+      /// @brief Work limit on face hops without consuming tracing time.
+      static constexpr size_t DefaultMaxZeroHops = 128;
+      /// @brief Work limit on face-crossing bracket bisections.
+      static constexpr size_t DefaultMaxBisections = 16;
+      /// @brief Work limit on halvings of a cell substep.
+      static constexpr size_t DefaultMaxSubdivisions = 8;
+      /// @brief Total tracing-loop work limit; not a convergence guarantee.
+      static constexpr size_t DefaultMaxOuterIterations = 100000;
+      /// @brief Work limit on consecutive iterations without sufficient progress.
+      static constexpr size_t DefaultMaxStagnations = 512;
+      /// @brief Face-crossing trial budget per face.
+      static constexpr size_t DefaultFaceTrials = 6;
+      /// @brief Dimensionless geometric growth factor for crossing brackets.
+      static constexpr Real DefaultBracketGrowth = Real(2.0);
+      /// @brief Work limit on crossing-bracket expansions.
+      static constexpr size_t DefaultMaxBracketExpansions = 3;
+      /// @brief Dimensionless safety multiplier of the local cell time-step cap.
+      static constexpr Real DefaultStepSafety = Real(0.5);
+      /// @brief sqrt(epsilon) multiplier of the reference-distance/velocity scale for minimum substeps.
+      static constexpr Real DefaultMinStepFactor = Real(10);
+      /// @brief sqrt(epsilon) multiplier for geometric and directional tolerances.
+      static constexpr Real DefaultTolFactor = Real(50);
+      /// @brief Dimensionless multiplier of the geometric tolerance before clamping.
+      static constexpr Real DefaultClampFactor = Real(10);
+
       size_t m_maxZeroHops;
       size_t m_maxBisections;
       size_t m_maxSubdivisions;

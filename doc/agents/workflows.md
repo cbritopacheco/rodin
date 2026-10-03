@@ -1,8 +1,38 @@
 # Extension workflows
 
-Use this page when the task is "add a new X" or "extend X to a new case".
-The philosophy page explains the shape of the library; this page is the
-operational checklist.
+Use this page for build and repository procedures, or when adding or
+extending a library concept. The philosophy page explains the shape of the
+library; this page provides the operational steps.
+
+## Build and repository workflow
+
+For a first build, initialize submodules. Hydrate Git LFS files when resources
+are needed:
+
+```sh
+git submodule update --init --recursive
+git lfs pull
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j
+```
+
+`RODIN_BUILD_EXAMPLES`, `RODIN_USE_PETSC`, and `RODIN_INSTALL_RESOURCES` default
+to `ON`. Use `-DRODIN_INSTALL_RESOURCES=OFF` for library-only builds,
+installation checks, and CI-style jobs that do not need the full resource tree.
+Prefer an existing configured `build/` tree and an incremental target build
+(`cmake --build build -j --target <name>`) over a full rebuild.
+
+Every file under `resources/` is stored in Git LFS. Before committing a new
+or updated resource, check `git check-attr filter -- <path>` and
+`git lfs status`; resource-dependent builds and tests require hydrated files.
+
+`master` is the default branch. Active development uses `module/*` and
+`model/*` topic branches off `develop`. Do not commit or push unless asked.
+
+If `graphify-out/` exists, `graphify-out/GRAPH_REPORT.md` and
+`graphify query "<question>"` can answer cross-module structure questions.
+Step-by-step build, example, and debugging procedures also live in
+`.claude/skills/*/SKILL.md` as plain markdown.
 
 ## New form-language node
 
@@ -88,4 +118,3 @@ operational checklist.
 5. Run the test at P1 and at higher order if the term claims order-genericity.
 6. For hyperelasticity, state the kinematics, stress measure, energy, and
    tangent being implemented.
-

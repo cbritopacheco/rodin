@@ -84,7 +84,7 @@ namespace Rodin::Test
        * @param epsilon Central-difference step.
        * @return Error report.
        */
-      FDProbeReport test(Real epsilon = 1e-6)
+      FDProbeReport test(Real epsilon = DefaultDifferenceStep)
       {
         return test(makeDeterministicDirection(), epsilon);
       }
@@ -95,7 +95,8 @@ namespace Rodin::Test
        * @param epsilon Central-difference step.
        * @return Error report.
        */
-      FDProbeReport test(const VectorType& direction, Real epsilon = 1e-6)
+      FDProbeReport test(
+        const VectorType& direction, Real epsilon = DefaultDifferenceStep)
       {
         auto& state = m_problem.getTrialFunction().getSolution();
         const auto stateData = state.getData();
@@ -127,6 +128,9 @@ namespace Rodin::Test
       }
 
     private:
+      /// @brief Absolute central-difference perturbation in solution units for a unit direction; heuristic.
+      static constexpr Real DefaultDifferenceStep = 1e-6;
+
       VectorType makeDeterministicDirection()
       {
         const auto& state = m_problem.getTrialFunction().getSolution();
@@ -180,7 +184,7 @@ namespace Rodin::Test
        * @param epsilon Central-difference step.
        * @return Error report.
        */
-      FDProbeReport test(Real epsilon = 1e-6)
+      FDProbeReport test(Real epsilon = DefaultDifferenceStep)
       {
         return test(makeDeterministicDirection(), epsilon);
       }
@@ -191,7 +195,8 @@ namespace Rodin::Test
        * @param epsilon Central-difference step.
        * @return Error report.
        */
-      FDProbeReport test(const VectorType& direction, Real epsilon = 1e-6)
+      FDProbeReport test(
+        const VectorType& direction, Real epsilon = DefaultDifferenceStep)
       {
         auto& solution = m_system.getSolution();
         if (solution.size() != direction.size())
@@ -228,6 +233,9 @@ namespace Rodin::Test
       }
 
     private:
+      /// @brief Absolute central-difference perturbation in solution units for a unit direction; heuristic.
+      static constexpr Real DefaultDifferenceStep = 1e-6;
+
       VectorType makeDeterministicDirection()
       {
         VectorType direction(m_system.getOperator().cols());

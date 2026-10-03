@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
@@ -126,6 +127,34 @@ namespace Rodin::Adaptation
 
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
+
+      /// @brief Lower bound on the automatically selected CG work budget; heuristic.
+      static constexpr std::size_t MinAutomaticCGIterations = 100;
+      /// @brief Upper bound on the automatically selected CG work budget; heuristic.
+      static constexpr std::size_t MaxAutomaticCGIterations = 2000;
+      /// @brief CG iterations per displacement DOF before clamping the work budget.
+      static constexpr std::size_t AutomaticCGIterationsPerDof = 2;
+
+      /// @brief Fallback accepted-step tolerance relative to mesh scale h; heuristic.
+      static constexpr Real DefaultStepOverHTolerance = Real(1e-4);
+      /// @brief Fallback RMS residual threshold multiplier of h times the target-gradient scale.
+      static constexpr Real DefaultRmsMeshFactor = Real(4);
+      /// @brief Fallback maximum residual threshold multiplier of h times the target-gradient scale.
+      static constexpr Real DefaultMaxMeshFactor = Real(10);
+      /// @brief Strict upper cap on the fraction to the feasibility boundary; leaves a 0.1% margin.
+      static constexpr Real MaxBoundaryFraction = Real(0.999);
+      /// @brief Halves rejected line-search steps; heuristic geometric contraction.
+      static constexpr Real LineSearchContraction = Real(0.5);
+      /// @brief Absolute denominator floor in energy units for relative stagnation checks.
+      static constexpr Real StagnationEnergyFloor = Real(1e-30);
+      /// @brief Heuristic robust-loss scale floor in units of h times the target-gradient scale.
+      static constexpr Real RobustScaleMeshFactor = Real(3);
+      /// @brief Dimensionless empirical residual quantile for automatic robust-loss scaling.
+      static constexpr Real RobustScaleQuantile = Real(0.9);
+      /// @brief Absolute coefficient-vector norm floor after Gram-Schmidt; depends on basis scaling.
+      static constexpr Real RigidModeNormFloor = Real(1e-12);
+      /// @brief Relative residual acceptance floor, independent of the requested CG stopping tolerance.
+      static constexpr Real LinearSolveAcceptanceFloor = Real(1e-6);
 
     public:
       /// @brief Mesh-validity summary of a displacement.
@@ -1814,6 +1843,8 @@ namespace Rodin::Adaptation
         // quadrature average of the pointwise unit normals, so a curved facet
         // contributes its mean orientation; a facet degenerate throughout
         // falls back to a fixed direction rather than a null vector.
+        // Absolute numerical floor for facet measures and normal norms in their
+        // respective mesh-coordinate scales; not a mesh-quality criterion.
         constexpr Real degenerate = Real(1e-30);
         std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
         std::vector<Real> measures(interfaceFacets.size(), Real(0));
@@ -1968,9 +1999,9 @@ namespace Rodin::Adaptation
         Real sigma = m_parameters.robustScale;
         if (!(sigma > Real(0)))
         {
-          sigma = Real(3) * h * gradientScale;
-          const std::size_t k90 =
-            static_cast<std::size_t>(Real(0.9) * static_cast<Real>(residuals.size() - 1));
+          sigma = RobustScaleMeshFactor * h * gradientScale;
+          const std::size_t k90 = static_cast<std::size_t>(
+            RobustScaleQuantile * static_cast<Real>(residuals.size() - 1));
           std::nth_element(residuals.begin(), residuals.begin() + k90, residuals.end());
           sigma = std::max(sigma, residuals[k90]);
         }

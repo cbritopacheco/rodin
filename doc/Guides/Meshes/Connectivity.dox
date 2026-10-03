@@ -83,7 +83,7 @@
 
   @section guides-meshes-connectivity-boundary Boundary Operations
 
-  **Most important**: For boundary conditions and boundary iterations, you need:
+  Most important: For boundary conditions and boundary iterations, you need:
   
   - 2D meshes: `mesh.getConnectivity().compute(1, 2)` (edge-to-cell)
   - 3D meshes: `mesh.getConnectivity().compute(2, 3)` (face-to-cell)
