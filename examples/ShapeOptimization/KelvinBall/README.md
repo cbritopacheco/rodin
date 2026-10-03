@@ -162,7 +162,9 @@ search.
 
 ### Minimum thickness
 
-The thickness bound is $d_{\min}=$ `--thickness-min` $\times h$ (default $2h$).
+The thickness bound $d_{\min}=$ `--thickness-min` is an absolute length,
+independent of the mesh size. Its default is zero, which disables the
+thickness penalty; a positive value enables it.
 For each quadrature point $x$ on the body interface, the inward geometric
 normal $d(x)$ defines a ray. Its first outward intersection with the
 complete sewn interface is $y=x+t(x)d(x)$. The chamber AABB tree is queried
@@ -249,7 +251,7 @@ $\phi_0(x) = |x| - 1$. The direction is normalised in the nodal maximum norm,
 ```
 
 so that the step length, not the metric, sets the size of the update. The level
-set is transported for a time $\tau = 0.1\,h$ (`--step`) by
+set is transported for a time $\tau = 0.1\,h_0$ (`--step`) by
 
 ```math
 \partial_t \Phi + \widehat\theta^{\,n} \cdot \nabla\Phi = 0, \qquad \Phi(0,\cdot) = \phi^n ,
@@ -383,11 +385,21 @@ polynomial, so a low order under-integrates it.
 After each transport the new zero level set must be resolved by the mesh
 again. Two methods are available through `--reconstruction`.
 
+The reference spacing is $h_0=R/(n-1)$, selected by `--n` (or `--h`).
+The fixed requested MMG bounds are
+$h_{\min}=\texttt{hmin-factor}\,h_0$ and
+$h_{\max}=\texttt{hmax-factor}\,h_0$, with factors 0.1 and 10 by default.
+The measured mean tetrahedral edge length $\bar h$ is reported separately.
+Regularization, normal smoothing, advection, the refinement band and WNGIR
+fitting scales use $h_0$, not $\bar h$: changing the mesh does not implicitly
+change these algorithmic parameters. Local element sizes are still used by
+the finite-element stabilization and boundary integrators.
+
 ### MMG (default)
 
 MMG discretises the advected level set at every iterate, with
-$h_{\mathrm{min}} = 0.1\,h$, $h_{\mathrm{max}} = 10\,h$, a Hausdorff tolerance of
-$0.1\,h^2$ and gradation 2, followed by an optimisation pass with the same
+$h_{\min}$ and $h_{\max}$ given by the fixed size bounds, a Hausdorff tolerance of
+$0.1\,h_0^2$ and gradation 2, followed by an optimisation pass with the same
 settings. The labels and planarity of the outer boundary and the cuts are
 checked after every reconstruction.
 
@@ -431,26 +443,29 @@ yet, $d(x)=|\lVert x\rVert-1|$ is the exact distance to the initial sphere.
 Thus the weight and scale agree, while the distance field belongs to the
 geometry present at each stage.
 
-With `--mmg-adapt`, the size map and WNGIR fit share one scale $\sigma$:
-`--wngir-robust-scale` when positive, or $3h$ otherwise. An MMG retry halves
-$h$ and therefore also the default $\sigma$; an explicitly supplied scale
-remains fixed. Without adaptation, WNGIR keeps its automatic, data-dependent
-scale. Adaptation
-applies after every cut with MMG reconstruction, but only once to the fixed
-background with WNGIR:
+With `--mmg-adapt`, the initial WNGIR background size map uses a Welsch width
+of $3h_0$ by default. MMG uses the factor-derived
+$h_{\min}$ and $h_{\max}$ as background size bounds.
+`--wngir-robust-scale` overrides that width and the WNGIR loss scale together.
+Otherwise WNGIR selects its loss scale from $h_0$ and
+the initial residual, independently of the width of the MMG refinement band.
+An MMG retry halves its requested size bounds; an explicitly supplied Welsch
+width remains fixed. Adaptation
+applies after every MMG cut or WNGIR fit, including the initial design:
 
 | Option | Meaning | Default |
 |---|---|---|
 | `--mmg-adapt` | Enables the adaptation | Off |
 | `--mmg-adapt-gradation` | Largest ratio between neighbouring sizes | 1.3 |
 
-The interface and far-field sizes are fixed at $h_\Gamma=h_{\min}=0.1h$
-and $h_{\mathrm{far}}=h_{\max}=10h$, where $h$ is the effective mesh size.
-These are also MMG's `hmin` and `hmax` for the adaptation pass. The
-preceding MMG level-set cut retains its separate bounds. The WNGIR background
-uses `--background-hmin` and `--background-hmax` only when adaptation is off;
-its Hausdorff tolerance still follows `--background-hausdorff`. The background
-remains fixed: later interfaces can leave the initially refined band.
+The requested interface and far-field sizes are $h_{\min}$ and $h_{\max}$.
+These are also MMG's size bounds; $h_{\min}$ need not equal the realized
+size of the classified interface triangles. The
+preceding MMG level-set cut uses the same bounds, except on a retry. The WNGIR
+background uses the same bounds even when adaptation is off; its Hausdorff
+tolerance follows `--background-hausdorff`. The background
+is refreshed from the adapted fitted mesh between design iterations when
+adaptation is enabled, so the refinement band follows the current interface.
 This range can refine the interface substantially; the reported cell count
 should be checked before running a long optimisation.
 
@@ -463,7 +478,7 @@ t_{ij} = \frac{\phi_i}{\phi_i - \phi_j}.
 ```
 
 The mesh is fitted to the previous interface and the step moves it by at most
-$0.1\,h$, so many crossings fall next to an existing vertex, $t_{ij} \approx 0$
+$0.1\,h_0$ at the default step, so many crossings fall next to an existing vertex, $t_{ij} \approx 0$
 or $1$, and the cut leaves slivers. Every reconstruction reports the number of
 crossed edges, the crossings within $10^{-3}$ of a vertex and the smallest
 $\min(t_{ij}, 1 - t_{ij})$.
@@ -475,39 +490,51 @@ crossing satisfies $\delta \le t_{ij} \le 1 - \delta$. No tetrahedron is left
 with all four vertices at zero, which MMG does not accept: the vertex farthest
 from the interface keeps its value. For a distance-like level set the interface
 moves by at most $\delta$ times the edge length. That move should stay below
-the Hausdorff tolerance $0.1\,h^2$ and well below the step $0.1\,h$, which
+the Hausdorff tolerance $0.1\,h_0^2$ and well below the default step $0.1\,h_0$, which
 suggests $\delta \approx 0.005$ at the usual resolutions.
 
 #### Retrying a failed reconstruction
 
 If the level-set discretisation, the optimisation pass or the adaptation of an
 iterate fails, the reconstruction is repeated on the same advected level set
-with every MMG size (minimum and maximum size, Hausdorff tolerance and
-adaptation sizes) computed from $h/2$, and halved again on a further failure,
-up to `--mmg-retries` times (default 2). The next iterate starts again from
-$h$. Each failed attempt writes what MMG received, the mesh and the transported
+with the cut's MMG size bounds and Hausdorff tolerance computed from $h_0/2$,
+and halved again on a further failure, up to `--mmg-retries` times (default 2).
+The optional post-cut adaptation retains the original requested bounds. Each failed
+attempt writes what MMG received, the mesh and the transported
 level set, to `mmg-failure-<iteration>-<attempt>.mesh` and `.sol` in the
-working directory, so that the failure can be reproduced. A retried mesh is finer, by up to a factor of 8 in cell count at $h/2$;
-with `--mmg-adapt` the next reconstruction coarsens it back. All MMG calls run
+working directory, so that the failure can be reproduced. A retried mesh may
+be finer; the subsequent adaptation retains the reference-based size map.
+All MMG calls run
 with angle detection disabled, since the only sharp edges of the chamber are
 the protected intersections of its fixed faces.
 
 ### WNGIR
 
-MMG is called **once**, before any interface exists, to optimise the
+MMG is first called before any interface exists to optimise the
 interface-free chamber. With `--mmg-adapt` it instead adapts that background
 near the initial sphere according to the Welsch-weighted size map, without
 inserting a material interface. Cut faces may be retriangulated but stay on
-their planes. The resulting mesh is the fixed background for the whole run.
-Without adaptation, its MMG optimisation uses `--background-hmin`,
-`--background-hmax`, and `--background-gradation` (defaults 0.1, 1, and 2).
-Both preparations use `--background-hausdorff` (default 0.05). These sizes
-and tolerances are in multiples of $h$.
+their planes. The resulting mesh is the background for the initial fit.
+Without adaptation, its MMG optimisation uses the fixed $h_{\min}$ and
+$h_{\max}$ bounds and `--background-gradation` (default 2).
+Both preparations use `--background-hausdorff` (default 0.05)
+in multiples of $h_0$.
 
-At every iterate the level set labels the background cells, which selects an
-envelope of internal facets, and WNGIR fits a fresh copy of the background so
+At every iterate a MinSTCut partition selects an envelope of internal facets.
+Cells whose nodal level-set values have one sign retain their material;
+mixed-sign cells are classified with a volume-weighted phase preference and
+a face-area perimeter cost. The phase moment is
+$\tanh(\overline\phi_K/(1.25h_K))$ and the capacity on an internal face is
+$0.04\min(h_K,h_L)|F|$, where $h_K$ is the volume-equivalent regular
+tetrahedron edge length. This regularizes classification, not the target
+level set. WNGIR fits a fresh copy of the background so
 that this envelope reaches the zero level set. The fitted copy carries the
-state and shape computations and is never reused as a background.
+state and shape computations. With `--mmg-adapt`, an MMG adaptation follows
+each fit, using the FMM distance to the fitted interface and the same Welsch
+size map as MMG reconstruction. The adapted mesh becomes the background for
+the next design iteration. Spaces and fields are rebuilt on this mesh; no
+coefficients are copied across the remeshing operation. Without adaptation,
+the initial background remains fixed throughout the run.
 
 The boundary is treated by what it must preserve:
 
@@ -522,28 +549,188 @@ The distance and the direction live on the fitted mesh, whose vertices have
 moved. They are carried to the background by evaluation at the background's
 own positions, which keeps the fitted interface in the transported level set.
 
-The level-set gradient is first projected into continuous P1 vectors, so its
-trace on the envelope is unambiguous. A fit stops once the root-mean-square
-distance from the envelope to the zero level set, relative to the mesh scale,
-drops below a tolerance. That tolerance is at least `--wngir-rms-floor`
-(default 0.005) and grows with the normal jump across the skeleton. The default
-budget is `--wngir-steps=12` and the default bulk coefficient on this path is
-`--wngir-kappa-bulk=8e-4`. The other fitting parameters use the common
-`--wngir-*` spellings of the WNGIR examples (see `KelvinBall --help`).
+The target is the P1 level set and its sensitivity is its exact element-wise
+gradient, evaluated in the containing cell at the moved quadrature point.
+At cell boundaries this is a one-sided derivative; it is not replaced by an
+independently projected gradient. The active residual is reported both in
+absolute units and relative to the reference level-set scale.
+Classification assigns material and interface labels to a copy;
+it does not set the fitting scale. The reference spacing $h_0$ determines the
+shape/distribution metric coefficients, automatic Welsch loss
+scale, and mesh-relative stopping thresholds. The reported area-equivalent
+interface triangle size is diagnostic only; it allows comparison with
+$\bar h$ and MMG's requested $h_{\min}$. KelvinBall uses the full-interface
+geometric target $D_\infty\leq0.1h_0^2$, the same length tolerance as the
+MMG reconstruction. Here $D_\infty$ is the maximum sampled value of
+$|\phi(T(x))|/|\nabla\phi(T(x))|$ on all interface facets, with an independent
+validation quadrature. It approximates distance to the target zero set; it is
+not a continuous Hausdorff certificate. Invalid or zero-gradient samples make
+validation fail rather than disappear from the maximum. Active RMS or Welsch
+energy alone cannot certify this target. The default budget is 30 outer iterations and
+15 inner barrier corrections. `--wngir-steps` is capped at 30;
+`--wngir-primal-barrier-iterations` is capped at 15.
+The inner relative stationarity-residual tolerance is $10^{-3}$.
+Linear steps default to MUMPS when available, otherwise SparseLU.
+`--wngir-direct-solver=cg` selects CG at relative tolerance $10^{-9}$,
+with at most 1000 iterations per solve. The active-residual convergence criteria are replaced
+by the full-interface supremum criterion; the absolute and accepted-step stopping
+thresholds are $10^{-3}h_0^2$. Per-iteration WNGIR diagnostics are printed by
+default; `--wngir-trace=0` disables them. Reaching the inner correction cap
+without certifying the stationarity residual stops fitting before accepting
+that direction. The default
+inner Newton corrections try full steps with backtracking on the frozen
+inner merit. Directional Newton scales the predictor and frozen metric before
+the hinge solve; the outer energy/quality line search then backtracks the
+resulting physical increment.
+The fitting, shape and distribution coefficients are
+`--wngir-kappa-f=1`, `--wngir-kappa-s=1` and `--wngir-kappa-d=1`.
+The other fitting parameters
+use the common `--wngir-*` spellings of the WNGIR examples (see
+`KelvinBall --help`).
+
+The fixed classified facet connectivity is not the triangulation of the
+target P1 zero set. Reducing its fitting error can therefore require strongly
+distorting some background cells. Refining the Welsch band does not remove
+that connectivity mismatch. A run reaching the distortion bound or its
+iteration budget is a constrained best-effort fit, not a certificate that the
+interface residual vanished. The exact P1 sensitivity is discontinuous at
+target cell boundaries, so smooth local Newton convergence is not assured
+across those boundaries.
+
+### Quadratic quality penalty
+
+The canonical inner model uses an affine squared-hinge penalty.
+There is no logarithmic or nonlinear-barrier alternative.
+
+For the affine slacks $s_j$ and $s_Q$, the pointwise penalty is
+
+$$
+B(v)=\frac{\mu}{2}\left[
+\kappa_j\left(1-\frac{s_j(v)}{\delta_j}\right)_+^2+
+\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right],
+\qquad
+\delta_j=g(1-j_{\mathrm{safe}}),\quad
+\delta_Q=g(Q_{\max}-1).
+$$
+
+Here $g$ is `--wngir-quality-guard` (default 0.1, strictly between zero
+and one), and $\mu$ retains the existing model-decrease scaling controlled
+by `--wngir-mu-hat`. Thus the default soft thresholds are
+$j_{\mathrm{soft}}=0.109$ and $Q_{\mathrm{soft}}=9.1$ when
+$j_{\mathrm{safe}}=0.01$ and $Q_{\max}=10$. The penalty Hessian is bounded
+for a fixed $\mu$ and guard, and is constant on each fixed active set.
+
+Inner corrections try full steps, with frozen-merit backtracking and no
+fraction-to-boundary restrictions.
+Virtual affine increments may cross the hard limits; accepted mesh updates
+must still pass the unchanged true-geometry Jacobian, distortion, and
+energy checks. Finite penalty weights do not guarantee a feasible inner
+minimizer or attainment of the geometric target. An outer line-search
+failure is therefore a failed fit, even when the inner model converged.
+
+### Nondimensional quality guard and penalty
+
+The invariants $j=\det F$ and $Q=|F|^2/(d j^{2/d})$ are dimensionless.
+Normalize their admissible intervals by
+
+$$
+\zeta_j=\frac{1-j}{1-j_{\mathrm{safe}}},\qquad
+\zeta_Q=\frac{Q-1}{Q_{\max}-1}.
+$$
+
+Both equal zero at identity and one at the hard bound. Their affine
+predictions enter the penalty through
+$t_i=(\zeta_i-(1-g))/g=1-s_i/\delta_i$. Thus $g$ is a dimensionless
+fraction of the admissible interval, not a length to multiply by $h$.
+The soft guard begins at $\zeta_i=1-g$.
+
+Let $\Delta m_k=\tfrac12 f_k(p_k)$ be the decrease predicted by the
+unpenalized system $M_kp_k=f_k$, and $V=|\Omega|$ the background volume.
+The existing scaling is $\mu_k=\widehat\mu\Delta m_k/V$. For
+$\Delta m_k>0$, dividing the inner objective by $\Delta m_k$ gives
+
+$$
+\frac{\tfrac12 M_k(v,v)-f_k(v)}{\Delta m_k}
++\frac{\widehat\mu}{2V}\int_\Omega
+\left(\kappa_j(t_j)_+^2+\kappa_Q(t_Q)_+^2\right)\,dx.
+$$
+
+Every term is dimensionless. In particular, $\widehat\mu$ is a nonnegative
+relative penalty strength, with no upper bound of one. A value of 90
+multiplies the volume-averaged normalized squared violation by 45.
+Changing $g$ changes both the activation threshold and the active penalty
+curvature, which scales as $\mu_k\kappa_i/\delta_i^2$.
+
+Under a uniform length change $x=L\widehat x$, $u=L\widehat u$ and
+$h=L\widehat h$, a distance level set and its Welsch scale also scale by
+$L$. With the solver's level-set gradient normalization, the fitting energy
+and displacement quadratic forms scale by $L^{d+1}$, the volume by $L^d$,
+and $\mu_k$ by $L$. Consequently the normalized objective above, the
+guard, and $\widehat\mu$ are invariant. Changing the outer container
+relative to the body is not a uniform length change and need not preserve
+the penalty balance.
+
+### Canonical fitting, shape and distribution metric
+
+The frozen outer metric is $M_k=F_k+S_k+D_k$.
+$F_k$ is normalized half-squared fitting curvature, omitting the level-set
+Hessian. $S_k$ is the positive-semidefinite shape curvature of $(d/4)(Q-1)$,
+restricted to the current deviatoric stretch directions.
+$D_k$ is pulled-back pointwise deviatoric current-strain regularity:
+$h_0\kappa_D\int j\,\operatorname{dev}\epsilon(v):\operatorname{dev}\epsilon(z)$,
+where $\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})$.
+There is no global dilation correction. Local isotropic strain and
+infinitesimal rotations are unpenalized. Higher-order spaces may contain
+additional conformal kernel modes, so this term alone is not an $H^1$ norm.
+The independent dimensionless coefficients
+are $\\kappa_F$, $\\kappa_S$ and $\\kappa_D$; the volume terms retain the
+mesh factor $h_0$. No shared bulk multiplier remains.
+
+The metric, fitting force and affine constraint rows are frozen during the
+inner quadratic-hinge solve. The fitting energy and force remain robust
+Welsch. There is no separate inertia audit. Linear residual, descent and
+actual-geometry quality checks remain active. Positive-semidefinite shape
+curvature is the canonical path. Unresolved similarity modes are gauged only
+in the linear solve, without adding an objective term. Inner convergence uses
+the absolute and relative residual of the frozen quadratic-hinge problem,
+not the relative correction size.
+
+Current-strain and shape contractions are tabulated during assembly. MUMPS
+retains symbolic analysis when the matrix pattern is unchanged and numeric
+factors when its values are identical. When all quality hinges are inactive,
+the predictor already solves the inner model and the redundant correction
+is skipped.
+
+The absolute small-step exit uses the sampled accepted physical displacement,
+not the unscaled predictor or coefficient norm, and requires consecutive
+small accepted steps. A failed rotated-fluid-cut
+coverage check saves `kelvin-cut-coverage-failure.mesh` and reports the first
+missed point. Planarity of the cuts does not guarantee coincident fluid rims;
+that coverage invariant is checked before each chamber state solve.
+
+KelvinBall restricts the local step matrices to the boundary-admissible
+space: zero motion on the outer
+sphere and tangential motion on the cuts.
+
+The old `--wngir-kappa-bulk`, `--wngir-quality-metric*`,
+`--wngir-direct-step`, `--wngir-quadratic-penalty`,
+`--wngir-nonlinear-barrier` and `--wngir-undamped-inner` options are removed
+and rejected, rather than silently ignored.
 
 ## Running
 
 ```sh
+KelvinBall --n=20 --hmin-factor=0.1 --hmax-factor=10 --iterations=20
 KelvinBall --n=17 --iterations=20
 KelvinBall --h=0.125 --iterations=20
 KelvinBall --outer-radius=3 --h=0.1666666667 --iterations=2
 KelvinBall --n=25 --iterations=5 --reconstruction=wngir
 KelvinBall --n=30 --iterations=20 --mmg-adapt
-KelvinBall --n=13 --iterations=5 --thickness-min=4
+KelvinBall --n=13 --iterations=5 --thickness-min=0.5
 ```
 
-The resolution is given either as points per edge (`--n`) or as a mesh size
-(`--h`, rounded up); the effective size is $h = L/(n-1)$. Without arguments the
+The initial grid spacing is selected by `--n` or `--h`;
+the later mean mesh edge length is measured separately. Without arguments the
 example uses `--n=13 --outer-radius=2 --iterations=1 --penalty=320
 --stabilization=0.05 --regularization=4 --step=0.1`. `--geometry-only` stops
 after the initial reconstruction and `--state-only` after the first Stokes
@@ -577,7 +764,9 @@ Each iterate is written to three XDMF series.
   and deformation, and a complete fluid grid carrying the six sewn velocities
   and pressures.
 - `KelvinBallMMG.xdmf` or `KelvinBallWNGIR.xdmf` — the reconstructed mesh,
-  before the next finite-element spaces are built.
+  with the initial design at time 0 and successive updates at times 1, 2, etc.,
+  before the next finite-element spaces are built. Each snapshot is flushed
+  immediately, including when using `--geometry-only` for the initial design.
 
 With `--motion-every=N`, every $N$-th iterate and the last one also write
 `KelvinBallMotion-<iterate>.xdmf`: the free motion of the body under a force

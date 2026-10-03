@@ -266,66 +266,117 @@ namespace KelvinBall
         MMG::Mesh classified(background);
         const auto& space = levelSet.getFiniteElementSpace();
         const auto& coefficients = levelSet.getData();
+        std::vector<Real> volumes(classified.getCellCount());
+        std::vector<Real> moments(classified.getCellCount());
+        std::vector<Real> sizes(classified.getCellCount());
+        MinSTCut::Options options;
+        options.cellInBand.resize(classified.getCellCount());
         for (auto cell = classified.getCell(); cell; ++cell)
         {
+          const Index index = cell->getIndex();
           Real meanLevelSet = 0;
+          Real minimum = std::numeric_limits<Real>::infinity();
+          Real maximum = -std::numeric_limits<Real>::infinity();
           for (const Index vertex : cell->getVertices())
           {
             const auto& dofs = space.getDOFs(0, vertex);
-            meanLevelSet += coefficients(dofs[0]);
+            const Real value = coefficients(dofs[0]);
+            meanLevelSet += value;
+            minimum = std::min(minimum, value);
+            maximum = std::max(maximum, value);
           }
           meanLevelSet /= static_cast<Real>(cell->getVertices().size());
-          classified.setAttribute({classified.getDimension(), cell->getIndex()},
-            meanLevelSet < 0 ? Obstacle : Fluid);
+          volumes[index] = cell->getMeasure();
+          sizes[index] = cellSize(*cell);
+          moments[index] = std::tanh(meanLevelSet / (Real(1.25) * sizes[index]));
+          options.cellInBand[index] = minimum <= 0 && maximum >= 0;
         }
 
         classified.getConnectivity().compute(2, 3);
+        std::vector<MinSTCut::Edge> edges;
         for (auto face = classified.getFace(); face; ++face)
         {
           const auto& incident =
             classified.getConnectivity().getIncidence({2, 3}, face->getIndex());
           if (incident.size() != 2)
             continue;
-          const auto first = classified.getCell(incident[0])->getAttribute();
-          const auto second = classified.getCell(incident[1])->getAttribute();
-          if (first && second && *first != *second)
-            classified.setAttribute({2, face->getIndex()}, Gamma);
+          const Real size = std::min(sizes[incident[0]], sizes[incident[1]]);
+          edges.push_back({incident[0], incident[1],
+            Real(0.04) * size * face->getMeasure(), face->getIndex()});
+          classified.setAttribute({2, face->getIndex()}, {});
         }
+        // The Potts perimeter term suppresses folded cell-wise sign patterns.
+        // Cells whose vertices have one sign retain that phase exactly.
+        const auto partition = MinSTCut().classify(volumes, moments, edges, options);
+        for (Index cell = 0; cell < classified.getCellCount(); ++cell)
+          classified.setAttribute({3, cell},
+            partition.labels[cell] == MinSTCut::Inside ? Obstacle : Fluid);
+        for (const auto& edge : partition.cutEdges)
+          classified.setAttribute({2, edge.index}, Gamma);
         return classified;
       }
 
       template <class LevelSet>
       MMGReconstruction fitLevelSetWNGIR(const KelvinBall::Mesh& mesh,
-        const LevelSet& levelSet, Real h, Real outerRadius, int argc, char** argv,
-        Real adaptedWelschScale = 0)
+        const LevelSet& levelSet, Real backgroundH, Real referenceSpacing, Real outerRadius,
+        int argc, char** argv)
       {
-        P1<Math::SpatialVector<Real>, KelvinBall::Mesh> gradientSpace(mesh, 3);
-        GridFunction projectedGradient(gradientSpace);
-        TrialFunction gradientTrial(gradientSpace);
-        TestFunction gradientTest(gradientSpace);
-        Problem gradientProjection(gradientTrial, gradientTest);
-        gradientProjection =
-          Integral(gradientTrial, gradientTest) - Integral(Grad(levelSet), gradientTest);
-        gradientProjection.assemble();
-        Solver::CG(gradientProjection).solve();
-        projectedGradient.getData() = gradientTrial.getSolution().getData();
+        std::vector<Index> interface;
+        Real interfaceSizeSum = 0;
+        for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+        {
+          if (face->getAttribute() == Attribute{Gamma})
+          {
+            interface.push_back(face->getIndex());
+            interfaceSizeSum +=
+              std::sqrt(Real(4) * face->getMeasure() / std::sqrt(Real(3)));
+          }
+        }
+        const Real meanInterfaceSize = interface.empty()
+          ? backgroundH
+          : interfaceSizeSum / static_cast<Real>(interface.size());
+
+        // Classification changes labels only. Copy the P1 coefficients onto
+        // that mesh so the locator used by WNGIR resolves both the target and
+        // its exact element-wise gradient on the same geometry.
+        P1<Real, KelvinBall::Mesh> targetSpace(mesh);
+        GridFunction targetLevelSet(targetSpace);
+        targetLevelSet.getData() = levelSet.getData();
+        auto targetGradient = Grad(targetLevelSet);
+        targetGradient.traceOf(Fluid);
 
         P1<Math::SpatialVector<Real>, KelvinBall::Mesh> displacementSpace(mesh, 3);
         TrialFunction displacementTrial(displacementSpace);
         TestFunction displacementTest(displacementSpace);
         Rodin::Examples::WNGIRExampleDefaults defaults;
-        defaults.kappaBulk = Real(8e-4);
-        // A fit from the classified staircase converges in seven to nine steps.
-        defaults.maxIterations = 12;
+        defaults.maxIterations = 30;
         auto parameters =
-          Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, defaults);
-        if (adaptedWelschScale > 0)
-          parameters.robustScale = adaptedWelschScale;
+          Rodin::Examples::makeWNGIRParameters(
+            argc, argv, referenceSpacing, Gamma, defaults);
         if (!Rodin::Examples::findOption(
               argc, argv, "wngir-primal-barrier-iterations", nullptr))
-          parameters.primalBarrierIterations = 30;
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-cg-max-iters", nullptr))
-          parameters.cgMaxIterations = 10000;
+          parameters.primalBarrierIterations = 15;
+        parameters.maxIterations =
+          std::clamp(parameters.maxIterations, size_t{1}, size_t{30});
+        parameters.primalBarrierIterations =
+          std::min(parameters.primalBarrierIterations, size_t{15});
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-geometric-sup-tol", nullptr))
+          parameters.geometricSupTolerance =
+            Real(0.1) * referenceSpacing * referenceSpacing;
+        if (!Rodin::Examples::findOption(
+              argc, argv, "wngir-primal-barrier-relative-tol", nullptr))
+          parameters.primalBarrierRelativeTolerance = Real(1e-3);
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-cg-rtol", nullptr))
+          parameters.cgRelativeTolerance = Real(1e-9);
+        parameters.cgMaxIterations =
+          std::clamp(parameters.cgMaxIterations, size_t{1}, size_t{1000});
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-step-tol", nullptr))
+          parameters.stepTol = Real(1e-3) * referenceSpacing * referenceSpacing;
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-step-h-tol", nullptr))
+          parameters.acceptedStepOverHTol = Real(1e-3) * referenceSpacing;
+        if (!Rodin::Examples::findOption(argc, argv, "trace", nullptr) &&
+          !Rodin::Examples::findOption(argc, argv, "wngir-trace", nullptr))
+          parameters.trace = true;
         // The outer sphere is curved, so its nodes are pinned: sliding in a
         // facet plane would walk them off the sphere. The cut planes bound the
         // wedge but are not walls, and the rim of the interface lies entirely
@@ -333,33 +384,82 @@ namespace KelvinBall
         parameters.fixedBoundaryAttributes = {Outer};
         parameters.slipBoundaryAttributes = {
           SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
-        // Pinning the outer sphere removes every rigid mode, so no floor is
-        // needed; the option still overrides this default.
-        if (!Rodin::Examples::findOption(
-              argc, argv, "wngir-rigid-stabilisation", nullptr))
-          parameters.rigidStabilisationLevel = 0;
         Adaptation::WNGIR fitting(displacementTrial, displacementTest);
         fitting.setParameters(parameters);
 
-        std::vector<Index> interface;
-        for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
-          if (face->getAttribute() == Attribute{Gamma})
-            interface.push_back(face->getIndex());
-
         RealFunction target(
-          [&](const Geometry::Point& point) { return levelSet.getValue(point); });
-        Adaptation::AnalyticVectorFunction targetGradient(
-          [&](const Geometry::Point& point) { return projectedGradient.getValue(point); },
-          3);
-
+          [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
         const auto report = fitting.solve(mesh, interface, target, targetGradient);
         Alert::Info() << substageHeading("WNGIR reconstruction") << Alert::NewLine
-                      << diagnosticLabel("Iterations:")
-                      << Alert::Notation::Number(report.iterations) << Alert::NewLine
-
+                      << diagnosticLabel("Background mean edge h:")
+                      << Alert::Notation::Number(backgroundH)
+                      << Alert::NewLine << diagnosticLabel("Fitting reference spacing h0:")
+                      << Alert::Notation::Number(parameters.h)
+                      << Alert::NewLine << diagnosticLabel("Mean interface triangle size:")
+                      << Alert::Notation::Number(meanInterfaceSize)
+                      << Alert::NewLine
+                      << diagnosticLabel("Outer iteration cap:")
+                      << Alert::Notation::Number(parameters.maxIterations)
+                      << Alert::NewLine << diagnosticLabel("Inner correction cap:")
+                      << Alert::Notation::Number(parameters.primalBarrierIterations)
+                      << Alert::NewLine << diagnosticLabel("Inner cap policy:")
+                      << "Stop on an uncertified inner residual"
+                      << Alert::NewLine << diagnosticLabel("Inner relative residual tolerance:")
+                      << Alert::Notation::Number(
+                           parameters.primalBarrierRelativeTolerance)
+                      << Alert::NewLine << diagnosticLabel("Barrier model:")
+                      << "Affine quadratic quality hinges"
+                      << Alert::NewLine << diagnosticLabel("Soft quality guard fraction:")
+                      << Alert::Notation::Number(parameters.qualityGuard)
+                      << Alert::NewLine << diagnosticLabel("Fitting / shape / distribution:")
+                      << Alert::Notation::Number(parameters.kappaF) << " / "
+                      << Alert::Notation::Number(parameters.kappaS) << " / "
+                      << Alert::Notation::Number(parameters.kappaD)
+                      << Alert::NewLine << diagnosticLabel("Inactive hinge skips:")
+                      << Alert::Notation::Number(report.inactiveHingeSkips)
+                      << Alert::NewLine << diagnosticLabel("Direct symbolic analyses:")
+                      << Alert::Notation::Number(report.directAnalyses)
+                      << Alert::NewLine << diagnosticLabel("Direct numeric factorizations:")
+                      << Alert::Notation::Number(report.directFactorizations)
+                      << Alert::NewLine << diagnosticLabel("Inner Newton steps:")
+                      << "Full with fixed-inner merit backtracking"
+                      << Alert::NewLine << diagnosticLabel("Linear backend:")
+                      << (parameters.directSolver == Adaptation::WNGIRParameters::DirectSolver::CG
+                            ? "CG"
+                            : (parameters.directSolver == Adaptation::WNGIRParameters::DirectSolver::MUMPS
+                                  ? "MUMPS" : "SparseLU"))
+                      << Alert::NewLine << diagnosticLabel("CG relative tolerance:")
+                      << Alert::Notation::Number(parameters.cgRelativeTolerance)
+                      << Alert::NewLine << diagnosticLabel("CG iterations per solve:")
+                      << Alert::Notation::Number(parameters.cgMaxIterations)
+                      << Alert::NewLine << diagnosticLabel("Outer iterations:")
+                      << Alert::Notation::Number(report.iterations)
+                      << Alert::NewLine << diagnosticLabel("Inner corrections (last):")
+                      << Alert::Notation::Number(report.lastPrimalBarrierIterations)
+                      << Alert::NewLine << diagnosticLabel("Inner relative correction:")
+                      << Alert::Notation::Number(report.primalBarrierRelativeCorrection)
+                      << Alert::NewLine << diagnosticLabel("Inner relative residual:")
+                      << Alert::Notation::Number(report.primalBarrierRelativeResidual)
+                      << Alert::NewLine << diagnosticLabel("Inner converged (last):")
+                      << (report.primalBarrierConverged ? "Yes" : "No")
+                      << Alert::NewLine << diagnosticLabel("Full inner Newton steps:")
+                      << Alert::Notation::Number(report.fullPrimalBarrierSteps)
+                      << Alert::NewLine << diagnosticLabel("Minimum inner step factor:")
+                      << Alert::Notation::Number(report.minPrimalBarrierAlpha)
+                      << Alert::NewLine << diagnosticLabel("Maximum linear iterations:")
+                      << Alert::Notation::Number(report.maxLinearIterations)
+                      << Alert::NewLine
                       << diagnosticLabel("Skeleton normal jump RMS:")
                       << Alert::Notation::Number(report.normalJumpRMS) << Alert::NewLine
                       << diagnosticLabel("Exit reason:") << report.exitReason
+                      << Alert::NewLine << diagnosticLabel("Geometric RMS distance:")
+                      << Alert::Notation::Number(report.geometricRMS)
+                      << Alert::NewLine << diagnosticLabel("Geometric D infinity:")
+                      << Alert::Notation::Number(report.geometricSup)
+                      << Alert::NewLine << diagnosticLabel("Geometric D infinity target:")
+                      << Alert::Notation::Number(parameters.geometricSupTolerance)
+                      << Alert::NewLine << diagnosticLabel("Geometric target reached:")
+                      << (report.geometricSup <= parameters.geometricSupTolerance ? "Yes" : "No")
                       << Alert::NewLine << diagnosticLabel("Welsch residual scale:")
                       << Alert::Notation::Number(report.sigma)
                       << Alert::NewLine << diagnosticLabel("Active RMS:")
@@ -369,20 +469,24 @@ namespace KelvinBall
                              ? report.activeRMS /
                                (parameters.h * report.levelSetGradientScale)
                              : 0)
-                      << Alert::NewLine << diagnosticLabel("RMS stopping tolerance:")
-                      << Alert::Notation::Number(report.effectiveTauRms) << Alert::NewLine
-                      << diagnosticLabel("Scaled RMS stopping tolerance:")
-                      << Alert::Notation::Number(report.effectiveTauRmsH)
                       << Alert::NewLine << diagnosticLabel("Active supremum:")
-                      << Alert::Notation::Number(report.activeSup) << Alert::NewLine
-                      << diagnosticLabel("Supremum stopping tolerance:")
-                      << Alert::Notation::Number(report.effectiveTauInf) << Alert::NewLine
-                      << diagnosticLabel("Scaled supremum stopping tolerance:")
-                      << Alert::Notation::Number(report.effectiveTauInfH)
+                      << Alert::Notation::Number(report.activeSup)
                       << Alert::NewLine << diagnosticLabel("Minimum Jacobian:")
                       << Alert::Notation::Number(report.minJ) << Alert::NewLine
                       << diagnosticLabel("Maximum relative distortion:")
-                      << Alert::Notation::Number(report.maxQRel) << Alert::Raise;
+                      << Alert::Notation::Number(report.maxQRel)
+                      << Alert::NewLine << diagnosticLabel("Setup time:")
+                      << Alert::Notation::Number(report.tSetup) << " s"
+                      << Alert::NewLine << diagnosticLabel("Step assembly time:")
+                      << Alert::Notation::Number(report.tAssembly) << " s"
+                      << Alert::NewLine << diagnosticLabel("Linear solve time:")
+                      << Alert::Notation::Number(report.tSolve) << " s"
+                      << Alert::NewLine << diagnosticLabel("Outer line-search time:")
+                      << Alert::Notation::Number(report.tLineSearch) << " s"
+                      << Alert::NewLine << diagnosticLabel("Linear solves:")
+                      << Alert::Notation::Number(report.linearSolveCount)
+                      << Alert::NewLine << diagnosticLabel("Total linear iterations:")
+                      << Alert::Notation::Number(report.linearIterations) << Alert::Raise;
 
         KelvinBall::Mesh moved(mesh);
         moveMesh(moved, mesh, displacementTrial.getSolution());
@@ -390,8 +494,53 @@ namespace KelvinBall
         checkMaterials(moved);
         const MeshDiagnostics diagnostics = getMeshDiagnostics(moved);
         return {MMG::Mesh(std::move(moved)),
-          {h, h, 0, parameters.fixedBoundaryAttributes.size(), diagnostics.cells,
-            diagnostics.cells}};
+          {backgroundH, backgroundH, 0,
+            parameters.fixedBoundaryAttributes.size(),
+            diagnostics.cells, diagnostics.cells}};
+      }
+
+      void adaptWNGIR(MMGReconstruction& fitted, const Sphere& sphere,
+        const Configuration& configuration, Real requestedWelschScale)
+      {
+        const auto before = getMeshDiagnostics(fitted.mesh);
+        sphere.adapt(fitted.mesh, requestedWelschScale);
+        // MMG preserves the material partition, but may change the internal
+        // face references. Gamma is the boundary between the two materials.
+        fitted.mesh.getConnectivity().compute(2, 3);
+        for (auto face = fitted.mesh.getFace(); face; ++face)
+        {
+          const auto& cells =
+            fitted.mesh.getConnectivity().getIncidence({2, 3}, face->getIndex());
+          if (cells.size() == 2 &&
+            fitted.mesh.getPolytope(3, cells[0])->getAttribute() !=
+              fitted.mesh.getPolytope(3, cells[1])->getAttribute())
+            fitted.mesh.setAttribute({2, face->getIndex()}, Gamma);
+        }
+        const auto after = getMeshDiagnostics(fitted.mesh);
+        fitted.diagnostics.minimumSize = configuration.hmin;
+        fitted.diagnostics.maximumSize = configuration.hmax;
+        fitted.diagnostics.hausdorffTolerance =
+          Real(0.1) * configuration.getGridSpacing() * configuration.getGridSpacing();
+        fitted.diagnostics.cellsBefore = before.cells;
+        fitted.diagnostics.cellsAfter = after.cells;
+        fitted.diagnostics.requiredBoundaryTriangles =
+          sphere.protectFixedGeometry(fitted.mesh, false);
+        Alert::Info() << substageHeading("MMG adaptation after WNGIR reconstruction")
+                      << Alert::NewLine << diagnosticLabel("Cell count:")
+                      << Alert::Notation::Number(before.cells) << " -> "
+                      << Alert::Notation::Number(after.cells)
+                      << Alert::NewLine << diagnosticLabel("Interface triangles:")
+                      << Alert::Notation::Number(before.interfaceTriangles) << " -> "
+                      << Alert::Notation::Number(after.interfaceTriangles)
+                      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+                      << Alert::Notation::Number(before.minimumQuality) << " -> "
+                      << Alert::Notation::Number(after.minimumQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+                      << Alert::Notation::Number(before.meanQuality) << " -> "
+                      << Alert::Notation::Number(after.meanQuality)
+                      << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
+                      << Alert::Notation::Number(before.meanElementSize) << " -> "
+                      << Alert::Notation::Number(after.meanElementSize) << Alert::Raise;
       }
 
       void printUsage(const char* executable)
@@ -399,9 +548,14 @@ namespace KelvinBall
         Alert::Info()
           << "Usage" << Alert::NewLine << "  " << executable << " [options]"
           << Alert::NewLine << Alert::Notation("--n=<points>")
-          << "              Background points per edge (default: 13)." << Alert::NewLine
+          << "              Background points per edge (default: 13)."
+          << Alert::NewLine
           << Alert::Notation("--h=<size>")
-          << "                Requested background size; alternative to --n."
+          << "                Initial grid spacing; alternative to --n."
+          << Alert::NewLine << Alert::Notation("--hmin-factor=<value>")
+          << "       Minimum MMG size / reference spacing h0 (default: 0.1)."
+          << Alert::NewLine << Alert::Notation("--hmax-factor=<value>")
+          << "       Maximum MMG size / reference spacing h0 (default: 10)."
           << Alert::NewLine << Alert::Notation("--outer-radius=<value>")
           << "     Chamber outer radius (default: 2)." << Alert::NewLine
           << Alert::Notation("--iterations=<count>")
@@ -411,15 +565,15 @@ namespace KelvinBall
           << Alert::Notation("--stabilization=<value>")
           << "    P1--P1 pressure-stabilization factor (default: 0.05)." << Alert::NewLine
           << Alert::Notation("--regularization=<value>")
-          << "   H1 smoothing length in multiples of h (default: 4)." << Alert::NewLine
+          << "   H1 smoothing length in multiples of h0 (default: 4)." << Alert::NewLine
           << Alert::Notation("--normal-regularization=<value>")
-          << " Thickness-normal smoothing length in h (default: 1)." << Alert::NewLine
+          << " Thickness-normal smoothing length in h0 (default: 1)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
-          << "             Advection time step in multiples of h (default: 0.1)."
+          << "             Advection time step in multiples of h0 (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--level-set-penalty=<value>")
           << " Rotated trace penalty of the level set (default: 1)." << Alert::NewLine
           << Alert::Notation("--thickness-min=<value>")
-          << "      Minimum body thickness in h (default: 2)."
+          << "      Absolute minimum body thickness (default: 0, off)."
           << Alert::NewLine
           << Alert::Notation("--motion-every=<count>")
           << "      Write the rigid motion every count iterates (default: 0, off)."
@@ -431,20 +585,16 @@ namespace KelvinBall
           << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
           << "  Interface reconstruction: mmg or wngir (default: mmg)." << Alert::NewLine
-          << Alert::Notation("--background-hmin=<value>")
-          << "  WNGIR background minimum size, in h (default: 0.1)." << Alert::NewLine
-          << Alert::Notation("--background-hmax=<value>")
-          << "  WNGIR background maximum size, in h (default: 1)." << Alert::NewLine
           << Alert::Notation("--background-hausdorff=<value>")
-          << " WNGIR background Hausdorff tolerance, in h (default: 0.05)."
+          << " WNGIR background Hausdorff tolerance, in h0 (default: 0.05)."
           << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
           << " WNGIR background gradation (default: 2)." << Alert::NewLine
           << Alert::Notation("--mmg-adapt")
-          << "                Adapt near the interface: after each MMG cut, or"
+          << "                Adapt near the interface after each reconstruction:"
           << Alert::NewLine
-          << "                              once on the fixed WNGIR background."
+          << "                              MMG cut or WNGIR fit, including the initial design."
           << Alert::NewLine
-          << "                              Adaptation hmin = 0.1 h, hmax = 10 h."
+          << "                              Adaptation uses the fixed size factors times h0."
           << Alert::NewLine
           << Alert::Notation("--mmg-adapt-gradation=<value>")
           << "  Adaptation gradation (default: 1.3)." << Alert::NewLine
@@ -457,11 +607,27 @@ namespace KelvinBall
           << Alert::NewLine
           << "                              the previous MMG scale (default: 2)."
           << Alert::NewLine << Alert::Notation("--wngir-*=<value>")
-          << "        WNGIR fitting parameters (--wngir-steps defaults to 12;"
+          << "        WNGIR fitting parameters (defaults and caps: 30 outer / 15 inner;"
           << Alert::NewLine
-          << "                              also --trace, --j-safe, --j-ls, --j-min)."
+          << "                              iteration trace on; --wngir-trace=0 disables;"
+          << Alert::NewLine
+          << "                              also --j-safe, --j-ls, --j-min)."
+          << Alert::NewLine << Alert::Notation("--wngir-kappa-f=<value>")
+          << "  Fitting curvature weight (default: 1)."
+          << Alert::NewLine << Alert::Notation("--wngir-kappa-s=<value>")
+          << "  Shape curvature weight (default: 1)."
+          << Alert::NewLine << Alert::Notation("--wngir-kappa-d=<value>")
+          << "  Distribution weight (default: 1)."
+          << Alert::NewLine << Alert::Notation("--wngir-direct-solver=<name>")
+          << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when built)."
+          << Alert::NewLine << Alert::Notation("--wngir-directional-newton[=0|1]")
+          << "  Scale the frozen model with directional Newton (default: 1)."
+          << Alert::NewLine << Alert::Notation("--wngir-mu-hat=<value>")
+          << "  Dimensionless quadratic-hinge weight (default: 90)."
+          << Alert::NewLine << Alert::Notation("--wngir-quality-guard=<fraction>")
+          << "  Soft guard fraction for that penalty (default: 0.1)."
           << Alert::NewLine << Alert::Notation("--geometry-only")
-          << "             Stop after initial MMG reconstruction." << Alert::NewLine
+          << "             Stop after initial reconstruction." << Alert::NewLine
           << Alert::Notation("--state-only")
           << "                Stop after the first Stokes evaluation." << Alert::NewLine
           << Alert::Notation("--save-mesh")
@@ -559,7 +725,6 @@ namespace KelvinBall
         diagnostics.vertices = mesh.getVertexCount();
         diagnostics.cells = mesh.getCellCount();
         Real qualitySum = 0;
-        Real elementSizeSum = 0;
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           if (cell->getAttribute() == Obstacle)
@@ -573,7 +738,6 @@ namespace KelvinBall
           if (vertices.size() != 4)
             throw std::runtime_error("Kelvin-ball mesh quality requires tetrahedra.");
           Real squaredEdgeLengthSum = 0;
-          Real edgeLengthSum = 0;
           for (size_t i = 0; i < vertices.size(); ++i)
           {
             for (size_t j = i + 1; j < vertices.size(); ++j)
@@ -581,7 +745,6 @@ namespace KelvinBall
               const Real edgeLength = (mesh.getVertexCoordinates(vertices[i]) -
                 mesh.getVertexCoordinates(vertices[j]))
                                         .norm();
-              edgeLengthSum += edgeLength;
               squaredEdgeLengthSum += edgeLength * edgeLength;
             }
           }
@@ -590,11 +753,9 @@ namespace KelvinBall
           diagnostics.minimumQuality = std::min(diagnostics.minimumQuality, quality);
           diagnostics.maximumQuality = std::max(diagnostics.maximumQuality, quality);
           qualitySum += quality;
-          elementSizeSum += edgeLengthSum / 6;
         }
         diagnostics.meanQuality = qualitySum / static_cast<Real>(diagnostics.cells);
-        diagnostics.meanElementSize =
-          elementSizeSum / static_cast<Real>(diagnostics.cells);
+        diagnostics.meanElementSize = meanElementSize(mesh);
         for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
         {
           if (face->getAttribute() == Gamma)
@@ -623,7 +784,8 @@ namespace KelvinBall
                       << Alert::Notation::Number(diagnostics.meanQuality)
                       << Alert::NewLine << diagnosticLabel("Maximum tetrahedron quality:")
                       << Alert::Notation::Number(diagnostics.maximumQuality)
-                      << Alert::NewLine << diagnosticLabel("Mean element size:")
+                      << Alert::NewLine
+                      << diagnosticLabel("Mean tetra edge length h:")
                       << Alert::Notation::Number(diagnostics.meanElementSize)
                       << Alert::Raise;
       }
@@ -696,13 +858,11 @@ namespace KelvinBall
 
       template <class LevelSet>
       MMGReconstruction discretizeLevelSetMMG(MMG::Mesh& mesh, const LevelSet& levelSet,
-        Real h, const Sphere& sphere, bool adapt, Real snap,
+        Real targetSize, Real hmin, Real hmax, const Sphere& sphere, bool adapt, Real snap,
         Real requestedWelschScale)
       {
         const size_t previousCells = mesh.getCellCount();
-        const Real hmin = 0.1 * h;
-        const Real hmax = 10 * h;
-        const Real hausdorff = 0.1 * h * h;
+        const Real hausdorff = 0.1 * targetSize * targetSize;
         // A retried reconstruction receives the mesh the failed attempt already
         // reduced to a single material, so the input need not be partitioned.
         const MeshDiagnostics inputDiagnostics = getMeshDiagnostics(mesh, false);
@@ -722,7 +882,8 @@ namespace KelvinBall
                       << Alert::Notation::Number(inputDiagnostics.minimumQuality)
                       << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
                       << Alert::Notation::Number(inputDiagnostics.meanQuality)
-                      << Alert::NewLine << diagnosticLabel("Mean element size:")
+                      << Alert::NewLine
+                      << diagnosticLabel("Mean tetra edge length h:")
                       << Alert::Notation::Number(inputDiagnostics.meanElementSize)
                       << Alert::Raise;
 
@@ -866,7 +1027,8 @@ namespace KelvinBall
                        << Alert::Notation::Number(restored) << Alert::NewLine
                        << diagnosticLabel("Maximum snapped level set:")
                        << Alert::Notation::Number(displacement) << " = "
-                       << Alert::Notation::Number(displacement / h) << " h"
+                       << Alert::Notation::Number(displacement / targetSize)
+                       << " target sizes"
                        << Alert::NewLine
                        << diagnosticLabel("Minimum crossing after snapping:")
                        << Alert::Notation::Number(snappedMinimum);
@@ -900,7 +1062,8 @@ namespace KelvinBall
           << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
           << Alert::Notation::Number(inputDiagnostics.meanQuality) << " -> "
           << Alert::Notation::Number(reconstructionDiagnostics.meanQuality)
-          << Alert::NewLine << diagnosticLabel("Mean element size:")
+          << Alert::NewLine
+          << diagnosticLabel("Mean tetra edge length h:")
           << Alert::Notation::Number(inputDiagnostics.meanElementSize) << " -> "
           << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize)
           << Alert::Raise;
@@ -909,7 +1072,7 @@ namespace KelvinBall
           sphere.protectFixedGeometry(reconstructed, false);
         if (adapt)
         {
-          sphere.adapt(reconstructed, h, requestedWelschScale);
+          sphere.adapt(reconstructed, requestedWelschScale);
         }
         else
         {
@@ -940,7 +1103,7 @@ namespace KelvinBall
           << diagnosticLabel("Mean tetrahedron quality:")
           << Alert::Notation::Number(reconstructionDiagnostics.meanQuality) << " -> "
           << Alert::Notation::Number(outputDiagnostics.meanQuality) << Alert::NewLine
-          << diagnosticLabel("Mean element size:")
+          << diagnosticLabel("Mean tetra edge length h:")
           << Alert::Notation::Number(reconstructionDiagnostics.meanElementSize) << " -> "
           << Alert::Notation::Number(outputDiagnostics.meanElementSize) << Alert::Raise;
         ReconstructionDiagnostics diagnostics{hmin, hmax, hausdorff,
@@ -1014,7 +1177,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Real normalRegularizationFactor = 1.0;
   Real stepFactor = 0.1;
   Real levelSetPenalty = 1;
-  Real thicknessFactor = 2;
+  Real minimumThickness = 0;
   size_t motionEvery = 0;
   size_t motionFrames = 24;
   Math::SpatialVector<Real> motionForce(3);
@@ -1039,7 +1202,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     else if (mode.rfind("--level-set-penalty=", 0) == 0)
       levelSetPenalty = std::stod(std::string(mode.substr(20)));
     else if (mode.rfind("--thickness-min=", 0) == 0)
-      thicknessFactor = std::stod(std::string(mode.substr(16)));
+      minimumThickness = std::stod(std::string(mode.substr(16)));
     else if (mode.rfind("--motion-every=", 0) == 0)
       motionEvery = std::stoul(std::string(mode.substr(15)));
     else if (mode.rfind("--motion-frames=", 0) == 0)
@@ -1093,8 +1256,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("The advection step factor must be positive.");
   if (!(levelSetPenalty > 0))
     throw std::runtime_error("The level-set trace penalty must be positive.");
-  if (!(thicknessFactor > 0))
-    throw std::runtime_error("--thickness-min must be positive.");
+  if (!std::isfinite(minimumThickness) || minimumThickness < 0)
+    throw std::runtime_error("--thickness-min must be nonnegative.");
   if (motionFrames == 0)
     throw std::runtime_error("The motion needs at least one frame.");
   if (!(motionForce.norm() > 0))
@@ -1107,20 +1270,20 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     throw std::runtime_error("--mmg-snap applies only to --reconstruction=mmg.");
   if (geometryOnly && stateOnly)
     throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
-  const Real h = configuration.getH();
+  const Real initialGridSpacing = configuration.getGridSpacing();
   const Real requestedWelschScale =
     Rodin::Examples::realOption(argc, argv, "wngir-robust-scale", Real(0));
-  const Real backgroundWelschScale =
-    requestedWelschScale > 0 ? requestedWelschScale : Real(3) * h;
-  const Real hilbertLength = regularizationFactor * h;
-  const Real normalLength = normalRegularizationFactor * h;
-  const Real dt = stepFactor * h;
   Alert::Info configurationInfo;
   configurationInfo << substageHeading("Configuration") << Alert::NewLine
                     << diagnosticLabel("Grid points:") << Alert::Notation::Number(points)
                     << Alert::NewLine << diagnosticLabel("Outer radius:")
                     << Alert::Notation::Number(outerRadius) << Alert::NewLine
-                    << diagnosticLabel("Effective h:") << Alert::Notation::Number(h)
+                    << diagnosticLabel("Reference spacing h0:")
+                    << Alert::Notation::Number(initialGridSpacing)
+                    << Alert::NewLine << diagnosticLabel("Requested minimum size:")
+                    << Alert::Notation::Number(configuration.hmin)
+                    << Alert::NewLine << diagnosticLabel("Requested maximum size:")
+                    << Alert::Notation::Number(configuration.hmax)
                     << Alert::NewLine << diagnosticLabel("Evaluated designs:")
                     << Alert::Notation::Number(maxIterations) << Alert::NewLine
                     << diagnosticLabel("Nitsche penalty:")
@@ -1131,16 +1294,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                     << Alert::NewLine << diagnosticLabel("Direct solver:")
                     << KelvinBall::DirectSolverName << Alert::NewLine
                     << diagnosticLabel("Regularization length:")
-                    << Alert::Notation::Number(hilbertLength) << " = "
-                    << Alert::Notation::Number(regularizationFactor) << " h"
+                    << Alert::Notation::Number(regularizationFactor) << " h0"
                     << Alert::NewLine << diagnosticLabel("Thickness model:")
                     << "Paired first-exit surrogate with aggregate correction"
                     << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
-                    << Alert::Notation::Number(normalLength) << " = "
-                    << Alert::Notation::Number(normalRegularizationFactor) << " h"
+                    << Alert::Notation::Number(normalRegularizationFactor) << " h0"
                     << Alert::NewLine << diagnosticLabel("Advection step:")
-                    << Alert::Notation::Number(dt) << " = "
-                    << Alert::Notation::Number(stepFactor) << " h" << Alert::NewLine
+                    << Alert::Notation::Number(stepFactor) << " h0" << Alert::NewLine
                     << diagnosticLabel("Level-set trace penalty:")
                     << Alert::Notation::Number(levelSetPenalty) << Alert::NewLine
                     << diagnosticLabel("Advection quadrature order:")
@@ -1150,28 +1310,28 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                     << diagnosticLabel("Reconstruction method:") << reconstructionMethod;
   if (reconstructionMethod == "wngir" && !configuration.adapt)
   {
-    configurationInfo << Alert::NewLine << diagnosticLabel("Background minimum size:")
-                      << Alert::Notation::Number(configuration.backgroundHMin) << " h"
-                      << Alert::NewLine << diagnosticLabel("Background maximum size:")
-                      << Alert::Notation::Number(configuration.backgroundHMax) << " h"
-                      << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
+    configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
                       << Alert::Notation::Number(configuration.backgroundHausdorff)
-                      << " h" << Alert::NewLine
+                      << " h0" << Alert::NewLine
                       << diagnosticLabel("Background gradation:")
                       << Alert::Notation::Number(configuration.backgroundGradation);
   }
   if (configuration.adapt)
   {
     configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation hmin (interface):")
-                      << Alert::Notation::Number(Real(0.1) * h) << " = 0.1 h"
+                      << Alert::Notation::Number(configuration.hmin)
                       << Alert::NewLine << diagnosticLabel("Adaptation hmax (far field):")
-                      << Alert::Notation::Number(Real(10) * h) << " = 10 h";
+                      << Alert::Notation::Number(configuration.hmax);
     if (reconstructionMethod == "wngir")
       configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
                         << Alert::Notation::Number(configuration.backgroundHausdorff)
-                        << " h";
-    configurationInfo << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
-                      << Alert::Notation::Number(backgroundWelschScale);
+                        << " h0";
+    if (reconstructionMethod == "wngir")
+      configurationInfo << Alert::NewLine
+                        << diagnosticLabel("Welsch size-map scale:")
+                        << (requestedWelschScale > 0
+                              ? "User-specified"
+                              : "3 h0 (fixed reference spacing)");
     configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation gradation:")
                       << Alert::Notation::Number(configuration.adaptGradation);
   }
@@ -1187,16 +1347,18 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       : "Stage 1: Discretizing the initial sphere with MMG.");
   Sphere sphere(configuration);
   SphereDiscretization initial = reconstructionMethod == "wngir"
-    ? sphere.prepareWNGIRBackground(backgroundWelschScale)
+    ? sphere.prepareWNGIRBackground(requestedWelschScale)
     : sphere.discretize(false, requestedWelschScale);
   ReconstructionDiagnostics reconstruction = initial.diagnostics;
   Optional<MMG::Mesh> wngirBackground;
+  Real backgroundH = nan;
   MMG::Mesh mesh;
   if (reconstructionMethod == "wngir")
   {
     wngirBackground.emplace(std::move(initial.mesh));
     const MeshDiagnostics backgroundDiagnostics =
       getMeshDiagnostics(*wngirBackground, false);
+    backgroundH = backgroundDiagnostics.meanElementSize;
     Alert::Info backgroundInfo;
     backgroundInfo << substageHeading(configuration.adapt
            ? "MMG background adaptation"
@@ -1210,11 +1372,14 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       << Alert::Notation::Number(backgroundDiagnostics.minimumQuality)
       << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
       << Alert::Notation::Number(backgroundDiagnostics.meanQuality)
-      << Alert::NewLine << diagnosticLabel("Mean element size:")
+      << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
       << Alert::Notation::Number(backgroundDiagnostics.meanElementSize);
     if (configuration.adapt)
-      backgroundInfo << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
-                     << Alert::Notation::Number(backgroundWelschScale);
+      backgroundInfo << Alert::NewLine
+                     << diagnosticLabel("Input chamber h:")
+                     << Alert::Notation::Number(reconstruction.backgroundMeanElementSize)
+                     << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
+                     << Alert::Notation::Number(reconstruction.welschScale);
     backgroundInfo << Alert::Raise;
     P1 sphereSpace(*wngirBackground);
     GridFunction sphereLevelSet(sphereSpace);
@@ -1225,15 +1390,31 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     P1 classifiedSphereSpace(classified);
     GridFunction classifiedSphereLevelSet(classifiedSphereSpace);
     classifiedSphereLevelSet.getData() = sphereLevelSet.getData();
-    MMGReconstruction fitted =
-      fitLevelSetWNGIR(classified, classifiedSphereLevelSet, h, outerRadius, argc, argv,
-        configuration.adapt ? backgroundWelschScale : 0);
+    MMGReconstruction fitted = fitLevelSetWNGIR(
+      classified, classifiedSphereLevelSet, backgroundH, initialGridSpacing, outerRadius,
+      argc, argv);
+    if (configuration.adapt)
+    {
+      adaptWNGIR(fitted, sphere, configuration, requestedWelschScale);
+      reconstruction = fitted.diagnostics;
+    }
     mesh = std::move(fitted.mesh);
   }
   else
   {
     mesh = std::move(initial.mesh);
   }
+  if (wngirBackground && configuration.adapt)
+  {
+    wngirBackground.emplace(mesh);
+    backgroundH = meanElementSize(*wngirBackground);
+  }
+  const std::string reconstructionName =
+    reconstructionMethod == "wngir" ? "KelvinBallWNGIR" : "KelvinBallMMG";
+  IO::XDMF reconstructionXdmf(reconstructionName);
+  auto reconstructionOutput = reconstructionXdmf.grid("Reconstructed");
+  reconstructionOutput.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
+  reconstructionXdmf.write(Real(0)).flush();
   checkFixedGeometry(mesh, outerRadius);
   checkMaterials(mesh);
   if (saveMeshDiagnostic)
@@ -1247,12 +1428,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
   std::ofstream history("kelvin-ball.csv");
   history.precision(17);
-  history << "iteration,outer_radius,h,dt,advection_quadrature_order,"
+  history << "iteration,outer_radius,initial_grid_spacing,hmin_factor,hmax_factor,requested_hmin,requested_hmax,"
+             "h,dt,advection_quadrature_order,"
              "regularization_length,nitsche_penalty,"
              "stabilization_factor,assembly_backend,direct_solver,"
              "vertices,cells,obstacle_cells,fluid_cells,"
              "interface_triangles,mesh_quality_min,mesh_quality_mean,mesh_quality_max,"
-             "mean_element_size,"
+             "background_h,"
              "remesh_hmin,remesh_hmax,remesh_hausdorff,"
              "required_boundary_triangles,remesh_cells_before,remesh_cells_after,"
              "k,c,q,rho,coupling_symmetry,nitsche_jump,volume,target_volume,"
@@ -1295,10 +1477,6 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   IO::XDMF sewedXdmf("KelvinBallSewed");
   auto sewedDesignOutput = sewedXdmf.grid("Design");
   auto sewedFluidOutput = sewedXdmf.grid("Fluid");
-  const std::string reconstructionName =
-    reconstructionMethod == "wngir" ? "KelvinBallWNGIR" : "KelvinBallMMG";
-  IO::XDMF reconstructionXdmf(reconstructionName);
-  auto reconstructionOutput = reconstructionXdmf.grid("Reconstructed");
   Optional<Real> previousRho;
   Optional<Real> predictedRhoChange;
   Optional<Real> previousVolume;
@@ -1317,13 +1495,33 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
       mesh = std::move(*nextMesh);
       nextMesh.reset();
+      if (wngirBackground && configuration.adapt)
+      {
+        // Refresh only between iterations, after the previous spaces and
+        // fields have expired. The background is fixed during each fit.
+        wngirBackground.emplace(mesh);
+        backgroundH = meanElementSize(*wngirBackground);
+      }
     }
+    const Real h = meanElementSize(mesh);
+    const Real hilbertLength = regularizationFactor * initialGridSpacing;
+    const Real normalLength = normalRegularizationFactor * initialGridSpacing;
+    const Real dt = stepFactor * initialGridSpacing;
     Alert::Info() << " ------------------------------------------------------------"
                   << Alert::NewLine << " Iteration "
                   << Alert::Notation::Number(iteration + 1) << " of "
                   << Alert::Notation::Number(maxIterations) << Alert::NewLine
                   << " ------------------------------------------------------------"
                   << Alert::Raise;
+    Alert::Info() << substageHeading("Current mesh scale") << Alert::NewLine
+                  << diagnosticLabel("Mean tetra edge length h:")
+                  << Alert::Notation::Number(h) << Alert::NewLine
+                  << diagnosticLabel("Regularization length:")
+                  << Alert::Notation::Number(hilbertLength) << Alert::NewLine
+                  << diagnosticLabel("Normal smoothing length:")
+                  << Alert::Notation::Number(normalLength) << Alert::NewLine
+                  << diagnosticLabel("Advection step:")
+                  << Alert::Notation::Number(dt) << Alert::Raise;
     const auto stage2Start = Clock::now();
     announce("Stage 2: Preparing the chamber fluid mesh.");
     auto& connectivity = mesh.getConnectivity();
@@ -1417,7 +1615,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                                 Real requiredDVolumeTheta,
                                 const GradientDiagnostics& rhoGradientDiagnostics,
                                 const GradientDiagnostics& volumeGradientDiagnostics) {
-      history << iteration << ',' << outerRadius << ',' << h << ',' << dt << ','
+      history << iteration << ',' << outerRadius << ',' << initialGridSpacing << ','
+              << configuration.hminFactor << ',' << configuration.hmaxFactor << ','
+              << configuration.hmin << ',' << configuration.hmax << ','
+              << h << ',' << dt << ','
               << advectionQuadratureOrder << ',' << hilbertLength << ',' << nitschePenalty
               << ',' << stabilizationFactor << ',' << assemblyBackend << ','
               << KelvinBall::DirectSolverName << ',' << meshDiagnostics.vertices << ','
@@ -1425,7 +1626,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << meshDiagnostics.fluidCells << ',' << meshDiagnostics.interfaceTriangles
               << ',' << meshDiagnostics.minimumQuality << ','
               << meshDiagnostics.meanQuality << ',' << meshDiagnostics.maximumQuality
-              << ',' << meshDiagnostics.meanElementSize << ','
+              << ',' << backgroundH << ','
               << reconstruction.minimumSize << ',' << reconstruction.maximumSize << ','
               << reconstruction.hausdorffTolerance << ','
               << reconstruction.requiredBoundaryTriangles << ','
@@ -1451,7 +1652,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << k / determinant << ','
               << (c != 0 ? 2 * M_PI * determinant / std::abs(c) : nan) << ','
               << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
-              << ',' << levelSetPenalty << ',' << thicknessFactor * h << ','
+              << ',' << levelSetPenalty << ',' << minimumThickness << ','
               << normalLength << ','
               << stageDiagnostics.thicknessPenalty << ','
               << stageDiagnostics.thicknessNominalPenalty << ','
@@ -1608,11 +1809,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     rayDirection.getData().setZero();
     GridFunction smoothedCurvature(levelSetSpace);
     smoothedCurvature.getData().setZero();
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
       thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
       mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
-      const Real activeGuard = thicknessFactor * h + Real(2) * dt;
+      const Real activeGuard = minimumThickness + Real(2) * dt;
       const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, activeGuard);
       const auto projectedNormal =
         thicknessPenalty.projectNormal(shapeSpace, normalLength);
@@ -1634,7 +1835,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       const auto thickness = thicknessPenalty.evaluate(mesh, shapeSpace,
         projectedNormal, thicknessLoad);
       Math::Vector<Real> unused = Math::Vector<Real>::Zero(shapeSpace.getSize());
-      const KelvinBall::ThicknessPenalty nominalPenalty(mesh, thicknessFactor * h);
+      const KelvinBall::ThicknessPenalty nominalPenalty(mesh, minimumThickness);
       stageDiagnostics.thicknessNominalPenalty =
         nominalPenalty.evaluate(mesh, shapeSpace, projectedNormal, unused).penalty;
       stageDiagnostics.thicknessGuardDistance = activeGuard;
@@ -1685,8 +1886,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           predictedThicknessChange ? *predictedThicknessChange : nan;
         Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
                       << diagnosticLabel("Minimum thickness:")
-                      << Alert::Notation::Number(thicknessFactor * h) << " = "
-                      << Alert::Notation::Number(thicknessFactor) << " h"
+                      << Alert::Notation::Number(minimumThickness)
                       << Alert::NewLine << diagnosticLabel("Guard distance:")
                       << Alert::Notation::Number(activeGuard)
                       << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
@@ -1745,7 +1945,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                            stageDiagnostics.predictedThicknessChange)
                       << Alert::Raise;
     }
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
       identifyGradient(shapeSpace, RealFunction{0}, shapeCoupling,
         thicknessDescent, hilbertLength, nitschePenalty, "Thickness descent",
@@ -1783,7 +1983,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     Real nullSpaceMultiplier = -dVolume(rhoGradient) / volumeMetric;
     GridFunction xiRho(shapeSpace);
     xiRho = rhoGradient + nullSpaceMultiplier * volumeGradient;
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
       const Real thicknessVolumeMultiplier =
         -dVolume(thicknessDescent) / volumeMetric;
@@ -1798,7 +1998,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         return -thicknessLoad.dot(candidate.getData()) / magnitude;
       };
       const Real targetRate = -stageDiagnostics.thicknessPenalty /
-        (thicknessFactor * h);
+        minimumThickness;
       Real multiplier = 0;
       bool feasible = true;
       if (thicknessRate(0) > targetRate)
@@ -1869,9 +2069,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real thetaInfinityNorm = xiRhoNorm.max();
     const Real dRhoTheta = dRho(theta);
     const Real dVolumeTheta = dVolume(theta);
-    stageDiagnostics.dThicknessTheta = -thicknessLoad.dot(theta.getData());
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
+      stageDiagnostics.dThicknessTheta = -thicknessLoad.dot(theta.getData());
       previousThicknessPenalty = stageDiagnostics.thicknessPenalty;
       predictedThicknessChange = dt * stageDiagnostics.dThicknessTheta;
     }
@@ -1887,11 +2087,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(dRhoTheta) << Alert::NewLine
                   << diagnosticLabel("D volume [theta]:")
                   << Alert::Notation::Number(dVolumeTheta) << Alert::NewLine
-                  << diagnosticLabel("Surrogate D thickness [theta]:")
-                  << Alert::Notation::Number(stageDiagnostics.dThicknessTheta)
-                  << Alert::NewLine
                   << diagnosticLabel("Required D volume [theta]:")
                   << Alert::Notation::Number(requiredDVolumeTheta) << Alert::Raise;
+    if (minimumThickness > 0)
+      Alert::Info() << substageHeading("Thickness directional derivative")
+                    << Alert::NewLine << diagnosticLabel("Surrogate D thickness [theta]:")
+                    << Alert::Notation::Number(stageDiagnostics.dThicknessTheta)
+                    << Alert::Raise;
     previousRho = rho;
     predictedRhoChange = dt * dRhoTheta;
     previousVolume = volume;
@@ -1977,7 +2179,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     chamber.clear();
     chamber.add("Distance", distance, IO::XDMF::Center::Node);
     chamber.add("Theta", theta, IO::XDMF::Center::Node);
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
       chamber.add("Thickness_Descent", thicknessDescent, IO::XDMF::Center::Node);
     SubMesh<Context::Local>::Builder interfaceBuilder;
     interfaceBuilder.initialize(mesh);
@@ -1993,7 +2195,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     GridFunction interfaceThicknessDescent(interfaceVectorSpace);
     GridFunction interfaceCurvature(interfaceScalarSpace);
     const auto& interfaceParentVertices = interfaceMesh.getPolytopeMap(0).left;
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
       for (Index vertex = 0; vertex < interfaceMesh.getVertexCount(); ++vertex)
       {
         const auto parent = interfaceParentVertices[vertex];
@@ -2016,7 +2218,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     auto interfaceOutput = xdmf.grid("Interface");
     interfaceOutput.clear();
     interfaceOutput.setMesh(interfaceMesh, IO::XDMF::MeshPolicy::Transient);
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
       interfaceOutput.add("Geometric_Normal", interfaceGeometricNormal,
         IO::XDMF::Center::Node);
@@ -2060,7 +2262,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     sewedDesignOutput.setMesh(sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
     sewedDesignOutput.add("Distance", sewedDistance, IO::XDMF::Center::Node);
     sewedDesignOutput.add("Theta", sewedVelocity, IO::XDMF::Center::Node);
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
       sewedDesign.setVector(sewedGeometricNormal, geometricNormal);
       sewedDesign.setVector(sewedNormal, smoothedNormal);
@@ -2087,7 +2289,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     GridFunction sewedInterfaceThicknessDescent(sewedInterfaceVectorSpace);
     GridFunction sewedInterfaceCurvature(sewedInterfaceScalarSpace);
     const auto& sewedInterfaceVertices = sewedInterfaceMesh.getPolytopeMap(0).left;
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
       for (Index vertex = 0; vertex < sewedInterfaceMesh.getVertexCount(); ++vertex)
       {
         const auto parent = sewedInterfaceVertices[vertex];
@@ -2112,7 +2314,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     sewedInterfaceOutput.clear();
     sewedInterfaceOutput.setMesh(
       sewedInterfaceMesh, IO::XDMF::MeshPolicy::Transient);
-    if (thicknessFactor > 0)
+    if (minimumThickness > 0)
     {
       sewedInterfaceOutput.add("Geometric_Normal", sewedInterfaceGeometricNormal,
         IO::XDMF::Center::Node);
@@ -2393,22 +2595,27 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         P1 classifiedLevelSetSpace(classified);
         GridFunction classifiedLevelSet(classifiedLevelSetSpace);
         classifiedLevelSet.getData() = advectedDistance.getData();
-        return fitLevelSetWNGIR(
-          classified, classifiedLevelSet, h, outerRadius, argc, argv,
-          configuration.adapt ? backgroundWelschScale : 0);
+        auto fitted = fitLevelSetWNGIR(
+          classified, classifiedLevelSet, backgroundH, initialGridSpacing, outerRadius,
+          argc, argv);
+        if (configuration.adapt)
+          adaptWNGIR(fitted, sphere, configuration, requestedWelschScale);
+        return fitted;
       }
       // A failed MMG stage is retried on the same advected level set with
       // every MMG size computed from half the scale; the next iteration
-      // starts again from h.
-      Real scale = h;
+      // starts again from the reference spacing.
+      Real scale = initialGridSpacing;
       for (size_t attempt = 0;; ++attempt)
       {
         try
         {
+          const Real retryFactor = scale / initialGridSpacing;
           auto reconstructed = discretizeLevelSetMMG(mesh, advectedDistance, scale,
+            retryFactor * configuration.hmin, retryFactor * configuration.hmax,
             sphere, configuration.adapt, configuration.mmgSnap,
             requestedWelschScale);
-          reconstructed.diagnostics.scale = scale / h;
+          reconstructed.diagnostics.scale = retryFactor;
           return reconstructed;
         }
         catch (const std::exception& error)
@@ -2423,9 +2630,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           if (attempt == configuration.mmgRetries)
             throw;
           Alert::Warning() << "MMG reconstruction failed at scale "
-                           << Alert::Notation::Number(scale / h) << " h: " << error.what()
+                           << Alert::Notation::Number(scale / initialGridSpacing)
+                           << " h0: " << error.what()
                            << Alert::NewLine << "Retrying at scale "
-                           << Alert::Notation::Number(scale / (2 * h)) << " h."
+                           << Alert::Notation::Number(scale / (2 * initialGridSpacing))
+                           << " h0."
                            << Alert::Raise;
           scale /= 2;
         }

@@ -44,6 +44,24 @@ namespace KelvinBall
     return scale * std::cbrt(cell.getMeasure());
   }
 
+  Real meanElementSize(const Mesh& mesh)
+  {
+    Real sum = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const auto& vertices = cell->getVertices();
+      if (vertices.size() != 4)
+        throw std::runtime_error("Mean element size requires tetrahedra.");
+      for (size_t i = 0; i < vertices.size(); ++i)
+        for (size_t j = i + 1; j < vertices.size(); ++j)
+          sum += (mesh.getVertexCoordinates(vertices[i]) -
+            mesh.getVertexCoordinates(vertices[j])).norm();
+    }
+    if (mesh.getCellCount() == 0)
+      throw std::runtime_error("Mean element size requires a nonempty mesh.");
+    return sum / (Real(6) * static_cast<Real>(mesh.getCellCount()));
+  }
+
   void splitSelfPairedCut(Mesh& mesh)
   {
     const size_t faceDimension = mesh.getDimension() - 1;

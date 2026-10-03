@@ -101,6 +101,8 @@ namespace KelvinBall
         {
           size_t found = 0;
           size_t missed = 0;
+          Math::SpatialPoint firstMiss(3);
+          firstMiss.setZero();
           for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
           {
             if (face->getAttribute() != pair.slave)
@@ -113,15 +115,25 @@ namespace KelvinBall
                     pair.master, pair.rotation * quadrature.getPoint(qp).vector()))
                 ++found;
               else
+              {
+                if (missed == 0)
+                  firstMiss = pair.rotation * quadrature.getPoint(qp).vector();
                 ++missed;
+              }
             }
           }
           if (found == 0 || missed != 0)
+          {
+            mesh.save("kelvin-cut-coverage-failure.mesh", IO::FileFormat::MEDIT);
             throw std::runtime_error(
               "The rotated chamber faces do not cover each other for slave attribute " +
               std::to_string(pair.slave) + " and master attribute " +
               std::to_string(pair.master) + ": " + std::to_string(found) +
-              " quadrature points located and " + std::to_string(missed) + " missed.");
+              " quadrature points located and " + std::to_string(missed) + " missed. " +
+              "First rotated miss: (" + std::to_string(firstMiss(0)) + ", " +
+              std::to_string(firstMiss(1)) + ", " + std::to_string(firstMiss(2)) +
+              "). Saved kelvin-cut-coverage-failure.mesh.");
+          }
         }
       }
 

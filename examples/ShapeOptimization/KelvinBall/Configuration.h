@@ -19,17 +19,20 @@ namespace KelvinBall
   struct Configuration
   {
       size_t points = 13;
-      Real requestedH = 0;
+      /// Only controls construction of the initial uniform chamber.
+      Real requestedGridSpacing = 0;
+      Real hminFactor = 0.1;
+      Real hmaxFactor = 10;
+      Real hmin = 0;
+      Real hmax = 0;
       Real outerRadius = 2;
       Real nitschePenalty = DefaultNitschePenalty;
       Real stabilizationFactor = DefaultStabilizationFactor;
-      /// Settings of the initial WNGIR background preparation; sizes are in h.
-      Real backgroundHMin = 0.1;
-      Real backgroundHMax = 1;
+      /// Settings of the initial WNGIR background preparation.
       Real backgroundHausdorff = 0.05;
       Real backgroundGradation = 2;
-      /// Optional MMG adaptation after each MMG cut or once on the fixed
-      /// WNGIR background. Its size map ranges from 0.1 h to 10 h.
+      /// Optional MMG adaptation after each MMG cut or WNGIR fit, and during
+      /// initial background preparation. Its size map ranges from hmin to hmax.
       bool adapt = false;
       Real adaptGradation = 1.3;
       /// Crossing fraction below which the MMG cut snaps the near endpoint of
@@ -39,13 +42,13 @@ namespace KelvinBall
       /// sizes computed from half the previous scale.
       size_t mmgRetries = 2;
       bool pointsSpecified = false;
-      bool hSpecified = false;
+      bool gridSpacingSpecified = false;
 
       bool parse(std::string_view option);
 
       void finalize();
 
-      Real getH() const;
+      Real getGridSpacing() const;
   };
 }
 

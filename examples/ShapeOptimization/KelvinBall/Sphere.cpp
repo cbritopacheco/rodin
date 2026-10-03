@@ -27,7 +27,7 @@ namespace KelvinBall
   {
     Mesh cube = Mesh::UniformGrid(Polytope::Type::Tetrahedron,
       {m_configuration.points, m_configuration.points, m_configuration.points});
-    cube.scale(m_configuration.getH());
+    cube.scale(m_configuration.getGridSpacing());
 
     using Key = std::tuple<long long, long long, long long>;
     constexpr Real tolerance = 1e-12;
@@ -174,12 +174,12 @@ namespace KelvinBall
   SphereDiscretization Sphere::discretize(bool conformingCuts,
     Real requestedWelschScale) const
   {
-    const Real h = m_configuration.getH();
     MMG::Mesh mesh(makeUniformChamber());
+    const Real h = m_configuration.getGridSpacing();
     const size_t cellsBefore = mesh.getCellCount();
     protectFixedGeometry(mesh, conformingCuts);
-    const Real hmin = 0.1 * h;
-    const Real hmax = 10 * h;
+    const Real hmin = m_configuration.hmin;
+    const Real hmax = m_configuration.hmax;
     const Real hausdorff = 0.1 * h * h;
     P1 levelSetSpace(mesh);
     GridFunction sphere(levelSetSpace);
@@ -198,7 +198,7 @@ namespace KelvinBall
     splitSelfPairedCut(mesh);
     if (m_configuration.adapt && !conformingCuts)
     {
-      adapt(mesh, h, requestedWelschScale);
+      adapt(mesh, requestedWelschScale);
     }
     else
     {
@@ -218,19 +218,18 @@ namespace KelvinBall
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
   }
 
-  SphereDiscretization Sphere::prepareWNGIRBackground(Real welschScale) const
+  SphereDiscretization Sphere::prepareWNGIRBackground(Real requestedWelschScale) const
   {
-    const Real h = m_configuration.getH();
-    const Real interfaceSize = Real(0.1) * h;
-    const Real farSize = Real(10) * h;
-    const Real hmin = m_configuration.adapt
-      ? interfaceSize
-      : m_configuration.backgroundHMin * h;
-    const Real hmax = m_configuration.adapt
-      ? farSize
-      : m_configuration.backgroundHMax * h;
-    const Real hausdorff = m_configuration.backgroundHausdorff * h;
     MMG::Mesh mesh(makeUniformChamber());
+    const Real h = m_configuration.getGridSpacing();
+    const Real interfaceSize = m_configuration.hmin;
+    const Real farSize = m_configuration.hmax;
+    const Real hmin = m_configuration.hmin;
+    const Real hmax = m_configuration.hmax;
+    const Real hausdorff = m_configuration.backgroundHausdorff * h;
+    const Real backgroundMeanElementSize = meanElementSize(mesh);
+    const Real welschScale = requestedWelschScale > 0
+      ? requestedWelschScale : Real(3) * h;
     const size_t cellsBefore = mesh.getCellCount();
     if (m_configuration.adapt)
     {
@@ -268,14 +267,18 @@ namespace KelvinBall
     const size_t requiredTriangles = protectFixedGeometry(mesh, !m_configuration.adapt);
 
     const size_t cellsAfter = mesh.getCellCount();
-    return {std::move(mesh),
-      {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
+    ReconstructionDiagnostics diagnostics{
+      hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter};
+    diagnostics.backgroundMeanElementSize = backgroundMeanElementSize;
+    diagnostics.welschScale = welschScale;
+    return {std::move(mesh), diagnostics};
   }
 
-  void Sphere::adapt(MMG::Mesh& mesh, Real h, Real requestedWelschScale) const
+  void Sphere::adapt(MMG::Mesh& mesh, Real requestedWelschScale) const
   {
-    const Real interfaceSize = Real(0.1) * h;
-    const Real farSize = Real(10) * h;
+    const Real h = m_configuration.getGridSpacing();
+    const Real interfaceSize = m_configuration.hmin;
+    const Real farSize = m_configuration.hmax;
     const Real welschScale = requestedWelschScale > 0
       ? requestedWelschScale : Real(3) * h;
     const Adaptation::WNGIRLoss welsch(welschScale);

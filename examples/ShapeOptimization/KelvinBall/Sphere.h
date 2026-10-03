@@ -23,6 +23,8 @@ namespace KelvinBall
       size_t requiredBoundaryTriangles = 0;
       size_t cellsBefore = 0;
       size_t cellsAfter = 0;
+      Real backgroundMeanElementSize = std::numeric_limits<Real>::quiet_NaN();
+      Real welschScale = std::numeric_limits<Real>::quiet_NaN();
       /// Smallest crossing fraction before snapping, snapped vertices, and the
       /// MMG scale in multiples of h; not a number where not applicable.
       Real minimumCrossing = std::numeric_limits<Real>::quiet_NaN();
@@ -65,10 +67,13 @@ namespace KelvinBall
        * @brief Prepares the fixed background mesh used by WNGIR.
        *
        * MMG optimizes the interface-free background, or adapts it according to
-       * the initial sphere's Welsch weight at @p welschScale. The returned mesh contains no design
-       * interface and remains fixed during optimization.
+       * the initial sphere's Welsch weight. Unless @p requestedWelschScale is
+       * positive, its width is three times the fixed reference grid spacing.
+       * The returned mesh contains no design interface and
+       * remains fixed during each WNGIR fit. With adaptation enabled, the
+       * adapted fitted mesh replaces it between design iterations.
        */
-      SphereDiscretization prepareWNGIRBackground(Real welschScale) const;
+      SphereDiscretization prepareWNGIRBackground(Real requestedWelschScale = 0) const;
 
       /**
        * @brief Adapts a mesh fitted to Gamma to the prescribed size map.
@@ -77,11 +82,11 @@ namespace KelvinBall
        * `--mmg-adapt` is given. The optimization pass keeps the edge lengths the
        * cut created, including its short edges; adaptation remeshes towards
        * a size set by the Welsch weight of the FMM distance to Gamma instead.
-       * The sizes and default Welsch scale are multiples of @p h, which a
-       * retried reconstruction halves. A positive @p requestedWelschScale
-       * overrides the default scale.
+       * The sizes and default Welsch scale are multiples of the fixed reference
+       * grid spacing. A positive @p requestedWelschScale overrides
+       * the default scale.
        */
-      void adapt(MMG::Mesh& mesh, Real h, Real requestedWelschScale = 0) const;
+      void adapt(MMG::Mesh& mesh, Real requestedWelschScale = 0) const;
 
       /**
        * @brief Marks the fixed boundary for MMG and returns the number of

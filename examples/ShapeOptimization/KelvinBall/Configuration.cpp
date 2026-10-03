@@ -21,19 +21,19 @@ namespace KelvinBall
     }
     else if (option.rfind("--h=", 0) == 0)
     {
-      requestedH = std::stod(std::string(option.substr(4)));
-      hSpecified = true;
+      requestedGridSpacing = std::stod(std::string(option.substr(4)));
+      gridSpacingSpecified = true;
     }
+    else if (option.rfind("--hmin-factor=", 0) == 0)
+      hminFactor = std::stod(std::string(option.substr(14)));
+    else if (option.rfind("--hmax-factor=", 0) == 0)
+      hmaxFactor = std::stod(std::string(option.substr(14)));
     else if (option.rfind("--outer-radius=", 0) == 0)
       outerRadius = std::stod(std::string(option.substr(15)));
     else if (option.rfind("--penalty=", 0) == 0)
       nitschePenalty = std::stod(std::string(option.substr(10)));
     else if (option.rfind("--stabilization=", 0) == 0)
       stabilizationFactor = std::stod(std::string(option.substr(16)));
-    else if (option.rfind("--background-hmin=", 0) == 0)
-      backgroundHMin = std::stod(std::string(option.substr(18)));
-    else if (option.rfind("--background-hmax=", 0) == 0)
-      backgroundHMax = std::stod(std::string(option.substr(18)));
     else if (option.rfind("--background-hausdorff=", 0) == 0)
       backgroundHausdorff = std::stod(std::string(option.substr(23)));
     else if (option.rfind("--background-gradation=", 0) == 0)
@@ -53,26 +53,29 @@ namespace KelvinBall
 
   void Configuration::finalize()
   {
-    if (pointsSpecified && hSpecified)
+    if (pointsSpecified && gridSpacingSpecified)
       throw std::runtime_error("Use either --n or --h, not both.");
     if (!(outerRadius > 1))
       throw std::runtime_error(
         "The chamber outer radius must exceed the unit sphere radius.");
-    if (hSpecified)
+    if (gridSpacingSpecified)
     {
-      if (!(requestedH > 0))
-        throw std::runtime_error("The requested mesh size must be positive.");
-      points = static_cast<size_t>(std::ceil(outerRadius / requestedH)) + 1;
+      if (!std::isfinite(requestedGridSpacing) || !(requestedGridSpacing > 0))
+        throw std::runtime_error("The requested initial grid spacing must be positive.");
+      points = static_cast<size_t>(std::ceil(outerRadius / requestedGridSpacing)) + 1;
     }
     if (points < 5)
-      throw std::runtime_error("The chamber uniform grid requires --n >= 5.");
+      throw std::runtime_error("The chamber uniform grid requires at least five points per edge.");
+    if (!std::isfinite(hminFactor) || !std::isfinite(hmaxFactor) ||
+        !(hminFactor > 0) || !(hmaxFactor >= hminFactor))
+      throw std::runtime_error(
+        "The size factors must satisfy 0 < --hmin-factor <= --hmax-factor.");
+    hmin = hminFactor * getGridSpacing();
+    hmax = hmaxFactor * getGridSpacing();
     if (!(nitschePenalty > 0))
       throw std::runtime_error("The Nitsche penalty must be positive.");
     if (stabilizationFactor < 0)
       throw std::runtime_error("The pressure stabilization must be nonnegative.");
-    if (!(backgroundHMin > 0) || !(backgroundHMax >= backgroundHMin))
-      throw std::runtime_error(
-        "The background sizes must satisfy 0 < --background-hmin <= --background-hmax.");
     if (!(backgroundHausdorff > 0))
       throw std::runtime_error("The background Hausdorff tolerance must be positive.");
     if (!(backgroundGradation > 1))
@@ -84,7 +87,7 @@ namespace KelvinBall
         "The snapping fraction must satisfy 0 <= --mmg-snap < 0.5.");
   }
 
-  Real Configuration::getH() const
+  Real Configuration::getGridSpacing() const
   {
     return outerRadius / static_cast<Real>(points - 1);
   }

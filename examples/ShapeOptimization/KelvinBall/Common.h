@@ -82,6 +82,9 @@ namespace KelvinBall
    */
   Real cellSize(const Polytope& cell);
 
+  /** Mean of the six edge lengths of each tetrahedron, averaged over cells. */
+  Real meanElementSize(const Mesh& mesh);
+
   void splitSelfPairedCut(Mesh& mesh);
 
   void prepare(Mesh& mesh);
