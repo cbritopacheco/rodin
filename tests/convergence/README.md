@@ -182,7 +182,7 @@ exists yet.
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 maps; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
-| Geometry approximation / Poisson patch | Map/derivative rates at fixed geometry degrees $q=1,2,3$ | Not yet implemented | Not yet implemented | Sine-map approximation and affine Poisson patches with $p=q$; native and real-PETSc local/MPI |
+| Geometry approximation / Poisson patch | Map/derivative rates at fixed geometry degrees $q=1,2,3$ | $q=1\to2\to3$ at fixed $n=3$, with affine $p=q$ patches | $(n,q)=(2,1)\to(3,2)\to(5,3)$, with affine $p=q$ patches | Sine-map approximation and affine Poisson patches with $p=q$; native and real-PETSc local/MPI |
 
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:
@@ -194,11 +194,15 @@ axis, $h=1/(n-1)$, and field degree $p$:
   `n=2` mesh.
   Nonlinear Poisson instead uses a fixed `n=3` mesh. Stokes uses `n=3`
   with velocity degrees $2\to3\to4$ and pressure degrees $1\to2\to3$.
+  The geometry-approximation study instead uses $q=1\to2\to3$ at fixed
+  $n=3$, measuring map/derivative errors separately from affine field patches.
 - hp: Poisson, Helmholtz, variable conductivity, linear elasticity,
   coupled reaction–diffusion, and nonlinear Poisson use
   `(n,p)=(2,1)→(3,2)→(5,3)`.
   Stokes instead uses $(n,k)=(3,2)\to(4,3)\to(5,4)$, with pressure
   degree $k-1$ and a global pressure-mean multiplier.
+  The geometry-approximation path uses $(n,q)=(2,1)\to(3,2)\to(5,3)$.
+  Its adjacent improvement policies are not fixed-degree powers of $h$.
 - isoparametric: curved P2 Poisson and conductivity use `n=5→9→17`
   in 1D/2D and `n=3→4→5` in 3D. A separate P1 geometry-map error
   study uses `n=5→9→17` in 1D/2D and `n=3→5→9` in 3D.

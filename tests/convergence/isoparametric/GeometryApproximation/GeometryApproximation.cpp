@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <array>
 #include <gtest/gtest.h>
 #include "../../CurvedGeometry.h"
 #include "Rodin/Assembly.h"
@@ -28,6 +29,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
   constexpr Real SensitivityTolerance = 1e-6, RateMargin = 0.35;
   constexpr Real WrongMapValueMinimum = 0.05, WrongMapDerivativeMinimum = 0.15;
   constexpr Real WrongTraceMinimum = 0.1;
+  // Finite-path improvement policies, not fixed-degree algebraic rate bounds.
+  constexpr Real DegreeReduction = 0.5, CoupledReduction = 0.25;
   constexpr size_t MaxIterations = 50000;
   [[maybe_unused]] constexpr Real DivergenceTolerance = 1e5;
 #if defined(RODIN_GEOMETRY_APPROXIMATION_PETSC) && defined(RODIN_USE_MPI)
@@ -194,6 +197,45 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
   class ApproximationTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
+      template <bool RefineMesh>
+      void degreePath() const
+      {
+        const std::array<size_t, 3> levels =
+          RefineMesh ? std::array<size_t, 3>{2, 3, 5} : std::array<size_t, 3>{3, 3, 3};
+        Workload<ContextType, 1> first(this->GetParam(), levels[0]);
+        Workload<ContextType, 2> second(this->GetParam(), levels[1]);
+        Workload<ContextType, 3> third(this->GetParam(), levels[2]);
+        const std::array errors{first.mapErrors(), second.mapErrors(), third.mapErrors()};
+        const std::array refined{first.mapErrors(RefinedMapOrder),
+          second.mapErrors(RefinedMapOrder), third.mapErrors(RefinedMapOrder)};
+        const std::array patches{first.patch(), second.patch(), third.patch()};
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          SCOPED_TRACE(
+            ::testing::Message() << "geometry degree=" << i + 1 << " n=" << levels[i]);
+          ASSERT_TRUE(errors[i].isFinite());
+          ASSERT_GT(errors[i].getL2(), 0);
+          ASSERT_GT(errors[i].getH1Seminorm(), 0);
+          ASSERT_TRUE(refined[i].isFinite());
+          EXPECT_LT(
+            std::abs(refined[i].getL2() / errors[i].getL2() - 1), SensitivityTolerance);
+          EXPECT_LT(std::abs(refined[i].getH1Seminorm() / errors[i].getH1Seminorm() - 1),
+            SensitivityTolerance);
+          ASSERT_TRUE(patches[i].isFinite());
+          EXPECT_LT(patches[i].getL2(), PatchTolerance);
+          EXPECT_LT(patches[i].getH1Seminorm(), PatchTolerance);
+          if (i == 0)
+            continue;
+          SCOPED_TRACE(::testing::Message()
+            << "map errors " << errors[i - 1].getL2() << " -> " << errors[i].getL2()
+            << " derivative " << errors[i - 1].getH1Seminorm() << " -> "
+            << errors[i].getH1Seminorm());
+          const Real reduction = RefineMesh ? CoupledReduction : DegreeReduction;
+          EXPECT_LT(errors[i].getL2(), reduction * errors[i - 1].getL2());
+          EXPECT_LT(errors[i].getH1Seminorm(), reduction * errors[i - 1].getH1Seminorm());
+        }
+      }
+
       template <size_t Q>
       void rates() const
       {
@@ -272,6 +314,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
       }
   };
   using LocalTest = ApproximationTest<Context::Local>;
+  TEST_P(LocalTest, GeometryDegreeRefinement)
+  {
+    degreePath<false>();
+  }
+  TEST_P(LocalTest, CoupledMeshAndGeometryRefinement)
+  {
+    degreePath<true>();
+  }
   TEST_P(LocalTest, Q1Rates)
   {
     rates<1>();
@@ -321,6 +371,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
     });
 #if defined(RODIN_GEOMETRY_APPROXIMATION_PETSC) && defined(RODIN_USE_MPI)
   using MPITest = ApproximationTest<Context::MPI>;
+  TEST_P(MPITest, GeometryDegreeRefinement)
+  {
+    degreePath<false>();
+  }
+  TEST_P(MPITest, CoupledMeshAndGeometryRefinement)
+  {
+    degreePath<true>();
+  }
   TEST_P(MPITest, Q1Rates)
   {
     rates<1>();

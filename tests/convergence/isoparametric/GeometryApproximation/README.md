@@ -59,6 +59,43 @@ invertibility. Positive finite determinant ratios are required at all sampled
 cell quadrature points. Segment, Triangle, Quadrilateral, Tetrahedron, Pyramid,
 Hexahedron and Wedge are tested. No spatial rate is defined for point geometry.
 
+## Geometry degree and combined refinement
+
+Two additional paths distinguish changing geometry degree from fixed-degree
+mesh refinement. Degree refinement uses $n=3$ and $q=1,2,3$.
+Combined refinement uses
+
+$$
+(n,q)=(2,1)\longrightarrow(3,2)\longrightarrow(5,3),
+\qquad h=(n-1)^{-1}.
+$$
+
+Every path contains three discretizations and checks both adjacent intervals.
+The same independent $G_0$ and $G_1$ integrals are evaluated at all levels.
+All errors must be finite and positive. Each interval requires
+
+$$
+G_j(h_{\ell},q_{\ell})<\rho G_j(h_{\ell-1},q_{\ell-1}),
+\qquad j\in\{0,1\},\quad\ell\in\{1,2\},
+$$
+
+with $\rho=1/2$ for degree refinement and $\rho=1/4$ for combined
+refinement. These are finite-path improvement policies for the analytic sine
+map, not asserted fixed-degree powers of $h$. Three degrees do not establish
+an asymptotic exponential law in $q$. Geometry interpolation families,
+reference domain, amplitude, map oracle and derivative convention remain
+unchanged. The combined path changes both $h$ and $q$, so it does not isolate
+either contribution.
+
+At every level, integration orders fourteen and eighteen must agree within
+$10^{-6}$ relatively for each map error. An independent physical affine
+Poisson patch with $p=q$ must retain both $10^{-9}$ field-error bounds.
+Thus improving geometry errors and exactly reproducing a physical field are
+distinct assertions. On MPI partitions, the same reference-cell ownership
+and globally reduced squared norms are used, including empty ranks on the
+coarsest mesh. These paths inherit the existing native and real-PETSc
+local/MPI rank and sequential/OpenMP matrix.
+
 ## Independent physical-field patch
 
 To distinguish geometry error from field error, a separate Poisson problem
@@ -125,5 +162,7 @@ only; squared contributions are reduced globally before taking square roots.
 Complex-PETSc builds do not register this real scalar suite. Registrations are
 labelled slow, use 1800-second timeouts and share a pyramid resource lock.
 
-Smooth PDE field rates on approximated domains and comparisons of solutions
-on the exact domain through a specified pullback remain subsequent work.
+Smooth represented-domain and lifted exact-domain PDE field studies are
+specified separately in [diffusion](../Diffusion/README.md) and
+[complex Helmholtz](../Helmholtz/README.md). Their field, geometry and total
+errors are not interchangeable with the reference-domain map errors here.
