@@ -101,6 +101,8 @@ namespace KelvinBall
         {
           size_t found = 0;
           size_t missed = 0;
+          Real totalArea = 0;
+          Real missedArea = 0;
           Math::SpatialPoint firstMiss(3);
           firstMiss.setZero();
           for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
@@ -111,6 +113,9 @@ namespace KelvinBall
             const auto& quadrature = face->getQuadrature(qf);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {
+              const Real weight =
+                qf.getWeight(qp) * quadrature.getPoint(qp).getDistortion();
+              totalArea += weight;
               if (locator.locate(
                     pair.master, pair.rotation * quadrature.getPoint(qp).vector()))
                 ++found;
@@ -119,20 +124,28 @@ namespace KelvinBall
                 if (missed == 0)
                   firstMiss = pair.rotation * quadrature.getPoint(qp).vector();
                 ++missed;
+                missedArea += weight;
               }
             }
           }
-          if (found == 0 || missed != 0)
+          if (missed != 0)
           {
             mesh.save("kelvin-cut-coverage-failure.mesh", IO::FileFormat::MEDIT);
-            throw std::runtime_error(
+            Alert::Warning() <<
               "The rotated chamber faces do not cover each other for slave attribute " +
               std::to_string(pair.slave) + " and master attribute " +
               std::to_string(pair.master) + ": " + std::to_string(found) +
               " quadrature points located and " + std::to_string(missed) + " missed. " +
               "First rotated miss: (" + std::to_string(firstMiss(0)) + ", " +
               std::to_string(firstMiss(1)) + ", " + std::to_string(firstMiss(2)) +
-              "). Saved kelvin-cut-coverage-failure.mesh.");
+              "). Saved kelvin-cut-coverage-failure.mesh."
+              << Alert::NewLine << "      Policy: Drop unmatched quadrature points."
+              << Alert::NewLine << "      Missed cut area: "
+              << Alert::Notation::Number(missedArea)
+              << Alert::NewLine << "      Missed cut area fraction: "
+              << Alert::Notation::Number(totalArea > 0 ? missedArea / totalArea : 0)
+              << Alert::NewLine << "      The chamber coupling is approximate."
+              << Alert::Raise;
           }
         }
       }

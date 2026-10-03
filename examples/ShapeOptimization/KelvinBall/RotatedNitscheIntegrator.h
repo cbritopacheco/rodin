@@ -126,6 +126,10 @@ namespace KelvinBall
 
       const Locator& getLocator() const;
 
+      // Unlocated rotated quadrature points contribute neither matrix nor
+      // load terms. Trace diagnostics use only the located overlap; coverage
+      // is reported separately by Metrics, not interpreted as a zero jump.
+
       template <size_t VelocityOrder, class VelocitySpace, class PressureSpace,
         class Offsets, class LinearSystem>
       void assembleStokes(const VelocitySpace& velocity, const PressureSpace& pressure,
@@ -372,6 +376,7 @@ namespace KelvinBall
       velocity, fixedVelocityBoundaries, velocityBlocks, blockOffsets);
     FaceNormal normal(mesh);
     size_t quadraturePoints = 0;
+    size_t skippedPoints = 0;
     Real normalResidual = 0;
 
     for (const RotationPair& pair : RotationPairs)
@@ -390,8 +395,10 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
-            throw std::runtime_error(
-              "A rotated Nitsche quadrature point was not located.");
+          {
+            ++skippedPoints;
+            continue;
+          }
           const auto slaveVelocity = Internal::evaluateScalarBasis<VelocityOrder>(
             velocity, *face, slavePoint.getPhysicalCoordinates());
           const auto slavePressure = Internal::evaluateScalarBasis<1>(
@@ -522,8 +529,10 @@ namespace KelvinBall
       Internal::addWithEliminatedColumns(system, entries, fixed);
     }
     Alert::Info() << diagnosticHeading("Rotated Nitsche assembly") << Alert::NewLine
-                  << diagnosticLabel("Quadrature points:")
+                  << diagnosticLabel("Attempted quadrature points:")
                   << Alert::Notation::Number(quadraturePoints) << Alert::NewLine
+                  << diagnosticLabel("Skipped quadrature points:")
+                  << Alert::Notation::Number(skippedPoints) << Alert::NewLine
                   << diagnosticLabel("Normal residual:")
                   << Alert::Notation::Number(normalResidual) << Alert::Raise;
     if (normalResidual > 1e-8)
@@ -554,8 +563,7 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
-            throw std::runtime_error(
-              "A rotated Nitsche quadrature point was not located.");
+            continue;
           const auto slave = Internal::evaluateScalarBasis<1>(
             space, *face, slavePoint.getPhysicalCoordinates());
           const auto master = Internal::evaluateScalarBasis<1>(
@@ -628,8 +636,7 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
-            throw std::runtime_error(
-              "A rotated scalar quadrature point was not located.");
+            continue;
           const auto slave = Internal::evaluateScalarBasis<1>(
             space, *face, slavePoint.getPhysicalCoordinates());
           const auto master = Internal::evaluateScalarBasis<1>(
@@ -679,8 +686,7 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
-            throw std::runtime_error(
-              "A rotated scalar quadrature point was not located.");
+            continue;
           const auto slave = Internal::evaluateScalarBasis<1>(
             space, *face, slavePoint.getPhysicalCoordinates());
           const auto master = Internal::evaluateScalarBasis<1>(
@@ -719,7 +725,7 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
-            throw std::runtime_error("A rotated trace diagnostic point was not located.");
+            continue;
           Math::SpatialMatrix<Real> slave(3, 3), master(3, 3);
           Internal::setColumn(slave, 0, u0.getValue(point));
           Internal::setColumn(slave, 1, u1.getValue(point));
@@ -757,7 +763,7 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
-            throw std::runtime_error("A rotated trace diagnostic point was not located.");
+            continue;
           const auto jump = u.getValue(*mapped) - pair.rotation * u.getValue(point);
           for (size_t i = 0; i < 3; ++i)
             residual = std::max(residual, std::abs(jump(i)));
@@ -787,8 +793,7 @@ namespace KelvinBall
           const auto mapped =
             m_locator.locate(pair.master, pair.rotation * point.vector());
           if (!mapped)
-            throw std::runtime_error(
-              "A rotated scalar diagnostic point was not located.");
+            continue;
           residual =
             std::max(residual, std::abs(u.getValue(*mapped) - u.getValue(point)));
         }

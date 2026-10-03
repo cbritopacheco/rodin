@@ -510,6 +510,14 @@ the protected intersections of its fixed faces.
 
 ### WNGIR
 
+Rotated coupling drops quadrature points whose opposite fluid trace cannot
+be located. No matrix or load contribution is assembled at those points,
+and jump diagnostics are evaluated only on the located overlap. A coverage
+warning reports the missed count and quadrature-weighted cut area fraction;
+the mesh is saved as `kelvin-cut-coverage-failure.mesh`. This is an approximate
+overlap policy, not a repair of the solid/fluid partition. Unmatched strips
+receive no rotational Nitsche transmission term.
+
 MMG is first called before any interface exists to optimise the
 interface-free chamber. With `--mmg-adapt` it instead adapts that background
 near the initial sphere according to the Welsch-weighted size map, without
