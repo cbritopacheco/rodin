@@ -48,5 +48,5 @@ assembly against nine scalar assemblies. It uses total process CPU time, includi
 OpenMP workers, and separates complete assembly, triplet generation, element
 binding, cached entry scans and sparse conversion. Those assembly costs should
 not be inferred from these value-operation timings. See
-[the CPU investigation](../../doc/spatial-matrix-assembly-cpu.md) for commands,
+[the SpatialMatrix guide](../../doc/Guides/FiniteElementSpaces.dox) (Assembly CPU investigation section) for commands,
 controlled comparisons, measured results and remaining scope.
