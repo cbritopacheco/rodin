@@ -10,6 +10,7 @@ set(RodinBenchmarks_SRCS
   Quadrature.cpp
   AABB.cpp
   ParametricTransformation.cpp
+  SpatialAlgebra.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
