@@ -59,7 +59,6 @@ namespace Rodin::Examples
       std::size_t maxIterations = Adaptation::WNGIRParameters{}.maxIterations;
       std::size_t quadratureOrder = 0;
       Real kappaF = 1;
-      Real kappaS = 1;
       Real kappaD = 1;
       Real kappaJ = 1;
       Real kappaQ = 1;
@@ -176,7 +175,7 @@ namespace Rodin::Examples
   {
     constexpr const char* options[] = {"wngir-kappa-f", "wngir-robust-scale",
       "wngir-kappa-j", "wngir-kappa-q", "wngir-jsafe", "wngir-qmax",
-      "wngir-quality-guard", "wngir-kappa-s", "wngir-kappa-d", "wngir-directional-newton",
+      "wngir-quality-guard", "wngir-kappa-d", "wngir-directional-newton",
       "wngir-directional-newton-max-step-h", "wngir-quality-witness",
       "wngir-direct-solver", "wngir-direct-threads", "wngir-geometric-sup-tol",
       "wngir-primal-barrier-iterations", "wngir-primal-barrier-relative-tol",
@@ -207,7 +206,6 @@ namespace Rodin::Examples
     p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
     p.qualityGuard = realOption(argc, argv, "wngir-quality-guard", p.qualityGuard);
-    p.kappaS = realOption(argc, argv, "wngir-kappa-s", defaults.kappaS);
     p.kappaD = realOption(argc, argv, "wngir-kappa-d", defaults.kappaD);
     p.directionalNewton =
       boolOption(argc, argv, "wngir-directional-newton", p.directionalNewton);

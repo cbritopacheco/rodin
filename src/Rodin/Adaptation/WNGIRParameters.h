@@ -35,9 +35,8 @@ namespace Rodin::Adaptation
   {
       /// Affine quadratic-hinge guard widths, relative to the identity margins.
       Real qualityGuard = Real(0.1);
-      /// Independent fitting, shape and distribution weights; volume terms scale with h.
+      /// Independent fitting and distribution weights; distribution scales with h.
       Real kappaF = 1; ///< Fitting curvature weight.
-      Real kappaS = 1; ///< Shape curvature weight.
       Real kappaD = 1; ///< Distribution (current-strain regularity) weight.
       /// Robust directional scaling of the inner model, omitting the level-set Hessian.
       bool directionalNewton = true;

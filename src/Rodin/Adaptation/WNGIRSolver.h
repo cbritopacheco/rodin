@@ -40,7 +40,6 @@
 #include "WNGIRRegularityMetric.h"
 #include "WNGIRPrimalBarrierForce.h"
 #include "WNGIRPrimalBarrierMetric.h"
-#include "WNGIRQualityMetric.h"
 #include "WNGIRReport.h"
 #include "WNGIRObservationCoefficient.h"
 #include "WNGIRSurfaceForceCoefficient.h"
@@ -91,18 +90,17 @@ namespace Rodin::Adaptation
   }
 
   /**
-   * @brief Curvature-informed WNGIR mesh-fitting solver for the local backend.
+   * @brief Fitting--distribution WNGIR mesh-fitting solver for the local backend.
    *
    * Fits the interface skeleton of a mesh to the zero level set of @f$\phi@f$
-   * with M = F + S + D (Fitting, Shape, Distribution) and affine quadratic hinges.
-   * The three independent weights are kappaF, kappaS and kappaD. Each outer iteration
+   * with M = F + D (Fitting, Distribution) and affine quadratic hinges.
+   * The independent weights are kappaF and kappaD. Each outer iteration
    * freezes the metric, force and constraint rows; inner Newton uses merit
    * backtracking. Directional Newton scales the physical predictor and metric
    * before constructing the hinges. Armijo then backtracks from the full increment.
    *
    * The form-language assembly uses the local Eigen backend, with CG, SparseLU
-   * or MUMPS solving the same pointwise deviatoric current-strain operator. Shape curvature is
-   * restricted to current deviatoric stretch after PSD projection. Linear systems select zero
+   * or MUMPS solving the same pointwise deviatoric current-strain operator. Linear systems select zero
    * along unresolved similarity modes; this does not modify the inner objective.
    * There is no full-space completion or inertia gate. Linear
    * residual, direction and actual-geometry line-search checks remain active.
@@ -220,10 +218,9 @@ namespace Rodin::Adaptation
           Alert::Exception() << "WNGIR MUMPS solves require RODIN_USE_MUMPS."
                              << Alert::Raise;
 #endif
-        if (!std::isfinite(parameters.kappaS) || parameters.kappaS < Real(0) ||
-          !std::isfinite(parameters.kappaD) || !(parameters.kappaD > Real(0)) ||
+        if (!std::isfinite(parameters.kappaD) || !(parameters.kappaD > Real(0)) ||
           !std::isfinite(parameters.kappaF) || !(parameters.kappaF > Real(0)))
-          Alert::Exception() << "WNGIR requires nonnegative shape curvature and positive "
+          Alert::Exception() << "WNGIR requires positive "
                                 "fitting/distribution weights."
                              << Alert::Raise;
         for (const Real value : {parameters.kappaJ, parameters.kappaQ,
@@ -540,8 +537,7 @@ namespace Rodin::Adaptation
           // The observation metric and the fitting force depend on the outer
           // displacement, not on the barrier increment, so they are assembled
           // here and reused by every correction below.
-          Detail::WNGIRQualityMetric qualityMetric(m_duStep, m_vStep, u, p);
-          m_localMetricForm = obsMetric + qualityMetric;
+          m_localMetricForm = obsMetric;
           m_localMetricForm.assemble();
           const Real coefficient = p.h * p.kappaD;
           size_t order = 2;

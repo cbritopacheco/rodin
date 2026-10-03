@@ -1,32 +1,31 @@
 # Canonical WNGIR Campaigns
 
-WNGIR now has one model: M = F + S + D (Fitting, Shape, Distribution), affine quadratic hinges,
+WNGIR now has one model: $M=F+D$ (Fitting, Distribution), affine quadratic hinges,
 directional Newton, frozen inner-merit backtracking, and actual outer j/Q
-and fitting-energy Armijo checks. S_+ is the sole shape metric: the local Hessian
-of (d/4)(Q-1) is projected onto its nonnegative spectrum before assembly.
+and fitting-energy Armijo checks. No shape or constraint Hessian is assembled
+in the canonical metric.
 There is no selectable full-Hessian or logarithmic model, coefficient-space
 completion, mass term, or nonlinear-hinge path. PSD does not imply invertibility.
 
 - F is kappa_f times the normalized Hessian of half the squared level-set residual with
   the level-set Hessian omitted. It is not robust-weighted.
-- S_+ is h*kappa_s times the positive spectral part of D2[(d/4)(Q-1)].
-- D is h*kappa_d times current-configuration symmetric strain,
-  with global uniform dilation projected out. It permits rigid motions.
+- $D$ is $h\kappa_D$ times pointwise deviatoric current-configuration strain.
+  Local infinitesimal rotations and isotropic strain have zero cost.
 - The fitting energy and force remain robust Welsch.
 - Hinge widths are 0.1 times the identity quality margins. The default
   model-decrease-scaled hinge weight is mu_hat=90.
-- Defaults are 30 outer / 15 inner corrections and kappa_f=kappa_s=kappa_d=1.
+- Defaults are 30 outer / 15 inner corrections and $\kappa_F=\kappa_D=1$.
   There is no shared bulk coefficient. These are choices, not a new calibration result.
-  The previous coefficient magnitudes were (kappa_f,kappa_s,kappa_d)=(1,1e-4,1e-4);
-  switching from full to PSD curvature does not reproduce the old metric away from identity.
-  More generally, old weights map to (kappa_obs,kappa_bulk*kappa_c,kappa_bulk*kappa_reg).
+  Historical shape-curvature runs are retained separately, not reproduced by
+  the canonical metric away from identity.
 
 There is no separate inertia audit or automatic metric repair. Linear residual,
 direction, inner merit and actual outer quality/energy checks remain in place.
 Fitting must resolve the similarity modes that D leaves free;
 for example, a planar interface cannot identify tangential translation.
-All three metric terms are PSD on admissible states; unresolved similarity modes
-can still prevent coercivity. No general invertibility claim is made.
+Both metric terms are PSD on admissible states. Unresolved conformal modes
+can still prevent coercivity; testing similarity modes does not exhaust the
+kernel for every finite-element space. No general invertibility claim is made.
 The distribution integrators tabulate frozen current strain once per basis and
 quadrature point, rather than reevaluating the inverse deformation for each
 basis pair. MUMPS retains symbolic analysis while the sparsity pattern matches,
@@ -38,7 +37,7 @@ Geometry traces record inactive-hinge skips and analysis/factorization counts.
 
 | Role | Parameters | Defaults |
 | --- | --- | --- |
-| Metric | kappa_f, kappa_s, kappa_d | 1, 1, 1 |
+| Metric | kappa_f, kappa_d | 1, 1 |
 | Hinge strength | mu_hat; kappa_j, kappa_q | 90; 1, 1 |
 | Guard width | quality_guard | 0.1 of identity margins |
 | Quality budget | j_safe, q_max; actual line-search Jacobian floor | 0.01, 10; 0.01 |
@@ -47,8 +46,9 @@ Geometry traces record inactive-hinge skips and analysis/factorization counts.
 | Inner stopping | stationarity residual relative / absolute | 1e-3 / 1e-12 |
 | Geometry target | geometric_sup_tolerance | 0 selects h^(p+1), hence h^2 for P1 |
 
-Legacy active-fit tolerance paths and predictor fallbacks are removed. The primary calibration controls are the three metric
-weights and mu_hat; the quality budget is prescribed rather than inferred from fit.
+Legacy active-fit tolerance paths and predictor fallbacks are removed. The primary
+calibration controls are the two metric weights and mu_hat; the quality budget
+is prescribed rather than inferred from fit.
 
 Termination is uniform:
 - Success requires the full-interface sampled D_inf target and the actual sampled j/Q budget.
@@ -67,9 +67,9 @@ Hausdorff distance or proof of geometric order. Invalid samples invalidate the
 whole diagnostic irrespective of the target value. The automatic h^(p+1) target
 is a screening budget with constant one, not a measured approximation constant.
 
-The running 68,750-case full-versus-PSD campaign retains its frozen binary and
-legacy stopping protocol. It is intentionally not interrupted or mixed with new
-results. New schemas/model identifiers reject resuming that campaign.
+Historical campaigns retain their frozen binaries and stopping protocols.
+They are not pooled with canonical results. New schemas/model identifiers
+reject resuming those campaigns.
 
 ## Model
 
@@ -79,16 +79,14 @@ normalization N, the metric is
 
 ```text
 F[v,z] = kappa_f N integral_interface (g_k.v)(g_k.z)
-S_+[v,z] = h kappa_s integral_volume [(d/4) D2Q(A_k)]_+[grad v,grad z]
-D[v,z] = h kappa_d [
-  integral_volume j_k e_k(v):e_k(z)
-  - (integral_volume j_k tr e_k(v))(integral_volume j_k tr e_k(z))/(d V_k)]
+D[v,z] = h kappa_d integral_volume j_k dev(e_k(v)):dev(e_k(z))
 ```
 
-Only global dilation is removed, not each element's volumetric strain.
-The negative rank-one term is implemented exactly by a sparse augmented
-direct solve or the corresponding CG operator. It is part of D, not an
-extra completion or penalty.
+The unique metric is fitting plus pointwise distribution. Local isotropic
+strain and infinitesimal rotations have zero distribution cost. Conforming
+degrees of freedom enforce compatibility. No shape/constraint Hessian or
+global dilation subtraction remains. Higher-order conformal modes require
+separate kernel checks; similarity gauges alone are not a coercivity proof.
 
 The frozen affine slacks are s_J = j_k-j_safe+Dj_k[grad v] and
 s_Q = Q_max-Q_k-DQ_k[grad v]. With delta_J=guard*(1-j_safe),
@@ -106,13 +104,13 @@ used. Inner merit backtracking handles active-set changes. The nonlinear
 outer update still requires actual Jacobian and distortion admissibility
 and sufficient decrease of E_W. Metrics do not add a quality force to E_W.
 
-The 2D runner uses MUMPS and independent --kappa-f/--kappa-s/--kappa-d grids,
+The 2D runner uses MUMPS and independent --kappa-f/--kappa-d grids,
 each defaulting to 1e-4,1e-3,1e-2,0.1,1. With mu_hat=0.1,1,10,100,1000,
-all five resolutions and eleven lobe counts give 34,375 canonical PSD cases.
-The full-curvature flag is removed; `--shape-curvature=psd` is the only runner value.
-The 3D runner still uses fixed --kappa-f and --kappa-s/--kappa-d grids.
+all five resolutions and eleven lobe counts give 6,875 fitting-distribution cases.
+Shape-curvature flags and weights are removed.
+The 3D runner uses fixed --kappa-f and --kappa-d/--mu-hat grids.
 Executable defaults remain all one. Executables use
---wngir-kappa-f, --wngir-kappa-s and --wngir-kappa-d; the old metric flags
+--wngir-kappa-f and --wngir-kappa-d; the old metric flags
 are rejected. Hinges retain mu_hat, kappa_j, kappa_q and the quality guard.
 Use a new output directory: model identifiers and schemas deliberately reject
 resuming the historical logarithmic campaigns. Historical calibration data,
@@ -125,7 +123,7 @@ Neither runner is launched automatically by this change.
 
 Each case saves a lossless trace in `<out-dir>/iteration_logs/`, with its case
 identity and command in the first two lines. New CSV records identify
-kappa_f, kappa_s and kappa_d and cannot resume older coefficient schemas.
+kappa_f, kappa_d and mu_hat and cannot resume older coefficient schemas.
 Inner rows contain stationarity residual, its tolerance and relative residual, plus
 Newton correction and iterate norms as diagnostics,
 step factor, linear iteration count/error, and convergence status; failed linear

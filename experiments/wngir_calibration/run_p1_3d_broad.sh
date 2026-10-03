@@ -20,7 +20,7 @@ run_stage() {
 
   python3 "$runner" preflight "${common[@]}"
   python3 "$runner" screen "${common[@]}" --steps=20 \
-    --kappa-f=1 --kappa-s=1 \
+    --kappa-f=1 \
     --kappa-d=1 --mu-hat=90
 }
 

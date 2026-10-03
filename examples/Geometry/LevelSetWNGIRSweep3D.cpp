@@ -384,8 +384,7 @@ int main(int argc, char** argv)
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
             << "  orbit R=" << orbitR << "  kappaF=" << wngirParams.kappaF
-            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
-            << '\n';
+            << " kappaD=" << wngirParams.kappaD << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;

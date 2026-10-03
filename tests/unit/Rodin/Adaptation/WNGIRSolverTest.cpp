@@ -30,7 +30,6 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.primalBarrierIterations, 15);
       EXPECT_EQ(parameters.primalBarrierRelativeTolerance, Real(1e-3));
       EXPECT_EQ(parameters.cgMaxIterations, 1000);
-      EXPECT_EQ(parameters.kappaS, Real(1));
       EXPECT_EQ(parameters.kappaD, Real(1));
       EXPECT_EQ(parameters.directSolverThreads, 0u);
       EXPECT_EQ(parameters.maxIterations, 30);
@@ -506,7 +505,8 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mumps.report.linearSolveCount, 0u);
     EXPECT_LE(mumps.report.linearError, Real(1e-10));
     EXPECT_GT(mumps.report.directFactorizations, 0u);
-    EXPECT_LT(mumps.report.directAnalyses, mumps.report.directFactorizations);
+    // Changing geometry and similarity gauges may change the sparse support.
+    EXPECT_LE(mumps.report.directAnalyses, mumps.report.directFactorizations);
   }
 #endif
 
@@ -630,7 +630,6 @@ namespace Rodin::Tests::Unit
           WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-6), Real(1000),
           [=](WNGIRParameters& p) {
             p.kappaF = scale;
-            p.kappaS = scale * Real(0.1);
             p.kappaD = scale;
             p.qualityGuard = Real(0.9);
             p.maxIterations = 3;
@@ -687,13 +686,8 @@ namespace Rodin::Tests::Unit
     TrialFunction trial(fes);
     TestFunction test(fes);
     WNGIR solver(trial, test);
-    for (const Real invalid : {Real(-1), std::numeric_limits<Real>::quiet_NaN()})
-    {
-      WNGIRParameters p;
-      p.kappaS = invalid;
-      EXPECT_THROW(solver.setParameters(p), Alert::Exception);
-    }
-    for (const Real invalid : {Real(0), Real(-1), std::numeric_limits<Real>::infinity()})
+    for (const Real invalid : {Real(0), Real(-1), std::numeric_limits<Real>::infinity(),
+           std::numeric_limits<Real>::quiet_NaN()})
     {
       WNGIRParameters p;
       p.kappaD = invalid;
@@ -812,7 +806,6 @@ namespace Rodin::Tests::Unit
       [](WNGIRParameters& p) {
         p.maxIterations = 1;
         p.cgRelativeTolerance = Real(1e-8);
-        p.kappaS = 0;
         p.kappaD = Real(1e-4);
       });
     ASSERT_EQ(state.report.iterations, 1u);

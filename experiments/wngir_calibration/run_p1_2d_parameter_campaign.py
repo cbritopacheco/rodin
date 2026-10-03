@@ -58,7 +58,7 @@ def parse_responses(output):
 
 
 FIELDS = [
-    "dataset", "n", "elements", "lobes", "kappa_f", "kappa_s", "kappa_d", "shape_curvature", "mu_hat", "kappa_j", "kappa_q",
+    "dataset", "n", "elements", "lobes", "kappa_f", "kappa_d", "mu_hat", "kappa_j", "kappa_q",
     "fit", "geom_rms", "geom_sup", "normal_rms", "iterations", "alpha", "step",
     "min_j", "max_j", "max_qrel",
     "active_rms", "active_sup", "active_rms_hg", "act_frac", "cR", "rej_j", "rej_q", "rej_e",
@@ -134,11 +134,10 @@ def read_done(path):
                 int(float(row["n"])),
                 int(float(row["lobes"])),
                 round(float(row["kappa_f"]), 14),
-                round(float(row["kappa_s"]), 14),
                 round(float(row["kappa_d"]), 14),
                 round(float(row["mu_hat"]), 14),
                 round(float(row["kappa_j"]), 14),
-                round(float(row["kappa_q"]), 14), row["shape_curvature"]))
+                round(float(row["kappa_q"]), 14)))
     return rows, done
 
 
@@ -184,10 +183,7 @@ def save_case_trace(out_dir, identity, command, output):
     return path
 
 
-def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kappa_j, kappa_q,
-             shape_curvature="psd"):
-    if shape_curvature != "psd":
-        raise ValueError("only canonical PSD shape curvature is supported")
+def run_case(args, exe, stage, n, lobes, kappa_f, kappa_d, mu_hat, kappa_j, kappa_q):
     cmd = [
         str(exe),
         f"--n={n}",
@@ -199,7 +195,6 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
         f"--R0={args.r0}",
         f"--classifier-eps={1.25 / (n - 1):.14g}",
         "--classifier-lambda=0.008",
-        f"--wngir-kappa-s={kappa_s:.14g}",
         f"--wngir-kappa-d={kappa_d:.14g}",
         f"--wngir-mu-hat={mu_hat:.14g}",
         f"--wngir-kappa-j={kappa_j:.14g}",
@@ -246,8 +241,8 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
     seconds = time.time() - t0
     if args.log_iterations:
         save_case_trace(args.out_dir,
-                        dict(dataset=stage, n=n, lobes=lobes, kappa_f=kappa_f, kappa_s=kappa_s,
-                             kappa_d=kappa_d, shape_curvature=shape_curvature,
+                        dict(dataset=stage, n=n, lobes=lobes, kappa_f=kappa_f,
+                             kappa_d=kappa_d,
                              mu_hat=mu_hat, kappa_j=kappa_j, kappa_q=kappa_q),
                         cmd, proc.stdout)
     elements_match = ELEMENTS_RE.search(proc.stdout)
@@ -261,9 +256,7 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
         "elements": elements,
         "lobes": lobes,
         "kappa_f": kappa_f,
-        "kappa_s": kappa_s,
         "kappa_d": kappa_d,
-        "shape_curvature": shape_curvature,
         "mu_hat": mu_hat,
         "kappa_j": kappa_j,
         "kappa_q": kappa_q,
@@ -359,18 +352,15 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kapp
     return row
 
 
-def cases_for(stage, ns, lobes, kappa_f, kappa_s, kappa_d, mu_hat, kappa_j, kappa_q,
-              shape_curvatures=("psd",)):
+def cases_for(stage, ns, lobes, kappa_f, kappa_d, mu_hat, kappa_j, kappa_q):
     for n in ns:
         for l in lobes:
             for kf in kappa_f:
-                for kb in kappa_s:
-                    for r in kappa_d:
-                        for mu in mu_hat:
-                            for kj in kappa_j:
-                                for kq in kappa_q:
-                                    for shape in shape_curvatures:
-                                        yield stage, n, l, kf, kb, r, mu, kj, kq, shape
+                for r in kappa_d:
+                    for mu in mu_hat:
+                        for kj in kappa_j:
+                            for kq in kappa_q:
+                                yield stage, n, l, kf, r, mu, kj, kq
 
 
 def main():
@@ -395,19 +385,13 @@ def main():
     parser.add_argument("--n", default="5,10,20,50,100")
     parser.add_argument("--lobes", default="0:10")
     metric_grid = "1e-4,1e-3,1e-2,0.1,1"
-    parser.add_argument("--kappa-s", default=metric_grid)
     parser.add_argument("--kappa-d", default=metric_grid)
     parser.add_argument("--kappa-f", default=metric_grid,
                         help="fitting metric coefficient grid")
     parser.add_argument("--mu-hat", default="90")
-    parser.add_argument("--shape-curvature", default="psd",
-                        help="canonical psd shape curvature")
     parser.add_argument("--kappa-j", default="1")
     parser.add_argument("--kappa-q", default="1")
     args = parser.parse_args()
-    shape_curvatures = list(dict.fromkeys(args.shape_curvature.split(",")))
-    if not shape_curvatures or any(value != "psd" for value in shape_curvatures):
-        parser.error("only canonical psd shape curvature is supported")
     if not 1 <= args.steps <= 200:
         parser.error("--steps must be between 1 and the campaign cap of 200")
     if args.barrier_max_iters < 1:
@@ -435,39 +419,35 @@ def main():
          int_values(args.n),
          int_values(args.lobes),
          real_values(args.kappa_f),
-         real_values(args.kappa_s),
          real_values(args.kappa_d),
          real_values(args.mu_hat)),
     ]
     if any(not grid or any(not math.isfinite(value) or value <= 0 for value in grid)
-           for grid in stages[0][3:6]):
-        parser.error("kappa-f, kappa-s and kappa-d grids must be finite and strictly positive")
+           for grid in stages[0][3:5]):
+        parser.error("kappa-f and kappa-d grids must be finite and strictly positive")
     kappa_j = real_values(args.kappa_j)
     kappa_q = real_values(args.kappa_q)
     expected_cases = sum(
-        len(ns) * len(lobes) * len(kfs) * len(kbs) * len(kappa_ds) * len(mus)
-        * len(kappa_j) * len(kappa_q) * len(shape_curvatures)
-        for _, ns, lobes, kfs, kbs, kappa_ds, mus in stages)
+        len(ns) * len(lobes) * len(kfs) * len(kappa_ds) * len(mus)
+        * len(kappa_j) * len(kappa_q)
+        for _, ns, lobes, kfs, kappa_ds, mus in stages)
     manifest = {
-        "model": "F+Splus+D-current-stretch-surface12-v8",
+        "model": "F+D-pointwise-deviatoric-surface12-v9",
         "executable": str(exe.resolve()),
         "sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
         "dataset": args.dataset,
         "expected_cases": expected_cases,
-        "shape_curvature": shape_curvatures,
         "n": stages[0][1],
         "lobes": stages[0][2],
         "kappa_f": stages[0][3],
-        "kappa_s": stages[0][4],
-        "kappa_d": stages[0][5],
-        "mu_hat": stages[0][6],
+        "kappa_d": stages[0][4],
+        "mu_hat": stages[0][5],
         "kappa_j": kappa_j,
         "kappa_q": kappa_q,
         "target": {"center": [0.5, 0.5], "R0": args.r0, "amplitude": args.amp, "phase": 0},
         "classifier": {"epsilon_over_h": 1.25, "lambda_c": 0.008},
         "fixed_profile": {
-            "model": "F+Splus+D-current-stretch-surface12-v8", "quality_guard": 0.1, "robust_scale": "automatic",
-            "shape_restriction": "current deviatoric stretch",
+            "model": "F+D-pointwise-deviatoric-surface12-v9", "quality_guard": 0.1, "robust_scale": "automatic",
             "j_safe": 1e-2, "q_max": 10,
             "barrier_iterations": args.barrier_max_iters, "barrier_relative_tolerance": 1e-3,
             "j_min": 1e-8, "j_line_search": 1e-2,
@@ -503,12 +483,12 @@ def main():
     sys.stdout.flush()
 
     completed = 0
-    for stage, ns, lobes, kfs, kbs, kappa_ds, mus in stages:
-        all_cases = list(cases_for(stage, ns, lobes, kfs, kbs, kappa_ds, mus,
-                                  kappa_j, kappa_q, shape_curvatures))
+    for stage, ns, lobes, kfs, kappa_ds, mus in stages:
+        all_cases = list(cases_for(stage, ns, lobes, kfs, kappa_ds, mus,
+                                  kappa_j, kappa_q))
         missing = [c for c in all_cases if (
             c[0], c[1], c[2], round(c[3], 14), round(c[4], 14),
-            round(c[5], 14), round(c[6], 14), round(c[7], 14), round(c[8], 14), c[9]) not in done]
+            round(c[5], 14), round(c[6], 14), round(c[7], 14)) not in done]
         sys.stdout.write(
             f"{stage}: total={len(all_cases)} done={len(all_cases) - len(missing)} "
             f"missing={len(missing)} n={ns} lobes={lobes}\n")
@@ -528,17 +508,16 @@ def main():
             done.add((
                 row["dataset"], int(row["n"]), int(row["lobes"]),
                 round(float(row["kappa_f"]), 14),
-                round(float(row["kappa_s"]), 14), round(float(row["kappa_d"]), 14),
+                round(float(row["kappa_d"]), 14),
                 round(float(row["mu_hat"]), 14), round(float(row["kappa_j"]), 14),
-                round(float(row["kappa_q"]), 14), row["shape_curvature"]))
+                round(float(row["kappa_q"]), 14)))
             completed += 1
             elapsed = time.time() - stage_t0
             eta = elapsed * (len(missing) - i) / i if i else 0
             sys.stdout.write(
                 f"{stage} {i}/{len(missing)} elements={row['elements']} lobes={row['lobes']} "
-                f"kappa_f={float(row['kappa_f']):.4g} kappa_s={float(row['kappa_s']):.4g} "
+                f"kappa_f={float(row['kappa_f']):.4g} "
                 f"kappa_d={float(row['kappa_d']):.3g} "
-                f"shape={row['shape_curvature']} "
                 f"mu={float(row['mu_hat']):.3g} fit={float(row['fit']):.4g} "
                 f"it={row['iterations']} Q={float(row['max_qrel']):.3g} "
                 f"sec={float(row['seconds']):.2f} eta={eta/3600:.2f}h\n")
