@@ -199,7 +199,7 @@ jobs:
       - name: Run curved PETSc convergence suites
         run: >-
           ctest --test-dir build/tests
-          -R '^RodinConvergenceIsoparametricPETSc(MPI)?(LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson|P0Projection|Diffusion|GeometryApproximation)_'
+          -R '^RodinConvergenceIsoparametricPETSc(MPI)?(LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson|P0Projection|Diffusion|ApproximatedDiffusion|LiftedDiffusion|SmoothLiftedDiffusion|GeometryApproximation)_'
           --output-on-failure -j 1
 
   PETScComplexConvergence:

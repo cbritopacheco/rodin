@@ -47,45 +47,56 @@ namespace Rodin::Tests::Convergence
 
       auto getSolution() const
       {
-        return Variational::RealFunction(
-          [dim = m_dimension, field = m_field](const Geometry::Point& p) {
-            Real value = 1;
-            if (field == Field::Constant)
-              return value;
-            if (field == Field::Smooth)
-            {
-              value = 1;
-              for (size_t d = 0; d < dim; ++d)
-                value *= std::sin(Math::Constants::pi() * p(d));
-              return 1 + value;
-            }
-            for (size_t d = 0; d < dim; ++d)
-              value += field == Field::Affine ? p(d) : p(d) * p(d);
-            return value;
-          });
+        return Variational::RealFunction([data = *this](const Geometry::Point& p) {
+          return data.getSolution(p.getPhysicalCoordinates());
+        });
+      }
+      /** Analytic extension at arbitrary physical coordinates, including lifts. */
+      Real getSolution(const Math::SpatialPoint& p) const
+      {
+        const size_t dim = m_dimension;
+        const auto field = m_field;
+        Real value = 1;
+        if (field == Field::Constant)
+          return value;
+        if (field == Field::Smooth)
+        {
+          value = 1;
+          for (size_t d = 0; d < dim; ++d)
+            value *= std::sin(Math::Constants::pi() * p(d));
+          return 1 + value;
+        }
+        for (size_t d = 0; d < dim; ++d)
+          value += field == Field::Affine ? p(d) : p(d) * p(d);
+        return value;
       }
 
       auto getGradient() const
       {
         return Variational::VectorFunction(
-          m_dimension, [dim = m_dimension, field = m_field](const Geometry::Point& p) {
-            Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-            const Real pi = Math::Constants::pi();
-            for (size_t d = 0; d < dim; ++d)
-            {
-              value(d) = field == Field::Constant ? 0
-                : field == Field::Affine          ? 1
-                                                  : 2 * p(d);
-              if (field == Field::Smooth)
-              {
-                value(d) = pi * std::cos(pi * p(d));
-                for (size_t j = 0; j < dim; ++j)
-                  if (j != d)
-                    value(d) *= std::sin(pi * p(j));
-              }
-            }
-            return value;
+          m_dimension, [data = *this](const Geometry::Point& p) {
+            return data.getGradient(p.getPhysicalCoordinates());
           });
+      }
+      /** Physical gradient of the same extension; no mesh point is fabricated. */
+      Math::SpatialVector<Real> getGradient(const Math::SpatialPoint& p) const
+      {
+        const size_t dim = m_dimension;
+        const auto field = m_field;
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        const Real pi = Math::Constants::pi();
+        for (size_t d = 0; d < dim; ++d)
+        {
+          value(d) = field == Field::Constant ? 0 : field == Field::Affine ? 1 : 2 * p(d);
+          if (field == Field::Smooth)
+          {
+            value(d) = pi * std::cos(pi * p(d));
+            for (size_t j = 0; j < dim; ++j)
+              if (j != d)
+                value(d) *= std::sin(pi * p(j));
+          }
+        }
+        return value;
       }
 
       auto getSource(bool constantCoefficient = false) const

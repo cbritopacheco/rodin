@@ -34,13 +34,28 @@ the mapped-element rates $O(h^3)$ in L2 and $O(h^2)$ in the H1 seminorm.
 The distinction matters: an order-`K` isoparametric map controls the accuracy
 of Jacobians, integration, traces, and curved-boundary placement. When the
 geometry is represented at compatible order and remains regular, the usual
-interpolation and Galerkin estimates apply on the mapped mesh. Later suites
-will use non-polynomial boundary maps to measure a geometric-approximation
-term that persists at every finite geometry order.
+interpolation and Galerkin estimates apply on the mapped mesh. The
+[nonpolynomial geometry suite](GeometryApproximation/README.md) installs sine
+maps at geometry degrees $q=1,2,3$ and independently measures map and
+derivative errors against an analytic reference on the original unit box.
+Unlike the exact quadratic map, this map has an approximation error at every
+finite geometry order.
+
+The [shared diffusion suite](Diffusion/README.md) distinguishes physical
+field errors on each represented domain from errors lifted to the exact
+sine-map domain. The lift uses common reference coordinates and exact
+logical cell/vertex correspondence. Field, geometry and total errors are
+integrated separately, with mesh Jacobians supplied by cached geometry
+points and the exact Jacobian supplied by an independent analytic map.
+Smooth P1/P2 fields on Q2 geometry test interacting errors; affine physical
+P2 fields on Q1/Q2 geometry isolate the geometry contribution. Both physics
+and all seven positive-dimensional geometries share this mechanism, including
+real-PETSc local/MPI and sequential/OpenMP assembly. Case-specific levels,
+budgets, hypotheses and limitations are stated in the suite specification.
 
 The same P2 map also supports a variable-conductivity study. In physical
-coordinates, $\gamma(x)=1+\sum_{j=1}^{d}x_j$ and
-$u_*(x)=\exp(\sum_{j=1}^{d}x_j)$ give the manufactured load
+coordinates, $\gamma(x)=1+\sum_{j=0}^{d-1}x_j$ and
+$u_*(x)=\exp(\sum_{j=0}^{d-1}x_j)$ give the manufactured load
 
 $$
 -\nabla\cdot(\gamma\nabla u_*)=-d(1+\gamma)u_*.
