@@ -49,18 +49,26 @@ using namespace Rodin::Variational;
 // ---------------------------------------------------------------------------
 // Global MPI handles (initialized in main())
 // ---------------------------------------------------------------------------
-static boost::mpi::environment* g_env   = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
+  /** Complex traces use the typed callable interface, not the real component pack. */
+  static auto complexVectorTrace(Complex first)
+  {
+    return VectorFunction(size_t{3}, [first](const Point&) {
+      return Math::SpatialVector<Complex>{
+        first, first + Complex(1, 1), first + Complex(2, 2)};
+    });
+  }
+
   /**
    * @brief Creates a local mesh with all incidences required for sharding
    * and boundary-DOF assembly.
    */
   static Mesh<Context::Local> makeShardableMesh(
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    Polytope::Type type, std::initializer_list<size_t> shape)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
     const size_t D = mesh.getDimension();
@@ -212,11 +220,96 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * Every supported trace DOF must be constrained on its owning rank.
-   * On this three-rank tetrahedral partition, face-local assembly alone
-   * omitted respectively 2, 2, 4, 6, and 8 owned DOFs for P1 and H1 orders
-   * one through four. Vector spaces duplicate the omissions per component.
+   * Sparse partitions exercise empty ranks without assigning nodal meaning to
+   * modal coefficients. Real/complex scalar and vector spaces must share the
+   * same logical entity indices at orders one through six.
    */
+  TEST_P(MPITraceGeometryTest, SparseHighOrderValueTypesShareLogicalIndices)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    const size_t dimension = Polytope::Traits(GetParam()).getDimension();
+    auto mesh = dimension == 1 ? distributeFromRoot(ctx, GetParam(), {2})
+      : dimension == 2         ? distributeFromRoot(ctx, GetParam(), {2, 2})
+                               : distributeFromRoot(ctx, GetParam(), {2, 2, 2});
+    const auto check = [&](const auto& space) {
+      Index begin, end;
+      space.getOwnershipRange(begin, end);
+      std::vector<std::pair<Index, Index>> ranges;
+      boost::mpi::all_gather(world, std::pair{begin, end}, ranges);
+      Index next = 0;
+      for (const auto& range : ranges)
+      {
+        EXPECT_EQ(range.first, next);
+        EXPECT_GE(range.second, range.first);
+        next = range.second;
+      }
+      EXPECT_EQ(next, space.getSize());
+      for (Index local = 0; local < space.getShard().getSize(); ++local)
+        EXPECT_EQ(
+          space.getLocalIndex(space.getGlobalIndex(local)), Optional<Index>(local));
+      using Record = std::pair<Index, std::vector<Index>>;
+      for (size_t d = 0; d <= dimension; ++d)
+      {
+        std::vector<Record> local;
+        for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+        {
+          const auto& dofs = space.getDOFs(d, entity);
+          std::vector<Index> indices(dofs.begin(), dofs.end());
+          std::sort(indices.begin(), indices.end());
+          local.emplace_back(mesh.getGlobalIndex(d, entity), std::move(indices));
+        }
+        std::vector<std::vector<Record>> gathered;
+        boost::mpi::all_gather(world, local, gathered);
+        IndexMap<std::vector<Index>> expected;
+        for (const auto& records : gathered)
+          for (const auto& [entity, indices] : records)
+          {
+            const auto [it, inserted] = expected.emplace(entity, indices);
+            if (!inserted)
+              EXPECT_EQ(it->second, indices) << "dimension=" << d << " entity=" << entity;
+          }
+      }
+    };
+    const auto orders = [&]<size_t K>() {
+      SCOPED_TRACE(K);
+      H1<K, Real, Mesh<Context::MPI>> real(std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Complex, Mesh<Context::MPI>> complex(
+        std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      EXPECT_EQ(real.getSize(), complex.getSize());
+      EXPECT_EQ(realVector.getSize(), 3 * real.getSize());
+      EXPECT_EQ(realVector.getSize(), complexVector.getSize());
+      check(real);
+      check(complex);
+      check(realVector);
+      check(complexVector);
+      for (size_t d = 0; d <= dimension; ++d)
+        for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+        {
+          EXPECT_EQ(real.getDOFs(d, entity).size(), complex.getDOFs(d, entity).size());
+          if (real.getDOFs(d, entity).size() == complex.getDOFs(d, entity).size())
+            EXPECT_TRUE((real.getDOFs(d, entity) == complex.getDOFs(d, entity)).all());
+          EXPECT_EQ(realVector.getDOFs(d, entity).size(),
+            complexVector.getDOFs(d, entity).size());
+          if (realVector.getDOFs(d, entity).size() ==
+            complexVector.getDOFs(d, entity).size())
+            EXPECT_TRUE(
+              (realVector.getDOFs(d, entity) == complexVector.getDOFs(d, entity)).all());
+        }
+    };
+    orders.template operator()<1>();
+    orders.template operator()<2>();
+    orders.template operator()<3>();
+    orders.template operator()<4>();
+    orders.template operator()<5>();
+    orders.template operator()<6>();
+  }
+
+  /** Every boundary DOF reaches its owner, independently of boundary-face ownership. */
   TEST_P(MPITraceGeometryTest, BoundaryConstraintsReachOwnersAcrossSpaces)
   {
     const auto& world = *g_world;
@@ -311,6 +404,20 @@ namespace Rodin::Tests::Unit
     H1<4, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH4(
       std::integral_constant<size_t, 4>{}, mesh, 3);
     probe(vectorH4, vectorValue, "H1<4> vector");
+    const auto complexVectorValue = complexVectorTrace(Complex(1, 2));
+    P1<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP1(mesh, 3);
+    probe(complexVectorP1, complexVectorValue, "P1 complex vector");
+    P0g<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP0g(mesh, 3);
+    probe(complexVectorP0g, complexVectorValue, "P0g complex vector");
+    const auto complexVectorOrders = [&]<size_t K>() {
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> space(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      probe(space, complexVectorValue, "H1 complex vector");
+    };
+    complexVectorOrders.template operator()<1>();
+    complexVectorOrders.template operator()<2>();
+    complexVectorOrders.template operator()<3>();
+    complexVectorOrders.template operator()<4>();
   }
 
   /**
@@ -365,10 +472,24 @@ namespace Rodin::Tests::Unit
     auto sub = builder.finalize();
     const Mesh<Context::MPI>& mesh = sub;
     const auto probe = [&](const auto& fes) {
+      using Space = std::remove_cvref_t<decltype(fes)>;
+      using Scalar = typename Space::ScalarType;
+      const auto prescribed = [] {
+        if constexpr (std::is_same_v<typename Space::RangeType,
+                        Math::SpatialVector<Real>>)
+          return VectorFunction{RealFunction(1), RealFunction(2), RealFunction(3)};
+        else if constexpr (std::is_same_v<typename Space::RangeType,
+                             Math::SpatialVector<Complex>>)
+          return complexVectorTrace(Complex(1, 2));
+        else if constexpr (std::is_same_v<Scalar, Complex>)
+          return ComplexFunction(Complex(1, 2));
+        else
+          return RealFunction(1);
+      }();
       TrialFunction u(fes);
-      auto dbc = DirichletBC(u, RealFunction(1));
+      auto dbc = DirichletBC(u, prescribed);
       dbc.assemble();
-      const auto& values = std::get<IndexMap<Real>>(dbc.getDOFs());
+      const auto& values = std::get<IndexMap<Scalar>>(dbc.getDOFs());
       const auto required = requiredDOFs(fes);
       std::set<Index> expected;
       for (auto face = mesh.getFace(); face; ++face)
@@ -385,6 +506,29 @@ namespace Rodin::Tests::Unit
     H1<2, Real, Mesh<Context::MPI>> p2(std::integral_constant<size_t, 2>{}, mesh);
     probe(p1);
     probe(p2);
+    P1<Complex, Mesh<Context::MPI>> complexP1(mesh);
+    P1<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP1(mesh, 3);
+    P1<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP1(mesh, 3);
+    probe(complexP1);
+    probe(vectorP1);
+    probe(complexVectorP1);
+    const auto orders = [&]<size_t K>() {
+      H1<K, Real, Mesh<Context::MPI>> scalar(std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Complex, Mesh<Context::MPI>> complex(
+        std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> vector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      probe(scalar);
+      probe(complex);
+      probe(vector);
+      probe(complexVector);
+    };
+    orders.template operator()<1>();
+    orders.template operator()<2>();
+    orders.template operator()<3>();
+    orders.template operator()<4>();
   }
 
   TEST_P(MPITraceGeometryTest, IdentificationRowsReachRequiredDOFs)
@@ -400,6 +544,9 @@ namespace Rodin::Tests::Unit
         if constexpr (std::is_same_v<typename Space::RangeType,
                         Math::SpatialVector<Real>>)
           return VectorFunction{RealFunction(2), RealFunction(3), RealFunction(4)};
+        else if constexpr (std::is_same_v<typename Space::RangeType,
+                             Math::SpatialVector<Complex>>)
+          return complexVectorTrace(Complex(2, 3));
         else if constexpr (std::is_same_v<typename Space::ScalarType, Complex>)
           return ComplexFunction(Complex(2, 3));
         else
@@ -483,6 +630,19 @@ namespace Rodin::Tests::Unit
     H1<4, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH4(
       std::integral_constant<size_t, 4>{}, mesh, 3);
     probe(vectorH4, "H1<4> vector");
+    P1<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP1(mesh, 3);
+    probe(complexVectorP1, "P1 complex vector");
+    P0g<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP0g(mesh, 3);
+    probe(complexVectorP0g, "P0g complex vector");
+    const auto complexVectorOrders = [&]<size_t K>() {
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> space(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      probe(space, "H1 complex vector");
+    };
+    complexVectorOrders.template operator()<1>();
+    complexVectorOrders.template operator()<2>();
+    complexVectorOrders.template operator()<3>();
+    complexVectorOrders.template operator()<4>();
   }
 
   /** Certifies the mesh metadata independently of constraint assembly. */
@@ -575,6 +735,9 @@ namespace Rodin::Tests::Unit
       H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> vector(
         std::integral_constant<size_t, K>{}, mesh, 3);
       probe(vector, "H1 vector");
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      probe(complexVector, "H1 complex vector");
     };
     orders.template operator()<1>();
     orders.template operator()<2>();
@@ -927,7 +1090,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 4, 4 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     size_t localCount = 0;
     Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
@@ -948,7 +1111,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, { 4, 4 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {4, 4});
 
     size_t localCount = 0;
     Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
@@ -968,7 +1131,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 4, 4 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     // Count only owned cells on this rank (ghost cells must be excluded to
     // avoid double-counting when reducing across ranks).
@@ -1010,7 +1173,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 4, 4 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
     TrialFunction u(fes);
@@ -1040,7 +1203,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "This test is designed for exactly 1 MPI rank.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 4, 4 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     P1<Real, Mesh<Context::MPI>> mpiFes(mpiMesh);
     TrialFunction uMPI(mpiFes);
@@ -1049,7 +1212,7 @@ namespace Rodin::Tests::Unit
     const size_t mpiFixed = std::get<IndexMap<Real>>(dbcMPI.getDOFs()).size();
 
     // Sequential reference
-    auto localMesh = makeShardableMesh(Polytope::Type::Triangle, { 4, 4 });
+    auto localMesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
     P1 seqFes(localMesh);
     TrialFunction uSeq(seqFes);
     DirichletBC dbcSeq(uSeq, RealFunction(1.0));
@@ -1072,7 +1235,7 @@ namespace Rodin::Tests::Unit
     const Real gValue = 3.14;
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 4, 4 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
     TrialFunction u(fes);
@@ -1128,7 +1291,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, { 10 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, {10});
 
     size_t localCount = 0;
     Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
@@ -1149,7 +1312,7 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, { 10 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, {10});
 
     // Count only owned cells on this rank (ghost cells must be excluded to
     // avoid double-counting when reducing across ranks).
@@ -1217,7 +1380,7 @@ namespace Rodin::Tests::Unit
     const Real gValue = 2.71;
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, { 10 });
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, {10});
 
     P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
     TrialFunction u(fes);
@@ -1282,7 +1445,7 @@ int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
-  g_env   = &env;
+  g_env = &env;
   g_world = &world;
 
   ::testing::InitGoogleTest(&argc, argv);
