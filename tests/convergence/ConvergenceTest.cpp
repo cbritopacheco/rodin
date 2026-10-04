@@ -11,6 +11,7 @@
  */
 
 #include <cmath>
+#include <limits>
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
@@ -18,9 +19,48 @@
 #include "Convergence.h"
 #include "LiftedConvergence.h"
 #include "FieldConvergence.h"
+#include "Conductivity.h"
 
 namespace Rodin::Tests::Convergence
 {
+  TEST(ConductivityDataTest, ExponentialPhysicalDataAndSourcesOnAllGeometries)
+  {
+    // Floating algebra budget, unrelated to entity identification or topology.
+    constexpr Real RoundoffBudget = 64 * std::numeric_limits<Real>::epsilon();
+    using Type = Geometry::Polytope::Type;
+    for (const auto geometry : {Type::Segment, Type::Triangle, Type::Quadrilateral,
+           Type::Tetrahedron, Type::Pyramid, Type::Hexahedron, Type::Wedge})
+    {
+      SCOPED_TRACE(UniformGrid::getGeometryName(geometry));
+      const auto mesh = UniformGrid(geometry).makeMesh(3);
+      const size_t dim = mesh.getDimension();
+      const auto cell = mesh.getPolytope(dim, 0);
+      const Math::Vector<Real> rc = Math::Vector<Real>::Constant(dim, 0.25);
+      const Geometry::Point point(*cell, rc);
+      const auto& x = point.getPhysicalCoordinates();
+      Real sum = 0;
+      for (size_t j = 0; j < dim; ++j)
+        sum += x(j);
+      const Real exact = std::exp(sum);
+      const ConductivityData data(dim, ConductivityData::Field::Exponential);
+      EXPECT_DOUBLE_EQ(data.getSolution(x), exact);
+      EXPECT_DOUBLE_EQ(data.getSolution()(point), exact);
+      for (size_t j = 0; j < dim; ++j)
+      {
+        EXPECT_DOUBLE_EQ(data.getGradient(x)(j), exact);
+        EXPECT_DOUBLE_EQ(data.getGradient()(point)(j), exact);
+      }
+      for (bool poisson : {false, true})
+      {
+        const Real gamma = poisson ? 1 : 1 + sum;
+        const Real source = -Real(dim) * (gamma + (poisson ? 0 : 1)) * exact;
+        EXPECT_DOUBLE_EQ(data.getCoefficient(poisson)(point), gamma);
+        EXPECT_NEAR(data.getSource(poisson)(point), source,
+          RoundoffBudget * std::max(Real(1), std::abs(source)));
+      }
+    }
+  }
+
   TEST(FieldConvergenceTest, AcceptsEveryFieldOnNonuniformRefinementPaths)
   {
     FieldConvergence<2> algebraic, exponential;

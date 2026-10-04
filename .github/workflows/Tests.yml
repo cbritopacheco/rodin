@@ -196,6 +196,10 @@ jobs:
           RodinConvergenceHPPETScNonlinearPoisson
           RodinConvergencePPETScReactionDiffusion
           RodinConvergenceHPPETScReactionDiffusion
+          RodinConvergencePPETScPoisson
+          RodinConvergenceHPPETScPoisson
+          RodinConvergencePPETScConductivity
+          RodinConvergenceHPPETScConductivity
           RodinConvergencePPETScStokes
           RodinConvergenceHPPETScStokes
 

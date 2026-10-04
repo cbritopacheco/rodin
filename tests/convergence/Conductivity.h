@@ -9,13 +9,15 @@
 #define RODIN_TESTS_CONVERGENCE_CONDUCTIVITY_H
 
 #include <cstdint>
+#include <cmath>
 #include "Convergence.h"
 
 namespace Rodin::Tests::Convergence
 {
   /** Manufactured data for @f$-\nabla\cdot(\gamma\nabla u)@f$ with
    * @f$\gamma=1+\sum_i x_i@f$, or @f$\gamma=1@f$ for Poisson.
-   * Constant, affine and quadratic physical patches supplement the smooth field.
+   * Constant, affine and quadratic physical patches supplement the sine and
+   * exponential analytic fields.
    */
   class ConductivityData
   {
@@ -25,7 +27,8 @@ namespace Rodin::Tests::Convergence
         Constant,
         Affine,
         Quadratic,
-        Smooth
+        Smooth,
+        Exponential
       };
 
       ConductivityData(size_t dimension, Field field)
@@ -59,6 +62,13 @@ namespace Rodin::Tests::Convergence
         Real value = 1;
         if (field == Field::Constant)
           return value;
+        if (field == Field::Exponential)
+        {
+          Real exponent = 0;
+          for (size_t d = 0; d < dim; ++d)
+            exponent += p(d);
+          return std::exp(exponent);
+        }
         if (field == Field::Smooth)
         {
           value = 1;
@@ -88,6 +98,8 @@ namespace Rodin::Tests::Convergence
         for (size_t d = 0; d < dim; ++d)
         {
           value(d) = field == Field::Constant ? 0 : field == Field::Affine ? 1 : 2 * p(d);
+          if (field == Field::Exponential)
+            value(d) = getSolution(p);
           if (field == Field::Smooth)
           {
             value(d) = pi * std::cos(pi * p(d));
@@ -103,10 +115,13 @@ namespace Rodin::Tests::Convergence
       {
         const auto gamma = getCoefficient(constantCoefficient);
         const auto gradient = getGradient();
+        const auto exact = getSolution();
         return Variational::RealFunction(
-          [dim = m_dimension, field = m_field, gamma, gradient, constantCoefficient](
-            const Geometry::Point& p) {
+          [dim = m_dimension, field = m_field, gamma, gradient, exact,
+            constantCoefficient](const Geometry::Point& p) {
             Real laplacian = field == Field::Quadratic ? 2 * Real(dim) : 0;
+            if (field == Field::Exponential)
+              laplacian = Real(dim) * exact(p);
             if (field == Field::Smooth)
             {
               const Real pi = Math::Constants::pi();
