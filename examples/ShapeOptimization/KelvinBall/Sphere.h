@@ -85,6 +85,9 @@ namespace KelvinBall
        * The sizes and default Welsch scale are multiples of the fixed reference
        * grid spacing. A positive @p requestedWelschScale overrides
        * the default scale.
+       * Adaptation is transactional: the candidate is committed only after
+       * fixed-boundary projection and cut splitting succeed. An exception
+       * leaves the supplied mesh unchanged, including its MMG feature tags.
        */
       void adapt(MMG::Mesh& mesh, Real requestedWelschScale = 0) const;
 

@@ -776,6 +776,13 @@ Each iterate is written to three XDMF series.
   before the next finite-element spaces are built. Each snapshot is flushed
   immediately, including when using `--geometry-only` for the initial design.
 
+Post-WNGIR MMG adaptation is transactional. A failed adaptation or invalid
+fixed-boundary projection discards the candidate, retains the fitted mesh and
+continues the optimisation with a warning. The rejected adaptation does not
+undo the WNGIR fit or accept invalid tetrahedra. Cell-count diagnostics record
+the unchanged fitted count for the skipped pass. The MMG reconstruction path
+retains its existing retry policy.
+
 Every design snapshot includes a vector field `Motion` for the force
 $F$ = `--motion-force` (default $e_x$), without applied torque. Since
 $\mathcal R [Z;\omega] = [F; 0]$ with $K = kI$, $C = cI$, $Q = qI$,

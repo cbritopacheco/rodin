@@ -503,7 +503,21 @@ namespace KelvinBall
         const Configuration& configuration, Real requestedWelschScale)
       {
         const auto before = getMeshDiagnostics(fitted.mesh);
-        sphere.adapt(fitted.mesh, requestedWelschScale);
+        try
+        {
+          sphere.adapt(fitted.mesh, requestedWelschScale);
+        }
+        catch (const std::exception& error)
+        {
+          fitted.diagnostics.cellsBefore = before.cells;
+          fitted.diagnostics.cellsAfter = before.cells;
+          Alert::Warning() << "Skipped MMG adaptation after WNGIR reconstruction: "
+                           << error.what() << Alert::NewLine
+                           << "Retaining the WNGIR-fitted mesh with "
+                           << Alert::Notation::Number(before.cells)
+                           << " cells and continuing optimization." << Alert::Raise;
+          return;
+        }
         // MMG preserves the material partition, but may change the internal
         // face references. Gamma is the boundary between the two materials.
         fitted.mesh.getConnectivity().compute(2, 3);

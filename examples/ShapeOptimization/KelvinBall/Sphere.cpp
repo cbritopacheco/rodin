@@ -380,8 +380,11 @@ namespace KelvinBall
     return {std::move(mesh), diagnostics};
   }
 
-  void Sphere::adapt(MMG::Mesh& mesh, Real requestedWelschScale) const
+  void Sphere::adapt(MMG::Mesh& fitted, Real requestedWelschScale) const
   {
+    // MMG and the subsequent exact-boundary projection operate on a candidate.
+    // Any exception leaves the fitted geometry, topology and MMG tags intact.
+    MMG::Mesh mesh = fitted;
     const Real h = m_configuration.getGridSpacing();
     const Real interfaceSize = m_configuration.hmin;
     const Real farSize = m_configuration.hmax;
@@ -411,5 +414,6 @@ namespace KelvinBall
       .adapt(mesh, size);
     projectFixedGeometry(mesh);
     splitSelfPairedCut(mesh);
+    fitted = std::move(mesh);
   }
 }
