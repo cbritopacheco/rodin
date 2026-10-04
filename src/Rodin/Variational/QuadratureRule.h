@@ -250,6 +250,9 @@ namespace Rodin::Variational
    * This specialization delegates the computation to linear forms over the
    * requested region. It is not a per-polytope quadrature rule and therefore
    * does not use @ref Geometry::PolytopeQuadrature directly.
+   * The configured order rule and attribute filter are forwarded to the
+   * auxiliary linear-form integrator. An empty order rule retains inference;
+   * explicit constant and per-polytope rules are not resolved before assembly.
    */
   template <class FES, class Data>
   class QuadratureRule<GridFunction<FES, Data>> : public Integrator
@@ -310,6 +313,7 @@ namespace Rodin::Variational
           case Geometry::Region::Cells:
           {
             auto lfi = Variational::Integral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
@@ -319,6 +323,7 @@ namespace Rodin::Variational
           case Geometry::Region::Boundary:
           {
             auto lfi = Variational::BoundaryIntegral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
@@ -328,6 +333,7 @@ namespace Rodin::Variational
           case Geometry::Region::Faces:
           {
             auto lfi = Variational::FaceIntegral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;
@@ -337,6 +343,7 @@ namespace Rodin::Variational
           case Geometry::Region::Interface:
           {
             auto lfi = Variational::InterfaceIntegral(m_v);
+            lfi.setOrder(this->getOrder());
             if (m_attrs.size() > 0)
               lfi.over(m_attrs);
             m_lf = lfi;

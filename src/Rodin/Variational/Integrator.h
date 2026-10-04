@@ -171,6 +171,15 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
+      /** @brief Gets the configured order rule for delegation to another integrator.
+       * An empty callable preserves inference; a nonempty callable preserves
+       * constant or per-polytope order selection without resolving it early.
+       */
+      const OrderType& getOrder() const noexcept
+      {
+        return m_order;
+      }
+
       virtual ~Integrator() = default;
 
       /**
