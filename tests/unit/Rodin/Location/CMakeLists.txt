@@ -1,4 +1,4 @@
-add_executable(RodinLocationAABBTest AABBTest.cpp AABBCandidatesTest.cpp)
+add_executable(RodinLocationAABBTest AABBTest.cpp AABBCandidatesTest.cpp AABBHeaderTest.cpp)
 target_link_libraries(RodinLocationAABBTest
   PUBLIC
   GTest::gtest

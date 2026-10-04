@@ -25,7 +25,9 @@ TEST(Location_AABBCandidates, PreservesSparseIndicesAndFiltersFallback)
     auto hit = locator.locate(sample.getPhysicalCoordinates());
     ASSERT_EQ(hit.has_value(), i == 1 || i == 3);
     if (hit)
+    {
       EXPECT_EQ(hit->getPolytope().getIndex(), i);
+    }
   }
   locator.setTolerance(locator.getTolerance());
   EXPECT_TRUE(locator.locate(
@@ -43,13 +45,13 @@ TEST(Location_AABBCandidates, EmptySelectionAndInvalidIndices)
       .getPhysicalCoordinates();
   EXPECT_FALSE(locator.setExhaustiveFallback(true).locate(x));
   candidates[1] = {2};
-  EXPECT_THROW((Location::AABB(mesh, candidates)), std::invalid_argument);
+  EXPECT_THROW((Location::AABB(mesh, candidates)), Alert::Exception);
   candidates[1] = {0, 0};
-  EXPECT_THROW((Location::AABB(mesh, candidates)), std::invalid_argument);
+  EXPECT_THROW((Location::AABB(mesh, candidates)), Alert::Exception);
   candidates.resize(3);
   candidates[1].clear();
   candidates[2] = {0};
-  EXPECT_THROW((Location::AABB(mesh, candidates)), std::invalid_argument);
+  EXPECT_THROW((Location::AABB(mesh, candidates)), Alert::Exception);
 }
 
 TEST(Location_AABBCandidates, ParentShardPreservesCurvedTransformation)

@@ -1220,8 +1220,8 @@ TEST(Location_AABB, RejectsInvalidToleranceConfiguration)
   for (Real invalid :
     {-1.0, std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::quiet_NaN()})
   {
-    EXPECT_THROW(locator.setTolerance(invalid), std::invalid_argument);
-    EXPECT_THROW(locator.setReferenceTolerance(invalid), std::invalid_argument);
+    EXPECT_THROW(locator.setTolerance(invalid), Alert::Exception);
+    EXPECT_THROW(locator.setReferenceTolerance(invalid), Alert::Exception);
   }
   EXPECT_TRUE(locator.locate(point({0.25})).has_value());
 }

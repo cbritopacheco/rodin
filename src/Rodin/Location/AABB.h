@@ -8,7 +8,6 @@
 #define RODIN_LOCATION_AABB_H
 
 #include <cmath>
-#include <stdexcept>
 #include <type_traits>
 #include <array>
 #include <atomic>
@@ -21,6 +20,9 @@
 #include <utility>
 #include <functional>
 #include <Eigen/QR>
+
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Context/ForwardDecls.h"
 
 #include "Rodin/Types.h"
 #include "Rodin/Geometry.h"
@@ -107,7 +109,7 @@ namespace Rodin::Location
        * The tolerance scale still uses all mesh vertices. The candidate lists
        * are a snapshot: reconstruct after topology, geometry or selection changes.
        * Empty lists above the mesh dimension are permitted for empty shards.
-       * @throws std::invalid_argument For duplicate or out-of-range indices.
+       * @throws Alert::Exception For duplicate or out-of-range indices.
        */
       AABB(const MeshType& mesh, Candidates candidates)
         : AABB(mesh)
@@ -117,14 +119,14 @@ namespace Rodin::Location
           if (candidates[d].empty())
             continue;
           if (d > mesh.getDimension())
-            throw std::invalid_argument(
-              "AABB candidate dimension exceeds the mesh dimension.");
+            Alert::MemberFunctionException(*this, __func__)
+              << "AABB candidate dimension exceeds the mesh dimension." << Alert::Raise;
           auto sorted = candidates[d];
           std::sort(sorted.begin(), sorted.end());
           if (sorted.back() >= mesh.getPolytopeCount(d) ||
             std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
-            throw std::invalid_argument(
-              "AABB candidate indices must be distinct and in range.");
+            Alert::MemberFunctionException(*this, __func__)
+              << "AABB candidate indices must be distinct and in range." << Alert::Raise;
         }
         if (candidates.size() > m_index.size())
           m_index = std::vector<DimensionIndex>(candidates.size());
@@ -162,8 +164,8 @@ namespace Rodin::Location
       AABB& setTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
-          throw std::invalid_argument(
-            "AABB physical tolerance must be finite and nonnegative.");
+          Alert::MemberFunctionException(*this, __func__)
+            << "AABB physical tolerance must be finite and nonnegative." << Alert::Raise;
         m_tolerance = tolerance;
         invalidate();
         return *this;
@@ -179,8 +181,8 @@ namespace Rodin::Location
       AABB& setReferenceTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
-          throw std::invalid_argument(
-            "AABB reference tolerance must be finite and nonnegative.");
+          Alert::MemberFunctionException(*this, __func__)
+            << "AABB reference tolerance must be finite and nonnegative." << Alert::Raise;
         m_referenceTolerance = tolerance;
         return *this;
       }

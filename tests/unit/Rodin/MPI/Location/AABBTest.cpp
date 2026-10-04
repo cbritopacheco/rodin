@@ -251,6 +251,7 @@ TEST(MPI_Location_AABB, EmptyRanksAndMPISubMesh)
     subBuilder.include(2, 0);
   auto submesh = subBuilder.finalize();
   EXPECT_EQ(submesh.getDimension(), 2);
+  EXPECT_EQ(submesh.getSpaceDimension(), parent.getSpaceDimension());
   Location::AABB locator(submesh);
   const auto rc = Polytope::Traits(Polytope::Type::Triangle).getCentroid();
   const auto x = Point(*parent.getCell(), rc).getPhysicalCoordinates();
