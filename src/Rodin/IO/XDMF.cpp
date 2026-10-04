@@ -371,6 +371,8 @@ namespace Rodin::IO
         snapAttr.name = attr.name;
         snapAttr.center = attr.center;
         snapAttr.dimension = attr.dimension;
+        snapAttr.rows = attr.rows;
+        snapAttr.columns = attr.columns;
 
         if (attr.policy == AttributePolicy::Static)
         {
@@ -475,12 +477,16 @@ namespace Rodin::IO
     {
       const auto attrH5 = attr.file.string();
       const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
-      const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";
+      const char* attrType = attr.rows
+        ? (attr.rows == 3 && attr.columns == 3 ? "Tensor" : "Matrix")
+        : ((attr.dimension == 1) ? "Scalar" : "Vector");
 
       std::ostringstream dimStr;
       const size_t count = (attr.center == Center::Node)
           ? snap.vertexCount : snap.cellCount;
-      if (attr.dimension == 1)
+      if (attr.rows)
+        dimStr << count << " " << attr.rows << " " << attr.columns;
+      else if (attr.dimension == 1)
         dimStr << count;
       else
         dimStr << count << " " << attr.dimension;
@@ -625,12 +631,16 @@ namespace Rodin::IO
                     patterns.attribute, stemStr, gr.name, attr.name, indexStr, rStr);
 
               const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
-              const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";
+              const char* attrType = attr.rows
+                ? (attr.rows == 3 && attr.columns == 3 ? "Tensor" : "Matrix")
+                : ((attr.dimension == 1) ? "Scalar" : "Vector");
 
               std::ostringstream dimStr;
               const std::uint64_t count = (attr.center == Center::Node)
                   ? meta.vertexCount : meta.cellCount;
-              if (attr.dimension == 1)
+              if (attr.rows)
+                dimStr << count << " " << attr.rows << " " << attr.columns;
+              else if (attr.dimension == 1)
                 dimStr << count;
               else
                 dimStr << count << " " << attr.dimension;

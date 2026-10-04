@@ -17,6 +17,7 @@
 #include <optional>
 #include <limits>
 #include <vector>
+#include <sstream>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
@@ -1824,8 +1825,8 @@ namespace Rodin::IO
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <class Range>
-  class GridFunctionLoader<
-    FileFormat::MFEM,
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionLoader<FileFormat::MFEM,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
@@ -1981,8 +1982,8 @@ namespace Rodin::IO
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <size_t K, class Range>
-  class GridFunctionLoader<
-    FileFormat::MFEM,
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionLoader<FileFormat::MFEM,
     Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
@@ -2773,8 +2774,8 @@ namespace Rodin::IO
    * @see <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a>
    */
   template <class Range>
-  class GridFunctionLoader<
-    FileFormat::MFEM,
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionLoader<FileFormat::MFEM,
     Variational::P0<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
@@ -3184,6 +3185,8 @@ namespace Rodin::IO
    * ```
    */
   template <class FES, class Scalar>
+    requires(
+      !FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
   class GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<Scalar>> final
     : public GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>
   {
@@ -3233,14 +3236,12 @@ namespace Rodin::IO
    * @tparam Scalar Scalar type for the vector data
    */
   template <size_t K, class Range, class Scalar>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
-      Math::Vector<Scalar>> final
-    : public GridFunctionPrinterBase<
-          FileFormat::MFEM,
-          Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
-          Math::Vector<Scalar>>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionPrinter<FileFormat::MFEM,
+    Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, Math::Vector<Scalar>>
+    final
+    : public GridFunctionPrinterBase<FileFormat::MFEM,
+        Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, Math::Vector<Scalar>>
   {
     public:
       /// @brief Finite element space type.
@@ -3463,6 +3464,8 @@ namespace Rodin::IO
                       os << uMFace(static_cast<Index>(idx)) << '\n';
                     }
                   }
+                  for (size_t k = 0; k < TriN; ++k)
+                    written[static_cast<size_t>(scalarLocalDof(fdofs, k))] = true;
                   break;
                 }
 
@@ -3663,6 +3666,103 @@ namespace Rodin::IO
               emitScalarDof(scalarLocalDof(cdofs, k));
           }
         }
+        }
+      }
+  };
+  /** @brief MFEM matrix fields reuse the scalar family's node permutation.
+   * Entries are separate components in row-major matrix order. MFEM does not
+   * record matrix shape, so the destination space supplies it when loading.
+   */
+  template <class FES, class Scalar>
+    requires(
+      FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
+  class GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<Scalar>>
+    : public GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>;
+      using Parent::Parent;
+      void print(std::ostream& os) override
+      {
+        const auto& field = this->getObject();
+        const auto& fes = field.getFiniteElementSpace();
+        const auto& scalar = fes.getScalarSpace();
+        using ScalarFES = std::decay_t<decltype(scalar)>;
+        Variational::GridFunction scalarField(scalar);
+        const size_t components = fes.getVectorDimension();
+        for (size_t c = 0; c < components; ++c)
+        {
+          for (size_t a = 0; a < scalar.getSize(); ++a)
+            scalarField.getData()[a] = field.getData()[a * components + c];
+          std::stringstream stream;
+          stream << std::setprecision(std::numeric_limits<Real>::max_digits10);
+          GridFunctionPrinter<FileFormat::MFEM, ScalarFES, Math::Vector<Scalar>>(
+            scalarField)
+            .print(stream);
+          std::string line;
+          for (size_t i = 0; i < 4; ++i)
+          {
+            std::getline(stream, line);
+            if (c == 0)
+              os << (i == 2 ? "VDim: " + std::to_string(components) : line) << '\n';
+          }
+          if (c == 0)
+            os << '\n';
+          os << stream.rdbuf();
+        }
+      }
+      void printData(std::ostream&) override {}
+  };
+
+  /** @brief Loads each MFEM component through the scalar family's node mapping. */
+  template <class FES, class Scalar>
+    requires(
+      FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
+  class GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Scalar>>
+    : public GridFunctionLoaderBase<FES, Math::Vector<Scalar>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = GridFunctionLoaderBase<FES, Math::Vector<Scalar>>;
+      using Parent::Parent;
+      void load(std::istream& is) override
+      {
+        auto& field = this->getObject();
+        const auto& fes = field.getFiniteElementSpace();
+        const auto& scalar = fes.getScalarSpace();
+        using ScalarFES = std::decay_t<decltype(scalar)>;
+        const size_t components = fes.getVectorDimension();
+        size_t lineNumber = 0;
+        std::array<std::string, 4> header;
+        for (auto& line : header)
+          line = MFEM::skipEmptyLinesAndComments(is, lineNumber);
+        size_t vdim, ordering;
+        std::string keyword;
+        std::istringstream dimensionLine(header[2]), orderingLine(header[3]);
+        if (!(dimensionLine >> keyword >> vdim) || keyword != "VDim:" ||
+          vdim != components || !(orderingLine >> keyword >> ordering) ||
+          keyword != "Ordering:" || ordering > 1)
+          Alert::Exception() << "Invalid MFEM matrix field header." << Alert::Raise;
+        std::vector<Scalar> values(scalar.getSize() * components);
+        for (auto& value : values)
+          if (!(is >> value))
+            Alert::Exception() << "Truncated MFEM matrix data." << Alert::Raise;
+        for (size_t c = 0; c < components; ++c)
+        {
+          std::stringstream stream;
+          stream << std::setprecision(std::numeric_limits<Real>::max_digits10);
+          stream << header[0] << '\n' << header[1] << "\nVDim: 1\nOrdering: 0\n\n";
+          for (size_t a = 0; a < scalar.getSize(); ++a)
+            stream
+              << values[ordering == 0 ? c * scalar.getSize() + a : a * components + c]
+              << '\n';
+          Variational::GridFunction scalarField(scalar);
+          GridFunctionLoader<FileFormat::MFEM, ScalarFES, Math::Vector<Scalar>>(
+            scalarField)
+            .load(stream);
+          for (size_t a = 0; a < scalar.getSize(); ++a)
+            field.getData()[a * components + c] = scalarField.getData()[a];
         }
       }
   };

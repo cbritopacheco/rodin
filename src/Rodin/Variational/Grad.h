@@ -18,6 +18,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialTensor.h"
 
 #include "VectorFunction.h"
 #include "IntegrationPoint.h"
@@ -69,6 +70,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref Grad "Grad<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
+   * | @ref Grad "Grad<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
    * | @ref GradBase "GradBase<GridFunction<FES, Data>, Derived>" | Generic gradient base for scalar grid functions. |
    * | @ref Grad "Grad<H1<K, Scalar, Mesh>, GridFunction<H1<K, Scalar, Mesh>, Data>>" | Gradient of an H1 grid function. |
    * | @ref Grad "Grad<H1<K, Scalar, Mesh>, ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, Space>>" | Gradient of an H1 shape-function expression. |

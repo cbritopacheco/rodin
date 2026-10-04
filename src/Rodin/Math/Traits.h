@@ -120,6 +120,7 @@ namespace Rodin::FormLanguage
     Complex,
     Vector,
     Matrix,
+    Tensor,
     Unknown
   };
 
@@ -158,13 +159,25 @@ namespace Rodin::FormLanguage
   /// @brief Type trait: whether @c T has vector range (a spatial vector or a
   /// single-column Eigen object).
   template <class T>
-  struct IsVectorRange
-    : std::bool_constant<
-        IsSpatialVector<std::decay_t<T>>::Value
-        || (
-          IsEigenObject<std::decay_t<T>>::Value
-          && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
-        )>
+  struct IsTensorRange : std::false_type
+  {
+      /// @brief Compile-time range classification.
+      static constexpr bool Value = false;
+  };
+
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class Scalar, size_t Rank>
+  struct IsTensorRange<Math::SpatialTensor<Scalar, Rank>> : std::true_type
+  {
+      /// @brief Compile-time range classification.
+      static constexpr bool Value = true;
+  };
+
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class T>
+  struct IsVectorRange : std::bool_constant<IsSpatialVector<std::decay_t<T>>::Value ||
+                           (IsEigenObject<std::decay_t<T>>::Value &&
+                             (ColsAtCompileTime<std::decay_t<T>>::Value == 1))>
   {
       /// @brief True if @c T has vector range.
       static constexpr bool Value = IsSpatialVector<std::decay_t<T>>::Value ||
@@ -201,6 +214,7 @@ namespace Rodin::FormLanguage
         : std::is_same_v<std::decay_t<T>, Complex> ? RangeKind::Complex
         : IsVectorRange<std::decay_t<T>>::Value    ? RangeKind::Vector
         : IsMatrixRange<std::decay_t<T>>::Value    ? RangeKind::Matrix
+        : IsTensorRange<std::decay_t<T>>::Value    ? RangeKind::Tensor
                                                    : RangeKind::Unknown;
   };
 

@@ -888,6 +888,20 @@ namespace Rodin::Math
   {
     return min(max(x, lo), hi);
   }
+  /// @brief Frobenius contraction of spatial tensors, conjugating the RHS.
+  template <class LHSScalar, class RHSScalar, size_t Rank>
+  auto dot(
+    const SpatialTensor<LHSScalar, Rank>& lhs, const SpatialTensor<RHSScalar, Rank>& rhs)
+  {
+    return lhs.dot(rhs);
+  }
+
+  /// @brief Entrywise tensor conjugation.
+  template <class Scalar, size_t Rank>
+  auto conj(const SpatialTensor<Scalar, Rank>& value)
+  {
+    return value.conjugate();
+  }
 }
 
 #endif
