@@ -309,12 +309,20 @@ Configure with `-DRODIN_BUILD_CONVERGENCE_TESTS=ON` and run with
 modules: unit-box grid construction and boundary partitioning, direct L2/H1
 error integration, error histories, and algebraic or exponential rate
 calculation. Refinement-specific directories add only the machinery unique to
-their refinement axis. `StokesData` supplies common exact fields and sources;
+their refinement axis. `FieldConvergence` retains one history per unknown
+field and requires at least three levels, finite positive $L^2/H^1$ errors,
+strict reduction, and the prescribed rate floors for every field and adjacent
+interval. Algebraic and exponential queries reuse `ErrorHistory`; an
+unchanged refinement parameter is rejected before a rate is computed.
+This prevents a successful component or an infinite slope from hiding a
+failed coupled-field study. Exact patches and L2-only discontinuous studies
+have separate acceptance contracts.
+`StokesData` supplies common exact fields and sources;
 `StokesProblem` supplies the native mixed solve, solver/residual and pressure
 gauge checks, and separate field-error measurements for h, p, and hp.
 `PETScStokesProblem` supplies the same workload with PETSc local/MPI
 storage and direct factorization, sharing the continuous data and error oracles.
-`CurvedGeometry` retains the unwarped vertices and installs the quadratic map
+`CurvedGeometry` retains the unwarped vertices and installs the selected geometry map
 on cells, traces, and MPI halos. The
 [curved Helmholtz specification](isoparametric/Helmholtz/README.md) distinguishes
 superparametric P1 fields from strictly isoparametric P2 fields and records

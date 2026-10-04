@@ -17,9 +17,87 @@
 
 #include "Convergence.h"
 #include "LiftedConvergence.h"
+#include "FieldConvergence.h"
 
 namespace Rodin::Tests::Convergence
 {
+  TEST(FieldConvergenceTest, AcceptsEveryFieldOnNonuniformRefinementPaths)
+  {
+    FieldConvergence<2> algebraic, exponential;
+    for (Real h : {0.5, 0.125, 0.0625})
+      algebraic.append(h, {ErrorNorms(h * h, h), ErrorNorms(h * h * h, h * h)});
+    for (Real p : {1, 3, 4})
+      exponential.append(p,
+        {ErrorNorms(std::exp(-2 * p), std::exp(-p)),
+          ErrorNorms(std::exp(-3 * p), std::exp(-2 * p))});
+    algebraic.expectAlgebraicFloor({1.9, 0.9});
+    exponential.expectExponentialFloor({1.9, 0.9});
+  }
+
+  TEST(FieldConvergenceTest, RejectsBadFinalIntervalInOtherField)
+  {
+    FieldConvergence<2> study;
+    for (Real h : {0.5, 0.25, 0.125})
+    {
+      const Real other = h == 0.125 ? Real(0.25) : h;
+      study.append(h, {ErrorNorms(h * h, h), ErrorNorms(2 * other * other, 2 * other)});
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectAlgebraicFloor({1.9, 0.9});
+    }
+    ASSERT_EQ(failures.size(), 4);
+    for (int i = 0; i < failures.size(); ++i)
+      EXPECT_NE(
+        std::string(failures.GetTestPartResult(i).message()).find("field=1 interval=2"),
+        std::string::npos);
+  }
+
+  TEST(FieldConvergenceTest, RejectsTwoLevelStudy)
+  {
+    FieldConvergence<1> study;
+    study.append(0.5, {ErrorNorms(0.25, 0.5)}).append(0.25, {ErrorNorms(0.0625, 0.25)});
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectAlgebraicFloor({1.9, 0.9});
+    }
+    ASSERT_EQ(failures.size(), 1);
+    EXPECT_TRUE(failures.GetTestPartResult(0).fatally_failed());
+  }
+
+  TEST(FieldConvergenceTest, RejectsUnchangedFinalRefinementParameter)
+  {
+    FieldConvergence<1> algebraic, exponential;
+    algebraic.append(0.5, {ErrorNorms(1, 1)})
+      .append(0.25, {ErrorNorms(0.5, 0.5)})
+      .append(0.25, {ErrorNorms(0.25, 0.25)});
+    exponential.append(1, {ErrorNorms(1, 1)})
+      .append(2, {ErrorNorms(0.5, 0.5)})
+      .append(2, {ErrorNorms(0.25, 0.25)});
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      algebraic.expectAlgebraicFloor({0.1, 0.1});
+      exponential.expectExponentialFloor({0.1, 0.1});
+    }
+    ASSERT_EQ(failures.size(), 2);
+    for (int i = 0; i < failures.size(); ++i)
+    {
+      EXPECT_TRUE(failures.GetTestPartResult(i).fatally_failed());
+      EXPECT_NE(
+        std::string(failures.GetTestPartResult(i).message()).find("field=0 interval=2"),
+        std::string::npos);
+    }
+  }
+
   /** @brief Independent algebraic histories exercise every lifted rate interval. */
   TEST(LiftedConvergenceTest, AcceptsSeparateFieldAndGeometryOrders)
   {
