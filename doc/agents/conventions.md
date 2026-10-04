@@ -19,7 +19,6 @@ the relevant commits to find why a condition, threshold, or formula was
 introduced or removed, especially in numerical convergence and stopping logic.
 If the implementation differs from a paper or specification, establish whether
 the difference was deliberate before editing the code.
-
 ## Numerical constants
 
 Avoid unexplained numeric thresholds, safety factors, and iteration limits.

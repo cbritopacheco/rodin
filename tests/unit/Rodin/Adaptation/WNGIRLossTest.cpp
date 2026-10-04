@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Rodin/Adaptation/WNGIRLoss.h"
+#include "Rodin/Adaptation/WNGIR/Loss.h"
 
 namespace Rodin::Adaptation
 {

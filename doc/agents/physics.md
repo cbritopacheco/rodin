@@ -72,21 +72,17 @@ attributes (`Geometry::MinSTCut` is the classifier primitive), geometry
 fitting owns node positions and never decides topology.
 
 On this branch the module is **WNGIR**: Welsch natural-gradient interface
-fitting. The unique model is \(M=F+S+D\) with affine quadratic hinges.
+fitting. The unique model is \(M=F+D\) with affine quadratic hinges.
 \(F\) is normalized half-squared fitting curvature without the level-set Hessian;
-\(S\) is the PSD part of the Hessian of \((d/4)(Q-1)\), restricted to current
-deviatoric stretch on both arguments:
-\(P_FG=\operatorname{dev}\operatorname{sym}(GF^{-1})F\). This preserves the
-current rotation and uniform-dilation kernel away from identity; clipping the
-additive Hessian alone does not. \(D\) is pulled-back pointwise deviatoric current
+\(D\) is pulled-back pointwise deviatoric current
 strain: \(h\kappa_D\int j\,\operatorname{dev}\epsilon(v):
 \operatorname{dev}\epsilon(z)\), where \(\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})\).
 It does not penalize local infinitesimal rotations or isotropic strain. There is
 no global dilation coupling. Higher-order spaces can contain additional conformal
 kernel modes not covered by the similarity gauge; this term alone is not an
 \(H^1\) norm. Their independent coefficients
-are kappaF, kappaS and kappaD, all defaulting to one. S and D retain the mesh
-factor \(h\); there is no shared kappaBulk multiplier.
+are kappaF and kappaD, both defaulting to one. D retains the mesh
+factor \(h\); there is no shape or constraint Hessian in the metric.
 The fitting energy/force remain robust Welsch. Minimizing this integral is not
 equivalent to minimizing the maximum geometric residual. Power-loss experiments
 are isolated diagnostics, not a production option or schedule.
@@ -107,12 +103,16 @@ along unresolved similarity modes using a tiny restricted eigensolve. This gauge
 is not part of the objective and releases modes when active hinges resolve them;
 it is not a global coercivity certificate.
 
-`WNGIR.h` is the public include; parameters/report and form-language
-coefficients live beside `WNGIRSolver.h`. The local Eigen backend supports CG,
+`WNGIR.h` is the public include; the implementation lives in `Adaptation/WNGIR/`,
+without a `Detail` layer. `Solver.h` retains the outer orchestration and metric
+Problem. `HingeProblem.h` assembles the tangent and negative stationarity
+residual for Rodin's `Solver::NewtonSolver`; its step policy retains the frozen
+inner merit search. `LinearSolver.h` adapts the similarity gauge and retained
+linear backends to the native solver interface. The local Eigen backend supports CG,
 SparseLU, and optional MUMPS solving the same pointwise deviatoric operator.
 The sparse metric is symmetrized before factorization and residual evaluation,
 so triangular direct solvers and the true-residual test use the same operator.
-One Problem and metric forms are retained, but deformation-dependent forms are
+Metric and hinge Problems and metric forms are retained, but deformation-dependent forms are
 reassembled per outer iteration. MUMPS retains symbolic analysis while the
 augmented sparsity pattern is unchanged and numeric factors for identical systems.
 `AnalyticFunctionAdapters.h` lifts analytic lambdas into FunctionBase;

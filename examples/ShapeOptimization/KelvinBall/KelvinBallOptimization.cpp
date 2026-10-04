@@ -390,103 +390,98 @@ namespace KelvinBall
         RealFunction target(
           [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
         const auto report = fitting.solve(mesh, interface, target, targetGradient);
-        Alert::Info() << substageHeading("WNGIR reconstruction") << Alert::NewLine
-                      << diagnosticLabel("Background mean edge h:")
-                      << Alert::Notation::Number(backgroundH)
-                      << Alert::NewLine << diagnosticLabel("Fitting reference spacing h0:")
-                      << Alert::Notation::Number(parameters.h)
-                      << Alert::NewLine << diagnosticLabel("Mean interface triangle size:")
-                      << Alert::Notation::Number(meanInterfaceSize)
-                      << Alert::NewLine
-                      << diagnosticLabel("Outer iteration cap:")
-                      << Alert::Notation::Number(parameters.maxIterations)
-                      << Alert::NewLine << diagnosticLabel("Inner correction cap:")
-                      << Alert::Notation::Number(parameters.primalBarrierIterations)
-                      << Alert::NewLine << diagnosticLabel("Inner cap policy:")
-                      << "Stop on an uncertified inner residual"
-                      << Alert::NewLine << diagnosticLabel("Inner relative residual tolerance:")
-                      << Alert::Notation::Number(
-                           parameters.primalBarrierRelativeTolerance)
-                      << Alert::NewLine << diagnosticLabel("Barrier model:")
-                      << "Affine quadratic quality hinges"
-                      << Alert::NewLine << diagnosticLabel("Soft quality guard fraction:")
-                      << Alert::Notation::Number(parameters.qualityGuard)
-                      << Alert::NewLine << diagnosticLabel("Fitting / shape / distribution:")
-                      << Alert::Notation::Number(parameters.kappaF) << " / "
-                      << Alert::Notation::Number(parameters.kappaS) << " / "
-                      << Alert::Notation::Number(parameters.kappaD)
-                      << Alert::NewLine << diagnosticLabel("Inactive hinge skips:")
-                      << Alert::Notation::Number(report.inactiveHingeSkips)
-                      << Alert::NewLine << diagnosticLabel("Direct symbolic analyses:")
-                      << Alert::Notation::Number(report.directAnalyses)
-                      << Alert::NewLine << diagnosticLabel("Direct numeric factorizations:")
-                      << Alert::Notation::Number(report.directFactorizations)
-                      << Alert::NewLine << diagnosticLabel("Inner Newton steps:")
-                      << "Full with fixed-inner merit backtracking"
-                      << Alert::NewLine << diagnosticLabel("Linear backend:")
-                      << (parameters.directSolver == Adaptation::WNGIRParameters::DirectSolver::CG
-                            ? "CG"
-                            : (parameters.directSolver == Adaptation::WNGIRParameters::DirectSolver::MUMPS
-                                  ? "MUMPS" : "SparseLU"))
-                      << Alert::NewLine << diagnosticLabel("CG relative tolerance:")
-                      << Alert::Notation::Number(parameters.cgRelativeTolerance)
-                      << Alert::NewLine << diagnosticLabel("CG iterations per solve:")
-                      << Alert::Notation::Number(parameters.cgMaxIterations)
-                      << Alert::NewLine << diagnosticLabel("Outer iterations:")
-                      << Alert::Notation::Number(report.iterations)
-                      << Alert::NewLine << diagnosticLabel("Inner corrections (last):")
-                      << Alert::Notation::Number(report.lastPrimalBarrierIterations)
-                      << Alert::NewLine << diagnosticLabel("Inner relative correction:")
-                      << Alert::Notation::Number(report.primalBarrierRelativeCorrection)
-                      << Alert::NewLine << diagnosticLabel("Inner relative residual:")
-                      << Alert::Notation::Number(report.primalBarrierRelativeResidual)
-                      << Alert::NewLine << diagnosticLabel("Inner converged (last):")
-                      << (report.primalBarrierConverged ? "Yes" : "No")
-                      << Alert::NewLine << diagnosticLabel("Full inner Newton steps:")
-                      << Alert::Notation::Number(report.fullPrimalBarrierSteps)
-                      << Alert::NewLine << diagnosticLabel("Minimum inner step factor:")
-                      << Alert::Notation::Number(report.minPrimalBarrierAlpha)
-                      << Alert::NewLine << diagnosticLabel("Maximum linear iterations:")
-                      << Alert::Notation::Number(report.maxLinearIterations)
-                      << Alert::NewLine
-                      << diagnosticLabel("Skeleton normal jump RMS:")
-                      << Alert::Notation::Number(report.normalJumpRMS) << Alert::NewLine
-                      << diagnosticLabel("Exit reason:") << report.exitReason
-                      << Alert::NewLine << diagnosticLabel("Geometric RMS distance:")
-                      << Alert::Notation::Number(report.geometricRMS)
-                      << Alert::NewLine << diagnosticLabel("Geometric D infinity:")
-                      << Alert::Notation::Number(report.geometricSup)
-                      << Alert::NewLine << diagnosticLabel("Geometric D infinity target:")
-                      << Alert::Notation::Number(parameters.geometricSupTolerance)
-                      << Alert::NewLine << diagnosticLabel("Geometric target reached:")
-                      << (report.geometricSup <= parameters.geometricSupTolerance ? "Yes" : "No")
-                      << Alert::NewLine << diagnosticLabel("Welsch residual scale:")
-                      << Alert::Notation::Number(report.sigma)
-                      << Alert::NewLine << diagnosticLabel("Active RMS:")
-                      << Alert::Notation::Number(report.activeRMS) << Alert::NewLine
-                      << diagnosticLabel("Active RMS / level-set mesh scale:")
-                      << Alert::Notation::Number(report.levelSetGradientScale > 0
-                             ? report.activeRMS /
-                               (parameters.h * report.levelSetGradientScale)
-                             : 0)
-                      << Alert::NewLine << diagnosticLabel("Active supremum:")
-                      << Alert::Notation::Number(report.activeSup)
-                      << Alert::NewLine << diagnosticLabel("Minimum Jacobian:")
-                      << Alert::Notation::Number(report.minJ) << Alert::NewLine
-                      << diagnosticLabel("Maximum relative distortion:")
-                      << Alert::Notation::Number(report.maxQRel)
-                      << Alert::NewLine << diagnosticLabel("Setup time:")
-                      << Alert::Notation::Number(report.tSetup) << " s"
-                      << Alert::NewLine << diagnosticLabel("Step assembly time:")
-                      << Alert::Notation::Number(report.tAssembly) << " s"
-                      << Alert::NewLine << diagnosticLabel("Linear solve time:")
-                      << Alert::Notation::Number(report.tSolve) << " s"
-                      << Alert::NewLine << diagnosticLabel("Outer line-search time:")
-                      << Alert::Notation::Number(report.tLineSearch) << " s"
-                      << Alert::NewLine << diagnosticLabel("Linear solves:")
-                      << Alert::Notation::Number(report.linearSolveCount)
-                      << Alert::NewLine << diagnosticLabel("Total linear iterations:")
-                      << Alert::Notation::Number(report.linearIterations) << Alert::Raise;
+        Alert::Info()
+          << substageHeading("WNGIR reconstruction") << Alert::NewLine
+          << diagnosticLabel("Background mean edge h:")
+          << Alert::Notation::Number(backgroundH) << Alert::NewLine
+          << diagnosticLabel("Fitting reference spacing h0:")
+          << Alert::Notation::Number(parameters.h) << Alert::NewLine
+          << diagnosticLabel("Mean interface triangle size:")
+          << Alert::Notation::Number(meanInterfaceSize) << Alert::NewLine
+          << diagnosticLabel("Outer iteration cap:")
+          << Alert::Notation::Number(parameters.maxIterations) << Alert::NewLine
+          << diagnosticLabel("Inner correction cap:")
+          << Alert::Notation::Number(parameters.primalBarrierIterations) << Alert::NewLine
+          << diagnosticLabel("Inner cap policy:")
+          << "Stop on an uncertified inner residual" << Alert::NewLine
+          << diagnosticLabel("Inner relative residual tolerance:")
+          << Alert::Notation::Number(parameters.primalBarrierRelativeTolerance)
+          << Alert::NewLine << diagnosticLabel("Barrier model:")
+          << "Affine quadratic quality hinges" << Alert::NewLine
+          << diagnosticLabel("Soft quality guard fraction:")
+          << Alert::Notation::Number(parameters.qualityGuard) << Alert::NewLine
+          << diagnosticLabel("Fitting / distribution:")
+          << Alert::Notation::Number(parameters.kappaF) << " / "
+          << Alert::Notation::Number(parameters.kappaD) << Alert::NewLine
+          << diagnosticLabel("Inactive hinge skips:")
+          << Alert::Notation::Number(report.inactiveHingeSkips) << Alert::NewLine
+          << diagnosticLabel("Direct symbolic analyses:")
+          << Alert::Notation::Number(report.directAnalyses) << Alert::NewLine
+          << diagnosticLabel("Direct numeric factorizations:")
+          << Alert::Notation::Number(report.directFactorizations) << Alert::NewLine
+          << diagnosticLabel("Inner Newton steps:")
+          << "Full with fixed-inner merit backtracking" << Alert::NewLine
+          << diagnosticLabel("Linear backend:")
+          << (parameters.directSolver == Adaptation::WNGIRParameters::DirectSolver::CG
+                 ? "CG"
+                 : (parameters.directSolver ==
+                         Adaptation::WNGIRParameters::DirectSolver::MUMPS
+                       ? "MUMPS"
+                       : "SparseLU"))
+          << Alert::NewLine << diagnosticLabel("CG relative tolerance:")
+          << Alert::Notation::Number(parameters.cgRelativeTolerance) << Alert::NewLine
+          << diagnosticLabel("CG iterations per solve:")
+          << Alert::Notation::Number(parameters.cgMaxIterations) << Alert::NewLine
+          << diagnosticLabel("Outer iterations:")
+          << Alert::Notation::Number(report.iterations) << Alert::NewLine
+          << diagnosticLabel("Inner corrections (last):")
+          << Alert::Notation::Number(report.lastPrimalBarrierIterations) << Alert::NewLine
+          << diagnosticLabel("Inner relative correction:")
+          << Alert::Notation::Number(report.primalBarrierRelativeCorrection)
+          << Alert::NewLine << diagnosticLabel("Inner relative residual:")
+          << Alert::Notation::Number(report.primalBarrierRelativeResidual)
+          << Alert::NewLine << diagnosticLabel("Inner converged (last):")
+          << (report.primalBarrierConverged ? "Yes" : "No") << Alert::NewLine
+          << diagnosticLabel("Full inner Newton steps:")
+          << Alert::Notation::Number(report.fullPrimalBarrierSteps) << Alert::NewLine
+          << diagnosticLabel("Minimum inner step factor:")
+          << Alert::Notation::Number(report.minPrimalBarrierAlpha) << Alert::NewLine
+          << diagnosticLabel("Maximum linear iterations:")
+          << Alert::Notation::Number(report.maxLinearIterations) << Alert::NewLine
+          << diagnosticLabel("Skeleton normal jump RMS:")
+          << Alert::Notation::Number(report.normalJumpRMS) << Alert::NewLine
+          << diagnosticLabel("Exit reason:") << report.exitReason << Alert::NewLine
+          << diagnosticLabel("Geometric RMS distance:")
+          << Alert::Notation::Number(report.geometricRMS) << Alert::NewLine
+          << diagnosticLabel("Geometric D infinity:")
+          << Alert::Notation::Number(report.geometricSup) << Alert::NewLine
+          << diagnosticLabel("Geometric D infinity target:")
+          << Alert::Notation::Number(parameters.geometricSupTolerance) << Alert::NewLine
+          << diagnosticLabel("Geometric target reached:")
+          << (report.geometricSup <= parameters.geometricSupTolerance ? "Yes" : "No")
+          << Alert::NewLine << diagnosticLabel("Welsch residual scale:")
+          << Alert::Notation::Number(report.sigma) << Alert::NewLine
+          << diagnosticLabel("Active RMS:") << Alert::Notation::Number(report.activeRMS)
+          << Alert::NewLine << diagnosticLabel("Active RMS / level-set mesh scale:")
+          << Alert::Notation::Number(report.levelSetGradientScale > 0
+                 ? report.activeRMS / (parameters.h * report.levelSetGradientScale)
+                 : 0)
+          << Alert::NewLine << diagnosticLabel("Active supremum:")
+          << Alert::Notation::Number(report.activeSup) << Alert::NewLine
+          << diagnosticLabel("Minimum Jacobian:") << Alert::Notation::Number(report.minJ)
+          << Alert::NewLine << diagnosticLabel("Maximum relative distortion:")
+          << Alert::Notation::Number(report.maxQRel) << Alert::NewLine
+          << diagnosticLabel("Setup time:") << Alert::Notation::Number(report.tSetup)
+          << " s" << Alert::NewLine << diagnosticLabel("Step assembly time:")
+          << Alert::Notation::Number(report.tAssembly) << " s" << Alert::NewLine
+          << diagnosticLabel("Linear solve time:")
+          << Alert::Notation::Number(report.tSolve) << " s" << Alert::NewLine
+          << diagnosticLabel("Outer line-search time:")
+          << Alert::Notation::Number(report.tLineSearch) << " s" << Alert::NewLine
+          << diagnosticLabel("Linear solves:")
+          << Alert::Notation::Number(report.linearSolveCount) << Alert::NewLine
+          << diagnosticLabel("Total linear iterations:")
+          << Alert::Notation::Number(report.linearIterations) << Alert::Raise;
 
         KelvinBall::Mesh moved(mesh);
         moveMesh(moved, mesh, displacementTrial.getSolution());
@@ -623,10 +618,8 @@ namespace KelvinBall
           << "                              also --j-safe, --j-ls, --j-min)."
           << Alert::NewLine << Alert::Notation("--wngir-kappa-f=<value>")
           << "  Fitting curvature weight (default: 1)." << Alert::NewLine
-          << Alert::Notation("--wngir-kappa-s=<value>")
-          << "  Shape curvature weight (default: 1)." << Alert::NewLine
           << Alert::Notation("--wngir-kappa-d=<value>")
-          << "  Distribution weight (default: 1)." << Alert::NewLine
+          << "  Distribution weight (default: 0.001)." << Alert::NewLine
           << Alert::Notation("--wngir-direct-solver=<name>")
           << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
              "built)."

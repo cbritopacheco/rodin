@@ -49,6 +49,52 @@ function(rodin_add_googletest)
   set(gtest_force_shared_crt ON)
   add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/googletest
     ${PROJECT_BINARY_DIR}/third-party/googletest EXCLUDE_FROM_ALL)
+  # GoogleTest enables -Wall; silence a warning in its vendored GCC code.
+  foreach(_target gtest gtest_main gmock gmock_main)
+    if(TARGET ${_target})
+      target_compile_options(${_target} PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>)
+    endif()
+  endforeach()
+endfunction()
+
+function(rodin_add_pybind11)
+  set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+  set(PYBIND11_TEST OFF)
+  set(PYBIND11_INSTALL OFF)
+  set(PYBIND11_FINDPYTHON ON)
+  set(Python_FIND_REGISTRY LAST)
+  set(Python_FIND_VIRTUALENV FIRST)
+  find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/pybind11
+    ${PROJECT_BINARY_DIR}/third-party/pybind11 EXCLUDE_FROM_ALL)
+endfunction()
+
+function(rodin_add_termcolor)
+  set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+  set(TERMCOLOR_TESTS OFF)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/termcolor
+    ${PROJECT_BINARY_DIR}/third-party/termcolor EXCLUDE_FROM_ALL)
+  # Alert's public headers include termcolor. Preserve Rodin's existing
+  # header installation without installing the vendor's package metadata.
+  install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/third-party/termcolor/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+endfunction()
+
+# m.css is a Python documentation tool, not a CMake subproject.
+function(rodin_add_mcss configuration)
+  set(Python3_FIND_REGISTRY LAST)
+  set(Python3_FIND_VIRTUALENV FIRST)
+  find_package(Python3 3.6 REQUIRED COMPONENTS Interpreter)
+  find_package(LATEX REQUIRED COMPONENTS PDFLATEX)
+  add_custom_target(RodinDoxygen
+    COMMAND ${Python3_EXECUTABLE}
+      ${PROJECT_SOURCE_DIR}/third-party/m.css/documentation/doxygen.py
+      "${configuration}"
+    COMMENT "Generate API documentation with m.css"
+    VERBATIM)
 endfunction()
 
 function(rodin_add_benchmark)

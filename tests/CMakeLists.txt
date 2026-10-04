@@ -6,7 +6,9 @@ foreach(_cache_mode OFF ON)
     COMMAND ${CMAKE_COMMAND}
       -S ${PROJECT_SOURCE_DIR}/tests/cmake/ThirdPartyIsolation
       -B ${CMAKE_CURRENT_BINARY_DIR}/ThirdPartyIsolation-${_cache_mode}
-      -DISOLATION_EXISTING_CACHE=${_cache_mode})
+      -DISOLATION_EXISTING_CACHE=${_cache_mode}
+      -DISOLATION_WITH_PY=${RODIN_WITH_PY}
+      -DISOLATION_WITH_MCSS=${RODIN_USE_MCSS})
   set_tests_properties(CMake.ThirdPartyIsolation.${_cache_mode}
     PROPERTIES LABELS unit)
 endforeach()

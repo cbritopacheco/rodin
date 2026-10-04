@@ -7,9 +7,9 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
-#include "Rodin/Adaptation/WNGIRPrimalBarrierState.h"
-#include "Rodin/Adaptation/WNGIRPrimalBarrierForce.h"
-#include "Rodin/Adaptation/WNGIRPrimalBarrierMetric.h"
+#include "Rodin/Adaptation/WNGIR/Hinge.h"
+#include "Rodin/Adaptation/WNGIR/HingeForce.h"
+#include "Rodin/Adaptation/WNGIR/HingeMetric.h"
 
 using namespace Rodin;
 using namespace Rodin::Adaptation;
@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
           return mu * Real(0.5) * violation * violation;
         };
         const auto energy = [&](const Math::SpatialMatrix<Real>& v) {
-          Detail::WNGIRPrimalBarrierState s(deformation, v, p, mu);
+          WNGIRPrimalBarrierState s(deformation, v, p, mu);
           const Real expected =
             scalarEnergy(s.getJacobianSlack(), p.qualityGuard * (Real(1) - p.jSafe)) +
             scalarEnergy(s.getDistortionSlack(), p.qualityGuard * (p.qMax - Real(1)));
@@ -53,14 +53,14 @@ namespace Rodin::Tests::Unit
           return s.getEnergy(p, mu);
         };
         const auto derivative = [&](const Math::SpatialMatrix<Real>& v) {
-          Detail::WNGIRPrimalBarrierState s(deformation, v, p, mu);
+          WNGIRPrimalBarrierState s(deformation, v, p, mu);
           return (s.getJacobianHessian() * s.getJacobianAction() - s.getJacobianForce()) *
             rowJ +
             (s.getDistortionHessian() * s.getDistortionAction() -
               s.getDistortionForce()) *
             rowQ;
         };
-        Detail::WNGIRPrimalBarrierState s(deformation, inner, p, mu);
+        WNGIRPrimalBarrierState s(deformation, inner, p, mu);
         ASSERT_TRUE(s.isFeasible());
         const Math::SpatialMatrix<Real> plus(inner + eps * direction),
           minus(inner - eps * direction);
@@ -109,9 +109,8 @@ namespace Rodin::Tests::Unit
       BilinearForm metric(trial, test);
       LinearForm force(test);
       const auto residual = [&]() {
-        metric =
-          Detail::WNGIRPrimalBarrierMetric(trial, test, current, inner, p, Real(0.02));
-        force = Detail::WNGIRPrimalBarrierForce(test, current, inner, p, Real(0.02));
+        metric = WNGIRPrimalBarrierMetric(trial, test, current, inner, p, Real(0.02));
+        force = WNGIRPrimalBarrierForce(test, current, inner, p, Real(0.02));
         metric.assemble();
         force.assemble();
         return Math::Vector<Real>(
@@ -138,7 +137,7 @@ namespace Rodin::Tests::Unit
     CellDeformation outer(2);
     Math::SpatialMatrix<Real> increment = -Math::SpatialMatrix<Real>::Identity(2, 2);
     WNGIRParameters parameters;
-    Detail::WNGIRPrimalBarrierState state(outer, increment, parameters, Real(0.02));
+    WNGIRPrimalBarrierState state(outer, increment, parameters, Real(0.02));
     EXPECT_TRUE(state.isFeasible());
     EXPECT_LT(state.getJacobianSlack(), Real(0));
     EXPECT_TRUE(std::isfinite(state.getEnergy(parameters, Real(0.02))));
@@ -147,7 +146,7 @@ namespace Rodin::Tests::Unit
     increment(0, 0) = Real(-1);
     increment(1, 1) = Real(1);
     outer.setDeformationGradient(increment);
-    Detail::WNGIRPrimalBarrierState inverted(outer, increment, parameters, Real(0.02));
+    WNGIRPrimalBarrierState inverted(outer, increment, parameters, Real(0.02));
     EXPECT_FALSE(inverted.isFeasible());
     EXPECT_TRUE(std::isinf(inverted.getEnergy(parameters, Real(0.02))));
   }

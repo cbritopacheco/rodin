@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(ThirdPartyIsolation LANGUAGES C CXX)
+include(GNUInstallDirs)
 
 get_filename_component(RODIN_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
 include(${RODIN_SOURCE_DIR}/cmake/RodinThirdParty.cmake)
@@ -67,5 +68,62 @@ get_directory_property(_benchmark_tests DIRECTORY
   "${RODIN_SOURCE_DIR}/third-party/benchmark" DEFINITION BENCHMARK_ENABLE_TESTING)
 if(_benchmark_tests)
   message(FATAL_ERROR "Private benchmark testing override was ignored")
+endif()
+
+set(TERMCOLOR_TESTS ON CACHE BOOL "Parent termcolor tests" FORCE)
+rodin_add_termcolor()
+if(NOT "$CACHE{TERMCOLOR_TESTS}" STREQUAL "ON" OR TARGET test_termcolor)
+  message(FATAL_ERROR "Private termcolor test override was ignored")
+endif()
+if(NOT TARGET termcolor::termcolor)
+  message(FATAL_ERROR "Bundled termcolor target was not published")
+endif()
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/termcolor.cpp"
+  "#include <termcolor/termcolor.hpp>\n#include <iostream>\nint main() { std::cout << termcolor::reset; }\n")
+add_executable(IsolationTermcolor "${CMAKE_CURRENT_BINARY_DIR}/termcolor.cpp")
+target_link_libraries(IsolationTermcolor PRIVATE termcolor::termcolor)
+
+# Optional bindings/documentation must not impose Python or LaTeX requirements
+# on Rodin's C++-only test configurations.
+if(ISOLATION_WITH_PY)
+  set(PYBIND11_TEST ON CACHE BOOL "Parent pybind11 tests" FORCE)
+  set(PYBIND11_INSTALL ON CACHE BOOL "Parent pybind11 install" FORCE)
+  set(PYBIND11_FINDPYTHON OFF CACHE STRING "Parent Python discovery mode" FORCE)
+  set(CMAKE_PREFIX_PATH "parent-prefix")
+  rodin_add_pybind11()
+  if(NOT "$CACHE{PYBIND11_TEST}" STREQUAL "ON" OR
+     NOT "$CACHE{PYBIND11_INSTALL}" STREQUAL "ON" OR
+     NOT "$CACHE{PYBIND11_FINDPYTHON}" STREQUAL "OFF" OR
+     NOT CMAKE_PREFIX_PATH STREQUAL "parent-prefix")
+    message(FATAL_ERROR "Bundled header libraries changed parent configuration")
+  endif()
+  if(TARGET pybind11_tests)
+    message(FATAL_ERROR "Private vendor tests were enabled")
+  endif()
+  if(NOT TARGET pybind11::module)
+    message(FATAL_ERROR "Bundled pybind11 target was not published")
+  endif()
+
+  # Exercise targets and pybind11_extension outside their function scopes,
+  # as Alert and the Python bindings do in the real build.
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/headers.cpp"
+    "#include <termcolor/termcolor.hpp>\n#include <pybind11/pybind11.h>\nPYBIND11_MODULE(isolation, m) { m.def(\"answer\", [] { return 42; }); }\n")
+  add_library(IsolationHeaders MODULE "${CMAKE_CURRENT_BINARY_DIR}/headers.cpp")
+  set_target_properties(IsolationHeaders PROPERTIES OUTPUT_NAME isolation)
+  target_link_libraries(IsolationHeaders PRIVATE termcolor::termcolor pybind11::module)
+  pybind11_extension(IsolationHeaders)
+  get_target_property(_suffix IsolationHeaders SUFFIX)
+  if(NOT _suffix)
+    message(FATAL_ERROR "Python module suffix was lost at the wrapper boundary")
+  endif()
+endif()
+if(ISOLATION_WITH_MCSS)
+  rodin_add_mcss("${CMAKE_CURRENT_BINARY_DIR}/conf.py")
+  if(NOT TARGET RodinDoxygen)
+    message(FATAL_ERROR "m.css documentation target was not published")
+  endif()
+  if(DEFINED Python3_FIND_REGISTRY OR DEFINED Python3_FIND_VIRTUALENV)
+    message(FATAL_ERROR "m.css discovery settings escaped the wrapper")
+  endif()
 endif()
 message(STATUS "Third-party isolation checks passed")

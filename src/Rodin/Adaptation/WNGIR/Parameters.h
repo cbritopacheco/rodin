@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIRPARAMETERS_H
-#define RODIN_ADAPTATION_WNGIRPARAMETERS_H
+#ifndef RODIN_ADAPTATION_WNGIR_PARAMETERS_H
+#define RODIN_ADAPTATION_WNGIR_PARAMETERS_H
 
 #include <algorithm>
 #include <cstddef>
@@ -35,10 +35,9 @@ namespace Rodin::Adaptation
   {
       /// Affine quadratic-hinge guard widths, relative to the identity margins.
       Real qualityGuard = Real(0.1);
-      /// Independent fitting, shape and distribution weights; volume terms scale with h.
+      /// Independent fitting and distribution weights; distribution scales with h.
       Real kappaF = 1; ///< Fitting curvature weight.
-      Real kappaS = 1; ///< Shape curvature weight.
-      Real kappaD = 1; ///< Distribution (current-strain regularity) weight.
+      Real kappaD = Real(1e-3); ///< Distribution (current-strain regularity) weight.
       /// Robust directional scaling of the inner model, omitting the level-set Hessian.
       bool directionalNewton = true;
       Real directionalNewtonMaxStepOverH = 1; ///< Maximum predictor motion divided by h.
@@ -67,8 +66,9 @@ namespace Rodin::Adaptation
         15; ///< Maximum Newton corrections of the hinge-penalized QP.
       Real primalBarrierRelativeTolerance =
         Real(1e-3); ///< Relative stationarity-residual tolerance for the inner QP.
-      Real primalBarrierAbsoluteTolerance = Real(1e-12); ///< Absolute inner residual tolerance.
-      Real muHat = Real(90); ///< @f$\widehat\mu@f$, dimensionless
+      Real primalBarrierAbsoluteTolerance =
+        Real(1e-12); ///< Absolute inner residual tolerance.
+      Real muHat = Real(100); ///< @f$\widehat\mu@f$, dimensionless
         ///< barrier/model-decrease ratio.
       Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
       size_t maxBacktracks = 32; ///< Maximum halvings of a physical trial increment.
@@ -82,7 +82,8 @@ namespace Rodin::Adaptation
       Real stepTol = 0; ///< Absolute physical accepted-displacement tolerance.
       Real acceptedStepOverHTol =
         Real(5e-4); ///< >0 stops best-effort when accepted step/h is small.
-      std::size_t stagnationIterations = 5; ///< Consecutive small steps or energy changes.
+      std::size_t stagnationIterations =
+        5; ///< Consecutive small steps or energy changes.
       Real cgRelativeTolerance =
         1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for CG.
       std::size_t cgMaxIterations =

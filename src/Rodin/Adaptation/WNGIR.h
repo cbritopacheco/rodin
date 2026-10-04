@@ -12,8 +12,8 @@
  * @brief Public include for robust natural-gradient interface fitting.
  */
 
-#include "WNGIRParameters.h"
-#include "WNGIRReport.h"
-#include "WNGIRSolver.h"
+#include "WNGIR/Parameters.h"
+#include "WNGIR/Report.h"
+#include "WNGIR/Solver.h"
 
 #endif

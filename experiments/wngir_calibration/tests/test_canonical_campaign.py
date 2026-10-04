@@ -20,16 +20,16 @@ class CanonicalCampaignTest(unittest.TestCase):
         with patch("run_p1_2d_parameter_campaign.subprocess.run") as run:
             run.return_value = SimpleNamespace(stdout="", returncode=0)
             run_case(args, Path("/tmp/example"), "canonical", 20, 4,
-                     1, 1e-4, 1, 90, 1, 1)
+                     1, 1, 90, 1, 1)
         self.check_command(run.call_args.args[0])
         self.assertEqual(run.call_args.kwargs["env"]["OPENBLAS_NUM_THREADS"], "4")
 
     def test_fitting_grid_and_resume_keys_are_independent(self):
         grid = [1e-4, 1e-3, 1e-2, .1, 1]
-        cases = list(cases_for("canonical", [20], [4], grid, grid, grid,
+        cases = list(cases_for("canonical", [20], [4], grid, grid,
                                [.1, 1, 10, 100, 1000], [1], [1]))
-        self.assertEqual(len(cases), 625)
-        self.assertEqual(len(set(cases)), 625)
+        self.assertEqual(len(cases), 125)
+        self.assertEqual(len(set(cases)), 125)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "campaign.csv"
             with path.open("w", newline="") as stream:
@@ -37,8 +37,8 @@ class CanonicalCampaignTest(unittest.TestCase):
                 writer.writeheader()
                 for kf in grid:
                     writer.writerow(dict(dataset="canonical", n=20, lobes=4,
-                                         kappa_f=kf, kappa_s=.001, kappa_d=.001,
-                                         shape_curvature="psd", mu_hat=.1, kappa_j=1, kappa_q=1))
+                                         kappa_f=kf, kappa_d=.001,
+                                         mu_hat=.1, kappa_j=1, kappa_q=1))
             _, done = read_done(path)
             self.assertEqual(len(done), 5)
             self.assertTrue(done.issubset(set(cases)))
@@ -56,28 +56,24 @@ class CanonicalCampaignTest(unittest.TestCase):
                 main()
                 run.assert_not_called()
             manifest = json.loads((Path(directory) / "canonical_p1_2d_manifest.json").read_text())
-            self.assertEqual(manifest["expected_cases"], 34375)
-            self.assertEqual(manifest["shape_curvature"], ["psd"])
-            self.assertEqual(manifest["model"], "F+Splus+D-current-stretch-surface12-v8")
+            self.assertEqual(manifest["expected_cases"], 6875)
+            self.assertNotIn("shape_curvature", manifest)
+            self.assertEqual(manifest["model"], "F+D-pointwise-deviatoric-surface12-v9")
             profile = manifest["fixed_profile"]
             self.assertEqual(profile["model"], manifest["model"])
             self.assertEqual(profile["interface_quadrature_order"],
                              "automatic: max(12, 2 * FE order + 2)")
             self.assertEqual(profile["geometric_validation_order"],
                              "automatic: max(14, 2 * FE order + 4)")
-            self.assertEqual(profile["shape_restriction"], "current deviatoric stretch")
-            for key in ("kappa_f", "kappa_s", "kappa_d"):
+            self.assertNotIn("shape_restriction", profile)
+            for key in ("kappa_f", "kappa_d"):
                 self.assertEqual(manifest[key], [1e-4, 1e-3, 1e-2, .1, 1])
 
-    def test_full_shape_variant_is_rejected(self):
-        args = SimpleNamespace(amp=.08, r0=.24, steps=30, barrier_max_iters=15,
-                               extra="", log_iterations=False, threads=4,
-                               dyld_library_path="", root=Path("/tmp"))
-        with patch("run_p1_2d_parameter_campaign.subprocess.run") as run:
-            with self.assertRaises(ValueError):
-                run_case(args, Path("/tmp/example"), "canonical", 20, 4,
-                         1, .001, .001, .1, 1, 1, "full")
-            run.assert_not_called()
+    def test_removed_shape_option_is_rejected(self):
+        with patch.object(sys, "argv", ["campaign", "--out-dir", "/tmp",
+                                      "--shape-curvature", "full"]):
+            with self.assertRaises(SystemExit):
+                main()
 
     def test_primary_responses_preserve_precision_and_inner_counts(self):
         output = ("wngir responses: energy=1.2345678901234567e-5 "
@@ -97,19 +93,19 @@ class CanonicalCampaignTest(unittest.TestCase):
         args = SimpleNamespace(exe=Path("/tmp/example"), kappa_f=1, amp=.08, r0=.24,
                                barrier_max_iters=15, cg_rtol=1e-8,
                                log_iterations=False)
-        self.check_command(command(args, 20, 4, 1e-4, 1, 90, 30))
+        self.check_command(command(args, 20, 4, 1, 90, 30))
 
-    def test_three_metric_coefficients_are_independent(self):
+    def test_two_metric_coefficients_are_independent(self):
         args = SimpleNamespace(exe=Path("/tmp/example"), kappa_f=2, amp=.08, r0=.24,
                                barrier_max_iters=15, cg_rtol=1e-8,
                                log_iterations=False)
-        result = command(args, 20, 4, 3, 5, 90, 30)
-        for option in ("--wngir-kappa-f=2", "--wngir-kappa-s=3", "--wngir-kappa-d=5"):
+        result = command(args, 20, 4, 5, 90, 30)
+        for option in ("--wngir-kappa-f=2", "--wngir-kappa-d=5"):
             self.assertIn(option, result)
 
     def check_command(self, args):
         self.assertIn("--wngir-kappa-f=1", args)
-        self.assertIn("--wngir-kappa-s=0.0001", args)
+        self.assertFalse(any("kappa-s" in arg for arg in args))
         self.assertIn("--wngir-kappa-d=1", args)
         self.assertIn("--wngir-direct-solver=mumps", args)
         self.assertIn("--wngir-primal-barrier-iterations=15", args)

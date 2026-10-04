@@ -564,7 +564,7 @@ independently projected gradient. The active residual is reported both in
 absolute units and relative to the reference level-set scale.
 Classification assigns material and interface labels to a copy;
 it does not set the fitting scale. The reference spacing $h_0$ determines the
-shape/distribution metric coefficients, automatic Welsch loss
+fitting/distribution metric coefficients, automatic Welsch loss
 scale, and mesh-relative stopping thresholds. The reported area-equivalent
 interface triangle size is diagnostic only; it allows comparison with
 $\bar h$ and MMG's requested $h_{\min}$. KelvinBall uses the full-interface
@@ -590,8 +590,8 @@ inner Newton corrections try full steps with backtracking on the frozen
 inner merit. Directional Newton scales the predictor and frozen metric before
 the hinge solve; the outer energy/quality line search then backtracks the
 resulting physical increment.
-The fitting, shape and distribution coefficients are
-`--wngir-kappa-f=1`, `--wngir-kappa-s=1` and `--wngir-kappa-d=1`.
+The fitting and distribution coefficients default to
+`--wngir-kappa-f=1` and `--wngir-kappa-d=0.001`.
 The other fitting parameters
 use the common `--wngir-*` spellings of the WNGIR examples (see
 `KelvinBall --help`).
@@ -678,12 +678,11 @@ guard, and $\widehat\mu$ are invariant. Changing the outer container
 relative to the body is not a uniform length change and need not preserve
 the penalty balance.
 
-### Canonical fitting, shape and distribution metric
+### Canonical fitting and distribution metric
 
-The frozen outer metric is $M_k=F_k+S_k+D_k$.
+The frozen outer metric is $M_k=F_k+D_k$.
 $F_k$ is normalized half-squared fitting curvature, omitting the level-set
-Hessian. $S_k$ is the positive-semidefinite shape curvature of $(d/4)(Q-1)$,
-restricted to the current deviatoric stretch directions.
+Hessian.
 $D_k$ is pulled-back pointwise deviatoric current-strain regularity:
 $h_0\kappa_D\int j\,\operatorname{dev}\epsilon(v):\operatorname{dev}\epsilon(z)$,
 where $\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})$.
@@ -691,19 +690,18 @@ There is no global dilation correction. Local isotropic strain and
 infinitesimal rotations are unpenalized. Higher-order spaces may contain
 additional conformal kernel modes, so this term alone is not an $H^1$ norm.
 The independent dimensionless coefficients
-are $\\kappa_F$, $\\kappa_S$ and $\\kappa_D$; the volume terms retain the
+are $\kappa_F$ and $\kappa_D$; the volume terms retain the
 mesh factor $h_0$. No shared bulk multiplier remains.
 
 The metric, fitting force and affine constraint rows are frozen during the
 inner quadratic-hinge solve. The fitting energy and force remain robust
 Welsch. There is no separate inertia audit. Linear residual, descent and
-actual-geometry quality checks remain active. Positive-semidefinite shape
-curvature is the canonical path. Unresolved similarity modes are gauged only
+actual-geometry quality checks remain active. Unresolved similarity modes are gauged only
 in the linear solve, without adding an objective term. Inner convergence uses
 the absolute and relative residual of the frozen quadratic-hinge problem,
 not the relative correction size.
 
-Current-strain and shape contractions are tabulated during assembly. MUMPS
+Current-strain contractions are tabulated during assembly. MUMPS
 retains symbolic analysis when the matrix pattern is unchanged and numeric
 factors when its values are identical. When all quality hinges are inactive,
 the predictor already solves the inner model and the redundant correction
@@ -720,7 +718,7 @@ KelvinBall restricts the local step matrices to the boundary-admissible
 space: zero motion on the outer
 sphere and tangential motion on the cuts.
 
-The old `--wngir-kappa-bulk`, `--wngir-quality-metric*`,
+The old `--wngir-kappa-s`, `--wngir-kappa-bulk`, `--wngir-quality-metric*`,
 `--wngir-direct-step`, `--wngir-quadratic-penalty`,
 `--wngir-nonlinear-barrier` and `--wngir-undamped-inner` options are removed
 and rejected, rather than silently ignored.

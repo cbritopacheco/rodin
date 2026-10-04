@@ -14,7 +14,7 @@
 #include <vector>
 
 #include <Rodin/Distance/Eikonal.h>
-#include <Rodin/Adaptation/WNGIRLoss.h>
+#include <Rodin/Adaptation/WNGIR/Loss.h>
 #include <Rodin/Variational.h>
 
 namespace KelvinBall

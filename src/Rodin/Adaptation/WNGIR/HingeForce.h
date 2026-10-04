@@ -2,13 +2,13 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIRPRIMALBARRIERFORCE_H
-#define RODIN_ADAPTATION_WNGIRPRIMALBARRIERFORCE_H
+#ifndef RODIN_ADAPTATION_WNGIR_HINGEFORCE_H
+#define RODIN_ADAPTATION_WNGIR_HINGEFORCE_H
 
-#include "CellDeformation.h"
-#include "WNGIRPrimalBarrierState.h"
+#include "../CellDeformation.h"
+#include "Hinge.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /// @brief Barrier contribution to the next primal Newton iterate.
   template <class TestFunction, class Displacement>

@@ -4,14 +4,14 @@
  */
 #include <gtest/gtest.h>
 #include <limits>
-#include "Rodin/Adaptation/WNGIRDirectionalNewton.h"
-#include "Rodin/Adaptation/WNGIRLoss.h"
+#include "Rodin/Adaptation/WNGIR/DirectionalNewton.h"
+#include "Rodin/Adaptation/WNGIR/Loss.h"
 
 using namespace Rodin;
 
 TEST(WNGIRDirectionalNewton, StepSelectionAndFallback)
 {
-  using Adaptation::Detail::wngirDirectionalNewtonStep;
+  using Adaptation::wngirDirectionalNewtonStep;
   EXPECT_DOUBLE_EQ(wngirDirectionalNewtonStep(4, 2, 3, 1, 100), 2);
   EXPECT_DOUBLE_EQ(wngirDirectionalNewtonStep(1, 2, 3, 1, 100), 0.5);
   EXPECT_DOUBLE_EQ(wngirDirectionalNewtonStep(400, 2, 3, 1, 100), 100);
@@ -26,7 +26,7 @@ TEST(WNGIRDirectionalNewton, StepSelectionAndFallback)
 
 TEST(WNGIRDirectionalNewton, PhysicalStepIsIndependentOfDirectionScale)
 {
-  using Adaptation::Detail::wngirDirectionalNewtonStep;
+  using Adaptation::wngirDirectionalNewtonStep;
   for (const Real curvature : {Real(-2), Real(2)})
     for (const Real bound : {Real(0.1), Real(100)})
     {

@@ -476,8 +476,7 @@ int run(int argc, char** argv)
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
             << "  phase=" << phase << "  kappaF=" << wngirParams.kappaF
-            << " kappaS=" << wngirParams.kappaS << " kappaD=" << wngirParams.kappaD
-            << '\n';
+            << " kappaD=" << wngirParams.kappaD << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;

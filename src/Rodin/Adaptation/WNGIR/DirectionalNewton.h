@@ -2,14 +2,14 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIRDIRECTIONALNEWTON_H
-#define RODIN_ADAPTATION_WNGIRDIRECTIONALNEWTON_H
+#ifndef RODIN_ADAPTATION_WNGIR_DIRECTIONALNEWTON_H
+#define RODIN_ADAPTATION_WNGIR_DIRECTIONALNEWTON_H
 
 #include <algorithm>
 #include <cmath>
 #include "Rodin/Types.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /// @brief Quadratic-model minimizer, bounded by physical motion rather than raw alpha.
   /// Positive fitting curvature supplies the fallback when robust curvature is nonpositive.
