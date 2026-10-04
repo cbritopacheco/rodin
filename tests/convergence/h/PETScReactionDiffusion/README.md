@@ -65,7 +65,13 @@ All forms and error integrals use order 12. CG uses relative tolerance
 $10^{-13}$, absolute tolerance $10^{-14}$, divergence threshold $10^5$,
 and at most 50,000 iterations. Each solve requires a positive PETSc
 convergence reason and a finite reported residual below $10^{-8}$; this
-residual is not an independently recomputed unpreconditioned residual.
+reported residual is distinct from the independently recomputed
+$\|Ax-b\|_2/\max(1,\|b\|_2)<10^{-11}$ also required by the shared
+`PETScReactionDiffusionProblem` workload. The workload constructs a fresh
+fixed-layout two-field problem for each measurement, with independently
+selectable norm quadrature and a solve-scoped const observer. It is shared
+with the [p](../../p/PETScReactionDiffusion/README.md) and
+[hp](../../hp/PETScReactionDiffusion/README.md) counterparts.
 At `n=5`, P2 sensitivity raises quadrature to 14 and tightens relative
 tolerance to $10^{-14}$; every component error must change by less than
 $10^{-6}$ relative to its baseline.
@@ -88,5 +94,6 @@ Entries are split by geometry/rank count, labelled `slow`, and have a
 PETSc CI job selects them explicitly by name.
 
 This suite certifies real two-field full-Dirichlet h studies on affine
-meshes. Complex fields, nonsymmetric reaction, mixed boundaries, p/hp,
-and curved geometry are separate tasks. Point/0D has no PDE h-rate here.
+meshes. Complex fields, nonsymmetric reaction and mixed boundaries are
+outside this suite. The p/hp and curved studies have separate
+specifications. Point/0D has no PDE h-rate here.

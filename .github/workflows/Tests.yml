@@ -194,6 +194,8 @@ jobs:
           cmake --build build -j 2 --target
           RodinConvergencePPETScNonlinearPoisson
           RodinConvergenceHPPETScNonlinearPoisson
+          RodinConvergencePPETScReactionDiffusion
+          RodinConvergenceHPPETScReactionDiffusion
           RodinConvergencePPETScStokes
           RodinConvergenceHPPETScStokes
 

@@ -27,6 +27,15 @@ quadrature order 16; CG uses relative tolerance $10^{-13}$ and at most
 20,000 iterations. Segment, triangle, quadrilateral, tetrahedron, pyramid,
 hexahedron and wedge are all tested.
 
+A second degree path retains $\alpha=0.2$ and instead uses the shared
+`ReactionDiffusionData` variant
+$\kappa=(1,2)$, $u_0=e^s$, $u_1=2e^{-s}$, and
+$f_i=(1-d\kappa_i)u_i+\alpha u_{1-i}$. This matches the h/hp and
+real-PETSc degree suites without replacing the original equal-diffusion
+problem. It uses the same $n=2$, degrees and per-interval decay floors,
+with assembly order 16 and independent norm order 18.
+`FieldConvergence` checks both norms of both fields on every interval.
+
 As a negative control, replacing the first load's coupling contribution
 $\alpha w_*$ by $20\alpha w_*$ caused the adjacent-degree assertions to
 fail on six of the seven geometries. The correct manufactured load was

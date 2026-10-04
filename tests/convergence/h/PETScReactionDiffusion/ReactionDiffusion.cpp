@@ -12,9 +12,7 @@
 #include <petsc.h>
 
 #include "Convergence.h"
-#include "../../ReactionDiffusion.h"
-#include "Rodin/Assembly.h"
-#include "Rodin/PETSc.h"
+#include "../../PETScReactionDiffusionProblem.h"
 
 #ifdef RODIN_USE_MPI
 #include <boost/mpi/environment.hpp>
@@ -52,43 +50,8 @@ namespace Rodin::Tests::Convergence::H::PETScReactionDiffusion
     ReactionDiffusionData::Field field, bool omitCoupling = false,
     size_t quadratureOrder = 12, Real tolerance = 1e-13)
   {
-    const ReactionDiffusionData data(mesh.getDimension(), field);
-    const auto exactU = data.getSolution(0), exactW = data.getSolution(1);
-    const auto sourceU = data.getSource(0), sourceW = data.getSource(1);
-    const auto gradientU = data.getGradient(0), gradientW = data.getGradient(1);
-    H1<K, Real, MeshType> space(std::integral_constant<size_t, K>{}, mesh);
-    PETSc::Variational::TrialFunction u(space), w(space);
-    PETSc::Variational::TestFunction v(space), z(space);
-    const Real alpha = omitCoupling ? 0 : 0.2;
-    auto aUU = Integral(Grad(u), Grad(v));
-    auto aWW = Integral(2 * Grad(w), Grad(z));
-    auto rUU = Integral(u, v);
-    auto rWW = Integral(w, z);
-    auto rUW = Integral(alpha * w, v);
-    auto rWU = Integral(alpha * u, z);
-    auto bU = Integral(sourceU, v);
-    auto bW = Integral(sourceW, z);
-    aUU.setOrder(quadratureOrder);
-    aWW.setOrder(quadratureOrder);
-    rUU.setOrder(quadratureOrder);
-    rWW.setOrder(quadratureOrder);
-    rUW.setOrder(quadratureOrder);
-    rWU.setOrder(quadratureOrder);
-    bU.setOrder(quadratureOrder);
-    bW.setOrder(quadratureOrder);
-    Problem problem(u, w, v, z);
-    problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW + DirichletBC(u, exactU) +
-      DirichletBC(w, exactW);
-    PETSc::Solver::CG solver(problem);
-    solver.setTolerances(tolerance, 1e-14, 1e5, 50000);
-    solver.solve();
-    KSPConvergedReason reason = KSP_CONVERGED_ITERATING;
-    EXPECT_EQ(KSPGetConvergedReason(solver.getHandle(), &reason), PETSC_SUCCESS);
-    EXPECT_GT(reason, 0);
-    EXPECT_TRUE(std::isfinite(solver.getError()));
-    EXPECT_LT(solver.getError(), 1e-8);
-    return {ErrorNorm::compute(mesh, u.getSolution(), exactU, gradientU, quadratureOrder),
-      ErrorNorm::compute(mesh, w.getSolution(), exactW, gradientW, quadratureOrder)};
+    return PETScReactionDiffusionProblem<K, MeshType>(mesh, field, quadratureOrder)
+      .solve(omitCoupling, tolerance);
   }
 
   template <class ContextType, size_t K>

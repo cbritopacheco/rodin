@@ -6,6 +6,7 @@ add_subdirectory(ReactionDiffusion)
 add_subdirectory(NonlinearPoisson)
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
   add_subdirectory(PETScNonlinearPoisson)
+  add_subdirectory(PETScReactionDiffusion)
 endif()
 add_subdirectory(Stokes)
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX

@@ -188,7 +188,7 @@ exists yet.
 | Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
-| Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
+| Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
@@ -349,7 +349,8 @@ Its PETSc [p](p/PETScNonlinearPoisson/README.md) and
 every-interval acceptance, higher-degree tangent controls, separate
 assembly/norm quadrature and nonlinear-tolerance checks, and the exact
 logical free-dimension contract for a fully constrained coarse mesh.
-The real-PETSc CI degree-refinement job runs these suites and Stokes p/hp
+The real-PETSc CI degree-refinement job runs these suites, coupled
+reaction–diffusion and Stokes p/hp
 separately from the h job, with sequential and OpenMP assembly in each.
 The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
@@ -363,6 +364,14 @@ oracles, and rank matrix. The
 [reaction–diffusion hp specification](hp/ReactionDiffusion/README.md)
 states the combined path and separate component errors; its path rates are
 not fixed-degree h orders.
+The PETSc [p](p/PETScReactionDiffusion/README.md) and
+[hp](hp/PETScReactionDiffusion/README.md) counterparts use the shared
+unequal-diffusion data, componentwise every-interval acceptance, resolved
+wrong-coupling patches, independently recomputed residuals, and separate
+assembly/norm quadrature and solver-tolerance controls. The native p suite
+retains its equal-diffusion case and additionally checks the same
+unequal-diffusion fields, so backend comparisons do not silently change
+the manufactured problem.
 The [PETSc Stokes specification](h/PETScStokes/README.md) records the six
 applicable geometries, pressure-sensitive negative control, global divergence
 norm check, factorization settings, and separate velocity/pressure orders.
@@ -438,7 +447,7 @@ After the reaction–diffusion h/hp, complex Helmholtz h, PETSc Stokes h,
 and native nonlinear Poisson p/hp batches, real-PETSc/SNES nonlinear Poisson
 adds the local/MPI h path. Native Stokes p/hp fills the remaining native
 p/hp entries in the table. Priority 1 continues with missing
-PETSc mixed-boundary/refinement variants; Stokes and nonlinear Poisson
+PETSc mixed-boundary/refinement variants; Stokes, coupled reaction–diffusion and nonlinear Poisson
 now have their local/MPI p/hp counterparts. Priorities 2–4 address curved fields, approximated
 nonpolynomial geometry, and exact-index MPI structural combinations.
 The curved complex Helmholtz batch supplies P1/P2 field rates on exact

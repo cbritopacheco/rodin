@@ -29,6 +29,8 @@ namespace Rodin::Tests::Convergence
   class ReactionDiffusionData
   {
     public:
+      static constexpr Real Coupling =
+        0.2; // Dimensionless off-diagonal reaction coefficient.
       enum class Field
       {
         Constant,
@@ -105,7 +107,7 @@ namespace Rodin::Tests::Convergence
             laplacian = 2 * Real(dim) * Real(component + 1);
           else if (field == Field::Smooth)
             laplacian = Real(dim) * exact(p);
-          return -Real(component + 1) * laplacian + exact(p) + 0.2 * other(p);
+          return -Real(component + 1) * laplacian + exact(p) + Coupling * other(p);
         });
       }
 
