@@ -252,6 +252,46 @@ TEST(MPI_Location_AABB, EmptyRanksAndMPISubMesh)
   EXPECT_EQ(meshLocator.locate(2, x).has_value(), world->rank() == 0);
 }
 
+TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
+{
+  Context::MPI context(*environment, *world);
+  auto parent = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  Shard::Builder builder;
+  builder.initialize(parent);
+  for (Index v = 0; v < 3; ++v)
+  {
+    const int owner = v == 2 && world->size() > 1 ? 1 : 0;
+    const auto [i, inserted] = builder.include({0, v},
+      world->rank() == owner ? Shard::State::Owned : Shard::State::Shared);
+    if (world->rank() != owner)
+      builder.setOwner(0, i, owner);
+    else
+      for (int r = 0; r < world->size(); ++r)
+        if (r != owner)
+          builder.halo(0, i, r);
+  }
+  for (Index c = 0; c < 2; ++c)
+  {
+    const int owner = static_cast<int>(c % world->size());
+    const auto [i, inserted] = builder.include({1, c},
+      world->rank() == owner ? Shard::State::Owned : Shard::State::Ghost);
+    if (world->rank() != owner)
+      builder.setOwner(1, i, owner);
+    else
+      for (int r = 0; r < world->size(); ++r)
+        if (r != owner)
+          builder.halo(1, i, r);
+  }
+  auto mesh = MPIMesh::Builder(context).initialize(builder.finalize()).finalize();
+  Location::AABB locator(mesh);
+  const auto& boundary = parent.getVertexCoordinates(1);
+  EXPECT_EQ(locator.locate(1, boundary).has_value(), world->rank() < 2);
+  EXPECT_EQ(locator.locate(0, boundary).has_value(), world->rank() == 0);
+  for (int q = 0; q <= world->rank(); ++q)
+    EXPECT_EQ(locator.locate(boundary).has_value(), world->rank() < 2);
+  world->barrier();
+}
+
 class MPILocationGeometryTest : public ::testing::TestWithParam<Polytope::Type> {};
 TEST_P(MPILocationGeometryTest, TransfersAndLocatesAllOrders)
 {

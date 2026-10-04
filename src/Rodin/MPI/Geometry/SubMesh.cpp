@@ -37,7 +37,9 @@ namespace Rodin::Geometry
     const Mesh<Context::MPI>& parent)
   {
     const auto& shard = parent.getShard();
-    const size_t dim = parent.getDimension();
+    // Preserve parent metadata capacity on ranks with no local entities. The
+    // collective selected dimension is established later in completeOverlap().
+    const size_t dim = std::max(parent.getDimension(), shard.getMetadataDimension());
 
     m_parent = parent;
 

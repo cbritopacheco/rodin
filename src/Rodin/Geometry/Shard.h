@@ -534,6 +534,18 @@ namespace Rodin::Geometry
       UnorderedMap<Index, IndexSet>& getHalo(size_t d);
 
       /**
+       * @brief Highest dimension for which shard metadata is allocated.
+       *
+       * Empty shards retain ownership/index-map capacity for their distributed
+       * parent even when the local mesh has topological dimension zero.
+       * This is capacity, not the dimension of a selected submesh.
+       */
+      size_t getMetadataDimension() const
+      {
+        return m_state.empty() ? 0 : m_state.size() - 1;
+      }
+
+      /**
        * @brief Returns the local state array for dimension `d`.
        * @param[in] d Topological dimension.
        * @returns Const reference to per-entity states.
