@@ -46,40 +46,52 @@ namespace Rodin::Tests::Convergence
       {
         assert(component < 2);
         return Variational::RealFunction(
-          [dim = m_dimension, field = m_field, component](const Geometry::Point& p) {
-            Real s = 0;
-            for (size_t j = 0; j < dim; ++j)
-              s += p(j);
-            const Real c = Real(component + 1);
-            if (field == Field::Constant)
-              return c;
-            if (field == Field::Smooth)
-              return c * std::exp(component == 0 ? s : -s);
-            return c * (1 + (field == Field::Affine ? s : s * s));
+          [data = *this, component](const Geometry::Point& p) {
+            return data.getSolution(p.getPhysicalCoordinates(), component);
           });
+      }
+
+      /** @brief Physical-coordinate evaluation for exact-domain comparisons. */
+      Real getSolution(const Math::SpatialPoint& x, size_t component) const
+      {
+        assert(component < 2);
+        Real s = 0;
+        for (size_t j = 0; j < m_dimension; ++j)
+          s += x(j);
+        const Real c = Real(component + 1);
+        if (m_field == Field::Constant)
+          return c;
+        if (m_field == Field::Smooth)
+          return c * std::exp(component == 0 ? s : -s);
+        return c * (1 + (m_field == Field::Affine ? s : s * s));
       }
 
       auto getGradient(size_t component) const
       {
-        const auto exact = getSolution(component);
-        return Variational::VectorFunction(m_dimension,
-          [dim = m_dimension, field = m_field, component, exact](
-            const Geometry::Point& p) {
-            Real s = 0;
-            for (size_t j = 0; j < dim; ++j)
-              s += p(j);
-            Real derivative = Real(component + 1);
-            if (field == Field::Constant)
-              derivative = 0;
-            else if (field == Field::Quadratic)
-              derivative *= 2 * s;
-            else if (field == Field::Smooth)
-              derivative = (component == 0 ? 1 : -1) * exact(p);
-            Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-            for (size_t j = 0; j < dim; ++j)
-              value(j) = derivative;
-            return value;
+        return Variational::VectorFunction(
+          m_dimension, [data = *this, component](const Geometry::Point& p) {
+            return data.getGradient(p.getPhysicalCoordinates(), component);
           });
+      }
+
+      Math::SpatialVector<Real> getGradient(
+        const Math::SpatialPoint& x, size_t component) const
+      {
+        assert(component < 2);
+        Real s = 0;
+        for (size_t j = 0; j < m_dimension; ++j)
+          s += x(j);
+        Real derivative = Real(component + 1);
+        if (m_field == Field::Constant)
+          derivative = 0;
+        else if (m_field == Field::Quadratic)
+          derivative *= 2 * s;
+        else if (m_field == Field::Smooth)
+          derivative = (component == 0 ? 1 : -1) * getSolution(x, component);
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(m_dimension));
+        for (size_t j = 0; j < m_dimension; ++j)
+          value(j) = derivative;
+        return value;
       }
 
       auto getSource(size_t component) const

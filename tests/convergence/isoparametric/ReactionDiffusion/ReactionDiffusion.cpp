@@ -6,7 +6,7 @@
  */
 
 /** @file
- * @brief Two coupled scalar diffusion fields on exact quadratic geometry.
+ * @brief Coupled scalar fields on exact quadratic and approximated sine geometry.
  */
 
 #include <gtest/gtest.h>
@@ -14,6 +14,8 @@
 #include "Rodin/Solver.h"
 #include "../../ReactionDiffusion.h"
 #include "../../CurvedGeometry.h"
+#include "../../LiftedConvergence.h"
+#include "../../SineMap.h"
 
 #ifdef RODIN_CURVED_REACTION_DIFFUSION_PETSC
 #include "Rodin/PETSc.h"
@@ -49,6 +51,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
   // Absolute dimensionless errors separating omitted coupling from roundoff.
   constexpr Real ControlL2 = 1e-3;
   constexpr Real ControlH1 = 1e-2;
+  constexpr size_t NormOrder = 13, RefinedNormOrder = 18;
+  constexpr Real ControlRatio = 2;
 
 #if defined(RODIN_CURVED_REACTION_DIFFUSION_PETSC) && defined(RODIN_USE_MPI)
   boost::mpi::environment* environment = nullptr;
@@ -57,7 +61,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
 
   /** @brief Coupled mapped workload with shared physical data and error oracles.
    * @par Architecture
-   * The mesh owns exact P2 maps on cells and traces. Each solve builds fresh
+   * The mesh owns P2 maps on cells and traces: exact for the quadratic map,
+   * interpolated for the sine map. Each solve builds fresh
    * scalar spaces and a two-field system. Backend policy is explicit; norms
    * integrate physical errors on owned cells before the MPI reduction.
    */
@@ -65,10 +70,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
   class Workload
   {
     public:
-      Workload(Polytope::Type geometry, size_t n)
+      using Map = typename CurvedGeometry<Mesh<ContextType>>::Map;
+      using LiftedErrors = std::array<LiftedErrorNorm::Result, 2>;
+      Workload(
+        Polytope::Type geometry, size_t n, Map map = Map::Quadratic, bool lifted = false)
         : m_mesh(makeMesh(geometry, n)),
-          m_geometry(m_mesh)
+          m_geometry(m_mesh, map)
       {
+        if (lifted)
+          m_reference.emplace(m_mesh);
         m_geometry.template install<2>();
       }
 
@@ -79,9 +89,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
 
       template <size_t K>
       std::array<ErrorNorms, 2> solve(Data::Field field, bool omitCoupling = false,
-        size_t order = AssemblyOrder, Real tolerance = SolverTolerance) const
+        size_t order = AssemblyOrder, Real tolerance = SolverTolerance,
+        size_t normOrder = 0, LiftedErrors* lifted = nullptr) const
       {
-        const size_t dim = m_mesh.getDimension();
+        const size_t dim = m_mesh.getSpaceDimension();
         const Data data(dim, field);
         const auto exactU = data.getSolution(0), exactW = data.getSolution(1);
         const auto sourceU = data.getSource(0), sourceW = data.getSource(1);
@@ -149,10 +160,33 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
 #endif
         EXPECT_TRUE(std::isfinite(relative));
         EXPECT_LT(relative, ResidualTolerance);
+        const size_t integrationOrder = normOrder == 0 ? order + 2 : normOrder;
+        if (lifted)
+        {
+          assert(m_reference);
+          // Adapter selects a scalar component without duplicating analytic data.
+          struct Component
+          {
+              const Data& data;
+              size_t index;
+              Real getSolution(const Math::SpatialPoint& x) const
+              {
+                return data.getSolution(x, index);
+              }
+              auto getGradient(const Math::SpatialPoint& x) const
+              {
+                return data.getGradient(x, index);
+              }
+          };
+          (*lifted)[0] = LiftedErrorNorm::compute(*m_reference, m_mesh, u.getSolution(),
+            Component{data, 0}, SineMap(), integrationOrder);
+          (*lifted)[1] = LiftedErrorNorm::compute(*m_reference, m_mesh, w.getSolution(),
+            Component{data, 1}, SineMap(), integrationOrder);
+        }
         return {ErrorNorm::compute(
-                  m_mesh, u.getSolution(), exactU, data.getGradient(0), order + 2),
+                  m_mesh, u.getSolution(), exactU, data.getGradient(0), integrationOrder),
           ErrorNorm::compute(
-            m_mesh, w.getSolution(), exactW, data.getGradient(1), order + 2)};
+            m_mesh, w.getSolution(), exactW, data.getGradient(1), integrationOrder)};
       }
 
     private:
@@ -167,6 +201,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
 #endif
       }
       Mesh<ContextType> m_mesh;
+      Optional<Mesh<ContextType>> m_reference;
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
 
@@ -174,6 +209,100 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
   class CurvedReactionDiffusionTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
+      using Map = typename Workload<ContextType>::Map;
+      using LiftedErrors = typename Workload<ContextType>::LiftedErrors;
+
+      template <size_t K>
+      void checkApproximatedRates() const
+      {
+        std::array<LiftedConvergence, 2> histories;
+        const auto levels = K == 1 ? std::initializer_list<size_t>{5, 9, 17}
+          : this->GetParam() == Polytope::Type::Segment
+          ? std::initializer_list<size_t>{5, 9, 17, 33}
+          : std::initializer_list<size_t>{3, 5, 9};
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "degree=" << K << " n=" << n);
+          Workload<ContextType> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Smooth, false,
+            AssemblyOrder, SolverTolerance, NormOrder, &lifted);
+          for (size_t component = 0; component < histories.size(); ++component)
+          {
+            SCOPED_TRACE(::testing::Message() << "field=" << component);
+            histories[component].append(
+              Real(1) / Real(n - 1), represented[component], lifted[component]);
+          }
+        }
+        for (size_t component = 0; component < histories.size(); ++component)
+        {
+          SCOPED_TRACE(::testing::Message() << "field=" << component);
+          histories[component].expectRates(K);
+        }
+      }
+
+      template <size_t K>
+      void checkApproximatedSensitivity() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        std::vector<std::array<LiftedConvergence::Components, 2>> errors;
+        for (size_t i = 0; i < 4; ++i)
+        {
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Smooth, false,
+            i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolverTolerance,
+            i == 3 ? RefinedNormOrder : NormOrder, &lifted);
+          for (size_t component = 0; component < 2; ++component)
+          {
+            LiftedConvergence::expectDecomposition(lifted[component]);
+          }
+          errors.push_back({LiftedConvergence::components(represented[0], lifted[0]),
+            LiftedConvergence::components(represented[1], lifted[1])});
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+          for (size_t component = 0; component < 2; ++component)
+          {
+            SCOPED_TRACE(
+              ::testing::Message() << "control=" << i << " field=" << component);
+            LiftedConvergence::expectSensitivity(
+              errors[0][component], errors[i][component]);
+          }
+      }
+
+      void checkApproximatedPatchAndControl() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        LiftedErrors base, wrong;
+        const auto patch = problem.template solve<2>(
+          Data::Field::Affine, false, AssemblyOrder, SolverTolerance, NormOrder, &base);
+        const auto incorrect = problem.template solve<2>(
+          Data::Field::Affine, true, AssemblyOrder, SolverTolerance, NormOrder, &wrong);
+        for (size_t component = 0; component < 2; ++component)
+        {
+          SCOPED_TRACE(::testing::Message() << "field=" << component);
+          LiftedConvergence::expectDecomposition(base[component]);
+          LiftedConvergence::expectDecomposition(wrong[component]);
+          for (const auto& e : {patch[component], base[component].field})
+          {
+            EXPECT_LT(e.getL2(), PatchTolerance);
+            EXPECT_LT(e.getH1Seminorm(), PatchTolerance);
+          }
+          EXPECT_EQ(base[component].geometry.getL2(), wrong[component].geometry.getL2());
+          EXPECT_EQ(base[component].geometry.getH1Seminorm(),
+            wrong[component].geometry.getH1Seminorm());
+          for (const auto& e : {incorrect[component], wrong[component].field})
+          {
+            EXPECT_GT(e.getL2(), ControlL2);
+            EXPECT_GT(e.getH1Seminorm(), ControlH1);
+          }
+          EXPECT_GT(
+            wrong[component].total.getL2(), ControlRatio * base[component].total.getL2());
+          EXPECT_GT(wrong[component].total.getH1Seminorm(),
+            ControlRatio * base[component].total.getH1Seminorm());
+        }
+      }
+
       template <size_t K>
       void checkRates() const
       {
@@ -265,6 +394,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
   };
 
   using LocalTest = CurvedReactionDiffusionTest<Context::Local>;
+  TEST_P(LocalTest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(LocalTest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(LocalTest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(LocalTest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(LocalTest, ApproximatedAffinePatchRejectsOmittedCoupling)
+  {
+    checkApproximatedPatchAndControl();
+  }
   TEST_P(LocalTest, P1OptimalRates)
   {
     checkRates<1>();
@@ -303,6 +452,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
 
 #if defined(RODIN_CURVED_REACTION_DIFFUSION_PETSC) && defined(RODIN_USE_MPI)
   using MPITest = CurvedReactionDiffusionTest<Context::MPI>;
+  TEST_P(MPITest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(MPITest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(MPITest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(MPITest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(MPITest, ApproximatedAffinePatchRejectsOmittedCoupling)
+  {
+    checkApproximatedPatchAndControl();
+  }
   TEST_P(MPITest, P1OptimalRates)
   {
     checkRates<1>();

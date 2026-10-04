@@ -1,4 +1,4 @@
-# Coupled reaction–diffusion on quadratic geometry
+# Coupled reaction–diffusion on exact and approximated geometry
 
 ## Mathematical problem and representation
 
@@ -113,3 +113,58 @@ This detects double-counted halo cells independently of PDE convergence.
 
 The suite is labelled slow; each geometry registration has a 1800-second
 timeout, and pyramid registrations share a resource lock.
+
+## Represented and lifted sine-map studies
+
+The approximated-domain cases instead use the exact map
+$\Phi(\xi)=\xi+0.1\sin(\pi\xi_0)e_{d-1}$ and its quadratic
+interpolant $\Phi_h$. Physical sources and traces retain the same exact
+fields on $\Omega_h=\Phi_h((0,1)^d)$. This separates field approximation
+from geometric displacement of the domain.
+In dimensions two and three, the first coordinate is unchanged and both
+map determinants equal one. In one dimension,
+$\Phi'=1+0.1\pi\cos(\pi\xi)>0$. The quadratic interpolant satisfies
+$\Phi_h'\ge1-0.3\pi>0$: its endpoint derivatives are twice a
+half-interval secant minus the full-interval secant, bounded by $3\pi$
+for the sine contribution. The piecewise-linear derivative of the quadratic
+interpolant lies between those endpoints. Thus the specified hierarchy
+retains regular maps; no assumption about interpolation overshoot is needed.
+
+For $x=\Phi(\xi)$ and $x_h=\Phi_h(\xi)$, each component has defects
+
+$$
+e_{i,F}(x)=u_{i,h}(x_h)-u_i(x_h),\qquad
+e_{i,G}(x)=u_i(x_h)-u_i(x),\qquad
+e_{i,T}=e_{i,F}+e_{i,G}.
+$$
+
+The shared `LiftedErrorNorm` integrates these quantities on the exact domain
+and applies $D\Phi^{-T}D\Phi_h^T$ to physical gradients before forming
+derivative defects. It pairs cells through retained logical indices and
+ordered vertices, without inverse point location. Only owned reference cells
+contribute to MPI norms. `LiftedConvergence` applies the same decomposition,
+adjacent-rate and sensitivity policies to each scalar field; the two-field
+solve and manufactured data remain specific to this formulation.
+
+For each field, the expected displacement/gradient orders are $(p+1,p)$
+for represented-domain and lifted-field errors, $(3,2)$ for geometry defects,
+and $(\min(p,2)+1,\min(p,2))$ for total errors, under the same regularity
+and geometry assumptions as above. Both triangle inequalities are checked
+with absolute roundoff allowance $10^{-11}$; errors are not assumed to add
+in norm. Every adjacent interval retains the margins $0.55$ and $0.45$.
+P1 uses $n=5,9,17$; P2 uses $n=3,5,9$, except Segment uses
+$n=5,9,17,33$ to resolve the coarse pre-asymptotic regime.
+
+At $n=5$, assembly order $11\to16$, norm order $13\to18$ and solve
+tolerance $10^{-13}\to10^{-14}$ are changed independently. All four
+error components for both fields must change by less than $10^{-6}$
+relatively. The physical-affine P2 patch retains represented and lifted-field
+errors below $10^{-9}$. Omitting both off-diagonal reaction terms, while
+retaining the correct sources and traces, must violate the absolute field
+error floors above and increase each total norm by a factor greater than two.
+The geometry defect must remain identical to the correct solve.
+
+All seven geometries have separate `Approximated` registrations for native,
+real-PETSc local and MPI ranks one through four. Sequential/OpenMP builds
+use identical acceptance logic. These cases retain slow-test labels,
+1800-second timeouts and the shared pyramid resource lock.

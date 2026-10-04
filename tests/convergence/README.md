@@ -188,7 +188,7 @@ exists yet.
 | Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact curved P2 maps; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
-| Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps; native local and real-PETSc local/MPI |
+| Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 maps; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
@@ -259,6 +259,9 @@ axis, $h=1/(n-1)$, and field degree $p$:
   `n=3→5→9` for P2 on all seven geometries; its
   [suite specification](isoparametric/ReactionDiffusion/README.md) states
   both component rates, representable patches and coupling controls.
+  Its smooth sine-map hierarchy measures represented-domain and lifted
+  field/geometry/total errors for both components, with the same P1/P2
+  levels except P2 Segment (`n=5→9→17→33`).
   Curved nonlinear Poisson uses the same P1/P2 sequences; its
   [suite specification](isoparametric/NonlinearPoisson/README.md) describes
   nonzero-trace lifting, residual/tangent consistency and independent controls.
