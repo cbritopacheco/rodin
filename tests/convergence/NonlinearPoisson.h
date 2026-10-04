@@ -9,6 +9,7 @@
 #define RODIN_TESTS_CONVERGENCE_NONLINEAR_POISSON_H
 
 #include <functional>
+#include <utility>
 #include <gtest/gtest.h>
 
 #include "Convergence.h"
@@ -42,45 +43,53 @@ namespace Rodin::Tests::Convergence
 
       auto getSolution() const
       {
-        return Variational::RealFunction([dim = m_dimension, amplitude = m_amplitude,
-                                           field = m_field](const Geometry::Point& x) {
-          if (field == Field::Constant)
-            return amplitude;
-          if (field == Field::Affine)
-          {
-            Real sum = 1;
-            for (size_t j = 0; j < dim; ++j)
-              sum += x(j);
-            return amplitude * sum;
-          }
-          Real value = amplitude;
-          for (size_t j = 0; j < dim; ++j)
-            value *= std::sin(Math::Constants::pi() * x(j));
-          return value;
+        return Variational::RealFunction([data = *this](const Geometry::Point& x) {
+          return data.getSolution(x.getPhysicalCoordinates());
         });
+      }
+
+      Real getSolution(const Math::SpatialPoint& x) const
+      {
+        if (m_field == Field::Constant)
+          return m_amplitude;
+        if (m_field == Field::Affine)
+        {
+          Real sum = 1;
+          for (size_t j = 0; j < m_dimension; ++j)
+            sum += x(j);
+          return m_amplitude * sum;
+        }
+        Real value = m_amplitude;
+        for (size_t j = 0; j < m_dimension; ++j)
+          value *= std::sin(Math::Constants::pi() * x(j));
+        return value;
       }
 
       auto getGradient() const
       {
-        return Variational::VectorFunction(m_dimension,
-          [dim = m_dimension, amplitude = m_amplitude, field = m_field](
-            const Geometry::Point& x) {
-            const Real pi = Math::Constants::pi();
-            Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-            for (size_t j = 0; j < dim; ++j)
-            {
-              if (field != Field::Sine)
-              {
-                value(j) = field == Field::Constant ? Real(0) : amplitude;
-                continue;
-              }
-              value(j) = amplitude * pi * std::cos(pi * x(j));
-              for (size_t k = 0; k < dim; ++k)
-                if (k != j)
-                  value(j) *= std::sin(pi * x(k));
-            }
-            return value;
+        return Variational::VectorFunction(
+          m_dimension, [data = *this](const Geometry::Point& x) {
+            return data.getGradient(x.getPhysicalCoordinates());
           });
+      }
+
+      Math::SpatialVector<Real> getGradient(const Math::SpatialPoint& x) const
+      {
+        const Real pi = Math::Constants::pi();
+        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(m_dimension));
+        for (size_t j = 0; j < m_dimension; ++j)
+        {
+          if (m_field != Field::Sine)
+          {
+            value(j) = m_field == Field::Constant ? Real(0) : m_amplitude;
+            continue;
+          }
+          value(j) = m_amplitude * pi * std::cos(pi * x(j));
+          for (size_t k = 0; k < m_dimension; ++k)
+            if (k != j)
+              value(j) *= std::sin(pi * x(k));
+        }
+        return value;
       }
 
       auto getSource() const
@@ -145,6 +154,17 @@ namespace Rodin::Tests::Convergence
       template <size_t K>
       ErrorNorms solve(bool omitCubic = false, Real tolerance = 1e-11) const
       {
+        return solve<K>(omitCubic, tolerance, 0, [](const auto&, const auto&) {});
+      }
+
+      /** @brief Measure the converged state without duplicating Newton assembly.
+       * Observer lifetimes are bounded by this solve. Norm quadrature can be
+       * varied independently of residual/tangent quadrature.
+       */
+      template <size_t K, class Observer>
+      ErrorNorms solve(
+        bool omitCubic, Real tolerance, size_t normOrder, Observer&& observe) const
+      {
         using namespace Variational;
         H1<K, Real> space(std::integral_constant<size_t, K>{}, m_mesh.get());
         GridFunction current(space);
@@ -183,8 +203,9 @@ namespace Rodin::Tests::Convergence
         EXPECT_LT(problem.getLinearSystem().getVector().norm() /
             std::max(Real(1), newton.getReport().initialResidual),
           ResidualTolerance);
-        return ErrorNorm::compute(
-          m_mesh.get(), current, getSolution(), getGradient(), m_order);
+        observe(std::as_const(current), m_data);
+        return ErrorNorm::compute(m_mesh.get(), current, getSolution(), getGradient(),
+          normOrder == 0 ? m_order : normOrder);
       }
 
       /** @brief Central difference of the assembled residual, compared with

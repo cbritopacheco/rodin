@@ -1,4 +1,4 @@
-# Semilinear Poisson on quadratic geometry
+# Semilinear Poisson on exact and approximated geometry
 
 ## Problem, boundary lifting and architecture
 
@@ -118,3 +118,54 @@ CMake registers native local and real-PETSc local/MPI suites with one to four
 ranks. Sequential/OpenMP is selected by the build. Complex-PETSc builds do
 not register this real suite. Registrations are labelled slow, have
 1800-second timeouts, and serialize pyramid cases through a resource lock.
+
+## Approximated geometry and exact-domain errors
+
+Separate cases interpolate $\Phi(\xi)=\xi+0.1\sin(\pi\xi_0)e_{d-1}$
+with degree-two geometry $\Phi_h$, defining $\Omega_h=\Phi_h((0,1)^d)$.
+The same physical sine field, source and essential trace are prescribed on
+$\Omega_h$. The exact-domain comparison uses $x=\Phi(\xi)$,
+$x_h=\Phi_h(\xi)$ and the defects
+
+$$
+e_F(x)=u_h(x_h)-u(x_h),\qquad
+e_G(x)=u(x_h)-u(x),\qquad e_T=e_F+e_G.
+$$
+
+The shared lift integrates on the exact domain, transforms gradients by
+$D\Phi^{-T}D\Phi_h^T$, and counts owned reference cells only in MPI.
+Both triangle inequalities are checked with an absolute allowance of
+$10^{-11}$; norms are not assumed to add. Logical cell indices and ordered
+vertices preserve chart correspondence without coordinate-tolerance matching.
+The regularity argument for these exact and quadratic-interpolated sine maps
+is given in the [coupled diffusion specification](../ReactionDiffusion/README.md).
+
+Under the stated regularity hypotheses, represented and lifted-field errors
+have orders $(p+1,p)$ in L2/H1 seminorm; geometry defects have orders $(3,2)$;
+total errors have orders $(\min(p,2)+1,\min(p,2))$. Every adjacent interval
+checks positive, finite, decreasing errors within the original $0.55$/$0.45$
+rate windows. P1 uses $n=5,9,17$ and P2 uses $n=3,5,9$, except
+Segment uses $n=5,9,17,33$ to resolve its coarse pre-asymptotic regime.
+
+Native Newton and PETSc SNES share a post-solve measurement callback. It
+receives the converged physical state and analytic data while their lifetimes
+are valid; SNES synchronizes the state before invoking it. This supplies
+lifted norms without reimplementing nonlinear assembly or retaining a field
+beyond its space lifetime. Existing solve defaults are unchanged.
+
+At $n=5$, assembly order $12\to16$, norm order $14\to18$ and
+nonlinear tolerance $10^{-11}\to10^{-12}$ are varied independently;
+all represented/lifted components must change by less than $10^{-6}$
+relatively. A physical-affine P2 patch requires represented and lifted-field
+errors below $10^{-9}$. Omitting the cubic term while retaining the correct
+source and trace must exceed the dimensionless field-error floors above and
+increase both total norms by more than a factor of two; geometry errors must
+remain identical. At $n=3$, the homogeneous reference-coordinate direction
+also checks residual/tangent consistency on the sine-map mesh for both field
+degrees, retaining the deliberately incorrect P2 tangent control.
+
+All seven geometries use separate `Approximated` CTest registrations in
+native and real-PETSc local/MPI configurations, including ranks one through
+four and sequential/OpenMP builds. Slow labels, timeouts and pyramid locking
+are retained. These checks concern the stated finite hierarchies, not a
+uniform asymptotic result for arbitrary curved meshes.

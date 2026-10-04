@@ -189,7 +189,7 @@ exists yet.
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact curved P2 maps; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
-| Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 maps; native Newton and real-PETSc SNES local/MPI |
+| Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
 | Geometry approximation / Poisson patch | Map/derivative rates at fixed geometry degrees $q=1,2,3$ | $q=1\to2\to3$ at fixed $n=3$, with affine $p=q$ patches | $(n,q)=(2,1)\to(3,2)\to(5,3)$, with affine $p=q$ patches | Sine-map approximation and affine Poisson patches with $p=q$; native and real-PETSc local/MPI |
@@ -265,6 +265,10 @@ axis, $h=1/(n-1)$, and field degree $p$:
   Curved nonlinear Poisson uses the same P1/P2 sequences; its
   [suite specification](isoparametric/NonlinearPoisson/README.md) describes
   nonzero-trace lifting, residual/tangent consistency and independent controls.
+  Its smooth sine-map hierarchy also measures represented-domain and lifted
+  field/geometry/total errors, with P2 Segment using `n=5→9→17→33`.
+  Assembly, norm quadrature and nonlinear stopping tolerances are varied
+  independently below the field-error budget.
   Curved P0 projection uses `n=5→9→17` on all seven geometries; its
   [suite specification](isoparametric/P0Projection/README.md) describes
   physical cell moments, interpolation rejection and analytic P0g means.

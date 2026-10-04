@@ -142,8 +142,10 @@ jobs:
 
   PETScCurvedConvergence:
     runs-on: ubuntu-24.04
-    # Resolved curved studies get a separate budget from the flat PDE matrix.
-    timeout-minutes: 120
+    # The new approximated elasticity, coupled diffusion and nonlinear matrices
+    # alone take about 78 minutes on the local sequential stack. Include the
+    # existing curved suites and build time without weakening refinement gates.
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:

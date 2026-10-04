@@ -8,6 +8,8 @@
 #ifndef RODIN_TESTS_CONVERGENCE_PETSC_NONLINEAR_POISSON_H
 #define RODIN_TESTS_CONVERGENCE_PETSC_NONLINEAR_POISSON_H
 
+#include <utility>
+
 #include "NonlinearPoisson.h"
 #include "Rodin/PETSc.h"
 
@@ -76,6 +78,13 @@ namespace Rodin::Tests::Convergence
 
       ErrorNorms solve(Real tolerance = 1e-11)
       {
+        return solve(tolerance, 0, [](const auto&, const auto&) {});
+      }
+
+      /** @brief Inspect the synchronized converged state with independent norm order. */
+      template <class Observer>
+      ErrorNorms solve(Real tolerance, size_t normOrder, Observer&& observe)
+      {
         Solver::SNES snes(m_ksp);
         snes.setStateUpdate([&](const PETSc::Math::Vector& x) { updateState(x); });
         snes.setType(SNESNEWTONLS).setTolerances(tolerance, tolerance, 1e-14, 20, 1000);
@@ -115,8 +124,9 @@ namespace Rodin::Tests::Convergence
           PETSC_SUCCESS);
         EXPECT_TRUE(std::isfinite(finalResidual));
         EXPECT_LT(finalResidual / std::max(Real(1), initialResidual), 1e-10);
-        return ErrorNorm::compute(
-          m_mesh.get(), m_state, m_data.getSolution(), m_data.getGradient(), m_order);
+        observe(std::as_const(m_state), std::as_const(m_data));
+        return ErrorNorm::compute(m_mesh.get(), m_state, m_data.getSolution(),
+          m_data.getGradient(), normOrder == 0 ? m_order : normOrder);
       }
 
       Real tangentDefect()

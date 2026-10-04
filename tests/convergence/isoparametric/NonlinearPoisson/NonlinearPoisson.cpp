@@ -6,6 +6,8 @@
  */
 #include "../../CurvedGeometry.h"
 #include "../../NonlinearPoisson.h"
+#include "../../LiftedConvergence.h"
+#include "../../SineMap.h"
 #ifdef RODIN_CURVED_NONLINEAR_POISSON_PETSC
 #include "../../PETScNonlinearPoisson.h"
 #ifdef RODIN_USE_MPI
@@ -25,6 +27,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
   constexpr Real PatchTolerance = 1e-9, TangentTolerance = 1e-6;
   constexpr Real WrongTangentMinimum = 1e-3, SensitivityTolerance = 1e-6;
   constexpr Real ControlL2 = 1e-3, ControlH1 = 1e-2;
+  constexpr size_t NormOrder = 14, RefinedNormOrder = 18;
 #if defined(RODIN_CURVED_NONLINEAR_POISSON_PETSC) && defined(RODIN_USE_MPI)
   boost::mpi::environment* environment = nullptr;
   boost::mpi::communicator* world = nullptr;
@@ -39,24 +42,36 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
   class Workload
   {
     public:
-      Workload(Polytope::Type geometry, size_t n)
+      using Map = typename CurvedGeometry<Mesh<ContextType>>::Map;
+      Workload(
+        Polytope::Type geometry, size_t n, Map map = Map::Quadratic, bool lifted = false)
         : m_mesh(makeMesh(geometry, n)),
-          m_geometry(m_mesh)
+          m_geometry(m_mesh, map)
       {
+        if (lifted)
+          m_reference.emplace(m_mesh);
         m_geometry.template install<2>();
       }
       template <size_t K>
       ErrorNorms solve(Data::Field field = Data::Field::Sine, bool omitCubic = false,
-        size_t order = AssemblyOrder, Real tolerance = SolveTolerance,
-        bool lift = true) const
+        size_t order = AssemblyOrder, Real tolerance = SolveTolerance, bool lift = true,
+        size_t normOrder = 0, LiftedErrorNorm::Result* lifted = nullptr) const
       {
+        const auto observe = [&](const auto& state, const auto& data) {
+          if (lifted)
+          {
+            assert(m_reference);
+            *lifted = LiftedErrorNorm::compute(*m_reference, m_mesh, state, data,
+              SineMap(), normOrder == 0 ? order : normOrder);
+          }
+        };
 #ifdef RODIN_CURVED_NONLINEAR_POISSON_PETSC
         PETScNonlinearPoissonProblem<K, Mesh<ContextType>> problem(
           m_mesh, order, 1, omitCubic, false, lift, field);
-        return problem.solve(tolerance);
+        return problem.solve(tolerance, normOrder, observe);
 #else
         NonlinearPoissonProblem problem(m_mesh, order, 1, lift, field);
-        return problem.template solve<K>(omitCubic, tolerance);
+        return problem.template solve<K>(omitCubic, tolerance, normOrder, observe);
 #endif
       }
       template <size_t K>
@@ -92,12 +107,84 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
 #endif
       }
       Mesh<ContextType> m_mesh;
+      Optional<Mesh<ContextType>> m_reference;
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
   template <class ContextType>
   class CurvedTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
+      using Map = typename Workload<ContextType>::Map;
+
+      template <size_t K>
+      void approximatedRates() const
+      {
+        LiftedConvergence history;
+        const auto levels = K == 1 ? std::initializer_list<size_t>{5, 9, 17}
+          : this->GetParam() == Polytope::Type::Segment
+          ? std::initializer_list<size_t>{5, 9, 17, 33}
+          : std::initializer_list<size_t>{3, 5, 9};
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "degree=" << K << " n=" << n);
+          Workload<ContextType> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrorNorm::Result lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Sine, false,
+            AssemblyOrder, SolveTolerance, true, NormOrder, &lifted);
+          history.append(Real(1) / Real(n - 1), represented, lifted);
+        }
+        history.expectRates(K);
+      }
+
+      template <size_t K>
+      void approximatedSensitivity() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        std::vector<LiftedConvergence::Components> errors;
+        for (size_t i = 0; i < 4; ++i)
+        {
+          LiftedErrorNorm::Result lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Sine, false,
+            i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolveTolerance, true,
+            i == 3 ? RefinedNormOrder : NormOrder, &lifted);
+          LiftedConvergence::expectDecomposition(lifted);
+          errors.push_back(LiftedConvergence::components(represented, lifted));
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+        {
+          SCOPED_TRACE(::testing::Message() << "control=" << i);
+          LiftedConvergence::expectSensitivity(errors[0], errors[i]);
+        }
+      }
+
+      void approximatedPatchAndControl() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        LiftedErrorNorm::Result base, wrong;
+        const auto patch = problem.template solve<2>(Data::Field::Affine, false,
+          AssemblyOrder, SolveTolerance, true, NormOrder, &base);
+        const auto incorrect = problem.template solve<2>(Data::Field::Affine, true,
+          AssemblyOrder, SolveTolerance, true, NormOrder, &wrong);
+        LiftedConvergence::expectDecomposition(base);
+        LiftedConvergence::expectDecomposition(wrong);
+        for (const auto& e : {patch, base.field})
+        {
+          EXPECT_LT(e.getL2(), PatchTolerance);
+          EXPECT_LT(e.getH1Seminorm(), PatchTolerance);
+        }
+        EXPECT_EQ(base.geometry.getL2(), wrong.geometry.getL2());
+        EXPECT_EQ(base.geometry.getH1Seminorm(), wrong.geometry.getH1Seminorm());
+        for (const auto& e : {incorrect, wrong.field})
+        {
+          EXPECT_GT(e.getL2(), ControlL2);
+          EXPECT_GT(e.getH1Seminorm(), ControlH1);
+        }
+        constexpr Real ControlRatio = 2;
+        EXPECT_GT(wrong.total.getL2(), ControlRatio * base.total.getL2());
+        EXPECT_GT(wrong.total.getH1Seminorm(), ControlRatio * base.total.getH1Seminorm());
+      }
+
       template <size_t K>
       void rates() const
       {
@@ -158,9 +245,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
             EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
           }
       }
-      void tangent() const
+      void tangent(Map map = Map::Quadratic) const
       {
-        Workload<ContextType> problem(this->GetParam(), 3);
+        Workload<ContextType> problem(this->GetParam(), 3, map);
         EXPECT_LT(problem.template tangent<1>(), TangentTolerance);
         EXPECT_LT(problem.template tangent<2>(), TangentTolerance);
         EXPECT_GT(problem.template tangent<2>(true), WrongTangentMinimum);
@@ -180,6 +267,30 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
       }
   };
   using LocalTest = CurvedTest<Context::Local>;
+  TEST_P(LocalTest, ApproximatedResidualTangentConsistency)
+  {
+    tangent(Map::Sine);
+  }
+  TEST_P(LocalTest, ApproximatedP1Rates)
+  {
+    approximatedRates<1>();
+  }
+  TEST_P(LocalTest, ApproximatedP2Rates)
+  {
+    approximatedRates<2>();
+  }
+  TEST_P(LocalTest, ApproximatedP1Sensitivity)
+  {
+    approximatedSensitivity<1>();
+  }
+  TEST_P(LocalTest, ApproximatedP2Sensitivity)
+  {
+    approximatedSensitivity<2>();
+  }
+  TEST_P(LocalTest, ApproximatedAffinePatchRejectsOmittedCubic)
+  {
+    approximatedPatchAndControl();
+  }
   TEST_P(LocalTest, P1Rates)
   {
     rates<1>();
@@ -221,6 +332,30 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
     });
 #if defined(RODIN_CURVED_NONLINEAR_POISSON_PETSC) && defined(RODIN_USE_MPI)
   using MPITest = CurvedTest<Context::MPI>;
+  TEST_P(MPITest, ApproximatedResidualTangentConsistency)
+  {
+    tangent(Map::Sine);
+  }
+  TEST_P(MPITest, ApproximatedP1Rates)
+  {
+    approximatedRates<1>();
+  }
+  TEST_P(MPITest, ApproximatedP2Rates)
+  {
+    approximatedRates<2>();
+  }
+  TEST_P(MPITest, ApproximatedP1Sensitivity)
+  {
+    approximatedSensitivity<1>();
+  }
+  TEST_P(MPITest, ApproximatedP2Sensitivity)
+  {
+    approximatedSensitivity<2>();
+  }
+  TEST_P(MPITest, ApproximatedAffinePatchRejectsOmittedCubic)
+  {
+    approximatedPatchAndControl();
+  }
   TEST_P(MPITest, P1Rates)
   {
     rates<1>();
