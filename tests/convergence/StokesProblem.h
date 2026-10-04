@@ -39,6 +39,13 @@ namespace Rodin::Tests::Convergence
       template <size_t K>
       StokesErrors solve(Real viscosity = 1) const
       {
+        return solve<K>(viscosity, 0, [](const auto&, const auto&, const auto&) {});
+      }
+
+      /** @brief Observe live converged fields with independent norm quadrature. */
+      template <size_t K, class Observer>
+      StokesErrors solve(Real viscosity, size_t normOrder, Observer&& observe) const
+      {
         static_assert(K >= 2);
         using namespace Variational;
         const auto& mesh = m_mesh.get();
@@ -78,11 +85,15 @@ namespace Rodin::Tests::Convergence
         auto pressureMean = Integral(p.getSolution());
         pressureMean.setOrder(m_order + 2);
         EXPECT_LT(std::abs(pressureMean.compute()), 1e-10);
-        return {ErrorNorm::computeVector(mesh, u.getSolution(), m_data.getVelocity(),
-                  m_data.getVelocityJacobian(), m_order),
-          ErrorNorm::compute(mesh, p.getSolution(), m_data.getPressure(),
-            m_data.getPressureGradient(), m_order),
-          ErrorNorm::computeDivergenceL2(mesh, u.getSolution(), m_order)};
+        const auto& velocity = u.getSolution();
+        const auto& pressure = p.getSolution();
+        observe(velocity, pressure, m_data);
+        const size_t integrationOrder = normOrder == 0 ? m_order : normOrder;
+        return {ErrorNorm::computeVector(mesh, velocity, m_data.getVelocity(),
+                  m_data.getVelocityJacobian(), integrationOrder),
+          ErrorNorm::compute(mesh, pressure, m_data.getPressure(),
+            m_data.getPressureGradient(), integrationOrder),
+          ErrorNorm::computeDivergenceL2(mesh, velocity, integrationOrder)};
       }
 
     private:

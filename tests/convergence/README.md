@@ -186,7 +186,7 @@ exists yet.
 | Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI P1/P2 | P1–P4 | P1–P3 | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native and complex-PETSc local/MPI |
 | Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
-| Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact curved P2 maps; native local and real-PETSc local/MPI |
+| Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
@@ -255,6 +255,12 @@ axis, $h=1/(n-1)$, and field degree $p$:
   Curved Taylor–Hood Stokes uses `n=3→5→9` in 2D and `n=3→4→5`
   in 3D; its [suite specification](isoparametric/Stokes/README.md) states
   velocity/pressure rates, the physical pressure gauge, and divergence controls.
+  Its sine-map hierarchy uses `n=9→17→33` for triangle,
+  `n=3→5→9` for quadrilateral, `n=9→11→13` for tetrahedron,
+  `n=5→7→9` for wedge, and `n=3→4→5` for pyramid/hexahedron.
+  These levels avoid coarse pressure transients without widening the
+  acceptance windows. Lifted pressure geometry error is analytically zero;
+  velocity geometry/total errors and lifted divergence are measured separately.
   Curved coupled reaction–diffusion uses `n=5→9→17` for P1 and
   `n=3→5→9` for P2 on all seven geometries; its
   [suite specification](isoparametric/ReactionDiffusion/README.md) states
@@ -368,7 +374,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
-| 3 | Exact-domain comparisons and further physics/degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches; Poisson/conductivity have represented-domain and lifted smooth P1/P2 studies at geometry degree 2, plus lifted affine P2 studies at geometry degrees 1–2. Complex Helmholtz adds represented-domain and lifted P1/P2 errors at geometry degree two, with a complex affine metric oracle. Further physics/degrees remain |
+| 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine P2 studies at geometry degrees 1–2. Further field/geometry degree combinations remain |
 | 4 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
 | Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |

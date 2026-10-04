@@ -6,11 +6,16 @@ set(_RODIN_CURVED_STOKES_GEOMETRIES
 foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
   add_test(NAME RodinConvergenceIsoparametricStokes_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
-      "--gtest_filter=AllGeometries/LocalTest.*/${geometry}")
+      "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
+  add_test(NAME RodinConvergenceIsoparametricStokes_Approximated_${geometry}
+    COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
+      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
   set_tests_properties(RodinConvergenceIsoparametricStokes_${geometry}
+    RodinConvergenceIsoparametricStokes_Approximated_${geometry}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
   if (geometry STREQUAL "Pyramid")
     set_tests_properties(RodinConvergenceIsoparametricStokes_${geometry}
+      RodinConvergenceIsoparametricStokes_Approximated_${geometry}
       PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
   endif()
 endforeach()
@@ -24,15 +29,22 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
   foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
     add_test(NAME RodinConvergenceIsoparametricPETScStokes_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
-        "--gtest_filter=AllGeometries/LocalTest.*/${geometry}")
+        "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
+    add_test(NAME RodinConvergenceIsoparametricPETScStokes_Approximated_${geometry}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
+        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
     set_tests_properties(RodinConvergenceIsoparametricPETScStokes_${geometry}
+      RodinConvergenceIsoparametricPETScStokes_Approximated_${geometry}
       PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
     if (geometry STREQUAL "Pyramid")
       set_tests_properties(RodinConvergenceIsoparametricPETScStokes_${geometry}
+        RodinConvergenceIsoparametricPETScStokes_Approximated_${geometry}
         PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
     endif()
     rodin_suppress_external_mpi_lsan_for_test(
       RodinConvergenceIsoparametricPETScStokes_${geometry})
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinConvergenceIsoparametricPETScStokes_Approximated_${geometry})
   endforeach()
   if (RODIN_USE_MPI)
     target_link_libraries(RodinConvergenceIsoparametricPETScStokes PRIVATE Rodin::MPI)
@@ -48,15 +60,24 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
-            "--gtest_filter=AllGeometries/MPITest.*/${geometry}")
+            "--gtest_filter=AllGeometries/MPITest.*/${geometry}-*MPITest.Approximated*/${geometry}")
+        add_test(NAME RodinConvergenceIsoparametricPETScMPIStokes_Approximated_np${np}_${geometry}
+          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
+            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}")
         set_tests_properties(RodinConvergenceIsoparametricPETScMPIStokes_np${np}_${geometry}
+          RodinConvergenceIsoparametricPETScMPIStokes_Approximated_np${np}_${geometry}
           PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
         if (geometry STREQUAL "Pyramid")
           set_tests_properties(RodinConvergenceIsoparametricPETScMPIStokes_np${np}_${geometry}
+            RodinConvergenceIsoparametricPETScMPIStokes_Approximated_np${np}_${geometry}
             PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
         endif()
         rodin_suppress_external_mpi_lsan_for_test(
           RodinConvergenceIsoparametricPETScMPIStokes_np${np}_${geometry})
+        rodin_suppress_external_mpi_lsan_for_test(
+          RodinConvergenceIsoparametricPETScMPIStokes_Approximated_np${np}_${geometry})
       endforeach()
     endforeach()
   endif()

@@ -5,9 +5,11 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Taylor--Hood velocity, pressure and divergence on exact P2 maps. */
+/** @file @brief Taylor--Hood fields on exact and approximated curved domains. */
 
 #include "../../CurvedGeometry.h"
+#include "../../LiftedConvergence.h"
+#include "../../SineMap.h"
 #ifdef RODIN_CURVED_STOKES_PETSC
 #include "../../PETScStokesProblem.h"
 #else
@@ -31,6 +33,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   constexpr Real WrongPressureL2 = 0.1;
   constexpr Real WrongPressureH1 = 1;
   constexpr Real GaugeTolerance = 1e-12; // Analytic unit volume and zero pressure mean.
+  constexpr size_t NormOrder = 14, RefinedNormOrder = 18;
+
+  struct LiftedErrors
+  {
+      LiftedErrorNorm::Result velocity, pressure;
+      std::array<Real, 3> divergence{};
+  };
 
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
   boost::mpi::environment* environment = nullptr;
@@ -40,20 +49,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   /**
    * @brief Curved mixed workload reusing the established Stokes solver contracts.
    * @par Architecture
-   * Exact P2 geometry is installed on a fresh grid and all its traces. The
+   * Exact or interpolated P2 geometry is installed on a fresh grid and its traces. The
    * existing native/PETSc StokesProblem owns space and system construction,
    * residual checks, pressure gauge, and physical error integration. The
-   * map preserves volume and x0, so the analytic pressure remains mean zero.
+   * Volume and pressure mean are independently checked; x0 is preserved.
+   * Solve-scoped const observers reuse the common exact-domain lift integrator.
    * MPI ownership and halo metadata are unchanged by geometry installation.
    */
   template <class ContextType>
   class Workload
   {
     public:
-      Workload(Polytope::Type geometry, size_t n)
+      using Map = typename CurvedGeometry<Mesh<ContextType>>::Map;
+      Workload(
+        Polytope::Type geometry, size_t n, Map map = Map::Quadratic, bool lifted = false)
         : m_mesh(makeMesh(geometry, n)),
-          m_geometry(m_mesh)
+          m_geometry(m_mesh, map),
+          m_sine(map == Map::Sine)
       {
+        if (lifted)
+          m_reference.emplace(m_mesh);
         m_geometry.template install<2>();
       }
 
@@ -62,14 +77,70 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         return m_mesh;
       }
 
-      StokesErrors solve(
-        StokesData::Field field, Real viscosity = 1, size_t order = AssemblyOrder) const
+      StokesErrors solve(StokesData::Field field, Real viscosity = 1,
+        size_t order = AssemblyOrder, size_t normOrder = 0,
+        LiftedErrors* lifted = nullptr) const
       {
-        const StokesData data(m_mesh.getDimension(), field);
+        const size_t dim = m_mesh.getSpaceDimension();
+        const StokesData data(dim, field, m_sine ? dim - 1 : 1);
+        const auto observe = [&](const auto& velocity, const auto& pressure,
+                               const StokesData& exact) {
+          if (!lifted)
+            return;
+          assert(m_reference);
+          struct VelocityData
+          {
+              const StokesData& data;
+              auto getSolution(const Math::SpatialPoint& x) const
+              {
+                return data.getVelocity(x);
+              }
+              auto getJacobian(const Math::SpatialPoint& x) const
+              {
+                return data.getVelocityJacobian(x);
+              }
+          };
+          struct PressureData
+          {
+              const StokesData& data;
+              Real getSolution(const Math::SpatialPoint& x) const
+              {
+                return data.getPressure(x);
+              }
+              auto getGradient(const Math::SpatialPoint& x) const
+              {
+                return data.getPressureGradient(x);
+              }
+          };
+          std::array<Real, 3> squared{};
+          const auto divergence = [&](const auto& derivatives, Real weight) {
+            for (size_t component = 0; component < derivatives.size(); ++component)
+            {
+              Real trace = 0;
+              for (size_t j = 0; j < dim; ++j)
+                trace += derivatives[component](j, j);
+              squared[component] += weight * trace * trace;
+            }
+          };
+          const size_t integrationOrder = normOrder == 0 ? order : normOrder;
+          lifted->velocity = LiftedErrorNorm::compute(*m_reference, m_mesh, velocity,
+            VelocityData{exact}, SineMap(), integrationOrder, divergence);
+          lifted->pressure = LiftedErrorNorm::compute(*m_reference, m_mesh, pressure,
+            PressureData{exact}, SineMap(), integrationOrder);
+#ifdef RODIN_USE_MPI
+          if constexpr (requires { m_mesh.getShard(); })
+            for (Real& value : squared)
+              value = boost::mpi::all_reduce(
+                m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
+#endif
+          for (size_t component = 0; component < squared.size(); ++component)
+            lifted->divergence[component] = std::sqrt(squared[component]);
+        };
 #ifdef RODIN_CURVED_STOKES_PETSC
-        return PETScStokesProblem(m_mesh, data, order).template solve<2>(viscosity);
+        return PETScStokesProblem(m_mesh, data, order)
+          .template solve<2>(viscosity, normOrder, observe);
 #else
-        return StokesProblem(m_mesh, data, order).solve<2>(viscosity);
+        return StokesProblem(m_mesh, data, order).solve<2>(viscosity, normOrder, observe);
 #endif
       }
 
@@ -85,13 +156,174 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 #endif
       }
       Mesh<ContextType> m_mesh;
+      Optional<Mesh<ContextType>> m_reference;
       CurvedGeometry<Mesh<ContextType>> m_geometry;
+      bool m_sine;
   };
 
   template <class ContextType>
   class CurvedStokesTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
+      using Map = typename Workload<ContextType>::Map;
+      static constexpr Real PressureGeometryTolerance = 1e-10;
+
+      void checkLifted(const LiftedErrors& error) const
+      {
+        LiftedConvergence::expectDecomposition(error.velocity);
+        LiftedConvergence::expectDecomposition(error.pressure);
+        // The sine shear preserves x0 and unit volume. Pressure is a function
+        // of x0 only, so its geometry defect is zero, not a positive rate study.
+        EXPECT_LT(error.pressure.geometry.getL2(), PressureGeometryTolerance);
+        EXPECT_LT(error.pressure.geometry.getH1Seminorm(), PressureGeometryTolerance);
+        const auto velocity =
+          std::array{error.velocity.field, error.velocity.geometry, error.velocity.total};
+        const Real dimension = UniformGrid(this->GetParam()).getDimension();
+        for (size_t component = 0; component < velocity.size(); ++component)
+        {
+          EXPECT_TRUE(std::isfinite(error.divergence[component]));
+          EXPECT_GE(error.divergence[component], 0);
+          EXPECT_LE(error.divergence[component],
+            std::sqrt(dimension) * velocity[component].getH1Seminorm() +
+              LiftedConvergence::RoundoffTolerance);
+        }
+      }
+
+      void checkApproximatedRates() const
+      {
+        const auto levels = this->GetParam() == Polytope::Type::Tetrahedron
+          ? std::initializer_list<size_t>{9, 11, 13}
+          : this->GetParam() == Polytope::Type::Wedge
+          ? std::initializer_list<size_t>{5, 7, 9}
+          : UniformGrid(this->GetParam()).getDimension() == 3
+          ? std::initializer_list<size_t>{3, 4, 5}
+          : this->GetParam() == Polytope::Type::Triangle
+          ? std::initializer_list<size_t>{9, 17, 33}
+          : std::initializer_list<size_t>{3, 5, 9};
+        LiftedConvergence velocity;
+        std::array<ErrorHistory, 3> pressure;
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "n=" << n);
+          Workload<ContextType> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrors lifted;
+          const auto represented =
+            problem.solve(StokesData::Field::Cubic, 1, AssemblyOrder, NormOrder, &lifted);
+          checkLifted(lifted);
+          const Real h = Real(1) / Real(n - 1);
+          velocity.append(h, represented.velocity, lifted.velocity);
+          const auto errors = std::array{
+            represented.pressure, lifted.pressure.field, lifted.pressure.total};
+          for (size_t component = 0; component < errors.size(); ++component)
+          {
+            ASSERT_TRUE(errors[component].isFinite());
+            ASSERT_GT(errors[component].getL2(), 0);
+            ASSERT_GT(errors[component].getH1Seminorm(), 0);
+            pressure[component].append(h, errors[component]);
+          }
+          EXPECT_LE(represented.divergence,
+            std::sqrt(Real(problem.getMesh().getSpaceDimension())) *
+                represented.velocity.getH1Seminorm() +
+              LiftedConvergence::RoundoffTolerance);
+        }
+        velocity.expectRates(2, 2);
+        for (size_t component = 0; component < pressure.size(); ++component)
+          for (size_t i = 1; i < pressure[component].getSize(); ++i)
+          {
+            SCOPED_TRACE(::testing::Message()
+              << "pressure component=" << component << " interval=" << i);
+            const auto& coarse = pressure[component].getSample(i - 1).error;
+            const auto& fine = pressure[component].getSample(i).error;
+            const auto rate = pressure[component].getAlgebraicRates(i);
+            SCOPED_TRACE(::testing::Message()
+              << "L2=" << coarse.getL2() << " -> " << fine.getL2()
+              << " H1=" << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm()
+              << " rates=" << rate.getL2() << "," << rate.getH1Seminorm());
+            EXPECT_GT(coarse.getL2(), fine.getL2());
+            EXPECT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
+            EXPECT_GT(rate.getL2(), 2 - RateMargin);
+            EXPECT_LT(rate.getL2(), 2 + RateMargin);
+            EXPECT_GT(rate.getH1Seminorm(), 1 - DerivativeMargin);
+            EXPECT_LT(rate.getH1Seminorm(), 1 + DerivativeMargin);
+          }
+      }
+
+      void checkApproximatedSensitivity() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        std::vector<LiftedConvergence::Components> velocity, pressure;
+        for (size_t i = 0; i < 3; ++i)
+        {
+          LiftedErrors lifted;
+          const auto represented = problem.solve(StokesData::Field::Cubic, 1,
+            i == 1 ? RefinedOrder : AssemblyOrder, i == 2 ? RefinedNormOrder : NormOrder,
+            &lifted);
+          checkLifted(lifted);
+          velocity.push_back(
+            LiftedConvergence::components(represented.velocity, lifted.velocity));
+          pressure.push_back(
+            LiftedConvergence::components(represented.pressure, lifted.pressure));
+        }
+        for (size_t i = 1; i < velocity.size(); ++i)
+        {
+          SCOPED_TRACE(::testing::Message() << "control=" << i);
+          LiftedConvergence::expectSensitivity(velocity[0], velocity[i]);
+          // Geometry-pressure norms are analytically zero: no relative comparison.
+          for (size_t component : {0u, 1u, 3u})
+            for (const auto& pair :
+              {std::pair{pressure[0][component].getL2(), pressure[i][component].getL2()},
+                std::pair{pressure[0][component].getH1Seminorm(),
+                  pressure[i][component].getH1Seminorm()}})
+            {
+              ASSERT_GT(pair.first, 0);
+              ASSERT_TRUE(std::isfinite(pair.second));
+              EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
+            }
+        }
+      }
+
+      void checkApproximatedPatch() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 3, Map::Sine, true);
+        LiftedErrors lifted;
+        const auto represented =
+          problem.solve(StokesData::Field::Affine, 1, AssemblyOrder, NormOrder, &lifted);
+        checkLifted(lifted);
+        for (const auto& error : {represented.velocity, represented.pressure,
+               lifted.velocity.field, lifted.pressure.field, lifted.pressure.total})
+        {
+          EXPECT_LT(error.getL2(), PatchTolerance);
+          EXPECT_LT(error.getH1Seminorm(), PatchTolerance);
+        }
+        EXPECT_LT(represented.divergence, PatchTolerance);
+        EXPECT_LT(lifted.divergence[0], PatchTolerance);
+        // This shear lift need not remain divergence-free on the exact domain.
+        EXPECT_GT(lifted.velocity.geometry.getH1Seminorm(), 0);
+        EXPECT_GT(lifted.divergence[1], 0);
+      }
+
+      void checkApproximatedControl() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        LiftedErrors base, wrong;
+        problem.solve(StokesData::Field::Quadratic, 1, AssemblyOrder, NormOrder, &base);
+        const auto incorrect = problem.solve(
+          StokesData::Field::Quadratic, WrongViscosity, AssemblyOrder, NormOrder, &wrong);
+        checkLifted(base);
+        checkLifted(wrong);
+        // Changing viscosity can be absorbed in pressure for this shear profile.
+        // It need not increase velocity error, so pressure is the operator oracle.
+        for (const auto& error :
+          {incorrect.pressure, wrong.pressure.field, wrong.pressure.total})
+        {
+          EXPECT_GT(error.getL2(), WrongPressureL2);
+          EXPECT_GT(error.getH1Seminorm(), WrongPressureH1);
+        }
+        EXPECT_EQ(base.velocity.geometry.getL2(), wrong.velocity.geometry.getL2());
+        EXPECT_EQ(base.velocity.geometry.getH1Seminorm(),
+          wrong.velocity.geometry.getH1Seminorm());
+      }
+
       void checkRates() const
       {
         const auto levels = UniformGrid(this->GetParam()).getDimension() == 3
@@ -194,9 +426,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           }
       }
 
-      void checkGauge() const
+      void checkGauge(Map map = Map::Quadratic) const
       {
-        Workload<ContextType> problem(this->GetParam(), 3);
+        Workload<ContextType> problem(this->GetParam(), 3, map);
         const StokesData data(problem.getMesh().getDimension(), StokesData::Field::Cubic);
         const auto& mesh = problem.getMesh();
         const auto pressure = data.getPressure();
@@ -231,6 +463,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   };
 
   using LocalTest = CurvedStokesTest<Context::Local>;
+  TEST_P(LocalTest, ApproximatedPhysicalPressureGauge)
+  {
+    checkGauge(Map::Sine);
+  }
+  TEST_P(LocalTest, ApproximatedVelocityPressureRates)
+  {
+    checkApproximatedRates();
+  }
+  TEST_P(LocalTest, ApproximatedSensitivity)
+  {
+    checkApproximatedSensitivity();
+  }
+  TEST_P(LocalTest, ApproximatedAffinePatch)
+  {
+    checkApproximatedPatch();
+  }
+  TEST_P(LocalTest, ApproximatedRejectsWrongViscosity)
+  {
+    checkApproximatedControl();
+  }
   TEST_P(LocalTest, AffinePhysicalPatch)
   {
     checkPatch();
@@ -261,6 +513,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
   using MPITest = CurvedStokesTest<Context::MPI>;
+  TEST_P(MPITest, ApproximatedPhysicalPressureGauge)
+  {
+    checkGauge(Map::Sine);
+  }
+  TEST_P(MPITest, ApproximatedVelocityPressureRates)
+  {
+    checkApproximatedRates();
+  }
+  TEST_P(MPITest, ApproximatedSensitivity)
+  {
+    checkApproximatedSensitivity();
+  }
+  TEST_P(MPITest, ApproximatedAffinePatch)
+  {
+    checkApproximatedPatch();
+  }
+  TEST_P(MPITest, ApproximatedRejectsWrongViscosity)
+  {
+    checkApproximatedControl();
+  }
   TEST_P(MPITest, AffinePhysicalPatch)
   {
     checkPatch();

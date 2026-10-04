@@ -1,8 +1,9 @@
 # Curved Taylor–Hood Stokes verification
 
 This suite tests the velocity/pressure pair $P_2/P_1$, together with a
-global $P_{0g}$ pressure-mean multiplier, on exact quadratic geometry.
-The physical domain is fixed across all refinement levels:
+global $P_{0g}$ pressure-mean multiplier, on exact quadratic geometry and
+quadratic approximations of a nonpolynomial geometry map. In the exact-map
+study, the physical domain is fixed across all refinement levels:
 
 $$
 \Omega=\Phi((0,1)^d),\qquad
@@ -109,3 +110,80 @@ Tests are labelled `convergence;slow`, with `petsc` and `distributed`
 where applicable. Geometry-specific registrations have 30-minute safety
 timeouts; pyramid registrations share a resource lock. Performance benchmarks
 remain separate from these convergence assertions.
+
+## Approximated domains and exact-domain lifts
+
+The second study uses the exact reference map and its nodal quadratic
+interpolant,
+
+$$
+\Phi(\xi)=\xi+0.1\sin(\pi\xi_0)e_{d-1},\qquad
+\Phi_h=I_2\Phi,\qquad \Omega_h=\Phi_h((0,1)^d).
+$$
+
+Manufactured data are evaluated in physical coordinates on $\Omega_h$:
+
+$$
+u(x)=x_{d-1}^3e_0,\qquad p(x)=x_0^2-\tfrac13,\qquad
+f(x)=(-6x_{d-1}+2x_0)e_0.
+$$
+
+Using the deformed coordinate in the shear profile gives a nonzero velocity
+geometry defect in both dimensions. The reference domain has unit volume
+and zero analytic pressure mean. Independent mapped-cell integrals check
+these quantities on each represented domain too; no cellwise identity
+$\det D\Phi_h=1$ is assumed. Map regularity is checked independently by
+the shared geometry study and remains a hypothesis of the rate estimates.
+
+Let $\ell_h=\Phi_h\circ\Phi^{-1}$ and $w_h^\ell=w_h\circ\ell_h$.
+For either field $w\in\{u,p\}$, the measured defects on $\Omega$ are
+
+$$
+F_w=w\circ\ell_h-w_h^\ell,\qquad
+G_w=w-w\circ\ell_h,\qquad T_w=w-w_h^\ell=F_w+G_w.
+$$
+
+Their L2 norms and H1 seminorms use the exact-domain Jacobian and the
+chain rule $D(w_h^\ell)=(Dw_h\circ\ell_h)D\ell_h$.
+Both triangle and reverse-triangle inequalities are checked numerically.
+Velocity represented-domain and lifted field errors have orders three/two;
+velocity geometry and total errors have orders three/two for this quadratic
+geometry. Pressure represented-domain, lifted field and total errors have
+orders two/one. Since $\ell_h$ preserves $x_0$, $G_p=0$ analytically;
+its two measured norms must be below $10^{-10}$, rather than being assigned
+a rate or used in a relative comparison.
+
+| Cell family | Grid points per axis in the sine-map rate study |
+| --- | --- |
+| Triangle | $9\to17\to33$ |
+| Quadrilateral | $3\to5\to9$ |
+| Tetrahedron | $9\to11\to13$ |
+| Wedge | $5\to7\to9$ |
+| Pyramid, hexahedron | $3\to4\to5$ |
+
+Every adjacent interval uses the actual spacing ratio. The finer triangle,
+tetrahedron and wedge levels avoid coarse pressure transients; the same
+fixed acceptance windows stated above apply without relaxation. These
+finite-hierarchy observations do not certify a uniform inf-sup constant.
+
+For each lifted velocity defect $E\in\{F_u,G_u,T_u\}$, independently
+integrated divergence obeys
+
+$$
+\|\operatorname{tr}DE\|_{L^2(\Omega)}\le\sqrt d\,|E|_{H^1(\Omega)}.
+$$
+
+A lift of a physically divergence-free field on $\Omega_h$ need not remain
+divergence-free on $\Omega$. The affine patch checks zero represented and
+lifted field errors, but explicitly retains a nonzero velocity geometry
+derivative and divergence defect. The wrong-viscosity control uses pressure
+as its rejection oracle: for a shear flow, pressure can absorb an incorrect
+viscosity without necessarily increasing velocity error.
+
+Assembly order $12\to16$ and norm order $14\to18$ are varied separately
+on the fixed $n=5$ mesh. Each nonzero field norm must change by less than
+$10^{-6}$ relatively. Existing direct-solver residual and pressure-gauge
+checks remain in force. Native and PETSc solvers expose const solution
+views only during a solve-scoped observer callback; the common lifted-norm
+helper evaluates owned quadrature points and reduces MPI contributions.
+It neither duplicates the mixed solve nor retains solution references.
