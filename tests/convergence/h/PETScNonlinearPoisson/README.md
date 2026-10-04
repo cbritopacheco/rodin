@@ -47,7 +47,8 @@ tolerances are $10^{-11}$, step tolerance $10^{-14}$, with at most 20
 iterations and 1000 function evaluations. The SPD tangent is solved by CG
 with Jacobi preconditioning, relative tolerance $10^{-13}$, absolute
 tolerance $10^{-14}$, and 50000-iteration limit. Positive SNES/KSP reasons
-and a nonzero nonlinear iteration count are required. The final residual is
+and a nonzero nonlinear iteration count are required when the homogeneous
+space has free DOFs. The final residual is
 reassembled after explicit state synchronization, outside the SNES cache,
 and must satisfy
 
@@ -57,6 +58,22 @@ $$
 $$
 
 This is a coefficient-vector norm, distinct from the field-error norms.
+The free dimension is determined from logical Dirichlet indices, not
+residual magnitude. If $N$ is the global space size, $\mathcal I_r$ the
+uniquely owned DOF range and $\mathcal C_r$ the assembled constraint map,
+
+$$
+N_{\mathrm{free}}=N-\sum_r\#(\mathcal C_r\cap\mathcal I_r).
+$$
+
+For $N_{\mathrm{free}}=0$, the homogeneous test space is $\{0\}$;
+zero initial residual and zero SNES iterations are required exactly.
+The $n=2$, P1 regression checks this case on six families. Cube-centred
+pyramid generation instead contributes one interior vertex and retains
+the nontrivial solve contract. Refining to $n=3$ gives a positive free
+dimension on every family. Owner-only integer counting also covers
+MPI partitions without owned cells.
+
 The sensitivity case at $p=2$, `n=3` raises quadrature to 14 and tightens
 SNES/CG tolerances by a factor ten. Each field error must change by less
 than $10^{-6}$ relative to baseline.

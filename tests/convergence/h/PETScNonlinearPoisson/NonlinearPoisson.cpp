@@ -78,6 +78,24 @@ namespace Rodin::Tests::Convergence::H::PETScNonlinearPoisson
   }
 
   template <class ContextType>
+  void checkCoarseFreeDimension(Polytope::Type geometry)
+  {
+    auto coarse = makeMesh<ContextType>(geometry, 2);
+    PETScNonlinearPoissonProblem<1, decltype(coarse)> problem(coarse);
+    // Cube-centred pyramid generation adds one interior vertex. The other
+    // families have only boundary vertices on this single-grid-interval mesh.
+    EXPECT_EQ(problem.getFreeDOFCount(), geometry == Polytope::Type::Pyramid ? 1u : 0u);
+    const auto errors = problem.solve();
+    EXPECT_TRUE(errors.isFinite());
+    EXPECT_GT(errors.getL2(), 0);
+    EXPECT_GT(errors.getH1Seminorm(), 0);
+    auto fine = makeMesh<ContextType>(geometry, 3);
+    PETScNonlinearPoissonProblem<1, decltype(fine)> refined(fine);
+    EXPECT_GT(refined.getFreeDOFCount(), 0u);
+    EXPECT_TRUE(refined.solve().isFinite());
+  }
+
+  template <class ContextType>
   void checkTangent(Polytope::Type geometry)
   {
     auto mesh = makeMesh<ContextType>(geometry, 3);
@@ -123,6 +141,10 @@ namespace Rodin::Tests::Convergence::H::PETScNonlinearPoisson
   {
     checkRates<Context::Local, 1>(GetParam());
   }
+  TEST_P(PETScNonlinearPoissonLocalTest, CoarseFreeDimensionControlsNewtonContract)
+  {
+    checkCoarseFreeDimension<Context::Local>(GetParam());
+  }
   TEST_P(PETScNonlinearPoissonLocalTest, P2OptimalRates)
   {
     checkRates<Context::Local, 2>(GetParam());
@@ -153,6 +175,10 @@ namespace Rodin::Tests::Convergence::H::PETScNonlinearPoisson
   TEST_P(PETScNonlinearPoissonMPITest, P1OptimalRates)
   {
     checkRates<Context::MPI, 1>(GetParam());
+  }
+  TEST_P(PETScNonlinearPoissonMPITest, CoarseFreeDimensionControlsNewtonContract)
+  {
+    checkCoarseFreeDimension<Context::MPI>(GetParam());
   }
   TEST_P(PETScNonlinearPoissonMPITest, P2OptimalRates)
   {

@@ -9,6 +9,11 @@
 #define RODIN_TESTS_CONVERGENCE_PETSC_NONLINEAR_POISSON_H
 
 #include <utility>
+#include <functional>
+#include <variant>
+#ifdef RODIN_USE_MPI
+#include <boost/mpi/collectives.hpp>
+#endif
 
 #include "NonlinearPoisson.h"
 #include "Rodin/PETSc.h"
@@ -72,8 +77,34 @@ namespace Rodin::Tests::Convergence
         r.setOrder(m_order);
         s.setOrder(m_order);
         b.setOrder(m_order);
-        m_problem = a + c + r + s - b + DirichletBC(m_du, Zero());
+        auto boundary = DirichletBC(m_du, Zero());
+        boundary.assemble();
+        const auto& rows =
+          std::get<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
+            boundary.getDOFs());
+        Index begin = 0, end = static_cast<Index>(m_space.getSize());
+        if constexpr (requires { mesh.getShard(); })
+          m_space.getOwnershipRange(begin, end);
+        m_freeDOFs = static_cast<size_t>(end - begin);
+        for (const auto& [global, value] : rows)
+        {
+          (void)value;
+          if (global >= begin && global < end)
+            --m_freeDOFs;
+        }
+#ifdef RODIN_USE_MPI
+        if constexpr (requires { mesh.getShard(); })
+          m_freeDOFs = boost::mpi::all_reduce(
+            mesh.getContext().getCommunicator(), m_freeDOFs, std::plus<size_t>());
+#endif
+        m_problem = a + c + r + s - b + boundary;
         m_problem.assemble();
+      }
+
+      /** @brief Global unconstrained dimension, counted by unique DOF ownership. */
+      size_t getFreeDOFCount() const
+      {
+        return m_freeDOFs;
       }
 
       ErrorNorms solve(Real tolerance = 1e-11)
@@ -100,15 +131,20 @@ namespace Rodin::Tests::Convergence
         EXPECT_EQ(
           VecNorm(m_problem.getLinearSystem().getVector(), NORM_2, &initialResidual),
           PETSC_SUCCESS);
-        if (!m_liftBoundary)
+        if (!m_liftBoundary && m_freeDOFs > 0)
         {
           EXPECT_GT(initialResidual, 0);
         }
         snes.solve();
         EXPECT_TRUE(snes.converged());
-        if (!m_liftBoundary)
+        if (!m_liftBoundary && m_freeDOFs > 0)
         {
           EXPECT_GT(snes.getIterationNumber(), 0);
+        }
+        if (m_freeDOFs == 0)
+        {
+          EXPECT_EQ(initialResidual, 0);
+          EXPECT_EQ(snes.getIterationNumber(), 0);
         }
         KSPConvergedReason reason = KSP_CONVERGED_ITERATING;
         EXPECT_EQ(KSPGetConvergedReason(m_ksp.getHandle(), &reason), PETSC_SUCCESS);
@@ -197,6 +233,7 @@ namespace Rodin::Tests::Convergence
       StateType m_state;
       StateType m_lift;
       bool m_liftBoundary;
+      size_t m_freeDOFs = 0;
       TrialType m_du;
       TestType m_v;
       ProblemType m_problem;
