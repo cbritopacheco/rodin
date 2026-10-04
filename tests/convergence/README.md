@@ -175,7 +175,7 @@ exists yet.
 | --- | --- | --- | --- | --- |
 | Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI P1/P2 | P1–P4 | P1–P3 | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native and complex-PETSc local/MPI |
-| Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | P1/P2 displacement, strain and stress on exact P2 maps; native local and real-PETSc local/MPI |
+| Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4 | Analytic vector P1–P3 | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact curved P2 maps; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps; native local and real-PETSc local/MPI |
@@ -239,6 +239,9 @@ axis, $h=1/(n-1)$, and field degree $p$:
   independently checking displacement, strain and stress on the exact
   sine-map domain. A separate complex-vector interpolation oracle checks
   the full complex norm; it is not a complex-PETSc elasticity solve.
+  The smooth sine-map elasticity hierarchy separately measures represented,
+  lifted field, geometry and total displacement/strain/stress errors, using
+  the same P1/P2 levels except P2 Segment (`n=5→9→17→33`).
   Curved Taylor–Hood Stokes uses `n=3→5→9` in 2D and `n=3→4→5`
   in 3D; its [suite specification](isoparametric/Stokes/README.md) states
   velocity/pressure rates, the physical pressure gauge, and divergence controls.

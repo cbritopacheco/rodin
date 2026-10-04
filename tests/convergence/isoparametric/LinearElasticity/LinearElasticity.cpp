@@ -56,6 +56,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   // Relative contamination policy, well below the adjacent-rate margins.
   constexpr Real SensitivityTolerance = 1e-6;
   constexpr Real NegativeControlFactor = 2;
+  constexpr size_t NormOrder = 13, RefinedNormOrder = 18;
+  constexpr Real DecompositionTolerance = 1e-11;
 
 #if defined(RODIN_CURVED_ELASTICITY_PETSC) && defined(RODIN_USE_MPI)
   boost::mpi::environment* environment = nullptr;
@@ -64,9 +66,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 
   struct Errors
   {
-      ErrorNorms displacement;
-      Real strain;
-      Real stress;
+      ErrorNorms displacement{0, 0};
+      Real strain = 0;
+      Real stress = 0;
   };
 
   struct LiftedErrors
@@ -256,6 +258,160 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   class CurvedLinearElasticityTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
+      static std::array<Errors, 4> components(
+        const Errors& represented, const LiftedErrors& lifted)
+      {
+        return {represented,
+          Errors{lifted.displacement.field, lifted.strain[0], lifted.stress[0]},
+          Errors{lifted.displacement.geometry, lifted.strain[1], lifted.stress[1]},
+          Errors{lifted.displacement.total, lifted.strain[2], lifted.stress[2]}};
+      }
+
+      static std::array<Real, 4> quantities(const Errors& error)
+      {
+        return {error.displacement.getL2(), error.displacement.getH1Seminorm(),
+          error.strain, error.stress};
+      }
+
+      void checkDecomposition(const LiftedErrors& error) const
+      {
+        const auto norms = components({{0, 0}, 0, 0}, error);
+        for (size_t quantity = 0; quantity < 4; ++quantity)
+        {
+          const Real field = quantities(norms[1])[quantity];
+          const Real geometry = quantities(norms[2])[quantity];
+          const Real total = quantities(norms[3])[quantity];
+          for (Real value : {field, geometry, total})
+            EXPECT_TRUE(std::isfinite(value));
+          EXPECT_LE(total, field + geometry + DecompositionTolerance);
+          EXPECT_GE(total, std::abs(field - geometry) - DecompositionTolerance);
+        }
+      }
+
+      template <size_t K>
+      void checkApproximatedRates() const
+      {
+        using Map = typename Workload<ContextType>::Map;
+        std::array<ErrorHistory, 4> displacement;
+        std::array<NormHistory, 4> strain, stress;
+        const auto levels = K == 1 ? std::initializer_list<size_t>{5, 9, 17}
+          : this->GetParam() == Polytope::Type::Segment
+          ? std::initializer_list<size_t>{5, 9, 17, 33}
+          : std::initializer_list<size_t>{3, 5, 9};
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "degree=" << K << " n=" << n);
+          Workload<ContextType> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Exponential,
+            false, AssemblyOrder, SolverTolerance, NormOrder, &lifted);
+          checkDecomposition(lifted);
+          const auto errors = components(represented, lifted);
+          for (size_t component = 0; component < errors.size(); ++component)
+          {
+            for (Real value : quantities(errors[component]))
+            {
+              ASSERT_TRUE(std::isfinite(value));
+              ASSERT_GT(value, 0);
+            }
+            const Real h = Real(1) / Real(n - 1);
+            displacement[component].append(h, errors[component].displacement);
+            strain[component].append(h, errors[component].strain);
+            stress[component].append(h, errors[component].stress);
+          }
+        }
+        constexpr Real L2Margin = 0.55, DerivativeMargin = 0.45;
+        for (size_t component = 0; component < displacement.size(); ++component)
+        {
+          const size_t degree = component < 2 ? K
+            : component == 2                  ? 2
+                                              : std::min(K, size_t(2));
+          for (size_t i = 1; i < displacement[component].getSize(); ++i)
+          {
+            SCOPED_TRACE(
+              ::testing::Message() << "component=" << component << " interval=" << i);
+            const auto& coarse = displacement[component].getSample(i - 1).error;
+            const auto& fine = displacement[component].getSample(i).error;
+            const auto rate = displacement[component].getAlgebraicRates(i);
+            EXPECT_GT(coarse.getL2(), fine.getL2());
+            EXPECT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
+            EXPECT_GT(rate.getL2(), degree + 1 - L2Margin);
+            EXPECT_LT(rate.getL2(), degree + 1 + L2Margin);
+            EXPECT_GT(rate.getH1Seminorm(), degree - DerivativeMargin);
+            EXPECT_LT(rate.getH1Seminorm(), degree + DerivativeMargin);
+            for (const auto* history : {&strain[component], &stress[component]})
+            {
+              const Real coarseError = history->getSample(i - 1).error;
+              const Real fineError = history->getSample(i).error;
+              const Real tensorRate = history->getAlgebraicRate(i);
+              SCOPED_TRACE(::testing::Message()
+                << "tensor errors=" << coarseError << " -> " << fineError
+                << " rate=" << tensorRate);
+              EXPECT_GT(coarseError, fineError);
+              EXPECT_GT(tensorRate, degree - DerivativeMargin);
+              EXPECT_LT(tensorRate, degree + DerivativeMargin);
+            }
+          }
+        }
+      }
+
+      template <size_t K>
+      void checkApproximatedSensitivity() const
+      {
+        using Map = typename Workload<ContextType>::Map;
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        std::array<std::array<Errors, 4>, 4> errors;
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Exponential,
+            false, i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolverTolerance,
+            i == 3 ? RefinedNormOrder : NormOrder, &lifted);
+          checkDecomposition(lifted);
+          errors[i] = components(represented, lifted);
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+          for (size_t component = 0; component < errors[i].size(); ++component)
+            for (size_t quantity = 0; quantity < 4; ++quantity)
+            {
+              SCOPED_TRACE(::testing::Message() << "control=" << i << " component="
+                                                << component << " quantity=" << quantity);
+              const Real base = quantities(errors[0][component])[quantity];
+              const Real refined = quantities(errors[i][component])[quantity];
+              ASSERT_GT(base, 0);
+              ASSERT_TRUE(std::isfinite(refined));
+              EXPECT_LT(std::abs(refined / base - 1), SensitivityTolerance);
+            }
+      }
+
+      void checkApproximatedControl() const
+      {
+        using Map = typename Workload<ContextType>::Map;
+        Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        LiftedErrors base, wrong;
+        const auto represented = problem.template solve<2>(Data::Field::Exponential,
+          false, AssemblyOrder, SolverTolerance, NormOrder, &base);
+        const auto incorrect = problem.template solve<2>(Data::Field::Exponential, true,
+          AssemblyOrder, SolverTolerance, NormOrder, &wrong);
+        checkDecomposition(base);
+        checkDecomposition(wrong);
+        const auto correct = components(represented, base);
+        const auto control = components(incorrect, wrong);
+        for (size_t quantity = 0; quantity < 4; ++quantity)
+        {
+          EXPECT_EQ(quantities(correct[2])[quantity], quantities(control[2])[quantity]);
+          for (size_t component : {0u, 1u, 3u})
+          {
+            const Real baseline = quantities(correct[component])[quantity];
+            const Real defect = quantities(control[component])[quantity];
+            ASSERT_TRUE(std::isfinite(defect));
+            ASSERT_GT(baseline, 0);
+            EXPECT_GT(defect, NegativeControlFactor * baseline);
+          }
+        }
+      }
+
       void checkComplexVectorMetric() const
       {
         using Map = typename Workload<ContextType>::Map;
@@ -487,6 +643,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   };
 
   using LocalTest = CurvedLinearElasticityTest<Context::Local>;
+  TEST_P(LocalTest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(LocalTest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(LocalTest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(LocalTest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(LocalTest, ApproximatedRejectsOmittedVolumetricTerm)
+  {
+    checkApproximatedControl();
+  }
   TEST_P(LocalTest, LiftedAsymmetricAffineMetricOracle)
   {
     checkLiftedMetric();
@@ -533,6 +709,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 
 #if defined(RODIN_CURVED_ELASTICITY_PETSC) && defined(RODIN_USE_MPI)
   using MPITest = CurvedLinearElasticityTest<Context::MPI>;
+  TEST_P(MPITest, ApproximatedP1Rates)
+  {
+    checkApproximatedRates<1>();
+  }
+  TEST_P(MPITest, ApproximatedP2Rates)
+  {
+    checkApproximatedRates<2>();
+  }
+  TEST_P(MPITest, ApproximatedP1Sensitivity)
+  {
+    checkApproximatedSensitivity<1>();
+  }
+  TEST_P(MPITest, ApproximatedP2Sensitivity)
+  {
+    checkApproximatedSensitivity<2>();
+  }
+  TEST_P(MPITest, ApproximatedRejectsOmittedVolumetricTerm)
+  {
+    checkApproximatedControl();
+  }
   TEST_P(MPITest, LiftedAsymmetricAffineMetricOracle)
   {
     checkLiftedMetric();
