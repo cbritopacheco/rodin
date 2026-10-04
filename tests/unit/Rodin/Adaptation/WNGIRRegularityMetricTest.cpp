@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <Eigen/Eigenvalues>
 #include <Eigen/QR>
-#include "Rodin/Adaptation/WNGIRRegularityMetric.h"
+#include "Rodin/Adaptation/WNGIR/Distribution.h"
 #include "Rodin/Geometry.h"
 
 using namespace Rodin;
@@ -45,21 +45,21 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, DeviatoricCurrentStrainKernelAndEne
       [](const Point& p) { return Math::SpatialVector<Real>(p.getCoordinates()); });
     position += current;
     constexpr Real coefficient = Real(0.7);
-    const auto weight = Adaptation::Detail::wngirCurrentVolumeWeight(current, Dimension);
-    auto integral = Integral(coefficient * weight *
-        Adaptation::Detail::wngirCurrentStrain(trial, current, Dimension),
-      Adaptation::Detail::wngirCurrentStrain(test, current, Dimension));
+    const auto weight = Adaptation::wngirCurrentVolumeWeight(current, Dimension);
+    auto integral = Integral(
+      coefficient * weight * Adaptation::wngirCurrentStrain(trial, current, Dimension),
+      Adaptation::wngirCurrentStrain(test, current, Dimension));
     integral.setOrder(2 * Order);
     auto traceIntegral = Integral((coefficient / Real(Dimension)) * weight *
-        Trace(Adaptation::Detail::wngirCurrentStrain(trial, current, Dimension)),
-      Trace(Adaptation::Detail::wngirCurrentStrain(test, current, Dimension)));
+        Trace(Adaptation::wngirCurrentStrain(trial, current, Dimension)),
+      Trace(Adaptation::wngirCurrentStrain(test, current, Dimension)));
     traceIntegral.setOrder(2 * Order);
     BilinearForm form(trial, test);
     form = integral - traceIntegral;
     form.assemble();
     BilinearForm tabulated(trial, test);
-    tabulated = Adaptation::Detail::WNGIRCurrentStrainMetric(
-      trial, test, current, coefficient, 2 * Order);
+    tabulated =
+      Adaptation::WNGIRCurrentStrainMetric(trial, test, current, coefficient, 2 * Order);
     tabulated.assemble();
     EXPECT_LT((tabulated.getOperator() - form.getOperator()).norm(),
       Real(1e-12) * form.getOperator().norm());
@@ -157,8 +157,7 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, StableQuadratureAndCompleteConforma
     position += current;
     const auto assemble = [&](size_t order) {
       BilinearForm form(trial, test);
-      form = Adaptation::Detail::WNGIRCurrentStrainMetric(
-        trial, test, current, Real(1), order);
+      form = Adaptation::WNGIRCurrentStrainMetric(trial, test, current, Real(1), order);
       form.assemble();
       Math::Matrix<Real> matrix(form.getOperator());
       return Math::Matrix<Real>((Real(0.5) * (matrix + matrix.transpose())).eval());

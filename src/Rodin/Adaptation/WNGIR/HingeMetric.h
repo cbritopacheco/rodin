@@ -2,13 +2,13 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIRPRIMALBARRIERMETRIC_H
-#define RODIN_ADAPTATION_WNGIRPRIMALBARRIERMETRIC_H
+#ifndef RODIN_ADAPTATION_WNGIR_HINGEMETRIC_H
+#define RODIN_ADAPTATION_WNGIR_HINGEMETRIC_H
 
-#include "CellDeformation.h"
-#include "WNGIRPrimalBarrierState.h"
+#include "../CellDeformation.h"
+#include "Hinge.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
     /// @brief Affine hinge Hessian or nonlinear hinge Gauss-Newton tangent.
   template <class TrialFunction, class TestFunction, class Displacement>

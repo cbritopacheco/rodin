@@ -2,15 +2,15 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIRPRIMALBARRIERSTATE_H
-#define RODIN_ADAPTATION_WNGIRPRIMALBARRIERSTATE_H
+#ifndef RODIN_ADAPTATION_WNGIR_HINGE_H
+#define RODIN_ADAPTATION_WNGIR_HINGE_H
 
 #include <limits>
 
-#include "CellDeformation.h"
-#include "WNGIRParameters.h"
+#include "../CellDeformation.h"
+#include "Parameters.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /// @brief Pointwise slacks and Newton coefficients of the affine quadratic hinges.
   class WNGIRPrimalBarrierState

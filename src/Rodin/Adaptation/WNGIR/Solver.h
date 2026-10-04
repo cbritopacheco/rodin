@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIRSOLVER_H
-#define RODIN_ADAPTATION_WNGIRSOLVER_H
+#ifndef RODIN_ADAPTATION_WNGIR_SOLVER_H
+#define RODIN_ADAPTATION_WNGIR_SOLVER_H
 
 #include <algorithm>
 #include <chrono>
@@ -19,9 +19,9 @@
 #include <utility>
 #include <vector>
 
-#include <Eigen/Eigenvalues>
-#include "Rodin/Solver/SparseLU.h"
-#include "Rodin/Solver/MUMPS.h"
+#include "Rodin/Solver/NewtonSolver.h"
+#include "HingeProblem.h"
+#include "LinearSolver.h"
 #include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Trace.h"
@@ -30,60 +30,57 @@
 
 #include "Rodin/Location.h"
 
-#include "CellDeformation.h"
-#include "WNGIRLoss.h"
-#include "WNGIRParameters.h"
-#include "WNGIRDirectionalNewton.h"
-#include "WNGIRRegularityMetric.h"
-#include "WNGIRPrimalBarrierForce.h"
-#include "WNGIRPrimalBarrierMetric.h"
-#include "WNGIRReport.h"
-#include "WNGIRObservationCoefficient.h"
-#include "WNGIRSurfaceForceCoefficient.h"
+#include "../CellDeformation.h"
+#include "Loss.h"
+#include "Parameters.h"
+#include "DirectionalNewton.h"
+#include "Distribution.h"
+#include "HingeForce.h"
+#include "HingeMetric.h"
+#include "Report.h"
+#include "FittingCoefficient.h"
+#include "FittingForce.h"
 
 namespace Rodin::Adaptation
 {
-  namespace Detail
+  /// @brief Sampled componentwise physical displacement norm, independent of FE coefficients.
+  template <class Mesh, class FES, class Displacement>
+  Real wngirPhysicalDisplacementNorm(const Mesh& mesh, const FES& fes,
+    const std::vector<Index>& cells, const Displacement& step,
+    std::size_t validationOrder = 0)
   {
-    /// @brief Sampled componentwise physical displacement norm, independent of FE coefficients.
-    template <class Mesh, class FES, class Displacement>
-    Real wngirPhysicalDisplacementNorm(const Mesh& mesh, const FES& fes,
-      const std::vector<Index>& cells, const Displacement& step,
-      std::size_t validationOrder = 0)
+    if constexpr (requires { step.acquire(); })
+      step.acquire();
+    Real maximum = 0;
+    for (const Index index : cells)
     {
-      if constexpr (requires { step.acquire(); })
-        step.acquire();
-      Real maximum = 0;
-      for (const Index index : cells)
-      {
-        const auto cell = mesh.getCell(index);
-        const Geometry::Polytope::Traits traits(cell->getGeometry());
-        const auto evaluate = [&](const Geometry::Point& point) {
-          const auto value = step.getValue(point);
-          Real norm = 0;
-          for (std::size_t component = 0; component < mesh.getDimension(); ++component)
-          {
-            if (!std::isfinite(value(component)))
-              return std::numeric_limits<Real>::infinity();
-            norm = std::max(norm, std::abs(value(component)));
-          }
-          return norm;
-        };
-        for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-          maximum = std::max(maximum, evaluate(Geometry::Point(*cell, traits.getVertex(vertex))));
-        const auto& fe = fes.getFiniteElement(cell->getDimension(), index);
-        // This is a polynomial FE field, not the composed level-set residual.
-        const auto& qf = QF::PolytopeQuadratureFormula::get(validationOrder > 0
-            ? validationOrder
-            : std::max<size_t>(6, 2 * fe.getOrder() + 4),
-          cell->getGeometry());
-        const auto& quadrature = cell->getQuadrature(qf);
-        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-          maximum = std::max(maximum, evaluate(quadrature.getPoint(q)));
-      }
-      return maximum;
+      const auto cell = mesh.getCell(index);
+      const Geometry::Polytope::Traits traits(cell->getGeometry());
+      const auto evaluate = [&](const Geometry::Point& point) {
+        const auto value = step.getValue(point);
+        Real norm = 0;
+        for (std::size_t component = 0; component < mesh.getDimension(); ++component)
+        {
+          if (!std::isfinite(value(component)))
+            return std::numeric_limits<Real>::infinity();
+          norm = std::max(norm, std::abs(value(component)));
+        }
+        return norm;
+      };
+      for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        maximum =
+          std::max(maximum, evaluate(Geometry::Point(*cell, traits.getVertex(vertex))));
+      const auto& fe = fes.getFiniteElement(cell->getDimension(), index);
+      // This is a polynomial FE field, not the composed level-set residual.
+      const auto& qf = QF::PolytopeQuadratureFormula::get(validationOrder > 0
+          ? validationOrder
+          : std::max<size_t>(6, 2 * fe.getOrder() + 4),
+        cell->getGeometry());
+      const auto& quadrature = cell->getQuadrature(qf);
+      for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+        maximum = std::max(maximum, evaluate(quadrature.getPoint(q)));
     }
-
+    return maximum;
   }
 
   /**
@@ -134,16 +131,16 @@ namespace Rodin::Adaptation
       /// @brief Mesh-validity summary of a displacement.
       struct AdmissibilityState
       {
-        /// @brief Smallest Jacobian over all cell quadrature points.
+          /// @brief Smallest Jacobian over all cell quadrature points.
           Real minJ = std::numeric_limits<Real>::infinity();
 
-        /// @brief Largest Jacobian over all cell quadrature points.
+          /// @brief Largest Jacobian over all cell quadrature points.
           Real maxJ = -std::numeric_limits<Real>::infinity();
 
-        /// @brief Largest relative distortion over the non-inverted points.
+          /// @brief Largest relative distortion over the non-inverted points.
           Real maxQ = 0;
 
-        /// @brief Number of quadrature points at or below the Jacobian floor.
+          /// @brief Number of quadrature points at or below the Jacobian floor.
           std::size_t inadmissibleCount = 0;
           Real affineMinJ = std::numeric_limits<Real>::infinity();
           Real affineMaxQ = 0;
@@ -159,29 +156,29 @@ namespace Rodin::Adaptation
           /// @brief Fixed-scale energy used by the current Armijo search.
           Real energy = 0;
 
-        /// @brief Measure carrying a non-negligible robust weight.
+          /// @brief Measure carrying a non-negligible robust weight.
           Real activeLen = 0;
 
-        /// @brief Measure of the whole interface.
+          /// @brief Measure of the whole interface.
           Real totalLen = 0;
 
-        /// @brief Root-mean-square residual over the active part.
+          /// @brief Root-mean-square residual over the active part.
           Real activeRMS = 0;
 
-        /// @brief Supremum residual over the active part.
+          /// @brief Supremum residual over the active part.
           Real activeSup = 0;
       };
 
       /// @brief Observation coercivity restricted to rigid displacements.
       struct RigidModeState
       {
-        /// @brief Smallest generalized observation eigenvalue.
+          /// @brief Smallest generalized observation eigenvalue.
           Real minimum = std::numeric_limits<Real>::quiet_NaN();
 
-        /// @brief Ratio of the smallest to largest generalized eigenvalue.
+          /// @brief Ratio of the smallest to largest generalized eigenvalue.
           Real ratio = std::numeric_limits<Real>::quiet_NaN();
 
-        /// @brief Dimension of the rigid-motion space tested.
+          /// @brief Dimension of the rigid-motion space tested.
           std::size_t dimension = 0;
       };
 
@@ -193,10 +190,10 @@ namespace Rodin::Adaptation
        */
       struct NormalJump
       {
-        /// @brief Measure-weighted RMS angle between adjacent facet normals.
+          /// @brief Measure-weighted RMS angle between adjacent facet normals.
           Real rms = 0;
 
-        /// @brief Largest angle between adjacent facet normals.
+          /// @brief Largest angle between adjacent facet normals.
           Real max = 0;
       };
 
@@ -206,12 +203,17 @@ namespace Rodin::Adaptation
           m_trialUUID(du.getUUID()),
           m_duStep(du.getFiniteElementSpace()),
           m_vStep(v.getFiniteElementSpace()),
-          m_stepProblem(m_duStep, m_vStep),
+          m_metricProblem(m_duStep, m_vStep),
+          m_hingeProblem(m_duStep, m_vStep),
+          m_linearSolver(m_hingeProblem),
           m_regularityForm(m_duStep, m_vStep),
           m_localMetricForm(m_duStep, m_vStep),
           m_surfaceForm(m_vStep),
           m_additionalMetric(du, v)
       {}
+
+      WNGIR(const WNGIR&) = delete;
+      WNGIR& operator=(const WNGIR&) = delete;
 
       /// @brief Adds a bilinear metric term; the robust fitting objective is unchanged.
       WNGIR& operator+=(const Variational::LocalBilinearFormIntegratorBase<Real>& term)
@@ -264,12 +266,14 @@ namespace Rodin::Adaptation
           Alert::Exception() << "WNGIR requires positive "
                                 "fitting/distribution weights."
                              << Alert::Raise;
-        for (const Real value : {parameters.kappaJ, parameters.kappaQ,
-               parameters.primalBarrierAbsoluteTolerance, parameters.energyStagTol,
-               parameters.stepTol, parameters.acceptedStepOverHTol, parameters.robustScale})
+        for (const Real value :
+          {parameters.kappaJ, parameters.kappaQ,
+            parameters.primalBarrierAbsoluteTolerance, parameters.energyStagTol,
+            parameters.stepTol, parameters.acceptedStepOverHTol, parameters.robustScale})
           if (!std::isfinite(value) || value < Real(0))
-            Alert::Exception() << "WNGIR weights and tolerances must be finite and nonnegative."
-                               << Alert::Raise;
+            Alert::Exception()
+              << "WNGIR weights and tolerances must be finite and nonnegative."
+              << Alert::Raise;
         if (!std::isfinite(parameters.primalBarrierRelativeTolerance) ||
           !(parameters.primalBarrierRelativeTolerance > Real(0)) ||
           !std::isfinite(parameters.cgRelativeTolerance) ||
@@ -281,8 +285,9 @@ namespace Rodin::Adaptation
           !(parameters.jLineSearchRatio > Real(0) &&
             parameters.jLineSearchRatio < Real(1)) ||
           parameters.primalBarrierIterations == 0 || parameters.stagnationIterations == 0)
-          Alert::Exception() << "WNGIR requires valid residual tolerances, budgets and line search."
-                             << Alert::Raise;
+          Alert::Exception()
+            << "WNGIR requires valid residual tolerances, budgets and line search."
+            << Alert::Raise;
         if (!std::isfinite(parameters.directionalNewtonMaxStepOverH) ||
           !(parameters.directionalNewtonMaxStepOverH > Real(0)))
           Alert::Exception()
@@ -391,14 +396,16 @@ namespace Rodin::Adaptation
         std::sort(markedFacets.begin(), markedFacets.end());
         std::sort(suppliedFacets.begin(), suppliedFacets.end());
         if (markedFacets != suppliedFacets)
-          Alert::Exception() << "WNGIR facet list must exactly match the interface attribute."
-                             << Alert::Raise;
+          Alert::Exception()
+            << "WNGIR facet list must exactly match the interface attribute."
+            << Alert::Raise;
         const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
         rep.normalJumpRMS = normalJump.rms;
         rep.normalJumpMax = normalJump.max;
         const Real geometricTarget = p.geometricSupTolerance > Real(0)
           ? p.geometricSupTolerance
-          : std::pow(h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
+          : std::pow(h,
+              fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
         if (!std::isfinite(geometricTarget) || !(geometricTarget > Real(0)))
           Alert::Exception() << "WNGIR requires a finite positive geometric target."
                              << Alert::Raise;
@@ -467,8 +474,8 @@ namespace Rodin::Adaptation
           rep.maxJ = initialAdm.maxJ;
           rep.maxQRel = initialAdm.maxQ;
         }
-        if (initialAdm.inadmissibleCount > 0 || initialAdm.minJ <= acceptedJacobianFloor ||
-          initialAdm.maxQ >= p.qMax)
+        if (initialAdm.inadmissibleCount > 0 ||
+          initialAdm.minJ <= acceptedJacobianFloor || initialAdm.maxQ >= p.qMax)
         {
           rep.exitReason = "initial-state-not-strictly-feasible";
           m_report = rep;
@@ -565,13 +572,13 @@ namespace Rodin::Adaptation
         for (; rep.iterations < p.maxIterations; ++rep.iterations)
         {
           auto tic = Clock::now();
-          Detail::WNGIRObservationCoefficient obsCoeff(
+          WNGIRObservationCoefficient obsCoeff(
             grad, u, locator, p, dataNormalization, meshDim);
           auto obsMetric =
             Variational::FaceIntegral(Variational::Dot(obsCoeff * m_duStep, m_vStep));
           obsMetric.setOrder(surfaceOrder);
           obsMetric.over(p.interfaceAttribute);
-          Detail::WNGIRSurfaceForceCoefficient forceCoeff(
+          WNGIRSurfaceForceCoefficient forceCoeff(
             phi, grad, u, locator, loss, dataNormalization, meshDim);
           auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
           surfaceForce.setOrder(surfaceOrder);
@@ -593,8 +600,8 @@ namespace Rodin::Adaptation
               order, 2 * fes.getFiniteElement(meshDim, cell->getIndex()).getOrder());
           if (p.quadratureOrder > 0)
             order = p.quadratureOrder;
-          m_regularityForm = Detail::WNGIRCurrentStrainMetric(
-            m_duStep, m_vStep, u, coefficient, order);
+          m_regularityForm =
+            WNGIRCurrentStrainMetric(m_duStep, m_vStep, u, coefficient, order);
           m_regularityForm.assemble();
           m_surfaceForm = surfaceForce;
           m_surfaceForm.assemble();
@@ -602,7 +609,7 @@ namespace Rodin::Adaptation
           Real predictorAction = Real(0);
           typename ProblemType::ProblemBodyType predictorBody(m_regularityForm);
           predictorBody = predictorBody + m_localMetricForm - m_surfaceForm;
-          m_stepProblem = predictorBody;
+          m_metricProblem = predictorBody;
           assembleStep();
           rep.tAssembly += secondsSince(tic);
 
@@ -613,7 +620,7 @@ namespace Rodin::Adaptation
                           Math::SparseMatrix<Real>>)
           {
             {
-              const auto& system = m_stepProblem.getLinearSystem();
+              const auto& system = m_metricProblem.getLinearSystem();
               fixedMetric = system.getOperator();
               fixedForce = system.getVector();
               m_similarityModes = getSimilarityModes(u);
@@ -622,7 +629,8 @@ namespace Rodin::Adaptation
           tic = Clock::now();
           std::size_t predictorIterations = 0;
           Real predictorError = std::numeric_limits<Real>::infinity();
-          solveOk = solveStep(vK, predictorIterations, predictorError, &rep);
+          solveOk =
+            solveStep(m_metricProblem, vK, predictorIterations, predictorError, &rep);
           recordLinearSolve(predictorIterations, predictorError);
           rep.tSolve += secondsSince(tic);
           if (!solveOk)
@@ -645,10 +653,10 @@ namespace Rodin::Adaptation
             const auto curvatures =
               getSurfaceDirectionalCurvature(mesh, fes, u, predictor, phi, grad,
                 interfaceFacets, loss, dataNormalization, meshDim, locator);
-            const Real norm = Detail::wngirPhysicalDisplacementNorm(
+            const Real norm = wngirPhysicalDisplacementNorm(
               mesh, fes, validationCells, predictor, p.geometricValidationOrder);
             rep.predictorScale =
-              Detail::wngirDirectionalNewtonStep(predictorAction, curvatures.first,
+              wngirDirectionalNewtonStep(predictorAction, curvatures.first,
                 curvatures.second, norm, h * p.directionalNewtonMaxStepOverH);
             if (!(rep.predictorScale > Real(0)) || !std::isfinite(rep.predictorScale))
             {
@@ -683,108 +691,100 @@ namespace Rodin::Adaptation
             const Real barrierCoefficient =
               domainMeasure > Real(0) ? p.muHat * modelDecrease / domainMeasure : Real(0);
             rep.primalBarrierCoefficient = barrierCoefficient;
-
+            const size_t innerIterations = std::max<size_t>(1, p.primalBarrierIterations);
+            const Real predictorNorm =
+              std::max(std::abs(predictor.max()), std::abs(predictor.min()));
+            const Real residualScale = fixedForce.norm();
+            const Real residualTolerance = p.primalBarrierAbsoluteTolerance +
+              p.primalBarrierRelativeTolerance * residualScale;
+            bool innerConverged = false;
+            rep.lastPrimalBarrierIterations = 0;
+            rep.lastPrimalBarrierAlpha = 0;
+            rep.minPrimalBarrierAlpha = 1;
+            rep.fullPrimalBarrierSteps = 0;
+            if (!hasActivePrimalHinges(
+                  mesh, fes, validationCells, u, vK, meshDim, barrierCoefficient))
             {
-              // The affine hinges permit any finite predictor increment.
-              const std::size_t innerIterations =
-                std::max<std::size_t>(1, p.primalBarrierIterations);
-              const Real predictorNorm =
-                std::max(std::abs(predictor.max()), std::abs(predictor.min()));
-              bool innerConverged = false;
-              rep.lastPrimalBarrierIterations = 0;
-              rep.lastPrimalBarrierAlpha = 0;
-              rep.minPrimalBarrierAlpha = 1;
-              rep.fullPrimalBarrierSteps = 0;
-              tic = Clock::now();
-              const Real residualScale = fixedForce.norm();
-              for (std::size_t inner = 0; inner <= innerIterations; ++inner)
-              {
-                if (inner == 0 &&
-                  !hasActivePrimalHinges(mesh, fes, validationCells, u, vK,
-                    meshDim, barrierCoefficient))
-                {
-                  Math::Vector<Real> image;
-                  image = fixedMetric * vK.getData();
-                  rep.primalBarrierResidual = (image - fixedForce).norm();
-                  rep.primalBarrierResidualTolerance = p.primalBarrierAbsoluteTolerance +
-                    p.primalBarrierRelativeTolerance * residualScale;
-                  rep.primalBarrierRelativeResidual = residualScale > Real(0)
-                    ? rep.primalBarrierResidual / residualScale : rep.primalBarrierResidual;
-                  innerConverged = rep.primalBarrierResidual <= rep.primalBarrierResidualTolerance;
-                  rep.primalBarrierConverged = innerConverged;
-                  rep.primalBarrierRelativeCorrection = Real(0);
-                  if (p.trace)
-                    std::cout << "        barrier skip: outer=" << rep.iterations
-                              << "  reason=inactive-hinges  residual=" << rep.primalBarrierResidual
-                              << "  rel=" << rep.primalBarrierRelativeResidual
-                              << "  converged=" << innerConverged << '\n';
-                  if (innerConverged)
-                  {
-                    ++rep.inactiveHingeSkips;
-                    break;
-                  }
-                }
-                Detail::WNGIRPrimalBarrierMetric barrierMetric(
-                  m_duStep, m_vStep, u, vK, p, barrierCoefficient);
-                Detail::WNGIRPrimalBarrierForce barrierForce(
-                  m_vStep, u, vK, p, barrierCoefficient);
-                typename ProblemType::ProblemBodyType body(m_regularityForm);
-                body =
-                  body + m_localMetricForm + barrierMetric - m_surfaceForm - barrierForce;
-                m_stepProblem = body;
-                assembleStep();
-                const Real innerAssemblySeconds = secondsSince(tic);
-                rep.tAssembly += innerAssemblySeconds;
-                rep.tPrimalBarrierAssembly += innerAssemblySeconds;
-
-                Math::Vector<Real> residualImage;
-                const auto& innerSystem = m_stepProblem.getLinearSystem();
-                residualImage = innerSystem.getOperator() * vK.getData();
-                rep.primalBarrierResidual =
-                  (residualImage - innerSystem.getVector()).norm();
-                rep.primalBarrierResidualTolerance = p.primalBarrierAbsoluteTolerance +
-                  p.primalBarrierRelativeTolerance * residualScale;
-                rep.primalBarrierRelativeResidual = residualScale > Real(0)
-                  ? rep.primalBarrierResidual / residualScale : rep.primalBarrierResidual;
-                innerConverged = std::isfinite(rep.primalBarrierResidual) &&
-                  rep.primalBarrierResidual <= rep.primalBarrierResidualTolerance;
+              const Math::Vector<Real> image = fixedMetric * vK.getData();
+              rep.primalBarrierResidual = (image - fixedForce).norm();
+              rep.primalBarrierResidualTolerance = residualTolerance;
+              rep.primalBarrierRelativeResidual = residualScale > Real(0)
+                ? rep.primalBarrierResidual / residualScale
+                : rep.primalBarrierResidual;
+              innerConverged = rep.primalBarrierResidual <= residualTolerance;
+              rep.primalBarrierConverged = innerConverged;
+              rep.primalBarrierRelativeCorrection = Real(0);
+              if (p.trace)
+                std::cout << "        barrier skip: outer=" << rep.iterations
+                          << "  reason=inactive-hinges  residual="
+                          << rep.primalBarrierResidual
+                          << "  rel=" << rep.primalBarrierRelativeResidual
+                          << "  converged=" << innerConverged << '\n';
+              if (innerConverged)
+                ++rep.inactiveHingeSkips;
+            }
+            if (!innerConverged)
+            {
+              WNGIRPrimalBarrierMetric barrierMetric(
+                m_duStep, m_vStep, u, vK, p, barrierCoefficient);
+              WNGIRPrimalBarrierForce barrierForce(m_vStep, u, vK, p, barrierCoefficient);
+              typename ProblemType::ProblemBodyType body(m_regularityForm);
+              body =
+                body + m_localMetricForm + barrierMetric - m_surfaceForm - barrierForce;
+              m_hingeProblem = body;
+              m_hingeProblem.setState(vK).setBoundaryDOFs(m_fixedIncrementDOFs);
+              using Newton = Solver::NewtonSolver<WNGIRLinearSolver<LinearSystemType>>;
+              Newton newton(m_linearSolver);
+              newton.setMaxIterations(innerIterations)
+                .setAbsoluteTolerance(residualTolerance)
+                .setRelativeTolerance(Real(0))
+                .setStepTolerance(Real(0));
+              const auto recordResidual = [&](Real residual, size_t inner) {
+                const Real assemblySeconds = m_hingeProblem.getAssemblySeconds();
+                rep.tAssembly += assemblySeconds;
+                rep.tPrimalBarrierAssembly += assemblySeconds;
+                rep.primalBarrierResidual = residual;
+                rep.primalBarrierResidualTolerance = residualTolerance;
+                rep.primalBarrierRelativeResidual =
+                  residualScale > Real(0) ? residual / residualScale : residual;
+                innerConverged = std::isfinite(residual) && residual <= residualTolerance;
                 if (p.trace)
                 {
                   const auto precision = std::cout.precision();
                   std::cout << std::setprecision(std::numeric_limits<Real>::max_digits10)
                             << "        barrier residual: outer=" << rep.iterations
-                            << "  inner=" << inner
-                            << "  residual=" << rep.primalBarrierResidual
-                            << "  force_norm=" << fixedForce.norm()
+                            << "  inner=" << inner << "  residual=" << residual
+                            << "  force_norm=" << residualScale
                             << "  rel=" << rep.primalBarrierRelativeResidual
-                            << "  tolerance=" << rep.primalBarrierResidualTolerance
+                            << "  tolerance=" << residualTolerance
                             << "  converged=" << innerConverged << '\n';
                   std::cout.precision(precision);
                 }
-                if (innerConverged || inner == innerIterations)
-                  break;
-
-                tic = Clock::now();
-                std::size_t barrierIterations = 0;
-                Real barrierError = std::numeric_limits<Real>::infinity();
-                solveOk = solveStep(uTrial, barrierIterations, barrierError, &rep);
+              };
+              newton.setMonitor([&](const typename Newton::Report& report) {
+                if (report.converged || !std::isfinite(report.finalResidual))
+                  recordResidual(report.finalResidual, report.iterations);
+              });
+              newton.setStepPolicy([&](auto&, auto& system, auto& newtonReport) {
+                recordResidual(newtonReport.finalResidual, newtonReport.iterations);
+                const size_t barrierIterations = m_linearSolver.getIterations();
+                const Real barrierError = m_linearSolver.getError();
                 recordLinearSolve(barrierIterations, barrierError);
-                const Real innerSolveSeconds = secondsSince(tic);
+                const Real innerSolveSeconds = m_linearSolver.getSolveSeconds();
                 rep.tSolve += innerSolveSeconds;
                 rep.tPrimalBarrierSolve += innerSolveSeconds;
+                solveOk = m_linearSolver.success();
                 if (!solveOk)
                 {
                   if (p.trace)
-                    std::cout << "        barrier inner=" << (inner + 1)
+                    std::cout << "        barrier inner=" << (newtonReport.iterations + 1)
                               << "  outer=" << rep.iterations << "  linear_ok=0"
                               << "  cg_it=" << barrierIterations
                               << "  cg_err=" << barrierError << std::endl;
                   rep.exitReason = "solve-linear-failed";
-                  break;
+                  return typename Newton::StepResult{false, false, Real(0)};
                 }
-
-                scratch = uTrial;
-                scratch -= vK;
+                scratch.setData(system.getSolution());
                 const Real correctionNorm =
                   std::max(std::abs(scratch.max()), std::abs(scratch.min()));
                 const Real iterateNorm = std::max(std::abs(vK.max()), std::abs(vK.min()));
@@ -796,8 +796,8 @@ namespace Rodin::Adaptation
                 rep.primalBarrierRelativeCorrection = relativeCorrection;
                 ++rep.primalBarrierIterations;
                 ++rep.lastPrimalBarrierIterations;
-                rep.maxPrimalBarrierIterations =
-                  std::max(rep.maxPrimalBarrierIterations, rep.lastPrimalBarrierIterations);
+                rep.maxPrimalBarrierIterations = std::max(
+                  rep.maxPrimalBarrierIterations, rep.lastPrimalBarrierIterations);
                 Real innerAlpha = Real(1);
                 if constexpr (std::is_same_v<typename FormLanguage::Traits<
                                                LinearSystemType>::OperatorType,
@@ -816,11 +816,7 @@ namespace Rodin::Adaptation
                         std::abs(quadratic) + std::abs(force) + std::abs(quality)};
                     };
                     const auto before = merit(vK);
-                    Math::Vector<Real> image;
-                    const auto& system = m_stepProblem.getLinearSystem();
-                    image = system.getOperator() * vK.getData();
-                    const Real slope =
-                      (image - system.getVector()).dot(scratch.getData());
+                    const Real slope = -system.getVector().dot(scratch.getData());
                     bool meritAccepted = false;
                     std::size_t backtracks = 0;
                     Real after = std::numeric_limits<Real>::infinity();
@@ -854,23 +850,24 @@ namespace Rodin::Adaptation
                       std::cout
                         << std::setprecision(std::numeric_limits<Real>::max_digits10)
                         << "        barrier merit: outer=" << rep.iterations
-                        << "  inner=" << (inner + 1) << "  before=" << before.first
-                        << "  after=" << after << "  slope=" << slope
-                        << "  alpha=" << innerAlpha << "  backtracks=" << backtracks
-                        << "  accepted=" << meritAccepted << std::endl;
+                        << "  inner=" << (newtonReport.iterations + 1)
+                        << "  before=" << before.first << "  after=" << after
+                        << "  slope=" << slope << "  alpha=" << innerAlpha
+                        << "  backtracks=" << backtracks << "  accepted=" << meritAccepted
+                        << std::endl;
                       std::cout.precision(precision);
                     }
                     if (!meritAccepted)
                     {
                       if (p.trace)
                         std::cout
-                          << "        barrier inner=" << (inner + 1)
+                          << "        barrier inner=" << (newtonReport.iterations + 1)
                           << "  outer=" << rep.iterations << "  linear_ok=1"
                           << "  merit_ok=0  converged=0  cg_it=" << barrierIterations
                           << "  cg_err=" << barrierError << std::endl;
                       rep.exitReason = "primal-barrier-line-search-failure";
                       solveOk = false;
-                      break;
+                      return typename Newton::StepResult{false, false, Real(0)};
                     }
                   }
                 }
@@ -883,7 +880,7 @@ namespace Rodin::Adaptation
                 {
                   const auto precision = std::cout.precision();
                   std::cout << std::setprecision(std::numeric_limits<Real>::max_digits10)
-                            << "        barrier inner=" << (inner + 1)
+                            << "        barrier inner=" << (newtonReport.iterations + 1)
                             << "  outer=" << rep.iterations << "  corr=" << correctionNorm
                             << "  iterate=" << iterateNorm
                             << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
@@ -894,15 +891,25 @@ namespace Rodin::Adaptation
                 }
                 scratch *= innerAlpha;
                 vK += scratch;
-                // Reassemble at the accepted inner iterate to certify its stationarity residual.
-                tic = Clock::now();
-              }
-              rep.primalBarrierConverged = innerConverged;
-              if (solveOk && !innerConverged)
+
+                return typename Newton::StepResult{true, false, scratch.getData().norm()};
+              });
+              newton.solve(vK);
+              innerConverged = newton.converged();
+              // Certify the last accepted iterate without spending another correction.
+              if (solveOk &&
+                newton.getReport().reason == Newton::ConvergedReason::MaxIterations)
               {
-                rep.exitReason = "primal-barrier-inner-not-converged";
-                solveOk = false;
+                m_hingeProblem.assemble();
+                recordResidual(
+                  m_hingeProblem.getLinearSystem().getVector().norm(), innerIterations);
               }
+            }
+            rep.primalBarrierConverged = innerConverged;
+            if (solveOk && !innerConverged)
+            {
+              rep.exitReason = "primal-barrier-inner-not-converged";
+              solveOk = false;
             }
           }
           if (!solveOk)
@@ -1022,7 +1029,7 @@ namespace Rodin::Adaptation
             // Measure the accepted FE field, not its coefficient vector.
             scratch = u;
             scratch -= previousU;
-            rep.acceptedStep = Detail::wngirPhysicalDisplacementNorm(
+            rep.acceptedStep = wngirPhysicalDisplacementNorm(
               mesh, fes, validationCells, scratch, p.geometricValidationOrder);
           }
           rep.minJ = adm.minJ;
@@ -1087,21 +1094,22 @@ namespace Rodin::Adaptation
             ++rep.iterations;
             break;
           }
-          const Real stepThreshold =
-            stepTol + h * p.acceptedStepOverHTol;
-          consecutiveSmallAcceptedSteps = rep.acceptedStep <= stepThreshold
-            ? consecutiveSmallAcceptedSteps + 1 : 0;
+          const Real stepThreshold = stepTol + h * p.acceptedStepOverHTol;
+          consecutiveSmallAcceptedSteps =
+            rep.acceptedStep <= stepThreshold ? consecutiveSmallAcceptedSteps + 1 : 0;
           const Real energyScale =
             std::max({std::abs(ePrev), std::abs(eNow), std::numeric_limits<Real>::min()});
           const Real energyChange = std::abs(ePrev - eNow) / energyScale;
-          consecutiveSmallEnergyChanges = p.energyStagTol > Real(0) &&
-              energyChange <= p.energyStagTol
-            ? consecutiveSmallEnergyChanges + 1 : 0;
+          consecutiveSmallEnergyChanges =
+            p.energyStagTol > Real(0) && energyChange <= p.energyStagTol
+            ? consecutiveSmallEnergyChanges + 1
+            : 0;
           if (consecutiveSmallAcceptedSteps >= p.stagnationIterations ||
             consecutiveSmallEnergyChanges >= p.stagnationIterations)
           {
             rep.exitReason = consecutiveSmallAcceptedSteps >= p.stagnationIterations
-              ? "best-effort-step-stagnation" : "best-effort-energy-stagnation";
+              ? "best-effort-step-stagnation"
+              : "best-effort-energy-stagnation";
             ++rep.iterations;
             break;
           }
@@ -1122,8 +1130,10 @@ namespace Rodin::Adaptation
         rep.geometricRMS = geometry.rms;
         rep.geometricSup = geometry.sup;
         rep.normalRMS = geometry.normalRMS;
-        rep.qualityBudgetSatisfied = rep.minJ > acceptedJacobianFloor && rep.maxQRel < p.qMax;
-        rep.geometricTargetReached = rep.qualityBudgetSatisfied && geometry.sup <= geometricTarget;
+        rep.qualityBudgetSatisfied =
+          rep.minJ > acceptedJacobianFloor && rep.maxQRel < p.qMax;
+        rep.geometricTargetReached =
+          rep.qualityBudgetSatisfied && geometry.sup <= geometricTarget;
         if (p.trace)
           traceGeometry(geometry, rep.iterations, "final");
 
@@ -1175,8 +1185,7 @@ namespace Rodin::Adaptation
               const auto& point = quadrature.getPoint(q);
               const Variational::IntegrationPoint ip(point, &qf, q);
               const auto value = direction.getValue(point);
-              const Detail::WNGIRResidualState state(
-                phi, grad, deformation, ip, loss, true);
+              const WNGIRResidualState state(phi, grad, deformation, ip, loss, true);
               const Real residual = state.getResidual();
               const Real action = state.getGradient().dot(value);
               const Real weight =
@@ -1276,7 +1285,7 @@ namespace Rodin::Adaptation
 #pragma omp parallel
 #endif
         {
-          Detail::WNGIRSurfaceForceCoefficient force(
+          WNGIRSurfaceForceCoefficient force(
             phi, grad, current, locator, loss, normalization, dimension);
 #ifdef RODIN_USE_OPENMP
 #pragma omp for schedule(static)
@@ -1379,7 +1388,7 @@ namespace Rodin::Adaptation
         }
 
         Math::Matrix<Real> observationGram = Math::Matrix<Real>::Zero(count, count);
-        Detail::WNGIRObservationCoefficient observation(
+        WNGIRObservationCoefficient observation(
           grad, current, locator, m_parameters, normalization, dimension);
         for (const Index facetIndex : interfaceFacets)
         {
@@ -1442,7 +1451,7 @@ namespace Rodin::Adaptation
             {
               const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-              const Detail::WNGIRPrimalBarrierState state(
+              const WNGIRPrimalBarrierState state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
               active = active || !state.isFeasible() ||
                 state.getJacobianHessian() != Real(0) ||
@@ -1479,7 +1488,7 @@ namespace Rodin::Adaptation
               const auto& point = quadrature.getPoint(q);
               const Variational::IntegrationPoint ip(point, &qf, q);
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-              const Detail::WNGIRPrimalBarrierState state(
+              const WNGIRPrimalBarrierState state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
               energy += qf.getWeight(q) * point.getDistortion() *
                 state.getEnergy(m_parameters, coefficient);
@@ -1539,7 +1548,8 @@ namespace Rodin::Adaptation
               const Real j = deformation.getJacobian();
               minJ = std::min(minJ, j);
               maxJ = std::max(maxJ, j);
-              if (!std::isfinite(j) || j <= m_parameters.jMinRatio || !deformation.isAdmissible())
+              if (!std::isfinite(j) || j <= m_parameters.jMinRatio ||
+                !deformation.isAdmissible())
                 ++inadmissibleCount;
               if (deformation.isAdmissible())
               {
@@ -1722,10 +1732,12 @@ namespace Rodin::Adaptation
             for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
             {
               const Geometry::Point point(*face, traits.getVertex(vertex));
-              const auto& moved = deformation.getMovedPoint(Variational::IntegrationPoint(point));
+              const auto& moved =
+                deformation.getMovedPoint(Variational::IntegrationPoint(point));
               const Real norm = grad.getValue(moved).norm();
               const Real distance = std::abs(phi.getValue(moved)) / norm;
-              if (!(norm > gradientFloor) || !std::isfinite(norm) || !std::isfinite(distance))
+              if (!(norm > gradientFloor) || !std::isfinite(norm) ||
+                !std::isfinite(distance))
                 ++state.invalidCount;
               else
                 state.maximumDistance = std::max(state.maximumDistance, distance);
@@ -1786,8 +1798,9 @@ namespace Rodin::Adaptation
               const Real gradientNorm = targetGradient.norm();
               const Real fittedNormalNorm = fittedNormal.norm();
               if (!(mappedMeasure > gradientFloor && gradientNorm > gradientFloor &&
-                    fittedNormalNorm > gradientFloor) || !std::isfinite(mappedMeasure) ||
-                  !std::isfinite(gradientNorm) || !std::isfinite(fittedNormalNorm))
+                    fittedNormalNorm > gradientFloor) ||
+                !std::isfinite(mappedMeasure) || !std::isfinite(gradientNorm) ||
+                !std::isfinite(fittedNormalNorm))
               {
                 ++state.invalidCount;
                 continue;
@@ -1822,8 +1835,7 @@ namespace Rodin::Adaptation
           total.squaredNormal += state.squaredNormal;
           total.invalidCount += state.invalidCount;
         }
-        if (!(total.measure > Real(0)) ||
-          total.invalidCount > 0)
+        if (!(total.measure > Real(0)) || total.invalidCount > 0)
           return {};
         return {std::sqrt(std::max(Real(0), total.squaredDistance) / total.measure),
           total.maximumDistance,
@@ -2011,12 +2023,6 @@ namespace Rodin::Adaptation
         return {sigma, gradientScale};
       }
 
-      struct SimilarityGauge
-      {
-          std::vector<Math::Vector<Real>> modes;
-          std::vector<Real> weights;
-      };
-
       void assembleBoundaryConditions()
       {
         m_fixedIncrementDOFs.clear();
@@ -2042,16 +2048,16 @@ namespace Rodin::Adaptation
       /// @brief Assemble one symmetric operator for the model, factors and residuals.
       void assembleStep()
       {
-        m_stepProblem.assemble();
+        m_metricProblem.assemble();
         using OperatorType =
           typename FormLanguage::Traits<LinearSystemType>::OperatorType;
         if constexpr (std::is_same_v<OperatorType, Math::SparseMatrix<Real>>)
         {
-          auto& matrix = m_stepProblem.getLinearSystem().getOperator();
+          auto& matrix = m_metricProblem.getLinearSystem().getOperator();
           matrix =
             (Real(0.5) * (matrix + Math::SparseMatrix<Real>(matrix.transpose()))).eval();
           if (!m_fixedIncrementDOFs.empty())
-            m_stepProblem.getLinearSystem().eliminate(m_fixedIncrementDOFs);
+            m_metricProblem.getLinearSystem().eliminate(m_fixedIncrementDOFs);
           matrix.makeCompressed();
         }
       }
@@ -2110,295 +2116,48 @@ namespace Rodin::Adaptation
       }
 
       /**
-       * @brief Selects zero in unresolved similarity modes of one linear system.
-       *
-       * Gauges are confined to the solve, not the metric or hinge objective.
-       * They are recomputed for each active-set matrix, so a hinge that resolves
-       * a previously free dilation releases that mode. True residuals are checked
-       * against the ungauged operator. No large sparse eigenproblem is required.
+       * @brief Solves the predictor and transfers it to a displacement field.
+       * The retained linear adapter also serves the native inner Newton solve.
        */
-      size_t gaugeSimilarityModes(const Math::SparseMatrix<Real>& matrix,
-        const Math::Vector<Real>& force, SimilarityGauge& projection) const
+      bool solveStep(ProblemType& problem, Displacement& out, size_t& iterations,
+        Real& error, WNGIRReport* report = nullptr)
       {
-        const auto& modes = m_similarityModes;
-        const size_t count = modes.cols();
-        if (count == 0)
-          return 0;
-        Math::Matrix<Real> images(matrix.rows(), count);
-        for (size_t column = 0; column < count; ++column)
-        {
-          Math::Vector<Real> image;
-          applyMetric(matrix, projection, modes.col(column), image);
-          images.col(column) = image;
-        }
-        Math::Matrix<Real> gram = modes.transpose() * images;
-        gram = (Real(0.5) * (gram + gram.transpose())).eval();
-        Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eigen(gram);
-        if (eigen.info() != Eigen::Success)
-          return 0;
-        const Real scale = matrix.diagonal().cwiseAbs().maxCoeff();
-        const Real tolerance =
-          NullModeRoundoffFactor * std::numeric_limits<Real>::epsilon();
-        size_t unresolved = 0;
-        for (size_t column = 0; column < count; ++column)
-        {
-          const Math::Vector<Real> candidate = modes * eigen.eigenvectors().col(column);
-          if ((images * eigen.eigenvectors().col(column)).norm() <= tolerance * scale &&
-            std::abs(force.dot(candidate)) <= tolerance * force.norm())
-          {
-            projection.modes.push_back(candidate);
-            projection.weights.push_back(scale);
-            ++unresolved;
-          }
-        }
-        return unresolved;
-      }
-
-      void applyMetric(const Math::SparseMatrix<Real>& A,
-        const SimilarityGauge& projection, const Math::Vector<Real>& x,
-        Math::Vector<Real>& y) const
-      {
-        y = A * x;
-        for (std::size_t k = 0; k < projection.weights.size(); ++k)
-          y += projection.weights[k] * projection.modes[k].dot(x) * projection.modes[k];
-      }
-
-      bool metricConjugateGradient(const Math::SparseMatrix<Real>& A,
-        const SimilarityGauge& projection, const Math::Vector<Real>& b,
-        Math::Vector<Real>& x, std::size_t maxIterations, Real relativeTolerance,
-        std::size_t& iterations, Real& error) const
-      {
-        Math::Vector<Real> jacobi(A.rows());
-        for (Eigen::Index i = 0; i < A.rows(); ++i)
-        {
-          const Real d = A.coeff(i, i);
-          jacobi(i) = (std::abs(d) > Real(0)) ? Real(1) / d : Real(1);
-        }
-        auto applyPreconditioner = [&](const Math::Vector<Real>& residual) {
-          return Math::Vector<Real>(jacobi.cwiseProduct(residual));
-        };
-        const Real rhsNorm = b.norm();
-        iterations = 0;
-        if (!(rhsNorm > Real(0)))
-        {
-          x.setZero();
-          error = Real(0);
-          return true;
-        }
-        Math::Vector<Real> Ax;
-        applyMetric(A, projection, x, Ax);
-        Math::Vector<Real> r = b - Ax;
-        Math::Vector<Real> z = applyPreconditioner(r);
-        Math::Vector<Real> p = z;
-        Real rz = r.dot(z);
-        const Real threshold = relativeTolerance * rhsNorm;
-        Math::Vector<Real> Ap;
-        for (std::size_t it = 0; it < maxIterations; ++it)
-        {
-          if (r.norm() <= threshold)
-            break;
-          applyMetric(A, projection, p, Ap);
-          const Real pAp = p.dot(Ap);
-          if (!(pAp > Real(0)))
-            break;
-          const Real alpha = rz / pAp;
-          x += alpha * p;
-          r -= alpha * Ap;
-          z = applyPreconditioner(r);
-          const Real rzNext = r.dot(z);
-          p = z + (rzNext / rz) * p;
-          rz = rzNext;
-          ++iterations;
-        }
-        error = r.norm() / rhsNorm;
-        return std::isfinite(error) && error <= relativeTolerance;
-      }
-
-      // Solves the currently-assembled step problem and copies the
-      // backend-matched solution GridFunction into @p out.
-      bool solveStep(Displacement& out, std::size_t& iterations, Real& error,
-        WNGIRReport* report = nullptr)
-      {
-        auto& axb = m_stepProblem.getLinearSystem();
-        using OperatorType =
-          typename FormLanguage::Traits<LinearSystemType>::OperatorType;
-        using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
-        if constexpr (std::is_same_v<OperatorType, Math::SparseMatrix<Real>> &&
-          std::is_same_v<VectorType, Math::Vector<Real>>)
-        {
-          const auto& rhs = axb.getVector();
-          SimilarityGauge gauged;
-          const size_t unresolved = gaugeSimilarityModes(axb.getOperator(), rhs, gauged);
-          if (report)
-            report->unresolvedSimilarityModes = unresolved;
-          if (m_parameters.directSolver != WNGIRParameters::DirectSolver::CG)
-          {
-            const auto solveDirect = [&](auto& direct, StringView backend) {
-              const auto solveSystem = [&](LinearSystemType& system) {
-                if constexpr (requires { direct.factorize(system); })
-                {
-                  auto& next = system.getOperator();
-                  next.makeCompressed();
-                  const auto& previous = m_directSystem.getOperator();
-                  const bool samePattern = next.rows() == previous.rows() &&
-                    next.cols() == previous.cols() &&
-                    next.nonZeros() == previous.nonZeros() &&
-                    std::equal(next.outerIndexPtr(),
-                      next.outerIndexPtr() + next.outerSize() + 1,
-                      previous.outerIndexPtr()) &&
-                    std::equal(next.innerIndexPtr(),
-                      next.innerIndexPtr() + next.nonZeros(), previous.innerIndexPtr());
-                  const bool sameValues = samePattern &&
-                    std::equal(next.valuePtr(), next.valuePtr() + next.nonZeros(),
-                      previous.valuePtr());
-                  if (!samePattern)
-                    direct.clear(Solver::Factorization::Symbolic);
-                  const bool numeric = direct.success() &&
-                    direct.getInfo().factorization == Solver::Factorization::Numeric;
-                  m_directSystem.getOperator() = next;
-                  m_directSystem.getVector() = system.getVector();
-                  if (!sameValues || !numeric)
-                  {
-                    if (report)
-                    {
-                      ++report->directFactorizations;
-                      if (!direct.getInfo().factorization)
-                        ++report->directAnalyses;
-                    }
-                    direct.factorize(m_directSystem);
-                  }
-                  if (direct.success())
-                    direct.solve(m_directSystem);
-                  if (direct.success())
-                    system.getSolution() = m_directSystem.getSolution();
-                }
-                else
-                  direct.solve(system);
-              };
-              const auto& matrix = axb.getOperator();
-              const auto& rigid = gauged;
-              if (rigid.weights.empty())
-                solveSystem(axb);
-              else
-              {
-                // Positive solve-only gauges use an auxiliary negative identity block.
-                const auto n = matrix.rows();
-                const auto rank = static_cast<Eigen::Index>(rigid.weights.size());
-                std::vector<Math::SparseTriplet<Real>> entries;
-                entries.reserve(matrix.nonZeros() + 2 * n * rank + rank);
-                for (Eigen::Index column = 0; column < matrix.outerSize(); ++column)
-                  for (Math::SparseMatrix<Real>::InnerIterator entry(matrix, column);
-                    entry; ++entry)
-                    entries.emplace_back(entry.row(), entry.col(), entry.value());
-                for (Eigen::Index k = 0; k < rank; ++k)
-                {
-                  const Real scale = std::sqrt(rigid.weights[k]);
-                  for (Eigen::Index i = 0; i < n; ++i)
-                  {
-                    const Real value = scale * rigid.modes[k](i);
-                    entries.emplace_back(i, n + k, value);
-                    entries.emplace_back(n + k, i, value);
-                  }
-                  entries.emplace_back(n + k, n + k, Real(-1));
-                }
-                LinearSystemType augmented;
-                augmented.getOperator().resize(n + rank, n + rank);
-                augmented.getOperator().setFromTriplets(entries.begin(), entries.end());
-                augmented.getVector() = Math::Vector<Real>::Zero(n + rank);
-                augmented.getVector().head(n) = rhs;
-                solveSystem(augmented);
-                if (direct.success())
-                  axb.getSolution() = augmented.getSolution().head(n);
-              }
-              iterations = 0;
-              Math::Vector<Real> image;
-              if (direct.success())
-                image = matrix * axb.getSolution();
-              error = direct.success() ? (image - rhs).norm() /
-                  std::max(rhs.norm(), std::numeric_limits<Real>::min())
-                                       : std::numeric_limits<Real>::infinity();
-              const bool ok = direct.success() && axb.getSolution().allFinite() &&
-                error <= m_parameters.cgRelativeTolerance;
-              if (m_parameters.trace)
-              {
-                std::cout << "        metric " << backend << ": ok=" << ok
-                          << "  rel=" << error << "  status=" << direct.getInfo().status;
-                if constexpr (requires { direct.getResources().instance.infog[1]; })
-                  std::cout << "  detail=" << direct.getResources().instance.infog[1];
-                std::cout << '\n';
-              }
-              if (!ok)
-                return false;
-              m_duStep.getSolution().setData(axb.getSolution());
-              out = m_duStep.getSolution();
-              return true;
-            };
-#ifdef RODIN_USE_MUMPS
-            if (m_parameters.directSolver == WNGIRParameters::DirectSolver::MUMPS)
-            {
-              if (!m_mumps)
-                m_mumps = std::make_unique<Solver::MUMPS<LinearSystemType>>(m_stepProblem);
-              m_mumps->setSymmetric(Solver::MUMPS<LinearSystemType>::Symmetry::General)
-                .setMaxThreads(m_parameters.directSolverThreads);
-              return solveDirect(*m_mumps, "MUMPS");
-            }
-#endif
-            Solver::SparseLU direct(m_stepProblem);
-            return solveDirect(direct, "LU");
-          }
-          const auto& guess = axb.getSolution();
-          const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
-            ? m_parameters.cgMaxIterations
-            : std::min<std::size_t>(AutomaticCGMaxIterations,
-                std::max<std::size_t>(AutomaticCGMinIterations,
-                  2 * m_duStep.getFiniteElementSpace().getSize()));
-          Math::Vector<Real> solution =
-            (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());
-          const bool solved = metricConjugateGradient(axb.getOperator(), gauged, rhs,
-            solution, maxIterations, m_parameters.cgRelativeTolerance, iterations, error);
-          Math::Vector<Real> image;
-          image = axb.getOperator() * solution;
-          error =
-            (image - rhs).norm() / std::max(rhs.norm(), std::numeric_limits<Real>::min());
-          const bool ok =
-            solved && std::isfinite(error) && error <= m_parameters.cgRelativeTolerance;
-          axb.getSolution() = solution;
-          m_duStep.getSolution().setData(solution);
-          out = m_duStep.getSolution();
-          if (m_parameters.trace &&
-            (!ok || !std::isfinite(out.max()) || !std::isfinite(out.min())))
-            std::cout << "        cg failure: ok=" << ok << "  it=" << iterations
-                      << "  max_it=" << maxIterations << "  err=" << error << "  finite="
-                      << (std::isfinite(out.max()) && std::isfinite(out.min())) << '\n';
-          return ok && std::isfinite(out.max()) && std::isfinite(out.min());
-        }
-        else
-        {
-          Alert::Exception() << "WNGIR requires the local Eigen backend." << Alert::Raise;
+        m_linearSolver.setParameters(m_parameters)
+          .setSimilarityModes(m_similarityModes)
+          .setReport(report);
+        auto& system = problem.getLinearSystem();
+        m_linearSolver.solve(system);
+        iterations = m_linearSolver.getIterations();
+        error = m_linearSolver.getError();
+        if (!m_linearSolver.success())
           return false;
-        }
+        m_duStep.getSolution().setData(system.getSolution());
+        out = m_duStep.getSolution();
+        return true;
       }
 
+      /// Dimensionless sufficient-decrease coefficient for the frozen inner merit.
       static constexpr Real InnerArmijoCoefficient = Real(1e-4);
+      /// Safeguard on trials per inner correction, independent of the Newton cap.
       static constexpr size_t InnerMaxBacktracks = 32;
+      /// Dimensionless reduction shared by the inner and outer Armijo searches.
       static constexpr Real BacktrackingReduction = Real(0.5);
+      /// Relative floating-point allowance in the quadratic inner merit.
       static constexpr Real MeritRoundoffFactor = Real(64);
-      static constexpr Real NullModeRoundoffFactor = Real(256);
+      /// Dimensionless tolerance for reporting an undamped inner correction.
       static constexpr Real FullStepTolerance = Real(1e-12);
+      /// Minimum robust scale in units of the reference mesh spacing.
       static constexpr Real RobustScaleMeshFloor = Real(3);
+      /// Residual quantile used by automatic robust-scale selection.
       static constexpr Real RobustScaleQuantile = Real(0.9);
-      static constexpr size_t AutomaticCGMinIterations = 100;
-      static constexpr size_t AutomaticCGMaxIterations = 2000;
 
       Displacement* m_u;
       Identifiable::UUID m_trialUUID;
       TrialFunctionType m_duStep;
       TestFunctionType m_vStep;
-      ProblemType m_stepProblem;
-      LinearSystemType m_directSystem;
-#ifdef RODIN_USE_MUMPS
-      std::unique_ptr<Solver::MUMPS<LinearSystemType>> m_mumps;
-#endif
+      ProblemType m_metricProblem;
+      WNGIRHingeProblem<TrialFunctionType, TestFunctionType> m_hingeProblem;
+      WNGIRLinearSolver<LinearSystemType> m_linearSolver;
       BilinearFormType m_regularityForm;
       Math::Matrix<Real> m_similarityModes;
       /// @brief Observation metric and fitting force at the outer displacement.

@@ -103,12 +103,16 @@ along unresolved similarity modes using a tiny restricted eigensolve. This gauge
 is not part of the objective and releases modes when active hinges resolve them;
 it is not a global coercivity certificate.
 
-`WNGIR.h` is the public include; parameters/report and form-language
-coefficients live beside `WNGIRSolver.h`. The local Eigen backend supports CG,
+`WNGIR.h` is the public include; the implementation lives in `Adaptation/WNGIR/`,
+without a `Detail` layer. `Solver.h` retains the outer orchestration and metric
+Problem. `HingeProblem.h` assembles the tangent and negative stationarity
+residual for Rodin's `Solver::NewtonSolver`; its step policy retains the frozen
+inner merit search. `LinearSolver.h` adapts the similarity gauge and retained
+linear backends to the native solver interface. The local Eigen backend supports CG,
 SparseLU, and optional MUMPS solving the same pointwise deviatoric operator.
 The sparse metric is symmetrized before factorization and residual evaluation,
 so triangular direct solvers and the true-residual test use the same operator.
-One Problem and metric forms are retained, but deformation-dependent forms are
+Metric and hinge Problems and metric forms are retained, but deformation-dependent forms are
 reassembled per outer iteration. MUMPS retains symbolic analysis while the
 augmented sparsity pattern is unchanged and numeric factors for identical systems.
 `AnalyticFunctionAdapters.h` lifts analytic lambdas into FunctionBase;

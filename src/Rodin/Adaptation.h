@@ -20,6 +20,6 @@
 #include "Adaptation/CellGeomCache.h"
 #include "Adaptation/DeformationMap.h"
 #include "Adaptation/WNGIR.h"
-#include "Adaptation/WNGIRAdmissibility.h"
+#include "Adaptation/WNGIR/Admissibility.h"
 
 #endif

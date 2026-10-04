@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIRLOSS_H
-#define RODIN_ADAPTATION_WNGIRLOSS_H
+#ifndef RODIN_ADAPTATION_WNGIR_LOSS_H
+#define RODIN_ADAPTATION_WNGIR_LOSS_H
 
 #include <cassert>
 #include <cmath>
@@ -33,7 +33,10 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Returns the squared robust residual scale.
-      Real getScaleSquared() const noexcept { return m_scale2; }
+      Real getScaleSquared() const noexcept
+      {
+        return m_scale2;
+      }
 
       /// @brief Evaluates @f$\rho(r)@f$.
       Real getValue(Real residual) const

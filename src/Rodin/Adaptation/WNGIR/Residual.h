@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIRRESIDUALSTATE_H
-#define RODIN_ADAPTATION_WNGIRRESIDUALSTATE_H
+#ifndef RODIN_ADAPTATION_WNGIR_RESIDUAL_H
+#define RODIN_ADAPTATION_WNGIR_RESIDUAL_H
 
 #include <cmath>
 
@@ -13,9 +13,9 @@
 #include "Rodin/Types.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
-#include "WNGIRLoss.h"
+#include "Loss.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /// @brief Pointwise robust residual state at a deformed interface point.
   class WNGIRResidualState

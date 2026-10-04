@@ -17,8 +17,8 @@
 #include <limits>
 #include <string>
 
-#include <Rodin/Adaptation/WNGIRParameters.h>
-#include <Rodin/Adaptation/WNGIRReport.h>
+#include <Rodin/Adaptation/WNGIR/Parameters.h>
+#include <Rodin/Adaptation/WNGIR/Report.h>
 #include <Rodin/MMG/MeshOptimizer.h>
 
 namespace Rodin::Examples

@@ -2,15 +2,15 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIRREGULARITYMETRIC_H
-#define RODIN_ADAPTATION_WNGIRREGULARITYMETRIC_H
+#ifndef RODIN_ADAPTATION_WNGIR_DISTRIBUTION_H
+#define RODIN_ADAPTATION_WNGIR_DISTRIBUTION_H
 
 #include <vector>
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
-#include "CellDeformation.h"
+#include "../CellDeformation.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /**
    * @brief Frozen pointwise deviatoric current-strain bilinear form.
@@ -24,7 +24,8 @@ namespace Rodin::Adaptation::Detail
    */
   template <class TrialFunction, class TestFunction, class Displacement>
   class WNGIRCurrentStrainMetric final
-    : public Variational::LocalBilinearFormIntegratorBase<typename TrialFunction::ScalarType>
+    : public Variational::LocalBilinearFormIntegratorBase<
+        typename TrialFunction::ScalarType>
   {
     public:
       using ScalarType = typename TrialFunction::ScalarType;
@@ -32,8 +33,12 @@ namespace Rodin::Adaptation::Detail
 
       WNGIRCurrentStrainMetric(const TrialFunction& trial, const TestFunction& test,
         const Displacement& current, Real coefficient, size_t order)
-        : Parent(trial.getLeaf(), test.getLeaf()), m_trial(trial), m_test(test),
-          m_current(current), m_coefficient(coefficient), m_order(order)
+        : Parent(trial.getLeaf(), test.getLeaf()),
+          m_trial(trial),
+          m_test(test),
+          m_current(current),
+          m_coefficient(coefficient),
+          m_order(order)
       {}
 
       const Geometry::Polytope& getPolytope() const final override
@@ -64,7 +69,8 @@ namespace Rodin::Adaptation::Detail
           const Variational::IntegrationPoint ip(point, &qf, q);
           CellDeformation deformation(d);
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-          const Math::SpatialMatrix<Real> inverse(deformation.getInverseTranspose().transpose());
+          const Math::SpatialMatrix<Real> inverse(
+            deformation.getInverseTranspose().transpose());
           trialJacobian.setIntegrationPoint(ip);
           for (size_t local = 0; local < nTrial; ++local)
           {
@@ -92,8 +98,8 @@ namespace Rodin::Adaptation::Detail
             deformation.getJacobian();
           for (size_t test = 0; test < nTest; ++test)
             for (size_t trial = 0; trial < nTrial; ++trial)
-              m_matrix(test, trial) += weight *
-                Math::dot(m_trialStrains[trial], m_testStrains[test]);
+              m_matrix(test, trial) +=
+                weight * Math::dot(m_trialStrains[trial], m_testStrains[test]);
         }
         return *this;
       }
@@ -102,7 +108,10 @@ namespace Rodin::Adaptation::Detail
       {
         return m_matrix(test, trial);
       }
-      Geometry::Region getRegion() const final override { return Geometry::Region::Cells; }
+      Geometry::Region getRegion() const final override
+      {
+        return Geometry::Region::Cells;
+      }
       WNGIRCurrentStrainMetric* copy() const noexcept final override
       {
         return new WNGIRCurrentStrainMetric(*this);

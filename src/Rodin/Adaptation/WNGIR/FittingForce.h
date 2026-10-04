@@ -2,16 +2,16 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIRSURFACEFORCECOEFFICIENT_H
-#define RODIN_ADAPTATION_WNGIRSURFACEFORCECOEFFICIENT_H
+#ifndef RODIN_ADAPTATION_WNGIR_FITTINGFORCE_H
+#define RODIN_ADAPTATION_WNGIR_FITTINGFORCE_H
 
 #include "Rodin/Variational/VectorFunction.h"
 
-#include "DeformationMap.h"
-#include "WNGIRLoss.h"
-#include "WNGIRResidualState.h"
+#include "../DeformationMap.h"
+#include "Loss.h"
+#include "Residual.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /// @brief Negative first-variation coefficient of the robust interface energy.
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>

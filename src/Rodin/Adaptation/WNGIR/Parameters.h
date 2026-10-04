@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIRPARAMETERS_H
-#define RODIN_ADAPTATION_WNGIRPARAMETERS_H
+#ifndef RODIN_ADAPTATION_WNGIR_PARAMETERS_H
+#define RODIN_ADAPTATION_WNGIR_PARAMETERS_H
 
 #include <algorithm>
 #include <cstddef>
@@ -66,7 +66,8 @@ namespace Rodin::Adaptation
         15; ///< Maximum Newton corrections of the hinge-penalized QP.
       Real primalBarrierRelativeTolerance =
         Real(1e-3); ///< Relative stationarity-residual tolerance for the inner QP.
-      Real primalBarrierAbsoluteTolerance = Real(1e-12); ///< Absolute inner residual tolerance.
+      Real primalBarrierAbsoluteTolerance =
+        Real(1e-12); ///< Absolute inner residual tolerance.
       Real muHat = Real(100); ///< @f$\widehat\mu@f$, dimensionless
         ///< barrier/model-decrease ratio.
       Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
@@ -81,7 +82,8 @@ namespace Rodin::Adaptation
       Real stepTol = 0; ///< Absolute physical accepted-displacement tolerance.
       Real acceptedStepOverHTol =
         Real(5e-4); ///< >0 stops best-effort when accepted step/h is small.
-      std::size_t stagnationIterations = 5; ///< Consecutive small steps or energy changes.
+      std::size_t stagnationIterations =
+        5; ///< Consecutive small steps or energy changes.
       Real cgRelativeTolerance =
         1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for CG.
       std::size_t cgMaxIterations =

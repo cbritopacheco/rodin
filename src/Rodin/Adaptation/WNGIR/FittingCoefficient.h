@@ -2,15 +2,15 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIROBSERVATIONCOEFFICIENT_H
-#define RODIN_ADAPTATION_WNGIROBSERVATIONCOEFFICIENT_H
+#ifndef RODIN_ADAPTATION_WNGIR_FITTINGCOEFFICIENT_H
+#define RODIN_ADAPTATION_WNGIR_FITTINGCOEFFICIENT_H
 
 #include "Rodin/Variational/MatrixFunction.h"
 
-#include "DeformationMap.h"
-#include "WNGIRParameters.h"
+#include "../DeformationMap.h"
+#include "Parameters.h"
 
-namespace Rodin::Adaptation::Detail
+namespace Rodin::Adaptation
 {
   /// @brief Matrix coefficient of the WNGIR surface observation metric.
   /// Hessian of half the squared residual, with D2 phi omitted and fixed normalization.
@@ -103,8 +103,8 @@ namespace Rodin::Adaptation::Detail
 
   template <class GradDerived, class Displacement, class LocatorType>
   WNGIRObservationCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>&,
-    const Displacement&, const LocatorType&, const WNGIRParameters&, Real, std::size_t)
-    -> WNGIRObservationCoefficient<GradDerived, Displacement, LocatorType>;
+    const Displacement&, const LocatorType&, const WNGIRParameters&, Real,
+    std::size_t) -> WNGIRObservationCoefficient<GradDerived, Displacement, LocatorType>;
 }
 
 #endif

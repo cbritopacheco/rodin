@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIRREPORT_H
-#define RODIN_ADAPTATION_WNGIRREPORT_H
+#ifndef RODIN_ADAPTATION_WNGIR_REPORT_H
+#define RODIN_ADAPTATION_WNGIR_REPORT_H
 
 #include <limits>
 
@@ -22,7 +22,7 @@ namespace Rodin::Adaptation
       Real sigma = 0;
     /// @brief Maximum sampled target level-set gradient on the interface.
       Real levelSetGradientScale = 0;
-    /// @brief Signed fitting-force action on the unconstrained predictor; not stationarity.
+      /// @brief Signed fitting-force action on the unconstrained predictor; not stationarity.
       Real predictorAction = 0;
       /// @brief Directional scaling applied before constructing the hinge model.
       Real predictorScale = 1;
@@ -30,11 +30,11 @@ namespace Rodin::Adaptation
       size_t unresolvedSimilarityModes = 0;
       /// @brief Action of the negative energy derivative on the accepted direction.
       Real directionAction = 0;
-    /// @brief Direction action divided by the unconstrained predictor action.
+      /// @brief Direction action divided by the unconstrained predictor action.
       Real descentRatio = 0;
-    /// @brief Direction coefficient norm divided by the predictor norm.
+      /// @brief Direction coefficient norm divided by the predictor norm.
       Real directionNormRatio = 0;
-    /// @brief Actual energy decrease divided by its linear prediction.
+      /// @brief Actual energy decrease divided by its linear prediction.
       Real actualPredictedDecrease = 0;
       /// @brief Number of outer backtracks accumulated by the solve.
       std::size_t backtracks = 0;
@@ -44,9 +44,9 @@ namespace Rodin::Adaptation
       std::size_t distortionRejections = 0;
       /// @brief Geometrically admissible trials rejected by the energy condition.
       std::size_t energyRejections = 0;
-    /// @brief Last accepted line-search factor.
+      /// @brief Last accepted line-search factor.
       Real lastAlpha = 0;
-    /// @brief Effective per-volume coefficient assembled for the last barrier QP.
+      /// @brief Effective per-volume coefficient assembled for the last barrier QP.
       Real primalBarrierCoefficient = 0;
       /// @brief Last primal-barrier Newton correction relative to the current iterate.
       Real primalBarrierRelativeCorrection = 0;
@@ -116,14 +116,17 @@ namespace Rodin::Adaptation
       const char* exitReason = "iter-budget";
       // Wall-clock breakdown (seconds, accumulated over iterations).
       Real tAssembly = 0; ///< WNGIR variational problem assembly.
-      std::size_t inactiveHingeSkips = 0; ///< Predictor already solves the inactive-hinge model.
+      std::size_t inactiveHingeSkips =
+        0; ///< Predictor already solves the inactive-hinge model.
       std::size_t directAnalyses = 0; ///< MUMPS symbolic analyses initiated by WNGIR.
-      std::size_t directFactorizations = 0; ///< MUMPS numeric factorizations initiated by WNGIR.
+      std::size_t directFactorizations =
+        0; ///< MUMPS numeric factorizations initiated by WNGIR.
       Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
       Real tFactor = 0; ///< Linear solver setup/preconditioner.
       Real tSolve = 0; ///< Predictor and inner linear solves.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
-      Real tPrimalBarrierLineSearch = 0; ///< fixed-inner-merit evaluation and backtracking.
+      Real tPrimalBarrierLineSearch =
+        0; ///< fixed-inner-merit evaluation and backtracking.
       Real tPrimalBarrierAssembly = 0; ///< Inner direction-system assembly.
       Real tPrimalBarrierSolve = 0; ///< Inner linear solves, excluding the predictor.
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
