@@ -30,6 +30,7 @@
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
@@ -64,6 +65,7 @@ namespace Rodin::Variational
    * |----------------|-------------|
    * | @ref P1Element "P1Element<Scalar>" | Scalar-valued continuous piecewise linear element. |
    * | @ref P1Element "P1Element<SpatialVector<Scalar>>" | Vector-valued continuous piecewise linear element. |
+   * | @ref P1Element "P1Element<SpatialMatrix<Scalar>>" | Full rectangular matrix range with this family's componentwise basis. |
    */
 
   /**
@@ -251,8 +253,8 @@ namespace Rodin::Variational
           constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
 
-          template <size_t Order>
           /// @brief Gets the derivative of the basis function.
+          template <size_t Order>
           constexpr DerivativeFunction<Order> getDerivative(size_t i) const
           {
             return DerivativeFunction<Order>(i, m_local, m_g);
@@ -1101,8 +1103,8 @@ namespace Rodin::Variational
             return out;
           }
 
-          template <size_t Order>
           /// @brief Gets the derivative of the basis function.
+          template <size_t Order>
           constexpr DerivativeFunction<Order> getDerivative(size_t i, size_t j) const
           {
             return DerivativeFunction<Order>(i, j, m_vdim, m_local, m_g);
@@ -1277,5 +1279,192 @@ namespace Rodin::Variational
 }
 
 #include "P1Element.hpp"
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued reference element built from scalar nodal functionals.
+  template <class Scalar>
+  class P1Element<Math::SpatialMatrix<Scalar>> final
+    : public FiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>
+  {
+    public:
+      /// @brief Scalar reference element for this family.
+      using ScalarElement = P1Element<Scalar>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<ScalarElement>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief CRTP or finite element base class.
+      using Parent = FiniteElementBase<P1Element<Math::SpatialMatrix<Scalar>>>;
+      /// @brief Basis type of the underlying scalar element.
+      using ScalarBasis = decltype(std::declval<ScalarElement>().getBasis(0));
+      /// @brief Nodal functional type of the underlying scalar element.
+      using ScalarLinearForm = decltype(std::declval<ScalarElement>().getLinearForm(0));
+
+      /// @brief Replicates a scalar reference element for a rectangular matrix range.
+      P1Element(Geometry::Polytope::Type geometry, size_t rows, size_t cols)
+        : P1Element(ScalarElement(geometry), rows, cols)
+      {}
+
+      /// @brief Replicates a scalar reference element for a rectangular matrix range.
+      P1Element(const ScalarElement& scalar, size_t rows, size_t cols)
+        : Parent(scalar.getGeometry()),
+          m_scalar(scalar),
+          m_rows(rows),
+          m_cols(cols)
+      {
+        if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
+          cols > RODIN_MAXIMAL_SPACE_DIMENSION)
+          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
+                             << Alert::Raise;
+      }
+
+      /// @brief Copies the element and its component extents.
+      P1Element(const P1Element&) = default;
+      /// @brief Moves the element and its component extents.
+      P1Element(P1Element&&) = default;
+      /// @brief Copies the element and its component extents.
+      P1Element& operator=(const P1Element&) = default;
+      /// @brief Moves the element and its component extents.
+      P1Element& operator=(P1Element&&) = default;
+
+      /// @brief Matrix basis with one nonzero entry.
+      class BasisFunction
+      {
+        public:
+          /// @brief Selects a matrix unit multiplied by a scalar basis function.
+          BasisFunction(ScalarBasis basis, size_t rows, size_t cols, size_t component)
+            : m_basis(std::move(basis)),
+              m_rows(rows),
+              m_cols(cols),
+              m_component(component)
+          {}
+
+          /// @brief Evaluates the selected matrix basis or its component nodal functional.
+          RangeType operator()(const Math::SpatialPoint& point) const
+          {
+            RangeType value(m_rows, m_cols);
+            value.setZero();
+            value(m_component / m_cols, m_component % m_cols) = m_basis(point);
+            return value;
+          }
+
+          /// @brief Returns a reference-coordinate derivative of the basis.
+          template <size_t Order>
+          auto getDerivative(size_t direction) const
+          {
+            return [derivative = m_basis.template getDerivative<Order>(direction),
+                     rows = m_rows, cols = m_cols, component = m_component](
+                     const Math::SpatialPoint& point) -> RangeType {
+              RangeType value(rows, cols);
+              value.setZero();
+              value(component / cols, component % cols) = derivative(point);
+              return value;
+            };
+          }
+
+        private:
+          ScalarBasis m_basis;
+          size_t m_rows, m_cols, m_component;
+      };
+
+      /// @brief Matrix-range finite element or expression specialization.
+      class LinearForm
+      {
+        public:
+          /// @brief Selects a matrix entry for the scalar nodal functional.
+          LinearForm(ScalarLinearForm form, size_t rows, size_t cols, size_t component)
+            : m_form(std::move(form)),
+              m_rows(rows),
+              m_cols(cols),
+              m_component(component)
+          {}
+
+          /// @brief Evaluates the selected matrix basis or its component nodal functional.
+          template <class Callable>
+          ScalarType operator()(const Callable& function) const
+          {
+            return m_form([&](const Math::SpatialPoint& point) -> ScalarType {
+              const auto value = function(point);
+              if (value.rows() != m_rows || value.cols() != m_cols)
+                Alert::Exception()
+                  << "Matrix value does not match the finite element range."
+                  << Alert::Raise;
+              return value(m_component / m_cols, m_component % m_cols);
+            });
+          }
+
+        private:
+          ScalarLinearForm m_form;
+          size_t m_rows, m_cols, m_component;
+      };
+
+      /// @brief Contracts each matrix entry with the scalar reference element.
+      template <class Coefficient>
+      void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& point) const
+      {
+        out.resize(m_rows, m_cols);
+        const size_t components = m_rows * m_cols;
+        for (size_t c = 0; c < components; ++c)
+          m_scalar.evaluate(
+            out(c / m_cols, c % m_cols),
+            [&](size_t a) { return coefficient(a * components + c); }, point);
+      }
+
+      /// @brief Returns the number of local matrix basis functions.
+      size_t getCount() const
+      {
+        return m_scalar.getCount() * m_rows * m_cols;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      size_t getOrder() const
+      {
+        return m_scalar.getOrder();
+      }
+      /// @brief Returns the number of matrix rows.
+      size_t getRows() const
+      {
+        return m_rows;
+      }
+      /// @brief Returns the number of matrix columns.
+      size_t getColumns() const
+      {
+        return m_cols;
+      }
+      /// @brief Returns the scalar element whose basis is replicated for matrix entries.
+      const ScalarElement& getScalarElement() const
+      {
+        return m_scalar;
+      }
+
+      /// @brief Returns the scalar reference node for the selected component DOF.
+      decltype(auto) getNode(size_t local) const
+      {
+        assert(local < getCount());
+        return m_scalar.getNode(local / (m_rows * m_cols));
+      }
+
+      /// @brief Returns a basis value at the bound integration point.
+      BasisFunction getBasis(size_t local) const
+      {
+        assert(local < getCount());
+        return {m_scalar.getBasis(local / (m_rows * m_cols)), m_rows, m_cols,
+          local % (m_rows * m_cols)};
+      }
+
+      /// @brief Returns the scalar nodal functional applied to the selected matrix entry.
+      LinearForm getLinearForm(size_t local) const
+      {
+        assert(local < getCount());
+        return {m_scalar.getLinearForm(local / (m_rows * m_cols)), m_rows, m_cols,
+          local % (m_rows * m_cols)};
+      }
+
+    private:
+      ScalarElement m_scalar;
+      size_t m_rows, m_cols;
+  };
+}
 
 #endif

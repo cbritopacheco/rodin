@@ -64,6 +64,9 @@
   - @subpage guides-quadrature — Quadrature families, exactness ranges,
     positive arbitrary-order fallbacks, and curved-element considerations
 
+  - @subpage guides-ordering — Matrix storage, tensor indexing and
+    finite-element component numbering
+
   @section guides-variational-index Weak formulations and variational problems
 
   From continuous PDEs to discrete linear systems:

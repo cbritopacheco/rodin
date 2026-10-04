@@ -108,6 +108,17 @@ namespace Rodin::IO
         return m_gf.get();
       }
 
+      /// @brief Rejects formats without a concrete finite element collection.
+      void print(std::ostream&) override
+      {
+        Alert::Exception()
+          << "No grid-function printer for this finite element collection."
+          << Alert::Raise;
+      }
+
+      /// @brief Hook for format-specific coefficient printers.
+      virtual void printData(std::ostream&) {}
+
     private:
       std::reference_wrapper<const ObjectType> m_gf;
   };

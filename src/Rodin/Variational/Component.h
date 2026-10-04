@@ -180,7 +180,9 @@ namespace Rodin::Variational
    */
   template <class OperandDerived>
   class Component<FunctionBase<OperandDerived>, size_t, size_t> final
-    : public RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>
+    : public ScalarFunctionBase<
+        typename FormLanguage::Traits<FunctionBase<OperandDerived>>::ScalarType,
+        Component<FunctionBase<OperandDerived>, size_t, size_t>>
   {
     public:
       /// @brief Operand type.
@@ -196,7 +198,9 @@ namespace Rodin::Variational
       using RangeType = ScalarType;
 
       /// @brief Parent class type.
-      using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
+      using Parent = ScalarFunctionBase<
+        typename FormLanguage::Traits<FunctionBase<OperandDerived>>::ScalarType,
+        Component<FunctionBase<OperandDerived>, size_t, size_t>>;
 
       /**
        * @brief Constructs component extractor for matrix function.
@@ -542,6 +546,316 @@ namespace Rodin::Variational
   template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
   Component(const ShapeFunctionBase<OperandDerived, FES, Space>&, size_t)
     -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<Variational::Component<
+    Variational::ShapeFunctionBase<Derived, FES, Space>, size_t, size_t>>
+    : Traits<Variational::Component<Variational::ShapeFunctionBase<Derived, FES, Space>>>
+  {};
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
+  class Component<ShapeFunctionBase<OperandDerived, FES, Space>, size_t, size_t> final
+    : public ShapeFunctionBase<
+        Component<ShapeFunctionBase<OperandDerived, FES, Space>, size_t, size_t>, FES,
+        Space>
+  {
+    public:
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Trial or test shape-function space.
+      static constexpr const ShapeFunctionSpaceType SpaceType = Space;
+
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
+
+      /// @brief Evaluated range of the operand.
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
+
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = ScalarType;
+
+      /// @brief CRTP or finite element base class.
+      using Parent =
+        ShapeFunctionBase<Component<OperandType, size_t, size_t>, FES, Space>;
+
+      static_assert(FormLanguage::IsMatrixRange<OperandRangeType>::Value);
+
+      /**
+       * @brief Constructs component extractor for ShapeFunction.
+       * @param u Matrix-valued trial or test function
+       * @param row Zero-based row index
+       * @param column Zero-based column index
+       */
+      Component(const OperandType& u, size_t row, size_t column)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u.copy()),
+          m_row(row),
+          m_column(column)
+      {}
+
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(const Component& other)
+        : Parent(other),
+          m_u(other.m_u->copy()),
+          m_row(other.m_row),
+          m_column(other.m_column)
+      {}
+
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(Component&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_row(other.m_row),
+          m_column(other.m_column)
+      {}
+
+      /**
+       * @brief Gets the matrix entry indices.
+       * @returns Row and column indices
+       */
+      constexpr std::pair<size_t, size_t> getIndex() const
+      {
+        return {m_row, m_column};
+      }
+
+      /**
+       * @brief Gets the underlying shape function.
+       * @returns Reference to the operand
+       */
+      constexpr const OperandType& getOperand() const
+      {
+        assert(m_u);
+        return *m_u;
+      }
+
+      /**
+       * @brief Gets the leaf (underlying trial/test function).
+       * @returns Reference to the leaf function
+       */
+      constexpr const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      /**
+       * @brief Gets number of degrees of freedom on a polytope.
+       * @param polytope Mesh polytope
+       * @returns Number of DOFs
+       */
+      constexpr size_t getDOFs(const Geometry::Polytope& polytope) const
+      {
+        const size_t d = polytope.getDimension();
+        const size_t i = polytope.getIndex();
+        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+      }
+
+      /**
+       * @brief Gets the current evaluation point.
+       * @returns Reference to the point
+       */
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_u->getIntegrationPoint();
+      }
+
+      /// @brief Binds the integration point and prepares local basis values.
+      Component& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_u->setIntegrationPoint(ip);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the basis function value for local DOF.
+       * @param local Local DOF index
+       * @returns Scalar basis function value
+       */
+      constexpr auto getBasis(size_t local) const
+      {
+        const auto basis = this->getOperand().getBasis(local);
+        return basis(m_row, m_column);
+      }
+
+      /// @brief Returns the polynomial order when it is known.
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
+      }
+
+      Component* copy() const noexcept override
+      {
+        return new Component(*this);
+      }
+
+    private:
+      std::unique_ptr<OperandType> m_u;
+      const size_t m_row, m_column;
+  };
+
+  /**
+   * @brief Deduction guide for ShapeFunction component extraction.
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t,
+    size_t) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t>;
+}
+
+namespace Rodin::Variational
+{
+  /** @brief One entry of a rank-three tensor-valued function. */
+  template <class Derived>
+  class Component<FunctionBase<Derived>, size_t, size_t, size_t> final
+    : public ScalarFunctionBase<
+        typename FormLanguage::Traits<FunctionBase<Derived>>::ScalarType,
+        Component<FunctionBase<Derived>, size_t, size_t, size_t>>
+  {
+    public:
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = FunctionBase<Derived>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+      /// @brief CRTP or finite element base class.
+      using Parent = ScalarFunctionBase<ScalarType, Component>;
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(const OperandType& operand, size_t row, size_t column, size_t direction)
+        : m_operand(operand.copy()),
+          m_row(row),
+          m_column(column),
+          m_direction(direction)
+      {}
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(const Component& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy()),
+          m_row(other.m_row),
+          m_column(other.m_column),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(Component&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand)),
+          m_row(other.m_row),
+          m_column(other.m_column),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Evaluates the expression at the supplied physical or integration point.
+      template <class Point>
+      ScalarType getValue(const Point& point) const
+      {
+        return m_operand->getValue(point)(m_row, m_column, m_direction);
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_operand->getOrder(poly);
+      }
+      Component* copy() const noexcept override
+      {
+        return new Component(*this);
+      }
+
+    private:
+      std::unique_ptr<OperandType> m_operand;
+      size_t m_row, m_column, m_direction;
+  };
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class Derived>
+  Component(const FunctionBase<Derived>&, size_t, size_t,
+    size_t) -> Component<FunctionBase<Derived>, size_t, size_t, size_t>;
+
+  /** @brief One entry of a tensor-valued trial or test basis. */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  class Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t> final
+    : public ShapeFunctionBase<
+        Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t>, FES,
+        Space>
+  {
+    public:
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunctionBase<Derived, FES, Space>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+      /// @brief CRTP or finite element base class.
+      using Parent = ShapeFunctionBase<Component, FES, Space>;
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(const OperandType& operand, size_t row, size_t column, size_t direction)
+        : Parent(operand.getFiniteElementSpace()),
+          m_operand(operand.copy()),
+          m_row(row),
+          m_column(column),
+          m_direction(direction)
+      {}
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(const Component& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy()),
+          m_row(other.m_row),
+          m_column(other.m_column),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Constructs entry access, or copies the owned expression operand.
+      Component(Component&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand)),
+          m_row(other.m_row),
+          m_column(other.m_column),
+          m_direction(other.m_direction)
+      {}
+      /// @brief Returns the leaf shape function used for assembly.
+      const auto& getLeaf() const
+      {
+        return m_operand->getLeaf();
+      }
+      /// @brief Returns the local basis count for the selected polytope.
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return m_operand->getDOFs(poly);
+      }
+      /// @brief Returns the currently bound integration point.
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_operand->getIntegrationPoint();
+      }
+      /// @brief Binds the integration point and prepares local basis values.
+      Component& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_operand->setIntegrationPoint(point);
+        return *this;
+      }
+      /// @brief Returns a basis value at the bound integration point.
+      ScalarType getBasis(size_t local) const
+      {
+        return m_operand->getBasis(local)(m_row, m_column, m_direction);
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_operand->getOrder(poly);
+      }
+      Component* copy() const noexcept override
+      {
+        return new Component(*this);
+      }
+
+    private:
+      std::unique_ptr<OperandType> m_operand;
+      size_t m_row, m_column, m_direction;
+  };
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t, size_t,
+    size_t) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t>;
 }
 
 #endif

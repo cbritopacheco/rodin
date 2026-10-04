@@ -161,3 +161,7 @@ target_link_libraries(RodinManufacturedStokesStabilizedTemporary
 gtest_discover_tests(RodinManufacturedStokesStabilizedTemporary
   PROPERTIES
     LABELS manufactured)
+add_executable(RodinManufacturedSpatialMatrix SpatialMatrix.cpp)
+target_link_libraries(RodinManufacturedSpatialMatrix
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational Rodin::Assembly Rodin::Solver)
+gtest_discover_tests(RodinManufacturedSpatialMatrix PROPERTIES LABELS manufactured)

@@ -74,6 +74,17 @@ namespace Rodin::FormLanguage
       /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Tensor product range when the operands support a contraction.
+      using TensorProductRange = typename decltype([] {
+        if constexpr (FormLanguage::IsTensorRange<LHSRangeType>::Value &&
+          requires(const LHSRangeType& lhs, const RHSRangeType& rhs) { lhs* rhs; })
+          return std::type_identity<
+            typename FormLanguage::RangeOf<decltype(std::declval<const LHSRangeType&>() *
+              std::declval<const RHSRangeType&>())>::Type>{};
+        else
+          return std::type_identity<void>{};
+      }())::type;
+
       /// @brief Range (evaluation value) type.
       using RangeType = std::conditional_t<
         // If
@@ -119,7 +130,7 @@ namespace Rodin::FormLanguage
                   Math::SpatialMatrix<ScalarType>, void>>>,
             // ---------------------------------------------------------------
             // Else
-            void>>>;
+            TensorProductRange>>>;
   };
 
   /// @brief Type traits for @c Mult over a shape function: exposes the finite element

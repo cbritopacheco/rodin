@@ -28,6 +28,7 @@
  * No MPI communication is required during construction.
  */
 
+#include <map>
 #include <cassert>
 #include <cstddef>
 #include <functional>
@@ -509,6 +510,178 @@ namespace Rodin::MPI
    * @brief Convenience alias for the default distributed vector P0g space.
    */
   using VectorP0g = Variational::P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>;
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class Scalar>
+  class P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>> final
+    : public FiniteElementSpace<Geometry::Mesh<Context::MPI>,
+        P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>>
+  {
+    public:
+      /// @brief Local matrix space on the mesh shard.
+      using FESType = P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>;
+      /// @brief Mesh and execution context of this specialization.
+      using MeshType = Geometry::Mesh<Context::MPI>;
+      /// @brief Scalar space supplying this family's DOF numbering.
+      using ScalarSpace = P0g<Scalar, Geometry::Mesh<Context::MPI>>;
+      /// @brief Matrix reference element for this family.
+      using ElementType = P0gElement<Math::SpatialMatrix<Scalar>>;
+      /// @brief Existing finite-element-space interface.
+      using Parent = FiniteElementSpace<MeshType,
+        P0g<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename ScalarSpace::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename ScalarSpace::ContextType;
+      /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
+      P0g(const MeshType& mesh, size_t rows, size_t cols)
+        : m_scalar(ScalarSpace(mesh)),
+          m_rows(rows),
+          m_cols(cols),
+          m_shard(mesh.getShard(), rows, cols)
+      {
+        if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
+          cols > RODIN_MAXIMAL_SPACE_DIMENSION)
+          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
+                             << Alert::Raise;
+        // Distributed scalar spaces may compute their size collectively.
+        // Resolve it at construction, never from a local evaluation loop.
+        m_size = m_scalar.getSize() * rows * cols;
+        m_dofs.resize(mesh.getDimension() + 1);
+        for (size_t d = 0; d <= mesh.getDimension(); ++d)
+        {
+          const size_t count = mesh.getConnectivity().getCount(d);
+          m_dofs[d].reserve(count);
+          for (size_t i = 0; i < count; ++i)
+          {
+            const auto& scalarDOFs = m_scalar.getDOFs(d, i);
+            auto& dofs = m_dofs[d].emplace_back(scalarDOFs.size() * rows * cols);
+            for (size_t a = 0; a < static_cast<size_t>(scalarDOFs.size()); ++a)
+              for (size_t c = 0; c < rows * cols; ++c)
+                dofs[a * rows * cols + c] = scalarDOFs[a] * rows * cols + c;
+            const auto& scalarFE = m_scalar.getFiniteElement(d, i);
+            m_elements.try_emplace(scalarFE.getGeometry(), scalarFE, rows, cols);
+          }
+        }
+        for (size_t i = 0; i < m_shard.getSize(); ++i)
+          m_globalToLocal.emplace(getGlobalIndex(i), i);
+      }
+
+      /// @brief Copies the space and its DOF maps.
+      P0g(const P0g&) = default;
+      /// @brief Moves the space and its DOF maps.
+      P0g(P0g&&) = default;
+      /// @brief Copies the space and its DOF maps.
+      P0g& operator=(const P0g&) = default;
+      /// @brief Moves the space and its DOF maps.
+      P0g& operator=(P0g&&) = default;
+
+      size_t getSize() const override
+      {
+        return m_size;
+      }
+      size_t getVectorDimension() const override
+      {
+        return m_rows * m_cols;
+      }
+      /// @brief Returns the number of matrix rows.
+      size_t getRows() const
+      {
+        return m_rows;
+      }
+      /// @brief Returns the number of matrix columns.
+      size_t getColumns() const
+      {
+        return m_cols;
+      }
+      const MeshType& getMesh() const override
+      {
+        return m_scalar.getMesh();
+      }
+      /// @brief Returns the scalar space supplying topology and component-independent maps.
+      const ScalarSpace& getScalarSpace() const
+      {
+        return m_scalar;
+      }
+
+      /// @brief Returns the matrix reference element of a mesh entity.
+      const ElementType& getFiniteElement(size_t d, Index i) const
+      {
+        return m_elements.at(m_scalar.getFiniteElement(d, i).getGeometry());
+      }
+
+      const IndexArray& getDOFs(size_t d, Index i) const override
+      {
+        return m_dofs.at(d).at(i);
+      }
+
+      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index local) const override
+      {
+        const Index components = m_rows * m_cols;
+        return m_scalar.getGlobalIndex(p, local / components) * components +
+          local % components;
+      }
+
+      /// @brief Pulls a physical callable back to a reference element.
+      template <class Callable>
+      auto getPullback(const std::pair<size_t, Index>& p, Callable&& value) const
+      {
+        return m_scalar.getPullback(p, std::forward<Callable>(value));
+      }
+
+      /// @brief Pushes a reference callable forward to the physical mesh.
+      template <class Callable>
+      auto getPushforward(const std::pair<size_t, Index>& p, Callable&& value) const
+      {
+        return m_scalar.getPushforward(p, std::forward<Callable>(value));
+      }
+
+      /// @brief Returns the matrix space on the local mesh shard.
+      const FESType& getShard() const
+      {
+        return m_shard;
+      }
+
+      /// @brief Returns the half-open range of owned global component DOFs.
+      void getOwnershipRange(Index& begin, Index& end) const
+      {
+        this->getScalarSpace().getOwnershipRange(begin, end);
+        begin *= this->getVectorDimension();
+        end *= this->getVectorDimension();
+      }
+
+      /// @brief Maps a local component DOF to its global coefficient index.
+      Index getGlobalIndex(Index local) const
+      {
+        assert(static_cast<size_t>(local) < m_shard.getSize());
+        const Index components = this->getVectorDimension();
+        return this->getScalarSpace().getGlobalIndex(local / components) * components +
+          local % components;
+      }
+
+      /// @brief Returns the shard-local index of a global DOF, if present.
+      Optional<Index> getLocalIndex(Index global) const
+      {
+        const auto it = m_globalToLocal.find(global);
+        if (it == m_globalToLocal.end())
+          return std::nullopt;
+        return it->second;
+      }
+
+    private:
+      ScalarSpace m_scalar;
+      size_t m_rows, m_cols;
+      FESType m_shard;
+      std::map<Index, Index> m_globalToLocal;
+      size_t m_size = 0;
+      std::vector<std::vector<IndexArray>> m_dofs;
+      std::map<Geometry::Polytope::Type, ElementType> m_elements;
+  };
 }
 
 #endif
