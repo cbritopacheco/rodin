@@ -2118,457 +2118,478 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     predictedRhoChange = dt * dRhoTheta;
     previousVolume = volume;
     predictedVolumeChange = dt * dVolumeTheta;
-    GridFunction eikonalDistance(levelSetSpace);
-    Distance::Eikonal(eikonalDistance)
-      .setInterior(Obstacle)
-      .setInterface(Gamma)
-      .solve()
-      .sign();
-    TrialFunction periodicDistance(levelSetSpace);
-    TestFunction distanceTest(levelSetSpace);
-    Problem distanceProjection(periodicDistance, distanceTest);
-    auto eikonalDistanceLoad = Integral(eikonalDistance, distanceTest);
-    eikonalDistanceLoad.setOrder(2);
+    GridFunction distance(levelSetSpace);
+    {
+      GridFunction eikonalDistance(levelSetSpace);
+      Distance::Eikonal(eikonalDistance)
+        .setInterior(Obstacle)
+        .setInterface(Gamma)
+        .solve()
+        .sign();
+      TrialFunction periodicDistance(levelSetSpace);
+      TestFunction distanceTest(levelSetSpace);
+      Problem distanceProjection(periodicDistance, distanceTest);
+      auto eikonalDistanceLoad = Integral(eikonalDistance, distanceTest);
+      eikonalDistanceLoad.setOrder(2);
     // The projection only reconciles the traces on the cuts: Gamma is pinned,
     // so it cannot move the interface the transport starts from.
-    distanceProjection = Integral(periodicDistance, distanceTest) - eikonalDistanceLoad +
-      DirichletBC(periodicDistance, RealFunction(0)).on(Gamma);
-    distanceProjection.assemble();
-    shapeCoupling.assembleScalarTracePenalty(levelSetSpace,
-      distanceProjection.getLinearSystem(), levelSetPenalty, FlatSet<Attribute>{Gamma});
-    Solver::CG(distanceProjection).solve();
-    GridFunction distance(levelSetSpace);
-    distance = periodicDistance.getSolution();
-    const auto& distanceSystem = distanceProjection.getLinearSystem();
-    const Real distanceProjectionResidual =
-      (distanceSystem.getOperator() * distanceSystem.getSolution() -
-        distanceSystem.getVector())
-        .norm() /
-      std::max(distanceSystem.getVector().norm(), Real(1));
-    const Real distanceProjectionCorrection =
-      (distance.getData() - eikonalDistance.getData()).lpNorm<Eigen::Infinity>();
+      distanceProjection = Integral(periodicDistance, distanceTest) -
+        eikonalDistanceLoad + DirichletBC(periodicDistance, RealFunction(0)).on(Gamma);
+      distanceProjection.assemble();
+      shapeCoupling.assembleScalarTracePenalty(levelSetSpace,
+        distanceProjection.getLinearSystem(), levelSetPenalty, FlatSet<Attribute>{Gamma});
+      Solver::CG(distanceProjection).solve();
+      distance = periodicDistance.getSolution();
+      const auto& distanceSystem = distanceProjection.getLinearSystem();
+      const Real distanceProjectionResidual =
+        (distanceSystem.getOperator() * distanceSystem.getSolution() -
+          distanceSystem.getVector())
+          .norm() /
+        std::max(distanceSystem.getVector().norm(), Real(1));
+      const Real distanceProjectionCorrection =
+        (distance.getData() - eikonalDistance.getData()).lpNorm<Eigen::Infinity>();
     // The Eikonal distance vanishes on Gamma, so the projected value at an
     // interface vertex is how far the projection moves the interface there.
-    std::vector<char> onInterface(mesh.getVertexCount(), 0);
-    for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
-    {
-      if (face->getAttribute() == Gamma)
-        for (const Index vertex : face->getVertices())
-          onInterface[vertex] = 1;
+      std::vector<char> onInterface(mesh.getVertexCount(), 0);
+      for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+      {
+        if (face->getAttribute() == Gamma)
+          for (const Index vertex : face->getVertices())
+            onInterface[vertex] = 1;
+      }
+      Real interfaceShiftMaximum = 0;
+      Real interfaceShiftSquares = 0;
+      size_t interfaceVertices = 0;
+      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
+        if (!onInterface[vertex])
+          continue;
+        const Real shift = std::abs(distance[vertex]);
+        interfaceShiftMaximum = std::max(interfaceShiftMaximum, shift);
+        interfaceShiftSquares += shift * shift;
+        ++interfaceVertices;
+      }
+      const Real interfaceShiftRMS = interfaceVertices
+        ? std::sqrt(interfaceShiftSquares / static_cast<Real>(interfaceVertices))
+        : Real(0);
+      stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(eikonalDistance);
+      stageDiagnostics.projectedJump = shapeCoupling.scalarJump(distance);
+      stageDiagnostics.distanceCorrection = distanceProjectionCorrection;
+      stageDiagnostics.interfaceShift = interfaceShiftMaximum;
+      Alert::Info() << substageHeading("Distance trace projection") << Alert::NewLine
+                    << diagnosticLabel("Linear residual:")
+                    << Alert::Notation::Number(distanceProjectionResidual)
+                    << Alert::NewLine << diagnosticLabel("Eikonal rotated jump:")
+                    << Alert::Notation::Number(stageDiagnostics.eikonalJump)
+                    << Alert::NewLine << diagnosticLabel("Projected rotated jump:")
+                    << Alert::Notation::Number(stageDiagnostics.projectedJump)
+                    << Alert::NewLine << diagnosticLabel("Infinity correction:")
+                    << Alert::Notation::Number(distanceProjectionCorrection)
+                    << Alert::NewLine << diagnosticLabel("Interface shift maximum:")
+                    << Alert::Notation::Number(interfaceShiftMaximum) << " = "
+                    << Alert::Notation::Number(interfaceShiftMaximum / h) << " h"
+                    << Alert::NewLine << diagnosticLabel("Interface shift RMS:")
+                    << Alert::Notation::Number(interfaceShiftRMS) << " = "
+                    << Alert::Notation::Number(interfaceShiftRMS / h) << " h"
+                    << Alert::Raise;
     }
-    Real interfaceShiftMaximum = 0;
-    Real interfaceShiftSquares = 0;
-    size_t interfaceVertices = 0;
-    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-    {
-      if (!onInterface[vertex])
-        continue;
-      const Real shift = std::abs(distance[vertex]);
-      interfaceShiftMaximum = std::max(interfaceShiftMaximum, shift);
-      interfaceShiftSquares += shift * shift;
-      ++interfaceVertices;
-    }
-    const Real interfaceShiftRMS = interfaceVertices
-      ? std::sqrt(interfaceShiftSquares / static_cast<Real>(interfaceVertices))
-      : Real(0);
-    stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(eikonalDistance);
-    stageDiagnostics.projectedJump = shapeCoupling.scalarJump(distance);
-    stageDiagnostics.distanceCorrection = distanceProjectionCorrection;
-    stageDiagnostics.interfaceShift = interfaceShiftMaximum;
-    Alert::Info() << substageHeading("Distance trace projection") << Alert::NewLine
-                  << diagnosticLabel("Linear residual:")
-                  << Alert::Notation::Number(distanceProjectionResidual) << Alert::NewLine
-                  << diagnosticLabel("Eikonal rotated jump:")
-                  << Alert::Notation::Number(stageDiagnostics.eikonalJump)
-                  << Alert::NewLine << diagnosticLabel("Projected rotated jump:")
-                  << Alert::Notation::Number(stageDiagnostics.projectedJump)
-                  << Alert::NewLine << diagnosticLabel("Infinity correction:")
-                  << Alert::Notation::Number(distanceProjectionCorrection)
-                  << Alert::NewLine << diagnosticLabel("Interface shift maximum:")
-                  << Alert::Notation::Number(interfaceShiftMaximum) << " = "
-                  << Alert::Notation::Number(interfaceShiftMaximum / h) << " h"
-                  << Alert::NewLine << diagnosticLabel("Interface shift RMS:")
-                  << Alert::Notation::Number(interfaceShiftRMS) << " = "
-                  << Alert::Notation::Number(interfaceShiftRMS / h) << " h"
-                  << Alert::Raise;
 
     stageSeconds[5] = elapsedSeconds(stage6Start);
     reportStageTiming(6, stageSeconds[5]);
-    const auto stage7Start = Clock::now();
-    announce("Stage 7: Writing the chamber and sewn fields.");
-    chamber.clear();
-    chamber.add("Distance", distance, IO::XDMF::Center::Node);
-    chamber.add("Theta", theta, IO::XDMF::Center::Node);
-    if (minimumThickness > 0)
-      chamber.add("Thickness_Descent", thicknessDescent, IO::XDMF::Center::Node);
-    SubMesh<Context::Local>::Builder interfaceBuilder;
-    interfaceBuilder.initialize(mesh);
-    for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
-      if (face->getAttribute() == Gamma)
-        interfaceBuilder.include(mesh.getDimension() - 1, face->getIndex());
-    SubMesh<Context::Local> interfaceMesh = interfaceBuilder.finalize();
-    P1 interfaceVectorSpace(interfaceMesh, 3);
-    P1 interfaceScalarSpace(interfaceMesh);
-    GridFunction interfaceGeometricNormal(interfaceVectorSpace);
-    GridFunction interfaceSmoothedNormal(interfaceVectorSpace);
-    GridFunction interfaceRayDirection(interfaceVectorSpace);
-    GridFunction interfaceThicknessDescent(interfaceVectorSpace);
-    GridFunction interfaceCurvature(interfaceScalarSpace);
-    const auto& interfaceParentVertices = interfaceMesh.getPolytopeMap(0).left;
-    if (minimumThickness > 0)
-      for (Index vertex = 0; vertex < interfaceMesh.getVertexCount(); ++vertex)
-      {
-        const auto parent = interfaceParentVertices[vertex];
-        const auto source = shapeSpace.getDOFs(0, parent);
-        const auto target = interfaceVectorSpace.getDOFs(0, vertex);
-        for (size_t component = 0; component < 3; ++component)
+    MMG::Mesh& advectionMesh = wngirBackground ? *wngirBackground : mesh;
+    P1 advectionLevelSetSpace(advectionMesh);
+    GridFunction advectedDistance(advectionLevelSetSpace);
+    // Only the transported scalar survives this scope. In particular, the
+    // full sewn meshes and their fields must expire before reconstruction.
+    {
+      const auto stage7Start = Clock::now();
+      announce("Stage 7: Writing the chamber and sewn fields.");
+      chamber.clear();
+      chamber.add("Distance", distance, IO::XDMF::Center::Node);
+      chamber.add("Theta", theta, IO::XDMF::Center::Node);
+      if (minimumThickness > 0)
+        chamber.add("Thickness_Descent", thicknessDescent, IO::XDMF::Center::Node);
+      SubMesh<Context::Local>::Builder interfaceBuilder;
+      interfaceBuilder.initialize(mesh);
+      for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+        if (face->getAttribute() == Gamma)
+          interfaceBuilder.include(mesh.getDimension() - 1, face->getIndex());
+      SubMesh<Context::Local> interfaceMesh = interfaceBuilder.finalize();
+      P1 interfaceVectorSpace(interfaceMesh, 3);
+      P1 interfaceScalarSpace(interfaceMesh);
+      GridFunction interfaceGeometricNormal(interfaceVectorSpace);
+      GridFunction interfaceSmoothedNormal(interfaceVectorSpace);
+      GridFunction interfaceRayDirection(interfaceVectorSpace);
+      GridFunction interfaceThicknessDescent(interfaceVectorSpace);
+      GridFunction interfaceCurvature(interfaceScalarSpace);
+      const auto& interfaceParentVertices = interfaceMesh.getPolytopeMap(0).left;
+      if (minimumThickness > 0)
+        for (Index vertex = 0; vertex < interfaceMesh.getVertexCount(); ++vertex)
         {
-          interfaceGeometricNormal.getData()(target(component)) =
-            geometricNormal.getData()(source(component));
-          interfaceSmoothedNormal.getData()(target(component)) =
-            smoothedNormal.getData()(source(component));
-          interfaceRayDirection.getData()(target(component)) =
-            rayDirection.getData()(source(component));
-          interfaceThicknessDescent.getData()(target(component)) =
-            thicknessDescent.getData()(source(component));
+          const auto parent = interfaceParentVertices[vertex];
+          const auto source = shapeSpace.getDOFs(0, parent);
+          const auto target = interfaceVectorSpace.getDOFs(0, vertex);
+          for (size_t component = 0; component < 3; ++component)
+          {
+            interfaceGeometricNormal.getData()(target(component)) =
+              geometricNormal.getData()(source(component));
+            interfaceSmoothedNormal.getData()(target(component)) =
+              smoothedNormal.getData()(source(component));
+            interfaceRayDirection.getData()(target(component)) =
+              rayDirection.getData()(source(component));
+            interfaceThicknessDescent.getData()(target(component)) =
+              thicknessDescent.getData()(source(component));
+          }
+          interfaceCurvature.getData()(interfaceScalarSpace.getDOFs(0, vertex)(0)) =
+            smoothedCurvature.getData()(levelSetSpace.getDOFs(0, parent)(0));
         }
-        interfaceCurvature.getData()(interfaceScalarSpace.getDOFs(0, vertex)(0)) =
-          smoothedCurvature.getData()(levelSetSpace.getDOFs(0, parent)(0));
-      }
-    auto interfaceOutput = xdmf.grid("Interface");
-    interfaceOutput.clear();
-    interfaceOutput.setMesh(interfaceMesh, IO::XDMF::MeshPolicy::Transient);
-    if (minimumThickness > 0)
-    {
-      interfaceOutput.add("Geometric_Normal", interfaceGeometricNormal,
-        IO::XDMF::Center::Node);
-      interfaceOutput.add("Smoothed_Normal", interfaceSmoothedNormal,
-        IO::XDMF::Center::Node);
-      interfaceOutput.add("Ray_Direction", interfaceRayDirection,
-        IO::XDMF::Center::Node);
-      interfaceOutput.add("Thickness_Descent", interfaceThicknessDescent,
-        IO::XDMF::Center::Node);
-      interfaceOutput.add("Smoothed_Curvature", interfaceCurvature,
-        IO::XDMF::Center::Node);
-    }
-    fluidState.clear();
-    fluidState.setMesh(fluid, IO::XDMF::MeshPolicy::Transient);
-    fluidState.add("Translation_0", uT0, IO::XDMF::Center::Node);
-    fluidState.add("Translation_1", uT1, IO::XDMF::Center::Node);
-    fluidState.add("Translation_2", uT2, IO::XDMF::Center::Node);
-    fluidState.add("Rotation_0", uR0, IO::XDMF::Center::Node);
-    fluidState.add("Rotation_1", uR1, IO::XDMF::Center::Node);
-    fluidState.add("Rotation_2", uR2, IO::XDMF::Center::Node);
-    fluidState.add("Pressure_Translation_0", pT0, IO::XDMF::Center::Node);
-    fluidState.add("Pressure_Translation_1", pT1, IO::XDMF::Center::Node);
-    fluidState.add("Pressure_Translation_2", pT2, IO::XDMF::Center::Node);
-    fluidState.add("Pressure_Rotation_0", pR0, IO::XDMF::Center::Node);
-    fluidState.add("Pressure_Rotation_1", pR1, IO::XDMF::Center::Node);
-    fluidState.add("Pressure_Rotation_2", pR2, IO::XDMF::Center::Node);
-    GridFunction chamberMotion(Vh);
-    chamberMotion.getData() = motionTranslation(0) * uT0.getData() +
-      motionTranslation(1) * uT1.getData() + motionTranslation(2) * uT2.getData() +
-      motionAngular(0) * uR0.getData() + motionAngular(1) * uR1.getData() +
-      motionAngular(2) * uR2.getData();
-    fluidState.add("Motion", chamberMotion, IO::XDMF::Center::Node);
-
-    KelvinBall::SewedOutput sewedDesign(mesh, FlatSet<Attribute>{Gamma, Outer});
-    P1 sewedDesignScalar(sewedDesign.getMesh());
-    P1 sewedDesignVector(sewedDesign.getMesh(), 3);
-    GridFunction sewedDistance(sewedDesignScalar);
-    GridFunction sewedVelocity(sewedDesignVector);
-    GridFunction sewedGeometricNormal(sewedDesignVector);
-    GridFunction sewedNormal(sewedDesignVector);
-    GridFunction sewedRayDirection(sewedDesignVector);
-    GridFunction sewedThicknessDescent(sewedDesignVector);
-    GridFunction sewedCurvature(sewedDesignScalar);
-    sewedDesign.setScalar(sewedDistance, distance);
-    sewedDesign.setVector(sewedVelocity, theta);
-    sewedDesignOutput.clear();
-    sewedDesignOutput.setMesh(sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
-    sewedDesignOutput.add("Distance", sewedDistance, IO::XDMF::Center::Node);
-    sewedDesignOutput.add("Theta", sewedVelocity, IO::XDMF::Center::Node);
-    if (minimumThickness > 0)
-    {
-      sewedDesign.setVector(sewedGeometricNormal, geometricNormal);
-      sewedDesign.setVector(sewedNormal, smoothedNormal);
-      sewedDesign.setVector(sewedRayDirection, rayDirection);
-      sewedDesign.setVector(sewedThicknessDescent, thicknessDescent);
-      sewedDesign.setScalar(sewedCurvature, smoothedCurvature);
-      sewedDesignOutput.add("Thickness_Descent", sewedThicknessDescent,
-        IO::XDMF::Center::Node);
-    }
-
-    SubMesh<Context::Local>::Builder sewedInterfaceBuilder;
-    sewedInterfaceBuilder.initialize(sewedDesign.getMesh());
-    for (auto face = sewedDesign.getMesh().getPolytope(
-           sewedDesign.getMesh().getDimension() - 1); face; ++face)
-      if (face->getAttribute() == Gamma)
-        sewedInterfaceBuilder.include(
-          sewedDesign.getMesh().getDimension() - 1, face->getIndex());
-    SubMesh<Context::Local> sewedInterfaceMesh = sewedInterfaceBuilder.finalize();
-    P1 sewedInterfaceVectorSpace(sewedInterfaceMesh, 3);
-    P1 sewedInterfaceScalarSpace(sewedInterfaceMesh);
-    GridFunction bodyMotion(sewedInterfaceVectorSpace);
-    bodyMotion =
-      VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
-        const Math::SpatialVector<Real> velocity =
-          motionTranslation + motionAngular.cross(point.getPhysicalCoordinates());
-        return velocity;
-      });
-    GridFunction sewedInterfaceGeometricNormal(sewedInterfaceVectorSpace);
-    GridFunction sewedInterfaceNormal(sewedInterfaceVectorSpace);
-    GridFunction sewedInterfaceRayDirection(sewedInterfaceVectorSpace);
-    GridFunction sewedInterfaceThicknessDescent(sewedInterfaceVectorSpace);
-    GridFunction sewedInterfaceCurvature(sewedInterfaceScalarSpace);
-    const auto& sewedInterfaceVertices = sewedInterfaceMesh.getPolytopeMap(0).left;
-    if (minimumThickness > 0)
-      for (Index vertex = 0; vertex < sewedInterfaceMesh.getVertexCount(); ++vertex)
+      auto interfaceOutput = xdmf.grid("Interface");
+      interfaceOutput.clear();
+      interfaceOutput.setMesh(interfaceMesh, IO::XDMF::MeshPolicy::Transient);
+      if (minimumThickness > 0)
       {
-        const auto parent = sewedInterfaceVertices[vertex];
-        const auto source = sewedDesignVector.getDOFs(0, parent);
-        const auto target = sewedInterfaceVectorSpace.getDOFs(0, vertex);
-        for (size_t component = 0; component < 3; ++component)
-        {
-          sewedInterfaceGeometricNormal.getData()(target(component)) =
-            sewedGeometricNormal.getData()(source(component));
-          sewedInterfaceNormal.getData()(target(component)) =
-            sewedNormal.getData()(source(component));
-          sewedInterfaceRayDirection.getData()(target(component)) =
-            sewedRayDirection.getData()(source(component));
-          sewedInterfaceThicknessDescent.getData()(target(component)) =
-            sewedThicknessDescent.getData()(source(component));
-        }
-        sewedInterfaceCurvature.getData()(
-          sewedInterfaceScalarSpace.getDOFs(0, vertex)(0)) =
-          sewedCurvature.getData()(sewedDesignScalar.getDOFs(0, parent)(0));
+        interfaceOutput.add(
+          "Geometric_Normal", interfaceGeometricNormal, IO::XDMF::Center::Node);
+        interfaceOutput.add(
+          "Smoothed_Normal", interfaceSmoothedNormal, IO::XDMF::Center::Node);
+        interfaceOutput.add(
+          "Ray_Direction", interfaceRayDirection, IO::XDMF::Center::Node);
+        interfaceOutput.add(
+          "Thickness_Descent", interfaceThicknessDescent, IO::XDMF::Center::Node);
+        interfaceOutput.add(
+          "Smoothed_Curvature", interfaceCurvature, IO::XDMF::Center::Node);
       }
-    auto sewedInterfaceOutput = sewedXdmf.grid("Interface");
-    sewedInterfaceOutput.clear();
-    sewedInterfaceOutput.setMesh(
-      sewedInterfaceMesh, IO::XDMF::MeshPolicy::Transient);
-    if (minimumThickness > 0)
-    {
-      sewedInterfaceOutput.add("Geometric_Normal", sewedInterfaceGeometricNormal,
-        IO::XDMF::Center::Node);
-      sewedInterfaceOutput.add("Smoothed_Normal", sewedInterfaceNormal,
-        IO::XDMF::Center::Node);
-      sewedInterfaceOutput.add("Ray_Direction", sewedInterfaceRayDirection,
-        IO::XDMF::Center::Node);
-      sewedInterfaceOutput.add("Thickness_Descent", sewedInterfaceThicknessDescent,
-        IO::XDMF::Center::Node);
-      sewedInterfaceOutput.add("Smoothed_Curvature", sewedInterfaceCurvature,
-        IO::XDMF::Center::Node);
-    }
+      fluidState.clear();
+      fluidState.setMesh(fluid, IO::XDMF::MeshPolicy::Transient);
+      fluidState.add("Translation_0", uT0, IO::XDMF::Center::Node);
+      fluidState.add("Translation_1", uT1, IO::XDMF::Center::Node);
+      fluidState.add("Translation_2", uT2, IO::XDMF::Center::Node);
+      fluidState.add("Rotation_0", uR0, IO::XDMF::Center::Node);
+      fluidState.add("Rotation_1", uR1, IO::XDMF::Center::Node);
+      fluidState.add("Rotation_2", uR2, IO::XDMF::Center::Node);
+      fluidState.add("Pressure_Translation_0", pT0, IO::XDMF::Center::Node);
+      fluidState.add("Pressure_Translation_1", pT1, IO::XDMF::Center::Node);
+      fluidState.add("Pressure_Translation_2", pT2, IO::XDMF::Center::Node);
+      fluidState.add("Pressure_Rotation_0", pR0, IO::XDMF::Center::Node);
+      fluidState.add("Pressure_Rotation_1", pR1, IO::XDMF::Center::Node);
+      fluidState.add("Pressure_Rotation_2", pR2, IO::XDMF::Center::Node);
+      GridFunction chamberMotion(Vh);
+      chamberMotion.getData() = motionTranslation(0) * uT0.getData() +
+        motionTranslation(1) * uT1.getData() + motionTranslation(2) * uT2.getData() +
+        motionAngular(0) * uR0.getData() + motionAngular(1) * uR1.getData() +
+        motionAngular(2) * uR2.getData();
+      fluidState.add("Motion", chamberMotion, IO::XDMF::Center::Node);
 
-    KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
-    VelocitySpace sewedVelocitySpace = makeVelocitySpace(sewedFluid.getMesh());
-    PressureSpace sewedPressureSpace(sewedFluid.getMesh());
-    GridFunction sewedUT0(sewedVelocitySpace), sewedUT1(sewedVelocitySpace),
-      sewedUT2(sewedVelocitySpace), sewedUR0(sewedVelocitySpace),
-      sewedUR1(sewedVelocitySpace), sewedUR2(sewedVelocitySpace);
-    GridFunction sewedPT0(sewedPressureSpace), sewedPT1(sewedPressureSpace),
-      sewedPT2(sewedPressureSpace), sewedPR0(sewedPressureSpace),
-      sewedPR1(sewedPressureSpace), sewedPR2(sewedPressureSpace);
-    const auto translations = std::array{&uT0, &uT1, &uT2};
-    const auto rotations = std::array{&uR0, &uR1, &uR2};
-    const auto translationPressures = std::array{&pT0, &pT1, &pT2};
-    const auto rotationPressures = std::array{&pR0, &pR1, &pR2};
-    sewedFluid.setVectorLoad(sewedUT0, translations, 0);
-    sewedFluid.setVectorLoad(sewedUT1, translations, 1);
-    sewedFluid.setVectorLoad(sewedUT2, translations, 2);
-    sewedFluid.setVectorLoad(sewedUR0, rotations, 0);
-    sewedFluid.setVectorLoad(sewedUR1, rotations, 1);
-    sewedFluid.setVectorLoad(sewedUR2, rotations, 2);
-    sewedFluid.setScalarLoad(sewedPT0, translationPressures, 0);
-    sewedFluid.setScalarLoad(sewedPT1, translationPressures, 1);
-    sewedFluid.setScalarLoad(sewedPT2, translationPressures, 2);
-    sewedFluid.setScalarLoad(sewedPR0, rotationPressures, 0);
-    sewedFluid.setScalarLoad(sewedPR1, rotationPressures, 1);
-    sewedFluid.setScalarLoad(sewedPR2, rotationPressures, 2);
-    sewedFluidOutput.clear();
-    sewedFluidOutput.setMesh(sewedFluid.getMesh(), IO::XDMF::MeshPolicy::Transient);
-    sewedFluidOutput.add("Translation_0", sewedUT0, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Translation_1", sewedUT1, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Translation_2", sewedUT2, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Rotation_0", sewedUR0, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Rotation_1", sewedUR1, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Rotation_2", sewedUR2, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Pressure_Translation_0", sewedPT0, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Pressure_Translation_1", sewedPT1, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Pressure_Translation_2", sewedPT2, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Pressure_Rotation_0", sewedPR0, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Pressure_Rotation_1", sewedPR1, IO::XDMF::Center::Node);
-    sewedFluidOutput.add("Pressure_Rotation_2", sewedPR2, IO::XDMF::Center::Node);
-    GridFunction fluidMotion(sewedVelocitySpace);
-    fluidMotion.getData() = motionTranslation(0) * sewedUT0.getData() +
-      motionTranslation(1) * sewedUT1.getData() +
-      motionTranslation(2) * sewedUT2.getData() + motionAngular(0) * sewedUR0.getData() +
-      motionAngular(1) * sewedUR1.getData() + motionAngular(2) * sewedUR2.getData();
-    sewedFluidOutput.add("Motion", fluidMotion, IO::XDMF::Center::Node);
-    sewedInterfaceOutput.add("Motion", bodyMotion, IO::XDMF::Center::Node);
+      KelvinBall::SewedOutput sewedDesign(mesh, FlatSet<Attribute>{Gamma, Outer});
+      P1 sewedDesignScalar(sewedDesign.getMesh());
+      P1 sewedDesignVector(sewedDesign.getMesh(), 3);
+      GridFunction sewedDistance(sewedDesignScalar);
+      GridFunction sewedVelocity(sewedDesignVector);
+      GridFunction sewedGeometricNormal(sewedDesignVector);
+      GridFunction sewedNormal(sewedDesignVector);
+      GridFunction sewedRayDirection(sewedDesignVector);
+      GridFunction sewedThicknessDescent(sewedDesignVector);
+      GridFunction sewedCurvature(sewedDesignScalar);
+      sewedDesign.setScalar(sewedDistance, distance);
+      sewedDesign.setVector(sewedVelocity, theta);
+      sewedDesignOutput.clear();
+      sewedDesignOutput.setMesh(sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
+      sewedDesignOutput.add("Distance", sewedDistance, IO::XDMF::Center::Node);
+      sewedDesignOutput.add("Theta", sewedVelocity, IO::XDMF::Center::Node);
+      if (minimumThickness > 0)
+      {
+        sewedDesign.setVector(sewedGeometricNormal, geometricNormal);
+        sewedDesign.setVector(sewedNormal, smoothedNormal);
+        sewedDesign.setVector(sewedRayDirection, rayDirection);
+        sewedDesign.setVector(sewedThicknessDescent, thicknessDescent);
+        sewedDesign.setScalar(sewedCurvature, smoothedCurvature);
+        sewedDesignOutput.add(
+          "Thickness_Descent", sewedThicknessDescent, IO::XDMF::Center::Node);
+      }
 
-    if (iteration + 1 == maxIterations)
-    {
-      xdmf.write(static_cast<Real>(iteration)).flush();
-      sewedXdmf.write(static_cast<Real>(iteration)).flush();
+      SubMesh<Context::Local>::Builder sewedInterfaceBuilder;
+      sewedInterfaceBuilder.initialize(sewedDesign.getMesh());
+      for (auto face =
+             sewedDesign.getMesh().getPolytope(sewedDesign.getMesh().getDimension() - 1);
+           face; ++face)
+        if (face->getAttribute() == Gamma)
+          sewedInterfaceBuilder.include(
+            sewedDesign.getMesh().getDimension() - 1, face->getIndex());
+      SubMesh<Context::Local> sewedInterfaceMesh = sewedInterfaceBuilder.finalize();
+      P1 sewedInterfaceVectorSpace(sewedInterfaceMesh, 3);
+      P1 sewedInterfaceScalarSpace(sewedInterfaceMesh);
+      GridFunction bodyMotion(sewedInterfaceVectorSpace);
+      bodyMotion =
+        VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
+          const Math::SpatialVector<Real> velocity =
+            motionTranslation + motionAngular.cross(point.getPhysicalCoordinates());
+          return velocity;
+        });
+      GridFunction sewedInterfaceGeometricNormal(sewedInterfaceVectorSpace);
+      GridFunction sewedInterfaceNormal(sewedInterfaceVectorSpace);
+      GridFunction sewedInterfaceRayDirection(sewedInterfaceVectorSpace);
+      GridFunction sewedInterfaceThicknessDescent(sewedInterfaceVectorSpace);
+      GridFunction sewedInterfaceCurvature(sewedInterfaceScalarSpace);
+      const auto& sewedInterfaceVertices = sewedInterfaceMesh.getPolytopeMap(0).left;
+      if (minimumThickness > 0)
+        for (Index vertex = 0; vertex < sewedInterfaceMesh.getVertexCount(); ++vertex)
+        {
+          const auto parent = sewedInterfaceVertices[vertex];
+          const auto source = sewedDesignVector.getDOFs(0, parent);
+          const auto target = sewedInterfaceVectorSpace.getDOFs(0, vertex);
+          for (size_t component = 0; component < 3; ++component)
+          {
+            sewedInterfaceGeometricNormal.getData()(target(component)) =
+              sewedGeometricNormal.getData()(source(component));
+            sewedInterfaceNormal.getData()(target(component)) =
+              sewedNormal.getData()(source(component));
+            sewedInterfaceRayDirection.getData()(target(component)) =
+              sewedRayDirection.getData()(source(component));
+            sewedInterfaceThicknessDescent.getData()(target(component)) =
+              sewedThicknessDescent.getData()(source(component));
+          }
+          sewedInterfaceCurvature.getData()(sewedInterfaceScalarSpace.getDOFs(0, vertex)(
+            0)) = sewedCurvature.getData()(sewedDesignScalar.getDOFs(0, parent)(0));
+        }
+      auto sewedInterfaceOutput = sewedXdmf.grid("Interface");
+      sewedInterfaceOutput.clear();
+      sewedInterfaceOutput.setMesh(sewedInterfaceMesh, IO::XDMF::MeshPolicy::Transient);
+      if (minimumThickness > 0)
+      {
+        sewedInterfaceOutput.add(
+          "Geometric_Normal", sewedInterfaceGeometricNormal, IO::XDMF::Center::Node);
+        sewedInterfaceOutput.add(
+          "Smoothed_Normal", sewedInterfaceNormal, IO::XDMF::Center::Node);
+        sewedInterfaceOutput.add(
+          "Ray_Direction", sewedInterfaceRayDirection, IO::XDMF::Center::Node);
+        sewedInterfaceOutput.add(
+          "Thickness_Descent", sewedInterfaceThicknessDescent, IO::XDMF::Center::Node);
+        sewedInterfaceOutput.add(
+          "Smoothed_Curvature", sewedInterfaceCurvature, IO::XDMF::Center::Node);
+      }
+
+      KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
+      VelocitySpace sewedVelocitySpace = makeVelocitySpace(sewedFluid.getMesh());
+      PressureSpace sewedPressureSpace(sewedFluid.getMesh());
+      GridFunction sewedUT0(sewedVelocitySpace), sewedUT1(sewedVelocitySpace),
+        sewedUT2(sewedVelocitySpace), sewedUR0(sewedVelocitySpace),
+        sewedUR1(sewedVelocitySpace), sewedUR2(sewedVelocitySpace);
+      GridFunction sewedPT0(sewedPressureSpace), sewedPT1(sewedPressureSpace),
+        sewedPT2(sewedPressureSpace), sewedPR0(sewedPressureSpace),
+        sewedPR1(sewedPressureSpace), sewedPR2(sewedPressureSpace);
+      const auto translations = std::array{&uT0, &uT1, &uT2};
+      const auto rotations = std::array{&uR0, &uR1, &uR2};
+      const auto translationPressures = std::array{&pT0, &pT1, &pT2};
+      const auto rotationPressures = std::array{&pR0, &pR1, &pR2};
+      sewedFluid.setVectorLoad(sewedUT0, translations, 0);
+      sewedFluid.setVectorLoad(sewedUT1, translations, 1);
+      sewedFluid.setVectorLoad(sewedUT2, translations, 2);
+      sewedFluid.setVectorLoad(sewedUR0, rotations, 0);
+      sewedFluid.setVectorLoad(sewedUR1, rotations, 1);
+      sewedFluid.setVectorLoad(sewedUR2, rotations, 2);
+      sewedFluid.setScalarLoad(sewedPT0, translationPressures, 0);
+      sewedFluid.setScalarLoad(sewedPT1, translationPressures, 1);
+      sewedFluid.setScalarLoad(sewedPT2, translationPressures, 2);
+      sewedFluid.setScalarLoad(sewedPR0, rotationPressures, 0);
+      sewedFluid.setScalarLoad(sewedPR1, rotationPressures, 1);
+      sewedFluid.setScalarLoad(sewedPR2, rotationPressures, 2);
+      sewedFluidOutput.clear();
+      sewedFluidOutput.setMesh(sewedFluid.getMesh(), IO::XDMF::MeshPolicy::Transient);
+      sewedFluidOutput.add("Translation_0", sewedUT0, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Translation_1", sewedUT1, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Translation_2", sewedUT2, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Rotation_0", sewedUR0, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Rotation_1", sewedUR1, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Rotation_2", sewedUR2, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Pressure_Translation_0", sewedPT0, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Pressure_Translation_1", sewedPT1, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Pressure_Translation_2", sewedPT2, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Pressure_Rotation_0", sewedPR0, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Pressure_Rotation_1", sewedPR1, IO::XDMF::Center::Node);
+      sewedFluidOutput.add("Pressure_Rotation_2", sewedPR2, IO::XDMF::Center::Node);
+      GridFunction fluidMotion(sewedVelocitySpace);
+      fluidMotion.getData() = motionTranslation(0) * sewedUT0.getData() +
+        motionTranslation(1) * sewedUT1.getData() +
+        motionTranslation(2) * sewedUT2.getData() +
+        motionAngular(0) * sewedUR0.getData() + motionAngular(1) * sewedUR1.getData() +
+        motionAngular(2) * sewedUR2.getData();
+      sewedFluidOutput.add("Motion", fluidMotion, IO::XDMF::Center::Node);
+      sewedInterfaceOutput.add("Motion", bodyMotion, IO::XDMF::Center::Node);
+
+      if (iteration + 1 == maxIterations)
+      {
+        xdmf.write(static_cast<Real>(iteration)).flush();
+        sewedXdmf.write(static_cast<Real>(iteration)).flush();
+        stageSeconds[6] = elapsedSeconds(stage7Start);
+        reportStageTiming(7, stageSeconds[6]);
+        writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
+          dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
+          volumeGradientDiagnostics);
+        chamber.clear();
+        fluidState.clear();
+        interfaceOutput.clear();
+        sewedDesignOutput.clear();
+        sewedFluidOutput.clear();
+        sewedInterfaceOutput.clear();
+        continue;
+      }
+
       stageSeconds[6] = elapsedSeconds(stage7Start);
       reportStageTiming(7, stageSeconds[6]);
-      writeHistory(nullSpaceMultiplier, xiRhoInfinityNorm, thetaInfinityNorm, dRhoTheta,
-        dVolumeTheta, requiredDVolumeTheta, rhoGradientDiagnostics,
-        volumeGradientDiagnostics);
-      continue;
-    }
-
-    stageSeconds[6] = elapsedSeconds(stage7Start);
-    reportStageTiming(7, stageSeconds[6]);
-    const auto stage8Start = Clock::now();
-    announce("Stage 8: Advecting the level set.");
-    MMG::Mesh& advectionMesh = wngirBackground ? *wngirBackground : mesh;
-    auto& advectionConnectivity = advectionMesh.getConnectivity();
-    advectionConnectivity.discover(3, 2);
-    advectionConnectivity.discover(3, 1);
-    advectionConnectivity.restrict(1, 0);
-    advectionConnectivity.restrict(2, 0);
-    advectionConnectivity.restrict(2, 3);
-    advectionConnectivity.discover(0, 0);
-    P1 advectionLevelSetSpace(advectionMesh);
-    P1 advectionShapeSpace(advectionMesh, 3);
-    GridFunction advectionDistance(advectionLevelSetSpace);
-    GridFunction advectionDirection(advectionShapeSpace);
-    if (wngirBackground)
-    {
+      const auto stage8Start = Clock::now();
+      announce("Stage 8: Advecting the level set.");
+      auto& advectionConnectivity = advectionMesh.getConnectivity();
+      advectionConnectivity.discover(3, 2);
+      advectionConnectivity.discover(3, 1);
+      advectionConnectivity.restrict(1, 0);
+      advectionConnectivity.restrict(2, 0);
+      advectionConnectivity.restrict(2, 3);
+      advectionConnectivity.discover(0, 0);
+      P1 advectionShapeSpace(advectionMesh, 3);
+      GridFunction advectionDistance(advectionLevelSetSpace);
+      GridFunction advectionDirection(advectionShapeSpace);
+      if (wngirBackground)
+      {
       // The fitted mesh is the background with its vertices moved: the same
       // numbering at different positions. Copying nodal values would carry
       // each one from x + u(x) back to x and undo the fit near the interface,
       // so both fields are evaluated at the positions of the background.
-      const Location::AABB<MMG::Mesh> fittedLocator(mesh);
-      std::size_t unlocated = 0;
-      advectionDistance = RealFunction([&](const Geometry::Point& point) {
-        const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
-        if (!located)
-        {
-          ++unlocated;
-          return Real(0);
-        }
-        return distance.getValue(*located);
-      });
-      advectionDirection =
-        VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
-          Math::SpatialVector<Real> value(3);
-          value.setZero();
+        const Location::AABB<MMG::Mesh> fittedLocator(mesh);
+        std::size_t unlocated = 0;
+        advectionDistance = RealFunction([&](const Geometry::Point& point) {
           const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
           if (!located)
           {
             ++unlocated;
-            return value;
+            return Real(0);
           }
-          const auto sample = theta.getValue(*located);
-          for (Eigen::Index component = 0; component < 3; ++component)
-            value(component) = sample(component);
-          return value;
+          return distance.getValue(*located);
         });
-      if (unlocated > 0)
-        throw std::runtime_error(
-          "Background points fell outside the fitted mesh during the transfer.");
-      Alert::Info()
-        << substageHeading("Fitted-to-background transfer") << Alert::NewLine
-        << diagnosticLabel("Nodal-copy error (distance):")
-        << Alert::Notation::Number(
-             (advectionDistance.getData() - distance.getData()).lpNorm<Eigen::Infinity>())
-        << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
-        << Alert::Notation::Number(
-             (advectionDirection.getData() - theta.getData()).lpNorm<Eigen::Infinity>())
-        << Alert::Raise;
-    }
-    else
-    {
-      advectionDistance.getData() = distance.getData();
-      advectionDirection.getData() = theta.getData();
-    }
-    KelvinBall::RotatedNitscheIntegrator advectionCoupling(advectionMesh,
-      FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
-      rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
-    TrialFunction advected(advectionLevelSetSpace);
-    TestFunction test(advectionLevelSetSpace);
-    KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
-      -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
-    Problem transport(advected, test);
-    const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
-      Math::RungeKutta::RK4{}, rotationalContinuation);
+        advectionDirection =
+          VectorFunction(static_cast<size_t>(3), [&](const Geometry::Point& point) {
+            Math::SpatialVector<Real> value(3);
+            value.setZero();
+            const auto located = fittedLocator.locate(3, point.getPhysicalCoordinates());
+            if (!located)
+            {
+              ++unlocated;
+              return value;
+            }
+            const auto sample = theta.getValue(*located);
+            for (Eigen::Index component = 0; component < 3; ++component)
+              value(component) = sample(component);
+            return value;
+          });
+        if (unlocated > 0)
+          throw std::runtime_error(
+            "Background points fell outside the fitted mesh during the transfer.");
+        Alert::Info()
+          << substageHeading("Fitted-to-background transfer") << Alert::NewLine
+          << diagnosticLabel("Nodal-copy error (distance):")
+          << Alert::Notation::Number((advectionDistance.getData() - distance.getData())
+                                       .lpNorm<Eigen::Infinity>())
+          << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
+          << Alert::Notation::Number(
+               (advectionDirection.getData() - theta.getData()).lpNorm<Eigen::Infinity>())
+          << Alert::Raise;
+      }
+      else
+      {
+        advectionDistance.getData() = distance.getData();
+        advectionDirection.getData() = theta.getData();
+      }
+      KelvinBall::RotatedNitscheIntegrator advectionCoupling(advectionMesh,
+        FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
+        rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+      TrialFunction advected(advectionLevelSetSpace);
+      TestFunction test(advectionLevelSetSpace);
+      KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
+        -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
+      Problem transport(advected, test);
+      const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
+        Math::RungeKutta::RK4{}, rotationalContinuation);
     // P1 mass products are quadratic. A lower-order sampling rule cannot
     // determine all local coefficients, even with complete coverage.
-    const size_t transportQuadratureOrder = std::max(size_t(2), advectionQuadratureOrder);
-    const KelvinBall::TransportProjection projection(
-      advectionMesh, advectionDistance, characteristic, transportQuadratureOrder);
-    const RealFunction retained(
-      [&](const Geometry::Point& point) { return projection.mask(point); });
-    const RealFunction transported(
-      [&](const Geometry::Point& point) { return projection.value(point); });
-    auto mass = Integral(retained * advected, test);
-    mass.setOrder(transportQuadratureOrder);
-    auto transportedDistance = Integral(transported, test);
-    transportedDistance.setOrder(transportQuadratureOrder);
-    transport = mass - transportedDistance;
-    transport.assemble();
-    advectionCoupling.assembleScalarTracePenalty(advectionLevelSetSpace,
-      transport.getLinearSystem(), levelSetPenalty, advectionDistance);
-    Solver::CG(transport).solve();
-    stageDiagnostics.transportAttempted = projection.getAttemptedCount();
-    stageDiagnostics.transportOmitted = projection.getOmittedCount();
-    stageDiagnostics.transportOmittedFraction = projection.getOmittedWeightFraction();
-    stageDiagnostics.transportFallbackCells = projection.getFallbackCellCount();
-    Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
-                  << diagnosticLabel("Projection quadrature order:")
-                  << transportQuadratureOrder << Alert::NewLine
-                  << diagnosticLabel("Attempted quadrature points:")
-                  << projection.getAttemptedCount() << Alert::NewLine
-                  << diagnosticLabel("Omitted quadrature points:")
-                  << projection.getOmittedCount() << Alert::NewLine
-                  << diagnosticLabel("Omitted integration fraction:")
-                  << projection.getOmittedWeightFraction() << Alert::NewLine
-                  << diagnosticLabel("Previous-distance fallback cells:")
-                  << projection.getFallbackCellCount() << Alert::Raise;
-    const auto& advectedDistance = advected.getSolution();
-    const auto& transportSystem = transport.getLinearSystem();
-    const Real transportResidual =
-      (transportSystem.getOperator() * transportSystem.getSolution() -
-        transportSystem.getVector())
-        .norm() /
-      std::max(transportSystem.getVector().norm(), Real(1));
-    const Real advectionIncrement =
-      (advectedDistance.getData() - advectionDistance.getData())
-        .lpNorm<Eigen::Infinity>();
-    const Real distanceJump = advectionCoupling.scalarJump(advectionDistance);
-    const Real advectedJump = advectionCoupling.scalarJump(advectedDistance);
-    stageDiagnostics.advectionIncrement = advectionIncrement;
-    stageDiagnostics.advectedJump = advectedJump;
-    Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
-                  << diagnosticLabel("Advection step:")
-                  << Alert::Notation::Number(dt)
-                  << Alert::NewLine << diagnosticLabel("Linear residual:")
-                  << Alert::Notation::Number(transportResidual) << Alert::NewLine
-                  << diagnosticLabel("Minimum:")
-                  << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
-                  << diagnosticLabel("Maximum:")
-                  << Alert::Notation::Number(advectedDistance.max()) << Alert::NewLine
-                  << diagnosticLabel("Increment infinity norm:")
-                  << Alert::Notation::Number(advectionIncrement) << Alert::NewLine
-                  << diagnosticLabel("Distance rotated jump:")
-                  << Alert::Notation::Number(distanceJump) << Alert::NewLine
-                  << diagnosticLabel("Advected rotated jump:")
-                  << Alert::Notation::Number(advectedJump) << Alert::Raise;
-    GridFunction advectedOutput(levelSetSpace);
-    advectedOutput.getData() = advectedDistance.getData();
-    chamber.add("Advected", advectedOutput, IO::XDMF::Center::Node);
-    GridFunction sewedAdvected(sewedDesignScalar);
-    sewedDesign.setScalar(sewedAdvected, advectedOutput);
-    sewedDesignOutput.add("Advected", sewedAdvected, IO::XDMF::Center::Node);
+      const size_t transportQuadratureOrder =
+        std::max(size_t(2), advectionQuadratureOrder);
+      const KelvinBall::TransportProjection projection(
+        advectionMesh, advectionDistance, characteristic, transportQuadratureOrder);
+      const RealFunction retained(
+        [&](const Geometry::Point& point) { return projection.mask(point); });
+      const RealFunction transported(
+        [&](const Geometry::Point& point) { return projection.value(point); });
+      auto mass = Integral(retained * advected, test);
+      mass.setOrder(transportQuadratureOrder);
+      auto transportedDistance = Integral(transported, test);
+      transportedDistance.setOrder(transportQuadratureOrder);
+      transport = mass - transportedDistance;
+      transport.assemble();
+      advectionCoupling.assembleScalarTracePenalty(advectionLevelSetSpace,
+        transport.getLinearSystem(), levelSetPenalty, advectionDistance);
+      Solver::CG(transport).solve();
+      stageDiagnostics.transportAttempted = projection.getAttemptedCount();
+      stageDiagnostics.transportOmitted = projection.getOmittedCount();
+      stageDiagnostics.transportOmittedFraction = projection.getOmittedWeightFraction();
+      stageDiagnostics.transportFallbackCells = projection.getFallbackCellCount();
+      Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
+                    << diagnosticLabel("Projection quadrature order:")
+                    << transportQuadratureOrder << Alert::NewLine
+                    << diagnosticLabel("Attempted quadrature points:")
+                    << projection.getAttemptedCount() << Alert::NewLine
+                    << diagnosticLabel("Omitted quadrature points:")
+                    << projection.getOmittedCount() << Alert::NewLine
+                    << diagnosticLabel("Omitted integration fraction:")
+                    << projection.getOmittedWeightFraction() << Alert::NewLine
+                    << diagnosticLabel("Previous-distance fallback cells:")
+                    << projection.getFallbackCellCount() << Alert::Raise;
+      advectedDistance = advected.getSolution();
+      const auto& transportSystem = transport.getLinearSystem();
+      const Real transportResidual =
+        (transportSystem.getOperator() * transportSystem.getSolution() -
+          transportSystem.getVector())
+          .norm() /
+        std::max(transportSystem.getVector().norm(), Real(1));
+      const Real advectionIncrement =
+        (advectedDistance.getData() - advectionDistance.getData())
+          .lpNorm<Eigen::Infinity>();
+      const Real distanceJump = advectionCoupling.scalarJump(advectionDistance);
+      const Real advectedJump = advectionCoupling.scalarJump(advectedDistance);
+      stageDiagnostics.advectionIncrement = advectionIncrement;
+      stageDiagnostics.advectedJump = advectedJump;
+      Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
+                    << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
+                    << Alert::NewLine << diagnosticLabel("Linear residual:")
+                    << Alert::Notation::Number(transportResidual) << Alert::NewLine
+                    << diagnosticLabel("Minimum:")
+                    << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
+                    << diagnosticLabel("Maximum:")
+                    << Alert::Notation::Number(advectedDistance.max()) << Alert::NewLine
+                    << diagnosticLabel("Increment infinity norm:")
+                    << Alert::Notation::Number(advectionIncrement) << Alert::NewLine
+                    << diagnosticLabel("Distance rotated jump:")
+                    << Alert::Notation::Number(distanceJump) << Alert::NewLine
+                    << diagnosticLabel("Advected rotated jump:")
+                    << Alert::Notation::Number(advectedJump) << Alert::Raise;
+      GridFunction advectedOutput(levelSetSpace);
+      advectedOutput.getData() = advectedDistance.getData();
+      chamber.add("Advected", advectedOutput, IO::XDMF::Center::Node);
+      GridFunction sewedAdvected(sewedDesignScalar);
+      sewedDesign.setScalar(sewedAdvected, advectedOutput);
+      sewedDesignOutput.add("Advected", sewedAdvected, IO::XDMF::Center::Node);
 
-    xdmf.write(static_cast<Real>(iteration)).flush();
-    sewedXdmf.write(static_cast<Real>(iteration)).flush();
-    stageSeconds[7] = elapsedSeconds(stage8Start);
-    reportStageTiming(8, stageSeconds[7]);
+      xdmf.write(static_cast<Real>(iteration)).flush();
+      sewedXdmf.write(static_cast<Real>(iteration)).flush();
+      stageSeconds[7] = elapsedSeconds(stage8Start);
+      reportStageTiming(8, stageSeconds[7]);
+    // Attribute writers capture fields by reference. Remove those callbacks
+    // before their fields expire; the written snapshot metadata is retained.
+      chamber.clear();
+      fluidState.clear();
+      interfaceOutput.clear();
+      sewedDesignOutput.clear();
+      sewedFluidOutput.clear();
+      sewedInterfaceOutput.clear();
+    }
 
     const auto stage9Start = Clock::now();
     announce(reconstructionMethod == "wngir"
