@@ -248,5 +248,17 @@ namespace Rodin::Tests::Manufactured::Assembly
 
     expectSameMatrix(Afull, Alhs);
     expectSameVector(bfull, brhs);
+
+    Problem incremental(u, v, p, q);
+    incremental += Integral(Grad(u), Grad(v));
+    incremental += Integral(u, v);
+    incremental -= Integral(p, v);
+    incremental -= Integral(u, q);
+    incremental += Integral(p, q);
+    incremental -= Integral(RealFunction(1.0), v);
+    incremental -= Integral(RealFunction(2.0), q);
+    incremental.assemble();
+    expectSameMatrix(Afull, incremental.getLinearSystem().getOperator());
+    expectSameVector(bfull, incremental.getLinearSystem().getVector());
   }
 }

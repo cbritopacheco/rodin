@@ -229,6 +229,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      const ProblemBodyType& getBody() const override
+      {
+        return m_pb;
+      }
+
       /**
        * @brief Assembles the variational formulation and establishes the
        *        initial guess.
@@ -604,6 +609,11 @@ namespace Rodin::Variational
         m_pb = rhs;
         m_assembled = false;
         return *this;
+      }
+
+      const ProblemBodyType& getBody() const override
+      {
+        return m_pb;
       }
 
       // --------------------------

@@ -331,6 +331,47 @@ namespace
     checkLocalBackendTargetedAssembly<Assembly::Sequential>();
   }
 
+  TEST(PETSc_TargetedAssembly, CompoundAssignmentSingleAndMixedProblems)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(1, 2);
+    P1 fes(mesh);
+    P0 pressure(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TrialFunction p(pressure);
+    PETSc::Variational::TestFunction v(fes);
+    PETSc::Variational::TestFunction q(pressure);
+    Problem expected(u, v), actual(u, v);
+    expected =
+      Integral(u, v) - Integral(RealFunction(1), v) + DirichletBC(u, RealFunction(1));
+    ProblemBase<PETSc::Math::LinearSystem>& base = actual;
+    base += Integral(u, v);
+    base -= Integral(RealFunction(1), v);
+    base += DirichletBC(u, RealFunction(1));
+    expected.assemble();
+    actual.assemble();
+    expectSameMatrix(
+      expected.getLinearSystem().getOperator(), actual.getLinearSystem().getOperator());
+    expectSameVector(
+      expected.getLinearSystem().getVector(), actual.getLinearSystem().getVector());
+
+    using Mixed = Problem<PETSc::Math::LinearSystem, decltype(u), decltype(v),
+      decltype(p), decltype(q)>;
+    Mixed mixedExpected(u, v, p, q), mixedActual(u, v, p, q);
+    mixedExpected =
+      Integral(u, v) + Integral(p, q) - Integral(p, v) - Integral(RealFunction(1), q);
+    mixedActual += Integral(u, v);
+    mixedActual += Integral(p, q);
+    mixedActual -= Integral(p, v);
+    mixedActual -= Integral(RealFunction(1), q);
+    mixedExpected.assemble();
+    mixedActual.assemble();
+    expectSameMatrix(mixedExpected.getLinearSystem().getOperator(),
+      mixedActual.getLinearSystem().getOperator());
+    expectSameVector(mixedExpected.getLinearSystem().getVector(),
+      mixedActual.getLinearSystem().getVector());
+  }
+
   /// @brief Verifies sequential reassembly keeps nonzero pattern for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialReassemblyKeepsNonzeroPattern)
   {

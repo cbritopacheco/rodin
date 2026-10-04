@@ -158,3 +158,22 @@ solution back into each `TrialFunction` (`u.getSolution()`).
 `getLinearSystem()` exposes the assembled A, b for direct inspection.
 Signs follow the math: `Integral(Grad(u), Grad(v)) - Integral(f, v)`
 states a(u,v) − L(v) = 0.
+
+`ProblemBase` and its concrete single/mixed-field problems also support
+`+=` and `-=` for terms supported by the existing `ProblemBody` arithmetic:
+
+```cpp
+Problem problem(u, v);
+problem += Integral(Grad(u), Grad(v));
+problem -= Integral(f, v);
+problem += DirichletBC(u, g);
+```
+
+Each operation owns its expression through clone-on-build and invalidates the
+previous assembly through virtual body assignment. `getBody()` is read-only;
+referenced coefficient changes still require explicit reassembly. Subtraction
+adds a negative form contribution, not removal by UUID. Boundary-condition
+subtraction and other operations absent from the body algebra remain unsupported.
+Compound operators return a `ProblemBase&`, including through a concrete problem.
+Non-variational adapters retain source compatibility and reject body access unless
+they provide it.
