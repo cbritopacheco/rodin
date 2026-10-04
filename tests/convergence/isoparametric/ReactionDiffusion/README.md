@@ -121,8 +121,12 @@ $\Phi(\xi)=\xi+0.1\sin(\pi\xi_0)e_{d-1}$ and its quadratic
 interpolant $\Phi_h$. Physical sources and traces retain the same exact
 fields on $\Omega_h=\Phi_h((0,1)^d)$. This separates field approximation
 from geometric displacement of the domain.
-In dimensions two and three, the first coordinate is unchanged and both
-map determinants equal one. In one dimension,
+In dimensions two and three, the first coordinate is unchanged and the
+exact-map determinant equals one. The interpolant's determinant is not
+assumed to be identically one on every cell family; the shared geometry
+study independently checks positive represented Jacobians at its integration
+points. Uniform regularity remains a hypothesis of the rate interpretation.
+In one dimension,
 $\Phi'=1+0.1\pi\cos(\pi\xi)>0$. The quadratic interpolant satisfies
 $\Phi_h'\ge1-0.3\pi>0$: its endpoint derivatives are twice a
 half-interval secant minus the full-interval secant, bounded by $3\pi$
