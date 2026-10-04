@@ -325,12 +325,13 @@ jobs:
         run: >-
           cmake --build build -j 2 --target
           RodinConvergenceHPETScHelmholtz RodinPETScSNESStateTest
+          RodinConvergencePPETScHelmholtz RodinConvergenceHPPETScHelmholtz
           RodinConvergenceIsoparametricPETScHelmholtz
           RodinConvergenceIsoparametricPETScP0Projection
 
       - name: Run complex PETSc convergence suite
         run: >-
-          ctest --test-dir build/tests -R 'RodinConvergence(H|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest'
+          ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest'
           --output-on-failure -j 2
 
   Unit:

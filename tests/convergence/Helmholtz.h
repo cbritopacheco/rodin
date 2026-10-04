@@ -24,6 +24,7 @@ namespace Rodin::Tests::Convergence
   class HelmholtzData
   {
     public:
+      static constexpr Real WaveNumberSquared = 0.25;
       enum class Field
       {
         Constant,
@@ -91,7 +92,7 @@ namespace Rodin::Tests::Convergence
               laplacian = 2 * Real(dim) * Complex(1, 0.5);
             else if (field == Field::Smooth)
               laplacian = -Real(dim) * exact(p);
-            return -laplacian - 0.25 * exact(p);
+            return -laplacian - WaveNumberSquared * exact(p);
           });
       }
 
