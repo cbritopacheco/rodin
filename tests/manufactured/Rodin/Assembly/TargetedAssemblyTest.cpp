@@ -250,13 +250,23 @@ namespace Rodin::Tests::Manufactured::Assembly
     expectSameVector(bfull, brhs);
 
     Problem incremental(u, v, p, q);
+    BilinearForm pressureMetric(p, q);
+    LinearForm pressureLoad(q);
+    pressureMetric = Integral(p, q);
+    pressureLoad = Integral(RealFunction(2.0), q);
+    pressureMetric.assemble();
+    pressureLoad.assemble();
     incremental += Integral(Grad(u), Grad(v));
     incremental += Integral(u, v);
     incremental -= Integral(p, v);
     incremental -= Integral(u, q);
-    incremental += Integral(p, q);
+    incremental += pressureMetric;
+    incremental += pressureMetric;
+    incremental -= pressureMetric;
     incremental -= Integral(RealFunction(1.0), v);
-    incremental -= Integral(RealFunction(2.0), q);
+    incremental -= pressureLoad;
+    incremental += pressureLoad;
+    incremental -= pressureLoad;
     incremental.assemble();
     expectSameMatrix(Afull, incremental.getLinearSystem().getOperator());
     expectSameVector(bfull, incremental.getLinearSystem().getVector());

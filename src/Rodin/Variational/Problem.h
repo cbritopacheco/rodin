@@ -182,6 +182,9 @@ namespace Rodin::Variational
        * Supports exactly the additions defined by the problem-body algebra,
        * including integrators, preassembled forms and boundary conditions.
        * Terms are owned through the existing clone-on-build semantics.
+       * Successful virtual body assignment sets the concrete problem's
+       * assembly flag to false. The next solve() reassembles; merely reading
+       * getLinearSystem() does not refresh the stored system.
        */
       template <class Term>
         requires requires(ProblemBase& problem, const ProblemBodyType& body,

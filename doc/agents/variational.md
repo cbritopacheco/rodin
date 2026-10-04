@@ -170,8 +170,15 @@ problem += DirichletBC(u, g);
 ```
 
 Each operation owns its expression through clone-on-build and invalidates the
-previous assembly through virtual body assignment. `getBody()` is read-only;
-referenced coefficient changes still require explicit reassembly. Subtraction
+previous assembly through virtual body assignment. `getBody()` is read-only.
+Specifically, assignment sets `m_assembled = false`; the next `solve()` rebuilds
+the system, whereas `getLinearSystem()` alone does not rebuild it.
+Both signs support preassembled `BilinearForm` and `LinearForm` snapshots.
+`problem += load` adds the linear form to the residual and therefore subtracts
+its vector from the right-hand side; `problem -= load` adds it to the right-hand
+side. Changing or destroying the original assembled form does not change its
+owned snapshot in the problem.
+Referenced coefficient changes still require explicit reassembly. Subtraction
 adds a negative form contribution, not removal by UUID. Boundary-condition
 subtraction and other operations absent from the body algebra remain unsupported.
 Compound operators return a `ProblemBase&`, including through a concrete problem.

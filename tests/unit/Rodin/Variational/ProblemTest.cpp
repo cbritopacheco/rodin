@@ -79,6 +79,88 @@ TEST(Rodin_Variational_Problem, CompoundAssignmentAcceptsPreassembledMetric)
     Real(1e-12));
 }
 
+TEST(Rodin_Variational_Problem, PreassembledFormSignsP1P2P3SparseAndDense)
+{
+  const auto check = []<size_t Order, class Matrix>() {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    for (size_t from = 0; from <= 2; ++from)
+      for (size_t to = 0; to <= 2; ++to)
+        if (from != to)
+          mesh.getConnectivity().compute(from, to);
+    H1 fes(std::integral_constant<size_t, Order>{}, mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    using System = Math::LinearSystem<Matrix, Math::Vector<Real>>;
+    BilinearForm<std::remove_reference_t<decltype(u.getSolution())>, decltype(fes),
+      decltype(fes), Matrix>
+      metric(u, v);
+    LinearForm load(v);
+    metric = Integral(u, v);
+    load = Integral(RealFunction(1), v);
+    metric.assemble();
+    load.assemble();
+    const Matrix matrix = metric.getOperator();
+    const Math::Vector<Real> vector = load.getVector();
+    Problem<System, decltype(u), decltype(v)> problem(u, v);
+    ProblemBase<System>& base = problem;
+    base += metric;
+    base -= load;
+    problem.assemble();
+    EXPECT_LT((problem.getLinearSystem().getOperator() - matrix).norm(), Real(1e-12));
+    EXPECT_LT((problem.getLinearSystem().getVector() - vector).norm(), Real(1e-12));
+    base -= metric;
+    base += load;
+    problem.assemble();
+    EXPECT_LT(problem.getLinearSystem().getOperator().norm(), Real(1e-12));
+    EXPECT_LT(problem.getLinearSystem().getVector().norm(), Real(1e-12));
+    base -= metric;
+    base += load;
+    metric.getOperator() *= 7;
+    load.getVector() *= 9;
+    problem.assemble();
+    EXPECT_LT((problem.getLinearSystem().getOperator() + matrix).norm(), Real(1e-12));
+    EXPECT_LT((problem.getLinearSystem().getVector() + vector).norm(), Real(1e-12));
+  };
+  check.template operator()<1, Math::SparseMatrix<Real>>();
+  check.template operator()<2, Math::SparseMatrix<Real>>();
+  check.template operator()<3, Math::SparseMatrix<Real>>();
+  check.template operator()<1, Math::Matrix<Real>>();
+  check.template operator()<2, Math::Matrix<Real>>();
+  check.template operator()<3, Math::Matrix<Real>>();
+}
+
+TEST(Rodin_Variational_Problem, PreassembledFormsInvalidateEverySolve)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  P1 fes(mesh);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  BilinearForm metric(u, v);
+  LinearForm load(v);
+  metric = Integral(u, v);
+  load = Integral(RealFunction(1), v);
+  metric.assemble();
+  load.assemble();
+  Problem problem(u, v);
+  problem += metric;
+  problem -= load;
+  Solver::CG solver(problem);
+  const auto solve = [&](Real expected) {
+    problem.solve(solver);
+    EXPECT_LT(
+      (u.getSolution().getData().array() - expected).matrix().norm(), Real(1e-10));
+  };
+  solve(1);
+  problem += metric;
+  solve(0.5);
+  problem -= metric;
+  solve(1);
+  problem += load;
+  solve(0);
+  problem -= load;
+  solve(1);
+}
+
 TEST(Rodin_Variational_Problem, CompoundAssignmentMatchesBodyP1P2P3)
 {
   const auto check = []<size_t Order>() {

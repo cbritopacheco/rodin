@@ -331,6 +331,54 @@ namespace
     checkLocalBackendTargetedAssembly<Assembly::Sequential>();
   }
 
+  TEST(PETSc_TargetedAssembly, PreassembledFormSignsAndSnapshots)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    BilinearForm metric(u, v);
+    LinearForm load(v);
+    metric = Integral(u, v);
+    load = Integral(RealFunction(1), v);
+    metric.assemble();
+    load.assemble();
+    Problem expected(u, v), actual(u, v);
+    ProblemBase<PETSc::Math::LinearSystem>& base = actual;
+    base += metric;
+    base -= load;
+    expected = Integral(u, v) - Integral(RealFunction(1), v);
+    expected.assemble();
+    actual.assemble();
+    expectSameMatrix(
+      expected.getLinearSystem().getOperator(), actual.getLinearSystem().getOperator());
+    expectSameVector(
+      expected.getLinearSystem().getVector(), actual.getLinearSystem().getVector());
+    base -= metric;
+    base += load;
+    actual.assemble();
+    PetscReal norm = 0;
+    auto ierr = MatNorm(actual.getLinearSystem().getOperator(), NORM_FROBENIUS, &norm);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_LT(norm, 1e-12);
+    ierr = VecNorm(actual.getLinearSystem().getVector(), NORM_2, &norm);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_LT(norm, 1e-12);
+    base -= metric;
+    base += load;
+    ierr = MatScale(metric.getOperator(), 7);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecScale(load.getVector(), 9);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    expected = -Integral(u, v) + Integral(RealFunction(1), v);
+    expected.assemble();
+    actual.assemble();
+    expectSameMatrix(
+      expected.getLinearSystem().getOperator(), actual.getLinearSystem().getOperator());
+    expectSameVector(
+      expected.getLinearSystem().getVector(), actual.getLinearSystem().getVector());
+  }
+
   TEST(PETSc_TargetedAssembly, CompoundAssignmentSingleAndMixedProblems)
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -358,12 +406,22 @@ namespace
     using Mixed = Problem<PETSc::Math::LinearSystem, decltype(u), decltype(v),
       decltype(p), decltype(q)>;
     Mixed mixedExpected(u, v, p, q), mixedActual(u, v, p, q);
+    BilinearForm pressureMetric(p, q);
+    LinearForm pressureLoad(q);
+    pressureMetric = Integral(p, q);
+    pressureLoad = Integral(RealFunction(1), q);
+    pressureMetric.assemble();
+    pressureLoad.assemble();
     mixedExpected =
       Integral(u, v) + Integral(p, q) - Integral(p, v) - Integral(RealFunction(1), q);
     mixedActual += Integral(u, v);
-    mixedActual += Integral(p, q);
+    mixedActual += pressureMetric;
+    mixedActual += pressureMetric;
+    mixedActual -= pressureMetric;
     mixedActual -= Integral(p, v);
-    mixedActual -= Integral(RealFunction(1), q);
+    mixedActual -= pressureLoad;
+    mixedActual += pressureLoad;
+    mixedActual -= pressureLoad;
     mixedExpected.assemble();
     mixedActual.assemble();
     expectSameMatrix(mixedExpected.getLinearSystem().getOperator(),

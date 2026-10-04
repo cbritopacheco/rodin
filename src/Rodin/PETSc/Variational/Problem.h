@@ -55,6 +55,34 @@
 
 namespace Rodin::Variational
 {
+  /** @brief Subtracts an owned PETSc bilinear-form snapshot. */
+  template <class Vector, class Scalar>
+  auto operator-(
+    const ProblemBody<::Mat, Vector, Scalar>& pb, const BilinearFormBase<::Mat>& bf)
+  {
+    ProblemBody<::Mat, Vector, Scalar> res(pb);
+    std::unique_ptr<BilinearFormBase<::Mat>> negative(bf.copy());
+    const auto ierr = MatScale(negative->getOperator(), -1);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    res.getBFs().add(*negative);
+    return res;
+  }
+
+  /** @brief Adds a PETSc linear form to the residual, hence negates its load. */
+  template <class Operator, class Scalar>
+  auto operator+(
+    const ProblemBody<Operator, ::Vec, Scalar>& pb, const LinearFormBase<::Vec>& lf)
+  {
+    ProblemBody<Operator, ::Vec, Scalar> res(pb);
+    std::unique_ptr<LinearFormBase<::Vec>> negative(lf.copy());
+    const auto ierr = VecScale(negative->getVector(), -1);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+    res.getLFs().add(*negative);
+    return res;
+  }
+
   /**
    * @brief PETSc variational problem for a single trial / test function pair.
    *
