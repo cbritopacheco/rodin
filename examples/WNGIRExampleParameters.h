@@ -58,10 +58,10 @@ namespace Rodin::Examples
   {
       std::size_t maxIterations = Adaptation::WNGIRParameters{}.maxIterations;
       std::size_t quadratureOrder = 0;
-      Real kappaF = 1;
-      Real kappaD = 1;
-      Real kappaJ = 1;
-      Real kappaQ = 1;
+      Real kappaF = Adaptation::WNGIRParameters{}.kappaF;
+      Real kappaD = Adaptation::WNGIRParameters{}.kappaD;
+      Real kappaJ = Adaptation::WNGIRParameters{}.kappaJ;
+      Real kappaQ = Adaptation::WNGIRParameters{}.kappaQ;
   };
 
   inline bool findOption(
@@ -203,8 +203,8 @@ namespace Rodin::Examples
 
     p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
     p.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
-    p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", Real(1e-2));
-    p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
+    p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", p.jSafe);
+    p.qMax = realOption(argc, argv, "wngir-qmax", p.qMax);
     p.qualityGuard = realOption(argc, argv, "wngir-quality-guard", p.qualityGuard);
     p.kappaD = realOption(argc, argv, "wngir-kappa-d", defaults.kappaD);
     p.directionalNewton =
@@ -237,11 +237,11 @@ namespace Rodin::Examples
     p.stagnationIterations = sizeOption(argc, argv,
       "wngir-stagnation-iterations", p.stagnationIterations);
     p.muHat = realOption(argc, argv, "wngir-mu-hat", p.muHat);
-    p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
+    p.omegaMin = realOption(argc, argv, "wngir-omega-min", p.omegaMin);
     p.maxBacktracks = sizeOption(argc, argv, "wngir-max-backtracks", p.maxBacktracks);
     p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
 
-    p.jMinRatio = realOption(argc, argv, "j-min", Real(1e-8));
+    p.jMinRatio = realOption(argc, argv, "j-min", p.jMinRatio);
     p.jLineSearchRatio =
       realOption(argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
     p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", p.energyStagTol);

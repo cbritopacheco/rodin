@@ -37,7 +37,7 @@ namespace Rodin::Adaptation
       Real qualityGuard = Real(0.1);
       /// Independent fitting and distribution weights; distribution scales with h.
       Real kappaF = 1; ///< Fitting curvature weight.
-      Real kappaD = 1; ///< Distribution (current-strain regularity) weight.
+      Real kappaD = Real(1e-3); ///< Distribution (current-strain regularity) weight.
       /// Robust directional scaling of the inner model, omitting the level-set Hessian.
       bool directionalNewton = true;
       Real directionalNewtonMaxStepOverH = 1; ///< Maximum predictor motion divided by h.
@@ -67,7 +67,7 @@ namespace Rodin::Adaptation
       Real primalBarrierRelativeTolerance =
         Real(1e-3); ///< Relative stationarity-residual tolerance for the inner QP.
       Real primalBarrierAbsoluteTolerance = Real(1e-12); ///< Absolute inner residual tolerance.
-      Real muHat = Real(90); ///< @f$\widehat\mu@f$, dimensionless
+      Real muHat = Real(100); ///< @f$\widehat\mu@f$, dimensionless
         ///< barrier/model-decrease ratio.
       Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
       size_t maxBacktracks = 32; ///< Maximum halvings of a physical trial increment.

@@ -13,9 +13,12 @@ completion, mass term, or nonlinear-hinge path. PSD does not imply invertibility
   Local infinitesimal rotations and isotropic strain have zero cost.
 - The fitting energy and force remain robust Welsch.
 - Hinge widths are 0.1 times the identity quality margins. The default
-  model-decrease-scaled hinge weight is mu_hat=90.
-- Defaults are 30 outer / 15 inner corrections and $\kappa_F=\kappa_D=1$.
-  There is no shared bulk coefficient. These are choices, not a new calibration result.
+  model-decrease-scaled hinge weight is $\widehat\mu=100$.
+- Defaults are 30 outer / 15 inner corrections and
+  $(\kappa_F,\kappa_D,\widehat\mu)=(1,10^{-3},100)$.
+  This is the provisional leader of the ongoing fitting--distribution campaign,
+  preferring unit fitting weight among tied leaders; it is not a completed
+  cross-dimensional calibration. There is no shared bulk coefficient.
   Historical shape-curvature runs are retained separately, not reproduced by
   the canonical metric away from identity.
 
@@ -37,14 +40,43 @@ Geometry traces record inactive-hinge skips and analysis/factorization counts.
 
 | Role | Parameters | Defaults |
 | --- | --- | --- |
-| Metric | kappa_f, kappa_d | 1, 1 |
-| Hinge strength | mu_hat; kappa_j, kappa_q | 90; 1, 1 |
+| Metric | kappa_f, kappa_d | 1, 1e-3 |
+| Hinge strength | mu_hat; kappa_j, kappa_q | 100; 1, 1 |
 | Guard width | quality_guard | 0.1 of identity margins |
 | Quality budget | j_safe, q_max; actual line-search Jacobian floor | 0.01, 10; 0.01 |
 | Robust fitting | robust_scale | automatic |
 | Iteration limits | outer, inner; CG per linear solve | 30, 15; 1000 |
 | Inner stopping | stationarity residual relative / absolute | 1e-3 / 1e-12 |
 | Geometry target | geometric_sup_tolerance | 0 selects h^(p+1), hence h^2 for P1 |
+
+## Composable Metric And Boundary Conditions
+
+```cpp
+WNGIR wngir(u, v);
+wngir += DirichletBC(u, VectorFunction(0.0, 0.0)).on(boundaryAttribute);
+wngir += Integral(Dot(u, v));
+wngir -= Integral(Dot(u, v));
+```
+
+Bilinear integrators augment the frozen displacement metric, not the robust
+fitting energy or force. They use the constructor's trial/test functions and
+native `BilinearForm` assembly. Subtraction must preserve the metric's PSD
+property. Arbitrary linear forms are not accepted: they would require a
+consistent change to the outer objective and Armijo merit.
+
+Homogeneous value conditions hold the current boundary displacement fixed by
+constraining every increment. Native `DirichletBC` assembly and `LinearSystem`
+elimination are reused. Nonzero values, identification conditions and conditions
+on a different trial function are rejected. General `Problem` and `ProblemBase`
+do not currently expose `+=`/`-=`; native bilinear and linear forms do. This
+extension does not change the shared problem API.
+
+Regression coverage includes P1/P2/P3 metric cancellation and boundary
+preservation, added-metric effects, rejected boundary contracts, fitting/quality
+diagnostics, inner stationarity and accepted-step stopping, similarity gauges,
+CG caps and direct residuals, coefficient scaling, and derivative/assembly
+checks. The local WNGIR backend is tested; this is not an MPI WNGIR validation
+or a certified Hausdorff-error estimate.
 
 Legacy active-fit tolerance paths and predictor fallbacks are removed. The primary
 calibration controls are the two metric weights and mu_hat; the quality budget
@@ -109,7 +141,7 @@ each defaulting to 1e-4,1e-3,1e-2,0.1,1. With mu_hat=0.1,1,10,100,1000,
 all five resolutions and eleven lobe counts give 6,875 fitting-distribution cases.
 Shape-curvature flags and weights are removed.
 The 3D runner uses fixed --kappa-f and --kappa-d/--mu-hat grids.
-Executable defaults remain all one. Executables use
+Executable defaults follow `WNGIRParameters`. Executables use
 --wngir-kappa-f and --wngir-kappa-d; the old metric flags
 are rejected. Hinges retain mu_hat, kappa_j, kappa_q and the quality guard.
 Use a new output directory: model identifiers and schemas deliberately reject

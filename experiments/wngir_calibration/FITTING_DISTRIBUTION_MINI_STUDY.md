@@ -83,7 +83,7 @@ local eigensolves. It does not establish a universal reduction in outer counts.
 The two remaining metric weights and hinge strength should be calibrated by
 target hits, worst and aggregate first-hit counts, then uncontaminated cost.
 Quality budget consumption is allowed, not an additional minimization target.
-Production weights remain one and hinge strength remains 90; the mini study
+At the time of this mini study, production weights were one and hinge strength was 90; the mini study
 does not establish new universal defaults. Pointwise distribution is PSD but
 not a continuous H1 norm modulo only similarities, particularly in 2D and
 higher-order spaces. The paper's old global-dilation coercivity proof has been
