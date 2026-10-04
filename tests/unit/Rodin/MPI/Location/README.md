@@ -26,7 +26,8 @@ The tests cover:
 - Construction and queries on one rank only, and unequal query counts.
 - Empty parent shards and MPI submeshes with collective logical dimensions.
 - All eight geometries, native/embedded configurations and H1 orders 1–4.
-- Preservation of coordinates/Jacobians through parent sharding and MPI transfer.
+- Preservation of coordinates/Jacobians through parent sharding and MPI transfer,
+  including cached default P1 maps as well as attached H1 maps.
 - Lifted MPI mesh identity, local/distributed index maps and P0 field evaluation.
 
 Run `RodinMPILocationAABBTest_np*` with CTest on 1–4 ranks. The tests have a

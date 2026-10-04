@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build a diagnostic copy of RodinAABBWorkload without changing production code.
+"""Build a diagnostic AABB executable without changing production code.
 
-Requires a Ninja Release build with compile_commands.json and RodinAABBWorkload
-already built. The ordinary target measures timings; the generated executable
-counts operations only. Its CSV is not suitable for timing comparisons.
+Requires a Ninja Release build with compile_commands.json and the selected
+benchmark target already built. The ordinary target measures timings; the
+generated executable counts operations only. Its timings are not performance
+evidence.
 """
 
 import argparse
@@ -71,7 +72,7 @@ def main():
     source_name = "MPIAABB.cpp" if args.target == "RodinMPIAABBBenchmarks" else "AABBWorkload.cpp"
     entry = next(e for e in entries if e["file"].endswith("/" + source_name))
     command = shlex.split(entry["command"])
-    obj = output / "AABBWorkloadDiagnostic.o"
+    obj = output / (args.target + "Diagnostic.o")
     command[command.index("-o") + 1] = str(obj)
     command[1:1] = ["-DRODIN_AABB_WORKLOAD_DIAGNOSTICS", "-include", str(header),
                     "-I" + str(root / "src/Rodin/Location")]

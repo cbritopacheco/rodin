@@ -104,7 +104,8 @@ namespace
   }
 
   template <size_t K>
-  void checkDistributedGeometry(Polytope::Type type, bool embedded)
+  void checkDistributedGeometry(
+    Polytope::Type type, bool embedded, bool defaultMaps = false)
   {
     Context::MPI context(*environment, *world);
     Sharder<Context::MPI> sharder(context);
@@ -117,6 +118,14 @@ namespace
     if (world->rank() == 0)
     {
       auto parent = curvedMesh<K>(type, embedded);
+      if (defaultMaps)
+      {
+        parent.flush();
+        // Cache every P1 chart, including points, so remote shard transport
+        // must serialize these polymorphic maps rather than rebuild them.
+        for (auto p = parent.getPolytope(d); p; ++p)
+          p->getTransformation();
+      }
       Point sample(*parent.getPolytope(d, 0), rc);
       expected = sample.getPhysicalCoordinates();
       for (size_t j = 0; j < d; ++j)
@@ -315,6 +324,10 @@ TEST_P(MPILocationGeometryTest, TransfersAndLocatesAllOrders)
     checkDistributedGeometry<3>(GetParam(), embedded);
     checkDistributedGeometry<4>(GetParam(), embedded);
   }
+}
+TEST_P(MPILocationGeometryTest, TransfersCachedDefaultMaps)
+{
+  checkDistributedGeometry<1>(GetParam(), true, true);
 }
 INSTANTIATE_TEST_SUITE_P(
   AllGeometries, MPILocationGeometryTest, ::testing::ValuesIn(Polytope::Types));

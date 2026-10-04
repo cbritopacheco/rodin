@@ -46,13 +46,19 @@ namespace
   constexpr size_t QueryBatch = 16;
   /// Cheap queries repeat batches for stable timing; expensive queries finish
   /// after one batch. This does not synchronize or constrain locator calls.
-  constexpr double MinimumQuerySeconds = 0.005;
+  [[maybe_unused]] constexpr double MinimumQuerySeconds = 0.005;
   /// Repeated manual samples; all ranks execute the same number of collectives.
   constexpr size_t TimingSamples = 5;
   /// Offset from a reference vertex, well outside numerical locator tolerance.
   constexpr Real MissOffset = Real(1e-4);
   /// Interior sample pulled toward the centroid to avoid partition boundaries.
   constexpr Real CentroidWeight = Real(0.75);
+  /// Grid points per axis: two sizes expose scaling without oversized P4 runs.
+  constexpr int64_t SmallResolution = 5;
+  constexpr int64_t LargeResolution = 9;
+  /// Distortion arguments use tenths; 0.2 is a moderate injective fixture shear.
+  constexpr Real DistortionUnit = Real(0.1);
+  constexpr int64_t DistortedFixture = 2;
 
   template <size_t K>
   void measure(benchmark::State& state, const Context::MPI& context, Polytope::Type type,
@@ -62,7 +68,7 @@ namespace
     const size_t d = Polytope::Traits(type).getDimension();
     const size_t resolution = static_cast<size_t>(state.range(0));
     const bool overlap = state.range(1) != 0;
-    const Real distortion = static_cast<Real>(state.range(2)) / Real(10);
+    const Real distortion = static_cast<Real>(state.range(2)) * DistortionUnit;
     auto parent = d == 0
       ? LocalMesh::Builder().initialize(1).nodes(1).vertex({Real(comm.rank())}).finalize()
       : LocalMesh::UniformGrid(type, Array<size_t>::Constant(d, resolution));
@@ -86,21 +92,68 @@ namespace
             std::move(nodes), element));
       }
     }
+    // Vertex owners are the smallest incident cell owner. This keeps lower-
+    // dimensional ownership valid and measures the MPI wrapper's real selection
+    // work, rather than marking every support vertex owned on every rank.
+    std::vector<int> vertexOwner(parent.getVertexCount(), comm.size());
+    std::vector<bool> partitionVertex(parent.getVertexCount(), false);
+    std::vector<FlatSet<int>> holders(parent.getVertexCount());
+    if (d > 0)
+      for (auto cell = parent.getCell(); cell; ++cell)
+      {
+        const int owner = static_cast<int>(cell->getIndex() % comm.size());
+        for (Index v : cell->getVertices())
+        {
+          vertexOwner[v] = std::min(vertexOwner[v], owner);
+          partitionVertex[v] = partitionVertex[v] || owner == comm.rank();
+          holders[v].insert(owner);
+        }
+      }
     Shard::Builder builder;
     builder.initialize(parent);
     for (auto cell = parent.getPolytope(d); cell; ++cell)
     {
-      const bool owned =
-        d == 0 || cell->getIndex() % comm.size() == static_cast<size_t>(comm.rank());
+      const int owner =
+        d == 0 ? comm.rank() : static_cast<int>(cell->getIndex() % comm.size());
+      const bool owned = owner == comm.rank();
       if (!owned && !overlap)
         continue;
       if (d > 0)
         for (Index v : cell->getVertices())
-          builder.include({0, v}, Shard::State::Owned);
-      builder.include(
+        {
+          const auto vState = vertexOwner[v] == comm.rank() ? Shard::State::Owned
+            : partitionVertex[v]                            ? Shard::State::Shared
+                                                            : Shard::State::Ghost;
+          const auto [local, inserted] = builder.include({0, v}, vState);
+          if (!inserted)
+            continue;
+          if (vState != Shard::State::Owned)
+            builder.setOwner(0, local, vertexOwner[v]);
+          else
+            for (int r = 0; r < comm.size(); ++r)
+              if (r != comm.rank() && (overlap || holders[v].contains(r)))
+                builder.halo(0, local, r);
+        }
+      const auto [local, inserted] = builder.include(
         {d, cell->getIndex()}, owned ? Shard::State::Owned : Shard::State::Ghost);
+      if (!owned)
+        builder.setOwner(d, local, owner);
+      else if (overlap)
+        for (int r = 0; r < comm.size(); ++r)
+          if (r != comm.rank())
+            builder.halo(d, local, r);
     }
-    auto mesh = MPIMesh::Builder(context).initialize(builder.finalize()).finalize();
+    auto localShard = builder.finalize();
+    if (d == 0)
+    {
+      // Each rank contributes one distinct point to the distributed point set.
+      auto& ids = localShard.getPolytopeMap(0);
+      ids.left[0] = comm.rank();
+      ids.right.clear();
+      ids.right.emplace(comm.rank(), 0);
+      localShard.getHalo(0).clear();
+    }
+    auto mesh = MPIMesh::Builder(context).initialize(std::move(localShard)).finalize();
     const auto& shard = mesh.getShard();
     Location::AABB<LocalMesh>::Candidates candidates(d + 1);
     std::vector<Math::SpatialPoint> queries;
@@ -109,6 +162,10 @@ namespace
       if (!shard.isOwned(d, cell->getIndex()))
         continue;
       candidates[d].push_back(cell->getIndex());
+      // Every backend repeats exactly the same query distribution, even when
+      // adaptive batching gives cheap queries more repetitions.
+      if (queries.size() >= QueryBatch)
+        continue;
       const Polytope::Traits traits(type);
       Math::SpatialPoint rc = d == 0 ? Math::SpatialPoint(0) : traits.getVertex(0);
       if (d > 0 && category != Query::Boundary && category != Query::NearMiss)
@@ -224,8 +281,15 @@ namespace
     state.counters["queries"] = queryOperations;
     state.counters["stored"] = shard.getPolytopeCount(d);
     state.counters["owned"] = candidates[d].size();
-    state.counters["candidate_id_bytes"] =
-      backend == Backend::FullShard ? 0 : candidates[d].size() * sizeof(Index);
+    size_t candidateIds = backend == Backend::FullShard ? 0 : candidates[d].size();
+    if (backend == Backend::MPI)
+    {
+      candidateIds = 0;
+      for (size_t dimension = 0; dimension <= shard.getDimension(); ++dimension)
+        for (Index i = 0; i < shard.getPolytopeCount(dimension); ++i)
+          candidateIds += shard.isOwned(dimension, i);
+    }
+    state.counters["candidate_id_bytes"] = candidateIds * sizeof(Index);
     state.counters["ranks"] = comm.size();
   }
 
@@ -250,9 +314,12 @@ namespace
             [&, type, backend, query](benchmark::State& state) {
               measure<K>(state, context, type, backend, query);
             })
-            ->Args({5, 0, 0})
-            ->Args({5, 1, 2})
-            ->Args({9, 1, 2})
+            ->Args({SmallResolution, 0, 0})
+            ->Args({SmallResolution, 1, 0})
+            ->Args({SmallResolution, 0, DistortedFixture})
+            ->Args({SmallResolution, 1, DistortedFixture})
+            ->Args({LargeResolution, 0, DistortedFixture})
+            ->Args({LargeResolution, 1, DistortedFixture})
             ->Iterations(TimingSamples)
             ->UseManualTime();
         }

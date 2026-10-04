@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <type_traits>
 #include <array>
 #include <atomic>
 #include <mutex>
@@ -140,6 +141,14 @@ namespace Rodin::Location
           m_projectionPruning(false),
           m_index(mesh.getDimension() + 1)
       {
+        // A missing MPI extension must fail at compile time rather than invoke
+        // collective MPI counts through the generic local implementation.
+        if constexpr (requires { mesh.getContext(); })
+        {
+          using MeshContext = std::remove_cvref_t<decltype(mesh.getContext())>;
+          static_assert(!std::is_same_v<MeshContext, Context::MPI>,
+            "Include Rodin/MPI/Location.h to locate points in an MPI mesh.");
+        }
         computeScale();
       }
 
@@ -420,13 +429,25 @@ namespace Rodin::Location
 
       void build(DimensionIndex& index, size_t dimension) const
       {
+        // Select the traversal policy once, so ordinary mesh builds retain
+        // their original loop without a per-entry subset branch or callback.
+        if (m_candidates)
+          build<true>(index, dimension);
+        else
+          build<false>(index, dimension);
+      }
+
+      template <bool Restricted>
+      void build(DimensionIndex& index, size_t dimension) const
+      {
         const auto& mesh = m_mesh.get();
         const size_t sdim = mesh.getSpaceDimension();
-        const std::vector<Index>* selected = m_candidates
-          ? (dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr)
-          : nullptr;
-        const size_t count = m_candidates ? (selected ? selected->size() : 0)
-                                          : mesh.getPolytopeCount(dimension);
+        const std::vector<Index>* selected = nullptr;
+        if constexpr (Restricted)
+          selected =
+            dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr;
+        const size_t count = Restricted ? (selected ? selected->size() : 0)
+                                        : mesh.getPolytopeCount(dimension);
         const bool projectionsEnabled =
           m_projectionPruning && dimension == sdim && dimension > 1;
 
@@ -445,21 +466,31 @@ namespace Rodin::Location
         index.entries.reserve(count);
         std::vector<ProjectionRange> ranges(projectionsEnabled ? count : 0);
         auto it = mesh.getPolytope(dimension);
+        Geometry::Polytope candidate(dimension, 0, mesh);
         for (size_t n = 0; n < count; ++n)
         {
-          if (selected)
-            it = mesh.getPolytope(dimension, (*selected)[n]);
+          const Geometry::Polytope& polytope = [&]() -> const Geometry::Polytope& {
+            if constexpr (Restricted)
+            {
+              // Sparse indices are mesh-local handles, so no iterator allocation
+              // is needed for an individual candidate.
+              candidate = Geometry::Polytope(dimension, (*selected)[n], mesh);
+              return candidate;
+            }
+            else
+              return *it;
+          }();
           if (projectionsEnabled)
             ranges[n].begin = index.projections.size();
-          makeBox(*it, lo[n], hi[n], index.projections);
+          makeBox(polytope, lo[n], hi[n], index.projections);
           if (projectionsEnabled)
             ranges[n].end = index.projections.size();
           for (size_t i = 0; i < sdim; ++i)
             mid[n][i] = std::isfinite(lo[n][i]) && std::isfinite(hi[n][i])
               ? Real(0.5) * lo[n][i] + Real(0.5) * hi[n][i]
               : Real(0);
-          index.entries.push_back(it->getIndex());
-          if (!selected)
+          index.entries.push_back(polytope.getIndex());
+          if constexpr (!Restricted)
             ++it;
         }
 
