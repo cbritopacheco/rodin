@@ -864,20 +864,17 @@ int run(int argc, char** argv)
     AnalyticVectorFunction gradFn(
       [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
     u.getData().setZero();
-    const auto report = wngir.solve(mesh, interfaceFacets, phiFn, gradFn);
+    const auto report = wngir.solve(phiFn, gradFn);
     const Real levelSetMeshScale = h * report.levelSetGradientScale;
-    std::cout << "  WNGIR: it=" << report.iterations << " exit=" << report.exitReason
-              << " activeRMS=" << std::scientific << report.activeRMS
-              << " activeRMS/(hG)="
-              << (levelSetMeshScale > Real(0) ? report.activeRMS / levelSetMeshScale
-                                              : Real(0))
-              << " activeSup/(hG)="
-              << (levelSetMeshScale > Real(0) ? report.activeSup / levelSetMeshScale
-                                              : Real(0))
-              << " Dinf=" << report.geometricSup
-              << " DinfTarget=" << report.geometricSupTarget
-              << " innerResidual=" << report.primalBarrierResidual
-              << " nJumpRMS=" << report.normalJumpRMS << '\n';
+    std::cout
+      << "  WNGIR: it=" << report.iterations << " exit=" << report.getReasonString()
+      << " activeRMS=" << std::scientific << report.activeRMS << " activeRMS/(hG)="
+      << (levelSetMeshScale > Real(0) ? report.activeRMS / levelSetMeshScale : Real(0))
+      << " activeSup/(hG)="
+      << (levelSetMeshScale > Real(0) ? report.activeSup / levelSetMeshScale : Real(0))
+      << " Dinf=" << report.geometricSup << " DinfTarget=" << report.geometricSupTarget
+      << " innerResidual=" << report.innerResidual << " nJumpRMS=" << report.normalJumpRMS
+      << '\n';
     tWNGIR = iterTimer.reset();
 
     updateMovedMesh(mesh, moved, u);

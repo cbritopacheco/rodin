@@ -23,15 +23,14 @@ namespace Rodin::Adaptation
    * kernel modes beyond global similarities; this form alone is not an H1 norm.
    */
   template <class TrialFunction, class TestFunction, class Displacement>
-  class WNGIRCurrentStrainMetric final
-    : public Variational::LocalBilinearFormIntegratorBase<
-        typename TrialFunction::ScalarType>
+  class WNGIRDistribution final : public Variational::LocalBilinearFormIntegratorBase<
+                                    typename TrialFunction::ScalarType>
   {
     public:
       using ScalarType = typename TrialFunction::ScalarType;
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      WNGIRCurrentStrainMetric(const TrialFunction& trial, const TestFunction& test,
+      WNGIRDistribution(const TrialFunction& trial, const TestFunction& test,
         const Displacement& current, Real coefficient, size_t order)
         : Parent(trial.getLeaf(), test.getLeaf()),
           m_trial(trial),
@@ -47,7 +46,7 @@ namespace Rodin::Adaptation
         return *m_polytope;
       }
 
-      WNGIRCurrentStrainMetric& setPolytope(const Geometry::Polytope& cell) final override
+      WNGIRDistribution& setPolytope(const Geometry::Polytope& cell) final override
       {
         m_polytope = &cell;
         const auto d = cell.getDimension();
@@ -112,9 +111,9 @@ namespace Rodin::Adaptation
       {
         return Geometry::Region::Cells;
       }
-      WNGIRCurrentStrainMetric* copy() const noexcept final override
+      WNGIRDistribution* copy() const noexcept final override
       {
-        return new WNGIRCurrentStrainMetric(*this);
+        return new WNGIRDistribution(*this);
       }
 
     private:

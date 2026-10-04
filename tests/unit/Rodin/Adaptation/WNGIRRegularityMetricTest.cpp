@@ -59,7 +59,7 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, DeviatoricCurrentStrainKernelAndEne
     form.assemble();
     BilinearForm tabulated(trial, test);
     tabulated =
-      Adaptation::WNGIRCurrentStrainMetric(trial, test, current, coefficient, 2 * Order);
+      Adaptation::WNGIRDistribution(trial, test, current, coefficient, 2 * Order);
     tabulated.assemble();
     EXPECT_LT((tabulated.getOperator() - form.getOperator()).norm(),
       Real(1e-12) * form.getOperator().norm());
@@ -157,7 +157,7 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, StableQuadratureAndCompleteConforma
     position += current;
     const auto assemble = [&](size_t order) {
       BilinearForm form(trial, test);
-      form = Adaptation::WNGIRCurrentStrainMetric(trial, test, current, Real(1), order);
+      form = Adaptation::WNGIRDistribution(trial, test, current, Real(1), order);
       form.assemble();
       Math::Matrix<Real> matrix(form.getOperator());
       return Math::Matrix<Real>((Real(0.5) * (matrix + matrix.transpose())).eval());

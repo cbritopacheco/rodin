@@ -986,7 +986,7 @@ int main(int argc, char** argv)
     u.getData().setZero();
     WNGIRReport rep;
     {
-      rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
+      rep = wngir.solve(phiFn, gradPhiFn);
       // Diagnostic: did WNGIR actually move the mesh, and did it converge?
       Real maxUoverH = 0;
       const auto& uFes = u.getFiniteElementSpace();
@@ -1001,13 +1001,12 @@ int main(int argc, char** argv)
         levelSetMeshScale > Real(0) ? rep.activeRMS / levelSetMeshScale : Real(0);
       const Real activeSupOverH =
         levelSetMeshScale > Real(0) ? rep.activeSup / levelSetMeshScale : Real(0);
-      std::cout << "  WNGIR: it=" << rep.iterations << "  exit=" << rep.exitReason
+      std::cout << "  WNGIR: it=" << rep.iterations << "  exit=" << rep.getReasonString()
                 << "  activeRMS=" << std::scientific << std::setprecision(2)
                 << rep.activeRMS << "  activeRMS/(hG)=" << activeRMSOverH
-                << "  activeSup/(hG)=" << activeSupOverH
-                << "  Dinf=" << rep.geometricSup
+                << "  activeSup/(hG)=" << activeSupOverH << "  Dinf=" << rep.geometricSup
                 << "  DinfTarget=" << rep.geometricSupTarget
-                << "  innerResidual=" << rep.primalBarrierResidual
+                << "  innerResidual=" << rep.innerResidual
                 << "  nJumpRMS=" << rep.normalJumpRMS << "  max|u|/h=" << maxUoverH
                 << '\n';
     }

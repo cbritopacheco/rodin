@@ -539,7 +539,6 @@ int main(int argc, char** argv)
   Real geometricRMS = std::numeric_limits<Real>::infinity();
   Real geometricSup = std::numeric_limits<Real>::infinity();
   Real normalRMS = std::numeric_limits<Real>::infinity();
-  Real rigidModeCoercivity = Real(0);
   std::size_t jacobianRejections = 0;
   std::size_t distortionRejections = 0;
   std::size_t energyRejections = 0;
@@ -548,7 +547,7 @@ int main(int argc, char** argv)
   std::size_t iterations = 0;
   const char* exitReason = "iter-budget";
   {
-    const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+    const auto wngirRep = wngirSolver.solve(phi, gradPhi);
     Rodin::Examples::printWNGIRResponses(wngirRep);
     geometricTargetReached = wngirRep.geometricTargetReached;
     std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
@@ -561,7 +560,7 @@ int main(int argc, char** argv)
                      : Real(0))
               << "  cgMax=" << wngirRep.maxLinearIterations
               << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
-              << "  exit=" << wngirRep.exitReason << '\n';
+              << "  exit=" << wngirRep.getReasonString() << '\n';
     iterations = wngirRep.iterations;
     lastAlpha = wngirRep.lastAlpha;
     acceptedStep = wngirRep.acceptedStep;
@@ -575,11 +574,10 @@ int main(int argc, char** argv)
     geometricRMS = wngirRep.geometricRMS;
     geometricSup = wngirRep.geometricSup;
     normalRMS = wngirRep.normalRMS;
-    rigidModeCoercivity = wngirRep.rigidModeCoercivity;
     jacobianRejections = wngirRep.jacobianRejections;
     distortionRejections = wngirRep.distortionRejections;
     energyRejections = wngirRep.energyRejections;
-    exitReason = wngirRep.exitReason;
+    exitReason = wngirRep.getReasonString();
     interfaceFit = computeInterfaceFit();
     if (trace)
       std::cout << "      wngir sigma=" << wngirRep.sigma
@@ -668,8 +666,8 @@ int main(int argc, char** argv)
             << (h * levelSetGradientScale > Real(0)
                    ? activeRMS / (h * levelSetGradientScale)
                    : Real(0))
-            << "  cR=" << rigidModeCoercivity << "  rej_j=" << jacobianRejections
-            << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections
+            << "  rej_j=" << jacobianRejections << "  rej_q=" << distortionRejections
+            << "  rej_e=" << energyRejections
             << "  converged=" << (converged ? "yes" : "best-effort")
             << "  exit=" << exitReason << "  geom_rms=" << geometricRMS
             << "  geom_sup=" << geometricSup << "  normal_rms=" << normalRMS << '\n';

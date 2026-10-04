@@ -28,22 +28,23 @@ namespace Rodin::Examples
   {
     const auto flags = std::cout.flags();
     const auto precision = std::cout.precision();
-    std::cout << std::scientific << std::setprecision(std::numeric_limits<Real>::max_digits10)
+    std::cout << std::scientific
+              << std::setprecision(std::numeric_limits<Real>::max_digits10)
               << "    wngir responses: energy=" << report.energy
               << " geom_sup=" << report.geometricSup
               << " geom_sup_target=" << report.geometricSupTarget
               << " target_hit=" << report.geometricTargetReached
               << " quality_ok=" << report.qualityBudgetSatisfied
               << " outer=" << report.iterations
-              << " inner_total=" << report.primalBarrierIterations
-              << " inner_max=" << report.maxPrimalBarrierIterations
-              << " inner_last=" << report.lastPrimalBarrierIterations
-              << " inner_converged=" << report.primalBarrierConverged
-              << " inner_residual=" << report.primalBarrierResidual
-              << " inner_relative_residual=" << report.primalBarrierRelativeResidual
-              << " inner_residual_tolerance=" << report.primalBarrierResidualTolerance
+              << " inner_total=" << report.innerIterations
+              << " inner_max=" << report.maxInnerIterations
+              << " inner_last=" << report.lastInnerIterations
+              << " inner_converged=" << report.innerConverged
+              << " inner_residual=" << report.innerResidual
+              << " inner_relative_residual=" << report.innerRelativeResidual
+              << " inner_residual_tolerance=" << report.innerResidualTolerance
               << " min_j=" << report.minJ << " max_qrel=" << report.maxQRel
-              << " exit=" << report.exitReason << '\n';
+              << " exit=" << report.getReasonString() << '\n';
     std::cout.flags(flags);
     std::cout.precision(precision);
   }
@@ -182,8 +183,7 @@ namespace Rodin::Examples
       "wngir-primal-barrier-absolute-tol", "wngir-stagnation-iterations", "wngir-mu-hat",
       "wngir-omega-min", "wngir-max-backtracks", "wngir-armijo", "wngir-jls",
       "wngir-j-min", "wngir-energy-stag-tol", "wngir-step-tol", "wngir-step-h-tol",
-      "wngir-steps", "wngir-cg-rtol", "wngir-cg-max-iters", "wngir-trace",
-      "wngir-rigid-diagnostics"};
+      "wngir-steps", "wngir-cg-rtol", "wngir-cg-max-iters", "wngir-trace"};
     for (int i = 1; i < argc; ++i)
     {
       const std::string argument(argv[i]);
@@ -214,27 +214,26 @@ namespace Rodin::Examples
       argc, argv, "wngir-directional-newton-max-step-h", p.directionalNewtonMaxStepOverH);
     p.traceQualityWitness = boolOption(argc, argv, "wngir-quality-witness", false);
     const auto defaultSolver =
-      p.directSolver == Adaptation::WNGIRParameters::DirectSolver::MUMPS ? "mumps"
+      p.linearSolver == Adaptation::WNGIRParameters::LinearSolver::MUMPS ? "mumps"
                                                                          : "sparse-lu";
-    const auto directSolver =
+    const auto linearSolver =
       stringOption(argc, argv, "wngir-direct-solver", defaultSolver);
-    if (directSolver == "mumps")
-      p.directSolver = Adaptation::WNGIRParameters::DirectSolver::MUMPS;
-    else if (directSolver == "sparse-lu")
-      p.directSolver = Adaptation::WNGIRParameters::DirectSolver::SparseLU;
-    else if (directSolver == "cg")
-      p.directSolver = Adaptation::WNGIRParameters::DirectSolver::CG;
+    if (linearSolver == "mumps")
+      p.linearSolver = Adaptation::WNGIRParameters::LinearSolver::MUMPS;
+    else if (linearSolver == "sparse-lu")
+      p.linearSolver = Adaptation::WNGIRParameters::LinearSolver::SparseLU;
+    else if (linearSolver == "cg")
+      p.linearSolver = Adaptation::WNGIRParameters::LinearSolver::CG;
     else
-      Alert::Exception() << "Unknown WNGIR solver: " << directSolver << Alert::Raise;
-    p.directSolverThreads = sizeOption(argc, argv, "wngir-direct-threads", 0);
+      Alert::Exception() << "Unknown WNGIR solver: " << linearSolver << Alert::Raise;
+    p.linearSolverThreads = sizeOption(argc, argv, "wngir-direct-threads", 0);
     p.geometricSupTolerance = realOption(argc, argv, "wngir-geometric-sup-tol", 0);
-    p.primalBarrierIterations = std::max<std::size_t>(1,
-      sizeOption(
-        argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
-    p.primalBarrierRelativeTolerance = realOption(
-      argc, argv, "wngir-primal-barrier-relative-tol", p.primalBarrierRelativeTolerance);
-    p.primalBarrierAbsoluteTolerance = realOption(argc, argv,
-      "wngir-primal-barrier-absolute-tol", p.primalBarrierAbsoluteTolerance);
+    p.innerIterations =
+      sizeOption(argc, argv, "wngir-primal-barrier-iterations", p.innerIterations);
+    p.innerRelativeTolerance = realOption(
+      argc, argv, "wngir-primal-barrier-relative-tol", p.innerRelativeTolerance);
+    p.innerAbsoluteTolerance = realOption(
+      argc, argv, "wngir-primal-barrier-absolute-tol", p.innerAbsoluteTolerance);
     p.stagnationIterations = sizeOption(argc, argv,
       "wngir-stagnation-iterations", p.stagnationIterations);
     p.muHat = realOption(argc, argv, "wngir-mu-hat", p.muHat);
@@ -255,15 +254,13 @@ namespace Rodin::Examples
       sizeOption(argc, argv, "geometric-validation-order", p.geometricValidationOrder);
     p.maxIterations = sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
 
-    p.cgRelativeTolerance =
-      realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
-    p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
-    p.hasInterfaceAttribute = true;
+    p.linearRelativeTolerance =
+      realOption(argc, argv, "wngir-cg-rtol", p.linearRelativeTolerance);
+    p.linearMaxIterations =
+      sizeOption(argc, argv, "wngir-cg-max-iters", p.linearMaxIterations);
     p.interfaceAttribute = interfaceAttribute;
     p.trace =
       boolOption(argc, argv, "trace", boolOption(argc, argv, "wngir-trace", false));
-    p.rigidDiagnostics =
-      boolOption(argc, argv, "wngir-rigid-diagnostics", p.rigidDiagnostics);
     return p;
   }
 }

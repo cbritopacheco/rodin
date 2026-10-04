@@ -28,11 +28,11 @@ namespace Rodin::Tests::Unit
       const WNGIRParameters parameters;
       EXPECT_EQ(parameters.kappaF, Real(1));
       EXPECT_EQ(parameters.muHat, Real(100));
-      EXPECT_EQ(parameters.primalBarrierIterations, 15);
-      EXPECT_EQ(parameters.primalBarrierRelativeTolerance, Real(1e-3));
-      EXPECT_EQ(parameters.cgMaxIterations, 1000);
+      EXPECT_EQ(parameters.innerIterations, 15);
+      EXPECT_EQ(parameters.innerRelativeTolerance, Real(1e-3));
+      EXPECT_EQ(parameters.linearMaxIterations, 1000);
       EXPECT_EQ(parameters.kappaD, Real(1e-3));
-      EXPECT_EQ(parameters.directSolverThreads, 0u);
+      EXPECT_EQ(parameters.linearSolverThreads, 0u);
       EXPECT_EQ(parameters.maxIterations, 30);
       EXPECT_TRUE(parameters.directionalNewton);
       EXPECT_EQ(parameters.directionalNewtonMaxStepOverH, Real(1));
@@ -112,8 +112,8 @@ namespace Rodin::Tests::Unit
     SolveState solveTranslatedLine(Real levelSetScale, Real robustScale = 0,
       bool trace = false, Real target = 0, bool partialGradient = false,
       std::size_t cgCap = 1000, bool strictCG = false,
-      WNGIRParameters::DirectSolver directSolver =
-        WNGIRParameters::DirectSolver::SparseLU,
+      WNGIRParameters::LinearSolver linearSolver =
+        WNGIRParameters::LinearSolver::SparseLU,
       bool flat = false, Real innerTolerance = Real(1e-3), Real muHat = Real(90),
       const std::function<void(WNGIRParameters&)>& configure = {}, Setup setup = nullptr)
     {
@@ -163,12 +163,11 @@ namespace Rodin::Tests::Unit
       parameters.trace = trace;
       parameters.traceQualityWitness = trace;
       parameters.geometricSupTolerance = target == Real(0) ? Real(1e-3) : target;
-      parameters.directSolver = directSolver;
-      parameters.directSolverThreads = 2;
-      parameters.primalBarrierRelativeTolerance = innerTolerance;
+      parameters.linearSolver = linearSolver;
+      parameters.linearSolverThreads = 2;
+      parameters.innerRelativeTolerance = innerTolerance;
       parameters.muHat = muHat;
       parameters.robustScale = robustScale;
-      parameters.hasInterfaceAttribute = true;
       parameters.interfaceAttribute = Interface;
       parameters.maxIterations = 12;
       parameters.acceptedStepOverHTol = 0;
@@ -176,8 +175,8 @@ namespace Rodin::Tests::Unit
       parameters.quadratureOrder = Order > 2 ? 0 : 2;
       // A tight linear solve, so that the geometric-invariance assertion below
       // measures the invariance and not the conjugate-gradient round-off.
-      parameters.cgRelativeTolerance = Real(1e-10);
-      parameters.cgMaxIterations = cgCap;
+      parameters.linearRelativeTolerance = Real(1e-10);
+      parameters.linearMaxIterations = cgCap;
       if (configure)
         configure(parameters);
       solver.setParameters(parameters);
@@ -198,7 +197,7 @@ namespace Rodin::Tests::Unit
         },
         2);
 
-      const WNGIRReport report = solver.solve(mesh, interfaceFacets, phi, grad);
+      const WNGIRReport report = solver.solve(phi, grad);
       Real physicalNorm = 0;
       const auto& solution = trial.getSolution();
       for (auto cell = mesh.getCell(); cell; ++cell)
@@ -225,12 +224,12 @@ namespace Rodin::Tests::Unit
   {
     const WNGIRParameters defaults;
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-      WNGIRParameters::DirectSolver::SparseLU, false,
-      defaults.primalBarrierRelativeTolerance, defaults.muHat, [&](WNGIRParameters& p) {
+      WNGIRParameters::LinearSolver::SparseLU, false, defaults.innerRelativeTolerance,
+      defaults.muHat, [&](WNGIRParameters& p) {
         p.kappaF = defaults.kappaF;
         p.kappaD = defaults.kappaD;
         p.maxIterations = defaults.maxIterations;
-        p.primalBarrierIterations = defaults.primalBarrierIterations;
+        p.innerIterations = defaults.innerIterations;
       });
     EXPECT_TRUE(state.report.qualityBudgetSatisfied);
     EXPECT_LE(state.report.geometricSup, Real(1e-3));
@@ -241,10 +240,10 @@ namespace Rodin::Tests::Unit
     const auto check = []<size_t Order>() {
       const auto baseline = solveTranslatedLine<Order>(Real(1));
       const auto extended = solveTranslatedLine<Order>(Real(1), 0, false, 0, false, 1000,
-        false, WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        false, WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
         [](auto& solver, auto& trial, auto& test) {
-          solver += Integral(Dot(trial, test));
-          solver -= Integral(Dot(trial, test));
+          solver.getMetric() += Integral(Dot(trial, test));
+          solver.getMetric() -= Integral(Dot(trial, test));
         });
       EXPECT_LT((baseline.displacement - extended.displacement).norm(), Real(1e-8));
       EXPECT_NEAR(baseline.report.energy, extended.report.energy, Real(1e-10));
@@ -259,11 +258,11 @@ namespace Rodin::Tests::Unit
   {
     const auto oneStep = [](WNGIRParameters& p) { p.maxIterations = 1; };
     const auto baseline = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), oneStep);
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), oneStep);
     const auto extended = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), oneStep,
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), oneStep,
       [](auto& solver, auto& trial, auto& test) {
-        solver += Integral(Dot(RealFunction(Real(10)) * trial, test));
+        solver.getMetric() += Integral(Dot(RealFunction(Real(10)) * trial, test));
       });
     EXPECT_GT((baseline.displacement - extended.displacement).norm(), Real(1e-5));
     EXPECT_EQ(extended.report.iterations, 1u);
@@ -276,7 +275,7 @@ namespace Rodin::Tests::Unit
     const auto check = []<size_t Order>() {
       IndexMap<Real> initialBoundary;
       const auto state = solveTranslatedLine<Order>(Real(1), 0, false, 0, false, 1000,
-        false, WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        false, WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
         [&](auto& solver, auto& trial, auto&) {
           trial.getSolution() = VectorFunction(Real(0.01), Real(0.01));
           auto boundary = DirichletBC(trial, VectorFunction(Real(0), Real(0)));
@@ -291,7 +290,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(state.displacement(dof), value, Real(1e-10));
       EXPECT_TRUE(state.report.qualityBudgetSatisfied);
       EXPECT_GT(state.report.iterations, 0u)
-        << "Order " << Order << ": " << state.report.exitReason;
+        << "Order " << Order << ": " << state.report.getReasonString();
     };
     check.template operator()<1>();
     check.template operator()<2>();
@@ -302,14 +301,14 @@ namespace Rodin::Tests::Unit
   {
     EXPECT_THROW(
       solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-        WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
         [](auto& solver, auto& trial, auto&) {
           solver += DirichletBC(trial, VectorFunction(Real(1), Real(1)));
         }),
       Alert::Exception);
     EXPECT_THROW(
       solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-        WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
         [](auto& solver, auto& trial, auto&) { solver += DirichletBC(trial, trial); }),
       Alert::Exception);
   }
@@ -318,7 +317,7 @@ namespace Rodin::Tests::Unit
   {
     EXPECT_THROW(
       solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-        WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
         [](auto& solver, auto& trial, auto&) {
           TrialFunction other(trial.getFiniteElementSpace());
           solver += DirichletBC(other, VectorFunction(Real(0), Real(0)));
@@ -373,15 +372,13 @@ namespace Rodin::Tests::Unit
         parameters.h = Real(0.25);
         // Require motion: the automatic h^2 target exceeds this initial offset.
         parameters.geometricSupTolerance = Real(1e-3);
-        parameters.hasInterfaceAttribute = true;
         parameters.interfaceAttribute = Interface;
         parameters.fixedBoundaryAttributes = {Fixed};
         if (sliding)
           parameters.slipBoundaryAttributes = {Slip};
-        parameters.rigidDiagnostics = false;
         parameters.maxIterations = 3;
-        parameters.cgRelativeTolerance = Real(1e-9);
-        parameters.directSolver = WNGIRParameters::DirectSolver::SparseLU;
+        parameters.linearRelativeTolerance = Real(1e-9);
+        parameters.linearSolver = WNGIRParameters::LinearSolver::SparseLU;
         solver.setParameters(parameters);
         RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
         AnalyticVectorFunction grad([dimension](const Point&) {
@@ -390,8 +387,8 @@ namespace Rodin::Tests::Unit
           value(0) = Real(1);
           return value;
         }, dimension);
-        const auto report = solver.solve(mesh, interface, phi, grad);
-        EXPECT_GT(report.iterations, 0u) << report.exitReason;
+        const auto report = solver.solve(phi, grad);
+        EXPECT_GT(report.iterations, 0u) << report.getReasonString();
         EXPECT_GT(trial.getSolution().getData().norm(), Real(1e-5));
         for (auto face = mesh.getPolytope(dimension - 1); face; ++face)
         {
@@ -419,7 +416,7 @@ namespace Rodin::Tests::Unit
   {
     constexpr Real tolerance = Real(0.01);
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(0),
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
       [](WNGIRParameters& p) {
         p.kappaF = Real(100);
         p.stepTol = tolerance;
@@ -430,7 +427,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(state.report.predictorScale, Real(1));
     EXPECT_LT(state.report.acceptedStep / state.report.predictorScale, tolerance);
     EXPECT_GT(state.report.acceptedStep, tolerance);
-    EXPECT_STRNE(state.report.exitReason, "best-effort-step-stagnation");
+    EXPECT_STRNE(state.report.getReasonString(), "best-effort-step-stagnation");
     EXPECT_GT(state.report.minJ, Real(0.01));
     EXPECT_LT(state.report.maxQRel, Real(10));
   }
@@ -439,7 +436,7 @@ namespace Rodin::Tests::Unit
   {
     constexpr Real tolerance = Real(1);
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(0),
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
       [](WNGIRParameters& p) {
         p.kappaF = Real(100);
         p.stepTol = tolerance;
@@ -449,14 +446,14 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(state.report.iterations, 1u);
     EXPECT_GT(state.report.acceptedStep, Real(0));
     EXPECT_LE(state.report.acceptedStep, tolerance);
-    EXPECT_STREQ(state.report.exitReason, "best-effort-step-stagnation");
+    EXPECT_STREQ(state.report.getReasonString(), "best-effort-step-stagnation");
     EXPECT_EQ((state.displacement.cwiseAbs().maxCoeff()), state.report.acceptedStep);
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, GeometricTargetPrecedesAbsoluteStagnation)
   {
     const auto state = solveTranslatedLine(Real(1), 0, false, Real(0.06), false, 1000,
-      true, WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(0),
+      true, WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
       [](WNGIRParameters& p) {
         p.kappaF = Real(100);
         p.stepTol = Real(1);
@@ -464,7 +461,8 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(state.report.iterations, 1u);
     EXPECT_LE(state.report.acceptedStep, Real(1));
     EXPECT_LE(state.report.geometricSup, Real(0.06));
-    EXPECT_STREQ(state.report.exitReason, "full-interface-geometric-sup-converged");
+    EXPECT_STREQ(
+      state.report.getReasonString(), "full-interface-geometric-sup-converged");
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, SquaredObservationDropsOnlyLevelSetHessian)
@@ -496,7 +494,7 @@ namespace Rodin::Tests::Unit
           },
           dimension);
         const Real normalization = Real(1) / (levelSetScale * levelSetScale);
-        WNGIRObservationCoefficient coefficient(
+        WNGIRFittingCoefficient coefficient(
           grad, current, locator, p, normalization, dimension);
         const auto actual = coefficient.getValue(ip);
         const auto x = point.getCoordinates();
@@ -556,7 +554,7 @@ namespace Rodin::Tests::Unit
     const SolveState traced = solveTranslatedLine(Real(1), Real(0), true);
     const std::string output = testing::internal::GetCapturedStdout();
     EXPECT_EQ(base.report.iterations, traced.report.iterations);
-    EXPECT_EQ(base.report.primalBarrierIterations, traced.report.primalBarrierIterations);
+    EXPECT_EQ(base.report.innerIterations, traced.report.innerIterations);
     EXPECT_EQ(base.report.energy, traced.report.energy);
     EXPECT_EQ(base.report.geometricSup, traced.report.geometricSup);
     EXPECT_EQ((base.displacement - traced.displacement).norm(), Real(0));
@@ -599,13 +597,15 @@ namespace Rodin::Tests::Unit
     const auto initial = solveTranslatedLine(Real(1), 0, false, Real(0.1));
     EXPECT_EQ(initial.report.iterations, 0);
     EXPECT_LT(initial.report.geometricSup, Real(0.1));
-    EXPECT_STREQ(initial.report.exitReason, "full-interface-geometric-sup-converged");
+    EXPECT_STREQ(
+      initial.report.getReasonString(), "full-interface-geometric-sup-converged");
     const auto fitted = solveTranslatedLine(Real(1), 0, false, Real(1e-3));
     EXPECT_GT(fitted.report.iterations, 0);
     EXPECT_LE(fitted.report.geometricSup, Real(1e-3));
     EXPECT_GT(fitted.report.minJ, Real(0.01));
     EXPECT_LT(fitted.report.maxQRel, Real(10));
-    EXPECT_STREQ(fitted.report.exitReason, "full-interface-geometric-sup-converged");
+    EXPECT_STREQ(
+      fitted.report.getReasonString(), "full-interface-geometric-sup-converged");
     EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, Real(-1)), Alert::Exception);
     const auto invalid = solveTranslatedLine(Real(1), 0, false, Real(0.1), true);
     // Invalid gradients on part of the initial interface forbid an initial hit.
@@ -623,7 +623,7 @@ namespace Rodin::Tests::Unit
       EXPECT_LT(state.report.geometricSup, Real(0.05));
       EXPECT_GT(state.report.minJ, Real(0.01));
       EXPECT_LT(state.report.maxQRel, Real(10));
-      EXPECT_GT(state.report.tPrimalBarrierLineSearch, Real(0));
+      EXPECT_GT(state.report.tInnerLineSearch, Real(0));
       std::istringstream lines(output);
       std::string line;
       std::size_t merits = 0;
@@ -650,20 +650,20 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(state.report.geometricSup, Real(0.05));
     EXPECT_GT(state.report.minJ, Real(0.01));
     EXPECT_LT(state.report.maxQRel, Real(10));
-    EXPECT_TRUE(state.report.primalBarrierConverged);
+    EXPECT_TRUE(state.report.innerConverged);
   }
 
   /// @brief Sparse augmented LU retains the same low-rank rigid operator as CG.
   TEST(Rodin_Adaptation_WNGIRSolver, DirectAugmentedSolvePreservesSimilarityGauge)
   {
-    const auto solve = [](WNGIRParameters::DirectSolver backend) {
+    const auto solve = [](WNGIRParameters::LinearSolver backend) {
       return solveTranslatedLine(
         Real(1), Real(0), false, Real(0), false, 1000, true, backend);
     };
-    const auto cg = solve(WNGIRParameters::DirectSolver::CG);
-    const auto lu = solve(WNGIRParameters::DirectSolver::SparseLU);
+    const auto cg = solve(WNGIRParameters::LinearSolver::CG);
+    const auto lu = solve(WNGIRParameters::LinearSolver::SparseLU);
     EXPECT_EQ(cg.report.iterations, lu.report.iterations);
-    EXPECT_STREQ(cg.report.exitReason, lu.report.exitReason);
+    EXPECT_STREQ(cg.report.getReasonString(), lu.report.getReasonString());
     EXPECT_NEAR((cg.displacement - lu.displacement).norm(), Real(0), Real(1e-8));
     EXPECT_EQ(lu.report.linearIterations, 0u);
     EXPECT_GT(lu.report.linearSolveCount, 0u);
@@ -674,32 +674,32 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, InactiveHingesSkipZeroCorrections)
   {
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-      WNGIRParameters::DirectSolver::MUMPS, false, Real(1e-3), Real(0));
+      WNGIRParameters::LinearSolver::MUMPS, false, Real(1e-3), Real(0));
     EXPECT_GT(state.report.inactiveHingeSkips, 0u);
-    EXPECT_EQ(state.report.primalBarrierIterations, 0u);
-    EXPECT_EQ(state.report.tPrimalBarrierAssembly, Real(0));
-    EXPECT_EQ(state.report.tPrimalBarrierSolve, Real(0));
-    EXPECT_TRUE(state.report.primalBarrierConverged);
+    EXPECT_EQ(state.report.innerIterations, 0u);
+    EXPECT_EQ(state.report.tInnerAssembly, Real(0));
+    EXPECT_EQ(state.report.tInnerSolve, Real(0));
+    EXPECT_TRUE(state.report.innerConverged);
     EXPECT_LT(state.report.geometricSup, Real(0.05));
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsDisabledInnerResidualTest)
   {
     EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-                   WNGIRParameters::DirectSolver::MUMPS, false, Real(0), Real(0)),
+                   WNGIRParameters::LinearSolver::MUMPS, false, Real(0), Real(0)),
       Alert::Exception);
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, MUMPSAugmentedSolvePreservesSimilarityGauge)
   {
-    const auto solve = [](WNGIRParameters::DirectSolver directSolver) {
+    const auto solve = [](WNGIRParameters::LinearSolver linearSolver) {
       return solveTranslatedLine(
-        Real(1), Real(0), false, Real(0), false, 1000, true, directSolver);
+        Real(1), Real(0), false, Real(0), false, 1000, true, linearSolver);
     };
-    const auto lu = solve(WNGIRParameters::DirectSolver::SparseLU);
-    const auto mumps = solve(WNGIRParameters::DirectSolver::MUMPS);
+    const auto lu = solve(WNGIRParameters::LinearSolver::SparseLU);
+    const auto mumps = solve(WNGIRParameters::LinearSolver::MUMPS);
     EXPECT_EQ(lu.report.iterations, mumps.report.iterations);
-    EXPECT_STREQ(lu.report.exitReason, mumps.report.exitReason);
+    EXPECT_STREQ(lu.report.getReasonString(), mumps.report.getReasonString());
     EXPECT_NEAR((lu.displacement - mumps.displacement).norm(), Real(0), Real(1e-8));
     EXPECT_EQ(mumps.report.linearIterations, 0u);
     EXPECT_GT(mumps.report.linearSolveCount, 0u);
@@ -720,20 +720,18 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(scaled.report.sigma, Real(7) * base.report.sigma, Real(1e-12));
     EXPECT_NEAR(scaled.report.levelSetGradientScale,
       Real(7) * base.report.levelSetGradientScale, Real(1e-12));
-    EXPECT_NEAR(
-      scaled.report.rigidModeCoercivity, base.report.rigidModeCoercivity, Real(1e-10));
     EXPECT_NEAR(scaled.report.geometricRMS, base.report.geometricRMS, Real(1e-10));
     EXPECT_NEAR(scaled.report.geometricSup, base.report.geometricSup, Real(1e-10));
     EXPECT_NEAR(scaled.report.normalRMS, base.report.normalRMS, Real(1e-12));
     EXPECT_EQ(base.report.iterations, scaled.report.iterations);
-    EXPECT_STREQ(base.report.exitReason, scaled.report.exitReason);
+    EXPECT_STREQ(base.report.getReasonString(), scaled.report.getReasonString());
   }
 
   /// @brief A vanishing sampled target gradient is reported before assembly.
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsDegenerateTargetGradient)
   {
     const SolveState state = solveTranslatedLine(Real(0));
-    EXPECT_STREQ(state.report.exitReason, "degenerate-target-gradient");
+    EXPECT_STREQ(state.report.getReasonString(), "degenerate-target-gradient");
     EXPECT_EQ(state.report.iterations, 0);
     EXPECT_EQ(state.report.levelSetGradientScale, Real(0));
   }
@@ -742,7 +740,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsEmptyRobustActiveSet)
   {
     const SolveState state = solveTranslatedLine(Real(1), Real(1e-6));
-    EXPECT_STREQ(state.report.exitReason, "observation-degenerate-active-set");
+    EXPECT_STREQ(state.report.getReasonString(), "observation-degenerate-active-set");
     EXPECT_EQ(state.report.iterations, 0);
     EXPECT_EQ(state.report.activeFraction, Real(0));
     EXPECT_TRUE(std::isinf(state.report.activeRMS));
@@ -751,8 +749,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, UnresolvedTranslationHasNoInertiaGate)
   {
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-      WNGIRParameters::DirectSolver::SparseLU, true);
-    EXPECT_STRNE(state.report.exitReason, "metric-inertia-unresolved");
+      WNGIRParameters::LinearSolver::SparseLU, true);
+    EXPECT_STRNE(state.report.getReasonString(), "metric-inertia-unresolved");
     EXPECT_GT(state.report.linearSolveCount, 0u);
     EXPECT_GT(state.report.minJ, Real(0.01));
     EXPECT_LT(state.report.maxQRel, Real(10));
@@ -795,22 +793,21 @@ namespace Rodin::Tests::Unit
     WNGIR solver(trial, test);
     WNGIRParameters p;
     p.h = h;
-    p.directSolver = WNGIRParameters::DirectSolver::MUMPS;
-    p.directSolverThreads = 1;
+    p.linearSolver = WNGIRParameters::LinearSolver::MUMPS;
+    p.linearSolverThreads = 1;
     p.maxIterations = 12;
-    p.hasInterfaceAttribute = true;
     p.interfaceAttribute = Interface;
     p.geometricSupTolerance = Real(1e-6);
-    p.cgRelativeTolerance = Real(1e-10);
+    p.linearRelativeTolerance = Real(1e-10);
     solver.setParameters(p);
     RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
     Math::Vector<Real> normal(3);
     normal << Real(1), Real(0), Real(0);
     const VectorFunction gradient(normal);
-    const auto report = solver.solve(mesh, facets, phi, gradient);
+    const auto report = solver.solve(phi, gradient);
     EXPECT_TRUE(report.geometricTargetReached);
     EXPECT_EQ(report.unresolvedSimilarityModes, 4u);
-    EXPECT_LE(report.linearError, p.cgRelativeTolerance);
+    EXPECT_LE(report.linearError, p.linearRelativeTolerance);
     EXPECT_NEAR(report.minJ, Real(1), Real(1e-10));
     EXPECT_NEAR(report.maxJ, Real(1), Real(1e-10));
     EXPECT_NEAR(report.maxQRel, Real(1), Real(1e-10));
@@ -827,7 +824,7 @@ namespace Rodin::Tests::Unit
     const auto check = []<size_t Order>() {
       const auto solve = [](Real scale) {
         return solveTranslatedLine<Order>(1, 0, false, 0, false, 1000, true,
-          WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-6), Real(1000),
+          WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-6), Real(1000),
           [=](WNGIRParameters& p) {
             p.kappaF = scale;
             p.kappaD = scale;
@@ -837,17 +834,16 @@ namespace Rodin::Tests::Unit
       };
       const auto reference = solve(1);
       ASSERT_GT(reference.report.iterations, 0u);
-      ASSERT_GT(reference.report.primalBarrierIterations, 0u);
+      ASSERT_GT(reference.report.innerIterations, 0u);
       for (const Real scale : {Real(1e-4), Real(1e3)})
       {
         const auto scaled = solve(scale);
         EXPECT_EQ(reference.report.iterations, scaled.report.iterations);
-        EXPECT_EQ(reference.report.primalBarrierIterations,
-          scaled.report.primalBarrierIterations);
-        EXPECT_STREQ(reference.report.exitReason, scaled.report.exitReason);
+        EXPECT_EQ(reference.report.innerIterations, scaled.report.innerIterations);
+        EXPECT_STREQ(reference.report.getReasonString(), scaled.report.getReasonString());
         EXPECT_NEAR((reference.displacement - scaled.displacement).norm(), 0, 1e-8);
-        EXPECT_NEAR(reference.report.primalBarrierCoefficient,
-          scaled.report.primalBarrierCoefficient, 1e-9);
+        EXPECT_NEAR(
+          reference.report.hingeCoefficient, scaled.report.hingeCoefficient, 1e-9);
       }
     };
     check.template operator()<1>();
@@ -858,13 +854,13 @@ namespace Rodin::Tests::Unit
   {
     testing::internal::CaptureStdout();
     const auto state = solveTranslatedLine(1, 0, true, 0, false, 1000, true,
-      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(1000),
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(1000),
       [](WNGIRParameters& p) {
         p.qualityGuard = Real(0.95);
         p.maxIterations = 1;
       });
     const auto output = testing::internal::GetCapturedStdout();
-    EXPECT_GT(state.report.primalBarrierIterations, 0u);
+    EXPECT_GT(state.report.innerIterations, 0u);
     std::istringstream lines(output);
     std::string line;
     size_t checked = 0;
@@ -907,32 +903,107 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, StrictCGCapIsNotBypassed)
   {
     const auto state = solveTranslatedLine(
-      Real(1), 0, false, 0, false, 1, true, WNGIRParameters::DirectSolver::CG);
-    EXPECT_STREQ(state.report.exitReason, "solve-predictor-failed");
+      Real(1), 0, false, 0, false, 1, true, WNGIRParameters::LinearSolver::CG);
+    EXPECT_STREQ(state.report.getReasonString(), "solve-predictor-failed");
     EXPECT_EQ(state.report.linearSolveCount, 1u);
     EXPECT_LE(state.report.maxLinearIterations, 1u);
     EXPECT_EQ(state.report.iterations, 0u);
   }
 
-  TEST(Rodin_Adaptation_WNGIRSolver, RejectsMismatchedInterface)
+  TEST(Rodin_Adaptation_WNGIRSolver, UnmarkedInterfaceReturnsWithoutMoving)
   {
-    EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-                   WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90),
-                   [](WNGIRParameters& p) { p.interfaceAttribute = 999; }),
-      Alert::Exception);
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+      [](WNGIRParameters& p) { p.interfaceAttribute = 999; });
+    EXPECT_STREQ(state.report.getReasonString(), "empty-interface");
+    EXPECT_EQ(state.report.iterations, 0u);
+    EXPECT_EQ(state.physicalNorm, Real(0));
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, MissingInterfaceReturnsWithoutMoving)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+      [](WNGIRParameters& p) { p.interfaceAttribute.reset(); });
+    EXPECT_EQ(state.report.reason, WNGIRReport::Reason::MissingInterface);
+    EXPECT_EQ(state.physicalNorm, Real(0));
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, MonitorReportsAcceptedGeometry)
+  {
+    std::vector<WNGIRReport> reports;
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+      [&reports](auto& solver, auto&, auto&) {
+        solver.setMonitor(
+          [&reports](const WNGIRReport& report) { reports.push_back(report); });
+      });
+    ASSERT_EQ(reports.size(), state.report.iterations + 1);
+    for (size_t i = 0; i < state.report.iterations; ++i)
+    {
+      EXPECT_EQ(reports[i].iterations, i + 1);
+      EXPECT_TRUE(std::isfinite(reports[i].geometricSup));
+      EXPECT_TRUE(reports[i].qualityBudgetSatisfied);
+      EXPECT_GT(reports[i].interfaceMeasure, Real(0));
+      if (i > 0)
+        EXPECT_LT(reports[i].energy, reports[i - 1].energy);
+    }
+    EXPECT_EQ(reports.back().reason, state.report.reason);
+    EXPECT_EQ(reports.back().geometricSup, state.report.geometricSup);
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, RepeatedSolveReassemblesAdditionalMetric)
+  {
+    solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+      [](auto& solver, auto& trial, auto& test) {
+        WNGIRParameters p;
+        p.h = Real(0.25);
+        p.maxIterations = 1;
+        p.geometricSupTolerance = Real(1e-6);
+        p.linearSolver = WNGIRParameters::LinearSolver::SparseLU;
+        solver.setParameters(p).setInterfaceAttribute(Interface);
+        const auto& mesh = trial.getFiniteElementSpace().getMesh();
+        const auto originalVertex = mesh.getVertexCoordinates(0);
+        RealFunction phi([](const Point& point) {
+          return point.x() - Real(0.55) + Real(0.02) * std::sin(Real(6) * point.y());
+        });
+        AnalyticVectorFunction gradient(
+          [](const Point& point) {
+            return Math::SpatialVector<Real>{
+              Real(1), Real(0.12) * std::cos(Real(6) * point.y())};
+          },
+          2);
+        const auto first = solver.solve(phi, gradient);
+        const Math::Vector<Real> displacement = trial.getSolution().getData();
+        trial.getSolution() = VectorFunction(Real(0), Real(0));
+        solver.getMetric() += Integral(Dot(RealFunction(Real(10)) * trial, test));
+        const auto second = solver.solve(phi, gradient);
+        EXPECT_EQ(first.iterations, 1u);
+        EXPECT_EQ(second.iterations, 1u);
+        EXPECT_TRUE(second.qualityBudgetSatisfied);
+        EXPECT_GT((trial.getSolution().getData() - displacement).norm(), Real(1e-5));
+        EXPECT_EQ(solver.getReport().energy, second.energy);
+        EXPECT_EQ((mesh.getVertexCoordinates(0) - originalVertex).norm(), Real(0));
+        trial.getSolution() = VectorFunction(Real(0), Real(0));
+        solver.getMetric() -= Integral(Dot(RealFunction(Real(10)) * trial, test));
+        const auto restored = solver.solve(phi, gradient);
+        EXPECT_LT((trial.getSolution().getData() - displacement).norm(), Real(1e-8));
+        EXPECT_NEAR(restored.energy, first.energy, Real(1e-10));
+      });
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, SmallStepsRequireTheConfiguredPersistence)
   {
     const auto state = solveTranslatedLine(Real(1), 0, false, Real(1e-12), false, 1000,
-      true, WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(0),
+      true, WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
       [](WNGIRParameters& p) {
         p.kappaF = Real(100);
         p.stepTol = Real(1);
         p.stagnationIterations = 3;
       });
     EXPECT_EQ(state.report.iterations, 3u);
-    EXPECT_STREQ(state.report.exitReason, "best-effort-step-stagnation");
+    EXPECT_STREQ(state.report.getReasonString(), "best-effort-step-stagnation");
     EXPECT_FALSE(state.report.geometricTargetReached);
   }
 
@@ -962,7 +1033,6 @@ namespace Rodin::Tests::Unit
     WNGIR solver(trial, test);
     WNGIRParameters p;
     p.h = Real(0.5);
-    p.hasInterfaceAttribute = true;
     p.interfaceAttribute = Interface;
     p.geometricSupTolerance = Real(0.1);
     solver.setParameters(p);
@@ -976,7 +1046,7 @@ namespace Rodin::Tests::Unit
           Real(1), Real(0.2) * (Real(2) * point.y() - Real(1))};
       },
       2);
-    const auto report = solver.solve(mesh, facets, phi, grad);
+    const auto report = solver.solve(phi, grad);
     EXPECT_EQ(report.iterations, 0u);
     EXPECT_NEAR(report.geometricSup, Real(0.05) / std::sqrt(Real(1.04)), Real(1e-12));
   }
@@ -984,9 +1054,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, InvalidGeometryCannotReachAutomaticTarget)
   {
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, true, 1000, true,
-      WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90),
+      WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
       [](WNGIRParameters& p) { p.geometricSupTolerance = 0; });
-    EXPECT_STREQ(state.report.exitReason, "geometric-validation-failed");
+    EXPECT_STREQ(state.report.getReasonString(), "geometric-validation-failed");
     EXPECT_FALSE(state.report.geometricTargetReached);
     EXPECT_TRUE(std::isinf(state.report.geometricSup));
   }
@@ -996,12 +1066,11 @@ namespace Rodin::Tests::Unit
     for (const Real mu : {Real(0), Real(90)})
     {
       const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-        WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), mu,
+        WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), mu,
         [](WNGIRParameters& p) { p.maxIterations = 1; });
-      ASSERT_TRUE(state.report.primalBarrierConverged);
-      EXPECT_LE(
-        state.report.primalBarrierResidual, state.report.primalBarrierResidualTolerance);
-      EXPECT_LE(state.report.maxPrimalBarrierIterations, 15u);
+      ASSERT_TRUE(state.report.innerConverged);
+      EXPECT_LE(state.report.innerResidual, state.report.innerResidualTolerance);
+      EXPECT_LE(state.report.maxInnerIterations, 15u);
     }
   }
 
@@ -1027,7 +1096,7 @@ namespace Rodin::Tests::Unit
       EXPECT_LT((system.getVector() - expected).norm(), Real(1e-12));
       WNGIRLinearSolver<typename decltype(problem)::LinearSystemType> linear(problem);
       WNGIRParameters parameters;
-      parameters.directSolver = WNGIRParameters::DirectSolver::SparseLU;
+      parameters.linearSolver = WNGIRParameters::LinearSolver::SparseLU;
       linear.setParameters(parameters);
       Solver::NewtonSolver newton(linear);
       newton.setMaxIterations(2).setAbsoluteTolerance(Real(1e-12));
@@ -1044,10 +1113,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, P2AcceptedStepUsesPhysicalField)
   {
     const auto state = solveTranslatedLine<2>(Real(1), 0, false, Real(1e-12), false, 1000,
-      true, WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(0),
+      true, WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
       [](WNGIRParameters& p) {
         p.maxIterations = 1;
-        p.cgRelativeTolerance = Real(1e-8);
+        p.linearRelativeTolerance = Real(1e-8);
         p.kappaD = Real(1e-4);
       });
     ASSERT_EQ(state.report.iterations, 1u);
@@ -1083,16 +1152,15 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsInvalidHingeWeightsAndControls)
   {
     for (const auto member : {&WNGIRParameters::kappaJ, &WNGIRParameters::kappaQ,
-           &WNGIRParameters::primalBarrierRelativeTolerance,
-           &WNGIRParameters::energyStagTol})
+           &WNGIRParameters::innerRelativeTolerance, &WNGIRParameters::energyStagTol})
       for (const Real invalid : {Real(-1), std::numeric_limits<Real>::infinity(),
              std::numeric_limits<Real>::quiet_NaN()})
         EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-                       WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3),
+                       WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3),
                        Real(90), [=](WNGIRParameters& p) { p.*member = invalid; }),
           Alert::Exception);
     EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-                   WNGIRParameters::DirectSolver::SparseLU, false, Real(1e-3), Real(90),
+                   WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
                    [](WNGIRParameters& p) { p.h = 0; }),
       Alert::Exception);
   }

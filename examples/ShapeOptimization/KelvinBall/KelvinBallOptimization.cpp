@@ -355,21 +355,20 @@ namespace KelvinBall
             argc, argv, referenceSpacing, Gamma, defaults);
         if (!Rodin::Examples::findOption(
               argc, argv, "wngir-primal-barrier-iterations", nullptr))
-          parameters.primalBarrierIterations = 15;
+          parameters.innerIterations = 15;
         parameters.maxIterations =
           std::clamp(parameters.maxIterations, size_t{1}, size_t{30});
-        parameters.primalBarrierIterations =
-          std::min(parameters.primalBarrierIterations, size_t{15});
+        parameters.innerIterations = std::min(parameters.innerIterations, size_t{15});
         if (!Rodin::Examples::findOption(argc, argv, "wngir-geometric-sup-tol", nullptr))
           parameters.geometricSupTolerance =
             Real(0.1) * referenceSpacing * referenceSpacing;
         if (!Rodin::Examples::findOption(
               argc, argv, "wngir-primal-barrier-relative-tol", nullptr))
-          parameters.primalBarrierRelativeTolerance = Real(1e-3);
+          parameters.innerRelativeTolerance = Real(1e-3);
         if (!Rodin::Examples::findOption(argc, argv, "wngir-cg-rtol", nullptr))
-          parameters.cgRelativeTolerance = Real(1e-9);
-        parameters.cgMaxIterations =
-          std::clamp(parameters.cgMaxIterations, size_t{1}, size_t{1000});
+          parameters.linearRelativeTolerance = Real(1e-9);
+        parameters.linearMaxIterations =
+          std::clamp(parameters.linearMaxIterations, size_t{1}, size_t{1000});
         if (!Rodin::Examples::findOption(argc, argv, "wngir-step-tol", nullptr))
           parameters.stepTol = Real(1e-3) * referenceSpacing * referenceSpacing;
         if (!Rodin::Examples::findOption(argc, argv, "wngir-step-h-tol", nullptr))
@@ -389,7 +388,7 @@ namespace KelvinBall
 
         RealFunction target(
           [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
-        const auto report = fitting.solve(mesh, interface, target, targetGradient);
+        const auto report = fitting.solve(target, targetGradient);
         Alert::Info()
           << substageHeading("WNGIR reconstruction") << Alert::NewLine
           << diagnosticLabel("Background mean edge h:")
@@ -401,14 +400,13 @@ namespace KelvinBall
           << diagnosticLabel("Outer iteration cap:")
           << Alert::Notation::Number(parameters.maxIterations) << Alert::NewLine
           << diagnosticLabel("Inner correction cap:")
-          << Alert::Notation::Number(parameters.primalBarrierIterations) << Alert::NewLine
+          << Alert::Notation::Number(parameters.innerIterations) << Alert::NewLine
           << diagnosticLabel("Inner cap policy:")
           << "Stop on an uncertified inner residual" << Alert::NewLine
           << diagnosticLabel("Inner relative residual tolerance:")
-          << Alert::Notation::Number(parameters.primalBarrierRelativeTolerance)
-          << Alert::NewLine << diagnosticLabel("Barrier model:")
-          << "Affine quadratic quality hinges" << Alert::NewLine
-          << diagnosticLabel("Soft quality guard fraction:")
+          << Alert::Notation::Number(parameters.innerRelativeTolerance) << Alert::NewLine
+          << diagnosticLabel("Barrier model:") << "Affine quadratic quality hinges"
+          << Alert::NewLine << diagnosticLabel("Soft quality guard fraction:")
           << Alert::Notation::Number(parameters.qualityGuard) << Alert::NewLine
           << diagnosticLabel("Fitting / distribution:")
           << Alert::Notation::Number(parameters.kappaF) << " / "
@@ -422,35 +420,35 @@ namespace KelvinBall
           << diagnosticLabel("Inner Newton steps:")
           << "Full with fixed-inner merit backtracking" << Alert::NewLine
           << diagnosticLabel("Linear backend:")
-          << (parameters.directSolver == Adaptation::WNGIRParameters::DirectSolver::CG
+          << (parameters.linearSolver == Adaptation::WNGIRParameters::LinearSolver::CG
                  ? "CG"
-                 : (parameters.directSolver ==
-                         Adaptation::WNGIRParameters::DirectSolver::MUMPS
+                 : (parameters.linearSolver ==
+                         Adaptation::WNGIRParameters::LinearSolver::MUMPS
                        ? "MUMPS"
                        : "SparseLU"))
           << Alert::NewLine << diagnosticLabel("CG relative tolerance:")
-          << Alert::Notation::Number(parameters.cgRelativeTolerance) << Alert::NewLine
+          << Alert::Notation::Number(parameters.linearRelativeTolerance) << Alert::NewLine
           << diagnosticLabel("CG iterations per solve:")
-          << Alert::Notation::Number(parameters.cgMaxIterations) << Alert::NewLine
+          << Alert::Notation::Number(parameters.linearMaxIterations) << Alert::NewLine
           << diagnosticLabel("Outer iterations:")
           << Alert::Notation::Number(report.iterations) << Alert::NewLine
           << diagnosticLabel("Inner corrections (last):")
-          << Alert::Notation::Number(report.lastPrimalBarrierIterations) << Alert::NewLine
+          << Alert::Notation::Number(report.lastInnerIterations) << Alert::NewLine
           << diagnosticLabel("Inner relative correction:")
-          << Alert::Notation::Number(report.primalBarrierRelativeCorrection)
-          << Alert::NewLine << diagnosticLabel("Inner relative residual:")
-          << Alert::Notation::Number(report.primalBarrierRelativeResidual)
-          << Alert::NewLine << diagnosticLabel("Inner converged (last):")
-          << (report.primalBarrierConverged ? "Yes" : "No") << Alert::NewLine
+          << Alert::Notation::Number(report.innerRelativeCorrection) << Alert::NewLine
+          << diagnosticLabel("Inner relative residual:")
+          << Alert::Notation::Number(report.innerRelativeResidual) << Alert::NewLine
+          << diagnosticLabel("Inner converged (last):")
+          << (report.innerConverged ? "Yes" : "No") << Alert::NewLine
           << diagnosticLabel("Full inner Newton steps:")
-          << Alert::Notation::Number(report.fullPrimalBarrierSteps) << Alert::NewLine
+          << Alert::Notation::Number(report.fullInnerSteps) << Alert::NewLine
           << diagnosticLabel("Minimum inner step factor:")
-          << Alert::Notation::Number(report.minPrimalBarrierAlpha) << Alert::NewLine
+          << Alert::Notation::Number(report.minInnerAlpha) << Alert::NewLine
           << diagnosticLabel("Maximum linear iterations:")
           << Alert::Notation::Number(report.maxLinearIterations) << Alert::NewLine
           << diagnosticLabel("Skeleton normal jump RMS:")
           << Alert::Notation::Number(report.normalJumpRMS) << Alert::NewLine
-          << diagnosticLabel("Exit reason:") << report.exitReason << Alert::NewLine
+          << diagnosticLabel("Exit reason:") << report.getReasonString() << Alert::NewLine
           << diagnosticLabel("Geometric RMS distance:")
           << Alert::Notation::Number(report.geometricRMS) << Alert::NewLine
           << diagnosticLabel("Geometric D infinity:")

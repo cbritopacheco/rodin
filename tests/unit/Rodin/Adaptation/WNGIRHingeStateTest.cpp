@@ -17,7 +17,7 @@ using namespace Rodin::Adaptation;
 namespace Rodin::Tests::Unit
 {
 
-  TEST(Rodin_Adaptation_WNGIRPrimalBarrierState, AffineHingeDerivatives2D3D)
+  TEST(Rodin_Adaptation_WNGIRHingeState, AffineHingeDerivatives2D3D)
   {
     for (const std::size_t dimension : {2u, 3u})
       for (const Real amplitude : {Real(0), Real(1)})
@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
           return mu * Real(0.5) * violation * violation;
         };
         const auto energy = [&](const Math::SpatialMatrix<Real>& v) {
-          WNGIRPrimalBarrierState s(deformation, v, p, mu);
+          WNGIRHingeState s(deformation, v, p, mu);
           const Real expected =
             scalarEnergy(s.getJacobianSlack(), p.qualityGuard * (Real(1) - p.jSafe)) +
             scalarEnergy(s.getDistortionSlack(), p.qualityGuard * (p.qMax - Real(1)));
@@ -53,14 +53,14 @@ namespace Rodin::Tests::Unit
           return s.getEnergy(p, mu);
         };
         const auto derivative = [&](const Math::SpatialMatrix<Real>& v) {
-          WNGIRPrimalBarrierState s(deformation, v, p, mu);
+          WNGIRHingeState s(deformation, v, p, mu);
           return (s.getJacobianHessian() * s.getJacobianAction() - s.getJacobianForce()) *
             rowJ +
             (s.getDistortionHessian() * s.getDistortionAction() -
               s.getDistortionForce()) *
             rowQ;
         };
-        WNGIRPrimalBarrierState s(deformation, inner, p, mu);
+        WNGIRHingeState s(deformation, inner, p, mu);
         ASSERT_TRUE(s.isFeasible());
         const Math::SpatialMatrix<Real> plus(inner + eps * direction),
           minus(inner - eps * direction);
@@ -72,7 +72,7 @@ namespace Rodin::Tests::Unit
       }
   }
 
-  TEST(Rodin_Adaptation_WNGIRPrimalBarrierState, AffineHingeAssembledTangentP1P2)
+  TEST(Rodin_Adaptation_WNGIRHingeState, AffineHingeAssembledTangentP1P2)
   {
     using namespace Geometry;
     using namespace Variational;
@@ -109,8 +109,8 @@ namespace Rodin::Tests::Unit
       BilinearForm metric(trial, test);
       LinearForm force(test);
       const auto residual = [&]() {
-        metric = WNGIRPrimalBarrierMetric(trial, test, current, inner, p, Real(0.02));
-        force = WNGIRPrimalBarrierForce(test, current, inner, p, Real(0.02));
+        metric = WNGIRHingeMetric(trial, test, current, inner, p, Real(0.02));
+        force = WNGIRHingeForce(test, current, inner, p, Real(0.02));
         metric.assemble();
         force.assemble();
         return Math::Vector<Real>(
@@ -132,12 +132,12 @@ namespace Rodin::Tests::Unit
     check.template operator()<2>();
   }
 
-  TEST(Rodin_Adaptation_WNGIRPrimalBarrierState, NegativeAffineSlackRemainsFinite)
+  TEST(Rodin_Adaptation_WNGIRHingeState, NegativeAffineSlackRemainsFinite)
   {
     CellDeformation outer(2);
     Math::SpatialMatrix<Real> increment = -Math::SpatialMatrix<Real>::Identity(2, 2);
     WNGIRParameters parameters;
-    WNGIRPrimalBarrierState state(outer, increment, parameters, Real(0.02));
+    WNGIRHingeState state(outer, increment, parameters, Real(0.02));
     EXPECT_TRUE(state.isFeasible());
     EXPECT_LT(state.getJacobianSlack(), Real(0));
     EXPECT_TRUE(std::isfinite(state.getEnergy(parameters, Real(0.02))));
@@ -146,7 +146,7 @@ namespace Rodin::Tests::Unit
     increment(0, 0) = Real(-1);
     increment(1, 1) = Real(1);
     outer.setDeformationGradient(increment);
-    WNGIRPrimalBarrierState inverted(outer, increment, parameters, Real(0.02));
+    WNGIRHingeState inverted(outer, increment, parameters, Real(0.02));
     EXPECT_FALSE(inverted.isFeasible());
     EXPECT_TRUE(std::isinf(inverted.getEnergy(parameters, Real(0.02))));
   }

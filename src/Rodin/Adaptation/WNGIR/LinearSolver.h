@@ -209,7 +209,7 @@ namespace Rodin::Adaptation
           const size_t unresolved = gaugeSimilarityModes(axb.getOperator(), rhs, gauged);
           if (report)
             report->unresolvedSimilarityModes = unresolved;
-          if (m_parameters.directSolver != WNGIRParameters::DirectSolver::CG)
+          if (m_parameters.linearSolver != WNGIRParameters::LinearSolver::CG)
           {
             const auto solveDirect = [&](auto& direct, StringView backend) {
               const auto solveSystem = [&](LinearSystemType& system) {
@@ -296,7 +296,7 @@ namespace Rodin::Adaptation
                   std::max(rhs.norm(), std::numeric_limits<Real>::min())
                                        : std::numeric_limits<Real>::infinity();
               const bool ok = direct.success() && axb.getSolution().allFinite() &&
-                error <= m_parameters.cgRelativeTolerance;
+                error <= m_parameters.linearRelativeTolerance;
               if (m_parameters.trace)
               {
                 std::cout << "        metric " << backend << ": ok=" << ok
@@ -310,13 +310,13 @@ namespace Rodin::Adaptation
               return true;
             };
 #ifdef RODIN_USE_MUMPS
-            if (m_parameters.directSolver == WNGIRParameters::DirectSolver::MUMPS)
+            if (m_parameters.linearSolver == WNGIRParameters::LinearSolver::MUMPS)
             {
               if (!m_mumps)
                 m_mumps =
                   std::make_unique<Solver::MUMPS<LinearSystemType>>(this->getProblem());
               m_mumps->setSymmetric(Solver::MUMPS<LinearSystemType>::Symmetry::General)
-                .setMaxThreads(m_parameters.directSolverThreads);
+                .setMaxThreads(m_parameters.linearSolverThreads);
               return solveDirect(*m_mumps, "MUMPS");
             }
 #endif
@@ -324,21 +324,22 @@ namespace Rodin::Adaptation
             return solveDirect(direct, "LU");
           }
           const auto& guess = axb.getSolution();
-          const std::size_t maxIterations = m_parameters.cgMaxIterations > 0
-            ? m_parameters.cgMaxIterations
+          const std::size_t maxIterations = m_parameters.linearMaxIterations > 0
+            ? m_parameters.linearMaxIterations
             : std::min<std::size_t>(AutomaticCGMaxIterations,
                 std::max<std::size_t>(AutomaticCGMinIterations,
                   AutomaticCGIterationsPerDOF * axb.getOperator().rows()));
           Math::Vector<Real> solution =
             (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());
-          const bool solved = metricConjugateGradient(axb.getOperator(), gauged, rhs,
-            solution, maxIterations, m_parameters.cgRelativeTolerance, iterations, error);
+          const bool solved =
+            metricConjugateGradient(axb.getOperator(), gauged, rhs, solution,
+              maxIterations, m_parameters.linearRelativeTolerance, iterations, error);
           Math::Vector<Real> image;
           image = axb.getOperator() * solution;
           error =
             (image - rhs).norm() / std::max(rhs.norm(), std::numeric_limits<Real>::min());
-          const bool ok =
-            solved && std::isfinite(error) && error <= m_parameters.cgRelativeTolerance;
+          const bool ok = solved && std::isfinite(error) &&
+            error <= m_parameters.linearRelativeTolerance;
           axb.getSolution() = solution;
           if (m_parameters.trace && (!ok || !solution.allFinite()))
             std::cout << "        cg failure: ok=" << ok << "  it=" << iterations

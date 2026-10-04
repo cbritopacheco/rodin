@@ -13,13 +13,13 @@
 namespace Rodin::Adaptation
 {
   /// @brief Pointwise slacks and Newton coefficients of the affine quadratic hinges.
-  class WNGIRPrimalBarrierState
+  class WNGIRHingeState
   {
     public:
-      /// @brief Constructs the w n g i r primal barrier state.
-      WNGIRPrimalBarrierState(const CellDeformation& deformation,
+      /// @brief Constructs the WNGIR hinge state.
+      WNGIRHingeState(const CellDeformation& deformation,
         const Math::SpatialMatrix<Real>& innerGradient, const WNGIRParameters& parameters,
-        Real barrierCoefficient)
+        Real hingeCoefficient)
         : m_rowDeformation(deformation)
       {
         if (!deformation.isAdmissible())
@@ -32,7 +32,7 @@ namespace Rodin::Adaptation
                                     Real& hessian, Real& force) {
           if (weight <= Real(0) || slack >= delta)
             return;
-          hessian = barrierCoefficient * weight / (delta * delta);
+          hessian = hingeCoefficient * weight / (delta * delta);
           force = hessian * (action - (delta - slack));
         };
         coefficients(m_jAction, m_jSlack,
@@ -45,13 +45,13 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Affine quality energy with the construction parameters, evaluated only on demand.
-      Real getEnergy(const WNGIRParameters& parameters, Real barrierCoefficient) const
+      Real getEnergy(const WNGIRParameters& parameters, Real hingeCoefficient) const
       {
         if (!m_feasible)
           return std::numeric_limits<Real>::infinity();
         const auto energy = [&](Real slack, Real delta, Real weight) {
           const Real violation = std::max(Real(0), Real(1) - slack / delta);
-          return Real(0.5) * barrierCoefficient * weight * violation * violation;
+          return Real(0.5) * hingeCoefficient * weight * violation * violation;
         };
         return energy(m_jSlack, parameters.qualityGuard * (Real(1) - parameters.jSafe),
                  parameters.kappaJ) +
