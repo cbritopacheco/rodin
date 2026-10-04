@@ -13,11 +13,59 @@
 #include <cmath>
 
 #include <gtest/gtest.h>
+#include <gtest/gtest-spi.h>
 
 #include "Convergence.h"
+#include "LiftedConvergence.h"
 
 namespace Rodin::Tests::Convergence
 {
+  /** @brief Independent algebraic histories exercise every lifted rate interval. */
+  TEST(LiftedConvergenceTest, AcceptsSeparateFieldAndGeometryOrders)
+  {
+    LiftedConvergence study;
+    for (Real h : {0.25, 0.125, 0.0625})
+    {
+      const ErrorNorms field(h * h, h), geometry(h * h * h, h * h);
+      const ErrorNorms total(field.getL2() + geometry.getL2(),
+        field.getH1Seminorm() + geometry.getH1Seminorm());
+      study.append(h, field, {field, geometry, total});
+    }
+    study.expectRates(1, 2);
+  }
+
+  TEST(LiftedConvergenceTest, RejectsBadFinalInterval)
+  {
+    LiftedConvergence study;
+    for (Real h : {0.25, 0.125, 0.0625})
+    {
+      const Real scale = h == 0.0625 ? Real(0.25) : h;
+      const ErrorNorms field(scale * scale, scale), geometry(h * h * h, h * h);
+      const ErrorNorms total(field.getL2() + geometry.getL2(),
+        field.getH1Seminorm() + geometry.getH1Seminorm());
+      study.append(h, field, {field, geometry, total});
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectRates(1, 2);
+    }
+    ASSERT_GT(failures.size(), 0);
+    for (int i = 0; i < failures.size(); ++i)
+      EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("interval=2"),
+        std::string::npos);
+  }
+
+  TEST(LiftedConvergenceTest, RejectsInvalidNormDecomposition)
+  {
+    EXPECT_NONFATAL_FAILURE(
+      LiftedConvergence::expectDecomposition({{1, 1}, {2, 2}, {4, 3}}), "values[2]");
+    EXPECT_NONFATAL_FAILURE(
+      LiftedConvergence::expectDecomposition({{1, 1}, {2, 2}, {0.5, 1}}), "values[2]");
+  }
+
   /**
    * @brief Verifies that algebraic rates use the actual scale ratio.
    *

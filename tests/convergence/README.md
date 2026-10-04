@@ -133,6 +133,16 @@ to the field space.
 
 ## Acceptance and reproducibility
 
+Shared test utilities keep error integration separate from acceptance policy.
+`ErrorNorm` integrates physical scalar/vector errors; `LiftedErrorNorm`
+integrates exact-domain field, geometry and total defects for real/complex
+scalar/vector fields. `ErrorHistory` and `NormHistory` use the actual spacing
+ratio on every adjacent interval. `LiftedConvergence` composes the scalar
+decomposition, rate and independent numerical-sensitivity checks without
+containing a PDE solve. Direct utility regressions include an invalid final
+interval and both violated triangle inequalities. Physics workloads retain
+their own manufactured data, solver policy and wrong-operator controls.
+
 At least three discretizations are required for a new rate claim so that two
 successive intervals are tested. The continuous data and measured quantity
 are held fixed. Each interval checks finite positive errors, strict error
