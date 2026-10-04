@@ -13,7 +13,7 @@ using namespace Rodin::Geometry;
 
 TEST(Location_AABBCandidates, PreservesSparseIndicesAndFiltersFallback)
 {
-  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {5});
   Location::AABB<LocalMesh>::Candidates candidates(2);
   candidates[1] = {3, 1};
   Location::AABB locator(mesh, candidates);
@@ -33,7 +33,7 @@ TEST(Location_AABBCandidates, PreservesSparseIndicesAndFiltersFallback)
 
 TEST(Location_AABBCandidates, EmptySelectionAndInvalidIndices)
 {
-  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
   Location::AABB<LocalMesh>::Candidates candidates(2);
   Location::AABB locator(mesh, candidates);
   const auto x = Point(*mesh.getCell(),
@@ -51,7 +51,7 @@ TEST(Location_AABBCandidates, EmptySelectionAndInvalidIndices)
 
 TEST(Location_AABBCandidates, ParentShardPreservesCurvedTransformation)
 {
-  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {1});
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
   Variational::RealH1Element<3> element(Polytope::Type::Segment);
   PointCloud nodes(1, element.getCount());
   // Monotone cubic, preserving endpoints and visibly differing from the affine map.

@@ -9,6 +9,7 @@
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/Variational.h>
+#include <Rodin/MPI/Variational/P0.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -22,16 +23,23 @@ namespace
   {
     Shard::Builder builder;
     builder.initialize(1, 2);
-    builder.vertex(0, Math::SpatialPoint::Zero(2), Shard::State::Shared);
-    Math::SpatialPoint end(2);
-    end << 1, 0;
-    builder.vertex(1, end, Shard::State::Ghost);
-    builder.setOwner(0, 0, 0).setOwner(0, 1, 0);
-    const IndexArray vertices{0, 1};
-    builder.polytope(1, 100, Polytope::Type::Segment, vertices, Shard::State::Ghost);
-    builder.polytope(1, 101, Polytope::Type::Segment, vertices, Shard::State::Shared);
-    builder.polytope(1, 102, Polytope::Type::Segment, vertices, Shard::State::Owned);
-    builder.setOwner(1, 0, 0).setOwner(1, 1, 0);
+    // Distinct topological entities with overlapping physical images.
+    for (Index c = 0; c < 3; ++c)
+    {
+      builder.vertex(2 * c, Math::SpatialPoint::Zero(2), Shard::State::Shared);
+      Math::SpatialPoint end(2);
+      end[0] = 1;
+      end[1] = 0;
+      builder.vertex(2 * c + 1, end, Shard::State::Ghost);
+      builder.setOwner(0, 2 * c, 0).setOwner(0, 2 * c + 1, 0);
+      IndexArray vertices(2);
+      vertices << 2 * c, 2 * c + 1;
+      const auto state = c == 0 ? Shard::State::Ghost :
+        c == 1 ? Shard::State::Shared : Shard::State::Owned;
+      builder.polytope(1, 100 + c, Polytope::Type::Segment, vertices, state);
+      if (state != Shard::State::Owned)
+        builder.setOwner(1, c, 0);
+    }
     return MPIMesh::Builder(context).initialize(builder.finalize()).finalize();
   }
 
@@ -59,7 +67,8 @@ namespace
       {
         Math::SpatialPoint x = Math::SpatialPoint::Zero(sdim);
         if (d > 0)
-          x.head(d) = traits.getVertex(v);
+          for (size_t j = 0; j < d; ++j)
+            x[j] = traits.getVertex(v)[j];
         x[0] = CellSpacing * c + AxisCompression * x[0];
         builder.vertex(x);
         vertices[v] = c * nv + v;
@@ -99,19 +108,36 @@ namespace
     Sharder<Context::MPI> sharder(context);
     const size_t d = Polytope::Traits(type).getDimension();
     Math::SpatialPoint expected;
-    Math::SpatialMatrix<Real> expectedJacobian;
+    std::vector<Real> expectedJacobian;
     Math::SpatialPoint rc = d == 0 ? Math::SpatialPoint(0) :
       (Real(0.75) * Polytope::Traits(type).getCentroid() +
-       Real(0.25) * Polytope::Traits(type).getVertex(0)).eval();
+       Real(0.25) * Polytope::Traits(type).getVertex(0));
     if (world->rank() == 0)
     {
       auto parent = curvedMesh<K>(type, embedded);
       Point sample(*parent.getPolytope(d, 0), rc);
       expected = sample.getPhysicalCoordinates();
-      expectedJacobian = sample.getJacobian();
-      BalancedCompactPartitioner partitioner(parent);
-      partitioner.partition(static_cast<size_t>(world->size()));
-      sharder.shard(partitioner);
+      for (size_t j = 0; j < d; ++j)
+        for (size_t i = 0; i < parent.getSpaceDimension(); ++i)
+          expectedJacobian.push_back(sample.getJacobian()(i, j));
+      if (d == 0)
+      {
+        // The cell sharder requires positive-dimensional cells. Distribute
+        // point entities directly through the same shard transport instead.
+        for (int r = 0; r < world->size(); ++r)
+        {
+          Shard::Builder builder;
+          builder.initialize(parent);
+          builder.include({0, static_cast<Index>(r)}, Shard::State::Owned);
+          sharder.getShards().push_back(builder.finalize());
+        }
+      }
+      else
+      {
+        BalancedCompactPartitioner partitioner(parent);
+        partitioner.partition(static_cast<size_t>(world->size()));
+        sharder.shard(partitioner);
+      }
       sharder.scatter(0);
     }
     boost::mpi::broadcast(*world, expected, 0);
@@ -139,7 +165,10 @@ namespace
       if (mesh.getGlobalIndex(d, p->getIndex()) == 0)
       {
         EXPECT_LT((sample.getPhysicalCoordinates() - expected).norm(), 1e-12);
-        EXPECT_LT((sample.getJacobian() - expectedJacobian).norm(), 1e-12);
+        for (size_t j = 0; j < d; ++j)
+          for (size_t i = 0; i < mesh.getSpaceDimension(); ++i)
+            EXPECT_NEAR(sample.getJacobian()(i, j),
+              expectedJacobian[j * mesh.getSpaceDimension() + i], 1e-12);
       }
       // Field evaluation must accept the lifted point and use local entity IDs.
       Variational::P0<Real, MPIMesh> space(mesh);
@@ -160,7 +189,8 @@ TEST(MPI_Location_AABB, OwnedSubsetBeforeSearchAndFallback)
   locator.setExhaustiveFallback(true).setProjectionPruning(true).setTolerance(1e-9)
     .setReferenceTolerance(1e-9);
   Math::SpatialPoint x(2);
-  x << Real(0.25), 0;
+  x[0] = Real(0.25);
+  x[1] = 0;
   auto hit = locator.locate(x);
   ASSERT_TRUE(hit);
   EXPECT_EQ(hit->getPolytope().getIndex(), 2);
@@ -180,7 +210,8 @@ TEST(MPI_Location_AABB, ConstructionAndQueriesOnOneRankOnly)
   {
     Location::AABB locator(mesh);
     Math::SpatialPoint x(2);
-    x << Real(0.5), 0;
+    x[0] = Real(0.5);
+    x[1] = 0;
     EXPECT_TRUE(locator.locate(x));
     locator.setTolerance(1e-8).setExhaustiveFallback(true);
     EXPECT_TRUE(locator.locate(x));

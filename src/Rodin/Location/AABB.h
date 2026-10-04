@@ -89,6 +89,40 @@ namespace Rodin::Location
   class AABB
   {
     public:
+      /// Candidate local indices grouped by topological dimension.
+      using Candidates = std::vector<std::vector<Index>>;
+
+      /**
+       * @brief Builds an index over an explicit candidate subset.
+       *
+       * Entries retain their original mesh indices. Omitted dimensions and
+       * empty lists have no candidates, including in exhaustive fallback.
+       * Ownership and other selection policies belong to the caller.
+       * The tolerance scale still uses all mesh vertices. The candidate lists
+       * are a snapshot: reconstruct after topology, geometry or selection changes.
+       * Empty lists above the mesh dimension are permitted for empty shards.
+       * @throws std::invalid_argument For duplicate or out-of-range indices.
+       */
+      AABB(const MeshType& mesh, Candidates candidates)
+        : AABB(mesh)
+      {
+        for (size_t d = 0; d < candidates.size(); ++d)
+        {
+          if (candidates[d].empty())
+            continue;
+          if (d > mesh.getDimension())
+            throw std::invalid_argument("AABB candidate dimension exceeds the mesh dimension.");
+          auto sorted = candidates[d];
+          std::sort(sorted.begin(), sorted.end());
+          if (sorted.back() >= mesh.getPolytopeCount(d) ||
+              std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+            throw std::invalid_argument("AABB candidate indices must be distinct and in range.");
+        }
+        if (candidates.size() > m_index.size())
+          m_index = std::vector<DimensionIndex>(candidates.size());
+        m_candidates = std::move(candidates);
+      }
+
       /// @brief Builds a locator bound to a fixed mesh.
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
@@ -381,7 +415,11 @@ namespace Rodin::Location
       {
         const auto& mesh = m_mesh.get();
         const size_t sdim = mesh.getSpaceDimension();
-        const size_t count = mesh.getPolytopeCount(dimension);
+        const std::vector<Index>* selected = m_candidates
+          ? (dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr)
+          : nullptr;
+        const size_t count = m_candidates
+          ? (selected ? selected->size() : 0) : mesh.getPolytopeCount(dimension);
         const bool projectionsEnabled =
           m_projectionPruning && dimension == sdim && dimension > 1;
 
@@ -399,9 +437,11 @@ namespace Rodin::Location
         std::vector<Bound> mid(count);
         index.entries.reserve(count);
         std::vector<ProjectionRange> ranges(projectionsEnabled ? count : 0);
-        size_t n = 0;
-        for (auto it = mesh.getPolytope(dimension); it; ++it, ++n)
+        auto it = mesh.getPolytope(dimension);
+        for (size_t n = 0; n < count; ++n)
         {
+          if (selected)
+            it = mesh.getPolytope(dimension, (*selected)[n]);
           if (projectionsEnabled)
             ranges[n].begin = index.projections.size();
           makeBox(*it, lo[n], hi[n], index.projections);
@@ -412,8 +452,9 @@ namespace Rodin::Location
               ? Real(0.5) * lo[n][i] + Real(0.5) * hi[n][i]
               : Real(0);
           index.entries.push_back(it->getIndex());
+          if (!selected)
+            ++it;
         }
-        assert(n == count);
 
         std::vector<uint32_t> order(count);
         for (uint32_t i = 0; i < count; ++i)
@@ -1442,6 +1483,7 @@ namespace Rodin::Location
       bool m_projectionPruning;
       Real m_scale;
       mutable std::vector<DimensionIndex> m_index;
+      Optional<Candidates> m_candidates;
   };
 }
 
