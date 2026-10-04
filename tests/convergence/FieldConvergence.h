@@ -9,6 +9,7 @@
 #define RODIN_TESTS_CONVERGENCE_FIELDCONVERGENCE_H
 
 #include <array>
+#include <gtest/gtest.h>
 
 #include "Convergence.h"
 
@@ -35,6 +36,11 @@ namespace Rodin::Tests::Convergence
         for (size_t field = 0; field < Fields; ++field)
           m_histories[field].append(parameter, errors[field]);
         return *this;
+      }
+
+      size_t getSize() const
+      {
+        return m_histories[0].getSize();
       }
 
       void expectExponentialFloor(const Rates& floor) const

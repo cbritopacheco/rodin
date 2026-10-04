@@ -24,14 +24,22 @@ namespace Rodin::Tests::Convergence
   TEST(FieldConvergenceTest, AcceptsEveryFieldOnNonuniformRefinementPaths)
   {
     FieldConvergence<2> algebraic, exponential;
+    FieldConvergence<1> scalar;
     for (Real h : {0.5, 0.125, 0.0625})
+    {
       algebraic.append(h, {ErrorNorms(h * h, h), ErrorNorms(h * h * h, h * h)});
+      scalar.append(h, {ErrorNorms(h * h, h)});
+    }
     for (Real p : {1, 3, 4})
       exponential.append(p,
         {ErrorNorms(std::exp(-2 * p), std::exp(-p)),
           ErrorNorms(std::exp(-3 * p), std::exp(-2 * p))});
     algebraic.expectAlgebraicFloor({1.9, 0.9});
     exponential.expectExponentialFloor({1.9, 0.9});
+    scalar.expectAlgebraicFloor({1.9, 0.9});
+    EXPECT_EQ(algebraic.getSize(), 3u);
+    EXPECT_EQ(exponential.getSize(), 3u);
+    EXPECT_EQ(scalar.getSize(), 3u);
   }
 
   TEST(FieldConvergenceTest, RejectsBadFinalIntervalInOtherField)

@@ -189,7 +189,7 @@ exists yet.
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic | P1–P3 | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic | Analytic two-field P1–P3 | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
-| Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; tangent controls | Analytic P1–P3; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
+| Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
 | Geometry approximation / Poisson patch | Map/derivative rates at fixed geometry degrees $q=1,2,3$ | $q=1\to2\to3$ at fixed $n=3$, with affine $p=q$ patches | $(n,q)=(2,1)\to(3,2)\to(5,3)$, with affine $p=q$ patches | Sine-map approximation and affine Poisson patches with $p=q$; native and real-PETSc local/MPI |
@@ -310,7 +310,8 @@ modules: unit-box grid construction and boundary partitioning, direct L2/H1
 error integration, error histories, and algebraic or exponential rate
 calculation. Refinement-specific directories add only the machinery unique to
 their refinement axis. `FieldConvergence` retains one history per unknown
-field and requires at least three levels, finite positive $L^2/H^1$ errors,
+field and requires at least three levels, finite positive $L^2$ errors and
+$H^1$-seminorm errors,
 strict reduction, and the prescribed rate floors for every field and adjacent
 interval. Algebraic and exponential queries reuse `ErrorHistory`; an
 unchanged refinement parameter is rejected before a rate is computed.
@@ -338,10 +339,18 @@ PETSc assembly and CG, plus P2/P1 Stokes with a P0g pressure gauge and
 LU/MUMPS factorization. Stokes additionally has PETSc local/MPI p and hp
 paths through velocity/pressure degrees $4/3$ on all six applicable geometries.
 Real-PETSc nonlinear Poisson additionally exercises SNES with CG/Jacobi
-tangents on local and distributed $P_1/P_2$ spaces;
+tangents on local and distributed $P_1/P_2$ spaces, plus fixed-mesh
+$p=1\to2\to3\to4$ and combined $p=1\to2\to3$ paths;
 the [suite specification](h/PETScNonlinearPoisson/README.md) states the
 residual/tangent callback checks, independently reassembled final residual,
 and analytically bounded missing-reaction control.
+Its PETSc [p](p/PETScNonlinearPoisson/README.md) and
+[hp](hp/PETScNonlinearPoisson/README.md) specifications state the levels,
+every-interval acceptance, higher-degree tangent controls, separate
+assembly/norm quadrature and nonlinear-tolerance checks, and the exact
+logical free-dimension contract for a fully constrained coarse mesh.
+The real-PETSc CI degree-refinement job runs these suites and Stokes p/hp
+separately from the h job, with sequential and OpenMP assembly in each.
 The distributed suite uses mesh
 families partitioned across one to four MPI ranks and globally reduced norms;
 it is a separate check from the local-context suites.
@@ -429,8 +438,8 @@ After the reaction–diffusion h/hp, complex Helmholtz h, PETSc Stokes h,
 and native nonlinear Poisson p/hp batches, real-PETSc/SNES nonlinear Poisson
 adds the local/MPI h path. Native Stokes p/hp fills the remaining native
 p/hp entries in the table. Priority 1 continues with missing
-PETSc mixed-boundary/refinement variants; Stokes now has its local/MPI
-p/hp counterparts. Priorities 2–4 address curved fields, approximated
+PETSc mixed-boundary/refinement variants; Stokes and nonlinear Poisson
+now have their local/MPI p/hp counterparts. Priorities 2–4 address curved fields, approximated
 nonpolynomial geometry, and exact-index MPI structural combinations.
 The curved complex Helmholtz batch supplies P1/P2 field rates on exact
 P2 maps, with native local and complex-PETSc local/MPI counterparts.

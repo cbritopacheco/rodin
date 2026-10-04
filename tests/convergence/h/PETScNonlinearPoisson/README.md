@@ -60,7 +60,8 @@ $$
 This is a coefficient-vector norm, distinct from the field-error norms.
 The free dimension is determined from logical Dirichlet indices, not
 residual magnitude. If $N$ is the global space size, $\mathcal I_r$ the
-uniquely owned DOF range and $\mathcal C_r$ the assembled constraint map,
+uniquely owned DOF range and $\mathcal C_r$ the constrained-index set
+obtained from the assembled boundary map,
 
 $$
 N_{\mathrm{free}}=N-\sum_r\#(\mathcal C_r\cap\mathcal I_r).
