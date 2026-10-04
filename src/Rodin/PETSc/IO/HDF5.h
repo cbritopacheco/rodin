@@ -196,6 +196,16 @@ namespace Rodin::IO
         }
 
         const auto values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
+        std::vector<double> imaginary(values.size(), 0);
+        if (H5Lexists(file, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
+          imaginary =
+            Internal::readVectorDouble(file, "/GridFunction/Values/ImaginaryData");
+        if (imaginary.size() != values.size())
+        {
+          H5Fclose(file);
+          Alert::Exception() << "Incompatible HDF5 imaginary coefficient count."
+                             << Alert::Raise;
+        }
 
         if (static_cast<PetscInt>(values.size()) != localN)
         {
@@ -206,13 +216,34 @@ namespace Rodin::IO
             << Alert::Raise;
         }
 
+        if constexpr (FormLanguage::IsMatrixRange<
+                        typename FormLanguage::Traits<FES>::RangeType>::Value)
+        {
+          const auto rows = Internal::readScalarULL(file, "/GridFunction/Meta/Rows");
+          const auto cols = Internal::readScalarULL(file, "/GridFunction/Meta/Columns");
+          if (rows != gf.getRows() || cols != gf.getColumns())
+          {
+            H5Fclose(file);
+            Alert::Exception() << "HDF5 matrix range shape mismatch." << Alert::Raise;
+          }
+        }
         H5Fclose(file);
 
         std::vector<PetscInt> indices(static_cast<size_t>(localN));
         std::iota(indices.begin(), indices.end(), rb);
         std::vector<PetscScalar> localValues(static_cast<size_t>(localN));
         for (PetscInt i = 0; i < localN; ++i)
-          localValues[static_cast<size_t>(i)] = static_cast<PetscScalar>(values[static_cast<size_t>(i)]);
+        {
+#if defined(PETSC_USE_COMPLEX)
+          localValues[static_cast<size_t>(i)] =
+            PetscCMPLX(values[static_cast<size_t>(i)], imaginary[static_cast<size_t>(i)]);
+#else
+          if (imaginary[static_cast<size_t>(i)] != 0)
+            Alert::Exception() << "Complex HDF5 coefficients require complex PETSc."
+                               << Alert::Raise;
+          localValues[static_cast<size_t>(i)] = values[static_cast<size_t>(i)];
+#endif
+        }
 
         ierr = VecSetValues(vec, localN, indices.data(), localValues.data(), INSERT_VALUES);
         assert(ierr == PETSC_SUCCESS);
@@ -289,8 +320,17 @@ namespace Rodin::IO
         assert(ierr == PETSC_SUCCESS);
 
         std::vector<double> values(static_cast<size_t>(localN));
+#if defined(PETSC_USE_COMPLEX)
+        std::vector<double> imaginary(static_cast<size_t>(localN));
+#endif
         for (PetscInt i = 0; i < localN; ++i)
+        {
           values[static_cast<size_t>(i)] = static_cast<double>(PetscRealPart(raw[i]));
+#if defined(PETSC_USE_COMPLEX)
+          imaginary[static_cast<size_t>(i)] =
+            static_cast<double>(PetscImaginaryPart(raw[i]));
+#endif
+        }
 
         ierr = VecRestoreArrayRead(vec, &raw);
         assert(ierr == PETSC_SUCCESS);
@@ -332,6 +372,19 @@ namespace Rodin::IO
           (void) writeStatus;
         }
         H5Dclose(dataSet);
+#if defined(PETSC_USE_COMPLEX)
+        const auto imaginarySet = H5Dcreate2(file, "/GridFunction/Values/ImaginaryData",
+          H5T_NATIVE_DOUBLE, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        assert(imaginarySet >= 0);
+        if (!imaginary.empty())
+        {
+          const auto status = H5Dwrite(imaginarySet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, imaginary.data());
+          assert(status >= 0);
+          (void)status;
+        }
+        H5Dclose(imaginarySet);
+#endif
         H5Sclose(dataSpace);
 
         Internal::writeScalarULL(file, "/GridFunction/Meta/Size",
@@ -339,6 +392,12 @@ namespace Rodin::IO
         Internal::writeScalarULL(file, "/GridFunction/Meta/Dimension",
             static_cast<unsigned long long>(gf.getDimension()));
 
+        if constexpr (FormLanguage::IsMatrixRange<
+                        typename FormLanguage::Traits<FES>::RangeType>::Value)
+        {
+          Internal::writeScalarULL(file, "/GridFunction/Meta/Rows", gf.getRows());
+          Internal::writeScalarULL(file, "/GridFunction/Meta/Columns", gf.getColumns());
+        }
         H5Fclose(file);
       }
 

@@ -1,6 +1,18 @@
 enable_testing()
 include(GoogleTest)
 
+foreach(_cache_mode OFF ON)
+  add_test(NAME CMake.ThirdPartyIsolation.${_cache_mode}
+    COMMAND ${CMAKE_COMMAND}
+      -S ${PROJECT_SOURCE_DIR}/tests/cmake/ThirdPartyIsolation
+      -B ${CMAKE_CURRENT_BINARY_DIR}/ThirdPartyIsolation-${_cache_mode}
+      -DISOLATION_EXISTING_CACHE=${_cache_mode}
+      -DISOLATION_WITH_PY=${RODIN_WITH_PY}
+      -DISOLATION_WITH_MCSS=${RODIN_USE_MCSS})
+  set_tests_properties(CMake.ThirdPartyIsolation.${_cache_mode}
+    PROPERTIES LABELS unit)
+endforeach()
+
 rodin_add_compile_options(
   LANG C CXX
   OPTIONS
@@ -34,7 +46,10 @@ if (RODIN_BUILD_MANUFACTURED_TESTS)
   add_subdirectory(manufactured)
 endif()
 
+if (RODIN_BUILD_CONVERGENCE_TESTS)
+  add_subdirectory(convergence)
+endif()
+
 if (RODIN_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
-

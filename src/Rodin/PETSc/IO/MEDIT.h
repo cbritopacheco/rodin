@@ -104,6 +104,13 @@ namespace Rodin::IO
           {
             os << val << '\n';
           }
+          else if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+          {
+            for (size_t r = 0; r < fes.getRows(); ++r)
+              for (size_t c = 0; c < fes.getColumns(); ++c)
+                os << val(r, c) << ' ';
+            os << '\n';
+          }
           else
           {
             static_assert(

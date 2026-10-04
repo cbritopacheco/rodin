@@ -66,6 +66,13 @@ namespace Rodin::QF
    */
   class GaussLobatto final : public QuadratureFormulaBase
   {
+      /// @brief Newton work budget for quadrature nodes; not a convergence guarantee.
+      static constexpr size_t DefaultRootMaxIterations = 100;
+      /// @brief Absolute Newton root-update tolerance on the dimensionless interval [-1,1].
+      static constexpr Real DefaultRootTolerance = 1e-14;
+      /// @brief Heuristic relative perturbation for differencing the Legendre derivative; absolute at zero.
+      static constexpr Real DerivativeDifferenceStep = 1e-8;
+
     public:
       /// Parent class type
       using Parent = QuadratureFormulaBase;
@@ -178,7 +185,7 @@ namespace Rodin::QF
        * @f]
        */
       static void gll1dUnit(size_t n, std::vector<Real>& x01, std::vector<Real>& w01,
-        size_t maxIt = 100, Real tol = 1e-14)
+        size_t maxIt = DefaultRootMaxIterations, Real tol = DefaultRootTolerance)
       {
         assert(n >= 2);
         // On [-1,1], endpoints ±1, interior are roots of P'_{n-1}(x).
@@ -221,7 +228,8 @@ namespace Rodin::QF
               // Here we use a stable relation:
               // d/dx P_j satisfies: P'_j = j/(x^2-1) (x P_j - P_{j-1})
               // Differentiate again (closed form). For robustness, use a small step secant on dPn1.
-              Real xkEps = xk * (1.0 + 1e-8) + ((xk == 0) ? 1e-8 : 0);
+              Real xkEps = xk * (1.0 + DerivativeDifferenceStep) +
+                ((xk == 0) ? DerivativeDifferenceStep : 0);
               // evaluate dP at xk_eps
               {
                 Real p0e = 1.0, p1e = xkEps;

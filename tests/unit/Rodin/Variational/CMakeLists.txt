@@ -1,5 +1,12 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalWeightedComplexQuadratureTest
+  WeightedComplexQuadratureTest.cpp)
+target_link_libraries(RodinVariationalWeightedComplexQuadratureTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalWeightedComplexQuadratureTest
+  PROPERTIES LABELS unit TIMEOUT 300)
+
 # Add H1 subdirectory for H1Element component tests
 add_subdirectory(H1)
 
@@ -21,6 +28,30 @@ target_link_libraries(RodinVariationalP0ElementTest
   GTest::gtest_main
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalP0ElementTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalP0SpaceTest P0SpaceTest.cpp)
+target_link_libraries(RodinVariationalP0SpaceTest
+  PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Variational
+)
+gtest_discover_tests(RodinVariationalP0SpaceTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalP0gSpaceTest P0gSpaceTest.cpp)
+target_link_libraries(RodinVariationalP0gSpaceTest
+  PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    Rodin::Variational
+)
+gtest_discover_tests(RodinVariationalP0gSpaceTest
   PROPERTIES
     LABELS unit
 )
@@ -699,3 +730,12 @@ gtest_discover_tests(RodinVariationalQuadratureRuleSpecializationTest
   PROPERTIES
     LABELS unit
 )
+add_executable(RodinVariationalMatrixRangeTest MatrixRangeTest.cpp)
+target_link_libraries(RodinVariationalMatrixRangeTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixRangeTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalMatrixQuadratureTest MatrixQuadratureTest.cpp)
+target_link_libraries(RodinVariationalMatrixQuadratureTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixQuadratureTest PROPERTIES LABELS unit)

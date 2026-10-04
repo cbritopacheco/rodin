@@ -41,18 +41,18 @@
 
   The `P0` space consists of functions that are
   constant on each cell of the mesh. Functions in P0 are generally
-  **discontinuous** across cell boundaries.
+  discontinuous across cell boundaries.
 
   @f[
     V_h^0 = \{ v \in L^2(\Omega) : v|_K \in \mathbb{P}_0(K), \
     \forall K \in \mathcal{T}_h \}
   @f]
 
-  **Properties:**
+  Properties:
   - One DOF per cell (the constant value on that cell)
   - Number of DOFs = number of cells (retrieved by `Wh.getSize()`)
   - Discontinuous across cell boundaries — this is an @f$ L^2 @f$ space,
-    **not** @f$ H^1 @f$-conforming
+    not @f$ H^1 @f$-conforming
   - Used for piecewise constant approximations such as material properties,
     indicator functions, and cell-based data
   - The `Grad` operator applied to a P0 function is identically zero
@@ -83,9 +83,9 @@
 
   The `P0g` space is a **global constant**
   finite element space — it consists of functions that are constant over the
-  **entire** mesh (not per-cell like P0).
+  entire mesh (not per-cell like P0).
 
-  **Properties:**
+  Properties:
   - Scalar P0g: **1 DOF** total (the single global constant)
   - Vector P0g: **vdim DOFs** total (one per component)
   - Continuous everywhere (trivially, since the function is constant)
@@ -109,7 +109,7 @@
     \forall K \in \mathcal{T}_h \}
   @f]
 
-  **Properties:**
+  Properties:
   - One DOF per vertex (the function value at that vertex)
   - Number of DOFs = number of vertices (retrieved by `Vh.getSize()`)
   - Continuous across cell boundaries (@f$ H^1 @f$-conforming): values at
@@ -160,7 +160,7 @@
   | Quadrilateral | @f$ (k+1)^2 @f$ | e.g., 9 for @f$ k = 2 @f$ |
   | Tetrahedron | @f$ \frac{(k+1)(k+2)(k+3)}{6} @f$ | e.g., 10 for @f$ k = 2 @f$ |
 
-  **Convergence rates** for smooth solutions:
+  Convergence rates for smooth solutions:
   - @f$ L^2 @f$ norm: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
   - @f$ H^1 @f$ seminorm: @f$ |u - u_h|_{H^1} = O(h^k) @f$
 
@@ -352,6 +352,44 @@
   xdmf.write();
   @endcode
 
+  @section fem-spaces-matrix Matrix-valued solution spaces
+
+  The local and MPI variants of P0, P0g, P1, and H1 support
+  @ref Rodin::Math::SpatialMatrix as their range. Specify the row and column
+  counts independently; each must lie between one and three.
+
+  @code{.cpp}
+  P0 cellStress(mesh, 3, 3);
+  P0g constantStress(mesh, 3, 3);
+  P1 stressSpace(mesh, 3, 3);
+  H1 higherOrderStress(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
+
+  GridFunction stress(stressSpace);
+  Math::SpatialMatrix<Real> initial(3, 3);
+  initial.setZero();
+  stress = initial;
+
+  TrialFunction sigma(stressSpace);
+  TestFunction tau(stressSpace);
+  auto mass = Integral(sigma, tau);
+  auto entryMass = Integral(Component(sigma, 0, 1), Component(tau, 0, 1));
+  @endcode
+
+  Each scalar basis function is replicated for every matrix entry. For a range
+  with @f$ r @f$ rows and @f$ c @f$ columns, the basis is
+  @f$ \phi_a E_{ij} @f$, the component index is @f$ ic+j @f$, and the global
+  DOF index is @f$ (rc)g_a+ic+j @f$. No symmetry or Voigt scaling is imposed.
+  Matrix contractions use the Frobenius product (conjugating the second
+  operand for complex entries). The scalar solver coefficients remain flat,
+  while basis and grid-function evaluations return matrices of the specified
+  shape. Transpose and matrix-component expressions can be used in forms.
+
+  All four families support real and complex matrix entries. Matrix gradients
+  and Jacobians return rank-three SpatialTensor values with the derivative
+  axis last. Matrix divergence contracts the column and derivative indices,
+  and Derivative selects one physical derivative direction. See
+  @ref guides-spatial-matrix for tensor coefficients and backend details.
+
   @section fem-spaces-choosing Choosing the Right Space
 
   | Problem type | Recommended space | Reason |
@@ -363,7 +401,7 @@
   | Higher accuracy for smooth solutions | `H1` with order @f$ k \geq 2 @f$ | @f$ O(h^{k+1}) @f$ @f$ L^2 @f$ convergence |
   | Incompressible flow (Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair, satisfies inf-sup |
 
-  **Rule of thumb**: Start with P1 for scalar problems. Use vector-valued P1
+  Rule of thumb: Start with P1 for scalar problems. Use vector-valued P1
   for elasticity and fluid dynamics. Move to higher-order H1 when you need
   better accuracy per DOF or when the PDE's solution is smooth enough to
   benefit from higher polynomial approximation.
@@ -381,3 +419,127 @@
   - @ref examples-pdes-elasticity "Elasticity example" — Vector-valued spaces
 
   */
+
+/**
+ * @page guides-spatial-matrix Matrix solutions and spatial tensors
+ *
+ * @section spatial-matrix-model Mathematical range and ordering
+ *
+ * P0, P0g, P1 and H1 accept @c Math::SpatialMatrix<Scalar> ranges for
+ * @c Real and @c Complex entries. Rows and columns are explicit, independently
+ * between one and @c RODIN_MAXIMAL_SPACE_DIMENSION. Symmetry is not imposed.
+ * A matrix space is the tensor product of its scalar space with the matrix
+ * units: @f$ V_h^{m\times n}=V_h\otimes\mathbb{K}^{m\times n} @f$.
+ * Matrix specializations live beside the scalar and vector specializations
+ * in each space family. Reference bases, physical mappings and DOF distribution
+ * belong to that family. The componentwise construction here describes P0,
+ * P0g, P1 and H1; future @f$H(\mathrm{div})@f$ and @f$H(\mathrm{curl})@f$
+ * families must supply their own conforming bases and Piola mappings.
+ * Local and global coefficient indices are interleaved in row-major order:
+ * @f$ a(mn)+in+j @f$. No Voigt scaling or symmetry reduction is applied.
+ * This coefficient numbering is independent of matrix memory storage;
+ * @ref guides-ordering "Matrix storage and finite-element component ordering"
+ * describes both conventions and their consequences for assembly.
+ *
+ * @code{.cpp}
+ * H1 stressSpace(std::integral_constant<size_t, 3>{}, mesh, 3, 3);
+ * GridFunction stress(stressSpace);
+ * TrialFunction sigma(stressSpace);
+ * TestFunction tau(stressSpace);
+ * BilinearForm mass(sigma, tau);
+ * mass = Integral(sigma, tau);
+ * @endcode
+ *
+ * @section spatial-matrix-operators Differential and constitutive operators
+ *
+ * Inner products use @f$ A:B=\sum_{ij}A_{ij}\overline{B_{ij}} @f$.
+ * Grad and Jacobian return @c SpatialTensor<Scalar,3> with
+ * @f$ G_{ijk}=\partial_k A_{ij} @f$. Derivative selects its last axis.
+ * Div uses row-wise divergence @f$ (\operatorname{div}A)_i=\sum_j\partial_jA_{ij} @f$
+ * and requires the column count to match the ambient spatial dimension.
+ * A matrix coefficient multiplying a matrix solution acts on its rows;
+ * a fourth-order tensor coefficient couples arbitrary matrix entries:
+ * @f$ (\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl} @f$.
+ * TensorFunction wraps constant or callable tensor coefficients. Tensor rank
+ * is a compile-time parameter; extents are runtime values with stack storage.
+ * Tensor-valued solution spaces are not introduced by this matrix-range API.
+ * A linear form must have a scalar integrand. Bare @c Integral(v) is therefore
+ * rejected for vector- and matrix-valued test functions; @c Integral(F,v)
+ * contracts a matching coefficient with the test function to form a scalar.
+ *
+ * Matrix Jacobians have rank three. The vector-only P1 Jacobian handlers and
+ * the weighted, rank-one and advection H1 handlers are restricted to their
+ * supported ranges. Matrix expressions use the existing generic quadrature
+ * rule for these forms; the componentwise unweighted H1 Jacobian handler
+ * supports matrix ranges directly. An explicit quadrature order remains
+ * appropriate for rational pyramid bases and curved mappings.
+ *
+ * @section spatial-matrix-nonlocal Nonlocal P1 forms
+ *
+ * The existing P1 potential quadrature handler accepts matrix trial and test
+ * functions. A kernel returning a scalar multiplies every component. A kernel
+ * filling a @c SpatialMatrix acts on rows, while a kernel filling a
+ * @c SpatialTensor<Scalar,4> couples all entries:
+ * @f[
+ *   (K A)_{ij}(x)=\int_\Omega
+ *      \sum_{kl}\mathcal K_{ijkl}(x,y)A_{kl}(y)\,dy.
+ * @f]
+ * The callback signatures are @c kernel(x,y), @c kernel(matrix,x,y) and
+ * @c kernel(tensor,x,y), respectively. Output extents must match the field
+ * dimensions. The existing collapsed quadrature on coincident triangles and
+ * centroid rules on other panel pairs are retained; nonsingular constant
+ * kernels do not establish accuracy for arbitrary singular kernels. This
+ * handler is specific to P1; nonlocal handlers for the other space families
+ * are not introduced here. The nonlocal regressions cover local Eigen and
+ * OpenMP assembly; distributed nonlocal assembly is not validated by the
+ * Jacobian and reaction-diffusion MPI tests.
+ *
+ * @code{.cpp}
+ * Math::SpatialTensor<Real, 4> elasticity(3, 3, 3, 3);
+ * elasticity.setZero();
+ * // Fill the constitutive entries, then assemble without a Voigt conversion.
+ * auto constitutive = Integral(TensorFunction(elasticity) * sigma, tau);
+ * @endcode
+ *
+ * Callable MatrixFunction coefficients accept explicit dimensions and
+ * @c setOrder for polynomial quadrature selection. Integrator @c setOrder
+ * specifies the integration degree. Rational pyramid bases and curved
+ * transformations require quadrature chosen for the mapped integrand;
+ * polynomial reference-degree defaults alone do not guarantee exactness.
+ * Grid-function derivatives on interfaces require a @c traceOf domain, as
+ * for scalar fields. Shape-function derivatives on a boundary are derivatives
+ * of the boundary element, matching the scalar finite element semantics.
+ *
+ * @section spatial-matrix-backends Backend and format support
+ *
+ * The same range and DOF maps are consumed by Eigen dense/sparse sequential
+ * and OpenMP assembly and by local/distributed PETSc assembly. MPI spaces
+ * expand scalar ownership and ghost maps component-wise. They cache collective
+ * global sizes at construction so local evaluations do not enter collectives.
+ *
+ * HDF5 persistence preserves raw coefficients, matrix rows/columns and complex
+ * imaginary parts. PETSc persistence stores the owned portion per shard.
+ * XDMF writes full matrix-valued arrays, including nonsymmetric entries.
+ * MFEM uses the scalar family's node conversion for each matrix entry; matrix
+ * dimensions must be supplied by the destination space because MFEM records
+ * only component count. Its existing unsupported collections remain unsupported
+ * (in particular the global constant P0g collection).
+ * MEDIT uses separate scalar vertex fields for every entry. Vertex formats
+ * interpolate higher-order fields from vertices and cannot preserve their
+ * arbitrary interior coefficients; use HDF5 for exact persistence.
+ *
+ * @section spatial-matrix-validation Validation coverage
+ *
+ * Native tests exercise all eight reference geometries, every matrix shape
+ * between one and three axes, nodal duality through cubic H1 and additional
+ * fourth/fifth-order representatives. Assembly and differential tests cover
+ * every non-point cell geometry, P0/P0g/P1/H1, rectangular and square ranges,
+ * complex entries, fourth-order material coupling, physical finite differences,
+ * curved and embedded triangles, boundary traces, cache lifetime, and Dirichlet
+ * data. Manufactured reaction-diffusion tests exercise complete solve paths.
+ * MPI/PETSc tests exercise ownership, ghosts, assembly and solves at one through
+ * four ranks. IO tests check real/complex HDF5, MEDIT vertex fields, MFEM node
+ * permutations and XDMF matrix metadata. This is finite regression coverage,
+ * rather than an assertion that arbitrary order, geometry and coefficient
+ * combinations have all been enumerated.
+ */

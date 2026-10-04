@@ -32,6 +32,7 @@ set(RodinVariational_HEADERS
   LinearFormIntegrator.h
   NonLinearFormIntegrator.h
   MatrixFunction.h
+  TensorFunction.h
   Problem.h
   ProblemBody.h
   RealFunction.h

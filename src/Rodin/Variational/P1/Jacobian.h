@@ -44,10 +44,9 @@ namespace Rodin::FormLanguage
   /// @brief Type traits for @c Jacobian over a grid function: exposes the finite element
   /// space and the operand type.
   template <class Range, class Data, class Mesh>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
   struct Traits<
-    Variational::Jacobian<
-      Variational::GridFunction<
-        Variational::P1<Range, Mesh>, Data>>>
+    Variational::Jacobian<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
       /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
@@ -57,10 +56,11 @@ namespace Rodin::FormLanguage
 
   /// @brief Type traits for @c Jacobian over a shape function: exposes the finite element
   /// space, the shape function space and the operand type.
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
-  struct Traits<
-    Variational::Jacobian<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
+  template <class NestedDerived, class Range, class Mesh,
+    Variational::ShapeFunctionSpaceType Space>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  struct Traits<Variational::Jacobian<
+    Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
       /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Mesh>;
@@ -275,9 +275,12 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an P1 ShapeFunction object.
    */
-  template <class ShapeFunctionDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
+  template <class ShapeFunctionDerived, class Range, class Mesh,
+    ShapeFunctionSpaceType Space>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
+    : public ShapeFunctionBase<
+        Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
   {
     static_assert(FormLanguage::IsVectorRange<Range>::Value,
                   "Jacobian<P1> specialization is intended for vector-valued P1.");

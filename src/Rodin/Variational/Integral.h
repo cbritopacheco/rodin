@@ -198,6 +198,11 @@ namespace Rodin::Variational
    * @f]
    */
   template <class NestedDerived, class FES>
+    requires(
+      std::is_same_v<typename FormLanguage::Traits<
+                       ShapeFunctionBase<NestedDerived, FES, TestSpace>>::RangeType,
+        typename FormLanguage::Traits<
+          ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>)
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
@@ -242,6 +247,10 @@ namespace Rodin::Variational
 
   /// @brief Deduction guide for @c Integral.
   template <class NestedDerived, class FES>
+    requires(std::is_same_v<typename FormLanguage::Traits<ShapeFunctionBase<NestedDerived,
+                              FES, TestSpace>>::RangeType,
+              typename FormLanguage::Traits<
+                ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>)
   Integral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
     -> Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 

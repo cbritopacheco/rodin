@@ -17,12 +17,15 @@
  * freedom mappings consistent across ownership and ghost layers.
  *
  * P0 degrees of freedom are associated with mesh cells: each cell carries
- * exactly one DOF. Cells are partitioned across ranks; owned cells receive
+ * one DOF per field component. Cells are partitioned across ranks; owned cells receive
  * contiguous global indices, and ghost cells synchronize their global DOF
  * index from the owning rank via a direct owner-push exchange.
  */
 
+#include <map>
 #include <limits>
+#include <algorithm>
+#include <type_traits>
 #include <vector>
 #include <utility>
 
@@ -249,8 +252,13 @@ namespace Rodin::Variational
        * @param[in] mesh Distributed mesh on which the space is defined.
        */
       P0(const MeshType& mesh)
+        : P0(mesh, 1)
+      {}
+
+      /** Constructs one constant DOF per cell and field component. */
+      P0(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
-          m_fes(mesh.getShard())
+          m_fes(makeShardFES(mesh, vdim))
       {
         const auto& ctx   = mesh.getContext();
         const auto& comm  = ctx.getCommunicator();
@@ -271,16 +279,17 @@ namespace Rodin::Variational
         for (size_t i = 0; i < localCellCount; ++i)
         {
           if (shard.isOwned(D, i))
-            ++m_owned;
+            m_owned += vdim;
         }
 
         // Assign contiguous global DOF range for owned cells via prefix scan.
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        // For P0, the local DOF index for cell i equals i (the cell index).
+        // The local DOFs of cell i occupy [i * vdim, (i + 1) * vdim).
         // Pre-allocate the left map with an invalid sentinel.
-        m_localToGlobal.left.assign(localCellCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(
+          localCellCount * vdim, std::numeric_limits<Index>::max());
 
         // send[r]: messages to rank r — pairs (globalCellID, globalDOF).
         // Keyed by rank so every neighbor gets an entry (possibly empty).
@@ -312,10 +321,14 @@ namespace Rodin::Variational
             continue;
 
           const Index gid    = mesh.getGlobalIndex(D, i);
-          const Index global = m_offset + dofIdx++;
-
-          m_localToGlobal.left[i] = global;
-          m_localToGlobal.right.emplace(global, static_cast<Index>(i));
+          const Index global = m_offset + dofIdx;
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            const Index local = static_cast<Index>(i * vdim + c);
+            const Index globalComponent = global + c;
+            m_localToGlobal.left[local] = globalComponent;
+          }
+          dofIdx += vdim;
 
           // Notify all neighbors that have this cell as a ghost.
           auto hit = halo.find(i);
@@ -365,15 +378,31 @@ namespace Rodin::Variational
             const Index li = *liOpt;
             assert(!shard.isOwned(D, li));
 
-            m_localToGlobal.left[li] = global;
-            m_localToGlobal.right.emplace(global, li);
+            for (size_t c = 0; c < vdim; ++c)
+            {
+              const Index local = li * vdim + c;
+              const Index globalComponent = global + c;
+              m_localToGlobal.left[local] = globalComponent;
+            }
           }
         }
 
 #ifndef NDEBUG
-        for (size_t i = 0; i < localCellCount; ++i)
+        for (size_t i = 0; i < localCellCount * vdim; ++i)
           assert(m_localToGlobal.left[i] != std::numeric_limits<Index>::max());
 #endif
+
+        // Ghost numbering arrives in neighbor order, not global-index order.
+        // Sorting once avoids repeatedly shifting the flat map's storage.
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(m_localToGlobal.left.size());
+        for (Index local = 0; local < m_localToGlobal.left.size(); ++local)
+          globalLocalPairs.emplace_back(m_localToGlobal.left[local], local);
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end());
+        m_localToGlobal.right.reserve(globalLocalPairs.size());
+        for (const auto& [global, local] : globalLocalPairs)
+          m_localToGlobal.right.emplace_hint(m_localToGlobal.right.end(), global, local);
+        assert(m_localToGlobal.right.size() == globalLocalPairs.size());
       }
 
       /**
@@ -475,7 +504,7 @@ namespace Rodin::Variational
        */
       size_t getSize() const override
       {
-        return getMesh().getCellCount();
+        return getMesh().getCellCount() * getVectorDimension();
       }
 
       /**
@@ -581,6 +610,19 @@ namespace Rodin::Variational
       }
 
     private:
+      static FESType makeShardFES(const MeshType& mesh, size_t vdim)
+      {
+        if constexpr (std::is_same_v<Range, Real> || std::is_same_v<Range, Complex>)
+        {
+          assert(vdim == 1);
+          return FESType(mesh.getShard());
+        }
+        else
+        {
+          return FESType(mesh.getShard(), vdim);
+        }
+      }
+
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
 
@@ -596,6 +638,178 @@ namespace Rodin::MPI
    * @brief Convenience alias for the default distributed scalar P0 space.
    */
   using P0 = Variational::P0<Real, Geometry::Mesh<Context::MPI>>;
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-range finite element or expression specialization.
+  template <class Scalar>
+  class P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>> final
+    : public FiniteElementSpace<Geometry::Mesh<Context::MPI>,
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>>
+  {
+    public:
+      /// @brief Local matrix space on the mesh shard.
+      using FESType = P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>;
+      /// @brief Mesh and execution context of this specialization.
+      using MeshType = Geometry::Mesh<Context::MPI>;
+      /// @brief Scalar space supplying this family's DOF numbering.
+      using ScalarSpace = P0<Scalar, Geometry::Mesh<Context::MPI>>;
+      /// @brief Matrix reference element for this family.
+      using ElementType = P0Element<Math::SpatialMatrix<Scalar>>;
+      /// @brief Existing finite-element-space interface.
+      using Parent = FiniteElementSpace<MeshType,
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::MPI>>>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename ScalarSpace::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename ScalarSpace::ContextType;
+      /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
+      P0(const MeshType& mesh, size_t rows, size_t cols)
+        : m_scalar(ScalarSpace(mesh)),
+          m_rows(rows),
+          m_cols(cols),
+          m_shard(mesh.getShard(), rows, cols)
+      {
+        if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
+          cols > RODIN_MAXIMAL_SPACE_DIMENSION)
+          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
+                             << Alert::Raise;
+        // Distributed scalar spaces may compute their size collectively.
+        // Resolve it at construction, never from a local evaluation loop.
+        m_size = m_scalar.getSize() * rows * cols;
+        m_dofs.resize(mesh.getDimension() + 1);
+        for (size_t d = mesh.getDimension(); d <= mesh.getDimension(); ++d)
+        {
+          const size_t count = mesh.getConnectivity().getCount(d);
+          m_dofs[d].reserve(count);
+          for (size_t i = 0; i < count; ++i)
+          {
+            const auto& scalarDOFs = m_scalar.getDOFs(d, i);
+            auto& dofs = m_dofs[d].emplace_back(scalarDOFs.size() * rows * cols);
+            for (size_t a = 0; a < static_cast<size_t>(scalarDOFs.size()); ++a)
+              for (size_t c = 0; c < rows * cols; ++c)
+                dofs[a * rows * cols + c] = scalarDOFs[a] * rows * cols + c;
+            const auto& scalarFE = m_scalar.getFiniteElement(d, i);
+            m_elements.try_emplace(scalarFE.getGeometry(), scalarFE, rows, cols);
+          }
+        }
+        for (size_t i = 0; i < m_shard.getSize(); ++i)
+          m_globalToLocal.emplace(getGlobalIndex(i), i);
+      }
+
+      /// @brief Copies the space and its DOF maps.
+      P0(const P0&) = default;
+      /// @brief Moves the space and its DOF maps.
+      P0(P0&&) = default;
+      /// @brief Copies the space and its DOF maps.
+      P0& operator=(const P0&) = default;
+      /// @brief Moves the space and its DOF maps.
+      P0& operator=(P0&&) = default;
+
+      size_t getSize() const override
+      {
+        return m_size;
+      }
+      size_t getVectorDimension() const override
+      {
+        return m_rows * m_cols;
+      }
+      /// @brief Returns the number of matrix rows.
+      size_t getRows() const
+      {
+        return m_rows;
+      }
+      /// @brief Returns the number of matrix columns.
+      size_t getColumns() const
+      {
+        return m_cols;
+      }
+      const MeshType& getMesh() const override
+      {
+        return m_scalar.getMesh();
+      }
+      /// @brief Returns the scalar space supplying topology and component-independent maps.
+      const ScalarSpace& getScalarSpace() const
+      {
+        return m_scalar;
+      }
+
+      /// @brief Returns the matrix reference element of a mesh entity.
+      const ElementType& getFiniteElement(size_t d, Index i) const
+      {
+        return m_elements.at(m_scalar.getFiniteElement(d, i).getGeometry());
+      }
+
+      const IndexArray& getDOFs(size_t d, Index i) const override
+      {
+        return m_dofs.at(d).at(i);
+      }
+
+      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index local) const override
+      {
+        const Index components = m_rows * m_cols;
+        return m_scalar.getGlobalIndex(p, local / components) * components +
+          local % components;
+      }
+
+      /// @brief Pulls a physical callable back to a reference element.
+      template <class Callable>
+      auto getPullback(const std::pair<size_t, Index>& p, Callable&& value) const
+      {
+        return m_scalar.getPullback(p, std::forward<Callable>(value));
+      }
+
+      /// @brief Pushes a reference callable forward to the physical mesh.
+      template <class Callable>
+      auto getPushforward(const std::pair<size_t, Index>& p, Callable&& value) const
+      {
+        return m_scalar.getPushforward(p, std::forward<Callable>(value));
+      }
+
+      /// @brief Returns the matrix space on the local mesh shard.
+      const FESType& getShard() const
+      {
+        return m_shard;
+      }
+
+      /// @brief Returns the half-open range of owned global component DOFs.
+      void getOwnershipRange(Index& begin, Index& end) const
+      {
+        this->getScalarSpace().getOwnershipRange(begin, end);
+        begin *= this->getVectorDimension();
+        end *= this->getVectorDimension();
+      }
+
+      /// @brief Maps a local component DOF to its global coefficient index.
+      Index getGlobalIndex(Index local) const
+      {
+        assert(static_cast<size_t>(local) < m_shard.getSize());
+        const Index components = this->getVectorDimension();
+        return this->getScalarSpace().getGlobalIndex(local / components) * components +
+          local % components;
+      }
+
+      /// @brief Returns the shard-local index of a global DOF, if present.
+      Optional<Index> getLocalIndex(Index global) const
+      {
+        const auto it = m_globalToLocal.find(global);
+        if (it == m_globalToLocal.end())
+          return std::nullopt;
+        return it->second;
+      }
+
+    private:
+      ScalarSpace m_scalar;
+      size_t m_rows, m_cols;
+      FESType m_shard;
+      std::map<Index, Index> m_globalToLocal;
+      size_t m_size = 0;
+      std::vector<std::vector<IndexArray>> m_dofs;
+      std::map<Geometry::Polytope::Type, ElementType> m_elements;
+  };
 }
 
 #endif

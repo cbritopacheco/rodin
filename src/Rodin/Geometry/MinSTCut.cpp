@@ -164,9 +164,11 @@ namespace Rodin::Geometry
       throw std::invalid_argument(
         "MinSTCut cellInBand size does not match the number of cells.");
 
-    // Pin-cost: should dominate any conceivable unary on the same cell.
-    // We compute it from the sum of unscaled unaries plus the sum of all
-    // pairwise capacities so a pinned cell can never be flipped by the cut.
+    // Finite pin penalty based on global unary and pairwise capacity sums.
+    // The multiplier is a heuristic margin, not an infinite-capacity guarantee
+    // for arbitrary per-edge scaling. The additive floor covers zero sums.
+    constexpr Real pinCostSafetyFactor = Real(1e3);
+    constexpr Real pinCostBaseCapacity = Real(1);
     Real totalUnary = 0;
     for (Index i = 0; i < volumes.size(); ++i)
     {
@@ -182,9 +184,9 @@ namespace Rodin::Geometry
         throw std::invalid_argument("MinSTCut received a negative pairwise capacity.");
       totalPairwise += e.capacity;
     }
-    const Real pinCost = Real(1e3) *
+    const Real pinCost = pinCostSafetyFactor *
       (options.unaryScale * totalUnary +
-        std::max(options.lambdaScale, Real(1)) * totalPairwise + Real(1));
+        std::max(options.lambdaScale, Real(1)) * totalPairwise + pinCostBaseCapacity);
 
     std::vector<Real> insideCosts(volumes.size());
     std::vector<Real> outsideCosts(volumes.size());

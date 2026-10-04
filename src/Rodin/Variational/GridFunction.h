@@ -51,6 +51,7 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <utility>
+#include <atomic>
 #include <fstream>
 #include <functional>
 #include <vector>
@@ -237,8 +238,8 @@ namespace Rodin::Variational
         return m_ref.get().z();
       }
 
-      template <class DataType>
       /// @brief Sets the degree-of-freedom data.
+      template <class DataType>
       constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
@@ -354,9 +355,9 @@ namespace Rodin::Variational
       /// @brief Parent CRTP reference type.
       using Parent = GridFunctionBaseReference<Derived>;
 
-      static_assert(
-          std::is_same_v<RangeType, ScalarType> ||
-          FormLanguage::IsVectorRange<RangeType>::Value);
+      static_assert(std::is_same_v<RangeType, ScalarType> ||
+        FormLanguage::IsVectorRange<RangeType>::Value ||
+        FormLanguage::IsMatrixRange<RangeType>::Value);
 
       /**
        * @brief Constructs a grid function on the given finite element space.
@@ -367,7 +368,8 @@ namespace Rodin::Variational
        */
       GridFunctionBase(const FES& fes)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
-          m_fes(std::cref(fes))
+          m_fes(std::cref(fes)),
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -377,7 +379,8 @@ namespace Rodin::Variational
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(other.m_name),
-          m_fes(other.m_fes)
+          m_fes(other.m_fes),
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -387,7 +390,8 @@ namespace Rodin::Variational
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(std::move(other.m_name)),
-          m_fes(std::move(other.m_fes))
+          m_fes(std::move(other.m_fes)),
+          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -533,6 +537,20 @@ namespace Rodin::Variational
       size_t getDimension() const
       {
         return m_fes.get().getVectorDimension();
+      }
+
+      /// @brief Returns the number of matrix rows.
+      size_t getRows() const
+        requires FormLanguage::IsMatrixRange<RangeType>::Value
+      {
+        return m_fes.get().getRows();
+      }
+
+      /// @brief Returns the number of matrix columns.
+      size_t getColumns() const
+        requires FormLanguage::IsMatrixRange<RangeType>::Value
+      {
+        return m_fes.get().getColumns();
       }
 
       /**
@@ -758,7 +776,14 @@ namespace Rodin::Variational
         const auto& basisValues = getCachedBasisValues(d, i, ip);
         for (Index local = 0; local < basisValues.size(); ++local)
         {
-          const auto k = this->operator[](dofs[local]) * basisValues[local];
+          const auto k = [&] {
+            if constexpr (requires {
+                            this->operator[](dofs[local]) * basisValues[local];
+                          })
+              return this->operator[](dofs[local]) * basisValues[local];
+            else
+              return basisValues[local] * this->operator[](dofs[local]);
+          }();
           if (local == 0)
             res = k;
           else
@@ -1144,7 +1169,11 @@ namespace Rodin::Variational
       struct EvaluationCache
       {
         const GridFunctionBase* owner = nullptr;
+        size_t ownerIdentity = static_cast<size_t>(-1);
         const FES* fes = nullptr;
+        // Distinguishes geometry-specific static elements when stack addresses
+        // for successive grid functions and spaces are reused.
+        const ElementType* element = nullptr;
         size_t d = static_cast<size_t>(-1);
         Index i = static_cast<Index>(-1);
         std::vector<Index> dofs;
@@ -1165,11 +1194,15 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
-        if (cache.owner != this || cache.fes != fes || cache.d != d || cache.i != i)
+        const auto* element = &fes->getFiniteElement(d, i);
+        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
+          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
+          cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
+          cache.element = element;
           cache.d = d;
           cache.i = i;
           const size_t count = static_cast<size_t>(dofs.size());
@@ -1185,17 +1218,21 @@ namespace Rodin::Variational
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
-        if (!cache.hasBasisValues || cache.owner != this || cache.d != d ||
-          cache.i != i || cache.qf != ip.getQuadratureFormula() ||
-          cache.qp != ip.getIndex())
+        const auto* fes = &this->getFiniteElementSpace();
+        const auto* element = &fes->getFiniteElement(d, i);
+        if (!cache.hasBasisValues || cache.owner != this ||
+          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
+          cache.element != element || cache.d != d || cache.i != i ||
+          cache.qf != ip.getQuadratureFormula() || cache.qp != ip.getIndex())
         {
-          const auto* fes = &this->getFiniteElementSpace();
-          const auto& fe = fes->getFiniteElement(d, i);
+          const auto& fe = *element;
           const size_t count = fe.getCount();
           const auto& p = ip.getPoint();
 
           cache.owner = this;
+          cache.ownerIdentity = m_cacheIdentity;
           cache.fes = fes;
+          cache.element = element;
           cache.d = d;
           cache.i = i;
           cache.qf = ip.getQuadratureFormula();
@@ -1213,7 +1250,8 @@ namespace Rodin::Variational
 
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
-
+      inline static std::atomic<size_t> s_nextCacheIdentity{0};
+      const size_t m_cacheIdentity;
   };
 
   /**

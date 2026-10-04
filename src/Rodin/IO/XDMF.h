@@ -647,6 +647,8 @@ namespace Rodin::IO
       {
         std::string name;                           ///< Attribute display name.
         Center center = Center::Node;               ///< Data centering.
+        size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
+        size_t columns = 0; ///< Matrix columns.
         size_t dimension = 1;                       ///< Vector dimension of the attribute.
         AttributePolicy policy = AttributePolicy::Transient; ///< Export policy.
         bool staticWritten = false;                 ///< Whether the static HDF5 file has been exported.
@@ -662,6 +664,8 @@ namespace Rodin::IO
           {
               std::string name; ///< Attribute display name.
               Center center = Center::Node; ///< Attribute centering.
+              size_t rows = 0; ///< Matrix rows, zero for scalar/vector attributes.
+              size_t columns = 0; ///< Matrix columns.
               size_t dimension = 1; ///< Attribute vector dimension.
               boost::filesystem::path file; ///< Attribute HDF5 file path.
               bool isStatic =
@@ -810,6 +814,12 @@ namespace Rodin::IO
     rec.name = name;
     rec.center = center;
     rec.dimension = gf.getDimension();
+    if constexpr (FormLanguage::IsMatrixRange<typename FormLanguage::Traits<
+                    typename GridFunctionType::FESType>::RangeType>::Value)
+    {
+      rec.rows = gf.getRows();
+      rec.columns = gf.getColumns();
+    }
     rec.policy = policy;
     // Capture the effective visualization mesh (shard for MPI, local mesh
     // for serial). The attribute write helpers iterate over this mesh's
